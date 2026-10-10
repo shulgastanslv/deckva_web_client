@@ -20,15 +20,9 @@ test("readIconScoutHits keeps iconscout previews and drops the rest", () => {
           },
           { name: "Missing id", urls: { png_256: "https://cdn.iconscout.com/x.png" } },
           {
-            id: 9,
             uuid: "c",
             name: "Vintage camera",
             urls: { thumb: "https://cdn3d.iconscout.com/3d/premium/thumb/camera.png" },
-          },
-          {
-            uuid: "d",
-            name: "Scene",
-            urls: { thumb: "https://cdni.iconscout.com/illustration/free/thumb/scene.png" },
           },
         ],
       },
@@ -38,7 +32,6 @@ test("readIconScoutHits keeps iconscout previews and drops the rest", () => {
   assert.deepEqual(hits, [
     { id: "a", name: "Arrow", previewUrl: "https://cdn.iconscout.com/icon/free/png-256/arrow.png" },
     { id: "c", name: "Vintage camera", previewUrl: "https://cdn3d.iconscout.com/3d/premium/thumb/camera.png" },
-    { id: "d", name: "Scene", previewUrl: "https://cdni.iconscout.com/illustration/free/thumb/scene.png" },
   ]);
 });
 

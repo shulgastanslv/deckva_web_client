@@ -20,10 +20,13 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "swibp | Carousel Maker",
-  description: "Carousel Maker by swibp",
+  title: "swibp | carousel maker",
+  description: "swibp | carousel maker by swibp",
   keywords: ["carousel", "maker", "swibp", "carousel maker", "carousel maker by swibp"],
   authors: [{ name: "swibp", url: "https://swibp.io" }],
+  icons: {
+    icon: "browser.svg",
+  },
   creator: "swibp",
   publisher: "swibp",
 };
@@ -36,7 +39,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {/* Load Montserrat for Fabric canvas text (matches templates/refs). */}
         <span className={`${montserrat.className} sr-only`} aria-hidden>
           .
         </span>

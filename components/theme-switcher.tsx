@@ -5,8 +5,9 @@ import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -21,7 +22,10 @@ export function ThemeSwitcher() {
       type="button"
       variant="ghost"
       size="icon"
-      className="h-9 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50"
+      className={cn(
+        "h-9 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50",
+        className,
+      )}
       title={dark ? "Switch to light" : "Switch to dark"}
       aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
       onClick={() => setTheme(dark ? "light" : "dark")}

@@ -19,6 +19,7 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
+import { StudioPhoneGate } from "@/components/studio-phone-gate";
 
 const SlideNavigator = dynamic(
   () => import("@/components/canvas/slide-navigator").then((mod) => mod.SlideNavigator),
@@ -145,6 +146,7 @@ export default function CarouselStudio() {
   }, [focusMode, manager]);
 
   return (
+    <StudioPhoneGate>
     <div className="flex flex-col h-screen w-full bg-background text-foreground font-sans overflow-hidden select-none">
       {!focusMode && (
         <Header
@@ -222,5 +224,6 @@ export default function CarouselStudio() {
         onClose={() => setShowPreviewModal(false)}
       />
     </div>
+    </StudioPhoneGate>
   );
 }

@@ -1,17 +1,20 @@
-import type { IconScoutHit } from "@/lib/iconscout";
+import type { IconScoutAsset, IconScoutHit } from "@/lib/iconscout";
 
 export const RECENT_LIMIT = 24;
 export const RECENT_PREVIEW = 6;
 export const RECENT_STORAGE_KEY = "swibp.iconscout.recent";
 
-const ASSETS = new Set(["icon", "illustration", "3d"]);
+const ASSETS = new Set<string>(["icon", "illustration", "3d"]);
 
 export interface RecentIcon extends IconScoutHit {
-  asset: "icon" | "illustration" | "3d";
+  asset: IconScoutAsset;
 }
 
 export function rememberIcon(items: RecentIcon[], next: RecentIcon): RecentIcon[] {
-  return [next, ...items.filter((item) => item.id !== next.id)].slice(0, RECENT_LIMIT);
+  return [
+    { id: next.id, name: next.name, previewUrl: next.previewUrl, asset: next.asset },
+    ...items.filter((item) => item.id !== next.id),
+  ].slice(0, RECENT_LIMIT);
 }
 
 export function readRecentIcons(raw: string | null): RecentIcon[] {
@@ -31,7 +34,7 @@ export function readRecentIcons(raw: string | null): RecentIcon[] {
         id: item.id,
         name: item.name,
         previewUrl: item.previewUrl,
-        asset: item.asset as RecentIcon["asset"],
+        asset: item.asset as IconScoutAsset,
       });
     }
     return items.slice(0, RECENT_LIMIT);

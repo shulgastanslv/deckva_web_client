@@ -104,10 +104,10 @@ export function ReviewsBlock() {
   const visible = open ? PINS : PINS.slice(0, PREVIEW);
 
   return (
-    <section id="reviews" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-5 sm:px-6">
-      <div className="rounded-[2rem] bg-muted px-4 py-5 sm:rounded-[2.4rem] sm:px-6 sm:py-6">
-        <p className="text-[13px] font-bold tracking-wide text-[#2f5bff]">Reviews</p>
-        <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+    <section id="reviews" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-5 sm:px-6 bg-transparent">
+      <div className="rounded-[2rem] px-4 py-5 sm:rounded-[2.4rem] sm:px-6 sm:py-6">
+        <p className="text-sm font-bold tracking-wide text-[#2f5bff]">Reviews</p>
+        <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-black sm:text-3xl">
           Threads carousels people posted
         </h2>
 

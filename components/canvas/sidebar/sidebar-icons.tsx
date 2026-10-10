@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, LayoutGrid, Search, X } from "lucide-react";
 
-import { loadIconScoutImage, loadIconScoutSvg, searchIconScout } from "@/actions/iconscout";
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import { useCanvasManager } from "@/context/canvas-manager";
-import type { IconScoutHit } from "@/lib/iconscout";
+import type { IconScoutAsset, IconScoutHit, IconScoutPage } from "@/lib/iconscout";
 import {
   RECENT_PREVIEW,
   RECENT_STORAGE_KEY,
@@ -18,15 +17,50 @@ import {
 import { cn } from "@/lib/utils";
 
 const ASSETS = [
-  { id: "icon", label: "Icons" },
-  { id: "illustration", label: "Illustrations" },
-  { id: "3d", label: "3D" },
-] as const;
+  { id: "icon" as const, label: "Icons" },
+  { id: "illustration" as const, label: "Illustrations" },
+  { id: "3d" as const, label: "3D" },
+];
 
-type AssetId = (typeof ASSETS)[number]["id"];
+async function searchIcons(
+  query: string,
+  asset: IconScoutAsset,
+  page: number,
+  signal: AbortSignal,
+): Promise<IconScoutPage> {
+  const url = new URL("/api/iconscout/search", window.location.origin);
+  url.searchParams.set("q", query);
+  url.searchParams.set("asset", asset);
+  url.searchParams.set("page", String(page));
 
-/** IconScout serves at most 1500 results, 200 per page. */
-const MAX_PAGES = 8;
+  const res = await fetch(url, { signal, cache: "no-store" });
+  const data: unknown = await res.json().catch(() => null);
+  if (!res.ok) {
+    const error =
+      data && typeof data === "object" && typeof (data as { error?: unknown }).error === "string"
+        ? (data as { error: string }).error
+        : "Search failed";
+    throw new Error(error);
+  }
+  return data as IconScoutPage;
+}
+
+async function downloadSvg(uuid: string): Promise<string> {
+  const res = await fetch("/api/iconscout/svg", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uuid }),
+  });
+  const data: unknown = await res.json().catch(() => null);
+  if (!res.ok || !data || typeof data !== "object" || typeof (data as { svg?: unknown }).svg !== "string") {
+    const error =
+      data && typeof data === "object" && typeof (data as { error?: unknown }).error === "string"
+        ? (data as { error: string }).error
+        : "Couldn't download the SVG";
+    throw new Error(error);
+  }
+  return (data as { svg: string }).svg;
+}
 
 function IconTile({
   item,
@@ -63,8 +97,10 @@ function IconTile({
 export function SidebarIcons() {
   const manager = useCanvasManager();
   const [query, setQuery] = useState("");
-  const [asset, setAsset] = useState<AssetId>("icon");
+  const [asset, setAsset] = useState<IconScoutAsset>("icon");
   const [items, setItems] = useState<IconScoutHit[]>([]);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [paging, setPaging] = useState(false);
@@ -72,15 +108,18 @@ export function SidebarIcons() {
   const [error, setError] = useState<string | null>(null);
   const [recent, setRecent] = useState<RecentIcon[]>([]);
   const [showAllRecent, setShowAllRecent] = useState(false);
+  const searchGen = useRef(0);
 
   useEffect(() => {
     setRecent(readRecentIcons(window.localStorage.getItem(RECENT_STORAGE_KEY)));
   }, []);
 
   useEffect(() => {
-    const trimmed = query.trim();
-    if (trimmed.length < 2) {
+    const q = query.trim();
+    if (q.length < 2) {
       setItems([]);
+      setPage(1);
+      setLastPage(1);
       setTotal(0);
       setLoading(false);
       setPaging(false);
@@ -88,46 +127,59 @@ export function SidebarIcons() {
       return;
     }
 
-    let cancelled = false;
+    const gen = ++searchGen.current;
+    const controller = new AbortController();
     setLoading(true);
     setPaging(false);
-    const timer = window.setTimeout(() => {
-      void (async () => {
-        const first = await searchIconScout({ query: trimmed, asset, page: 1 });
-        if (cancelled) return;
-        if (!first.ok) {
-          setItems([]);
-          setTotal(0);
-          setError("Failed to search IconScout");
-          setLoading(false);
-          return;
-        }
-        setItems(first.items);
-        setTotal(first.total);
-        setError(null);
-        setLoading(false);
+    setError(null);
 
-        const lastPage = Math.min(first.lastPage, MAX_PAGES);
-        if (lastPage < 2) return;
-        setPaging(true);
-        for (let page = 2; page <= lastPage; page += 1) {
-          const next = await searchIconScout({ query: trimmed, asset, page });
-          if (cancelled) return;
-          if (!next.ok) break;
-          setItems((current) => {
-            const seen = new Set(current.map((item) => item.id));
-            return [...current, ...next.items.filter((item) => !seen.has(item.id))];
-          });
-        }
-        if (!cancelled) setPaging(false);
-      })();
+    const timer = window.setTimeout(() => {
+      void searchIcons(q, asset, 1, controller.signal)
+        .then((result) => {
+          if (gen !== searchGen.current) return;
+          setItems(result.items);
+          setPage(result.page);
+          setLastPage(result.lastPage);
+          setTotal(result.total);
+        })
+        .catch((err: unknown) => {
+          if (controller.signal.aborted || gen !== searchGen.current) return;
+          setItems([]);
+          setPage(1);
+          setLastPage(1);
+          setTotal(0);
+          setError(err instanceof Error ? err.message : "Search failed");
+        })
+        .finally(() => {
+          if (gen === searchGen.current) setLoading(false);
+        });
     }, 280);
 
     return () => {
-      cancelled = true;
       window.clearTimeout(timer);
+      controller.abort();
     };
   }, [query, asset]);
+
+  const loadMore = async () => {
+    const q = query.trim();
+    if (paging || loading || q.length < 2 || page >= lastPage) return;
+    setPaging(true);
+    try {
+      const result = await searchIcons(q, asset, page + 1, new AbortController().signal);
+      setItems((current) => {
+        const seen = new Set(current.map((item) => item.id));
+        return [...current, ...result.items.filter((item) => !seen.has(item.id))];
+      });
+      setPage(result.page);
+      setLastPage(result.lastPage);
+      setTotal(result.total);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Search failed");
+    } finally {
+      setPaging(false);
+    }
+  };
 
   const remember = (hit: RecentIcon) => {
     setRecent((current) => {
@@ -137,31 +189,27 @@ export function SidebarIcons() {
     });
   };
 
-  const addHit = async (hit: IconScoutHit, kind: AssetId) => {
+  const addHit = async (hit: IconScoutHit, kind: IconScoutAsset) => {
     if (!manager || loadingId) return;
     setLoadingId(hit.id);
     setError(null);
     try {
       if (kind === "icon") {
-        const res = await loadIconScoutSvg(hit.id);
-        if (res.ok === false) {
-          setError(res.error);
-          return;
+        try {
+          const svg = await downloadSvg(hit.id);
+          await manager.objects.addSvgIcon(svg, { maxSize: 280 });
+        } catch {
+          // CDN preview works when api-download is slow; no download credit.
+          await manager.objects.addImage(hit.previewUrl, { maxSize: 280 });
         }
-        await manager.objects.addSvgIcon(res.svg, { maxSize: 280 });
       } else {
-        const res = await loadIconScoutImage(hit.previewUrl);
-        if (!res.ok) {
-          setError("Failed to load IconScout image");
-          return;
-        }
-        await manager.objects.addImage(res.dataUrl, { maxSize: 280 });
+        await manager.objects.addImage(hit.previewUrl, { maxSize: 280 });
       }
       manager.commit();
       remember({ ...hit, asset: kind });
     } catch (err) {
       console.error(err);
-      setError("Couldn't add that image");
+      setError(err instanceof Error ? err.message : "Couldn't add that image");
     } finally {
       setLoadingId(null);
     }
@@ -196,7 +244,7 @@ export function SidebarIcons() {
           icon={LayoutGrid}
           value={asset}
           onChange={(id) => {
-            if (ASSETS.some((item) => item.id === id)) setAsset(id as AssetId);
+            if (ASSETS.some((item) => item.id === id)) setAsset(id as IconScoutAsset);
           }}
           groups={[{ label: "Type", options: ASSETS.map((item) => ({ id: item.id, label: item.label })) }]}
         />
@@ -225,9 +273,8 @@ export function SidebarIcons() {
       <div className="flex min-w-0 flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <span className="text-[13px] font-medium text-muted-foreground/80">Results</span>
-          <span className="inline-flex items-center gap-1 tabular-nums text-[13px] text-muted-foreground/40">
-            {paging ? <Loader2 className="size-3 animate-spin" /> : null}
-            {searching ? `${items.length}${total > items.length ? ` / ${total}` : ""}` : recent.length}
+          <span className="tabular-nums text-[13px] text-muted-foreground/40">
+            {searching ? `${items.length}${total > items.length ? ` / ${total}` : ""}` : ""}
           </span>
         </div>
 
@@ -242,17 +289,29 @@ export function SidebarIcons() {
         ) : items.length === 0 ? (
           <p className="py-12 text-center text-[13px] text-muted-foreground">Nothing matched.</p>
         ) : (
-          <div className="grid min-w-0 grid-cols-3 gap-2">
-            {items.map((item) => (
-              <IconTile
-                key={item.id}
-                item={item}
-                busy={loadingId === item.id}
-                disabled={loadingId !== null}
-                onClick={() => void addHit(item, asset)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid min-w-0 grid-cols-3 gap-2">
+              {items.map((item) => (
+                <IconTile
+                  key={item.id}
+                  item={item}
+                  busy={loadingId === item.id}
+                  disabled={loadingId !== null}
+                  onClick={() => void addHit(item, asset)}
+                />
+              ))}
+            </div>
+            {page < lastPage ? (
+              <button
+                type="button"
+                disabled={paging}
+                onClick={() => void loadMore()}
+                className="mt-2 h-8 rounded-lg bg-muted/30 text-[13px] font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+              >
+                {paging ? "Loading…" : "Load more"}
+              </button>
+            ) : null}
+          </>
         )}
       </div>
     </div>

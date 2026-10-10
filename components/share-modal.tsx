@@ -39,7 +39,7 @@ export function ShareModal({
 
   const shareUrl =
     typeof window !== "undefined" && projectId
-      ? `${window.location.origin}/?project=${projectId}`
+      ? `${window.location.origin}/view/${projectId}`
       : "";
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export function ShareModal({
     const id = projectId ?? (await ensureSavedAndPublic());
     if (!id || typeof window === "undefined") return;
 
-    const url = `${window.location.origin}/?project=${id}`;
+    const url = `${window.location.origin}/view/${id}`;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);

@@ -332,10 +332,10 @@ export function LandingPage() {
               <ExportArt />
             </Layer>
 
-            <Layer className="bg-muted p-5 sm:p-6 md:col-span-7">
+            <Layer className="bg-[#ffe4ef] p-5 sm:p-6 md:col-span-7">
               <div className="flex h-full flex-col justify-between gap-6 sm:flex-row sm:items-center">
                 <div>
-                  <p className="text-sm font-bold text-black">#Ready</p>
+                  <p className="text-sm font-bold text-[#9a4f6b]">#Ready</p>
                   <h3 className="mt-2 text-2xl font-extrabold tracking-tight">
                     From topic to post
                   </h3>

@@ -277,11 +277,54 @@ export async function setProjectPublic(
     return {
       success: true,
       isPublic,
-      sharePath: `/?project=${projectId}`,
+      sharePath: `/view/${projectId}`,
     };
   } catch (err) {
     console.error("setProjectPublic error:", err);
     return { success: false, error: "Couldn't update access" };
+  }
+}
+
+/** Public carousel for a share link. Only projects marked public. */
+export async function getPublicCarousel(projectId: string): Promise<
+  ActionResult<{
+    title: string;
+    aspectRatio: RatioKey;
+    slides: Array<string | null>;
+  }>
+> {
+  try {
+    if (!projectId) return { success: false, error: "projectId is required" };
+
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, isPublic: true },
+      select: {
+        title: true,
+        aspectRatio: true,
+        thumbnail: true,
+        slides: {
+          orderBy: { order: "asc" },
+          select: { thumbnail: true },
+        },
+      },
+    });
+
+    if (!project) return { success: false, error: "This carousel is not public" };
+
+    const slides =
+      project.slides.length > 0
+        ? project.slides.map((slide) => slide.thumbnail)
+        : [project.thumbnail];
+
+    return {
+      success: true,
+      title: project.title,
+      aspectRatio: isRatioKey(project.aspectRatio) ? project.aspectRatio : "4:5",
+      slides,
+    };
+  } catch (err) {
+    console.error("getPublicCarousel error:", err);
+    return { success: false, error: "Couldn't load the carousel" };
   }
 }
 
