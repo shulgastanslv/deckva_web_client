@@ -20,15 +20,15 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "swibp | carousel maker",
-  description: "swibp | carousel maker by swibp",
+  title: "Swibp | carousel maker",
+  description: "Swibp | carousel maker by swibp",
   keywords: ["carousel", "maker", "swibp", "carousel maker", "carousel maker by swibp"],
-  authors: [{ name: "swibp", url: "https://swibp.io" }],
+  authors: [{ name: "Swibp", url: "https://swibp.io" }],
   icons: {
-    icon: "browser.svg",
+    icon: "/browser.svg",
   },
-  creator: "swibp",
-  publisher: "swibp",
+  creator: "Swibp",
+  publisher: "Swibp",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
