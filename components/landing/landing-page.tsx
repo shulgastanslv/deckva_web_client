@@ -144,7 +144,7 @@ function SectionHead({
 }) {
   return (
     <div className="mb-6 max-w-2xl sm:mb-8">
-      <p className="text-[13px] font-bold tracking-wide text-[#2f5bff]">{eyebrow}</p>
+      <p className="text-sm font-bold tracking-wide text-[#2f5bff]">{eyebrow}</p>
       <h2 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
         {title}
       </h2>
@@ -173,7 +173,7 @@ export function LandingPage() {
 
           <WhiteLogo width={36} height={36} />
 
-          <nav className="hidden items-center gap-7 text-[13px] font-medium text-white/85 md:flex">
+          <nav className="hidden items-center gap-7 text-sm font-medium text-white/85 md:flex">
             {NAV.map((item) => (
               <a key={item.link} href={item.link} className="hover:text-white">
                 {item.name}
@@ -193,7 +193,10 @@ export function LandingPage() {
               asChild
               className="h-10 rounded-full bg-white px-4 text-[#1a2f86] hover:bg-white/90"
             >
-              <Link href="/studio">Open a studio</Link>
+              <Link href="/studio">
+                <span className="sm:hidden">Studio</span>
+                <span className="hidden sm:inline">Open a studio</span>
+              </Link>
             </Button>
             <Sheet>
               <SheetTrigger asChild>
@@ -237,7 +240,7 @@ export function LandingPage() {
           </div>
         </div>
 
-        <div className="relative z-10 mt-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pt-4 pb-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pt-5 lg:pb-20">
+        <div className="relative z-10 mx-auto mt-6 grid max-w-6xl items-center gap-2 px-4 pt-2 pb-12 sm:mt-10 sm:gap-6 sm:px-6 sm:pt-4 sm:pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:pt-5 lg:pb-20">
           <div>
             <h1 className="max-w-xl text-4xl leading-[0.95] font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
               Make carousel
@@ -250,7 +253,7 @@ export function LandingPage() {
               className="text-lg font-medium text-white/90 sm:text-2xl"
               spanClassName="text-white/90"
             />
-            <p className="mt-4 max-w-md text-[13px] leading-relaxed text-white/75 sm:text-base">
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/75 sm:text-base">
               The model itself decides what to put on the cover, why to explain the middle and
               why to finish.               You fix the wording. You do not build every frame from scratch.
             </p>
@@ -263,7 +266,7 @@ export function LandingPage() {
               </Button>
               <a
                 href="#product"
-                className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-[13px] font-medium text-white hover:bg-white/10"
+                className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-medium text-white hover:bg-white/10"
               >
                 How it works
               </a>
@@ -275,16 +278,16 @@ export function LandingPage() {
 
       <section
         id="product"
-        className="relative z-20 mx-auto -mt-14 max-w-6xl scroll-mt-24 px-4 sm:-mt-20 sm:px-6"
+        className="relative z-20 mx-auto -mt-8 max-w-6xl scroll-mt-24 px-4 sm:-mt-16 sm:px-6 lg:-mt-20"
       >
         <Reveal>
           <div className="grid gap-3 md:grid-cols-12 md:grid-rows-[auto_auto_auto]">
-            <Layer className="bg-[#f4f5f9] backdrop-blur-xl sm:p-8 md:col-span-7 md:row-span-2 md:min-h-[480px]">
-              <p className="text-[13px] font-bold text-black  ">#Generate</p>
+            <Layer className="bg-[#f4f5f9] p-5 backdrop-blur-xl sm:p-8 md:col-span-7 md:row-span-2 md:min-h-[480px]">
+              <p className="text-sm font-bold text-black  ">#Generate</p>
               <h2 className="mt-3 max-w-sm text-3xl font-extrabold tracking-tight sm:text-4xl text-black">
                 Topic → carousel
               </h2>
-              <p className="mt-3 max-w-xs text-[13px] text-black">
+              <p className="mt-3 max-w-xs text-sm text-black">
                 Cover, middle, ending — from a couple of sentences.
               </p>
               <div className="mt-6 flex justify-center md:mt-8">
@@ -293,11 +296,11 @@ export function LandingPage() {
             </Layer>
 
             <Layer className="bg-[#e4ebff] p-5 sm:p-6 md:col-span-5 md:min-h-[230px]">
-              <p className="text-[13px] font-bold text-[#3a4f9a]">#Feed</p>
+              <p className="text-sm font-bold text-[#3a4f9a]">#Feed</p>
               <h3 className="mt-2 text-xl font-extrabold tracking-tight">
                 A post, not a file
               </h3>
-              <p className="mt-2 max-w-xs text-[13px] leading-relaxed text-[#5c6170]">
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#5c6170]">
                 The carousel is already in feed proportions. Cover plus the next frames, not a single square.
               </p>
               <div className="mt-2 flex justify-center">
@@ -306,11 +309,11 @@ export function LandingPage() {
             </Layer>
 
             <Layer className="bg-[#efe7ff] p-5 sm:p-6 md:col-span-5">
-              <p className="text-[13px] font-bold text-[#6b5f9a]">#Studio</p>
+              <p className="text-sm font-bold text-[#6b5f9a]">#Studio</p>
               <h3 className="mt-2 text-xl font-extrabold tracking-tight">
                 Edit on the canvas
               </h3>
-              <p className="mt-2 max-w-xs text-[13px] leading-relaxed text-[#5c6170]">
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#5c6170]">
                 Text, background, and frame order. Generation only opens the carousel. You finish it.
               </p>
               <div className="mt-3">
@@ -319,11 +322,11 @@ export function LandingPage() {
             </Layer>
 
             <Layer className="bg-[#e5f6ea] p-5 sm:p-6 md:col-span-5">
-              <p className="text-[13px] font-bold text-[#3d6b4f]">#Export</p>
+              <p className="text-sm font-bold text-[#3d6b4f]">#Export</p>
               <h3 className="mt-2 text-xl font-extrabold tracking-tight">
                 ZIP or PNG
               </h3>
-              <p className="mt-2 max-w-xs text-[13px] leading-relaxed text-[#5c6170]">
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#5c6170]">
                 Each slide is its own PNG. The whole carousel downloads as one archive, with no watermark.
               </p>
               <ExportArt />
@@ -332,16 +335,16 @@ export function LandingPage() {
             <Layer className="bg-muted p-5 sm:p-6 md:col-span-7">
               <div className="flex h-full flex-col justify-between gap-6 sm:flex-row sm:items-center">
                 <div>
-                  <p className="text-[13px] font-bold text-black">#Ready</p>
+                  <p className="text-sm font-bold text-black">#Ready</p>
                   <h3 className="mt-2 text-2xl font-extrabold tracking-tight">
                     From topic to post
                   </h3>
-                  <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-[#5c6170]">
+                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-[#5c6170]">
                     The topic becomes frames, the frames download, and they go straight into the post. No blank canvas and no evening of assembly.
                   </p>
                   <Link
                     href="/studio"
-                    className="mt-5 inline-flex h-11 items-center rounded-full bg-black px-5 text-[13px] font-semibold text-white"
+                    className="mt-5 inline-flex h-11 items-center rounded-full bg-black px-5 text-sm font-semibold text-white"
                   >
                     Open studio
                   </Link>
@@ -368,7 +371,7 @@ export function LandingPage() {
           <Layer className="bg-white">
             <div className="grid items-center gap-8 p-6 sm:p-10 lg:grid-cols-2 lg:gap-10">
               <div>
-                <p className="text-[13px] font-bold text-[#6b5f9a]">Studio</p>
+                <p className="text-sm font-bold text-[#6b5f9a]">Studio</p>
                 <h2 className="mt-3 text-3xl font-extrabold tracking-tight">
                   An editor built for the feed
                 </h2>
@@ -387,7 +390,7 @@ export function LandingPage() {
                 </ul>
                 <Link
                   href="/studio"
-                  className="mt-6 inline-flex h-11 items-center rounded-full bg-[#14151c] px-5 text-[13px] font-semibold text-white"
+                  className="mt-6 inline-flex h-11 items-center rounded-full bg-[#14151c] px-5 text-sm font-semibold text-white"
                 >
                   Open studio
                 </Link>
@@ -400,22 +403,22 @@ export function LandingPage() {
         <Reveal delay={0.05}>
           <div className="grid gap-3 lg:grid-cols-2">
             <Layer className="bg-[#e4ebff] p-7 sm:p-10">
-              <p className="text-[13px] font-bold text-[#3a4f9a]">Icons</p>
+              <p className="text-sm font-bold text-[#3a4f9a]">Icons</p>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
                 14 million
               </h2>
-              <p className="mt-3 max-w-xs text-[13px] text-[#5c6170]">
+              <p className="mt-3 max-w-xs text-sm text-[#5c6170]">
                 Search sits next to the canvas. The icon drops onto the slide.
               </p>
               <IconsArt />
             </Layer>
 
             <Layer className="bg-[#fff4cc] p-7 sm:p-10">
-              <p className="text-[13px] font-bold text-[#8a7a3a]">Templates</p>
+              <p className="text-sm font-bold text-[#8a7a3a]">Templates</p>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
                 Library of templates
               </h2>
-              <p className="mt-3 max-w-xs text-[13px] text-[#5c6170]">
+              <p className="mt-3 max-w-xs text-sm text-[#5c6170]">
                 Cover and ending stay in rhythm. You change the words.
               </p>
               <TemplatesArt />
@@ -435,7 +438,7 @@ export function LandingPage() {
               <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
                 FAQ
               </h2>
-              <p className="mt-3 max-w-xs text-[13px] text-[#5c6170]">
+              <p className="mt-3 max-w-xs text-sm text-[#5c6170]">
                 Generation, edits, export, and your account — in short.
               </p>
             </div>
@@ -471,20 +474,20 @@ export function LandingPage() {
                   <br />
                   The carousel is next.
                 </h2>
-                <p className="mt-4 max-w-sm text-[13px] text-white/75 sm:text-base">
+                <p className="mt-4 max-w-sm text-sm text-white/75 sm:text-base">
                   Open the studio and build the first feed in one pass.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
                   <Link
                     href="/studio"
-                    className="inline-flex h-11 items-center rounded-full bg-white px-5 text-[13px] font-semibold text-[#1a2f86]"
+                    className="inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-semibold text-[#1a2f86]"
                   >
                     Create a carousel
                   </Link>
                   <button
                     type="button"
                     onClick={() => setAuthOpen(true)}
-                    className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-[13px] font-semibold"
+                    className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-semibold"
                   >
                     Sign in
                   </button>
@@ -501,10 +504,10 @@ export function LandingPage() {
 
       <footer>
         <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <Link href="/" className="text-[13px] font-semibold tracking-tight">
+          <Link href="/" className="text-sm font-semibold tracking-tight">
             swibp.io
           </Link>
-          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-[#5c6170]">
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#5c6170]">
             {NAV.map((item) => (
               <a
                 key={item.link}
@@ -515,7 +518,7 @@ export function LandingPage() {
               </a>
             ))}
           </nav>
-          <p className="text-[13px] text-[#8b90a0]">© {new Date().getFullYear()}</p>
+          <p className="text-sm text-[#8b90a0]">© {new Date().getFullYear()}</p>
         </div>
       </footer>
     </div>

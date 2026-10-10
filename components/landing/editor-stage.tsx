@@ -132,7 +132,7 @@ export function EditorStage() {
         </div>
       </div>
       <div className="h-2.5 rounded-b-[0.55rem] bg-[#14151c]" />
-      <div className="relative -mt-px h-3.5 w-[106%] -translate-x-[3%] rounded-b-[1.1rem] bg-gradient-to-b from-[#d8dbe4] to-[#b4b8c4] shadow-[0_14px_28px_rgba(20,21,28,0.12)]">
+      <div className="relative -mt-px h-3.5 w-full rounded-b-[1.1rem] bg-gradient-to-b from-[#d8dbe4] to-[#b4b8c4] shadow-[0_14px_28px_rgba(20,21,28,0.12)] sm:w-[106%] sm:-translate-x-[3%]">
         <div className="absolute left-1/2 top-0 h-1.5 w-14 -translate-x-1/2 rounded-b-md bg-[#14151c]" />
       </div>
     </div>

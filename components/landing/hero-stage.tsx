@@ -85,12 +85,12 @@ export function HeroStage() {
   const rotFront = useTransform(scrollYProgress, [0, 1], [6, 2]);
 
   return (
-    <section ref={ref} className="relative flex items-center justify-center overflow-hidden py-10">
-      <div className="relative mx-auto h-[600px] w-full max-w-4xl perspective-1000">
+    <section ref={ref} className="relative flex items-center justify-center overflow-hidden py-2 sm:py-6 lg:py-10">
+      <div className="relative mx-auto h-[420px] w-full max-w-4xl sm:h-[540px] lg:h-[620px]">
 
-        {/* Задний телефон (Threads) */}
+        {/* Задний телефон */}
         <motion.div
-          className="absolute top-10 left-10 z-10 scale-90 opacity-80 sm:left-20"
+          className="absolute top-8 left-[6%] z-10 hidden scale-[0.72] opacity-80 sm:block lg:scale-90"
           style={reduce ? undefined : { y: yBack, rotate: rotBack }}
         >
           <motion.div
@@ -105,7 +105,7 @@ export function HeroStage() {
 
         {/* Передний телефон (Instagram) */}
         <motion.div
-          className="absolute top-0 right-10 z-20 sm:right-20"
+          className="absolute top-0 left-1/2 z-20 origin-top -translate-x-1/2 scale-[0.62] sm:left-auto sm:right-[6%] sm:translate-x-0 sm:scale-[0.78] lg:scale-100"
           style={reduce ? { rotate: 6 } : { y: yFront, rotate: rotFront }}
         >
           <motion.div

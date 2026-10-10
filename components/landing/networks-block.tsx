@@ -75,14 +75,14 @@ export function NetworksBlock() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-6">
         {NETWORKS.map((network) => {
           const Logo = MARKS[network.id];
           const dark = network.id === "pinterest";
           return (
             <article
               key={network.id}
-              className="rounded-[1.6rem] px-2.5 pb-3 pt-3"
+              className="w-[168px] shrink-0 snap-start rounded-[1.6rem] px-2.5 pb-3 pt-3 sm:w-auto"
               style={{ background: network.panel }}
             >
               <MiniPhone>

@@ -111,7 +111,7 @@ export function ReviewsBlock() {
           Threads carousels people posted
         </h2>
 
-        <ul className="mt-4 columns-2 gap-3 lg:columns-3">
+        <ul className="mt-4 columns-1 gap-3 min-[480px]:columns-2 lg:columns-3">
           {visible.map((pin, index) => (
             <li key={index} className="mb-3 break-inside-avoid">
               <article className="overflow-hidden rounded-2xl bg-white text-neutral-900">
