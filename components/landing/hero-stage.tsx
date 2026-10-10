@@ -32,7 +32,7 @@ export function ThreadShot({ start }: { start: number }) {
     <img
       src={THREAD_SHOTS[index]}
       alt=""
-      className="h-full w-full object-cover object-top"
+      className="h-min w-min object-cover object-top"
     />
   );
 }

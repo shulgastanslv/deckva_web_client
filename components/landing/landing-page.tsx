@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Check, Menu } from "lucide-react";
 
 import { WhiteLogo } from "@/components/logo";
@@ -157,6 +158,8 @@ function SectionHead({
 
 export function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
+  const { status } = useSession();
+  const signedIn = status === "authenticated";
 
   return (
     <div className="relative">
@@ -182,13 +185,23 @@ export function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              className="hidden h-10 rounded-full px-4 text-white hover:bg-white/10 hover:text-white sm:inline-flex"
-              onClick={() => setAuthOpen(true)}
-            >
-              Sign In
-            </Button>
+            {signedIn ? (
+              <Button
+                asChild
+                variant="ghost"
+                className="hidden h-10 rounded-full px-4 text-white hover:bg-white/10 hover:text-white sm:inline-flex"
+              >
+                <Link href="/studio">Projects</Link>
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                className="hidden h-10 rounded-full px-4 text-white hover:bg-white/10 hover:text-white sm:inline-flex"
+                onClick={() => setAuthOpen(true)}
+              >
+                Sign In
+              </Button>
+            )}
             <Button
               asChild
               className="h-10 rounded-full bg-white px-4 text-[#1a2f86] hover:bg-white/90"
@@ -224,13 +237,19 @@ export function LandingPage() {
                       </a>
                     </SheetClose>
                   ))}
-                  <Button
-                    variant="outline"
-                    className="mt-3 h-10 rounded-full"
-                    onClick={() => setAuthOpen(true)}
-                  >
-                    Sign in
-                  </Button>
+                  {signedIn ? (
+                    <Button asChild variant="outline" className="mt-3 h-10 rounded-full">
+                      <Link href="/studio">Projects</Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="mt-3 h-10 rounded-full"
+                      onClick={() => setAuthOpen(true)}
+                    >
+                      Sign in
+                    </Button>
+                  )}
                   <Button asChild className="h-10 rounded-full">
                     <Link href="/studio">Open studio</Link>
                   </Button>
@@ -484,13 +503,22 @@ export function LandingPage() {
                   >
                     Create a carousel
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => setAuthOpen(true)}
-                    className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-semibold"
-                  >
-                    Sign in
-                  </button>
+                  {signedIn ? (
+                    <Link
+                      href="/studio"
+                      className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-semibold"
+                    >
+                      Projects
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setAuthOpen(true)}
+                      className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-semibold"
+                    >
+                      Sign in
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="relative z-10 overflow-hidden">
