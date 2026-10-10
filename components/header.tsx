@@ -25,11 +25,14 @@ import {
   Focus,
   Shield,
   MessageSquareText,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { NotificationsMenu } from "@/components/notifications-menu";
 import Link from "next/link";
 import Logo from "@/components/logo";
 import { useSession, signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 import { AuthModal } from "@/components/auth";
 import { SocialSubscribeDialog } from "@/components/social-subscribe-dialog";
 import { NewProjectModal } from "@/components/new-project-modal";
@@ -47,7 +50,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CommandsKbd } from "@/components/commands_kbd";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { ShareModal } from "./share-modal";
 import { ExportModal } from "./export-modal";
 import { useCanvasManager } from "@/context/canvas-manager";
@@ -78,10 +80,18 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isPublishOpen, setIsPublishOpen] = useState(false);
   const { data: session, status } = useSession();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [themeMounted, setThemeMounted] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copying, setCopying] = useState(false);
+
+  useEffect(() => {
+    setThemeMounted(true);
+  }, []);
+
+  const isDark = themeMounted && resolvedTheme === "dark";
 
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
@@ -217,17 +227,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
               <CloudOff className="w-4 h-4" />
             </span>
           )}
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              onClick={() => setShowShare(true)}
-              size="icon"
-              className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50"
-              title="Share"
-            >
-              <Share className="w-3.5 h-3.5" />
-            </Button>
-          </div>
+
         </div>
 
         <div className="flex items-center gap-1">
@@ -281,10 +281,27 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
           >
             <Focus className="w-3 h-3" />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsFeedbackOpen(true)}
+            className="h-9 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50 hidden sm:inline-flex"
+            title="Send feedback"
+          >
+            <MessageSquareText className="w-4 h-3" />
+          </Button>
         </div>
 
         <div className="flex items-center gap-1">
-          <ThemeSwitcher />
+          <Button
+            variant="ghost"
+            onClick={() => setShowShare(true)}
+            size="icon"
+            className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50"
+            title="Share"
+          >
+            <Share className="w-3.5 h-3.5" />
+          </Button>
           <NotificationsMenu />
           <Button
             variant="secondary"
@@ -398,10 +415,14 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer text-[13px]"
-                  onClick={() => setIsFeedbackOpen(true)}
+                  onClick={() => setTheme(isDark ? "light" : "dark")}
                 >
-                  <MessageSquareText className="w-3.5 h-3.5 mr-2" />
-                  <span>Send feedback</span>
+                  {isDark ? (
+                    <Sun className="w-3.5 h-3.5 mr-2" />
+                  ) : (
+                    <Moon className="w-3.5 h-3.5 mr-2" />
+                  )}
+                  <span>{isDark ? "Light theme" : "Dark theme"}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

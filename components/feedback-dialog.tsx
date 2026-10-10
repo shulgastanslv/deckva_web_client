@@ -110,9 +110,6 @@ export function FeedbackDialog({
               A bug, an idea, or a missing piece.
             </p>
           </DialogHeader>
-          <div className="mr-1 shrink-0">
-            <FeedbackArt className="h-auto w-full max-w-[180px]" />
-          </div>
         </div>
 
         {sent ? (

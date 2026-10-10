@@ -375,6 +375,8 @@ export class CanvasManager {
     this.viewportNativeWidth = nativeW;
     this.viewportNativeHeight = nativeH;
     this.effects.onCanvasResize();
+    // Overlay was drawn for the previous frame size; rebuild for the new ratio.
+    this.grid.redraw();
     this.canvas.renderAll();
   }
 
