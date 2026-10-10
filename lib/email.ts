@@ -14,7 +14,7 @@ export function isValidEmail(value: string): boolean {
 }
 
 export function appBaseUrl(): string {
-  return (process.env.NEXTAUTH_URL || "http://localhost:3000").replace(/\/$/, "");
+  return (process.env.NEXTAUTH_URL ).replace(/\/$/, "");
 }
 
 /** OS resolver. Nodemailer's own DNS query times out on some Windows DNS setups. */
