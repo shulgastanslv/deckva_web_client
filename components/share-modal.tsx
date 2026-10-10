@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Check, Copy, Loader2, Link2 } from "lucide-react";
 import { setProjectPublic } from "@/actions/projects";
+import { ShareProjectArt } from "@/components/canvas/canvas_icons";
 import { useProject } from "@/hooks/use-project";
 import { useSession } from "next-auth/react";
 

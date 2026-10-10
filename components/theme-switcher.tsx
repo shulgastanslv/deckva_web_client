@@ -23,7 +23,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
       variant="ghost"
       size="icon"
       className={cn(
-        "h-9 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50",
+        "h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50",
         className,
       )}
       title={dark ? "Switch to light" : "Switch to dark"}

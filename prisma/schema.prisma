@@ -34,6 +34,7 @@ model User {
   templates     Template[]
   news          News[]
   notifications Notification[]
+  feedbacks     Feedback[]
 }
 
 /// One-time links for email confirmation and password reset.
@@ -134,6 +135,20 @@ model Notification {
   news   News?   @relation(fields: [newsId], references: [id], onDelete: SetNull)
 
   @@index([userId, createdAt])
+}
+
+/// User notes from the studio. Images are data URLs when attached.
+model Feedback {
+  id        String   @id @default(cuid())
+  message   String   @db.Text
+  images    String[] @default([])
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
 }
 
 /// Bookmarks / "saved" projects for a user (not ownership).

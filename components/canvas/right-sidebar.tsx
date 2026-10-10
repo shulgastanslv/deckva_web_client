@@ -29,7 +29,6 @@ import {
   AlignVerticalSpaceBetween,
   PanelRightClose,
   PanelRightOpen,
-  MousePointerClick,
   Upload,
   Crop,
   WandSparkles,
@@ -89,6 +88,7 @@ import {
 import { applyList, applySelectionStyle, writeFormattedText, type ListKind } from "@/lib/canvas/text-format";
 import type { TextStyles } from "@/lib/canvas/text-flow";
 import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
+import { SelectObjectArt } from "@/components/canvas/canvas_icons";
 
 type TextAlign = "left" | "center" | "right" | "justify";
 
@@ -1162,8 +1162,8 @@ export function RightSidebar({
               )}
             </div>
           ) : !formValues ? (
-            <div className="flex flex-col items-center justify-center gap-3 px-5 py-16 text-center text-muted-foreground">
-              <MousePointerClick className="size-7 stroke-[1.5] text-muted-foreground/60" />
+            <div className="flex flex-col items-center justify-center gap-3 px-5 py-14 text-center text-muted-foreground">
+              <SelectObjectArt className="h-auto w-full max-w-[160px]" />
               <p className="text-[13px] leading-snug">
                 Select an object on the canvas to change its properties
               </p>

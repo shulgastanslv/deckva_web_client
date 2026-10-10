@@ -24,6 +24,7 @@ import {
   CloudOff,
   Focus,
   Shield,
+  MessageSquareText,
 } from "lucide-react";
 import { NotificationsMenu } from "@/components/notifications-menu";
 import Link from "next/link";
@@ -34,6 +35,7 @@ import { SocialSubscribeDialog } from "@/components/social-subscribe-dialog";
 import { NewProjectModal } from "@/components/new-project-modal";
 import { WhatsNewModal } from "@/components/whats-new-modal";
 import { HelpDialog } from "@/components/help-dialog";
+import { FeedbackDialog } from "@/components/feedback-dialog";
 import { PublishTemplateDialog } from "@/components/publish-template-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -73,6 +75,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isPublishOpen, setIsPublishOpen] = useState(false);
   const { data: session, status } = useSession();
   const [showShare, setShowShare] = useState(false);
@@ -189,12 +192,10 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
   const userInitial = userName ? userName[0].toUpperCase() : "?";
   const slideCount = slides.length || 1;
 
-  const router = useRouter();
-
   return (
     <>
-      <header className="h-14 w-full flex items-center justify-between px-4 bg-background/80 backdrop-blur-md border-b border-border/60 text-[13px] z-20 shrink-0 gap-3 select-none">
-        <div className="flex items-center gap-1.5 min-w-0">
+      <header className="h-13 w-full flex items-center justify-between px-4 bg-background/80 backdrop-blur-md border-b border-border/60 text-[13px] z-20 shrink-0 gap-4 select-none">
+        <div className="flex items-center gap-2 min-w-0">
           <Logo
             width={30}
             height={30}
@@ -213,18 +214,20 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
           />
           {isDirty && (
             <span className="text-[13px] text-muted-foreground shrink-0 hidden sm:inline">
-              <CloudOff className="w-3.5 h-3.5" />
+              <CloudOff className="w-4 h-4" />
             </span>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 shrink-0"
-            title="Help"
-            onClick={() => setIsHelpOpen(true)}
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-          </Button>
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              onClick={() => setShowShare(true)}
+              size="icon"
+              className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50"
+              title="Share"
+            >
+              <Share className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-1">
@@ -259,28 +262,13 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             <BookOpen className="w-3.5 h-3.5" />
           </Button>
           <div className="h-4 w-px bg-border/60 mx-0.5 hidden sm:block" />
-
           <Button
-            variant={isDirty ? "default" : "secondary"}
-            size="sm"
-            onClick={() => void handleSave()}
-            className="h-9 px-3 text-[13px] font-medium gap-1.5 rounded-full shadow-2xs hover:shadow-xs transition-all"
-            title="Save project (Ctrl+S)"
-          >
-            {isSaving ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <Save className="w-3 h-3" />
-            )}
-            <span className="hidden sm:inline">Save</span>
-          </Button>
-          <Button
-            variant="secondary"
+            variant="default"
             size="sm"
             onClick={onPreview}
             className="h-9 px-3 text-[13px] font-medium gap-1.5 rounded-full shadow-2xs hover:shadow-xs transition-all"
           >
-            <Layers2 className="w-3 h-3 fill-current text-muted-foreground" />
+            <Layers2 className="w-3 h-3 fill-current text-primary-foreground" />
             <span className="hidden sm:inline">Preview</span>
           </Button>
 
@@ -296,15 +284,6 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            onClick={() => setShowShare(true)}
-            size="icon"
-            className="h-9 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50"
-            title="Share"
-          >
-            <Share className="w-3.5 h-3.5" />
-          </Button>
           <ThemeSwitcher />
           <NotificationsMenu />
           <Button
@@ -382,7 +361,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-56 bg-background/50 backdrop-blur-sm"
+                className="w-56 bg-background/80 backdrop-blur-sm"
               >
                 <DropdownMenuLabel className="truncate text-[13px]">
                   {userEmail}
@@ -416,6 +395,13 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                 >
                   <Send className="w-3.5 h-3.5 mr-2 text-sky-500" />
                   <span>Telegram & Threads</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer text-[13px]"
+                  onClick={() => setIsFeedbackOpen(true)}
+                >
+                  <MessageSquareText className="w-3.5 h-3.5 mr-2" />
+                  <span>Send feedback</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -459,6 +445,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
       <ExportModal open={showExport} onOpenChange={setShowExport} />
       <WhatsNewModal open={isWhatsNewOpen} onOpenChange={setIsWhatsNewOpen} />
       <HelpDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
+      <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
       <PublishTemplateDialog
         open={isPublishOpen}
         onOpenChange={setIsPublishOpen}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import { listNews, publishNews, sendNotification, type NewsItem } from "@/actions/admin";
+import { listFeedbacks, type FeedbackItem } from "@/actions/feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -73,10 +74,14 @@ function DeskForm({
 
 export function AdminPanel({ email }: { email: string }) {
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
 
   const reload = () => {
     void listNews().then((res) => {
       if (res.success) setNews(res.news);
+    });
+    void listFeedbacks().then((res) => {
+      if (res.success) setFeedbacks(res.items);
     });
   };
 
@@ -137,6 +142,46 @@ export function AdminPanel({ email }: { email: string }) {
                 <p className="mt-1 whitespace-pre-wrap text-[13px] text-muted-foreground">{item.body}</p>
                 {item.authorName ? (
                   <p className="mt-2 text-[10px] text-muted-foreground">{item.authorName}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-[13px] font-semibold">Feedback</h2>
+        {feedbacks.length === 0 ? (
+          <p className="text-[13px] text-muted-foreground">No feedback yet.</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {feedbacks.map((item) => (
+              <li key={item.id} className="rounded-2xl border border-border/60 px-4 py-3">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="truncate text-[13px] font-medium">
+                    {item.userName ?? item.userEmail}
+                  </p>
+                  <time className="shrink-0 text-[10px] text-muted-foreground">
+                    {new Date(item.createdAt).toLocaleString()}
+                  </time>
+                </div>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">{item.userEmail}</p>
+                <p className="mt-2 whitespace-pre-wrap text-[13px] text-muted-foreground">{item.message}</p>
+                {item.images.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.images.map((src, index) => (
+                      <a
+                        key={`${item.id}-${index}`}
+                        href={src}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block size-16 overflow-hidden rounded-xl bg-muted"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt="" className="size-full object-cover" />
+                      </a>
+                    ))}
+                  </div>
                 ) : null}
               </li>
             ))}

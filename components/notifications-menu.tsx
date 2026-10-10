@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 
 import { listMyNotifications, markNotificationsRead, type NotificationItem } from "@/actions/admin";
+import { NotificationsArt } from "@/components/canvas/canvas_icons";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -56,7 +57,10 @@ export function NotificationsMenu() {
         <DropdownMenuLabel className="text-[13px] font-semibold">Notifications</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {items.length === 0 ? (
-          <div className="py-4 text-center text-[13px] text-muted-foreground">No new notifications</div>
+          <div className="flex flex-col items-center gap-2 px-2 py-5 text-center">
+            <NotificationsArt className="h-auto w-full max-w-[120px]" />
+            <p className="text-[13px] text-muted-foreground">No new notifications</p>
+          </div>
         ) : (
           <ul className="max-h-80 space-y-2 overflow-y-auto">
             {items.map((item) => (
