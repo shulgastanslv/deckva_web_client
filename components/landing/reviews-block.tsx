@@ -2,9 +2,17 @@
 
 import { useState } from "react";
 
-import { THREAD_SHOTS } from "@/components/landing/hero-stage";
-
-const PHOTOS = THREAD_SHOTS;
+const PHOTOS = [
+  "/threads/function.png",
+  "/threads/gotoit.png",
+  "/threads/lua.png",
+  "/threads/memcashed.png",
+  "/threads/rainbow.png",
+  "/threads/redis.png",
+  "/threads/redis2.png",
+  "/threads/vlan.png",
+  "/threads/yandexmap.png",
+] as const;
 
 const PINS = [
   {

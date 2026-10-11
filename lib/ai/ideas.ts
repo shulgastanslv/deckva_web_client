@@ -1,4 +1,4 @@
-import { catalogForPrompt, suggestedSetById } from "./carousel-style";
+import { suggestedSetById } from "./carousel-style";
 import { SUGGESTED_SETS } from "@/lib/presets/backgrounds";
 
 export interface CarouselThemeIdea {
@@ -18,34 +18,21 @@ export interface CarouselIdeasResult {
   palettes: CarouselPaletteIdea[];
 }
 
+const SET_IDS = SUGGESTED_SETS.map((set) => set.id).join(", ");
+
 export function ideasSystemPrompt(): string {
   return [
-    "You invent Instagram carousel ideas for Swibp.",
-    "Reply with ONLY a single JSON object. No markdown.",
-    "Shape:",
-    '{',
-    '  "themes":[{"title":"...","prompt":"...","setId":"night","slides":6}],',
-    '  "palettes":[{"setId":"butter","reason":"..."}]',
-    '}',
-    "",
-    "Rules:",
-    "- Exactly 6 themes. title max 6 words. prompt is the full brief for a carousel generator (1–2 sentences).",
-    "- Exactly 5 palettes. setId MUST be from the catalog below.",
-    "- slides between 4 and 8.",
-    "- Match the seed language (RU/EN). Editorial lifestyle tone like Swibp refs.",
-    "- Themes should be distinct angles, not near-duplicates.",
-    "",
-    "Color catalog:",
-    catalogForPrompt(),
+    'JSON only: {"themes":[{"title":"...","prompt":"...","setId":"black","slides":5}],"palettes":[{"setId":"butter","reason":"..."}]}',
+    "4 themes, 3 palettes. setId from:",
+    SET_IDS,
+    "Match seed language. title ≤5 words. prompt 1 short sentence.",
   ].join("\n");
 }
 
 export function ideasUserPrompt(seed: string): string {
   const trimmed = seed.trim();
-  if (!trimmed) {
-    return "Seed: open — invent fresh carousel themes for creators, lifestyle, and practical tips.";
-  }
-  return `Seed / niche: ${trimmed}\nInvent themes and matching palettes for this niche.`;
+  if (!trimmed) return "Seed: creators / lifestyle tips";
+  return `Seed: ${trimmed}`;
 }
 
 function asSetId(value: unknown): string | null {
@@ -54,7 +41,7 @@ function asSetId(value: unknown): string | null {
 }
 
 export function parseIdeasPayload(raw: unknown): CarouselIdeasResult {
-  const fallbackPalettes = SUGGESTED_SETS.slice(0, 5).map((set) => ({
+  const fallbackPalettes = SUGGESTED_SETS.slice(0, 3).map((set) => ({
     setId: set.id,
     reason: set.label,
   }));
@@ -73,11 +60,11 @@ export function parseIdeasPayload(raw: unknown): CarouselIdeasResult {
     const row = item as Record<string, unknown>;
     const title = typeof row.title === "string" ? row.title.trim() : "";
     const prompt = typeof row.prompt === "string" ? row.prompt.trim() : "";
-    const setId = asSetId(row.setId) ?? "night";
-    const slides = Math.min(8, Math.max(4, Math.round(Number(row.slides) || 6)));
+    const setId = asSetId(row.setId) ?? "black";
+    const slides = Math.min(8, Math.max(4, Math.round(Number(row.slides) || 5)));
     if (title.length < 2 || prompt.length < 4) continue;
     themes.push({ title, prompt, setId, slides });
-    if (themes.length >= 6) break;
+    if (themes.length >= 4) break;
   }
 
   const palettes: CarouselPaletteIdea[] = [];
@@ -93,7 +80,7 @@ export function parseIdeasPayload(raw: unknown): CarouselIdeasResult {
         ? row.reason.trim()
         : suggestedSetById(setId)?.label || setId;
     palettes.push({ setId, reason });
-    if (palettes.length >= 5) break;
+    if (palettes.length >= 3) break;
   }
 
   return {

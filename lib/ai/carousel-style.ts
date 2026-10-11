@@ -63,29 +63,3 @@ export function backgroundsForSet(set: SuggestedSet, count: number): string[] {
   };
   return generateSlideBackgrounds(recipe, count).map(snapToSolidPreset);
 }
-
-export function catalogForPrompt(): string {
-  return SUGGESTED_SETS.map(
-    (set) =>
-      `- ${set.id}: bg ${set.background}, text ${set.text}, accent ${set.accent}, card ${set.card}`,
-  ).join("\n");
-}
-
-/**
- * Editorial rules distilled from templates/refs + Swibp template JSON:
- * left margin, big Montserrat headlines, numbered points, corner chrome, footer.
- */
-export function refStyleGuide(): string {
-  return [
-    "Visual language (match templates/refs + Swibp editorial carousels):",
-    "- Instagram 4:5 lifestyle/editorial slides — not corporate decks.",
-    "- Big bold sans headlines (Montserrat energy), tight line-height, often 1–3 short lines.",
-    "- Cover: oversized title mid-frame; optional soft subtitle in parentheses or brackets.",
-    "- Point slides: numbered like \"1 / topic\" or \"[1] topic\", body under it, left-aligned, lower two-thirds.",
-    "- CTA last: short invite + optional body; keep airy.",
-    "- Corner chrome feel: handle [@…], // section label, footer tagline + @handle, slide [i/n].",
-    "- Prefer lowercase or sentence case; punchy RU/EN matching the theme; no hashtag spam.",
-    "- Color: pick ONE setId from the catalog. Do not invent hex codes outside that set.",
-    "- Per-slide background: omit (we vary from the set) OR use only catalog hex values.",
-  ].join("\n");
-}

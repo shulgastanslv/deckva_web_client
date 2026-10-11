@@ -1,7 +1,6 @@
 import type { ProjectPalette } from "@/lib/canvas/document";
 
 export type CarouselSlideRole = "cover" | "point" | "cta";
-/** editorial = left-aligned numbered (refs); center/top/split kept for variety */
 export type CarouselSlideLayout = "editorial" | "center" | "top" | "split";
 
 export interface CarouselSlideSpec {
@@ -12,51 +11,6 @@ export interface CarouselSlideSpec {
   background?: string;
   layout?: CarouselSlideLayout;
 }
-
-export interface CarouselPaletteEvent {
-  type: "palette";
-  /** Preferred: id from SUGGESTED_SETS */
-  setId?: string;
-  background: string;
-  text: string;
-  accent: string;
-  card: string;
-  tagline?: string;
-  handle?: string;
-}
-
-export interface CarouselSlideEvent {
-  type: "slide";
-  index: number;
-  role: CarouselSlideRole;
-  heading: string;
-  body?: string;
-  background?: string;
-  layout?: CarouselSlideLayout;
-}
-
-export interface CarouselDoneEvent {
-  type: "done";
-  title: string;
-}
-
-export interface CarouselErrorEvent {
-  type: "error";
-  message: string;
-}
-
-export interface CarouselMetaEvent {
-  type: "meta";
-  slides: number;
-  theme: string;
-}
-
-export type CarouselStreamEvent =
-  | CarouselMetaEvent
-  | CarouselPaletteEvent
-  | CarouselSlideEvent
-  | CarouselDoneEvent
-  | CarouselErrorEvent;
 
 export type CarouselPalette = ProjectPalette;
 

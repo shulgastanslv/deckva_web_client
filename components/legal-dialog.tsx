@@ -46,7 +46,7 @@ const TERMS: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "Other services",
     paragraphs: [
-      "Sign-in can go through Google. Fonts can load from Google Fonts. Icons can come from IconScout, and placing an SVG icon can spend a download on that account. Some tools send a prompt to an AI provider to generate a layout.",
+      "Sign-in can go through Google. Fonts can load from Google Fonts. Icons can come from IconScout, and placing an SVG icon can spend a download on that account. Carousel generation runs locally through Ollama on your machine.",
       "Those services have their own terms. Swibp is not responsible for an outage or a change on their side.",
     ],
   },
@@ -115,7 +115,7 @@ const PRIVACY: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "Processors",
     paragraphs: [
-      "The database that holds accounts and projects is hosted for us. Google handles Google sign-in. Google Fonts serves typefaces you pick, so a font request includes the family name. IconScout serves icon search and downloads when you use that panel. An AI provider receives the prompt you submit for generation, not your password.",
+      "The database that holds accounts and projects is hosted for us. Google handles Google sign-in. Google Fonts serves typefaces you pick, so a font request includes the family name. IconScout serves icon search and downloads when you use that panel. Generation prompts stay on your machine via Ollama.",
       "Those providers process data under their own policies, only for the feature you used.",
     ],
   },

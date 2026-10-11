@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import {
   Heart,
   MessageCircle,
   Send,
   Bookmark,
-  Repeat2,
-  MoreHorizontal
-} from "lucide-react"; // <-- Красивые иконки из коробки
+  MoreHorizontal,
+} from "lucide-react";
+
+import { ThreadsUI, type ThreadsPostData } from "@/components/landing/threads-ui";
 
 export type FeedSlide = {
   src: string;
@@ -19,17 +20,17 @@ export type FeedSlide = {
 
 const SLIDES = [
   {
-    src: "/threads/function.png",
+    src: "/landing/slide-cover.jpg",
     title: "Finished recursion",
     caption: "One function, one frame.",
   },
   {
-    src: "/threads/rainbow.png",
+    src: "/landing/slide-mid.jpg",
     title: "Hail to the Rainbow",
     caption: "The frames stay in order.",
   },
   {
-    src: "/threads/redis2.png",
+    src: "/landing/slide-end.jpg",
     title: "How Redis works",
     caption: "Cover, then the explanation.",
   },
@@ -140,53 +141,37 @@ export function InstagramFeed({
   );
 }
 
-// --- Threads Feed Component ---
+/** Threads phone feed — `slides` become the post carousel media. */
 export function ThreadsFeed({
   slides = SLIDES,
   index: controlledIndex,
+  author = "swibp",
+  text = "A carousel from one thought. Cover, middle, and ending.",
 }: {
-  slides?: typeof SLIDES;
+  slides?: FeedSlide[];
   index?: number;
+  author?: string;
+  text?: string;
 }) {
-  const localIndex = useSlide(1, slides.length, controlledIndex === undefined);
+  const localIndex = useSlide(0, slides.length, controlledIndex === undefined);
   const currentIndex = controlledIndex ?? localIndex;
-  const slide = slides[currentIndex];
+
+  const post: ThreadsPostData = {
+    author,
+    avatar: slides[0]?.src,
+    time: "2h",
+    text,
+    media: slides.map((s) => s.src),
+    likes: 148,
+    replies: 33,
+    reposts: 8,
+  };
 
   return (
-    <div className="flex h-full flex-col bg-white text-neutral-900 p-4">
-      {/* Header Thread */}
-      <div className="flex gap-3 mb-4">
-        <div className="h-10 w-10 shrink-0 rounded-full bg-neutral-200 overflow-hidden">
-           <img src={slide.src} className="h-full w-full object-cover" />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-baseline justify-between">
-             <span className="font-semibold text-[13px]">swibp</span>
-             <span className="text-[13px] text-neutral-400">2h</span>
-          </div>
-          <p className="text-[13px] leading-snug mt-1">
-            A carousel from one thought. Cover, middle, and ending. 🧵
-          </p>
-        </div>
-      </div>
-
-      {/* Media Content */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-neutral-100 mb-4">
-        <Frame src={slide.src} title="" /> {/* Убираем текст внутри картинки для чистоты треде */}
-         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">
-            <Dots index={currentIndex} count={slides.length} />
-         </div>
-      </div>
-
-      {/* Actions Thread Style */}
-      <div className="flex items-center justify-between mt-auto pt-2 border-t border-neutral-100">
-        <div className="flex gap-4">
-          <Heart className="h-5 w-5 text-neutral-600" />
-          <Repeat2 className="h-5 w-5 text-neutral-600" />
-          <MessageCircle className="h-5 w-5 text-neutral-600" />
-          <Send className="h-5 w-5 text-neutral-600" />
-        </div>
-      </div>
-    </div>
+    <ThreadsUI
+      posts={[post]}
+      mediaIndex={currentIndex}
+      autoplay={controlledIndex === undefined}
+    />
   );
 }

@@ -8,7 +8,12 @@ import {
   Type,
 } from "lucide-react";
 
-import { PhoneFrame, THREAD_SHOTS, ThreadShot } from "@/components/landing/hero-stage";
+import { PhoneFrame, THREAD_SHOTS } from "@/components/landing/hero-stage";
+import {
+  DEMO_THREADS_POSTS,
+  ThreadsUI,
+  type ThreadsPostData,
+} from "@/components/landing/threads-ui";
 
 const SAMPLE_SLIDES = THREAD_SHOTS;
 
@@ -51,14 +56,20 @@ export function PromptMock() {
   );
 }
 
-/** Phone showing a Threads screenshot. */
+/** Phone with a live Threads UI post (pass `posts` to customize). */
 export function PhoneCarouselMock({
   start = 0,
   className,
+  posts,
 }: {
   start?: number;
   className?: string;
+  posts?: ThreadsPostData[];
 }) {
+  const feed =
+    posts ??
+    [DEMO_THREADS_POSTS[start % DEMO_THREADS_POSTS.length]].filter(Boolean);
+
   return (
     <PhoneFrame
       className={
@@ -66,7 +77,7 @@ export function PhoneCarouselMock({
         "h-[380px] w-[190px] border-[6px] sm:h-[420px] sm:w-[210px]"
       }
     >
-      <ThreadShot start={start} />
+      <ThreadsUI posts={feed} />
     </PhoneFrame>
   );
 }
@@ -83,7 +94,7 @@ export function DualPhonesMock() {
       </div>
       <div className="absolute bottom-[-78px] right-0 z-10 origin-bottom rotate-6 scale-[0.68] sm:bottom-[-118px] sm:scale-[0.9]">
         <PhoneCarouselMock
-          start={4}
+          start={1}
           className="h-[360px] w-[180px] border-[6px] sm:h-[420px] sm:w-[210px]"
         />
       </div>
