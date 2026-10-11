@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, MoreHorizontal, Pencil, Star, Trash2 } from "lucide-react";
+import { Copy, MoreHorizontal, Pencil, Settings2, Star, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ export function GalleryMenu({
   canRename = true,
   starred = false,
   onRename,
+  onEdit,
   onDuplicate,
   onDelete,
   onStar,
@@ -37,6 +38,7 @@ export function GalleryMenu({
   canRename?: boolean;
   starred?: boolean;
   onRename?: (title: string) => void;
+  onEdit?: () => void;
   onDuplicate?: () => void;
   onDelete?: () => void;
   onStar?: () => void;
@@ -152,6 +154,15 @@ export function GalleryMenu({
           >
             <Pencil className="size-4" />
             Rename
+          </DropdownMenuItem>
+        ) : null}
+        {onEdit ? (
+          <DropdownMenuItem
+            className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+            onClick={onEdit}
+          >
+            <Settings2 className="size-4" />
+            Edit
           </DropdownMenuItem>
         ) : null}
         {onDuplicate ? (

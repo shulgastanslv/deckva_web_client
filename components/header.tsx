@@ -39,13 +39,13 @@ import { NewProjectModal } from "@/components/new-project-modal";
 import { WhatsNewModal } from "@/components/whats-new-modal";
 import { HelpDialog } from "@/components/help-dialog";
 import { FeedbackDialog } from "@/components/feedback-dialog";
+import { ProfileSettingsDialog } from "@/components/profile-settings-dialog";
 import { PublishTemplateDialog } from "@/components/publish-template-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -61,6 +61,7 @@ import {
   renderSlidesToImages,
 } from "@/lib/export/carousel";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onPreview?: () => void;
@@ -78,6 +79,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isPublishOpen, setIsPublishOpen] = useState(false);
   const { data: session, status } = useSession();
   const { resolvedTheme, setTheme } = useTheme();
@@ -359,7 +361,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full p-0 hover:bg-muted/50 hover:text-foreground"
+                  className="h-8 w-8 rounded-full p-0 ring-1 ring-border/60 hover:bg-muted/40 hover:ring-border"
                   title="Account"
                 >
                   <Avatar className="h-8 w-8">
@@ -370,7 +372,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                       }
                       alt={userName}
                     />
-                    <AvatarFallback className="text-[13px]">
+                    <AvatarFallback className="bg-muted text-[13px] font-medium">
                       {userInitial}
                     </AvatarFallback>
                   </Avatar>
@@ -378,60 +380,116 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-56 bg-background/80 backdrop-blur-sm"
+                sideOffset={8}
+                className="w-64 rounded-2xl border-0 bg-background/95 p-0 text-popover-foreground shadow-xl ring-1 ring-foreground/10 backdrop-blur-md"
               >
-                <DropdownMenuLabel className="truncate text-[13px]">
-                  {userEmail}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer text-[13px]"
-                  onClick={() => setIsNewProjectOpen(true)}
-                >
-                  <GalleryHorizontalEndIcon className="w-3.5 h-3.5 mr-2" />
-                  <span>New project</span>
-                </DropdownMenuItem>
-                {session.user?.role === "ADMIN" ? (
-                  <DropdownMenuItem asChild className="cursor-pointer text-[13px]">
-                    <Link href="/admin">
-                      <Shield className="w-3.5 h-3.5 mr-2" />
-                      <span>Admin</span>
-                    </Link>
+                <div className="flex items-center gap-3 px-4 pt-3.5 pb-3">
+                  <Avatar className="size-10 ring-1 ring-border/60">
+                    <AvatarImage
+                      src={
+                        session.user?.image ??
+                        `https://api.dicebear.com/10.x/squircles/svg?seed=${session.user?.id}`
+                      }
+                      alt={userName}
+                    />
+                    <AvatarFallback className="bg-muted text-[13px] font-semibold">
+                      {userInitial}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold tracking-tight text-foreground">
+                      {userName}
+                    </p>
+                    {userEmail && userEmail !== userName ? (
+                      <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                        {userEmail}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <DropdownMenuSeparator className="mx-0 my-0" />
+
+                <div className="py-1">
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                    onClick={() => setIsProfileOpen(true)}
+                  >
+                    <User className="size-4 text-muted-foreground" />
+                    Profile
                   </DropdownMenuItem>
-                ) : null}
-                <DropdownMenuItem
-                  className="cursor-pointer text-[13px] md:hidden"
-                  onClick={openPublish}
-                >
-                  <Globe className="w-3.5 h-3.5 mr-2" />
-                  <span>Publish template</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer text-[13px]"
-                  onClick={() => setIsSocialOpen(true)}
-                >
-                  <Send className="w-3.5 h-3.5 mr-2 text-sky-500" />
-                  <span>Telegram & Threads</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer text-[13px]"
-                  onClick={() => setTheme(isDark ? "light" : "dark")}
-                >
-                  {isDark ? (
-                    <Sun className="w-3.5 h-3.5 mr-2" />
-                  ) : (
-                    <Moon className="w-3.5 h-3.5 mr-2" />
-                  )}
-                  <span>{isDark ? "Light theme" : "Dark theme"}</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer text-[13px] text-destructive focus:text-destructive"
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                >
-                  <LogOut className="w-3.5 h-3.5 mr-2" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                    onClick={() => setIsNewProjectOpen(true)}
+                  >
+                    <GalleryHorizontalEndIcon className="size-4 text-muted-foreground" />
+                    New project
+                  </DropdownMenuItem>
+                  {session.user?.role === "ADMIN" ? (
+                    <DropdownMenuItem asChild className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]">
+                      <Link href="/admin">
+                        <Shield className="size-4 text-muted-foreground" />
+                        Admin
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : null}
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px] md:hidden"
+                    onClick={openPublish}
+                  >
+                    <Globe className="size-4 text-muted-foreground" />
+                    Publish template
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                    onClick={() => setIsSocialOpen(true)}
+                  >
+                    <Send className="size-4 text-sky-500" />
+                    Telegram & Threads
+                  </DropdownMenuItem>
+                </div>
+
+                <DropdownMenuSeparator className="mx-0 my-0" />
+
+                <div className="py-1">
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                    onClick={() => setTheme(isDark ? "light" : "dark")}
+                  >
+                    {isDark ? (
+                      <Sun className="size-4 text-muted-foreground" />
+                    ) : (
+                      <Moon className="size-4 text-muted-foreground" />
+                    )}
+                    <span className="flex-1">{isDark ? "Light theme" : "Dark theme"}</span>
+                    <span
+                      className={cn(
+                        "relative h-5 w-9 shrink-0 rounded-full transition-colors",
+                        isDark ? "bg-foreground/20" : "bg-muted",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "absolute top-0.5 size-4 rounded-full bg-background shadow-sm ring-1 ring-foreground/10 transition-transform",
+                          isDark ? "left-4" : "left-0.5",
+                        )}
+                      />
+                    </span>
+                  </DropdownMenuItem>
+                </div>
+
+                <DropdownMenuSeparator className="mx-0 my-0" />
+
+                <div className="py-1 pb-1.5">
+                  <DropdownMenuItem
+                    variant="destructive"
+                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                  >
+                    <LogOut className="size-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : null}
@@ -467,6 +525,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
       <WhatsNewModal open={isWhatsNewOpen} onOpenChange={setIsWhatsNewOpen} />
       <HelpDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
       <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
+      <ProfileSettingsDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
       <PublishTemplateDialog
         open={isPublishOpen}
         onOpenChange={setIsPublishOpen}

@@ -1,9 +1,12 @@
 import { Ollama } from "ollama";
 
-import { carouselSystemPrompt, carouselUserPrompt } from "./carousel-prompt";
+import {
+  carouselNumPredict,
+  carouselPromptConfig,
+  carouselSystemPrompt,
+  carouselUserPrompt,
+} from "./carousel-prompt";
 import type { CarouselGenerateOptions } from "./generate-options";
-import { extractJsonObject, ideasSystemPrompt, ideasUserPrompt } from "./ideas";
-import { carouselPromptConfig } from "./prompt-config";
 
 const OLLAMA_HOST = process.env.OLLAMA_HOST?.trim() || "http://127.0.0.1:11434";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL?.trim() || "qwen2.5:3b";
@@ -17,6 +20,7 @@ function client(): Ollama {
 }
 
 function withAbort(ollama: Ollama, signal?: AbortSignal): () => void {
+  if (!signal) return () => undefined;
   const abort = () => {
     try {
       ollama.abort();
@@ -24,16 +28,33 @@ function withAbort(ollama: Ollama, signal?: AbortSignal): () => void {
       // ignore
     }
   };
-  if (!signal) return () => undefined;
   if (signal.aborted) abort();
   else signal.addEventListener("abort", abort, { once: true });
   return () => signal.removeEventListener("abort", abort);
 }
 
-function carouselNumPredict(slides: number, sentences: number): number {
-  const m = carouselPromptConfig.model;
-  const perSlide = m.tokensPerSlideBase + sentences * m.tokensPerSentence;
-  return Math.min(m.tokensMax, m.tokensBase + slides * perSlide);
+/** Pull JSON object from model text that may wrap it in fences. */
+export function extractJsonObject(text: string): unknown {
+  const trimmed = text.trim();
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    // continue
+  }
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced?.[1]) {
+    try {
+      return JSON.parse(fenced[1].trim());
+    } catch {
+      // continue
+    }
+  }
+  const start = trimmed.indexOf("{");
+  const end = trimmed.lastIndexOf("}");
+  if (start >= 0 && end > start) {
+    return JSON.parse(trimmed.slice(start, end + 1));
+  }
+  throw new Error("Model did not return JSON");
 }
 
 export async function completeOllamaCarousel(input: {
@@ -44,7 +65,7 @@ export async function completeOllamaCarousel(input: {
 }): Promise<unknown> {
   const ollama = client();
   const clear = withAbort(ollama, input.signal);
-  const { temperature, topP, numCtx, keepAlive } = carouselPromptConfig.model;
+  const { temperature, topP, numCtx, keepAlive } = carouselPromptConfig;
 
   try {
     const response = await ollama.chat({
@@ -69,38 +90,6 @@ export async function completeOllamaCarousel(input: {
     const content = response.message?.content;
     if (typeof content !== "string" || !content.trim()) {
       throw new Error("Empty Ollama carousel response");
-    }
-    return extractJsonObject(content);
-  } finally {
-    clear();
-  }
-}
-
-export async function completeOllamaIdeas(input: {
-  seed: string;
-  signal?: AbortSignal;
-}): Promise<unknown> {
-  const ollama = client();
-  const clear = withAbort(ollama, input.signal);
-  try {
-    const response = await ollama.chat({
-      model: OLLAMA_MODEL,
-      stream: false,
-      format: "json",
-      keep_alive: carouselPromptConfig.model.keepAlive,
-      options: {
-        temperature: 0.5,
-        num_predict: 280,
-        num_ctx: 1536,
-      },
-      messages: [
-        { role: "system", content: ideasSystemPrompt() },
-        { role: "user", content: ideasUserPrompt(input.seed) },
-      ],
-    });
-    const content = response.message?.content;
-    if (typeof content !== "string" || !content.trim()) {
-      throw new Error("Empty Ollama ideas response");
     }
     return extractJsonObject(content);
   } finally {

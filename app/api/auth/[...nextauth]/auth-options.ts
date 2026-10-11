@@ -134,7 +134,16 @@ export const authOptions: AuthOptions = {
       if (account?.provider !== "google") return true;
       return verifiedGoogleEmail(profile) !== null;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account, profile, trigger, session }) {
+      if (trigger === "update" && session) {
+        if (typeof session.name === "string") token.name = session.name;
+        if (session.name === null) token.name = null;
+        if (typeof session.image === "string" || session.image === null) {
+          token.picture = session.image;
+          token.image = session.image;
+        }
+      }
+
       if (account?.provider === "google") {
         const email = verifiedGoogleEmail(profile);
         if (!email) throw new Error("Google did not confirm this email");
@@ -149,6 +158,7 @@ export const authOptions: AuthOptions = {
         token.email = dbUser.email;
         token.name = dbUser.name;
         token.image = dbUser.image;
+        token.picture = dbUser.image;
       } else if (user?.id) {
         token.id = user.id;
         token.sub = user.id;
@@ -175,7 +185,9 @@ export const authOptions: AuthOptions = {
         session.user.role = token.role === "ADMIN" ? "ADMIN" : "USER";
         if (token.email) session.user.email = token.email;
         session.user.name = token.name ?? null;
-        session.user.image = token.picture ?? null;
+        session.user.image =
+          (typeof token.picture === "string" ? token.picture : null) ??
+          (typeof token.image === "string" ? token.image : null);
       }
       return session;
     },

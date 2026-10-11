@@ -1,5 +1,4 @@
 import { getTemplateById } from "@/actions/templates";
-import type { CanvasManager } from "@/lib/canvas/manager";
 import type { SlidesController } from "@/lib/canvas/slides";
 import { buildCarouselSlide } from "@/lib/ai/carousel-slide";
 import { backgroundsForSet, suggestedSetById } from "@/lib/ai/carousel-style";
@@ -13,9 +12,7 @@ import type { ProjectPalette } from "@/lib/canvas/document";
 import type { SlideItem } from "@/lib/types";
 import type { CanvasStoreState } from "@/store/useCanvasStore";
 
-type Store = {
-  getState: () => CanvasStoreState;
-};
+type Store = { getState: () => CanvasStoreState };
 
 type CarouselApiResponse = {
   error?: string;
@@ -33,7 +30,6 @@ export async function runCarouselGenerate(input: {
   setId?: string;
   options?: Partial<CarouselGenerateOptions>;
   store: Store;
-  manager: CanvasManager;
   slidesController: SlidesController;
   signal?: AbortSignal;
 }): Promise<void> {
@@ -50,7 +46,6 @@ export async function runCarouselGenerate(input: {
     genProgress: 0.12,
     genExpectedSlides: expected,
     genTheme: theme,
-    genFx: "idle",
   });
 
   slidesController.saveCurrent({ thumbnail: false });
@@ -64,7 +59,7 @@ export async function runCarouselGenerate(input: {
 
   const data = (await response.json().catch(() => null)) as CarouselApiResponse | null;
   if (signal?.aborted) {
-    store.getState().setGenerate({ genStatus: "idle", genPhase: "", genFx: "idle" });
+    store.getState().setGenerate({ genStatus: "idle", genPhase: "" });
     return;
   }
 
@@ -78,7 +73,6 @@ export async function runCarouselGenerate(input: {
       genStatus: "error",
       genError: data.error || "No slides generated",
       genPhase: "No slides generated",
-      genFx: "idle",
     });
     return;
   }
@@ -104,9 +98,7 @@ export async function runCarouselGenerate(input: {
 
   if (resolvedOptions.templateId) {
     const tpl = await getTemplateById(resolvedOptions.templateId);
-    if (!tpl.success) {
-      throw new Error("Template not found");
-    }
+    if (!tpl.success) throw new Error("Template not found");
     store.getState().setCurrentRatio(tpl.template.aspectRatio);
     slides = buildSlidesFromTemplate({
       templateSlides: tpl.template.slides,
@@ -116,22 +108,20 @@ export async function runCarouselGenerate(input: {
   } else {
     const slideBackgrounds = backgroundsForSet(set, specs.length);
     const state = store.getState();
-    slides = specs.map((spec, built) => {
-      const bg = spec.background || slideBackgrounds[built] || palette.background;
-      return buildCarouselSlide({
-        spec: { ...spec, index: built, background: bg },
+    slides = specs.map((spec, index) =>
+      buildCarouselSlide({
+        spec: { ...spec, background: spec.background || slideBackgrounds[index] || palette.background },
         palette,
-        textStyles: state.textStyles,
         chrome: state.chrome,
         width: state.canvasDimensions.width,
         height: state.canvasDimensions.height,
-        slideIndex: built,
+        slideIndex: index,
         slideCount: specs.length,
-        id: built + 1,
+        id: index + 1,
         handle: data.handle,
         options: resolvedOptions,
-      });
-    });
+      }),
+    );
   }
 
   store.getState().setSlides(slides);
@@ -148,6 +138,5 @@ export async function runCarouselGenerate(input: {
     genProgress: 1,
     genBuiltCount: slides.length,
     genTitle: projectTitle,
-    genFx: "idle",
   });
 }

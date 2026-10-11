@@ -111,13 +111,9 @@ export function SidebarGenerate() {
           headingPosition,
           sentences,
           edgeCount,
-          swipeHint: false,
-          swipeText: DEFAULT_GENERATE_OPTIONS.swipeText,
-          includeCta: false,
           templateId,
         },
         store: useCanvasStore,
-        manager,
         slidesController,
         signal: abort.signal,
       });

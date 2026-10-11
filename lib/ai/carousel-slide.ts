@@ -1,8 +1,5 @@
-import {
-  applyChrome,
-  type ChromeTemplate,
-} from "@/lib/canvas/chrome";
-import type { ProjectPalette, TextStyleDef, TextStyleId } from "@/lib/canvas/document";
+import { applyChrome, type ChromeTemplate } from "@/lib/canvas/chrome";
+import type { ProjectPalette } from "@/lib/canvas/document";
 import type { FabricCanvasJSON, SlideItem } from "@/lib/types";
 import type { CarouselSlideSpec } from "./carousel-types";
 import {
@@ -19,7 +16,7 @@ const CONTENT_WIDTH_RATIO = 0.78;
 
 function textObject(input: {
   text: string;
-  styleId: TextStyleId;
+  styleId: "heading" | "body";
   fontSize: number;
   fontWeight: string | number;
   fill: string;
@@ -27,7 +24,6 @@ function textObject(input: {
   top: number;
   width: number;
   originX?: "left" | "center" | "right";
-  originY?: "top" | "center";
   textAlign?: "left" | "center" | "right";
   lineHeight?: number;
   charSpacing?: number;
@@ -36,7 +32,7 @@ function textObject(input: {
   return {
     type: "Textbox",
     originX: input.originX ?? "left",
-    originY: input.originY ?? "top",
+    originY: "top",
     left: input.left,
     top: input.top,
     width: input.width,
@@ -54,10 +50,6 @@ function textObject(input: {
   };
 }
 
-function cleanHeading(heading: string): string {
-  return heading.replace(/^\s*\[?\d+\]?\s*[\/.]\s*/i, "").trim();
-}
-
 function estimateTextHeight(text: string, fontSize: number, width: number, lineHeight: number) {
   const avgChar = fontSize * 0.52;
   const charsPerLine = Math.max(8, Math.floor(width / avgChar));
@@ -67,47 +59,16 @@ function estimateTextHeight(text: string, fontSize: number, width: number, lineH
   return Math.round(lines * fontSize * lineHeight);
 }
 
-const EDGE_SLOTS: Array<{
-  left: (w: number) => number;
-  top: (h: number) => number;
-  width: (cw: number) => number;
-  align: "left" | "right";
-  originX: "left" | "right";
-}> = [
-  {
-    left: () => MARGIN,
-    top: () => 48,
-    width: (cw) => Math.round(cw * 0.42),
-    align: "left",
-    originX: "left",
-  },
-  {
-    left: (w) => w - MARGIN,
-    top: () => 48,
-    width: (cw) => Math.round(cw * 0.42),
-    align: "right",
-    originX: "right",
-  },
-  {
-    left: () => MARGIN,
-    top: (h) => h - 88,
-    width: (cw) => Math.round(cw * 0.42),
-    align: "left",
-    originX: "left",
-  },
-  {
-    left: (w) => w - MARGIN,
-    top: (h) => h - 120,
-    width: (cw) => Math.round(cw * 0.36),
-    align: "right",
-    originX: "right",
-  },
+const EDGE_SLOTS = [
+  { left: () => MARGIN, top: () => 48, width: (cw: number) => Math.round(cw * 0.42), align: "left" as const, originX: "left" as const },
+  { left: (w: number) => w - MARGIN, top: () => 48, width: (cw: number) => Math.round(cw * 0.42), align: "right" as const, originX: "right" as const },
+  { left: () => MARGIN, top: (h: number) => h - 88, width: (cw: number) => Math.round(cw * 0.42), align: "left" as const, originX: "left" as const },
+  { left: (w: number) => w - MARGIN, top: (h: number) => h - 120, width: (cw: number) => Math.round(cw * 0.36), align: "right" as const, originX: "right" as const },
 ];
 
 export function buildCarouselSlide(input: {
   spec: CarouselSlideSpec;
   palette: ProjectPalette;
-  textStyles: Record<TextStyleId, TextStyleDef>;
   chrome: ChromeTemplate[];
   width: number;
   height: number;
@@ -123,14 +84,12 @@ export function buildCarouselSlide(input: {
   const contentW = Math.round(width * CONTENT_WIDTH_RATIO);
   const centerX = width / 2;
   const handle = (input.handle || "@swibp").replace(/^@/, "");
-  const heading = cleanHeading(spec.heading);
+  const heading = spec.heading.replace(/^\s*\[?\d+\]?\s*[\/.]\s*/i, "").trim();
   const body = spec.body?.trim() || "";
-  const isLast = slideIndex >= slideCount - 1;
 
   const headingLineHeight = 1.05;
   const bodyLineHeight = 1.28;
   const gap = 24;
-
   const headingH = estimateTextHeight(heading, HEADING_SIZE, contentW, headingLineHeight);
   const bodyH = body ? estimateTextHeight(body, BODY_SIZE, contentW, bodyLineHeight) : 0;
   const blockH = headingH + (body ? gap + bodyH : 0);
@@ -138,27 +97,19 @@ export function buildCarouselSlide(input: {
   const topPad = 120;
   const bottomPad = 130;
   let blockTop: number;
-  if (options.headingPosition === "top") {
-    blockTop = topPad;
-  } else if (options.headingPosition === "bottom") {
-    blockTop = Math.max(topPad, height - bottomPad - blockH);
-  } else {
-    blockTop = Math.round((height - blockH) / 2);
-  }
+  if (options.headingPosition === "top") blockTop = topPad;
+  else if (options.headingPosition === "bottom") blockTop = Math.max(topPad, height - bottomPad - blockH);
+  else blockTop = Math.round((height - blockH) / 2);
 
   const objects: Record<string, unknown>[] = [];
 
-  const edges = edgeLabelsForSlide({
+  edgeLabelsForSlide({
     edgeCount: options.edgeCount,
     handle,
     slideIndex,
     slideCount,
     heading,
-    includeCta: options.includeCta,
-    isLast,
-  });
-
-  edges.forEach((label, i) => {
+  }).forEach((label, i) => {
     const slot = EDGE_SLOTS[i];
     if (!slot) return;
     objects.push(
@@ -178,24 +129,6 @@ export function buildCarouselSlide(input: {
       }),
     );
   });
-
-  if (options.swipeHint && !isLast) {
-    objects.push(
-      textObject({
-        text: options.swipeText,
-        styleId: "body",
-        fontSize: 18,
-        fontWeight: 600,
-        fill: palette.accent,
-        left: width - MARGIN,
-        top: height - 64,
-        width: Math.round(contentW * 0.4),
-        textAlign: "right",
-        originX: "right",
-        role: "swipe",
-      }),
-    );
-  }
 
   objects.push(
     textObject({

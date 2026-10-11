@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Search, X, Loader2, LayoutGrid, FileJson, Crown } from "lucide-react";
+import { Search, X, Loader2, LayoutGrid, FileJson, Crown, User } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import {
@@ -10,6 +10,7 @@ import {
   getTemplateCategories,
   renameTemplate,
   duplicateTemplate,
+  deleteTemplate,
   type TemplateListItem,
 } from "@/actions/templates";
 import { useApplyTemplate } from "@/hooks/use-apply-template";
@@ -19,6 +20,7 @@ import { GalleryCard, GallerySection, carouselMeta, splitGallery } from "@/compo
 import { GalleryMenu } from "@/components/canvas/sidebar/gallery-menu";
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { PreviewTemplateDialog } from "@/components/canvas/preview-template-dialog";
+import { EditTemplateDialog } from "@/components/edit-template-dialog";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
 
 export function SidebarTemplates() {
@@ -29,6 +31,7 @@ export function SidebarTemplates() {
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
+  const [ownership, setOwnership] = useState<"all" | "mine">("all");
   const [categories, setCategories] = useState<string[]>([]);
   const [templates, setTemplates] = useState<TemplateListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +39,7 @@ export function SidebarTemplates() {
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [editTemplate, setEditTemplate] = useState<TemplateListItem | null>(null);
   const [preview, setPreview] = useState<{
     title: string;
     aspectRatio?: RatioKey;
@@ -51,6 +55,7 @@ export function SidebarTemplates() {
         getTemplates({
           category: category === "all" ? undefined : category,
           search: search.trim() || undefined,
+          mine: ownership === "mine",
         }),
         getTemplateCategories(),
       ]);
@@ -66,7 +71,7 @@ export function SidebarTemplates() {
     } finally {
       setLoading(false);
     }
-  }, [category, search]);
+  }, [category, ownership, search]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -92,8 +97,18 @@ export function SidebarTemplates() {
     if (res.success) void fetchTemplates();
   };
 
+  const handleDelete = async (tpl: TemplateListItem) => {
+    if (!window.confirm(`Delete “${tpl.title}”? This cannot be undone.`)) return;
+    setTemplates((prev) => prev.filter((item) => item.id !== tpl.id));
+    const res = await deleteTemplate(tpl.id);
+    if (!res.success) {
+      alert("Failed to delete template");
+      void fetchTemplates();
+    }
+  };
+
   const templateMenu = (tpl: TemplateListItem) => {
-    const canRename = Boolean(
+    const canManage = Boolean(
       session?.user && (tpl.authorId === session.user.id || session.user.role === "ADMIN"),
     );
     return (
@@ -104,9 +119,11 @@ export function SidebarTemplates() {
           createdBy={tpl.authorName}
           category={tpl.category}
           ratio={tpl.aspectRatio}
-          canRename={canRename}
-          onRename={canRename ? (title) => void handleRename(tpl.id, title) : undefined}
+          canRename={canManage}
+          onRename={canManage ? (title) => void handleRename(tpl.id, title) : undefined}
+          onEdit={canManage ? () => setEditTemplate(tpl) : undefined}
           onDuplicate={session?.user ? () => void handleDuplicate(tpl.id) : undefined}
+          onDelete={canManage ? () => void handleDelete(tpl) : undefined}
         />
       </div>
     );
@@ -138,8 +155,6 @@ export function SidebarTemplates() {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
-
-
 
   const handleApply = async (id: string) => {
     if (applyingId) return;
@@ -204,12 +219,11 @@ export function SidebarTemplates() {
   };
 
   const tabs = useMemo(() => ["all", ...categories], [categories]);
-  const filtering = search.trim().length > 0 || category !== "all";
+  const filtering = search.trim().length > 0 || category !== "all" || ownership !== "all";
   const { recent, more } = splitGallery(templates, showAll || filtering);
 
   return (
     <div className="flex flex-col gap-4 p-1">
-
       <input
         ref={fileInputRef}
         type="file"
@@ -220,7 +234,6 @@ export function SidebarTemplates() {
           void handleImportFile(file);
         }}
       />
-
 
       <div className="flex min-w-0 items-center gap-1.5">
         <div className="relative min-w-0 flex-1">
@@ -242,6 +255,22 @@ export function SidebarTemplates() {
             </button>
           )}
         </div>
+        {session?.user ? (
+          <FilterMenu
+            icon={User}
+            value={ownership}
+            onChange={(id) => setOwnership(id === "mine" ? "mine" : "all")}
+            groups={[
+              {
+                label: "Ownership",
+                options: [
+                  { id: "all", label: "All" },
+                  { id: "mine", label: "Mine" },
+                ],
+              },
+            ]}
+          />
+        ) : null}
         <FilterMenu
           icon={LayoutGrid}
           value={category}
@@ -288,7 +317,9 @@ export function SidebarTemplates() {
       ) : templates.length === 0 ? (
         <div className="py-6 px-2 text-center space-y-3">
           <p className="text-[13px] text-muted-foreground">
-            No templates found. Seed built-in presets or publish your own through Publish.
+            {ownership === "mine"
+              ? "You haven’t published any templates yet."
+              : "No templates found. Seed built-in presets or publish your own through Publish."}
           </p>
         </div>
       ) : (
@@ -354,6 +385,14 @@ export function SidebarTemplates() {
         busy={applyingId === "insert" || applyingId === "replace"}
         onInsert={(indices) => void insertPreviewSlides(indices)}
         onReplace={() => void replaceWithPreview()}
+      />
+      <EditTemplateDialog
+        open={editTemplate != null}
+        onOpenChange={(open) => {
+          if (!open) setEditTemplate(null);
+        }}
+        template={editTemplate}
+        onSaved={() => void fetchTemplates()}
       />
     </div>
   );

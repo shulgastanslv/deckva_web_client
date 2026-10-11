@@ -73,11 +73,20 @@ interface TemplateListRow {
 export async function getTemplates(options?: {
   category?: string;
   search?: string;
+  mine?: boolean;
 }): Promise<ActionResult<{ templates: TemplateListItem[] }>> {
   try {
     const search = options?.search?.trim();
     const category = options?.category?.trim();
     const filters: Prisma.Sql[] = [Prisma.sql`TRUE`];
+
+    if (options?.mine) {
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.id) {
+        return { success: true, templates: [] };
+      }
+      filters.push(Prisma.sql`t."authorId" = ${session.user.id}`);
+    }
 
     if (category && category !== "all") {
       filters.push(Prisma.sql`category = ${category}`);
@@ -360,13 +369,17 @@ export async function deleteTemplate(
   try {
     const user = await requireUser();
     if (!user) return { success: false, error: "Sign in" };
-    if (!isAdminUser(user)) return { success: false, error: "Admins only" };
 
     const row = await prisma.template.findUnique({
       where: { id: templateId },
-      select: { id: true },
+      select: { id: true, authorId: true },
     });
     if (!row) return { success: false, error: "Template not found" };
+
+    const owns = row.authorId === user.id;
+    if (!owns && !isAdminUser(user)) {
+      return { success: false, error: "You can't delete this template" };
+    }
 
     await prisma.template.delete({ where: { id: templateId } });
     revalidatePath("/");

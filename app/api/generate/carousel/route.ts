@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       options,
       signal: request.signal,
     });
-    const result = parseCarouselResult(raw, slides, options);
+    const result = parseCarouselResult(raw, slides);
     return Response.json({
       theme,
       setId: set.id,
