@@ -15,6 +15,7 @@ import {
 } from "@/lib/ai/generate-options";
 import { runCarouselGenerate } from "@/lib/ai/run-carousel-generate";
 import { suggestedSetById } from "@/lib/ai/carousel-style";
+import type { ThemeIdea } from "@/lib/ai/themes";
 import { getTemplates, type TemplateListItem } from "@/actions/templates";
 import { SUGGESTED_SETS } from "@/lib/presets/backgrounds";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -50,6 +51,9 @@ export function SidebarGenerate() {
   const [sentences, setSentences] = useState(DEFAULT_GENERATE_OPTIONS.sentences);
   const [edgeCount, setEdgeCount] = useState(DEFAULT_GENERATE_OPTIONS.edgeCount);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [themeIdeas, setThemeIdeas] = useState<ThemeIdea[]>([]);
+  const [themesLoading, setThemesLoading] = useState(false);
+  const [themesError, setThemesError] = useState<string | null>(null);
 
   const busy = genStatus === "streaming" || genStatus === "building";
   const selectedSet = suggestedSetById(setId) ?? SUGGESTED_SETS[0]!;
@@ -94,6 +98,38 @@ export function SidebarGenerate() {
     });
   };
 
+  const suggestThemes = async () => {
+    if (themesLoading || busy) return;
+    setThemesLoading(true);
+    setThemesError(null);
+    try {
+      const response = await fetch("/api/generate/themes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ seed: theme.trim() }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        themes?: ThemeIdea[];
+        error?: string;
+      } | null;
+      if (!response.ok || !data?.themes?.length) {
+        throw new Error(data?.error || "Couldn't suggest themes");
+      }
+      setThemeIdeas(data.themes);
+    } catch (error) {
+      setThemeIdeas([]);
+      setThemesError(error instanceof Error ? error.message : "Couldn't suggest themes");
+    } finally {
+      setThemesLoading(false);
+    }
+  };
+
+  const applyThemeIdea = (idea: ThemeIdea) => {
+    setTheme(idea.prompt);
+    setSlides(idea.slides);
+    if (!usingTemplate) applyPalette(idea.setId);
+  };
+
   const generate = async () => {
     if (!manager || !slidesController || busy) return;
     const trimmed = theme.trim();
@@ -135,9 +171,26 @@ export function SidebarGenerate() {
   return (
     <div className="flex w-full min-w-0 flex-col gap-3 px-1 py-1 text-[13px] text-foreground">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="gen-theme" className="px-1 text-muted-foreground">
-          Theme
-        </Label>
+        <div className="flex items-center justify-between gap-2 px-1">
+          <Label htmlFor="gen-theme" className="text-muted-foreground">
+            Theme
+          </Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={busy || themesLoading}
+            onClick={() => void suggestThemes()}
+            className="h-7 rounded-full px-2 text-[11px]"
+          >
+            {themesLoading ? (
+              <Loader2 className="size-3 animate-spin" />
+            ) : (
+              <Sparkles className="size-3" />
+            )}
+            Suggest
+          </Button>
+        </div>
         <Textarea
           id="gen-theme"
           value={theme}
@@ -147,6 +200,25 @@ export function SidebarGenerate() {
           disabled={busy}
           className="min-h-28 resize-y"
         />
+        {themesError ? (
+          <p className="px-1 text-[11px] text-destructive">{themesError}</p>
+        ) : null}
+        {themeIdeas.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5 px-0.5">
+            {themeIdeas.map((idea) => (
+              <button
+                key={`${idea.title}-${idea.prompt}`}
+                type="button"
+                disabled={busy}
+                title={idea.prompt}
+                onClick={() => applyThemeIdea(idea)}
+                className="rounded-full border border-border/60 bg-muted/40 px-2.5 py-1 text-left text-[11px] text-foreground transition-colors hover:bg-muted/70 disabled:opacity-60"
+              >
+                <span className="font-medium">{idea.title}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className="flex w-full flex-col gap-2">
