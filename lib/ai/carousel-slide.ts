@@ -4,10 +4,18 @@ import {
 } from "@/lib/canvas/chrome";
 import type { ProjectPalette, TextStyleDef, TextStyleId } from "@/lib/canvas/document";
 import type { FabricCanvasJSON, SlideItem } from "@/lib/types";
-import type { CarouselSlideLayout, CarouselSlideSpec } from "./carousel-types";
+import type { CarouselSlideSpec } from "./carousel-types";
+import {
+  edgeLabelsForSlide,
+  type CarouselGenerateOptions,
+  DEFAULT_GENERATE_OPTIONS,
+} from "./generate-options";
 
 const FONT = "Montserrat";
-const MARGIN = 64;
+const MARGIN = 56;
+const HEADING_SIZE = 56;
+const BODY_SIZE = 24;
+const CONTENT_WIDTH_RATIO = 0.78;
 
 function textObject(input: {
   text: string;
@@ -46,15 +54,55 @@ function textObject(input: {
   };
 }
 
-function defaultLayout(role: CarouselSlideSpec["role"], layout?: CarouselSlideLayout): CarouselSlideLayout {
-  if (layout) return layout;
-  if (role === "cover") return "center";
-  return "editorial";
-}
-
 function cleanHeading(heading: string): string {
   return heading.replace(/^\s*\[?\d+\]?\s*[\/.]\s*/i, "").trim();
 }
+
+function estimateTextHeight(text: string, fontSize: number, width: number, lineHeight: number) {
+  const avgChar = fontSize * 0.52;
+  const charsPerLine = Math.max(8, Math.floor(width / avgChar));
+  const lines = text
+    .split(/\n+/)
+    .reduce((sum, paragraph) => sum + Math.max(1, Math.ceil(paragraph.length / charsPerLine)), 0);
+  return Math.round(lines * fontSize * lineHeight);
+}
+
+const EDGE_SLOTS: Array<{
+  left: (w: number) => number;
+  top: (h: number) => number;
+  width: (cw: number) => number;
+  align: "left" | "right";
+  originX: "left" | "right";
+}> = [
+  {
+    left: () => MARGIN,
+    top: () => 48,
+    width: (cw) => Math.round(cw * 0.42),
+    align: "left",
+    originX: "left",
+  },
+  {
+    left: (w) => w - MARGIN,
+    top: () => 48,
+    width: (cw) => Math.round(cw * 0.42),
+    align: "right",
+    originX: "right",
+  },
+  {
+    left: () => MARGIN,
+    top: (h) => h - 88,
+    width: (cw) => Math.round(cw * 0.42),
+    align: "left",
+    originX: "left",
+  },
+  {
+    left: (w) => w - MARGIN,
+    top: (h) => h - 120,
+    width: (cw) => Math.round(cw * 0.36),
+    align: "right",
+    originX: "right",
+  },
+];
 
 export function buildCarouselSlide(input: {
   spec: CarouselSlideSpec;
@@ -66,160 +114,122 @@ export function buildCarouselSlide(input: {
   slideIndex: number;
   slideCount: number;
   id: number;
-  tagline?: string;
   handle?: string;
-  section?: string;
+  options?: CarouselGenerateOptions;
 }): SlideItem {
   const { spec, palette, width, height, slideIndex, slideCount } = input;
-  const layout = defaultLayout(spec.role, spec.layout);
+  const options = input.options ?? DEFAULT_GENERATE_OPTIONS;
   const background = spec.background ?? palette.background;
-  const contentW = width - MARGIN * 2;
+  const contentW = Math.round(width * CONTENT_WIDTH_RATIO);
+  const centerX = width / 2;
   const handle = (input.handle || "@swibp").replace(/^@/, "");
-  const tagline = input.tagline?.trim() || "блог про ясный контент\nи карусели, которые читают";
-  const section =
-    input.section?.trim() ||
-    (spec.role === "cover" ? "// обложка" : spec.role === "cta" ? "// дальше" : "// по делу");
+  const heading = cleanHeading(spec.heading);
+  const body = spec.body?.trim() || "";
+  const isLast = slideIndex >= slideCount - 1;
 
-  const centered = layout === "center";
-  const split = layout === "split";
-  const titleLeft = split ? MARGIN + Math.round(width * 0.06) : centered ? width / 2 : MARGIN;
-  const titleWidth = split ? contentW - Math.round(width * 0.06) : contentW;
+  const headingLineHeight = 1.05;
+  const bodyLineHeight = 1.28;
+  const gap = 24;
+
+  const headingH = estimateTextHeight(heading, HEADING_SIZE, contentW, headingLineHeight);
+  const bodyH = body ? estimateTextHeight(body, BODY_SIZE, contentW, bodyLineHeight) : 0;
+  const blockH = headingH + (body ? gap + bodyH : 0);
+
+  const topPad = 120;
+  const bottomPad = 130;
+  let blockTop: number;
+  if (options.headingPosition === "top") {
+    blockTop = topPad;
+  } else if (options.headingPosition === "bottom") {
+    blockTop = Math.max(topPad, height - bottomPad - blockH);
+  } else {
+    blockTop = Math.round((height - blockH) / 2);
+  }
 
   const objects: Record<string, unknown>[] = [];
 
-  objects.push(
-    textObject({
-      text: `[ @${handle} ]`,
-      styleId: "body",
-      fontSize: 20,
-      fontWeight: 600,
-      fill: palette.text,
-      left: MARGIN,
-      top: 56,
-      width: Math.round(contentW * 0.45),
-      charSpacing: 40,
-      role: "handle",
-    }),
-  );
-  objects.push(
-    textObject({
-      text: section,
-      styleId: "body",
-      fontSize: 20,
-      fontWeight: 500,
-      fill: palette.text,
-      left: Math.round(width * 0.48),
-      top: 56,
-      width: Math.round(contentW * 0.5),
-      textAlign: "right",
-      charSpacing: 20,
-    }),
-  );
+  const edges = edgeLabelsForSlide({
+    edgeCount: options.edgeCount,
+    handle,
+    slideIndex,
+    slideCount,
+    heading,
+    includeCta: options.includeCta,
+    isLast,
+  });
 
-  if (split) {
-    objects.push({
-      type: "Rect",
-      left: 0,
-      top: 0,
-      width: Math.round(width * 0.08),
-      height,
-      fill: palette.accent,
-      selectable: true,
-      swibpSlot: "accent",
-    });
-  }
-
-  const displayTitle =
-    spec.role === "point"
-      ? `${slideIndex + 1} / ${cleanHeading(spec.heading)}`
-      : cleanHeading(spec.heading);
-
-  const headingSize = spec.role === "cover" ? 88 : spec.role === "cta" ? 72 : 64;
-  const headingTop =
-    layout === "top"
-      ? Math.round(height * 0.2)
-      : layout === "editorial"
-        ? spec.role === "cover"
-          ? Math.round(height * 0.32)
-          : Math.round(height * 0.58)
-        : Math.round(height * (spec.body ? 0.36 : 0.42));
-
-  objects.push(
-    textObject({
-      text: displayTitle,
-      styleId: "heading",
-      fontSize: headingSize,
-      fontWeight: "bold",
-      fill: palette.text,
-      left: titleLeft,
-      top: headingTop,
-      width: titleWidth,
-      textAlign: centered ? "center" : "left",
-      originX: centered ? "center" : "left",
-      lineHeight: 0.92,
-    }),
-  );
-
-  if (spec.body) {
+  edges.forEach((label, i) => {
+    const slot = EDGE_SLOTS[i];
+    if (!slot) return;
     objects.push(
       textObject({
-        text: spec.body,
+        text: label,
         styleId: "body",
-        fontSize: spec.role === "cover" ? 28 : 30,
-        fontWeight: 400,
+        fontSize: 16,
+        fontWeight: 500,
         fill: palette.text,
-        left: titleLeft,
-        top: headingTop + Math.round(headingSize * 1.3),
-        width: titleWidth,
-        textAlign: centered ? "center" : "left",
-        originX: centered ? "center" : "left",
-        lineHeight: 1.15,
+        left: slot.left(width),
+        top: slot.top(height),
+        width: slot.width(contentW),
+        textAlign: slot.align,
+        originX: slot.originX,
+        charSpacing: 20,
+        role: "edge",
+      }),
+    );
+  });
+
+  if (options.swipeHint && !isLast) {
+    objects.push(
+      textObject({
+        text: options.swipeText,
+        styleId: "body",
+        fontSize: 18,
+        fontWeight: 600,
+        fill: palette.accent,
+        left: width - MARGIN,
+        top: height - 64,
+        width: Math.round(contentW * 0.4),
+        textAlign: "right",
+        originX: "right",
+        role: "swipe",
       }),
     );
   }
 
   objects.push(
     textObject({
-      text: tagline,
-      styleId: "body",
-      fontSize: 18,
-      fontWeight: 400,
+      text: heading,
+      styleId: "heading",
+      fontSize: HEADING_SIZE,
+      fontWeight: "bold",
       fill: palette.text,
-      left: MARGIN,
-      top: height - 114,
-      width: Math.round(contentW * 0.62),
-      lineHeight: 1.15,
-      role: "footer",
+      left: centerX,
+      top: blockTop,
+      width: contentW,
+      textAlign: "center",
+      originX: "center",
+      lineHeight: headingLineHeight,
     }),
   );
-  objects.push(
-    textObject({
-      text: `@${handle}`,
-      styleId: "body",
-      fontSize: 18,
-      fontWeight: 500,
-      fill: palette.text,
-      left: Math.round(width * 0.62),
-      top: height - 86,
-      width: Math.round(contentW * 0.38),
-      textAlign: "right",
-      role: "handle",
-    }),
-  );
-  objects.push(
-    textObject({
-      text: `[${slideIndex + 1}/${slideCount}]`,
-      styleId: "body",
-      fontSize: 18,
-      fontWeight: 500,
-      fill: palette.accent,
-      left: Math.round(width * 0.62),
-      top: height - 56,
-      width: Math.round(contentW * 0.38),
-      textAlign: "right",
-      role: "number",
-    }),
-  );
+
+  if (body) {
+    objects.push(
+      textObject({
+        text: body,
+        styleId: "body",
+        fontSize: BODY_SIZE,
+        fontWeight: 400,
+        fill: palette.text,
+        left: centerX,
+        top: blockTop + headingH + gap,
+        width: contentW,
+        textAlign: "center",
+        originX: "center",
+        lineHeight: bodyLineHeight,
+      }),
+    );
+  }
 
   const canvasJSON: FabricCanvasJSON = {
     version: "6.0.0",

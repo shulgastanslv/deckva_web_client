@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/lib/generated/prisma/client";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { emailIsAdmin } from "@/lib/auth-role";
 import { prisma } from "@/lib/prisma";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
 import {
@@ -238,9 +239,13 @@ async function requireUser() {
   if (!session?.user?.id) return null;
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, role: true },
+    select: { id: true, role: true, email: true },
   });
   return user;
+}
+
+function isAdminUser(user: { role: string; email: string }): boolean {
+  return user.role === "ADMIN" || emailIsAdmin(user.email);
 }
 
 export async function renameTemplate(
@@ -259,11 +264,12 @@ export async function renameTemplate(
     });
     if (!row) return { success: false, error: "Template not found" };
     const owns = row.authorId === user.id;
-    const admin = user.role === "ADMIN";
+    const admin = isAdminUser(user);
     if (!owns && !admin) return { success: false, error: "You can't rename this template" };
 
     await prisma.template.update({ where: { id: templateId }, data: { title: next } });
     revalidatePath("/");
+    revalidatePath("/admin");
     return { success: true };
   } catch (err) {
     console.error("renameTemplate error:", err);
@@ -293,9 +299,81 @@ export async function duplicateTemplate(
       select: { id: true },
     });
     revalidatePath("/");
+    revalidatePath("/admin");
     return { success: true, templateId: copy.id };
   } catch (err) {
     console.error("duplicateTemplate error:", err);
     return { success: false, error: "Couldn't duplicate the template" };
+  }
+}
+
+export async function updateTemplateMeta(
+  templateId: string,
+  input: { title?: string; category?: string; badge?: string | null },
+): Promise<ActionResult<object>> {
+  try {
+    const user = await requireUser();
+    if (!user) return { success: false, error: "Sign in" };
+
+    const row = await prisma.template.findUnique({
+      where: { id: templateId },
+      select: { authorId: true },
+    });
+    if (!row) return { success: false, error: "Template not found" };
+
+    const owns = row.authorId === user.id;
+    if (!owns && !isAdminUser(user)) {
+      return { success: false, error: "You can't edit this template" };
+    }
+
+    const data: { title?: string; category?: string; badge?: string | null } = {};
+    if (typeof input.title === "string") {
+      const title = input.title.trim();
+      if (!title) return { success: false, error: "Enter a name" };
+      data.title = title;
+    }
+    if (typeof input.category === "string") {
+      const category = input.category.trim();
+      if (!category) return { success: false, error: "Enter a category" };
+      data.category = category;
+    }
+    if (input.badge !== undefined) {
+      data.badge = input.badge?.trim() || null;
+    }
+    if (Object.keys(data).length === 0) {
+      return { success: false, error: "Nothing to update" };
+    }
+
+    await prisma.template.update({ where: { id: templateId }, data });
+    revalidatePath("/");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err) {
+    console.error("updateTemplateMeta error:", err);
+    return { success: false, error: "Couldn't update the template" };
+  }
+}
+
+export async function deleteTemplate(
+  templateId: string,
+): Promise<ActionResult<object>> {
+  try {
+    const user = await requireUser();
+    if (!user) return { success: false, error: "Sign in" };
+    if (!isAdminUser(user)) return { success: false, error: "Admins only" };
+
+    const row = await prisma.template.findUnique({
+      where: { id: templateId },
+      select: { id: true },
+    });
+    if (!row) return { success: false, error: "Template not found" };
+
+    await prisma.template.delete({ where: { id: templateId } });
+    revalidatePath("/");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err) {
+    console.error("deleteTemplate error:", err);
+    return { success: false, error: "Couldn't delete the template" };
   }
 }

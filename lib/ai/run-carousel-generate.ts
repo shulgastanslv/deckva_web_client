@@ -1,8 +1,14 @@
+import { getTemplateById } from "@/actions/templates";
 import type { CanvasManager } from "@/lib/canvas/manager";
 import type { SlidesController } from "@/lib/canvas/slides";
 import { buildCarouselSlide } from "@/lib/ai/carousel-slide";
 import { backgroundsForSet, suggestedSetById } from "@/lib/ai/carousel-style";
 import type { CarouselSlideSpec } from "@/lib/ai/carousel-types";
+import { buildSlidesFromTemplate } from "@/lib/ai/fill-template-slides";
+import {
+  normalizeGenerateOptions,
+  type CarouselGenerateOptions,
+} from "@/lib/ai/generate-options";
 import type { ProjectPalette } from "@/lib/canvas/document";
 import type { SlideItem } from "@/lib/types";
 import type { CanvasStoreState } from "@/store/useCanvasStore";
@@ -16,15 +22,16 @@ type CarouselApiResponse = {
   title?: string;
   setId?: string;
   palette?: ProjectPalette;
-  tagline?: string;
   handle?: string;
   slides?: CarouselSlideSpec[];
+  options?: CarouselGenerateOptions;
 };
 
 export async function runCarouselGenerate(input: {
   theme: string;
   slides: number;
   setId?: string;
+  options?: Partial<CarouselGenerateOptions>;
   store: Store;
   manager: CanvasManager;
   slidesController: SlidesController;
@@ -34,6 +41,7 @@ export async function runCarouselGenerate(input: {
   const theme = input.theme.trim();
   const expected = Math.min(20, Math.max(1, Math.round(input.slides)));
   const setId = input.setId?.trim() || undefined;
+  const options = normalizeGenerateOptions(input.options);
 
   store.getState().resetGenerate();
   store.getState().setGenerate({
@@ -50,7 +58,7 @@ export async function runCarouselGenerate(input: {
   const response = await fetch("/api/generate/carousel", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ theme, slides: expected, setId }),
+    body: JSON.stringify({ theme, slides: expected, setId, options }),
     signal,
   });
 
@@ -77,38 +85,54 @@ export async function runCarouselGenerate(input: {
 
   store.getState().setGenerate({
     genStatus: "building",
-    genPhase: "Building slides…",
+    genPhase: options.templateId ? "Filling template…" : "Building slides…",
     genProgress: 0.75,
     genBuiltCount: specs.length,
   });
 
-  const set = suggestedSetById(data.setId || setId) ?? suggestedSetById("black")!;
+  const resolvedOptions = normalizeGenerateOptions(data.options ?? options);
+  const set = suggestedSetById(data.setId || setId) ?? suggestedSetById("butter")!;
   const palette: ProjectPalette = data.palette ?? {
     background: set.background,
     text: set.text,
     accent: set.accent,
     card: set.card,
   };
-  const slideBackgrounds = backgroundsForSet(set, specs.length);
   store.getState().setPalette(palette);
 
-  const state = store.getState();
-  const slides: SlideItem[] = specs.map((spec, built) => {
-    const bg = spec.background || slideBackgrounds[built] || palette.background;
-    return buildCarouselSlide({
-      spec: { ...spec, index: built, background: bg },
-      palette,
-      textStyles: state.textStyles,
-      chrome: state.chrome,
-      width: state.canvasDimensions.width,
-      height: state.canvasDimensions.height,
-      slideIndex: built,
-      slideCount: specs.length,
-      id: built + 1,
-      tagline: data.tagline,
-      handle: data.handle,
+  let slides: SlideItem[];
+
+  if (resolvedOptions.templateId) {
+    const tpl = await getTemplateById(resolvedOptions.templateId);
+    if (!tpl.success) {
+      throw new Error("Template not found");
+    }
+    store.getState().setCurrentRatio(tpl.template.aspectRatio);
+    slides = buildSlidesFromTemplate({
+      templateSlides: tpl.template.slides,
+      specs,
+      thumbnails: tpl.template.thumbnails,
     });
-  });
+  } else {
+    const slideBackgrounds = backgroundsForSet(set, specs.length);
+    const state = store.getState();
+    slides = specs.map((spec, built) => {
+      const bg = spec.background || slideBackgrounds[built] || palette.background;
+      return buildCarouselSlide({
+        spec: { ...spec, index: built, background: bg },
+        palette,
+        textStyles: state.textStyles,
+        chrome: state.chrome,
+        width: state.canvasDimensions.width,
+        height: state.canvasDimensions.height,
+        slideIndex: built,
+        slideCount: specs.length,
+        id: built + 1,
+        handle: data.handle,
+        options: resolvedOptions,
+      });
+    });
+  }
 
   store.getState().setSlides(slides);
   store.getState().setCurrentSlideId(slides[0]!.id);

@@ -6,8 +6,10 @@ import { Loader2 } from "lucide-react";
 
 import { listNews, publishNews, sendNotification, type NewsItem } from "@/actions/admin";
 import { listFeedbacks, type FeedbackItem } from "@/actions/feedback";
+import { AdminTemplates } from "@/components/admin-templates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 function DeskForm({
   title,
@@ -90,18 +92,22 @@ export function AdminPanel({ email }: { email: string }) {
   }, []);
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">Admin</h1>
           <p className="text-[13px] text-muted-foreground">
-            Signed in as {email}. News goes on the record. Notifications reach every account.
+            Signed in as {email}. Manage templates, news, and feedback.
           </p>
         </div>
-        <Link href="/" className="text-[13px] text-muted-foreground hover:text-foreground">
+        <Link href="/studio" className="text-[13px] text-muted-foreground hover:text-foreground">
           Back to the studio
         </Link>
       </div>
+
+      <AdminTemplates />
+
+      <Separator />
 
       <DeskForm
         title="Notification"

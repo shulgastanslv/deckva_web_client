@@ -1,7 +1,9 @@
 import { Ollama } from "ollama";
 
 import { carouselSystemPrompt, carouselUserPrompt } from "./carousel-prompt";
+import type { CarouselGenerateOptions } from "./generate-options";
 import { extractJsonObject, ideasSystemPrompt, ideasUserPrompt } from "./ideas";
+import { carouselPromptConfig } from "./prompt-config";
 
 const OLLAMA_HOST = process.env.OLLAMA_HOST?.trim() || "http://127.0.0.1:11434";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL?.trim() || "qwen2.5:3b";
@@ -28,29 +30,40 @@ function withAbort(ollama: Ollama, signal?: AbortSignal): () => void {
   return () => signal.removeEventListener("abort", abort);
 }
 
-/** One-shot JSON chat — faster than streaming JSONL for small local models. */
+function carouselNumPredict(slides: number, sentences: number): number {
+  const m = carouselPromptConfig.model;
+  const perSlide = m.tokensPerSlideBase + sentences * m.tokensPerSentence;
+  return Math.min(m.tokensMax, m.tokensBase + slides * perSlide);
+}
+
 export async function completeOllamaCarousel(input: {
   theme: string;
   slides: number;
+  options: CarouselGenerateOptions;
   signal?: AbortSignal;
 }): Promise<unknown> {
   const ollama = client();
   const clear = withAbort(ollama, input.signal);
+  const { temperature, topP, numCtx, keepAlive } = carouselPromptConfig.model;
+
   try {
     const response = await ollama.chat({
       model: OLLAMA_MODEL,
       stream: false,
       format: "json",
-      keep_alive: "60m",
+      keep_alive: keepAlive,
       options: {
-        temperature: 0.2,
-        top_p: 0.85,
-        num_predict: Math.min(500, 24 + input.slides * 36),
-        num_ctx: 1024,
+        temperature,
+        top_p: topP,
+        num_predict: carouselNumPredict(input.slides, input.options.sentences),
+        num_ctx: numCtx,
       },
       messages: [
-        { role: "system", content: carouselSystemPrompt() },
-        { role: "user", content: carouselUserPrompt(input.theme, input.slides) },
+        { role: "system", content: carouselSystemPrompt(input.options) },
+        {
+          role: "user",
+          content: carouselUserPrompt(input.theme, input.slides, input.options),
+        },
       ],
     });
     const content = response.message?.content;
@@ -74,11 +87,11 @@ export async function completeOllamaIdeas(input: {
       model: OLLAMA_MODEL,
       stream: false,
       format: "json",
-      keep_alive: "60m",
+      keep_alive: carouselPromptConfig.model.keepAlive,
       options: {
         temperature: 0.5,
-        num_predict: 320,
-        num_ctx: 1024,
+        num_predict: 280,
+        num_ctx: 1536,
       },
       messages: [
         { role: "system", content: ideasSystemPrompt() },

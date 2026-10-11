@@ -1,3 +1,4 @@
+import type { CarouselGenerateOptions } from "./generate-options";
 import type { CarouselSlideLayout, CarouselSlideRole, CarouselSlideSpec } from "./carousel-types";
 
 export interface CarouselGenerateResult {
@@ -5,17 +6,22 @@ export interface CarouselGenerateResult {
   slides: CarouselSlideSpec[];
 }
 
-function roleForIndex(index: number, total: number): CarouselSlideRole {
+function roleForIndex(
+  index: number,
+  total: number,
+  includeCta: boolean,
+): CarouselSlideRole {
   if (index <= 0) return "cover";
-  if (index >= total - 1) return "cta";
+  if (includeCta && index >= total - 1) return "cta";
   return "point";
 }
 
-function layoutForIndex(index: number): CarouselSlideLayout {
-  return index === 0 ? "center" : "editorial";
-}
-
-export function parseCarouselResult(raw: unknown, expected: number): CarouselGenerateResult {
+export function parseCarouselResult(
+  raw: unknown,
+  expected: number,
+  options?: Pick<CarouselGenerateOptions, "includeCta">,
+): CarouselGenerateResult {
+  const includeCta = options?.includeCta ?? true;
   if (!raw || typeof raw !== "object") {
     throw new Error("Ollama returned invalid JSON");
   }
@@ -27,6 +33,7 @@ export function parseCarouselResult(raw: unknown, expected: number): CarouselGen
 
   const rows = Array.isArray(obj.slides) ? obj.slides : [];
   const slides: CarouselSlideSpec[] = [];
+  const layout: CarouselSlideLayout = "center";
 
   for (const item of rows) {
     if (!item || typeof item !== "object") continue;
@@ -47,22 +54,21 @@ export function parseCarouselResult(raw: unknown, expected: number): CarouselGen
     const index = slides.length;
     slides.push({
       index,
-      role: roleForIndex(index, expected),
-      layout: layoutForIndex(index),
+      role: roleForIndex(index, expected, includeCta),
+      layout,
       heading,
       body: body || undefined,
     });
     if (slides.length >= expected) break;
   }
 
-  // Fix roles/layouts with final count.
   const total = slides.length;
   for (let i = 0; i < total; i += 1) {
     slides[i] = {
       ...slides[i]!,
       index: i,
-      role: roleForIndex(i, total),
-      layout: layoutForIndex(i),
+      role: roleForIndex(i, total, includeCta),
+      layout,
     };
   }
 

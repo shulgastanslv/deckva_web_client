@@ -22,7 +22,7 @@ const SET_IDS = SUGGESTED_SETS.map((set) => set.id).join(", ");
 
 export function ideasSystemPrompt(): string {
   return [
-    'JSON only: {"themes":[{"title":"...","prompt":"...","setId":"black","slides":5}],"palettes":[{"setId":"butter","reason":"..."}]}',
+    'JSON only: {"themes":[{"title":"...","prompt":"...","setId":"butter","slides":5}],"palettes":[{"setId":"mint","reason":"..."}]}',
     "4 themes, 3 palettes. setId from:",
     SET_IDS,
     "Match seed language. title ≤5 words. prompt 1 short sentence.",
@@ -60,7 +60,7 @@ export function parseIdeasPayload(raw: unknown): CarouselIdeasResult {
     const row = item as Record<string, unknown>;
     const title = typeof row.title === "string" ? row.title.trim() : "";
     const prompt = typeof row.prompt === "string" ? row.prompt.trim() : "";
-    const setId = asSetId(row.setId) ?? "black";
+    const setId = asSetId(row.setId) ?? "butter";
     const slides = Math.min(8, Math.max(4, Math.round(Number(row.slides) || 5)));
     if (title.length < 2 || prompt.length < 4) continue;
     themes.push({ title, prompt, setId, slides });

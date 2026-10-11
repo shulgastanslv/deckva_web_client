@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cancelGenerateSession } from "@/lib/ai/generate-session";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
+import Logo from "../logo";
 
 export function GenerateOverlay() {
   const status = useCanvasStore((s) => s.genStatus);
@@ -51,7 +52,7 @@ export function GenerateOverlay() {
             {active ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
-              <Sparkles className="size-4" />
+              <Logo width={16} height={16} className="size-5" />
             )}
           </span>
           <div className="min-w-0 flex-1">
