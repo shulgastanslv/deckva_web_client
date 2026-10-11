@@ -17,9 +17,10 @@ const HERO_POST_A: ThreadsPostData[] = [
   {
     id: "hero-a",
     author: "swibp",
-    avatar: "post_logo.jpg",
+    avatar: "/post_logo.jpg",
     verified: true,
     time: "1h",
+    topic: "Product",
     text: "Explain a launch in six frames. Cover first — then the story.",
     media: [
       "/landing/slide-cover.jpg",
@@ -36,8 +37,9 @@ const HERO_POST_B: ThreadsPostData[] = [
   {
     id: "hero-b",
     author: "swibp",
-    avatar: "post_logo.jpg",
+    avatar: "/post_logo.jpg",
     time: "3h",
+    topic: "Design",
     text: "One point per frame. The carousel keeps the rhythm.",
     media: [
       "/landing/slide-mid.jpg",
