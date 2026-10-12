@@ -38,7 +38,6 @@ export function normalizeGenerateOptions(
         : null,
   };
 }
-
 /** Edge chrome labels — local, no extra model tokens. */
 export function edgeLabelsForSlide(input: {
   edgeCount: number;
@@ -53,3 +52,4 @@ export function edgeLabelsForSlide(input: {
     .slice(0, input.edgeCount)
     .filter(Boolean);
 }
+
