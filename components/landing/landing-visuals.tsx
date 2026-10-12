@@ -61,10 +61,12 @@ export function PhoneCarouselMock({
   start = 0,
   className,
   posts,
+  compact = true,
 }: {
   start?: number;
   className?: string;
   posts?: ThreadsPostData[];
+  compact?: boolean;
 }) {
   const feed =
     posts ??
@@ -74,10 +76,10 @@ export function PhoneCarouselMock({
     <PhoneFrame
       className={
         className ??
-        "h-[380px] w-[190px] border-[6px] sm:h-[420px] sm:w-[210px]"
+        "h-[380px] w-[200px] border-[6px] sm:h-[420px] sm:w-[210px]"
       }
     >
-      <ThreadsUI posts={feed} />
+      <ThreadsUI posts={feed} compact={compact} showReplyBar={false} showTabBar={false} />
     </PhoneFrame>
   );
 }
@@ -85,17 +87,17 @@ export function PhoneCarouselMock({
 /** Two phones layered for CTA — bleed out of the stage. */
 export function DualPhonesMock() {
   return (
-    <div className="relative mx-auto h-[240px] w-full max-w-[320px] sm:h-[320px] sm:max-w-[360px]">
-      <div className="absolute bottom-[-70px] left-[2%] z-0 origin-bottom -rotate-12 scale-[0.62] sm:bottom-[-110px] sm:scale-[0.82]">
+    <div className="relative mx-auto h-[280px] w-full max-w-[340px] sm:h-[360px] sm:max-w-[400px]">
+      <div className="absolute bottom-[-48px] left-0 z-0 origin-bottom -rotate-[9deg] sm:bottom-[-72px]">
         <PhoneCarouselMock
           start={0}
-          className="h-[340px] w-[170px] border-[6px] sm:h-[400px] sm:w-[200px]"
+          className="h-[320px] w-[160px] border-[5px] shadow-none sm:h-[400px] sm:w-[200px] sm:border-[6px]"
         />
       </div>
-      <div className="absolute bottom-[-78px] right-0 z-10 origin-bottom rotate-6 scale-[0.68] sm:bottom-[-118px] sm:scale-[0.9]">
+      <div className="absolute bottom-[-56px] right-0 z-10 origin-bottom rotate-[5deg] sm:bottom-[-80px]">
         <PhoneCarouselMock
           start={1}
-          className="h-[360px] w-[180px] border-[6px] sm:h-[420px] sm:w-[210px]"
+          className="h-[340px] w-[170px] border-[5px] shadow-xl sm:h-[420px] sm:w-[210px] sm:border-[6px]"
         />
       </div>
     </div>

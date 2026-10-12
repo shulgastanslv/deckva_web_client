@@ -43,7 +43,17 @@ import {
   TemplatesArt,
 } from "@/components/landing/landing-art";
 import { DualPhonesMock } from "@/components/landing/landing-visuals";
+import { EngagementScroll } from "@/components/landing/engagement-scroll";
 import { EditorStage } from "./editor-stage";
+
+/** Belarus self-employed (НПД) disclosure — replace with your real details. */
+const LEGAL = {
+  status: "Плательщик налога на профессиональный доход",
+  fullName: "Шуляк Станислав",
+  unp: "XXXXXXXXX",
+  email: "hello@swibp.io",
+  country: "Республика Беларусь",
+} as const;
 
 const NAV = [
   { name: "Product", link: "#product" },
@@ -259,7 +269,7 @@ export function LandingPage() {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto mt-6 grid max-w-6xl items-center gap-2 px-4 pt-2 pb-12 sm:mt-10 sm:gap-6 sm:px-6 sm:pt-4 sm:pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:pt-5 lg:pb-20">
+        <div className="relative z-10 mx-auto mt-6 grid max-w-6xl items-center gap-4 px-4 pt-2 pb-16 sm:mt-10 sm:gap-6 sm:px-6 sm:pt-4 sm:pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:pt-5 lg:pb-20">
           <div>
             <h1 className="max-w-xl text-4xl leading-[0.95] font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
               Make carousel
@@ -481,13 +491,17 @@ export function LandingPage() {
         </Reveal>
       </section>
 
+      <Reveal>
+        <EngagementScroll />
+      </Reveal>
+
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
         <Reveal>
           <Layer className="bg-[#2f5bff] text-white">
-            <div className="relative grid items-end gap-6 px-6 pt-12 sm:px-12 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="relative grid items-end gap-8 px-6 pt-12 sm:gap-10 sm:px-12 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="absolute -right-10 top-8 size-40 rounded-full bg-white/10 blur-2xl" />
               <div className="absolute bottom-20 left-[40%] size-28 rounded-full bg-[#9eb6ff]/30 blur-xl" />
-              <div className="relative z-10 pb-12 sm:pb-16">
+              <div className="relative z-10 pb-4 sm:pb-16">
                 <h2 className="mt-3 max-w-md text-3xl font-extrabold tracking-tight sm:text-5xl">
                   You have the topic.
                   <br />
@@ -521,8 +535,8 @@ export function LandingPage() {
                   )}
                 </div>
               </div>
-              <div className="relative z-10 overflow-hidden">
-                <div className="absolute inset-x-8 top-5 bottom-0 h-96 rounded-full bg-[#1a3fd6]" />
+              <div className="relative z-10 -mx-2 overflow-hidden pb-0 sm:mx-0">
+                <div className="absolute inset-x-6 top-8 bottom-0 rounded-full bg-[#1a3fd6]/80 blur-sm" />
                 <DualPhonesMock />
               </div>
             </div>
@@ -530,12 +544,21 @@ export function LandingPage() {
         </Reveal>
       </section>
 
-      <footer>
-        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <Link href="/" className="text-sm font-semibold tracking-tight">
-            swibp.io
-          </Link>
-          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#5c6170]">
+      <footer className="border-t border-black/5">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_auto_1.2fr] lg:items-start">
+          <div>
+            <Link href="/" className="text-sm font-semibold tracking-tight">
+              swibp.io
+            </Link>
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#8b90a0]">
+              Studio for carousels. Topic to frames to export.
+            </p>
+            <p className="mt-4 text-sm text-[#8b90a0]">
+              © {new Date().getFullYear()} Swibp
+            </p>
+          </div>
+
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#5c6170] lg:justify-center">
             {NAV.map((item) => (
               <a
                 key={item.link}
@@ -546,7 +569,34 @@ export function LandingPage() {
               </a>
             ))}
           </nav>
-          <p className="text-sm text-[#8b90a0]">© {new Date().getFullYear()}</p>
+
+          <div className="text-sm leading-relaxed text-[#5c6170]">
+            <p className="font-semibold text-[#14151c]">{LEGAL.status}</p>
+            <p className="mt-1">{LEGAL.country}</p>
+            <dl className="mt-3 space-y-1.5">
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="text-[#8b90a0]">ФИО</dt>
+                <dd className="font-medium text-[#14151c]">{LEGAL.fullName}</dd>
+              </div>
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="text-[#8b90a0]">УНП</dt>
+                <dd className="font-medium tabular-nums text-[#14151c]">
+                  {LEGAL.unp}
+                </dd>
+              </div>
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="text-[#8b90a0]">Email</dt>
+                <dd>
+                  <a
+                    href={`mailto:${LEGAL.email}`}
+                    className="font-medium text-[#14151c] hover:text-[#2f5bff]"
+                  >
+                    {LEGAL.email}
+                  </a>
+                </dd>
+              </div>
+            </dl>
+          </div>
         </div>
       </footer>
     </div>

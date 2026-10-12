@@ -116,7 +116,7 @@ export function HeroStage() {
         >
           <motion.div
             animate={reduce ? undefined : { y: [0, -15, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
           >
             <ThreadsPhone posts={HERO_POST_B} />
           </motion.div>
@@ -124,7 +124,7 @@ export function HeroStage() {
 
         <motion.div
           className="absolute left-1/2 top-0 z-20 origin-top -translate-x-1/2 scale-[0.62] sm:left-auto sm:right-[6%] sm:translate-x-0 sm:scale-[0.78] lg:scale-100"
-          style={reduce ? { rotate: 6 } : { y: yFront, rotate: rotFront }}
+          style={reduce ? { rotate: 16 } : { y: yFront, rotate: rotFront }}
         >
           <motion.div
             animate={reduce ? undefined : { y: [0, 15, 0] }}

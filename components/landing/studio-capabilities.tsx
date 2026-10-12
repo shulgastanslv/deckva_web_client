@@ -114,46 +114,41 @@ function Tool({
   children: ReactNode;
 }) {
   return (
-    <article className="overflow-hidden rounded-[2rem] bg-white p-5 sm:rounded-[2.4rem]">
+    <article className="overflow-hidden rounded-[2rem] bg-white p-5 sm:rounded-[2.4rem] sm:p-6">
       <p className="text-[13px] font-bold text-[#2f5bff]">{eyebrow}</p>
       <h3 className="mt-2 text-xl font-extrabold tracking-tight text-[#14151c]">{title}</h3>
       <p className="mt-1.5 text-[13px] leading-relaxed text-[#5c6170]">{text}</p>
-      <div className="mt-4">{children}</div>
+      <div className="mt-5">{children}</div>
     </article>
   );
 }
 
 function BackgroundArt() {
   return (
-    <svg viewBox="0 0 420 190" className="mt-2 h-auto w-full" aria-hidden>
-      <circle cx="250" cy="110" r="78" fill="#fff" />
-      <g transform="rotate(-10 110 110)">
-        <rect x="28" y="42" width="110" height="132" rx="18" fill="#2f5bff" />
-        <rect x="44" y="60" width="58" height="8" rx="4" fill="#fff" />
-        <rect x="44" y="78" width="40" height="6" rx="3" fill="#c9d4ff" />
-      </g>
-      <g transform="rotate(6 230 108)">
-        <rect x="164" y="36" width="118" height="140" rx="18" fill="#fff" />
-        <circle cx="188" cy="64" r="4" fill="#c9d4ff" />
-        <circle cx="206" cy="64" r="4" fill="#c9d4ff" />
-        <circle cx="224" cy="64" r="4" fill="#c9d4ff" />
-        <circle cx="188" cy="82" r="4" fill="#c9d4ff" />
-        <circle cx="206" cy="82" r="4" fill="#c9d4ff" />
-        <circle cx="224" cy="82" r="4" fill="#c9d4ff" />
-        <circle cx="188" cy="100" r="4" fill="#c9d4ff" />
-        <circle cx="206" cy="100" r="4" fill="#c9d4ff" />
-        <rect x="180" y="124" width="72" height="28" rx="8" fill="#e4ebff" />
-      </g>
-      <g transform="rotate(12 340 120)">
-        <clipPath id="bg-split">
-          <rect x="292" y="48" width="100" height="124" rx="18" />
-        </clipPath>
-        <g clipPath="url(#bg-split)">
-          <rect x="292" y="48" width="100" height="124" fill="#14151c" />
-          <rect x="292" y="48" width="50" height="124" fill="#ffe08a" />
-        </g>
-        <rect x="308" y="68" width="22" height="8" rx="4" fill="#14151c" />
-        <rect x="354" y="68" width="24" height="8" rx="4" fill="#fff" />
+    <svg viewBox="0 0 420 170" className="mt-5 h-auto w-full" aria-hidden>
+      <circle cx="210" cy="96" r="72" fill="#fff" opacity="0.55" />
+
+      {/* fill */}
+      <rect x="54" y="34" width="88" height="108" rx="18" fill="#2f5bff" />
+      <rect x="70" y="58" width="40" height="5" rx="2.5" fill="#fff" opacity="0.85" />
+      <rect x="70" y="70" width="26" height="4" rx="2" fill="#fff" opacity="0.3" />
+
+      {/* pattern */}
+      <rect x="166" y="26" width="88" height="118" rx="18" fill="#fff" />
+      <path
+        d="M178 48h64M178 64h64M178 80h64M178 96h64M178 112h40"
+        stroke="#c9d4ff"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+
+      {/* split */}
+      <clipPath id="bg-split">
+        <rect x="278" y="34" width="88" height="108" rx="18" />
+      </clipPath>
+      <g clipPath="url(#bg-split)">
+        <rect x="278" y="34" width="88" height="108" fill="#14151c" />
+        <rect x="278" y="34" width="44" height="108" fill="#ffe08a" />
       </g>
     </svg>
   );
@@ -161,112 +156,150 @@ function BackgroundArt() {
 
 function GridArt() {
   return (
-    <svg viewBox="0 0 280 180" className="mt-2 h-auto w-full" aria-hidden>
-      <circle cx="150" cy="96" r="70" fill="#fff" />
-      <rect x="36" y="22" width="208" height="140" rx="22" fill="#fff" />
-      <path d="M78 40v104M120 40v104M162 40v104M204 40v104M52 62h176M52 96h176M52 130h176" stroke="#d9cef5" strokeWidth="2" />
-      <rect x="120" y="62" width="84" height="68" rx="12" fill="#6b5f9a" />
-      <circle cx="120" cy="62" r="4" fill="#2f5bff" />
-      <circle cx="204" cy="62" r="4" fill="#2f5bff" />
-      <circle cx="120" cy="130" r="4" fill="#2f5bff" />
-      <circle cx="204" cy="130" r="4" fill="#2f5bff" />
+    <svg viewBox="0 0 280 170" className="mt-5 h-auto w-full" aria-hidden>
+      <rect x="48" y="18" width="184" height="134" rx="20" fill="#fff" />
+
+      {/* selection grid */}
+      <path
+        d="M84 34v102M120 34v102M156 34v102M192 34v102M64 54h152M64 74h152M64 94h152M64 114h152"
+        stroke="#cfc3ef"
+        strokeWidth="1.75"
+      />
+
+      {/* muted square snapped to cells */}
+      <rect x="120" y="74" width="72" height="40" rx="6" fill="#f9f9f9" />
+
+      {/* selection outline */}
+      <rect
+        x="120"
+        y="74"
+        width="72"
+        height="40"
+        rx="6"
+        fill="none"
+        stroke="#2f5bff"
+        strokeWidth="2"
+      />
+
+      {/* selection handles */}
+      <circle cx="120" cy="74" r="3.5" fill="#2f5bff" />
+      <circle cx="192" cy="74" r="3.5" fill="#2f5bff" />
+      <circle cx="120" cy="114" r="3.5" fill="#2f5bff" />
+      <circle cx="192" cy="114" r="3.5" fill="#2f5bff" />
     </svg>
   );
 }
 
 function PaletteArt() {
   return (
-    <svg viewBox="0 0 280 170" className="mt-1 h-auto w-full" aria-hidden>
-      <circle cx="150" cy="90" r="64" fill="#ffe08a" />
-      <g transform="rotate(-8 90 96)">
-        <rect x="24" y="58" width="132" height="64" rx="18" fill="#fff" />
-        <circle cx="52" cy="90" r="12" fill="#14151c" />
-        <circle cx="82" cy="90" r="12" fill="#fff4cc" />
-        <circle cx="112" cy="90" r="12" fill="#2f5bff" />
-        <circle cx="142" cy="90" r="12" fill="#e4ebff" />
-      </g>
-      <rect x="108" y="36" width="148" height="72" rx="20" fill="#fff" />
-      <circle cx="140" cy="72" r="14" fill="#e5f6ea" />
-      <circle cx="174" cy="72" r="14" fill="#3d6b4f" />
-      <circle cx="208" cy="72" r="14" fill="#14151c" />
-      <circle cx="242" cy="72" r="14" fill="#ffe08a" />
+    <svg viewBox="0 0 280 150" className="mt-3 h-auto w-full" aria-hidden>
+      {/* three themed carousel slides */}
+      <rect x="16" y="28" width="72" height="88" rx="12" fill="#14151c" />
+      <rect x="28" y="44" width="36" height="5" rx="2.5" fill="#fff" />
+      <rect x="28" y="56" width="24" height="4" rx="2" fill="#5c6170" />
+      <rect x="28" y="88" width="28" height="12" rx="4" fill="#2f5bff" />
+
+      <rect x="100" y="20" width="80" height="100" rx="12" fill="#fff" />
+      <rect x="114" y="40" width="40" height="5" rx="2.5" fill="#14151c" />
+      <rect x="114" y="52" width="28" height="4" rx="2" fill="#c9d4ff" />
+      <rect x="114" y="88" width="32" height="14" rx="4" fill="#ffe08a" />
+
+      <rect x="192" y="28" width="72" height="88" rx="12" fill="#e5f6ea" />
+      <rect x="204" y="44" width="36" height="5" rx="2.5" fill="#3d6b4f" />
+      <rect x="204" y="56" width="24" height="4" rx="2" fill="#3d6b4f" opacity="0.35" />
+      <rect x="204" y="88" width="28" height="12" rx="4" fill="#3d6b4f" />
     </svg>
   );
 }
 
 function FocusArt() {
   return (
-    <svg viewBox="0 0 420 180" className="mt-2 h-auto w-full" aria-hidden>
-      <rect x="16" y="36" width="92" height="112" rx="18" fill="#2a2c38" />
-      <rect x="312" y="36" width="92" height="112" rx="18" fill="#2a2c38" />
-      <rect x="132" y="18" width="156" height="148" rx="22" fill="#fff" />
-      <rect x="150" y="38" width="86" height="10" rx="5" fill="#14151c" />
-      <rect x="150" y="56" width="54" height="7" rx="3.5" fill="#e4ebff" />
-      <rect x="150" y="76" width="120" height="52" rx="12" fill="#2f5bff" />
-      <rect x="164" y="92" width="48" height="7" rx="3.5" fill="#fff" />
-      <rect x="228" y="138" width="44" height="18" rx="9" fill="#14151c" />
-      <text x="250" y="151" textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff">
-        Esc
-      </text>
+    <svg viewBox="0 0 420 170" className="mt-5 h-auto w-full" aria-hidden>
+      {/* faded neighbors — almost gone */}
+      <rect x="48" y="42" width="64" height="86" rx="16" fill="#2a2c38" opacity="0.45" />
+      <rect x="308" y="42" width="64" height="86" rx="16" fill="#2a2c38" opacity="0.45" />
+
+      {/* the only slide that matters */}
+      <rect x="140" y="18" width="140" height="134" rx="22" fill="#fff" />
+      <rect x="164" y="48" width="56" height="6" rx="3" fill="#14151c" />
+      <rect x="164" y="62" width="36" height="4" rx="2" fill="#d5d8e4" />
+      <rect x="164" y="84" width="92" height="36" rx="10" fill="#2f5bff" />
+      <rect x="176" y="98" width="28" height="4" rx="2" fill="#fff" opacity="0.85" />
     </svg>
   );
 }
 
 function LinesArt() {
   return (
-    <svg viewBox="0 0 220 120" className="h-auto w-full" aria-hidden>
-      <rect x="8" y="28" width="78" height="64" rx="16" fill="#fff" />
-      <rect x="20" y="44" width="52" height="6" rx="3" fill="#14151c" />
-      <rect x="20" y="56" width="40" height="6" rx="3" fill="#c9d4ff" />
-      <rect x="20" y="68" width="46" height="6" rx="3" fill="#e4ebff" />
-      <path d="M96 60h16" stroke="#2f5bff" strokeWidth="3" strokeLinecap="round" />
-      <path d="M106 54l8 6-8 6" fill="none" stroke="#2f5bff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="122" y="18" width="28" height="40" rx="8" fill="#fff" />
-      <rect x="154" y="34" width="28" height="52" rx="8" fill="#fff" />
-      <rect x="186" y="26" width="28" height="46" rx="8" fill="#2f5bff" />
+    <svg viewBox="0 0 220 100" className="h-auto w-full" aria-hidden>
+      {/* text lines */}
+      <rect x="8" y="22" width="56" height="5" rx="2.5" fill="#14151c" />
+      <rect x="8" y="36" width="44" height="5" rx="2.5" fill="#c9d4ff" />
+      <rect x="8" y="50" width="50" height="5" rx="2.5" fill="#e4ebff" />
+      <rect x="8" y="64" width="36" height="5" rx="2.5" fill="#c9d4ff" />
+      {/* arrow */}
+      <path d="M78 48h18" stroke="#2f5bff" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M90 42l8 6-8 6" fill="none" stroke="#2f5bff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      {/* resulting carousel frames */}
+      <rect x="112" y="18" width="28" height="64" rx="7" fill="#fff" stroke="#e4ebff" strokeWidth="2" />
+      <rect x="118" y="30" width="16" height="3" rx="1.5" fill="#14151c" />
+      <rect x="146" y="18" width="28" height="64" rx="7" fill="#fff" stroke="#e4ebff" strokeWidth="2" />
+      <rect x="152" y="30" width="16" height="3" rx="1.5" fill="#14151c" />
+      <rect x="180" y="18" width="28" height="64" rx="7" fill="#2f5bff" />
+      <rect x="186" y="30" width="16" height="3" rx="1.5" fill="#fff" opacity="0.9" />
     </svg>
   );
 }
 
 function AuthorArt() {
   return (
-    <svg viewBox="0 0 220 120" className="h-auto w-full" aria-hidden>
-      <circle cx="150" cy="64" r="42" fill="#ffe08a" />
-      <rect x="28" y="16" width="120" height="88" rx="18" fill="#fff" />
-      <circle cx="52" cy="86" r="12" fill="#14151c" />
-      <rect x="70" y="80" width="52" height="8" rx="4" fill="#14151c" />
-      <rect x="70" y="92" width="28" height="5" rx="2.5" fill="#e4ebff" />
-      <rect x="44" y="32" width="72" height="28" rx="8" fill="#e4ebff" />
+    <svg viewBox="0 0 220 100" className="h-auto w-full" aria-hidden>
+      {/* peek previous */}
+      <rect x="8" y="22" width="36" height="56" rx="8" fill="#e4ebff" />
+      {/* main slide with author badge */}
+      <rect x="52" y="8" width="100" height="84" rx="12" fill="#fff" />
+      <rect x="68" y="24" width="52" height="6" rx="3" fill="#14151c" />
+      <rect x="68" y="38" width="36" height="4" rx="2" fill="#e4ebff" />
+      <circle cx="70" cy="74" r="9" fill="#14151c" />
+      <rect x="84" y="70" width="40" height="5" rx="2.5" fill="#14151c" />
+      <rect x="84" y="78" width="22" height="3.5" rx="1.75" fill="#c9d4ff" />
+      {/* peek next */}
+      <rect x="160" y="22" width="36" height="56" rx="8" fill="#e4ebff" />
     </svg>
   );
 }
 
 function SwipeArt() {
   return (
-    <svg viewBox="0 0 220 120" className="h-auto w-full" aria-hidden>
-      <rect x="24" y="14" width="128" height="92" rx="18" fill="#fff" />
-      <rect x="40" y="30" width="72" height="10" rx="5" fill="#14151c" />
-      <rect x="40" y="48" width="48" height="7" rx="3.5" fill="#e4ebff" />
-      <rect x="72" y="74" width="68" height="22" rx="11" fill="#14151c" />
-      <text x="106" y="89" textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff">
-        swipe →
-      </text>
-      <path d="M168 48c16 4 28 16 30 32" fill="none" stroke="#2f5bff" strokeWidth="8" strokeLinecap="round" />
+    <svg viewBox="0 0 220 100" className="h-auto w-full" aria-hidden>
+      <rect x="28" y="8" width="100" height="84" rx="12" fill="#fff" />
+      <rect x="44" y="24" width="52" height="6" rx="3" fill="#14151c" />
+      <rect x="44" y="38" width="36" height="4" rx="2" fill="#e4ebff" />
+      {/* swipe cue */}
+      <rect x="52" y="68" width="52" height="14" rx="7" fill="#14151c" />
+      <path d="M68 75h16" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+      <path d="M80 71l6 4-6 4" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {/* next frames sliding in */}
+      <rect x="140" y="18" width="32" height="64" rx="8" fill="#c9d4ff" />
+      <rect x="180" y="28" width="28" height="44" rx="7" fill="#e4ebff" />
     </svg>
   );
 }
 
 function NumbersArt() {
   return (
-    <svg viewBox="0 0 220 120" className="h-auto w-full" aria-hidden>
-      <circle cx="64" cy="70" r="36" fill="#ffe08a" />
-      <rect x="48" y="16" width="140" height="92" rx="18" fill="#14151c" />
-      <rect x="66" y="34" width="78" height="10" rx="5" fill="#fff" />
-      <rect x="66" y="52" width="52" height="7" rx="3.5" fill="#5c6170" />
-      <rect x="66" y="70" width="104" height="22" rx="12" fill="#2f5bff" />
-      <text x="70" y="86" fontSize="12" fontWeight="800" fill="#fff">
+    <svg viewBox="0 0 220 100" className="h-auto w-full" aria-hidden>
+      {/* carousel stack */}
+      <rect x="24" y="28" width="40" height="52" rx="8" fill="#e4ebff" />
+      <rect x="72" y="16" width="76" height="68" rx="10" fill="#14151c" />
+      <rect x="88" y="32" width="36" height="5" rx="2.5" fill="#fff" opacity="0.9" />
+      <rect x="88" y="44" width="24" height="4" rx="2" fill="#5c6170" />
+      {/* counter badge */}
+      <rect x="88" y="58" width="44" height="14" rx="7" fill="#2f5bff" />
+      <text x="110" y="68" textAnchor="middle" fontSize="9" fontWeight="800" fill="#fff">
         01 / 08
       </text>
+      <rect x="156" y="28" width="40" height="52" rx="8" fill="#e4ebff" />
     </svg>
   );
 }

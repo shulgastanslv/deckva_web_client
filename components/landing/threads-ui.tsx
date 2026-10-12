@@ -213,7 +213,7 @@ function MediaCarousel({ media, index }: { media: string[]; index: number }) {
 
   if (single) {
     return (
-      <div className="relative mt-2 w-full overflow-hidden rounded-[18px] border border-black/[0.08] bg-black">
+      <div className="relative mt-2.5 w-full overflow-hidden rounded-[16px] border border-black/[0.08] bg-black">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={frame} alt="" className="block h-auto w-full object-contain" />
       </div>
@@ -221,7 +221,7 @@ function MediaCarousel({ media, index }: { media: string[]; index: number }) {
   }
 
   return (
-    <div className="relative mt-2 aspect-square w-full overflow-hidden rounded-[18px] border border-black/[0.08] bg-neutral-100">
+    <div className="relative mt-2.5 aspect-square w-full overflow-hidden rounded-[16px] border border-black/[0.08] bg-neutral-100">
       <motion.img
         key={frame}
         src={frame}
@@ -269,7 +269,7 @@ function ActionRow({
   const text = compact ? "text-[11px]" : "text-[12px]";
 
   return (
-    <div className={cn("mt-2 flex items-center text-neutral-800", gap)}>
+    <div className={cn("mt-2.5 flex items-center text-neutral-800", gap)}>
       <span className={cn("flex items-center gap-1", liked && "text-[#ff3040]")}>
         <Heart
           className={cn(icon, liked && "fill-[#ff3040] text-[#ff3040]")}
@@ -329,17 +329,17 @@ export function ThreadsPost({
   const reposts = formatCount(post.reposts);
 
   return (
-    <article className={cn("relative flex gap-2.5 px-3.5 pt-2 pb-3", className)}>
+    <article className={cn("relative flex gap-3 px-4 pt-3 pb-3.5", className)}>
       <div className="relative flex w-9 shrink-0 flex-col items-center">
         <Avatar src={post.avatar} name={post.author} />
         {showThreadLine ? (
-          <div className="mt-1.5 w-px flex-1 bg-neutral-200" aria-hidden />
+          <div className="mt-2 w-px flex-1 bg-neutral-200" aria-hidden />
         ) : null}
       </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 pr-0.5">
         <div className="flex min-w-0 items-center gap-0.5">
-          <span className="truncate text-[13px] font-semibold tracking-tight text-neutral-950">
+          <span className="truncate text-[14px] font-semibold tracking-tight text-neutral-950">
             {post.author}
           </span>
           {post.verified ? (
@@ -362,14 +362,14 @@ export function ThreadsPost({
             </>
           ) : null}
           {post.time ? (
-            <span className="ml-auto shrink-0 pl-2 text-[12px] text-neutral-400">
+            <span className="ml-auto shrink-0 pl-2 text-[13px] text-neutral-400">
               {post.time}
             </span>
           ) : null}
           <MoreHorizontal className="ml-1 size-4 shrink-0 text-neutral-400" />
         </div>
 
-        <p className="mt-0.5 whitespace-pre-wrap text-[14px] leading-[1.35] text-neutral-900">
+        <p className="mt-1 whitespace-pre-wrap text-[14px] leading-[1.4] text-neutral-900">
           {post.text}
           {post.showTranslate ? <TranslateLink /> : null}
         </p>
@@ -400,7 +400,7 @@ function ThreadsReply({
   const hasKids = Boolean(reply.children?.length);
 
   return (
-    <div className={cn("relative flex gap-2.5 px-3.5 py-2", nested && "pl-[52px]")}>
+    <div className={cn("relative flex gap-3 px-4 py-2.5", nested && "pl-[52px]")}>
       <div className="relative flex w-9 shrink-0 flex-col items-center">
         <Avatar
           src={reply.avatar}
@@ -408,13 +408,13 @@ function ThreadsReply({
           follow={reply.showFollow}
         />
         {hasKids ? (
-          <div className="mt-1.5 w-px flex-1 bg-neutral-200" aria-hidden />
+          <div className="mt-2 w-px flex-1 bg-neutral-200" aria-hidden />
         ) : null}
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className="truncate text-[13px] font-semibold text-neutral-950">
+          <span className="truncate text-[14px] font-semibold text-neutral-950">
             {reply.author}
           </span>
           {reply.isAuthor ? (
@@ -446,16 +446,71 @@ function ThreadsReply({
   );
 }
 
+function StatusBar() {
+  return (
+    <div className="flex h-[44px] shrink-0 items-end justify-between bg-white px-5 pb-1.5 pt-2">
+      <span className="min-w-[54px] text-[15px] font-semibold tracking-[-0.02em] text-neutral-950">
+        9:41
+      </span>
+      <div className="mb-0.5 flex items-center gap-[5px]">
+        <svg
+          width="17"
+          height="11"
+          viewBox="0 0 17 11"
+          fill="none"
+          aria-hidden
+          className="text-neutral-950"
+        >
+          <rect x="0.5" y="2.5" width="3" height="8" rx="0.8" fill="currentColor" />
+          <rect x="4.5" y="1.5" width="3" height="9" rx="0.8" fill="currentColor" />
+          <rect x="8.5" y="0" width="3" height="10.5" rx="0.8" fill="currentColor" />
+          <rect
+            x="12.5"
+            y="0"
+            width="3"
+            height="10.5"
+            rx="0.8"
+            fill="currentColor"
+            opacity="0.35"
+          />
+        </svg>
+        <svg
+          width="15"
+          height="11"
+          viewBox="0 0 15 11"
+          fill="none"
+          aria-hidden
+          className="text-neutral-950"
+        >
+          <path
+            d="M7.5 3.2c1.7 0 3.2.7 4.3 1.7l1.1-1.2A7.4 7.4 0 0 0 7.5 1.4 7.4 7.4 0 0 0 2.1 3.7l1.1 1.2A5.9 5.9 0 0 1 7.5 3.2Z"
+            fill="currentColor"
+          />
+          <path
+            d="M7.5 6.1c.9 0 1.7.4 2.3 1l1.1-1.2A4.6 4.6 0 0 0 7.5 4.6 4.6 4.6 0 0 0 4.1 5.9l1.1 1.2a3.1 3.1 0 0 1 2.3-1Z"
+            fill="currentColor"
+          />
+          <circle cx="7.5" cy="9.4" r="1.2" fill="currentColor" />
+        </svg>
+        <div className="relative ml-0.5 flex h-[11px] w-[24px] items-center rounded-[3px] border-[1.2px] border-neutral-950/90 p-[1.5px]">
+          <div className="h-full w-[70%] rounded-[1.5px] bg-neutral-950" />
+          <div className="absolute -right-[3px] top-1/2 h-[4px] w-[1.5px] -translate-y-1/2 rounded-r-[1px] bg-neutral-950/90" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ThreadsHeader() {
   return (
-    <header className="relative flex h-11 shrink-0 items-center justify-center border-b border-neutral-100 bg-white px-3">
+    <header className="relative flex h-11 shrink-0 items-center justify-center border-b border-neutral-100/80 bg-white px-3">
       <ChevronLeft
-        className="absolute left-2.5 top-1/2 size-[22px] -translate-y-1/2 text-neutral-950"
+        className="absolute left-2 top-1/2 size-[22px] -translate-y-1/2 text-neutral-950"
         strokeWidth={2}
       />
       <FaThreads className="size-[22px] text-neutral-950" aria-label="Threads" />
       <div
-        className="absolute right-3.5 top-1/2 flex -translate-y-1/2 flex-col gap-[5px]"
+        className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col gap-[5px]"
         aria-label="Menu"
       >
         <span className="h-[1.5px] w-[15px] rounded-full bg-neutral-950" />
@@ -467,7 +522,7 @@ function ThreadsHeader() {
 
 function ThreadsFilterBar() {
   return (
-    <div className="flex shrink-0 items-center gap-3 border-t border-neutral-100 px-3.5 py-2.5 text-[13px]">
+    <div className="flex shrink-0 items-center gap-3 border-t border-neutral-100 px-4 py-2.5 text-[13px]">
       <button
         type="button"
         className="inline-flex items-center gap-1 font-semibold text-neutral-950"
@@ -497,8 +552,8 @@ function ThreadsFilterBar() {
 
 function ThreadsReplyBar({ author }: { author: string }) {
   return (
-    <div className="shrink-0 border-t border-neutral-100 bg-white/95 px-3 py-2 backdrop-blur-md">
-      <div className="flex items-center gap-2 rounded-full bg-neutral-100 px-2 py-1.5">
+    <div className="shrink-0 border-t border-neutral-100 bg-white/95 px-3.5 py-2.5 backdrop-blur-md">
+      <div className="flex items-center gap-2 rounded-full bg-neutral-100 px-2.5 py-2">
         <Avatar name="you" src={DEMO_AVATAR} size="xs" />
         <span className="min-w-0 flex-1 truncate text-[13px] text-neutral-400">
           Reply to {author}...
@@ -515,14 +570,14 @@ function ThreadsReplyBar({ author }: { author: string }) {
 
 function ThreadsTabBar() {
   return (
-    <nav className="flex h-[52px] shrink-0 items-center justify-around bg-white px-2 pb-1.5">
-      <Home className="size-[26px] text-neutral-950" strokeWidth={1.6} />
-      <Search className="size-[26px] text-neutral-400" strokeWidth={1.6} />
-      <div className="flex h-8 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50">
-        <Plus className="size-5 text-neutral-700" strokeWidth={1.75} />
+    <nav className="flex h-[50px] shrink-0 items-center justify-around border-t border-neutral-100 bg-white px-2 pb-1">
+      <Home className="size-[24px] text-neutral-950" strokeWidth={1.6} />
+      <Search className="size-[24px] text-neutral-400" strokeWidth={1.6} />
+      <div className="flex h-7 w-10 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50">
+        <Plus className="size-4 text-neutral-700" strokeWidth={1.75} />
       </div>
-      <Heart className="size-[26px] text-neutral-400" strokeWidth={1.6} />
-      <User className="size-[26px] text-neutral-400" strokeWidth={1.6} />
+      <Heart className="size-[24px] text-neutral-400" strokeWidth={1.6} />
+      <User className="size-[24px] text-neutral-400" strokeWidth={1.6} />
     </nav>
   );
 }
@@ -549,6 +604,8 @@ export function ThreadsUI({
   mediaIndex,
   autoplay = true,
   showReplyBar = true,
+  showTabBar = true,
+  compact = false,
 }: {
   posts?: ThreadsPostData[];
   children?: ReactNode;
@@ -557,11 +614,16 @@ export function ThreadsUI({
   mediaIndex?: number;
   autoplay?: boolean;
   showReplyBar?: boolean;
+  showTabBar?: boolean;
+  /** Tighter chrome for small phone mocks */
+  compact?: boolean;
 }) {
   const main = posts[0];
   const replyTo = main?.author ?? "user";
   const comments = main?.comments ?? [];
   const feedTail = posts.slice(1);
+  const reply = showReplyBar && !compact;
+  const tabs = showTabBar && !compact;
 
   return (
     <div
@@ -570,18 +632,15 @@ export function ThreadsUI({
         className,
       )}
     >
-      <div className="flex h-11 shrink-0 items-end justify-between px-6 pb-1.5 text-[12px] font-semibold text-neutral-950">
-        <span>9:41</span>
-        <div className="flex items-center gap-1.5">
-          <span className="h-[7px] w-[14px] rounded-[1px] bg-neutral-950" />
-          <span className="h-2.5 w-2.5 rounded-full border-[1.5px] border-neutral-950" />
-          <span className="h-[11px] w-[22px] rounded-[3px] border-[1.5px] border-neutral-950" />
-        </div>
-      </div>
-
+      <StatusBar />
       <ThreadsHeader />
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div
+        className={cn(
+          "min-h-0 flex-1 overscroll-contain",
+          compact ? "overflow-hidden" : "overflow-y-auto",
+        )}
+      >
         {children ?? (
           <>
             {main ? (
@@ -589,39 +648,44 @@ export function ThreadsUI({
                 post={main}
                 mediaIndex={mediaIndex}
                 autoplay={autoplay}
-                showThreadLine={comments.length > 0 || feedTail.length > 0}
+                showThreadLine={!compact && (comments.length > 0 || feedTail.length > 0)}
+                className={compact ? "px-3 pt-2.5 pb-2" : undefined}
               />
             ) : null}
 
-            {comments.length > 0 || main ? <ThreadsFilterBar /> : null}
+            {!compact && (comments.length > 0 || main) ? <ThreadsFilterBar /> : null}
 
-            {comments.map((reply) => (
-              <div key={reply.id ?? reply.author}>
-                <ThreadsReply reply={reply} />
-                {reply.children?.map((child) => (
-                  <ThreadsReply
-                    key={child.id ?? `${reply.author}-${child.author}`}
-                    reply={child}
-                    nested
+            {!compact
+              ? comments.map((item) => (
+                  <div key={item.id ?? item.author}>
+                    <ThreadsReply reply={item} />
+                    {item.children?.map((child) => (
+                      <ThreadsReply
+                        key={child.id ?? `${item.author}-${child.author}`}
+                        reply={child}
+                        nested
+                      />
+                    ))}
+                  </div>
+                ))
+              : null}
+
+            {!compact
+              ? feedTail.map((post, i) => (
+                  <ThreadsPost
+                    key={post.id ?? `${post.author}-${i}`}
+                    post={post}
+                    autoplay={false}
+                    showThreadLine={i < feedTail.length - 1}
                   />
-                ))}
-              </div>
-            ))}
-
-            {feedTail.map((post, i) => (
-              <ThreadsPost
-                key={post.id ?? `${post.author}-${i}`}
-                post={post}
-                autoplay={false}
-                showThreadLine={i < feedTail.length - 1}
-              />
-            ))}
+                ))
+              : null}
           </>
         )}
       </div>
 
-      {showReplyBar ? <ThreadsReplyBar author={replyTo} /> : null}
-      <ThreadsTabBar />
+      {reply ? <ThreadsReplyBar author={replyTo} /> : null}
+      {tabs ? <ThreadsTabBar /> : null}
     </div>
   );
 }
