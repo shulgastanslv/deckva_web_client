@@ -58,7 +58,7 @@ export function FreeBlock() {
           <LandingPad>
             <p className="text-lg font-bold text-white">Форматы</p>
             <h3 className="mt-2 text-2xl font-extrabold tracking-tight text-white">
-              Четыре формата для вашей карусели
+             Разные форматы для разных задач
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-white/70">
               Один макет переключается для поста, квадрат, история или широкий фрейм.

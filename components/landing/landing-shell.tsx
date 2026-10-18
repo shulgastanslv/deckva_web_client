@@ -80,7 +80,7 @@ export function LandingLayer({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[1.75rem] sm:rounded-[2rem]",
+        "relative overflow-hidden rounded-[3rem] sm:rounded-[3rem]",
         className
       )}
     >

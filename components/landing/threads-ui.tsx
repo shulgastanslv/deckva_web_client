@@ -576,7 +576,7 @@ function ThreadsTabBar() {
       <div className="flex h-7 w-10 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50">
         <Plus className="size-4 text-neutral-700" strokeWidth={1.75} />
       </div>
-      <Heart className="size-[24px] text-neutral-400" strokeWidth={1.6} />
+      <Heart className="size-[24px] text-neutral-400 " strokeWidth={1.6} />
       <User className="size-[24px] text-neutral-400" strokeWidth={1.6} />
     </nav>
   );

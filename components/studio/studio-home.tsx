@@ -143,6 +143,7 @@ export function StudioHome() {
   const userId = session?.user?.id;
   const showRecents = status === "authenticated" && Boolean(userId);
 
+
   const canSubmit = Boolean(theme.trim()) && !submitting;
   const showPlaceholder = !theme.trim();
   const { text: placeholderText, full: placeholderFull } = useTypingPlaceholder(
@@ -176,6 +177,7 @@ export function StudioHome() {
     router.push("/studio/editor");
   };
 
+
   return (
     <div
       className={cn(
@@ -200,7 +202,7 @@ export function StudioHome() {
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           <h1 className="text-3xl font-bold tracking-normal text-foreground">
-            Дизайн стал легче
+            Привет, {"Stas"}
             <span className="ml-2.5 inline-flex items-center justify-center align-middle">
               <LogoAnimated width={36} height={36} href="/studio" />
             </span>

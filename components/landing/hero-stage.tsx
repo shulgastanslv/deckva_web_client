@@ -20,8 +20,9 @@ const HERO_POST_A: ThreadsPostData[] = [
     avatar: "/post_logo.jpg",
     verified: true,
     time: "1h",
-    topic: "Product",
-    text: "Explain a launch in six frames. Cover first — then the story.",
+    liked: true,
+    topic: "Примеры",
+    text: "Примеры каруселей, которые были созданы в Swibp.",
     media: [
       "/landing/slide-cover.jpg",
       "/landing/slide-mid.jpg",
@@ -39,8 +40,8 @@ const HERO_POST_B: ThreadsPostData[] = [
     author: "swibp",
     avatar: "/post_logo.jpg",
     time: "3h",
-    topic: "Design",
-    text: "One point per frame. The carousel keeps the rhythm.",
+    topic: "Примеры",
+    text: "Примеры каруселей, которые были созданы в Swibp.",
     media: [
       "/landing/slide-mid.jpg",
       "/landing/slide-end.jpg",
@@ -109,7 +110,7 @@ export function HeroStage() {
       ref={ref}
       className="relative flex items-center justify-center overflow-hidden py-0 sm:py-4 lg:py-8"
     >
-      <div className="relative mx-auto h-[340px] w-full max-w-4xl sm:h-[540px] lg:h-[620px]">
+      <div className="relative mx-auto h-[440px] w-full max-w-4xl sm:h-[640px] lg:h-[720px]">
         <motion.div
           className="absolute left-[6%] top-8 z-10 hidden scale-[0.72] opacity-80 sm:block lg:scale-90"
           style={reduce ? undefined : { y: yBack, rotate: rotBack }}

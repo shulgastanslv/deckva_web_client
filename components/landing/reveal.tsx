@@ -23,9 +23,9 @@ export function Reveal({
   return (
     <motion.div
       className={cn("w-full", className)}
-      initial={{ opacity: 0, y: 28 }}
+      initial={{ opacity: 0, y: 5 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.18, margin: "0px 0px -48px 0px" }}
+      viewport={{ once: true, amount: 0.18, margin: "0px 0px -24px 0px" }}
       transition={{
         duration: 0.65,
         ease: [0.22, 1, 0.36, 1],

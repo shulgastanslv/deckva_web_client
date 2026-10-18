@@ -34,7 +34,6 @@ import { SlideMarquee } from "@/components/landing/slide-marquee";
 import { ReviewsBlock } from "@/components/landing/reviews-block";
 import { LeaveReviewBlock } from "@/components/landing/leave-review-block";
 import {
-  ExportArt,
   FeedArt,
   GenerateArt,
   IconsArt,
@@ -53,7 +52,6 @@ import {
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
 import { TooltipProvider } from "../ui/tooltip";
 
-/** Belarus self-employed (НПД) disclosure — replace with your real details. */
 const LEGAL = {
   status: "Плательщик налога на профессиональный доход",
   fullName: "Шульга Станислав",
@@ -159,7 +157,7 @@ export function LandingPage() {
             >
               <Link href="/studio">
                 <span className="sm:hidden">Студия</span>
-                <span className="hidden sm:inline">Открыть студию</span>
+                <span className="hidden sm:inline">Открыть</span>
               </Link>
             </Button>
             <Sheet>
@@ -248,13 +246,12 @@ export function LandingPage() {
 
       <LandingSection
         id="product"
-        className="relative z-20 -mt-10 py-0 sm:-mt-14 sm:py-0 lg:-mt-16"
+        className="relative z-20 -mt-10 py-0 sm:py-0 lg:-mt-40"
       >
-        <Reveal>
           <LandingGrid className="md:grid-cols-12">
-            <LandingLayer className="bg-white/90 backdrop-blur-sm md:col-span-7 md:row-span-2">
+            <LandingLayer className="bg-white/80 backdrop-blur-xl md:col-span-7 md:row-span-2">
               <LandingPad>
-                <p className="text-lg font-bold text-land-blue">Генерация карусели</p>
+                <p className="text-lg font-bold text-land-ink">Генерация карусели</p>
                 <h2 className="mt-2 text-4xl font-extrabold tracking-tight text-land-ink">
                   Тема → карусель
                 </h2>
@@ -267,7 +264,7 @@ export function LandingPage() {
               </LandingPad>
             </LandingLayer>
 
-            <LandingLayer className="bg-white/90 backdrop-blur-sm md:col-span-5">
+            <LandingLayer className="bg-white/80 backdrop-blur-xl md:col-span-5">
               <LandingPad className="sm:p-7">
                 <p className="text-lg font-bold text-land-blue">Редактор</p>
                 <h3 className="mt-2 text-xl font-extrabold tracking-tight text-land-ink">
@@ -297,7 +294,6 @@ export function LandingPage() {
               </LandingPad>
             </LandingLayer>
           </LandingGrid>
-        </Reveal>
       </LandingSection>
 
 
