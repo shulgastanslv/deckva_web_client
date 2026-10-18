@@ -175,7 +175,7 @@ export function StudioHome() {
 
   return (
     <div className="flex h-full items-center justify-center overflow-y-auto bg-background px-6 text-foreground sm:px-8">
-      <div className="mx-auto flex w-full max-w-[720px] flex-col items-center py-10">
+      <div className="mx-auto flex w-full max-w-[750px] flex-col items-center py-10">
         <motion.div
           className="flex flex-col items-center text-center"
           initial={{ opacity: 0, y: 8 }}
@@ -207,7 +207,7 @@ export function StudioHome() {
             onValueChange={setTheme}
             onSubmit={submitPrompt}
             isLoading={submitting}
-            maxHeight={160}
+            maxHeight={250}
             className="w-full rounded-[28px] border border-border bg-background px-4 pb-3 pt-4 shadow-none"
           >
             <div className="relative bg-background text-left">
