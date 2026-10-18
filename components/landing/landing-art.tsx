@@ -50,45 +50,74 @@ export function FreeArt() {
 
 export function GenerateArt() {
   return (
-    <svg viewBox="0 0 380 220" className="h-auto w-full max-w-[440px]" aria-hidden>
-      <circle cx="196" cy="118" r="78" fill={MIST} />
-      <g transform="rotate(-14 150 120)">
-        <rect x="108" y="58" width="92" height="122" rx="16" fill={WHITE} />
-        <rect x="122" y="74" width="48" height="8" rx="4" fill={BLUE_SOFT} />
-        <rect x="122" y="90" width="64" height="40" rx="8" fill={MIST} />
-      </g>
-      <g transform="rotate(12 250 120)">
-        <rect x="204" y="52" width="92" height="122" rx="16" fill={WHITE} />
-        <rect x="218" y="68" width="48" height="8" rx="4" fill={BLUE} />
-        <rect x="218" y="84" width="64" height="40" rx="8" fill={MIST} />
-      </g>
-      <rect x="146" y="40" width="100" height="132" rx="18" fill={WHITE} />
-      <rect x="162" y="56" width="56" height="10" rx="5" fill={INK} />
-      <rect x="162" y="74" width="40" height="6" rx="3" fill={MIST} />
-      <rect x="162" y="90" width="68" height="46" rx="10" fill={BLUE} />
-      <rect x="174" y="104" width="28" height="6" rx="3" fill={WHITE} />
-      <rect x="174" y="116" width="18" height="5" rx="2.5" fill={BLUE_SOFT} />
-      <circle cx="168" cy="156" r="3.5" fill={BLUE} />
-      <circle cx="182" cy="156" r="3.5" fill={MIST} />
-      <circle cx="196" cy="156" r="3.5" fill={MIST} />
+    <svg viewBox="0 0 400 240" className="h-auto w-full max-w-[440px]" aria-hidden>
+      <circle cx="210" cy="128" r="88" fill={MIST} />
+
+      {/* Topic prompt */}
+      <rect x="28" y="72" width="118" height="96" rx="20" fill={WHITE} />
+      <circle cx="48" cy="94" r="8" fill={BLUE} />
       <path
-        d="M78 150c18-8 28-6 40 2"
-        fill="none"
+        d="M48 90v8M44 94h8"
         stroke={WHITE}
-        strokeWidth="14"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <rect x="62" y="88" width="64" height="8" rx="4" fill={INK} />
+      <rect x="44" y="112" width="86" height="7" rx="3.5" fill={BLUE_SOFT} />
+      <rect x="44" y="126" width="68" height="7" rx="3.5" fill={MIST} />
+      <rect x="44" y="140" width="52" height="7" rx="3.5" fill={MIST} />
+
+      {/* Topic → carousel */}
+      <path
+        d="M156 120h28"
+        fill="none"
+        stroke={BLUE}
+        strokeWidth="3.5"
         strokeLinecap="round"
       />
       <path
-        d="M292 78c16 10 22 28 12 42"
+        d="M176 112l12 8-12 8"
         fill="none"
-        stroke={WHITE}
-        strokeWidth="14"
+        stroke={BLUE}
+        strokeWidth="3.5"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
+
+      {/* Ending slide */}
+      <g transform="rotate(11 308 128)">
+        <rect x="262" y="62" width="88" height="118" rx="16" fill={WHITE} />
+        <rect x="276" y="78" width="40" height="7" rx="3.5" fill={BLUE_SOFT} />
+        <rect x="276" y="94" width="58" height="36" rx="8" fill={MIST} />
+        <rect x="276" y="140" width="34" height="6" rx="3" fill={MIST} />
+      </g>
+
+      {/* Middle slide */}
+      <g transform="rotate(-9 232 130)">
+        <rect x="188" y="58" width="88" height="118" rx="16" fill={WHITE} />
+        <rect x="202" y="74" width="44" height="7" rx="3.5" fill={INK} />
+        <rect x="202" y="90" width="58" height="42" rx="8" fill={MIST} />
+        <rect x="202" y="142" width="28" height="6" rx="3" fill={BLUE_SOFT} />
+      </g>
+
+      {/* Cover slide */}
+      <rect x="224" y="42" width="96" height="128" rx="18" fill={WHITE} />
+      <rect x="240" y="58" width="52" height="9" rx="4.5" fill={INK} />
+      <rect x="240" y="74" width="36" height="6" rx="3" fill={MIST} />
+      <rect x="240" y="92" width="64" height="44" rx="10" fill={BLUE} />
+      <rect x="252" y="106" width="28" height="6" rx="3" fill={WHITE} />
+      <rect x="252" y="118" width="18" height="5" rx="2.5" fill={BLUE_SOFT} />
+      <circle cx="248" cy="152" r="3.5" fill={BLUE} />
+      <circle cx="262" cy="152" r="3.5" fill={MIST} />
+      <circle cx="276" cy="152" r="3.5" fill={MIST} />
+
+      {/* Spark */}
       <path
-        d="M48 52l5 11 11 1.6-8.4 6.6 2.6 10.6L48 76l-10.2 6 2.6-10.6L32 64.8l11-1.6z"
-        fill={WHITE}
+        d="M342 48l4 9 9 1.4-7 5.4 2.2 8.8L342 68l-8.2 4.6 2.2-8.8-7-5.4 9-1.4z"
+        fill={BLUE}
       />
+      <circle cx="56" cy="48" r="6" fill={BLUE_SOFT} />
+      <circle cx="368" cy="168" r="5" fill={WHITE} />
     </svg>
   );
 }
@@ -150,79 +179,67 @@ export function StudioArt() {
 
 export function IconsArt() {
   return (
-    <svg viewBox="0 0 320 190" className="mt-4 h-auto w-full" aria-hidden>
-      <rect x="36" y="78" width="248" height="44" rx="22" fill={WHITE} />
+    <svg viewBox="0 0 320 120" className="mt-6 h-auto w-full" aria-hidden>
+      <rect x="24" y="32" width="272" height="56" rx="28" fill={WHITE} />
       <circle
-        cx="62"
-        cy="100"
-        r="8"
+        cx="52"
+        cy="60"
+        r="10"
         fill="none"
         stroke={BLUE}
-        strokeWidth="2.5"
+        strokeWidth="3"
       />
       <path
-        d="M68 106l6 6"
+        d="M60 68l8 8"
         stroke={BLUE}
-        strokeWidth="2.5"
+        strokeWidth="3"
         strokeLinecap="round"
       />
-      <rect x="86" y="94" width="92" height="8" rx="4" fill={BLUE_SOFT} />
-      <rect x="186" y="94" width="48" height="8" rx="4" fill={MIST} />
-      <g transform="rotate(-14 58 48)">
-        <rect x="28" y="18" width="52" height="52" rx="16" fill={WHITE} />
-        <path
-          d="M54 32l2.6 6.6 7 .4-5.4 4.4 1.8 7L54 46.4 48 50.4l1.8-7-5.4-4.4 7-.4z"
-          fill={BLUE}
-        />
-      </g>
-      <g transform="rotate(10 262 46)">
-        <rect x="236" y="0" width="52" height="52" rx="16" fill={WHITE} />
-        <path
-          d="M262 30c-6-4-11-8-11-13 0-3 2.4-5.4 5.4-5.4 1.8 0 3.4.8 4.6 2.4 1.2-1.6 2.8-2.4 4.6-2.4 3 0 5.4 2.4 5.4 5.4 0 5-5 9-9 13z"
-          fill={BLUE_SOFT}
-        />
-      </g>
-      <g transform="rotate(8 70 156)">
-        <rect x="18" y="128" width="48" height="48" rx="16" fill={WHITE} />
-        <path d="M46 140l-8 12h6l-3 12 10-14h-6z" fill={BLUE} />
-      </g>
-      <g transform="rotate(-8 250 158)">
-        <rect x="226" y="132" width="48" height="48" rx="16" fill={WHITE} />
-        <path
-          d="M242 156c0-5 3.2-8 8-8s8 3 8 8-2.6 6.4-6.4 7.4v4.6h-3.2v-4.2c-3.6-.8-6.4-3.6-6.4-7.8z"
-          fill={INK}
-        />
-      </g>
-      <g transform="translate(132 18)">
-        <rect width="56" height="56" rx="18" fill={WHITE} />
-        <path d="M28 16l8 8-8 8-8-8z" fill={BLUE} />
-        <path
-          d="M20 36h16"
-          stroke={BLUE}
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-      </g>
+      <text
+        x="80"
+        y="66"
+        fontSize="18"
+        fontWeight="700"
+        fill={INK}
+        fontFamily="system-ui, sans-serif"
+      >
+        Icons
+      </text>
+      <rect x="150" y="46" width="2.5" height="28" rx="1.25" fill={BLUE} />
     </svg>
   );
 }
 
 export function TemplatesArt() {
   return (
-    <svg viewBox="0 0 320 180" className="mt-4 h-auto w-full" aria-hidden>
-      <g transform="rotate(-8 90 100)">
-        <rect x="24" y="28" width="120" height="132" rx="20" fill={WHITE} />
-        <rect x="40" y="46" width="72" height="10" rx="5" fill={INK} />
-        <rect x="40" y="64" width="48" height="7" rx="3.5" fill={BLUE_SOFT} />
-        <rect x="40" y="84" width="88" height="48" rx="12" fill={MIST} />
+    <svg viewBox="0 0 320 200" className="mt-4 h-auto w-full" aria-hidden>
+      {/* Back template */}
+      <g transform="rotate(-10 88 108)">
+        <rect x="28" y="36" width="100" height="132" rx="18" fill={WHITE} />
+        <rect x="44" y="52" width="56" height="8" rx="4" fill={BLUE_SOFT} />
+        <rect x="44" y="68" width="68" height="42" rx="10" fill={MIST} />
+        <rect x="44" y="122" width="40" height="6" rx="3" fill={MIST} />
+        <rect x="44" y="136" width="28" height="6" rx="3" fill={MIST} />
       </g>
-      <g transform="rotate(6 220 100)">
-        <rect x="156" y="22" width="120" height="132" rx="20" fill={WHITE} />
-        <rect x="172" y="40" width="72" height="10" rx="5" fill={BLUE} />
-        <rect x="172" y="58" width="52" height="7" rx="3.5" fill={MIST} />
-        <rect x="186" y="78" width="60" height="40" rx="10" fill={MIST} />
-        <rect x="196" y="88" width="28" height="6" rx="3" fill={BLUE} />
+
+      {/* Middle template */}
+      <g transform="rotate(7 248 112)">
+        <rect x="196" y="32" width="100" height="132" rx="18" fill={WHITE} />
+        <rect x="212" y="48" width="52" height="8" rx="4" fill={INK} />
+        <rect x="212" y="64" width="68" height="48" rx="10" fill={MIST} />
+        <circle cx="246" cy="140" r="10" fill={BLUE_SOFT} />
       </g>
+
+      {/* Front cover template */}
+      <rect x="110" y="24" width="108" height="144" rx="20" fill={WHITE} />
+      <rect x="126" y="42" width="60" height="10" rx="5" fill={INK} />
+      <rect x="126" y="60" width="40" height="6" rx="3" fill={MIST} />
+      <rect x="126" y="80" width="76" height="52" rx="12" fill={BLUE} />
+      <rect x="140" y="96" width="32" height="6" rx="3" fill={WHITE} />
+      <rect x="140" y="110" width="22" height="5" rx="2.5" fill={BLUE_SOFT} />
+      <circle cx="140" cy="150" r="3.5" fill={BLUE} />
+      <circle cx="154" cy="150" r="3.5" fill={MIST} />
+      <circle cx="168" cy="150" r="3.5" fill={MIST} />
     </svg>
   );
 }

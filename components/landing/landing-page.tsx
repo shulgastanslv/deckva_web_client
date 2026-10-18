@@ -32,12 +32,14 @@ import { FreeBlock } from "@/components/landing/free-block";
 import { PhotoStatement } from "@/components/landing/photo-statement";
 import { SlideMarquee } from "@/components/landing/slide-marquee";
 import { ReviewsBlock } from "@/components/landing/reviews-block";
+import { LeaveReviewBlock } from "@/components/landing/leave-review-block";
 import {
   ExportArt,
   FeedArt,
   GenerateArt,
   IconsArt,
   StudioArt,
+  TemplatesArt,
 } from "@/components/landing/landing-art";
 import { DualPhonesMock } from "@/components/landing/landing-visuals";
 import { EngagementScroll } from "@/components/landing/engagement-scroll";
@@ -63,6 +65,7 @@ const NAV = [
   { name: "Studio", link: "#studio" },
   { name: "Free", link: "#free" },
   { name: "Reviews", link: "#reviews" },
+  { name: "Feedback", link: "#review" },
   { name: "FAQ", link: "#faq" },
 ];
 
@@ -359,6 +362,10 @@ export function LandingPage() {
         <ReviewsBlock />
       </Reveal>
 
+      <Reveal>
+        <LeaveReviewBlock />
+      </Reveal>
+
       <LandingSection id="studio" className="space-y-4 py-12 sm:space-y-4 sm:py-16">
         <Reveal>
           <LandingLayer className="bg-white">
@@ -414,15 +421,8 @@ export function LandingPage() {
               </LandingPad>
             </LandingLayer>
 
-            <LandingLayer className="relative min-h-[300px] bg-land-ink text-white sm:min-h-[360px]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/covers/third.jpg"
-                alt=""
-                className="absolute inset-0 size-full object-cover opacity-50"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-land-ink via-land-ink/75 to-land-ink/25" />
-              <LandingPad className="relative z-10 flex h-full min-h-[260px] flex-col justify-end">
+            <LandingLayer className="bg-land-ink text-white">
+              <LandingPad>
                 <p className="text-sm font-bold text-white/65">Templates</p>
                 <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
                   Library of templates
@@ -430,6 +430,7 @@ export function LandingPage() {
                 <p className="mt-3 max-w-xs text-sm text-white/75">
                   Cover and ending stay in rhythm. You change the words.
                 </p>
+                <TemplatesArt />
               </LandingPad>
             </LandingLayer>
           </LandingGrid>
