@@ -76,33 +76,51 @@ export function StudioCapabilities() {
         </Card>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-2">
-        <Tool
-          eyebrow="Slides from text"
-          title="One line, one slide"
-          text="Paste the story. Each line becomes a frame."
-        >
-          <LinesArt />
-        </Tool>
-        <Tool
-          eyebrow="Author"
-          title="Name in the corner"
-          text="Avatar and @handle, dropped onto the slide."
-        >
-          <AuthorArt />
-        </Tool>
-        <Tool eyebrow="Swipe" title="The cue to continue" text="swipe → sits where the thumb lands.">
-          <SwipeArt />
-        </Tool>
-        <Tool eyebrow="Numbers" title="01 of 08" text="Pick the style and the corner. The count follows the deck.">
-          <NumbersArt />
-        </Tool>
+      <div className="overflow-hidden rounded-[2rem] bg-white ring-1 ring-black/5 sm:rounded-[2.4rem]">
+        <div className="border-b border-black/5 px-6 py-5 sm:px-8 sm:py-6">
+          <p className="text-[13px] font-bold tracking-wide text-[#2f5bff]">
+            Details
+          </p>
+          <h3 className="mt-1.5 text-2xl font-extrabold tracking-tight text-[#14151c] sm:text-3xl">
+            Small tools that finish the post
+          </h3>
+        </div>
+        <ul className="divide-y divide-black/5">
+          <ToolRow
+            eyebrow="Slides from text"
+            title="One line, one slide"
+            text="Paste the story. Each line becomes a frame."
+          >
+            <LinesArt />
+          </ToolRow>
+          <ToolRow
+            eyebrow="Author"
+            title="Name in the corner"
+            text="Avatar and @handle, dropped onto the slide."
+          >
+            <AuthorArt />
+          </ToolRow>
+          <ToolRow
+            eyebrow="Swipe"
+            title="The cue to continue"
+            text="swipe → sits where the thumb lands."
+          >
+            <SwipeArt />
+          </ToolRow>
+          <ToolRow
+            eyebrow="Numbers"
+            title="01 of 08"
+            text="Pick the style and the corner. The count follows the deck."
+          >
+            <NumbersArt />
+          </ToolRow>
+        </ul>
       </div>
     </div>
   );
 }
 
-function Tool({
+function ToolRow({
   eyebrow,
   title,
   text,
@@ -114,12 +132,18 @@ function Tool({
   children: ReactNode;
 }) {
   return (
-    <article className="overflow-hidden rounded-[2rem] bg-white p-5 sm:rounded-[2.4rem] sm:p-6">
-      <p className="text-[13px] font-bold text-[#2f5bff]">{eyebrow}</p>
-      <h3 className="mt-2 text-xl font-extrabold tracking-tight text-[#14151c]">{title}</h3>
-      <p className="mt-1.5 text-[13px] leading-relaxed text-[#5c6170]">{text}</p>
-      <div className="mt-5">{children}</div>
-    </article>
+    <li className="grid items-center gap-4 px-6 py-5 sm:grid-cols-[1fr_200px] sm:gap-8 sm:px-8 sm:py-6">
+      <div>
+        <p className="text-[13px] font-bold text-[#2f5bff]">{eyebrow}</p>
+        <h4 className="mt-1 text-xl font-extrabold tracking-tight text-[#14151c]">
+          {title}
+        </h4>
+        <p className="mt-1.5 max-w-md text-[13px] leading-relaxed text-[#5c6170]">
+          {text}
+        </p>
+      </div>
+      <div className="justify-self-start sm:justify-self-end">{children}</div>
+    </li>
   );
 }
 

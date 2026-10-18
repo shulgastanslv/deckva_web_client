@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Check, Menu } from "lucide-react";
@@ -27,24 +27,27 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import { FloatingNav } from "@/components/ui/floating-navbar";
 import { HeroStage } from "@/components/landing/hero-stage";
-import { AudienceBlock } from "@/components/landing/audience-block";
 import { Reveal } from "@/components/landing/reveal";
 import { FreeBlock } from "@/components/landing/free-block";
-import { NetworksBlock } from "@/components/landing/networks-block";
-import { StudioCapabilities } from "@/components/landing/studio-capabilities";
+import { PhotoStatement } from "@/components/landing/photo-statement";
+import { SlideMarquee } from "@/components/landing/slide-marquee";
 import { ReviewsBlock } from "@/components/landing/reviews-block";
 import {
   ExportArt,
   FeedArt,
   GenerateArt,
   IconsArt,
-  PublishArt,
   StudioArt,
-  TemplatesArt,
 } from "@/components/landing/landing-art";
 import { DualPhonesMock } from "@/components/landing/landing-visuals";
 import { EngagementScroll } from "@/components/landing/engagement-scroll";
 import { EditorStage } from "./editor-stage";
+import {
+  LandingGrid,
+  LandingLayer,
+  LandingPad,
+  LandingSection,
+} from "@/components/landing/landing-shell";
 
 /** Belarus self-employed (НПД) disclosure — replace with your real details. */
 const LEGAL = {
@@ -58,7 +61,6 @@ const LEGAL = {
 const NAV = [
   { name: "Product", link: "#product" },
   { name: "Studio", link: "#studio" },
-  { name: "Networks", link: "#networks" },
   { name: "Free", link: "#free" },
   { name: "Reviews", link: "#reviews" },
   { name: "FAQ", link: "#faq" },
@@ -70,6 +72,7 @@ const EDITOR_POINTS = [
   "Slide navigator",
   "Export PNG / ZIP",
 ];
+
 const FAQ = [
   {
     value: "what",
@@ -128,44 +131,6 @@ const FAQ = [
   },
 ];
 
-function Layer({
-  className,
-  children,
-}: {
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-[2rem] sm:rounded-[2.4rem] ${className ?? ""}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-function SectionHead({
-  eyebrow,
-  title,
-  text,
-}: {
-  eyebrow: string;
-  title: string;
-  text?: string;
-}) {
-  return (
-    <div className="mb-6 max-w-2xl sm:mb-8">
-      <p className="text-sm font-bold tracking-wide text-[#2f5bff]">{eyebrow}</p>
-      <h2 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
-        {title}
-      </h2>
-      {text ? (
-        <p className="mt-3 text-base leading-relaxed text-[#5c6170]">{text}</p>
-      ) : null}
-    </div>
-  );
-}
-
 export function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const { status } = useSession();
@@ -176,14 +141,14 @@ export function LandingPage() {
       <FloatingNav navItems={NAV} ctaHref="/studio" ctaLabel="Studio" />
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
-      <section className="relative overflow-hidden bg-[#2f5bff] text-white">
+      <section className="relative overflow-hidden bg-land-blue text-white">
         <Spotlight
           className="-top-40 left-0 md:-top-20 md:left-60"
           fill="white"
         />
         <BackgroundBeams className="opacity-60" />
-        <div className="relative z-10 mx-auto mt-4 flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
 
+        <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
           <WhiteLogo width={36} height={36} />
 
           <nav className="hidden items-center gap-7 text-sm font-medium text-white/85 md:flex">
@@ -214,7 +179,7 @@ export function LandingPage() {
             )}
             <Button
               asChild
-              className="h-10 rounded-full bg-white px-4 text-[#1a2f86] hover:bg-white/90"
+              className="h-10 rounded-full bg-white px-4 text-land-blue hover:bg-white/90"
             >
               <Link href="/studio">
                 <span className="sm:hidden">Studio</span>
@@ -248,7 +213,11 @@ export function LandingPage() {
                     </SheetClose>
                   ))}
                   {signedIn ? (
-                    <Button asChild variant="outline" className="mt-3 h-10 rounded-full">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="mt-3 h-10 rounded-full"
+                    >
                       <Link href="/studio">Projects</Link>
                     </Button>
                   ) : (
@@ -269,7 +238,7 @@ export function LandingPage() {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto mt-6 grid max-w-6xl items-center gap-4 px-4 pt-2 pb-16 sm:mt-10 sm:gap-6 sm:px-6 sm:pt-4 sm:pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:pt-5 lg:pb-20">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-16 pt-6 sm:gap-10 sm:px-6 sm:pb-20 sm:pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:pb-24">
           <div>
             <h1 className="max-w-xl text-4xl leading-[0.95] font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
               Make carousel
@@ -279,17 +248,18 @@ export function LandingPage() {
             <TextGenerateEffect
               words="Describe your topic. AI will create the carousel."
               duration={0.35}
-              className="text-lg font-medium text-white/90 sm:text-2xl"
+              className="mt-4 text-lg font-medium text-white/90 sm:text-2xl"
               spanClassName="text-white/90"
             />
             <p className="mt-4 max-w-md text-sm leading-relaxed text-white/75 sm:text-base">
-              The model itself decides what to put on the cover, why to explain the middle and
-              why to finish.               You fix the wording. You do not build every frame from scratch.
+              The model itself decides what to put on the cover, what to explain
+              in the middle, and how to finish. You fix the wording — you do not
+              build every frame from scratch.
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button
                 asChild
-                className="h-11 rounded-full bg-white px-5 text-[#1a2f86] hover:bg-white/90"
+                className="h-11 rounded-full bg-white px-5 text-land-blue hover:bg-white/90"
               >
                 <Link href="/studio">Create carousel</Link>
               </Button>
@@ -305,88 +275,82 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section
+      <LandingSection
         id="product"
-        className="relative z-20 mx-auto -mt-8 max-w-6xl scroll-mt-24 px-4 sm:-mt-16 sm:px-6 lg:-mt-20"
+        className="relative z-20 -mt-10 py-0 sm:-mt-14 sm:py-0 lg:-mt-16"
       >
         <Reveal>
-          <div className="grid gap-3 md:grid-cols-12 md:grid-rows-[auto_auto_auto]">
-            <Layer className="bg-[#f4f5f9] p-5 backdrop-blur-xl sm:p-8 md:col-span-7 md:row-span-2 md:min-h-[480px]">
-              <p className="text-sm font-bold text-black  ">#Generate</p>
-              <h2 className="mt-3 max-w-sm text-3xl font-extrabold tracking-tight sm:text-4xl text-black">
-                Topic → carousel
-              </h2>
-              <p className="mt-3 max-w-xs text-sm text-black">
-                Cover, middle, ending — from a couple of sentences.
-              </p>
-              <div className="mt-6 flex justify-center md:mt-8">
-                <GenerateArt />
-              </div>
-            </Layer>
-
-            <Layer className="bg-[#e4ebff] p-5 sm:p-6 md:col-span-5 md:min-h-[230px]">
-              <p className="text-sm font-bold text-[#3a4f9a]">#Feed</p>
-              <h3 className="mt-2 text-xl font-extrabold tracking-tight">
-                A post, not a file
-              </h3>
-              <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#5c6170]">
-                The carousel is already in feed proportions. Cover plus the next frames, not a single square.
-              </p>
-              <div className="mt-2 flex justify-center">
-                <FeedArt />
-              </div>
-            </Layer>
-
-            <Layer className="bg-[#efe7ff] p-5 sm:p-6 md:col-span-5">
-              <p className="text-sm font-bold text-[#6b5f9a]">#Studio</p>
-              <h3 className="mt-2 text-xl font-extrabold tracking-tight">
-                Edit on the canvas
-              </h3>
-              <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#5c6170]">
-                Text, background, and frame order. Generation only opens the carousel. You finish it.
-              </p>
-              <div className="mt-3">
-                <StudioArt />
-              </div>
-            </Layer>
-
-            <Layer className="bg-[#e5f6ea] p-5 sm:p-6 md:col-span-5">
-              <p className="text-sm font-bold text-[#3d6b4f]">#Export</p>
-              <h3 className="mt-2 text-xl font-extrabold tracking-tight">
-                ZIP or PNG
-              </h3>
-              <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#5c6170]">
-                Each slide is its own PNG. The whole carousel downloads as one archive, with no watermark.
-              </p>
-              <ExportArt />
-            </Layer>
-
-            <Layer className="bg-[#ffe4ef] p-5 sm:p-6 md:col-span-7">
-              <div className="flex h-full flex-col justify-between gap-6 sm:flex-row sm:items-center">
-                <div>
-                  <p className="text-sm font-bold text-[#9a4f6b]">#Ready</p>
-                  <h3 className="mt-2 text-2xl font-extrabold tracking-tight">
-                    From topic to post
-                  </h3>
-                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-[#5c6170]">
-                    The topic becomes frames, the frames download, and they go straight into the post. No blank canvas and no evening of assembly.
-                  </p>
-                  <Link
-                    href="/studio"
-                    className="mt-5 inline-flex h-11 items-center rounded-full bg-black px-5 text-sm font-semibold text-white"
-                  >
-                    Open studio
-                  </Link>
+          <LandingGrid className="md:grid-cols-12">
+            <LandingLayer className="bg-white md:col-span-7 md:row-span-2">
+              <LandingPad>
+                <p className="text-sm font-bold text-land-blue">#Generate</p>
+                <h2 className="mt-2 max-w-sm text-2xl font-extrabold tracking-tight text-land-ink sm:text-3xl">
+                  Topic → carousel
+                </h2>
+                <p className="mt-2 max-w-xs text-sm text-land-ink/55">
+                  Cover, middle, ending — from a couple of sentences.
+                </p>
+                <div className="mt-6 flex justify-center">
+                  <GenerateArt />
                 </div>
-                <PublishArt />
-              </div>
-            </Layer>
-          </div>
+              </LandingPad>
+            </LandingLayer>
+
+            <LandingLayer className="bg-white md:col-span-5">
+              <LandingPad className="sm:p-7">
+                <p className="text-sm font-bold text-land-blue">#Feed</p>
+                <h3 className="mt-2 text-xl font-extrabold tracking-tight text-land-ink">
+                  A post, not a file
+                </h3>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-land-ink/55">
+                  Already in feed proportions — not a single square.
+                </p>
+                <div className="mt-4 flex justify-center">
+                  <FeedArt />
+                </div>
+              </LandingPad>
+            </LandingLayer>
+
+            <LandingLayer className="bg-land-ink text-white md:col-span-5">
+              <LandingPad className="sm:p-7">
+                <p className="text-sm font-bold text-white/60">#Studio</p>
+                <h3 className="mt-2 text-xl font-extrabold tracking-tight">
+                  Edit on the canvas
+                </h3>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-white/70">
+                  Text, background, and frame order — you finish it.
+                </p>
+                <div className="mt-4">
+                  <StudioArt />
+                </div>
+              </LandingPad>
+            </LandingLayer>
+
+            <LandingLayer className="bg-white w-full md:col-span-7">
+              <LandingPad className="sm:p-7">
+                <div className="grid items-center gap-4 sm:grid-cols-[1fr_auto]">
+                  <div>
+                    <p className="text-sm font-bold text-land-blue">#Export</p>
+                    <h3 className="mt-2 text-xl font-extrabold tracking-tight text-land-ink sm:text-2xl">
+                      ZIP or PNG
+                    </h3>
+                    <p className="mt-2 max-w-sm text-sm leading-relaxed text-land-ink/55">
+                      Each slide as its own file. The whole set as one archive.
+                    </p>
+                  </div>
+                  <ExportArt />
+                </div>
+              </LandingPad>
+            </LandingLayer>
+          </LandingGrid>
         </Reveal>
-      </section>
+      </LandingSection>
 
+   
+      <Reveal>
+        <PhotoStatement />
+      </Reveal>
 
-     
       <Reveal>
         <FreeBlock />
       </Reveal>
@@ -395,79 +359,91 @@ export function LandingPage() {
         <ReviewsBlock />
       </Reveal>
 
-      <section id="studio" className="mx-auto max-w-6xl scroll-mt-24 space-y-4 px-4 py-5 sm:px-6">
+      <LandingSection id="studio" className="space-y-4 py-12 sm:space-y-4 sm:py-16">
         <Reveal>
-          <Layer className="bg-white">
-            <div className="grid items-center gap-8 p-6 sm:p-10 lg:grid-cols-2 lg:gap-10">
-              <div>
-                <p className="text-sm font-bold text-[#6b5f9a]">Studio</p>
-                <h2 className="mt-3 text-3xl font-extrabold tracking-tight">
-                  An editor built for the feed
-                </h2>
-                <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-[#5c6170]">
-                  The canvas is already in post format. Frames sit underneath: cover, middle, ending. Text and layers sit on the right.
-                </p>
-                <ul className="mt-5 flex flex-col gap-2">
-                  {EDITOR_POINTS.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-lg font-semibold">
-                      <span className="grid size-6 place-items-center rounded-full bg-[#14151c] text-white">
-                        <Check className="size-3.5" />
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/studio"
-                  className="mt-6 inline-flex h-11 items-center rounded-full bg-[#14151c] px-5 text-sm font-semibold text-white"
-                >
-                  Open studio
-                </Link>
+          <LandingLayer className="bg-white">
+            <LandingPad>
+              <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
+                <div>
+                  <p className="text-sm font-bold text-land-blue">Studio</p>
+                  <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-land-ink">
+                    An editor built for the feed
+                  </h2>
+                  <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-land-ink/55">
+                    The canvas is already in post format. Frames sit underneath:
+                    cover, middle, ending. Text and layers sit on the right.
+                  </p>
+                  <ul className="mt-6 flex flex-col gap-2.5">
+                    {EDITOR_POINTS.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-center gap-2.5 text-base font-semibold text-land-ink sm:text-lg"
+                      >
+                        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-land-blue text-white">
+                          <Check className="size-3.5" />
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href="/studio"
+                    className="mt-8 inline-flex h-11 items-center rounded-full bg-land-ink px-5 text-sm font-semibold text-white"
+                  >
+                    Open studio
+                  </Link>
+                </div>
+                <EditorStage />
               </div>
-              <EditorStage />
-            </div>
-          </Layer>
+            </LandingPad>
+          </LandingLayer>
         </Reveal>
 
-        <Reveal delay={0.05}>
-          <div className="grid gap-3 lg:grid-cols-2">
-            <Layer className="bg-[#e4ebff] p-7 sm:p-10">
-              <p className="text-sm font-bold text-[#3a4f9a]">Icons</p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                14 million
-              </h2>
-              <p className="mt-3 max-w-xs text-sm text-[#5c6170]">
-                Search sits next to the canvas. The icon drops onto the slide.
-              </p>
-              <IconsArt />
-            </Layer>
+        <Reveal delay={0.06}>
+          <LandingGrid className="lg:grid-cols-2">
+            <LandingLayer className="bg-land-ink">
+              <LandingPad>
+                <p className="text-sm font-bold text-white">Icons</p>
+                <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                  14 million
+                </h2>
+                <p className="mt-3 max-w-xs text-sm text-white/70">
+                  Search sits next to the canvas. The icon drops onto the slide.
+                </p>
+                <IconsArt />
+              </LandingPad>
+            </LandingLayer>
 
-            <Layer className="bg-[#fff4cc] p-7 sm:p-10">
-              <p className="text-sm font-bold text-[#8a7a3a]">Templates</p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Library of templates
-              </h2>
-              <p className="mt-3 max-w-xs text-sm text-[#5c6170]">
-                Cover and ending stay in rhythm. You change the words.
-              </p>
-              <TemplatesArt />
-            </Layer>
-          </div>
+            <LandingLayer className="relative min-h-[300px] bg-land-ink text-white sm:min-h-[360px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/covers/third.jpg"
+                alt=""
+                className="absolute inset-0 size-full object-cover opacity-50"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-land-ink via-land-ink/75 to-land-ink/25" />
+              <LandingPad className="relative z-10 flex h-full min-h-[260px] flex-col justify-end">
+                <p className="text-sm font-bold text-white/65">Templates</p>
+                <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                  Library of templates
+                </h2>
+                <p className="mt-3 max-w-xs text-sm text-white/75">
+                  Cover and ending stay in rhythm. You change the words.
+                </p>
+              </LandingPad>
+            </LandingLayer>
+          </LandingGrid>
         </Reveal>
+      </LandingSection>
 
-        <Reveal delay={0.05}>
-          <StudioCapabilities />
-        </Reveal>
-      </section>
-
-      <section id="faq" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-12 sm:px-6">
+      <LandingSection id="faq">
         <Reveal>
-          <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+          <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:gap-12">
             <div>
-              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              <h2 className="text-3xl font-extrabold tracking-tight text-land-ink sm:text-4xl">
                 FAQ
               </h2>
-              <p className="mt-3 max-w-xs text-sm text-[#5c6170]">
+              <p className="mt-3 max-w-xs text-sm text-land-ink/55">
                 Generation, edits, export, and your account — in short.
               </p>
             </div>
@@ -476,12 +452,12 @@ export function LandingPage() {
                 <AccordionItem
                   key={item.value}
                   value={item.value}
-                  className="border-black/10"
+                  className="border-land-ink/10"
                 >
-                  <AccordionTrigger className="py-4 text-left text-base font-semibold hover:no-underline">
+                  <AccordionTrigger className="py-4 text-left text-base font-semibold text-land-ink hover:no-underline">
                     {item.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-[#5c6170]">
+                  <AccordionContent className="text-land-ink/55">
                     {item.a}
                   </AccordionContent>
                 </AccordionItem>
@@ -489,20 +465,17 @@ export function LandingPage() {
             </Accordion>
           </div>
         </Reveal>
-      </section>
+      </LandingSection>
 
-      <Reveal>
-        <EngagementScroll />
-      </Reveal>
 
-      <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+      <LandingSection className="pb-16 pt-4 sm:pb-20 sm:pt-6">
         <Reveal>
-          <Layer className="bg-[#2f5bff] text-white">
+          <LandingLayer className="bg-land-blue text-white">
             <div className="relative grid items-end gap-8 px-6 pt-12 sm:gap-10 sm:px-12 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="absolute -right-10 top-8 size-40 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute bottom-20 left-[40%] size-28 rounded-full bg-[#9eb6ff]/30 blur-xl" />
+              <div className="absolute bottom-20 left-[40%] size-28 rounded-full bg-white/15 blur-xl" />
               <div className="relative z-10 pb-4 sm:pb-16">
-                <h2 className="mt-3 max-w-md text-3xl font-extrabold tracking-tight sm:text-5xl">
+                <h2 className="max-w-md text-3xl font-extrabold tracking-tight sm:text-5xl">
                   You have the topic.
                   <br />
                   The carousel is next.
@@ -513,7 +486,7 @@ export function LandingPage() {
                 <div className="mt-8 flex flex-wrap gap-3">
                   <Link
                     href="/studio"
-                    className="inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-semibold text-[#1a2f86]"
+                    className="inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-semibold text-land-blue"
                   >
                     Create a carousel
                   </Link>
@@ -536,60 +509,63 @@ export function LandingPage() {
                 </div>
               </div>
               <div className="relative z-10 -mx-2 overflow-hidden pb-0 sm:mx-0">
-                <div className="absolute inset-x-6 top-8 bottom-0 rounded-full bg-[#1a3fd6]/80 blur-sm" />
+                <div className="absolute inset-x-6 top-8 bottom-0 rounded-full bg-land-ink/25 blur-sm" />
                 <DualPhonesMock />
               </div>
             </div>
-          </Layer>
+          </LandingLayer>
         </Reveal>
-      </section>
+      </LandingSection>
 
-      <footer className="border-t border-black/5">
+      <footer className="border-t border-land-ink/8 bg-white/40">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_auto_1.2fr] lg:items-start">
           <div>
-            <Link href="/" className="text-sm font-semibold tracking-tight">
+            <Link
+              href="/"
+              className="text-sm font-semibold tracking-tight text-land-ink"
+            >
               swibp.io
             </Link>
-            <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#8b90a0]">
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-land-ink/45">
               Studio for carousels. Topic to frames to export.
             </p>
-            <p className="mt-4 text-sm text-[#8b90a0]">
+            <p className="mt-4 text-sm text-land-ink/45">
               © {new Date().getFullYear()} Swibp
             </p>
           </div>
 
-          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#5c6170] lg:justify-center">
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-land-ink/55 lg:justify-center">
             {NAV.map((item) => (
               <a
                 key={item.link}
                 href={item.link}
-                className="hover:text-[#14151c]"
+                className="hover:text-land-ink"
               >
                 {item.name}
               </a>
             ))}
           </nav>
 
-          <div className="text-sm leading-relaxed text-[#5c6170]">
-            <p className="font-semibold text-[#14151c]">{LEGAL.status}</p>
+          <div className="text-sm leading-relaxed text-land-ink/55">
+            <p className="font-semibold text-land-ink">{LEGAL.status}</p>
             <p className="mt-1">{LEGAL.country}</p>
             <dl className="mt-3 space-y-1.5">
               <div className="flex flex-wrap gap-x-2">
-                <dt className="text-[#8b90a0]">ФИО</dt>
-                <dd className="font-medium text-[#14151c]">{LEGAL.fullName}</dd>
+                <dt className="text-land-ink/45">ФИО</dt>
+                <dd className="font-medium text-land-ink">{LEGAL.fullName}</dd>
               </div>
               <div className="flex flex-wrap gap-x-2">
-                <dt className="text-[#8b90a0]">УНП</dt>
-                <dd className="font-medium tabular-nums text-[#14151c]">
+                <dt className="text-land-ink/45">УНП</dt>
+                <dd className="font-medium tabular-nums text-land-ink">
                   {LEGAL.unp}
                 </dd>
               </div>
               <div className="flex flex-wrap gap-x-2">
-                <dt className="text-[#8b90a0]">Email</dt>
+                <dt className="text-land-ink/45">Email</dt>
                 <dd>
                   <a
                     href={`mailto:${LEGAL.email}`}
-                    className="font-medium text-[#14151c] hover:text-[#2f5bff]"
+                    className="font-medium text-land-ink hover:text-land-blue"
                   >
                     {LEGAL.email}
                   </a>

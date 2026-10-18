@@ -47,7 +47,6 @@ import { cn } from "@/lib/utils";
 import { useElementLibrary } from "@/components/canvas/use-element-library";
 import { clampZoom } from "@/components/canvas/zoom-controls";
 import { useCanvasStore } from "@/store/useCanvasStore";
-import { GridControls } from "@/components/canvas/grid-controls";
 
 interface ElementsToolbarProps {
   onExit: () => void;
@@ -157,7 +156,7 @@ function RailTool({
             {children}
           </button>
         </TooltipTrigger>
-        <TooltipContent side="right" sideOffset={10}>
+        <TooltipContent side="top" sideOffset={10}>
           <ToolHint label={label} shortcut={shortcut} hint={hint} />
         </TooltipContent>
       </Tooltip>
@@ -215,7 +214,7 @@ function ToolFlyout({
       onClick={() => onUse(active)}
       menu={
         <CornerMenu label={`${active.label} options`} disabled={disabled}>
-          <DropdownMenuContent side="right" align="start" sideOffset={8} className="w-52!">
+          <DropdownMenuContent side="top" align="center" sideOffset={10} className="w-52!">
             {tools.map((tool) => {
               const ItemIcon = tool.icon;
               const selected = tool.id === active.id;
@@ -241,7 +240,7 @@ function ToolFlyout({
 }
 
 function BarDivider() {
-  return <div className="my-1 h-px w-4 shrink-0 bg-border" />;
+  return <div className="mx-0.5 h-4 w-px shrink-0 bg-border" />;
 }
 
 export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
@@ -329,8 +328,8 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="pointer-events-none fixed top-1/2 left-2 z-30 -translate-y-1/2">
-        <div className="pointer-events-auto flex max-h-[calc(100vh-16px)] w-fit flex-col items-center gap-1 overflow-y-auto rounded-full border border-border/50 bg-background/90 p-1 shadow-lg backdrop-blur-md">
+      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-3">
+        <div className="pointer-events-auto flex w-fit max-w-[calc(100vw-24px)] items-center gap-1 overflow-x-auto rounded-full border border-border/50 bg-background/90 p-1.5 shadow-lg backdrop-blur-md">
           <input
             type="file"
             ref={fileInputRef}
@@ -387,7 +386,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             onDrop={onImageDrop}
             menu={
               <CornerMenu label="Image options" disabled={!manager}>
-              <DropdownMenuContent side="right" align="start" sideOffset={8} className="w-64!">
+              <DropdownMenuContent side="top" align="center" sideOffset={10} className="w-64!">
                 <DropdownMenuItem onSelect={() => fileInputRef.current?.click()} className="gap-2">
                   <ImagePlus />
                   Upload image
@@ -434,6 +433,8 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
           >
             <ImagePlus className="size-4" />
           </RailTool>
+
+          <BarDivider />
 
           <RailTool label="Zoom out" onClick={() => setZoom(clampZoom(zoom - 10))}>
             <ZoomOut className="size-4" />

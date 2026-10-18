@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 
+import {
+  LandingHead,
+  LandingSection,
+} from "@/components/landing/landing-shell";
+
 const PHOTOS = [
   "/threads/function.png",
   "/threads/gotoit.png",
@@ -112,59 +117,63 @@ export function ReviewsBlock() {
   const visible = open ? PINS : PINS.slice(0, PREVIEW);
 
   return (
-    <section id="reviews" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-5 sm:px-6 bg-transparent">
-      <div className="rounded-[2rem] px-4 py-5 sm:rounded-[2.4rem] sm:px-6 sm:py-6">
-        <p className="text-sm font-bold tracking-wide text-[#2f5bff]">Reviews</p>
-        <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-black sm:text-3xl">
-          Threads carousels people posted
-        </h2>
+    <LandingSection id="reviews">
+      <LandingHead
+        eyebrow="Reviews"
+        title="Threads carousels people posted"
+      />
 
-        <ul className="mt-4 columns-1 gap-3 min-[480px]:columns-2 lg:columns-3">
-          {visible.map((pin, index) => (
-            <li key={index} className="mb-3 break-inside-avoid">
-              <article className="overflow-hidden rounded-2xl bg-white text-neutral-900">
-                <div className="p-2.5">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={PHOTOS[index % PHOTOS.length]}
-                      alt=""
-                      className="size-8 rounded-full object-cover"
-                    />
-                    <p className="min-w-0 text-[13px] leading-none">
-                      <span className="font-semibold">{pin.name}</span>
-                      <span className="text-muted-foreground"> · {pin.time}</span>
-                    </p>
-                  </div>
-                  <div className={`relative mt-2 overflow-hidden rounded-xl ${pin.aspect}`}>
-                    <img
-                      src={PHOTOS[index % PHOTOS.length]}
-                      alt=""
-                      className={`absolute inset-0 h-full w-full object-cover object-top ${"focus" in pin ? pin.focus : ""}`}
-                    />
-                    <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1">
-                      <span className="size-1.5 rounded-full bg-white" />
-                      <span className="size-1.5 rounded-full bg-white/45" />
-                      <span className="size-1.5 rounded-full bg-white/45" />
-                    </div>
-                  </div>
-                  <p className="mt-2 text-[13px] text-neutral-500">{pin.views} views</p>
+      <ul className="columns-1 gap-3 min-[480px]:columns-2 lg:columns-3">
+        {visible.map((pin, index) => (
+          <li key={index} className="mb-3 break-inside-avoid">
+            <article className="overflow-hidden rounded-2xl bg-white text-land-ink ring-1 ring-land-ink/5">
+              <div className="p-2.5">
+                <div className="flex items-center gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={PHOTOS[index % PHOTOS.length]}
+                    alt=""
+                    className="size-8 rounded-full object-cover"
+                  />
+                  <p className="min-w-0 text-[13px] leading-none">
+                    <span className="font-semibold">{pin.name}</span>
+                    <span className="text-land-ink/45"> · {pin.time}</span>
+                  </p>
                 </div>
-                <p className="border-t border-neutral-100 px-2.5 py-2.5 text-[13px] leading-snug">
-                  “{pin.comment}”
+                <div
+                  className={`relative mt-2 overflow-hidden rounded-xl ${pin.aspect}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={PHOTOS[index % PHOTOS.length]}
+                    alt=""
+                    className={`absolute inset-0 h-full w-full object-cover object-top ${"focus" in pin ? pin.focus : ""}`}
+                  />
+                  <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1">
+                    <span className="size-1.5 rounded-full bg-white" />
+                    <span className="size-1.5 rounded-full bg-white/45" />
+                    <span className="size-1.5 rounded-full bg-white/45" />
+                  </div>
+                </div>
+                <p className="mt-2 text-[13px] text-land-ink/45">
+                  {pin.views} views
                 </p>
-              </article>
-            </li>
-          ))}
-        </ul>
+              </div>
+              <p className="border-t border-land-ink/8 px-2.5 py-2.5 text-[13px] leading-snug text-land-ink">
+                “{pin.comment}”
+              </p>
+            </article>
+          </li>
+        ))}
+      </ul>
 
-        <button
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          className="mt-2 inline-flex h-12 items-center rounded-full bg-foreground px-4 text-[13px] font-semibold text-background"
-        >
-          {open ? "Show less" : "Show more"}
-        </button>
-      </div>
-    </section>
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="mt-4 inline-flex h-11 items-center rounded-full bg-land-ink px-5 text-sm font-semibold text-white"
+      >
+        {open ? "Show less" : "Show more"}
+      </button>
+    </LandingSection>
   );
 }

@@ -66,7 +66,7 @@ export function StudioTemplates() {
     <div className="h-full overflow-y-auto bg-background text-foreground">
       <div className="mx-auto w-full max-w-[1120px] px-8 pb-16 pt-16">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Templates</h1>
+          <h1 className="text-2xl font-bold tracking-normal">Templates</h1>
           <p className="mt-2 text-base leading-relaxed text-muted-foreground">
             Pick a layout — it opens in the editor as your starting carousel.
           </p>

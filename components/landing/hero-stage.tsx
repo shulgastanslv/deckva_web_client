@@ -61,7 +61,7 @@ export function PhoneFrame({
   return (
     <div
       className={cn(
-        "relative mx-auto h-[600px] w-[300px] overflow-hidden rounded-[3rem] border-[8px] border-neutral-900 bg-neutral-950 shadow-2xl",
+        "relative mx-auto h-[520px] w-[260px] overflow-hidden rounded-[2.75rem] border-[7px] border-land-ink bg-land-ink shadow-2xl sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px]",
         "before:pointer-events-none before:absolute before:left-0 before:top-0 before:z-20 before:h-full before:w-full before:bg-gradient-to-tr before:from-white/5 before:to-transparent",
         "after:absolute after:-left-[10px] after:top-24 after:h-12 after:w-1 after:rounded-l-md after:bg-neutral-800",
         className
@@ -107,9 +107,9 @@ export function HeroStage() {
   return (
     <section
       ref={ref}
-      className="relative flex items-center justify-center overflow-hidden py-2 sm:py-6 lg:py-10"
+      className="relative flex items-center justify-center overflow-hidden py-0 sm:py-4 lg:py-8"
     >
-      <div className="relative mx-auto h-[420px] w-full max-w-4xl sm:h-[540px] lg:h-[620px]">
+      <div className="relative mx-auto h-[340px] w-full max-w-4xl sm:h-[540px] lg:h-[620px]">
         <motion.div
           className="absolute left-[6%] top-8 z-10 hidden scale-[0.72] opacity-80 sm:block lg:scale-90"
           style={reduce ? undefined : { y: yBack, rotate: rotBack }}

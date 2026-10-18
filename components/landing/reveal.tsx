@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
+import { cn } from "@/lib/utils";
+
 export function Reveal({
   children,
   className,
@@ -20,11 +22,15 @@ export function Reveal({
 
   return (
     <motion.div
-      className={`landing-reveal max-md:!opacity-100 max-md:!transform-none ${className ?? ""}`}
-      initial={{ opacity: 0, y: 40 }}
+      className={cn("w-full", className)}
+      initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: "some" }}
-      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay }}
+      viewport={{ once: true, amount: 0.18, margin: "0px 0px -48px 0px" }}
+      transition={{
+        duration: 0.65,
+        ease: [0.22, 1, 0.36, 1],
+        delay,
+      }}
     >
       {children}
     </motion.div>

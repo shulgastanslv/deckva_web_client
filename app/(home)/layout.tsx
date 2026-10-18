@@ -28,7 +28,7 @@ export default function MarketingLayout({
   return (
     <div
       data-theme="light"
-      className={`${manrope.className} min-h-full bg-[#f6f4fb] text-[#14151c]`}
+      className={`${manrope.className} min-h-full bg-land-mist text-land-ink`}
     >
       {children}
     </div>

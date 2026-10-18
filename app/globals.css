@@ -50,6 +50,11 @@
     --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
     --animate-marquee: marquee 32s linear infinite;
 
+    /* Landing — three colors only */
+    --color-land-ink: #14151c;
+    --color-land-blue: #2f5bff;
+    --color-land-mist: #e8ecf7;
+
     @keyframes scroll {
         to {
             transform: translate(calc(-50% - 0.5rem));
@@ -182,9 +187,3 @@
     }
 }
 
-@media (max-width: 767px) {
-    .landing-reveal {
-        opacity: 1 !important;
-        transform: none !important;
-    }
-}

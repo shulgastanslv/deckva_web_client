@@ -13,7 +13,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { AuthModal } from "@/components/auth";
 import { LogoAnimated } from "@/components/logo-animated";
-import { ThemeSwitcher } from "@/components/theme-switcher";
+import { StudioUserNav } from "@/components/studio/studio-user-nav";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -88,7 +88,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">
-      <aside className="flex w-14 shrink-0 flex-col items-center justify-between border-r border-border/60 bg-background py-5">
+      <aside className="flex w-14 shrink-0 flex-col items-center justify-between bg-muted/20 py-5">
         <TooltipProvider delayDuration={250}>
           <div className="flex flex-col items-center">
             <LogoAnimated
@@ -135,7 +135,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          <ThemeSwitcher className="size-9 rounded-full hover:bg-muted/70" />
+          <StudioUserNav />
         </TooltipProvider>
       </aside>
 

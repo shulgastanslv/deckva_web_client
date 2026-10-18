@@ -75,7 +75,7 @@ export function StudioProjects() {
   if (!userId) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 bg-background px-8 text-center text-foreground">
-        <h1 className="text-3xl font-extrabold tracking-tight">Projects</h1>
+        <h1 className="text-2xl font-bold tracking-normal">Projects</h1>
         <p className="max-w-sm text-base leading-relaxed text-muted-foreground">
           Sign in to browse and open your saved carousels.
         </p>
@@ -95,7 +95,7 @@ export function StudioProjects() {
     <div className="h-full overflow-y-auto bg-background text-foreground">
       <div className="mx-auto w-full max-w-[1120px] px-8 pb-16 pt-16">
         <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-extrabold tracking-tight">Projects</h1>
+          <h1 className="text-2xl font-bold tracking-normal">Projects</h1>
         </div>
 
         {loading && projects.length === 0 ? (
