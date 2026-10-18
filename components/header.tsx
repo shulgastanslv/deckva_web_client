@@ -208,10 +208,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
     <>
       <header className="h-13 w-full flex items-center justify-between px-4 bg-background/80 backdrop-blur-md border-b border-border/60 text-[13px] z-20 shrink-0 gap-4 select-none">
         <div className="flex items-center gap-2 min-w-0">
-          <Logo
-            width={30}
-            height={30}
-          />
+          <Logo width={30} height={30} href="/studio" />
           <ChevronRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
           <input
             type="text"

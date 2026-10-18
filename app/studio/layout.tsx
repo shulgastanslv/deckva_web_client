@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
+
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-landing",
+});
 
 export const metadata: Metadata = {
   title: "Swibp | carousel maker",
@@ -17,5 +23,7 @@ export default function StudioLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <div className={`${manrope.className} h-dvh antialiased`}>{children}</div>
+  );
 }

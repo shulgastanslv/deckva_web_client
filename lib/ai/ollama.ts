@@ -87,7 +87,7 @@ export async function completeOllamaCarousel(input: {
         num_ctx: numCtx,
       },
       messages: [
-        { role: "system", content: await carouselSystemPrompt(input.options) },
+        { role: "system", content: carouselSystemPrompt(input.options) },
         {
           role: "user",
           content: carouselUserPrompt(input.theme, input.slides, input.options),

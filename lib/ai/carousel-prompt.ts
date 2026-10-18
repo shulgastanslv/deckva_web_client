@@ -1,7 +1,9 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-
 import type { CarouselGenerateOptions } from "./generate-options";
+import {
+  CAROUSEL_COPY_STYLES,
+  DEFAULT_CAROUSEL_COPY_STYLE_ID,
+  formatCarouselStyleCatalog,
+} from "./carousel-styles";
 
 /** Model + copy knobs for carousel generation. */
 export const carouselPromptConfig = {
@@ -16,71 +18,58 @@ export const carouselPromptConfig = {
   keepAlive: "60m",
 } as const;
 
-export const CAROUSEL_STYLES_PROMPT_PATH = path.join(
-  process.cwd(),
-  "docs",
-  "ollama-carousel-styles-prompt.md",
-);
+/** System prompt assembled from the typed style catalog (no markdown file). */
+export function buildCarouselStylesSystemPrompt(): string {
+  const catalog = formatCarouselStyleCatalog(CAROUSEL_COPY_STYLES);
+  const styleCount = CAROUSEL_COPY_STYLES.length;
 
-const FALLBACK_SYSTEM_PROMPT = [
-  "You write Threads / Instagram carousels.",
-  'JSON only: {"title":"...","slides":[{"heading":"...","body":"..."}]}',
-  "Slide 1 is an introduction. No follow/save CTA.",
-  "Same language as the theme. No markdown.",
-].join("\n");
-
-let cachedSystemPrompt: string | null = null;
-let cachedPromptPath: string | null = null;
-
-/** Pull the first fenced ```text block after a markdown heading. */
-export function extractPromptSection(markdown: string, heading: string): string {
-  const headingIdx = markdown.indexOf(heading);
-  if (headingIdx < 0) {
-    throw new Error(`Prompt file missing heading: ${heading}`);
-  }
-
-  const after = markdown.slice(headingIdx + heading.length);
-  const match = after.match(/```(?:text)?\r?\n([\s\S]*?)\r?\n```/);
-  const body = match?.[1]?.trim();
-  if (!body) {
-    throw new Error(`Prompt file missing fenced block after: ${heading}`);
-  }
-  return body;
-}
-
-/** Load + cache the SYSTEM PROMPT block from docs/ollama-carousel-styles-prompt.md */
-export async function loadCarouselStylesSystemPrompt(
-  filePath: string = CAROUSEL_STYLES_PROMPT_PATH,
-): Promise<string> {
-  if (cachedSystemPrompt && cachedPromptPath === filePath) {
-    return cachedSystemPrompt;
-  }
-
-  try {
-    const markdown = await readFile(filePath, "utf8");
-    const prompt = extractPromptSection(markdown, "## SYSTEM PROMPT");
-    cachedSystemPrompt = prompt;
-    cachedPromptPath = filePath;
-    return prompt;
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    console.warn(`[carousel-prompt] Falling back to inline system prompt: ${reason}`);
-    cachedSystemPrompt = FALLBACK_SYSTEM_PROMPT;
-    cachedPromptPath = filePath;
-    return FALLBACK_SYSTEM_PROMPT;
-  }
-}
-
-/** Clear cache — useful in tests or after editing the md at runtime. */
-export function clearCarouselPromptCache(): void {
-  cachedSystemPrompt = null;
-  cachedPromptPath = null;
-}
-
-export async function carouselSystemPrompt(options: CarouselGenerateOptions): Promise<string> {
-  const base = await loadCarouselStylesSystemPrompt();
   return [
-    base,
+    "You write Threads / Instagram carousels.",
+    "",
+    "OUTPUT",
+    "- JSON only. No markdown. No commentary.",
+    "- Schema:",
+    "{",
+    `  "styleId": "${DEFAULT_CAROUSEL_COPY_STYLE_ID}",`,
+    '  "styleName": "Hook ladder",',
+    '  "whyStyle": "one short reason tied to the topic",',
+    '  "title": "short carousel title",',
+    '  "slides": [',
+    '    { "heading": "...", "body": "..." }',
+    "  ]",
+    "}",
+    "- Exactly N slides (N comes from the user message).",
+    '- Slide 1 = cover / hook. Last slide = payoff or clean close. No "follow / save / like" CTA.',
+    `- heading ≤ ${carouselPromptConfig.headingMaxWords} words, concrete, no numbering like "1." unless the chosen style requires numbers in the text itself.`,
+    "- body: exactly the requested sentence count per slide. Plain spoken. No hashtags. No emoji.",
+    "- Same language as the Theme.",
+    "- One idea per slide. No repeating the same tip in different words.",
+    "",
+    "STYLE SELECTION (mandatory)",
+    "1. Read the Theme.",
+    "2. Pick EXACTLY ONE style from the catalog below.",
+    "3. Put its id in styleId and its name in styleName.",
+    "4. Write whyStyle in ≤12 words.",
+    "5. Structure the deck to match that style's rules.",
+    "6. If the topic fits several styles, prefer the most specific match (not the generic tip list).",
+    "7. Never invent a style outside the catalog.",
+    "",
+    `STYLE CATALOG (${styleCount})`,
+    "",
+    catalog,
+    "",
+    "HARD RULES",
+    "- Do not mix two styles in one response.",
+    "- Do not put style names into slide headings.",
+    '- Do not write "Slide 1" in the content.',
+    "- Prefer concrete nouns over abstract adjectives.",
+    `- If Theme is empty or nonsense, still pick ${DEFAULT_CAROUSEL_COPY_STYLE_ID} and write a safe generic tips deck about clear communication.`,
+  ].join("\n");
+}
+
+export function carouselSystemPrompt(options: CarouselGenerateOptions): string {
+  return [
+    buildCarouselStylesSystemPrompt(),
     "",
     "RUNTIME CONSTRAINTS",
     `- heading ≤${carouselPromptConfig.headingMaxWords} words`,
