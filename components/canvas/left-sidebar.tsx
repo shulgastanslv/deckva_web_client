@@ -94,12 +94,12 @@ export function LeftSidebar({
   const [legal, setLegal] = useState<LegalKind | null>(null);
 
   const navItems: { id: NavId; icon: ReactNode; label: string }[] = [
-    { id: "elements", icon: <ShapesIcon className="size-[18px] stroke-[1.7]" />, label: "Elements" },
-    { id: "tools", icon: <ToolCase className="size-[18px] stroke-[1.7]" />, label: "Tools" },
-    { id: "layers", icon: <LayersIcon className="size-[18px] stroke-[1.7]" />, label: "Layers" },
-    { id: "background", icon: <ImageIcon className="size-[18px] stroke-[1.7]" />, label: "Background" },
-    { id: "filters", icon: <FilterIcon className="size-[18px] stroke-[1.7]" />, label: "Filter" },
-    { id: "icons", icon: <StickyNoteIcon className="size-[18px] stroke-[1.7]" />, label: "Icons" },
+    { id: "elements", icon: <ShapesIcon className="size-[18px] stroke-[1.5]" />, label: "Elements" },
+    { id: "tools", icon: <ToolCase className="size-[18px] stroke-[1.5]" />, label: "Tools" },
+    { id: "layers", icon: <LayersIcon className="size-[18px] stroke-[1.5]" />, label: "Layers" },
+    { id: "background", icon: <ImageIcon className="size-[18px] stroke-[1.5]" />, label: "Background" },
+    { id: "filters", icon: <FilterIcon className="size-[18px] stroke-[1.5]" />, label: "Filter" },
+    { id: "icons", icon: <StickyNoteIcon className="size-[18px] stroke-[1.5]" />, label: "Icons" },
   ];
 
   return (

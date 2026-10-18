@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   FolderIcon,
   HomeIcon,
-  LayoutGridIcon,
+  BookOpenIcon,
   PlusIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -40,7 +40,7 @@ const NAV = [
   {
     href: "/studio/templates",
     label: "Templates",
-    icon: LayoutGridIcon,
+    icon: BookOpenIcon,
     match: (path: string) => path.startsWith("/studio/templates"),
   },
 ] as const;
@@ -123,7 +123,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
               <RailTip label="New project">
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="secondary"
                   size="icon"
                   className="size-9 rounded-full text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                   aria-label="New project"

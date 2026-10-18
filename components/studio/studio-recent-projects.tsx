@@ -7,7 +7,6 @@ import {
   Bookmark,
   Eye,
   FolderOpen,
-  Layers,
   Loader2,
   Plus,
   Search,
@@ -355,9 +354,6 @@ export function StudioRecentProjects({ userId }: { userId?: string }) {
                         {project.title || "Untitled"}
                       </span>
                     )}
-                    <span className="absolute bottom-2 left-2 inline-flex size-6 items-center justify-center rounded-md bg-black/45 text-white backdrop-blur-sm">
-                      <Layers className="size-3.5" />
-                    </span>
                   </button>
 
                   <div

@@ -199,7 +199,7 @@ export function StudioHome() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1 className="text-3xl font-bold tracking-normal text-foreground">
+          <h1 className="text-2xl font-bold tracking-normal text-foreground">
             Design is easier with
             <span className="ml-2.5 inline-flex items-center justify-center align-middle">
               <LogoAnimated width={36} height={36} href="/studio" />
@@ -208,7 +208,7 @@ export function StudioHome() {
               swibp
             </span>
           </h1>
-          <p className="mt-2 text-base font-normal tracking-normal text-muted-foreground">
+          <p className="mt-2 text-md font-normal tracking-normal text-muted-foreground">
             One prompt. Many slides. Ready to post.
           </p>
         </motion.div>
@@ -225,9 +225,9 @@ export function StudioHome() {
             onSubmit={submitPrompt}
             isLoading={submitting}
             maxHeight={250}
-            className="w-full rounded-[28px] border border-border bg-background px-4 pb-3 pt-4 shadow-none"
+            className="w-full rounded-[28px] border border-border dark:bg-muted/50 px-4 pb-3 pt-4 shadow-none"
           >
-            <div className="relative bg-background text-left">
+            <div className="relative bg-transparent text-left">
               <PromptInputTextarea
                 placeholder=""
                 aria-label="Carousel prompt"
@@ -294,8 +294,8 @@ export function StudioHome() {
                     className={cn(
                       "size-9 shrink-0 rounded-full transition-colors",
                       canSubmit
-                        ? "bg-foreground text-background hover:bg-foreground/90"
-                        : "bg-muted text-muted-foreground",
+                        ? "bg-primary text-white hover:bg-primary/90"
+                        : "bg-primary text-white hover:bg-primary/90",
                     )}
                     disabled={!canSubmit}
                     onClick={submitPrompt}
