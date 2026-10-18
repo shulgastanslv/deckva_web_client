@@ -19,7 +19,14 @@ type ProfileResult<T extends object = object> =
   | { success: false; error: string };
 
 export async function getProfile(): Promise<
-  ProfileResult<{ name: string | null; email: string; hasPassword: boolean }>
+  ProfileResult<{
+    name: string | null;
+    email: string;
+    image: string | null;
+    hasPassword: boolean;
+    emailVerified: string | null;
+    createdAt: string;
+  }>
 > {
   try {
     const session = await getServerSession(authOptions);
@@ -27,7 +34,14 @@ export async function getProfile(): Promise<
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { name: true, email: true, password: true },
+      select: {
+        name: true,
+        email: true,
+        image: true,
+        password: true,
+        emailVerified: true,
+        createdAt: true,
+      },
     });
     if (!user) return { success: false, error: "Account not found" };
 
@@ -35,7 +49,10 @@ export async function getProfile(): Promise<
       success: true,
       name: user.name,
       email: user.email,
+      image: user.image,
       hasPassword: Boolean(user.password),
+      emailVerified: user.emailVerified?.toISOString() ?? null,
+      createdAt: user.createdAt.toISOString(),
     };
   } catch (err) {
     console.error("getProfile error:", err);
@@ -99,6 +116,41 @@ export async function updateProfile(input: {
   } catch (err) {
     console.error("updateProfile error:", err);
     return { success: false, error: "Couldn't update profile" };
+  }
+}
+
+export async function deleteAccount(input: {
+  confirm: string;
+  password?: string;
+}): Promise<ProfileResult> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return { success: false, error: "Sign in" };
+
+    if (input.confirm.trim().toUpperCase() !== "DELETE") {
+      return { success: false, error: 'Type DELETE to confirm' };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true, password: true },
+    });
+    if (!user) return { success: false, error: "Account not found" };
+
+    if (user.password) {
+      const password = input.password ?? "";
+      if (!password) {
+        return { success: false, error: "Enter your password" };
+      }
+      const ok = await bcrypt.compare(password, user.password);
+      if (!ok) return { success: false, error: "Password is incorrect" };
+    }
+
+    await prisma.user.delete({ where: { id: user.id } });
+    return { success: true };
+  } catch (err) {
+    console.error("deleteAccount error:", err);
+    return { success: false, error: "Couldn't delete account" };
   }
 }
 

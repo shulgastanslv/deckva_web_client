@@ -27,6 +27,11 @@ import {
   MessageSquareText,
   Moon,
   Sun,
+  Sparkles,
+  Home,
+  ExternalLink,
+  Mail,
+  MoreHorizontal,
 } from "lucide-react";
 import { NotificationsMenu } from "@/components/notifications-menu";
 import Link from "next/link";
@@ -47,6 +52,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CommandsKbd } from "@/components/commands_kbd";
@@ -378,10 +386,10 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
               <DropdownMenuContent
                 align="end"
                 sideOffset={8}
-                className="w-64 rounded-2xl border-0 bg-background/95 p-0 text-popover-foreground shadow-xl ring-1 ring-foreground/10 backdrop-blur-md"
+                className="w-[252px] overflow-visible rounded-xl border-0 bg-background/95 p-0 text-popover-foreground shadow-xl ring-1 ring-foreground/10 backdrop-blur-md"
               >
-                <div className="flex items-center gap-3 px-4 pt-3.5 pb-3">
-                  <Avatar className="size-10 ring-1 ring-border/60">
+                <div className="flex items-center gap-2.5 px-3 py-2.5">
+                  <Avatar className="size-8 ring-1 ring-border/60">
                     <AvatarImage
                       src={
                         session.user?.image ??
@@ -389,16 +397,16 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                       }
                       alt={userName}
                     />
-                    <AvatarFallback className="bg-muted text-[13px] font-semibold">
+                    <AvatarFallback className="bg-muted text-[12px] font-semibold">
                       {userInitial}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold tracking-tight text-foreground">
+                    <p className="truncate text-[13px] font-semibold leading-tight tracking-tight text-foreground">
                       {userName}
                     </p>
                     {userEmail && userEmail !== userName ? (
-                      <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                      <p className="truncate text-[12px] leading-tight text-muted-foreground">
                         {userEmail}
                       </p>
                     ) : null}
@@ -407,50 +415,94 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
 
                 <DropdownMenuSeparator className="mx-0 my-0" />
 
-                <div className="py-1">
+                <div className="p-1">
                   <DropdownMenuItem
-                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                    className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
                     onClick={() => setIsProfileOpen(true)}
                   >
                     <User className="size-4 text-muted-foreground" />
                     Profile
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
-                    onClick={() => setIsNewProjectOpen(true)}
-                  >
-                    <GalleryHorizontalEndIcon className="size-4 text-muted-foreground" />
-                    New project
-                  </DropdownMenuItem>
-                  {session.user?.role === "ADMIN" ? (
-                    <DropdownMenuItem asChild className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]">
-                      <Link href="/admin">
-                        <Shield className="size-4 text-muted-foreground" />
-                        Admin
-                      </Link>
-                    </DropdownMenuItem>
-                  ) : null}
-                  <DropdownMenuItem
-                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px] md:hidden"
+                    className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px] md:hidden"
                     onClick={openPublish}
                   >
                     <Globe className="size-4 text-muted-foreground" />
-                    Publish template
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
-                    onClick={() => setIsSocialOpen(true)}
-                  >
-                    <Send className="size-4 text-sky-500" />
-                    Telegram & Threads
+                    Publish
                   </DropdownMenuItem>
                 </div>
 
                 <DropdownMenuSeparator className="mx-0 my-0" />
 
-                <div className="py-1">
+                <div className="p-1">
+                  <DropdownMenuItem asChild className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]">
+                    <Link href="/docs">
+                      <BookOpen className="size-4 text-muted-foreground" />
+                      User guide
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                    className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
+                    onClick={() => setIsWhatsNewOpen(true)}
+                  >
+                    <Sparkles className="size-4 text-muted-foreground" />
+                    What&apos;s new
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]">
+                    <Link href="/docs/contact">
+                      <Mail className="size-4 text-muted-foreground" />
+                      Contact us
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="cursor-default gap-2.5 rounded-lg px-2.5 py-2 text-[13px]">
+                      <MoreHorizontal className="size-4 text-muted-foreground" />
+                      More
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent
+                      sideOffset={6}
+                      className="z-[60] w-48 rounded-xl border-0 bg-background p-1 shadow-xl ring-1 ring-foreground/10"
+                    >
+                      <DropdownMenuItem
+                        className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
+                        onClick={() => setIsNewProjectOpen(true)}
+                      >
+                        New project
+                      </DropdownMenuItem>
+                      {session.user?.role === "ADMIN" ? (
+                        <DropdownMenuItem asChild className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]">
+                          <Link href="/admin">
+                            Admin Panel
+                          </Link>
+                        </DropdownMenuItem>
+                      ) : null}
+                      <DropdownMenuSeparator className="my-1" />
+                      <DropdownMenuItem asChild className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]">
+                        <Link href="/">
+                          Home page
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
+                        onClick={() => setIsSocialOpen(true)}
+                      >
+                        Social
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]">
+                        <Link href="/docs/resources">
+                          Resources
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </div>
+
+                <DropdownMenuSeparator className="mx-0 my-0" />
+
+                <div className="p-1">
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
                     onClick={() => setTheme(isDark ? "light" : "dark")}
                   >
                     {isDark ? (
@@ -458,17 +510,17 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                     ) : (
                       <Moon className="size-4 text-muted-foreground" />
                     )}
-                    <span className="flex-1">{isDark ? "Light theme" : "Dark theme"}</span>
+                    <span className="flex-1">{isDark ? "Light" : "Dark"}</span>
                     <span
                       className={cn(
-                        "relative h-5 w-9 shrink-0 rounded-full transition-colors",
+                        "relative h-[18px] w-8 shrink-0 rounded-full transition-colors",
                         isDark ? "bg-foreground/20" : "bg-muted",
                       )}
                     >
                       <span
                         className={cn(
-                          "absolute top-0.5 size-4 rounded-full bg-background shadow-sm ring-1 ring-foreground/10 transition-transform",
-                          isDark ? "left-4" : "left-0.5",
+                          "absolute top-0.5 size-3.5 rounded-full bg-background shadow-sm ring-1 ring-foreground/10 transition-transform",
+                          isDark ? "left-[14px]" : "left-0.5",
                         )}
                       />
                     </span>
@@ -477,10 +529,10 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
 
                 <DropdownMenuSeparator className="mx-0 my-0" />
 
-                <div className="py-1 pb-1.5">
+                <div className="p-1">
                   <DropdownMenuItem
                     variant="destructive"
-                    className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                    className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
                     onClick={() => signOut({ callbackUrl: "/" })}
                   >
                     <LogOut className="size-4" />

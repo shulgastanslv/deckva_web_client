@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
 
 import { AuthModal } from "@/components/auth";
+import { StudioRecentProjects } from "@/components/studio/studio-recent-projects";
 import { Button } from "@/components/ui/button";
 import {
   PromptInput,
@@ -135,10 +136,12 @@ function useTypingPlaceholder(
 
 export function StudioHome() {
   const router = useRouter();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const [theme, setTheme] = useState("");
   const [authOpen, setAuthOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const userId = session?.user?.id;
+  const showRecents = status === "authenticated" && Boolean(userId);
 
   const canSubmit = Boolean(theme.trim()) && !submitting;
   const showPlaceholder = !theme.trim();
@@ -174,8 +177,22 @@ export function StudioHome() {
   };
 
   return (
-    <div className="flex h-full items-center justify-center overflow-y-auto bg-background px-6 text-foreground sm:px-8">
-      <div className="mx-auto flex w-full max-w-[750px] flex-col items-center py-10">
+    <div
+      className={cn(
+        "h-screen bg-background px-6 text-foreground sm:px-8 overflow-y-auto",
+        showRecents
+          ? "flex flex-col"
+          : "flex items-center justify-center",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto flex w-full flex-col items-center justify-center",
+          showRecents
+            ? "max-w-[1200px] py-10 mt-20"
+            : "max-w-[7500px] py-10",
+        )}
+      >
         <motion.div
           className="flex flex-col items-center text-center"
           initial={{ opacity: 0, y: 8 }}
@@ -197,7 +214,7 @@ export function StudioHome() {
         </motion.div>
 
         <motion.div
-          className="mt-8 w-full"
+          className="mt-8 w-full max-w-[750px]"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -214,7 +231,7 @@ export function StudioHome() {
               <PromptInputTextarea
                 placeholder=""
                 aria-label="Carousel prompt"
-                className="min-h-[64px] bg-transparent px-1 py-0 text-base leading-relaxed text-foreground dark:bg-transparent"
+                className="min-h-[44px] bg-transparent px-1 py-0 text-base leading-relaxed text-foreground dark:bg-transparent"
                 onKeyDown={(e) => {
                   if (e.key === "Tab" && showPlaceholder) {
                     e.preventDefault();
@@ -319,6 +336,17 @@ export function StudioHome() {
             })}
           </motion.div>
         </motion.div>
+
+        {showRecents ? (
+          <motion.div
+            className="mt-10 w-full"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.14, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <StudioRecentProjects userId={userId} />
+          </motion.div>
+        ) : null}
       </div>
 
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />

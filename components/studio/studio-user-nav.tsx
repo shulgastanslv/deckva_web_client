@@ -1,10 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
+  BookOpen,
   CircleUserRound,
+  ExternalLink,
+  Home,
   LogOut,
+  Mail,
+  MoreHorizontal,
   Moon,
+  Send,
+  Sparkles,
   Sun,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -12,11 +20,16 @@ import { useTheme } from "next-themes";
 
 import { AuthModal } from "@/components/auth";
 import { ProfileSettingsDialog } from "@/components/profile-settings-dialog";
+import { SocialSubscribeDialog } from "@/components/social-subscribe-dialog";
+import { WhatsNewModal } from "@/components/whats-new-modal";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -25,6 +38,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+
+const itemClass =
+  "cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]";
 
 function UserLetterAvatar({
   letter,
@@ -52,6 +68,8 @@ export function StudioUserNav() {
   const [mounted, setMounted] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const [socialOpen, setSocialOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -88,20 +106,20 @@ export function StudioUserNav() {
           <DropdownMenuContent
             side="right"
             align="end"
-            sideOffset={12}
-            className="w-[280px] rounded-2xl border border-border bg-background p-0 shadow-lg"
+            sideOffset={10}
+            className="w-[252px] overflow-visible rounded-xl border border-border bg-background p-0 shadow-lg"
           >
-            <div className="flex items-center gap-3 px-4 pt-4 pb-3">
+            <div className="flex items-center gap-2.5 px-3 py-2.5">
               <UserLetterAvatar
                 letter={userLetter}
-                className="size-10 text-[13px]"
+                className="size-8 text-[12px]"
               />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold text-foreground">
+                <p className="truncate text-[13px] font-semibold leading-tight text-foreground">
                   {userName}
                 </p>
                 {userEmail ? (
-                  <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                  <p className="truncate text-[12px] leading-tight text-muted-foreground">
                     {userEmail}
                   </p>
                 ) : null}
@@ -110,16 +128,16 @@ export function StudioUserNav() {
 
             <DropdownMenuSeparator className="mx-0 my-0" />
 
-            <div className="py-1.5">
+            <div className="p-1">
               <DropdownMenuItem
-                className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                className={itemClass}
                 onClick={() => setProfileOpen(true)}
               >
                 <CircleUserRound className="size-4 text-foreground" />
-                Manage Account
+                Account
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                className={itemClass}
                 onClick={() => setTheme(isDark ? "light" : "dark")}
               >
                 {isDark ? (
@@ -133,13 +151,65 @@ export function StudioUserNav() {
 
             <DropdownMenuSeparator className="mx-0 my-0" />
 
-            <div className="py-1.5 pb-2">
+            <div className="p-1">
+              <DropdownMenuItem asChild className={itemClass}>
+                <Link href="/docs">
+                  <BookOpen className="size-4 text-foreground" />
+                  User guide
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer gap-3 rounded-none px-4 py-2.5 text-[13px]"
+                className={itemClass}
+                onClick={() => setWhatsNewOpen(true)}
+              >
+                <Sparkles className="size-4 text-foreground" />
+                What&apos;s new
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className={itemClass}>
+                <Link href="/docs/contact">
+                  <Mail className="size-4 text-foreground" />
+                  Contact us
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className={itemClass}>
+                  <MoreHorizontal className="size-4 text-foreground" />
+                  More
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent
+                  sideOffset={6}
+                  className="z-[60] w-48 rounded-xl border border-border bg-background p-1 shadow-xl"
+                >
+                  <DropdownMenuItem asChild className={itemClass}>
+                    <Link href="/">
+                      Home page
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={itemClass}
+                    onClick={() => setSocialOpen(true)}
+                  >
+                    Social
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className={itemClass}>
+                    <Link href="/docs/resources">
+                      Resources
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            </div>
+
+            <DropdownMenuSeparator className="mx-0 my-0" />
+
+            <div className="p-1">
+              <DropdownMenuItem
+                className={itemClass}
                 onClick={() => signOut({ callbackUrl: "/" })}
               >
                 <LogOut className="size-4 text-foreground" />
-                Log Out
+                Log out
               </DropdownMenuItem>
             </div>
           </DropdownMenuContent>
@@ -164,6 +234,8 @@ export function StudioUserNav() {
 
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
       <ProfileSettingsDialog open={profileOpen} onOpenChange={setProfileOpen} />
+      <WhatsNewModal open={whatsNewOpen} onOpenChange={setWhatsNewOpen} />
+      <SocialSubscribeDialog open={socialOpen} onOpenChange={setSocialOpen} />
     </>
   );
 }
