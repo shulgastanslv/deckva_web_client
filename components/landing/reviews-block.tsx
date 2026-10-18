@@ -119,14 +119,14 @@ export function ReviewsBlock() {
   return (
     <LandingSection id="reviews">
       <LandingHead
-        eyebrow="Reviews"
-        title="Threads carousels people posted"
+        eyebrow="Отзывы"
+        title="Карусели, которые люди опубликовали"
       />
 
       <ul className="columns-1 gap-3 min-[480px]:columns-2 lg:columns-3">
         {visible.map((pin, index) => (
           <li key={index} className="mb-3 break-inside-avoid">
-            <article className="overflow-hidden rounded-2xl bg-white text-land-ink ring-1 ring-land-ink/5">
+            <article className="overflow-hidden rounded-2xl bg-white">
               <div className="p-2.5">
                 <div className="flex items-center gap-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -170,9 +170,9 @@ export function ReviewsBlock() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="mt-4 inline-flex h-11 items-center rounded-full bg-land-ink px-5 text-sm font-semibold text-white"
+        className="mt-4 inline-flex h-11 items-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground"
       >
-        {open ? "Show less" : "Show more"}
+        {open ? "Показать меньше" : "Показать " + visible.length + " отзывов"}
       </button>
     </LandingSection>
   );

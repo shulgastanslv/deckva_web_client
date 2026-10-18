@@ -199,17 +199,14 @@ export function StudioHome() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1 className="text-2xl font-bold tracking-normal text-foreground">
-            Design is easier with
+          <h1 className="text-3xl font-bold tracking-normal text-foreground">
+            Дизайн стал легче
             <span className="ml-2.5 inline-flex items-center justify-center align-middle">
               <LogoAnimated width={36} height={36} href="/studio" />
             </span>
-            <span className="ml-2.5 inline-flex items-center justify-center align-middle">
-              swibp
-            </span>
           </h1>
-          <p className="mt-2 text-md font-normal tracking-normal text-muted-foreground">
-            One prompt. Many slides. Ready to post.
+          <p className="mt-2 text-base font-normal tracking-normal text-muted-foreground">
+            Один запрос. Много слайдов. Готовы к публикации.
           </p>
         </motion.div>
 

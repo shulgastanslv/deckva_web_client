@@ -30,8 +30,8 @@ export function ReferencePanel() {
       )}
     >
       <div className="flex h-10 items-center justify-between px-3 border-b border-border/40">
-        <span className="text-[13px] font-medium uppercase tracking-wider text-muted-foreground">
-          Image
+        <span className="text-[14px] font-medium tracking-wider text-foreground">
+          Reference
         </span>
         <Button
           variant="ghost"

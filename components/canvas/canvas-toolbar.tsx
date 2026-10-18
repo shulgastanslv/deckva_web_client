@@ -7,6 +7,7 @@ import {
   Workflow,
   Check,
   FileCode2,
+  LayoutIcon,
 } from "lucide-react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
@@ -115,7 +116,7 @@ export function CanvasToolbar() {
             }`}
             title="Split: reference panel"
           >
-            <SplitSquareVertical className="w-3.5 h-3.5" />
+            <LayoutIcon className="w-3.5 h-3.5" />
           </Button>
 
           <Button

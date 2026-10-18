@@ -8,15 +8,10 @@ const manrope = Manrope({
 
 
 export const metadata: Metadata = {
-  title: "Swibp | carousel maker",
-  description: "Swibp | carousel maker by swibp",
-  keywords: ["carousel", "maker", "swibp", "carousel maker", "carousel maker by swibp"],
+  title: "Swibp | Carousel Generator",
+  description: "Swibp | Carousel Generator by swibp",
+  keywords: ["carousel", "generator", "swibp", "carousel generator", "carousel generator by swibp"],
   authors: [{ name: "Swibp", url: "https://swibp.io" }],
-  icons: {
-    icon: "/browser.svg",
-  },
-  creator: "Swibp",
-  publisher: "Swibp",
 };
 
 

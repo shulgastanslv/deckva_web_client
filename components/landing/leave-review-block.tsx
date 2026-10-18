@@ -45,7 +45,7 @@ export function LeaveReviewBlock() {
     setBusy(false);
 
     if (!res.success) {
-      setError(res.error);
+      setError((res as { error: string }).error);
       return;
     }
 
@@ -59,26 +59,25 @@ export function LeaveReviewBlock() {
         <LandingPad>
           <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <LandingHead
-              eyebrow="Review"
-              title="Leave a review"
-              text="Tell us what worked, what didn’t, or what you want next. We read every note."
+              title="Оставьте отзыв"
+              text="Расскажите нам, что понравилось, что не понравилось, или что вы хотите дальше. Мы читаем каждый отзыв."
             />
 
             {sent ? (
               <div className="flex min-h-[220px] flex-col justify-center rounded-[1.5rem] bg-land-mist px-6 py-8 sm:px-8">
                 <p className="text-2xl font-extrabold tracking-tight text-land-ink">
-                  Thanks — we got it
+                  Спасибо!
                 </p>
                 <p className="mt-2 max-w-sm text-sm leading-relaxed text-land-ink/55">
-                  Your review is on the list. Come back anytime after the next
-                  carousel.
+                  Ваш отзыв добавлен в список. Вернитесь в любое время после следующей
+                  карусели.
                 </p>
                 <button
                   type="button"
                   onClick={() => setSent(false)}
                   className="mt-6 inline-flex h-11 w-fit items-center rounded-full bg-land-ink px-5 text-sm font-semibold text-white"
                 >
-                  Write another
+                  Написать другой
                 </button>
               </div>
             ) : (
@@ -87,7 +86,7 @@ export function LeaveReviewBlock() {
                 className="flex flex-col gap-5"
               >
                 <div>
-                  <p className="text-sm font-semibold text-land-ink">Rating</p>
+                  <p className="text-sm font-semibold text-land-ink">Оценка</p>
                   <div
                     className="mt-2 flex items-center gap-1"
                     onMouseLeave={() => setHover(0)}
@@ -98,7 +97,7 @@ export function LeaveReviewBlock() {
                         <button
                           key={value}
                           type="button"
-                          aria-label={`${value} stars`}
+                          aria-label={`${value} звезд`}
                           aria-pressed={rating === value}
                           onMouseEnter={() => setHover(value)}
                           onClick={() => setRating(value)}
@@ -127,7 +126,7 @@ export function LeaveReviewBlock() {
                     htmlFor="landing-review"
                     className="text-sm font-semibold text-land-ink"
                   >
-                    Your review
+                    Ваш отзыв
                   </label>
                   <textarea
                     id="landing-review"
@@ -136,7 +135,7 @@ export function LeaveReviewBlock() {
                     rows={5}
                     required
                     minLength={4}
-                    placeholder="What should we know about Swibp?"
+                    placeholder="Что мы должны знать о Swibp?"
                     className="mt-2 min-h-[140px] w-full resize-y rounded-2xl border border-land-ink/10 bg-land-mist/50 px-4 py-3 text-base leading-relaxed text-land-ink outline-none placeholder:text-land-ink/35 focus:border-land-blue/40 focus:ring-3 focus:ring-land-blue/15"
                   />
                 </div>
@@ -155,14 +154,14 @@ export function LeaveReviewBlock() {
                     {busy ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : status === "authenticated" ? (
-                      "Send review"
+                      "Отправить отзыв"
                     ) : (
-                      "Sign in to send"
+                      "Войти, чтобы отправить"
                     )}
                   </button>
                   {status !== "authenticated" ? (
                     <p className="text-sm text-land-ink/45">
-                      Reviews are saved to your account.
+                      Отзывы сохраняются в вашем аккаунте.
                     </p>
                   ) : null}
                 </div>

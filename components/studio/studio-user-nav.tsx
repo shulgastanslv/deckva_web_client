@@ -94,7 +94,7 @@ export function StudioUserNav() {
                 >
                   <UserLetterAvatar
                     letter={userLetter}
-                    className="size-8 text-[13px]"
+                    className="size-9 text-[13px] bg-white text-black border border-border backdrop-blur-sm"
                   />
                 </button>
               </DropdownMenuTrigger>

@@ -205,7 +205,7 @@ export function IconsArt() {
       >
         Icons
       </text>
-      <rect x="150" y="46" width="2.5" height="28" rx="1.25" fill={BLUE} />
+      <rect x="222" y="46" width="2.5" height="28" rx="1.25" fill={BLUE} />
     </svg>
   );
 }

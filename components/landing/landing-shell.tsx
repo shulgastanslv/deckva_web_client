@@ -31,24 +31,26 @@ export function LandingHead({
   text,
   light = false,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: ReactNode;
   text?: string;
   light?: boolean;
 }) {
   return (
     <div className="mb-8 max-w-2xl sm:mb-10">
-      <p
+      {eyebrow ? (
+        <p
         className={cn(
-          "text-sm font-bold tracking-wide",
+          "text-lg font-bold tracking-wide",
           light ? "text-white/70" : "text-land-blue"
         )}
       >
         {eyebrow}
-      </p>
+        </p>
+      ) : null}
       <h2
         className={cn(
-          "mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl",
+          "mt-2 text-4xl font-extrabold tracking-tight",
           light ? "text-white" : "text-land-ink"
         )}
       >
@@ -57,7 +59,7 @@ export function LandingHead({
       {text ? (
         <p
           className={cn(
-            "mt-3 text-base leading-relaxed",
+            "mt-3 text-lg leading-relaxed",
             light ? "text-white/75" : "text-land-ink/55"
           )}
         >
