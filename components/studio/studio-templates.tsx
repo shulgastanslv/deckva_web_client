@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import {
@@ -11,9 +11,13 @@ import {
   type TemplateListItem,
 } from "@/actions/templates";
 import { AuthModal } from "@/components/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
+import {
+  StudioContent,
+  StudioContentBody,
+} from "@/components/studio/ui/studio-content";
+import { StudioPageHeader } from "@/components/studio/ui/studio-page-header";
+import { StudioTab } from "@/components/studio/ui/studio-tab";
 
 export function StudioTemplates() {
   const router = useRouter();
@@ -25,6 +29,16 @@ export function StudioTemplates() {
   const [templates, setTemplates] = useState<TemplateListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [openingId, setOpeningId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onSidebarSearch = (event: Event) => {
+      const query = (event as CustomEvent<{ query?: string }>).detail?.query;
+      if (typeof query === "string") setSearch(query);
+    };
+    window.addEventListener("studio:sidebar-search", onSidebarSearch);
+    return () =>
+      window.removeEventListener("studio:sidebar-search", onSidebarSearch);
+  }, []);
 
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
@@ -63,71 +77,58 @@ export function StudioTemplates() {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-background text-foreground">
-      <div className="mx-auto w-full max-w-[1120px] px-8 pb-16 pt-16">
-        <div>
-          <h1 className="text-2xl font-bold tracking-normal">Templates</h1>
-          <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-            Pick a layout — it opens in the editor as your starting carousel.
-          </p>
-        </div>
+    <StudioContent>
+      <StudioPageHeader
+        title="Templates"
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search templates"
+        tabs={
+          <>
+            {tabs.map((tab) => (
+              <StudioTab
+                key={tab}
+                active={category === tab}
+                onClick={() => setCategory(tab)}
+              >
+                {tab === "all" ? "All" : tab}
+              </StudioTab>
+            ))}
+          </>
+        }
+      />
 
-        <div className="relative mt-8 max-w-md">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search templates…"
-            className="h-10 rounded-full border-border bg-card pl-10 pr-10"
-          />
-          {search ? (
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              onClick={() => setSearch("")}
-            >
-              <X className="size-4" />
-            </button>
-          ) : null}
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setCategory(tab)}
-              className={cn(
-                "rounded-full border px-3 py-1 text-sm font-medium transition-colors",
-                category === tab
-                  ? "border-border bg-secondary text-foreground"
-                  : "border-border/70 text-muted-foreground hover:bg-muted",
-              )}
-            >
-              {tab === "all" ? "All" : tab}
-            </button>
-          ))}
-        </div>
-
+      <StudioContentBody>
         {loading && templates.length === 0 ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
           </div>
         ) : templates.length === 0 ? (
-          <p className="py-16 text-center text-base text-muted-foreground">
-            No templates found
-          </p>
+          <div className="py-16 text-center">
+            <p
+              className="text-[22px] text-neutral-950 dark:text-foreground"
+              style={{
+                fontFamily:
+                  "var(--font-studio-serif), ui-serif, Georgia, serif",
+              }}
+            >
+              No templates
+            </p>
+            <p className="mt-2 text-[13px] text-neutral-500 dark:text-muted-foreground">
+              Try another category or search.
+            </p>
+          </div>
         ) : (
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <StudioBoardGrid>
             {templates.map((tpl) => (
               <button
                 key={tpl.id}
                 type="button"
                 disabled={openingId === tpl.id}
                 onClick={() => openTemplate(tpl.id)}
-                className="group flex flex-col gap-1.5 text-left disabled:opacity-60"
+                className="group flex flex-col gap-2.5 text-left disabled:opacity-50"
               >
-                <div className="relative aspect-4/5 overflow-hidden rounded-2xl border border-border bg-muted shadow-none">
+                <div className="relative aspect-4/5 overflow-hidden rounded-xl border border-border/40 bg-muted/40 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] group-hover:border-border group-hover:shadow-sm">
                   {tpl.previewUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -137,7 +138,7 @@ export function StudioTemplates() {
                       draggable={false}
                     />
                   ) : (
-                    <span className="flex h-full items-center justify-center px-2 text-center text-[10px] font-medium leading-tight text-muted-foreground">
+                    <span className="flex h-full items-center justify-center px-3 text-center text-[12px] text-muted-foreground/70">
                       {tpl.title}
                     </span>
                   )}
@@ -148,18 +149,21 @@ export function StudioTemplates() {
                   ) : null}
                 </div>
                 <div className="px-0.5">
-                  <p className="truncate text-sm font-semibold">{tpl.title}</p>
-                  <p className="truncate text-sm text-muted-foreground">
-                    {tpl.slideCount} slides · {tpl.aspectRatio}
+                  <p className="truncate text-[13px] font-medium text-foreground">
+                    {tpl.title}
+                  </p>
+                  <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                    {tpl.slideCount} slides
+                    {tpl.badge ? ` · ${tpl.badge}` : ""}
                   </p>
                 </div>
               </button>
             ))}
-          </div>
+          </StudioBoardGrid>
         )}
-      </div>
+      </StudioContentBody>
 
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
-    </div>
+    </StudioContent>
   );
 }

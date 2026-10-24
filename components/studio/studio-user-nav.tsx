@@ -5,13 +5,11 @@ import Link from "next/link";
 import {
   BookOpen,
   CircleUserRound,
-  ExternalLink,
   Home,
   LogOut,
   Mail,
-  MoreHorizontal,
   Moon,
-  Send,
+  Share2,
   Sparkles,
   Sun,
 } from "lucide-react";
@@ -21,15 +19,13 @@ import { useTheme } from "next-themes";
 import { AuthModal } from "@/components/auth";
 import { ProfileSettingsDialog } from "@/components/profile-settings-dialog";
 import { SocialSubscribeDialog } from "@/components/social-subscribe-dialog";
+import { StudioAvatar } from "@/components/studio/ui/studio-avatar";
 import { WhatsNewModal } from "@/components/whats-new-modal";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -40,32 +36,17 @@ import {
 import { cn } from "@/lib/utils";
 
 const itemClass =
-  "cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]";
+  "cursor-pointer gap-2.5 rounded-lg px-2.5 py-2.5 text-[13px]";
 
-function UserLetterAvatar({
-  letter,
-  className,
+export function StudioUserNav({
+  variant = "header",
 }: {
-  letter: string;
-  className?: string;
+  variant?: "header" | "rail";
 }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground",
-        className,
-      )}
-      aria-hidden
-    >
-      {letter}
-    </span>
-  );
-}
-
-export function StudioUserNav() {
   const { data: session, status } = useSession();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
@@ -79,140 +60,134 @@ export function StudioUserNav() {
   const userEmail = session?.user?.email ?? "";
   const userName = session?.user?.name?.trim() || userEmail || "Account";
   const userLetter = (userName[0] || "U").toUpperCase();
+  const isHeader = variant === "header";
+
+  const menu = (
+    <DropdownMenuContent
+      side="bottom"
+      align="end"
+      sideOffset={10}
+      className="w-[280px] overflow-hidden rounded-2xl border border-neutral-200 bg-white p-0 shadow-xl dark:border-border dark:bg-background"
+    >
+      <div className="flex items-center gap-3 px-4 py-3.5">
+        <StudioAvatar letter={userLetter} className="size-10 text-[14px]" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[14px] font-semibold leading-tight text-neutral-950 dark:text-foreground">
+            {userName}
+          </p>
+          {userEmail ? (
+            <p className="mt-0.5 truncate text-[12px] leading-tight text-neutral-500 dark:text-muted-foreground">
+              {userEmail}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <DropdownMenuSeparator className="mx-0 my-0" />
+
+      <div className="p-1.5">
+        <DropdownMenuItem
+          className={itemClass}
+          onClick={() => setProfileOpen(true)}
+        >
+          <CircleUserRound className="size-4 text-neutral-500" />
+          Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className={itemClass}
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+        >
+          {isDark ? (
+            <Sun className="size-4 text-neutral-500" />
+          ) : (
+            <Moon className="size-4 text-neutral-500" />
+          )}
+          {isDark ? "Light mode" : "Dark mode"}
+        </DropdownMenuItem>
+      </div>
+
+      <DropdownMenuSeparator className="mx-0 my-0" />
+
+      <div className="p-1.5">
+        <DropdownMenuItem asChild className={itemClass}>
+          <Link href="/docs">
+            <BookOpen className="size-4 text-neutral-500" />
+            Learning center
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className={itemClass}
+          onClick={() => setWhatsNewOpen(true)}
+        >
+          <Sparkles className="size-4 text-neutral-500" />
+          What&apos;s new
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className={itemClass}>
+          <Link href="/docs/contact">
+            <Mail className="size-4 text-neutral-500" />
+            Contact us
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className={itemClass}
+          onClick={() => setSocialOpen(true)}
+        >
+          <Share2 className="size-4 text-neutral-500" />
+          Social
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className={itemClass}>
+          <Link href="/">
+            <Home className="size-4 text-neutral-500" />
+            Home page
+          </Link>
+        </DropdownMenuItem>
+      </div>
+
+      <DropdownMenuSeparator className="mx-0 my-0" />
+
+      <div className="p-1.5">
+        <DropdownMenuItem
+          className={itemClass}
+          variant="destructive"
+          onClick={() => signOut({ callbackUrl: "/" })}
+        >
+          <LogOut className="size-4" />
+          Log out
+        </DropdownMenuItem>
+      </div>
+    </DropdownMenuContent>
+  );
 
   return (
     <>
       {status === "authenticated" && session?.user ? (
-        <DropdownMenu>
+        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className={cn(
+                    "rounded-full outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-ring",
+                    menuOpen && "ring-2 ring-[#2f5bff]/40",
+                  )}
                   aria-label="Account"
                 >
-                  <UserLetterAvatar
+                  <StudioAvatar
                     letter={userLetter}
-                    className="size-9 text-[13px] bg-white text-black border border-border backdrop-blur-sm"
+                    className="size-9 border border-black/5 text-[13px] shadow-sm"
                   />
                 </button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8}>
-              Account
+            <TooltipContent side={isHeader ? "bottom" : "right"} sideOffset={8}>
+              <p className="font-medium">{userName}</p>
+              {userEmail ? (
+                <p className="text-[11px] opacity-80">{userEmail}</p>
+              ) : null}
             </TooltipContent>
           </Tooltip>
-          <DropdownMenuContent
-            side="right"
-            align="end"
-            sideOffset={10}
-            className="w-[252px] overflow-visible rounded-xl border border-border bg-background p-0 shadow-lg"
-          >
-            <div className="flex items-center gap-2.5 px-3 py-2.5">
-              <UserLetterAvatar
-                letter={userLetter}
-                className="size-8 text-[12px]"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold leading-tight text-foreground">
-                  {userName}
-                </p>
-                {userEmail ? (
-                  <p className="truncate text-[12px] leading-tight text-muted-foreground">
-                    {userEmail}
-                  </p>
-                ) : null}
-              </div>
-            </div>
-
-            <DropdownMenuSeparator className="mx-0 my-0" />
-
-            <div className="p-1">
-              <DropdownMenuItem
-                className={itemClass}
-                onClick={() => setProfileOpen(true)}
-              >
-                <CircleUserRound className="size-4 text-foreground" />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className={itemClass}
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-              >
-                {isDark ? (
-                  <Sun className="size-4 text-foreground" />
-                ) : (
-                  <Moon className="size-4 text-foreground" />
-                )}
-                {isDark ? "Light" : "Dark"}
-              </DropdownMenuItem>
-            </div>
-
-            <DropdownMenuSeparator className="mx-0 my-0" />
-
-            <div className="p-1">
-              <DropdownMenuItem asChild className={itemClass}>
-                <Link href="/docs">
-                  <BookOpen className="size-4 text-foreground" />
-                  User guide
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className={itemClass}
-                onClick={() => setWhatsNewOpen(true)}
-              >
-                <Sparkles className="size-4 text-foreground" />
-                What&apos;s new
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className={itemClass}>
-                <Link href="/docs/contact">
-                  <Mail className="size-4 text-foreground" />
-                  Contact us
-                </Link>
-              </DropdownMenuItem>
-
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger className={itemClass}>
-                  <MoreHorizontal className="size-4 text-foreground" />
-                  More
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent
-                  sideOffset={6}
-                  className="z-[60] w-48 rounded-xl border border-border bg-background p-1 shadow-xl"
-                >
-                  <DropdownMenuItem asChild className={itemClass}>
-                    <Link href="/">
-                      Home page
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className={itemClass}
-                    onClick={() => setSocialOpen(true)}
-                  >
-                    Social
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className={itemClass}>
-                    <Link href="/docs/resources">
-                      Resources
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            </div>
-
-            <DropdownMenuSeparator className="mx-0 my-0" />
-
-            <div className="p-1">
-              <DropdownMenuItem
-                className={itemClass}
-                onClick={() => signOut({ callbackUrl: "/" })}
-              >
-                <LogOut className="size-4 text-foreground" />
-                Log out
-              </DropdownMenuItem>
-            </div>
-          </DropdownMenuContent>
+          {menu}
         </DropdownMenu>
       ) : (
         <Tooltip>
@@ -223,10 +198,10 @@ export function StudioUserNav() {
               className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Sign in"
             >
-              <UserLetterAvatar letter="U" className="size-9 text-[13px]" />
+              <StudioAvatar letter="U" className="size-9 text-[13px]" />
             </button>
           </TooltipTrigger>
-          <TooltipContent side="right" sideOffset={8}>
+          <TooltipContent side="bottom" sideOffset={8}>
             Sign in
           </TooltipContent>
         </Tooltip>

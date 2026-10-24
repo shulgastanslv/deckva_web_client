@@ -1,68 +1,21 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  FolderIcon,
-  HomeIcon,
-  BookOpenIcon,
-  PlusIcon,
-} from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { AuthModal } from "@/components/auth";
-import { LogoAnimated } from "@/components/logo-animated";
-import { StudioUserNav } from "@/components/studio/studio-user-nav";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { stashStudioIntent } from "@/lib/studio/pending-intent";
-import { cn } from "@/lib/utils";
-
-const NAV = [
-  {
-    href: "/studio",
-    label: "Home",
-    icon: HomeIcon,
-    match: (path: string) => path === "/studio",
-  },
-  {
-    href: "/studio/projects",
-    label: "Projects",
-    icon: FolderIcon,
-    match: (path: string) => path.startsWith("/studio/projects"),
-  },
-  {
-    href: "/studio/templates",
-    label: "Templates",
-    icon: BookOpenIcon,
-    match: (path: string) => path.startsWith("/studio/templates"),
-  },
-] as const;
-
-function RailTip({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent side="right" sideOffset={8}>
-        {label}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
+import { StudioGenerateDialog } from "@/components/studio/create/studio-generate-dialog";
+import { StudioHeader } from "@/components/studio/header/studio-header";
+import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
+import { StudioSidebar } from "@/components/studio/sidebar/studio-sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function StudioShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { status } = useSession();
   const [authOpen, setAuthOpen] = useState(false);
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
+  const [sidebarSearch, setSidebarSearch] = useState("");
+  const create = useStudioCreate();
+  const { authNeeded, setAuthNeeded } = create;
 
   useEffect(() => {
     const onAuthLink = (event: Event) => {
@@ -77,84 +30,65 @@ export function StudioShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("core:auth-link", onAuthLink);
   }, []);
 
-  const startBlank = () => {
-    if (status !== "authenticated") {
-      setAuthOpen(true);
-      return;
-    }
-    stashStudioIntent({ type: "new" });
-    router.push("/studio/editor");
-  };
+  useEffect(() => {
+    if (!authNeeded) return;
+    setAuthOpen(true);
+    setAuthNeeded(false);
+  }, [authNeeded, setAuthNeeded]);
+
+  useEffect(() => {
+    const q = sidebarSearch.trim();
+    const t = window.setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent("studio:sidebar-search", { detail: { query: q } }),
+      );
+    }, q ? 180 : 0);
+    return () => window.clearTimeout(t);
+  }, [sidebarSearch]);
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">
-      <aside className="flex w-14 shrink-0 flex-col items-center justify-between bg-muted/20 py-5">
-        <TooltipProvider delayDuration={250}>
-          <div className="flex flex-col items-center">
-            <LogoAnimated
-              width={26}
-              height={26}
-              href="/studio"
-              className="opacity-90 hover:opacity-100"
-            />
-            <div className="mt-7 flex flex-col items-center gap-1.5">
-              {NAV.map(({ href, label, icon: Icon, match }) => {
-                const active = match(pathname);
-                return (
-                  <RailTip key={href} label={label}>
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="icon"
-                      className={cn(
-                        "size-9 rounded-full transition-colors",
-                        active
-                          ? "bg-muted text-foreground"
-                          : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
-                      )}
-                    >
-                      <Link href={href} aria-label={label}>
-                        <Icon className="size-[18px] stroke-[1.5]" />
-                      </Link>
-                    </Button>
-                  </RailTip>
-                );
-              })}
-              <RailTip label="New project">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  className="size-9 rounded-full text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-                  aria-label="New project"
-                  onClick={startBlank}
-                >
-                  <PlusIcon className="size-[18px] stroke-[1.5]" />
-                </Button>
-              </RailTip>
-            </div>
+    <TooltipProvider delayDuration={250}>
+      <div className="flex h-dvh w-full overflow-hidden bg-[#f5f5f5] text-foreground dark:bg-background">
+        <StudioSidebar
+          search={sidebarSearch}
+          onSearchChange={setSidebarSearch}
+          onBlank={create.openBlank}
+          onGenerate={create.openGenerate}
+          onTemplates={create.openTemplates}
+        />
+
+        <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-background dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
+          <StudioHeader onSignIn={() => setAuthOpen(true)} />
+          <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
+            {children}
           </div>
+        </div>
 
-          <StudioUserNav />
-        </TooltipProvider>
-      </aside>
+        <StudioGenerateDialog
+          open={create.generateOpen}
+          onOpenChange={(open) => {
+            if (!open) create.closeGenerate();
+            else create.setGenerateOpen(true);
+          }}
+          theme={create.theme}
+          onThemeChange={create.setTheme}
+          submitting={create.submitting}
+          onSubmit={create.submitGenerate}
+        />
 
-      <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden bg-background">
-        {children}
+        <AuthModal
+          isOpen={authOpen}
+          verifyToken={authVerifyToken}
+          resetToken={authResetToken}
+          onOpenChange={(open) => {
+            setAuthOpen(open);
+            if (!open) {
+              setAuthVerifyToken(null);
+              setAuthResetToken(null);
+            }
+          }}
+        />
       </div>
-
-      <AuthModal
-        isOpen={authOpen}
-        verifyToken={authVerifyToken}
-        resetToken={authResetToken}
-        onOpenChange={(open) => {
-          setAuthOpen(open);
-          if (!open) {
-            setAuthVerifyToken(null);
-            setAuthResetToken(null);
-          }
-        }}
-      />
-    </div>
+    </TooltipProvider>
   );
 }

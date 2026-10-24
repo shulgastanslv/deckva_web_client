@@ -1,354 +1,243 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ArrowUpIcon,
-  BookOpenIcon,
-  CircleHelpIcon,
-  LayoutTemplateIcon,
-  LightbulbIcon,
-  ListChecksIcon,
-  Loader2,
-  PlusIcon,
-  ScaleIcon,
-  SparklesIcon,
-} from "lucide-react";
+import { ChevronDown, Loader2, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { motion } from "motion/react";
 
-import { AuthModal } from "@/components/auth";
-import { StudioRecentProjects } from "@/components/studio/studio-recent-projects";
-import { Button } from "@/components/ui/button";
 import {
-  PromptInput,
-  PromptInputAction,
-  PromptInputActions,
-  PromptInputTextarea,
-} from "@/components/ui/prompt-input";
-import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
-import { stashStudioIntent } from "@/lib/studio/pending-intent";
-import { cn } from "@/lib/utils";
-import { LogoAnimated } from "@/components/logo-animated";
+  getUserProjects,
+  type ProjectListItem,
+} from "@/actions/projects";
+import {
+  getTemplates,
+  type TemplateListItem,
+} from "@/actions/templates";
+import { AuthModal } from "@/components/auth";
+import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
+import { StudioGenerateDialog } from "@/components/studio/create/studio-generate-dialog";
+import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
+import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
+import { StudioProjectCard } from "@/components/studio/projects/studio-project-card";
+import { StudioProjectList } from "@/components/studio/projects/studio-project-list";
+import { StudioGeneratePrompt } from "@/components/studio/start/studio-generate-prompt";
+import { StudioGreeting } from "@/components/studio/start/studio-greeting";
+import { StudioStartRow } from "@/components/studio/start/studio-start-row";
+import {
+  StudioCreateTile,
+  StudioStartTile,
+} from "@/components/studio/start/studio-start-tile";
+import {
+  StudioContent,
+  StudioContentBody,
+} from "@/components/studio/ui/studio-content";
+import { StudioSectionHeader } from "@/components/studio/ui/studio-section-header";
+import { StudioViewToggle } from "@/components/studio/ui/studio-view-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const PROMPT_SUGGESTIONS = [
-  {
-    label: "Mistakes",
-    seed: "Common mistakes that kill carousel results — and the fix",
-    icon: CircleHelpIcon,
-  },
-  {
-    label: "Framework",
-    seed: "A simple named framework people can reuse today",
-    icon: LayoutTemplateIcon,
-  },
-  {
-    label: "Story",
-    seed: "A short founder story with one sharp lesson",
-    icon: BookOpenIcon,
-  },
-  {
-    label: "Checklist",
-    seed: "A launch checklist before you hit publish",
-    icon: ListChecksIcon,
-  },
-  {
-    label: "Contrarian",
-    seed: "A contrarian take on advice everyone repeats",
-    icon: ScaleIcon,
-  },
-  {
-    label: "FAQ",
-    seed: "Questions people ask before they start",
-    icon: LightbulbIcon,
-  },
-  {
-    label: "Playbook",
-    seed: "A day-one playbook to get the first win",
-    icon: SparklesIcon,
-  },
-] as const;
-
-const PLACEHOLDER_PROMPTS = [
-  "A 5-slide carousel about shipping in public…",
-  "Common mistakes that kill carousel results — and the fix",
-  "A simple framework people can reuse today",
-  "A short founder story with one sharp lesson",
-  "A launch checklist before you hit publish",
-] as const;
-
-const actionBtn =
-  "size-8 shrink-0 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground";
-
-function useTypingPlaceholder(
-  examples: readonly string[],
-  enabled: boolean,
-) {
-  const [index, setIndex] = useState(0);
-  const [text, setText] = useState("");
-
-  useEffect(() => {
-    if (!enabled || examples.length === 0) {
-      setText("");
-      return;
-    }
-
-    let cancelled = false;
-    let timeout: ReturnType<typeof setTimeout>;
-    const full = examples[index % examples.length] ?? "";
-    let i = 0;
-    let deleting = false;
-
-    const tick = () => {
-      if (cancelled) return;
-      if (!deleting) {
-        i += 1;
-        setText(full.slice(0, i));
-        if (i >= full.length) {
-          deleting = true;
-          timeout = setTimeout(tick, 1600);
-          return;
-        }
-        timeout = setTimeout(tick, 26);
-        return;
-      }
-      i -= 1;
-      setText(full.slice(0, Math.max(i, 0)));
-      if (i <= 0) {
-        setIndex((n) => (n + 1) % examples.length);
-        return;
-      }
-      timeout = setTimeout(tick, 14);
-    };
-
-    timeout = setTimeout(tick, 320);
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [enabled, examples, index]);
-
-  return {
-    text,
-    full: examples[index % examples.length] ?? "",
-  };
-}
+type ViewMode = "list" | "grid";
 
 export function StudioHome() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [theme, setTheme] = useState("");
-  const [authOpen, setAuthOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const userId = session?.user?.id;
-  const showRecents = status === "authenticated" && Boolean(userId);
+  const signedIn = status === "authenticated" && Boolean(userId);
+  const create = useStudioCreate();
 
+  const [projects, setProjects] = useState<ProjectListItem[]>([]);
+  const [templates, setTemplates] = useState<TemplateListItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState<ViewMode>("list");
+  const [templateCategory, setTemplateCategory] = useState<string>("all");
 
-  const canSubmit = Boolean(theme.trim()) && !submitting;
-  const showPlaceholder = !theme.trim();
-  const { text: placeholderText, full: placeholderFull } = useTypingPlaceholder(
-    PLACEHOLDER_PROMPTS,
-    showPlaceholder && !submitting,
-  );
+  const fetchProjects = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    try {
+      const res = await getUserProjects();
+      if (res.success) setProjects(res.projects);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
 
-  const acceptPlaceholder = () => {
-    if (!placeholderFull) return;
-    setTheme(placeholderFull);
+  useEffect(() => {
+    if (userId) void fetchProjects();
+    else {
+      setProjects([]);
+      setLoading(false);
+    }
+  }, [userId, fetchProjects]);
+
+  useEffect(() => {
+    const onChanged = () => {
+      if (userId) void fetchProjects();
+    };
+    window.addEventListener("core:projects-changed", onChanged);
+    window.addEventListener("studio:org-changed", onChanged);
+    return () => {
+      window.removeEventListener("core:projects-changed", onChanged);
+      window.removeEventListener("studio:org-changed", onChanged);
+    };
+  }, [userId, fetchProjects]);
+
+  useEffect(() => {
+    const onSidebarSearch = (event: Event) => {
+      const query = (event as CustomEvent<{ query?: string }>).detail?.query;
+      if (typeof query === "string") setSearch(query);
+    };
+    window.addEventListener("studio:sidebar-search", onSidebarSearch);
+    return () =>
+      window.removeEventListener("studio:sidebar-search", onSidebarSearch);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const res = await getTemplates();
+      if (cancelled) return;
+      if (res.success) setTemplates(res.templates);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set(templates.map((t) => t.category).filter(Boolean));
+    return ["all", ...Array.from(set)];
+  }, [templates]);
+
+  const startTemplates = useMemo(() => {
+    const filtered =
+      templateCategory === "all"
+        ? templates
+        : templates.filter((t) => t.category === templateCategory);
+    return filtered.slice(0, 8);
+  }, [templates, templateCategory]);
+
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return projects
+      .filter((p) => {
+        if (q && !(p.title || "Untitled").toLowerCase().includes(q)) {
+          return false;
+        }
+        return true;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
+  }, [projects, search]);
+
+  const openTemplate = (id: string) => {
+    if (status !== "authenticated") {
+      create.setAuthNeeded(true);
+      return;
+    }
+    router.push(`/studio/editor?template=${id}`);
   };
 
-  const requireAuth = () => {
-    if (status === "authenticated") return true;
-    setAuthOpen(true);
-    return false;
-  };
-
-  const goEditor = () => {
-    if (!requireAuth()) return;
-    stashStudioIntent({ type: "new" });
-    router.push("/studio/editor");
-  };
-
-  const submitPrompt = () => {
-    const trimmed = theme.trim();
-    if (!trimmed || submitting) return;
-    if (!requireAuth()) return;
-    setSubmitting(true);
-    stashStudioIntent({ type: "generate", theme: trimmed, slides: 5 });
-    router.push("/studio/editor");
-  };
-
+  const categoryLabel =
+    templateCategory === "all"
+      ? "Carousel templates"
+      : `Templates for ${templateCategory}`;
 
   return (
-    <div
-      className={cn(
-        "h-screen bg-background px-6 text-foreground sm:px-8 overflow-y-auto",
-        showRecents
-          ? "flex flex-col"
-          : "flex items-center justify-center",
-      )}
-    >
-      <div
-        className={cn(
-          "mx-auto flex w-full flex-col items-center justify-center",
-          showRecents
-            ? "max-w-[1200px] py-10 mt-20"
-            : "max-w-[7500px] py-10",
-        )}
-      >
-        <motion.div
-          className="flex flex-col items-center text-center"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <h1 className="text-3xl font-bold tracking-normal text-foreground">
-            Привет, {"Stas"}
-            <span className="ml-2.5 inline-flex items-center justify-center align-middle">
-              <LogoAnimated width={36} height={36} href="/studio" />
-            </span>
-          </h1>
-          <p className="mt-2 text-base font-normal tracking-normal text-muted-foreground">
-            Один запрос. Много слайдов. Готовы к публикации.
-          </p>
-        </motion.div>
+    <StudioContent>
+      <StudioContentBody className="pt-4 sm:pt-6">
+        <div className="mb-8">
+          <StudioGreeting name={session?.user?.name || session?.user?.email} />
+        </div>
 
-        <motion.div
-          className="mt-8 w-full max-w-[750px]"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <PromptInput
-            value={theme}
-            onValueChange={setTheme}
-            onSubmit={submitPrompt}
-            isLoading={submitting}
-            maxHeight={250}
-            className="w-full rounded-[28px] border border-border dark:bg-muted/50 px-4 pb-3 pt-4 shadow-none"
-          >
-            <div className="relative bg-transparent text-left">
-              <PromptInputTextarea
-                placeholder=""
-                aria-label="Carousel prompt"
-                className="min-h-[44px] bg-transparent px-1 py-0 text-base leading-relaxed text-foreground dark:bg-transparent"
-                onKeyDown={(e) => {
-                  if (e.key === "Tab" && showPlaceholder) {
-                    e.preventDefault();
-                    acceptPlaceholder();
-                  }
-                }}
-              />
-              {showPlaceholder ? (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-x-1 top-0 py-0 text-left text-base leading-relaxed text-muted-foreground/55"
-                >
-                  {placeholderText}
-                  <span className="ml-px inline-block h-[1.05em] w-px translate-y-[0.12em] bg-muted-foreground/45 align-middle" />
-                </div>
-              ) : null}
+
+          
+
+        <section>
+          <StudioSectionHeader
+            title="Jump back to recents"
+            trailing={
+              signedIn ? (
+                <StudioViewToggle view={view} onChange={setView} />
+              ) : null
+            }
+          />
+
+          {!signedIn ? (
+            <div className="max-w-md py-6">
+              <p className="text-[14px] leading-relaxed text-neutral-500 dark:text-muted-foreground">
+                Sign in to keep your carousels and jump back into drafts.
+              </p>
+              <button
+                type="button"
+                className="mt-3 text-[13px] font-medium text-neutral-950 underline-offset-4 hover:underline dark:text-foreground"
+                onClick={() => create.setAuthNeeded(true)}
+              >
+                Sign in
+              </button>
             </div>
-            <PromptInputActions className="mt-2 h-9 items-center justify-between px-0">
-              <div className="flex h-9 items-center gap-0.5">
-                <PromptInputAction tooltip="New blank project">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className={actionBtn}
-                    onClick={goEditor}
-                  >
-                    <PlusIcon className="size-4" />
-                  </Button>
-                </PromptInputAction>
-                <PromptInputAction tooltip="Open templates">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className={actionBtn}
-                    onClick={() => router.push("/studio/templates")}
-                  >
-                    <BookOpenIcon className="size-4" />
-                  </Button>
-                </PromptInputAction>
-              </div>
-              <div className="flex h-9 items-center gap-0.5">
-                <PromptInputAction tooltip="Use suggested prompt (Tab)">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className={actionBtn}
-                    onClick={acceptPlaceholder}
-                    disabled={!showPlaceholder}
-                  >
-                    <LightbulbIcon className="size-4" />
-                  </Button>
-                </PromptInputAction>
-                <PromptInputAction tooltip="Generate carousel">
-                  <Button
-                    type="button"
-                    size="icon"
-                    className={cn(
-                      "size-9 shrink-0 rounded-full transition-colors",
-                      canSubmit
-                        ? "bg-primary text-white hover:bg-primary/90"
-                        : "bg-primary text-white hover:bg-primary/90",
-                    )}
-                    disabled={!canSubmit}
-                    onClick={submitPrompt}
-                    aria-label="Generate carousel"
-                  >
-                    {submitting ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <ArrowUpIcon className="size-4" />
-                    )}
-                  </Button>
-                </PromptInputAction>
-              </div>
-            </PromptInputActions>
-          </PromptInput>
+          ) : loading && projects.length === 0 ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="size-4 animate-spin text-neutral-400" />
+            </div>
+          ) : visible.length === 0 ? (
+            <p className="py-8 text-[13px] text-neutral-500 dark:text-muted-foreground">
+              {search.trim()
+                ? "Nothing found."
+                : "No carousels yet — create one above."}
+            </p>
+          ) : view === "list" ? (
+            <div className="overflow-x-auto">
+              <StudioProjectList
+                projects={visible.slice(0, 12)}
+                onOpen={(id) =>
+                  router.push(`/studio/editor?project=${id}`)
+                }
+                onChanged={fetchProjects}
+              />
+            </div>
+          ) : (
+            <StudioBoardGrid>
+              {visible.slice(0, 12).map((project) => (
+                <StudioProjectCard
+                  key={project.id}
+                  project={project}
+                  onOpen={() =>
+                    router.push(`/studio/editor?project=${project.id}`)
+                  }
+                  onChanged={fetchProjects}
+                />
+              ))}
+            </StudioBoardGrid>
+          )}
+        </section>
+      </StudioContentBody>
 
-          <motion.div
-            className="mt-5 flex flex-wrap items-center justify-center gap-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.12, duration: 0.3 }}
-          >
-            {PROMPT_SUGGESTIONS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <PromptSuggestion
-                  key={item.label}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setTheme(item.seed)}
-                  className="h-9 gap-1.5 rounded-full border-border bg-transparent px-3.5 text-sm font-medium text-foreground shadow-none hover:bg-muted"
-                >
-                  <Icon className="size-3.5 text-muted-foreground" />
-                  {item.label}
-                </PromptSuggestion>
-              );
-            })}
-          </motion.div>
-        </motion.div>
+      <StudioGenerateDialog
+        open={create.generateOpen}
+        onOpenChange={(open) => {
+          if (!open) create.closeGenerate();
+          else create.setGenerateOpen(true);
+        }}
+        theme={create.theme}
+        onThemeChange={create.setTheme}
+        submitting={create.submitting}
+        onSubmit={create.submitGenerate}
+      />
 
-        {showRecents ? (
-          <motion.div
-            className="mt-10 w-full"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.14, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <StudioRecentProjects userId={userId} />
-          </motion.div>
-        ) : null}
-      </div>
-
-      <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
-    </div>
+      <AuthModal
+        isOpen={create.authNeeded}
+        onOpenChange={(open) => {
+          if (!open) create.setAuthNeeded(false);
+        }}
+      />
+    </StudioContent>
   );
 }

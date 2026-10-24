@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/lib/generated/prisma/client";
 
+import { ensureUserOrganization } from "@/actions/organizations";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { prisma } from "@/lib/prisma";
 import {
@@ -24,6 +25,7 @@ export interface ProjectListItem {
   createdAt: string;
   previewUrl: string | null;
   authorName: string | null;
+  folderId: string | null;
 }
 
 export interface ProjectDetail {
@@ -113,15 +115,22 @@ function projectSnapshot(
   };
 }
 
-export async function getUserProjects(): Promise<
-  ActionResult<{ projects: ProjectListItem[] }>
-> {
+export async function getUserProjects(options?: {
+  folderId?: string | null;
+}): Promise<ActionResult<{ projects: ProjectListItem[] }>> {
   try {
     const userId = await requireUserId();
     if (!userId) return { success: false, error: "Sign in" };
 
+    const org = await ensureUserOrganization();
+    const organizationId = org.success ? org.organization.id : null;
+
     const rawProjects = await prisma.project.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...(organizationId ? { organizationId } : {}),
+        ...(options?.folderId ? { folderId: options.folderId } : {}),
+      },
       orderBy: { updatedAt: "desc" },
       include: {
         user: { select: { name: true, email: true } },
@@ -145,6 +154,7 @@ export async function getUserProjects(): Promise<
       createdAt: p.createdAt.toISOString(),
       previewUrl: p.slides[0]?.thumbnail || p.thumbnail || null,
       authorName: p.user.name || p.user.email,
+      folderId: p.folderId,
     }));
 
     return { success: true, projects };
@@ -162,6 +172,9 @@ export async function createProject(input?: {
     const userId = await requireUserId();
     if (!userId) return { success: false, error: "Sign in" };
 
+    const org = await ensureUserOrganization();
+    const organizationId = org.success ? org.organization.id : null;
+
     const aspectRatio = input?.aspectRatio ?? "4:5";
     const dims = CANVAS_RATIOS[aspectRatio] ?? CANVAS_RATIOS["4:5"];
     const title = input?.title?.trim() || "Untitled Carousel";
@@ -169,6 +182,7 @@ export async function createProject(input?: {
     const project = await prisma.project.create({
       data: {
         userId,
+        organizationId: organizationId ?? undefined,
         title,
         aspectRatio,
         width: dims.width,
