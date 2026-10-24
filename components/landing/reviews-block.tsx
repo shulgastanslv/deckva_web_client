@@ -105,7 +105,7 @@ const PINS = [
     name: "theshulya",
     time: "1w",
     views: "154K",
-    comment: "Free export. The views match what I saw on the canvas.",
+    comment: "Clean export. The views match what I saw on the canvas.",
     aspect: "aspect-[3/4]",
   },
 ] as const;
@@ -126,7 +126,7 @@ export function ReviewsBlock() {
       <ul className="columns-1 gap-3 min-[480px]:columns-2 lg:columns-3">
         {visible.map((pin, index) => (
           <li key={index} className="mb-3 break-inside-avoid">
-            <article className="overflow-hidden rounded-2xl bg-white">
+            <article className="overflow-hidden rounded-2xl bg-land-card">
               <div className="p-2.5">
                 <div className="flex items-center gap-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}

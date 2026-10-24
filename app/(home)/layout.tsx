@@ -6,14 +6,18 @@ const manrope = Manrope({
   variable: "--font-landing",
 });
 
-
 export const metadata: Metadata = {
   title: "Swibp | Carousel Generator",
   description: "Swibp | Carousel Generator by swibp",
-  keywords: ["carousel", "generator", "swibp", "carousel generator", "carousel generator by swibp"],
+  keywords: [
+    "carousel",
+    "generator",
+    "swibp",
+    "carousel generator",
+    "carousel generator by swibp",
+  ],
   authors: [{ name: "Swibp", url: "https://swibp.io" }],
 };
-
 
 export default function MarketingLayout({
   children,
@@ -22,7 +26,6 @@ export default function MarketingLayout({
 }) {
   return (
     <div
-      data-theme="light"
       className={`${manrope.className} min-h-full bg-land-mist text-land-ink`}
     >
       {children}

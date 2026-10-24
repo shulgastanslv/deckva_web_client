@@ -62,7 +62,7 @@ export function PhoneFrame({
   return (
     <div
       className={cn(
-        "relative mx-auto h-[520px] w-[260px] overflow-hidden rounded-[2.75rem] border-[7px] border-land-ink bg-land-ink shadow-2xl sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px]",
+        "relative mx-auto h-[520px] w-[260px] overflow-hidden rounded-[2.75rem] border-[7px] border-land-panel bg-land-panel shadow-2xl sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px]",
         "before:pointer-events-none before:absolute before:left-0 before:top-0 before:z-20 before:h-full before:w-full before:bg-gradient-to-tr before:from-white/5 before:to-transparent",
         "after:absolute after:-left-[10px] after:top-24 after:h-12 after:w-1 after:rounded-l-md after:bg-neutral-800",
         className

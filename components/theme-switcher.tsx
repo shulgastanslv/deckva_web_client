@@ -15,7 +15,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
     setMounted(true);
   }, []);
 
-  const dark = mounted && resolvedTheme === "dark";
+  const dark = resolvedTheme === "dark";
 
   return (
     <Button
@@ -30,7 +30,13 @@ export function ThemeSwitcher({ className }: { className?: string }) {
       aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
       onClick={() => setTheme(dark ? "light" : "dark")}
     >
-      {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      {!mounted ? (
+        <Moon className="size-4 opacity-0" />
+      ) : dark ? (
+        <Sun className="size-4" />
+      ) : (
+        <Moon className="size-4" />
+      )}
     </Button>
   );
 }

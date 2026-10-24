@@ -48,7 +48,7 @@ export function SlideMarquee() {
         text="Covers, middles, endings — the same rhythm you ship to the feed."
       />
 
-      <LandingLayer className="bg-white py-5 ring-1 ring-land-ink/5 sm:py-6">
+      <LandingLayer className="bg-land-card py-5 ring-1 ring-land-ink/5 sm:py-6">
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent sm:w-16" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent sm:w-16" />
 

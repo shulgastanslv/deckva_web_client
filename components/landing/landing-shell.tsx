@@ -40,17 +40,17 @@ export function LandingHead({
     <div className="mb-8 max-w-2xl sm:mb-10">
       {eyebrow ? (
         <p
-        className={cn(
-          "text-lg font-bold tracking-wide",
-          light ? "text-white/70" : "text-land-blue"
-        )}
-      >
-        {eyebrow}
+          className={cn(
+            "text-xl font-bold tracking-wide",
+            light ? "text-white/70" : "text-land-blue"
+          )}
+        >
+          {eyebrow}
         </p>
       ) : null}
       <h2
         className={cn(
-          "mt-2 text-4xl font-extrabold tracking-tight",
+          "mt-2 text-5xl font-extrabold tracking-tight sm:text-6xl",
           light ? "text-white" : "text-land-ink"
         )}
       >
@@ -59,7 +59,7 @@ export function LandingHead({
       {text ? (
         <p
           className={cn(
-            "mt-3 text-lg leading-relaxed",
+            "mt-4 text-xl leading-relaxed",
             light ? "text-white/75" : "text-land-ink/55"
           )}
         >

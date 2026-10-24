@@ -50,10 +50,12 @@
     --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
     --animate-marquee: marquee 32s linear infinite;
 
-    /* Landing — three colors only */
-    --color-land-ink: #14151c;
+    /* Landing — theme-aware surfaces */
+    --color-land-ink: var(--land-ink);
     --color-land-blue: #2f5bff;
-    --color-land-mist: #e8ecf7;
+    --color-land-mist: var(--land-mist);
+    --color-land-card: var(--land-card);
+    --color-land-panel: #14151c;
 
     @keyframes scroll {
         to {
@@ -86,6 +88,10 @@
    LIGHT THEME (Сланцево-синяя гармония)
    ========================================= */
 :root {
+    --land-ink: #14151c;
+    --land-mist: #e8ecf7;
+    --land-card: #ffffff;
+
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0.005 270); /* Легкий синий подтон в черном */
 
@@ -132,6 +138,10 @@
 }
 
 .dark {
+    --land-ink: #eef0f6;
+    --land-mist: #12131a;
+    --land-card: #1c1d26;
+
     --background: #101010;
     --foreground: #ffffff;
 

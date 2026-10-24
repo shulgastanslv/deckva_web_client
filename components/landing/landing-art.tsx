@@ -1,10 +1,17 @@
-/** Illustrations use only ink / blue / mist (+ white). */
+/** Soft periwinkle / teal / peach accents — tuned to BLUE. */
 
 const INK = "#14151c";
 const BLUE = "#2f5bff";
-const MIST = "#e8ecf7";
 const WHITE = "#fff";
-const BLUE_SOFT = "#c9d4ff";
+/** Cool lilac → periwinkle, sits next to BLUE on the wheel. */
+const LILAC = "#9aaef5";
+const LILAC_SOFT = "#e6ebff";
+/** Soft teal — cooler than sage, bridges blue → green without clashing. */
+const SAGE = "#6fb8b0";
+const SAGE_SOFT = "#dff3f0";
+/** Warm peach — complementary accent against electric blue. */
+const PINK = "#f0a08a";
+const PINK_SOFT = "#fceae3";
 
 export function FreeArt() {
   return (
@@ -89,16 +96,53 @@ export function FeedArt() {
 
 export function StudioArt() {
   return (
-    <svg width="277" height="188" viewBox="0 0 277 188" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M244.024 0H32.9762C14.7639 0 0 14.7667 0 32.9825V155.018C0 173.233 14.7639 188 32.9762 188H244.024C262.236 188 277 173.233 277 155.018V32.9825C277 14.7667 262.236 0 244.024 0Z" fill="white" />
-      <rect x="34.625" y="16.4912" width="207.75" height="155.018" rx="25" fill="#E8ECF7" />
-      <rect x="79.1428" y="49.4736" width="117.065" height="24.7368" rx="12.3684" fill="black" />
-      <rect x="118.714" y="80.8071" width="77.494" height="24.7368" rx="12.3684" fill="#2F5BFF" />
-      <rect x="79.1428" y="112.14" width="69.25" height="24.7368" rx="12.3684" fill="#1E1E1E" />
-      <path d="M259.001 108.082C266.718 103.931 270.577 101.856 271.553 99.3575C272.4 97.1897 272.162 94.7475 270.912 92.7843C269.471 90.522 265.284 89.232 256.91 86.652L225.259 76.9004C218.193 74.7235 214.66 73.6351 212.324 74.5175C210.291 75.2856 208.706 76.9212 208.002 78.9782C207.193 81.3413 208.391 84.8391 210.787 91.8346L221.401 122.822C224.348 131.427 225.822 135.729 228.172 137.097C230.211 138.283 232.697 138.41 234.845 137.437C237.323 136.316 239.226 132.185 243.034 123.925L245.847 117.822C246.452 116.507 246.755 115.85 247.17 115.276C247.538 114.766 247.971 114.307 248.456 113.908C249.004 113.458 249.641 113.116 250.916 112.43L259.001 108.082Z" fill="#2F5BFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke="white" />
+    <svg
+      viewBox="0 0 320 200"
+      width="320"
+      height="200"
+      className="h-auto w-full max-w-[320px]"
+      fill="none"
+      aria-hidden
+    >
+      <circle cx="168" cy="100" r="88" fill={SAGE_SOFT} />
+
+      {/* Slide filmstrip */}
+      <rect x="28" y="36" width="36" height="128" rx="10" fill={WHITE} />
+      <rect x="34" y="46" width="24" height="28" rx="6" fill={PINK} />
+      <rect x="34" y="82" width="24" height="28" rx="6" fill={LILAC} />
+      <rect x="34" y="118" width="24" height="28" rx="6" fill={SAGE} />
+
+      {/* Canvas */}
+      <rect x="80" y="28" width="148" height="144" rx="18" fill={WHITE} />
+      <rect x="96" y="48" width="88" height="10" rx="5" fill={INK} />
+      <rect x="96" y="66" width="56" height="7" rx="3.5" fill={PINK_SOFT} />
+      <rect x="96" y="88" width="116" height="52" rx="12" fill={BLUE} />
+      <rect x="112" y="106" width="48" height="6" rx="3" fill={WHITE} />
+      <rect x="112" y="118" width="32" height="5" rx="2.5" fill={LILAC_SOFT} />
+
+      {/* Selection handles */}
+      <rect
+        x="90"
+        y="82"
+        width="128"
+        height="64"
+        rx="14"
+        fill="none"
+        stroke={PINK}
+        strokeWidth="2"
+      />
+      <rect x="86" y="78" width="8" height="8" rx="2" fill={WHITE} stroke={PINK} strokeWidth="2" />
+      <rect x="214" y="78" width="8" height="8" rx="2" fill={WHITE} stroke={PINK} strokeWidth="2" />
+      <rect x="86" y="142" width="8" height="8" rx="2" fill={WHITE} stroke={PINK} strokeWidth="2" />
+      <rect x="214" y="142" width="8" height="8" rx="2" fill={WHITE} stroke={PINK} strokeWidth="2" />
+
+      {/* Inspector */}
+      <rect x="244" y="44" width="52" height="112" rx="12" fill={WHITE} />
+      <rect x="254" y="58" width="32" height="6" rx="3" fill={INK} />
+      <rect x="254" y="74" width="32" height="18" rx="6" fill={PINK_SOFT} />
+      <rect x="254" y="100" width="32" height="18" rx="6" fill={SAGE_SOFT} />
+      <rect x="254" y="126" width="20" height="6" rx="3" fill={LILAC} />
     </svg>
-
-
   );
 }
 
@@ -139,234 +183,114 @@ export function CarouselEditorArt() {
 
 export function IconsArt() {
   return (
-    <div className={`relative mx-auto flex items-center justify-center p-4`}>
-      <svg
-        viewBox="0 0 520 340"
-        width="100%"
-        height="100%"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="drop-shadow-xl"
-      >
-        <defs>
-          {/* Мягкое свечение на фоне */}
-          <radialGradient
-            id="bgGlow"
-            cx="50%"
-            cy="50%"
-            r="50%"
-            fx="50%"
-            fy="50%"
-          >
-            <stop offset="0%" stopColor="#e8ecf7" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#e8ecf7" stopOpacity="0" />
-          </radialGradient>
+    <svg
+      viewBox="0 0 280 140"
+      className="mt-6 h-auto w-full max-w-sm"
+      fill="none"
+      aria-hidden
+    >
+      {/* Heart */}
+      <rect x="16" y="28" width="72" height="72" rx="18" fill={PINK_SOFT} />
+      <path
+        d="M52 76s-16-10-16-20c0-5 4-9 9-9 3.5 0 6 2 7 4 1-2 3.5-4 7-4 5 0 9 4 9 9 0 10-16 20-16 20Z"
+        fill={PINK}
+      />
 
-          {/* Тень для плавающей активной иконки */}
-          <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%" filterUnits="userSpaceOnUse">
-            <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#14151c" floodOpacity="0.12" />
-          </filter>
-        </defs>
+      {/* Star */}
+      <rect x="104" y="28" width="72" height="72" rx="18" fill={LILAC_SOFT} />
+      <path
+        d="M140 44l6.5 13 14.5 2-10.5 10 2.5 14.5-13-7-13 7 2.5-14.5-10.5-10 14.5-2L140 44Z"
+        fill={LILAC}
+      />
 
-        {/* Фоновый круг мягкого свечения */}
-        <circle cx="260" cy="170" r="160" fill="url(#bgGlow)" />
-
-        {/* --- ОСНОВНАЯ КАРТОЧКА-ПАНЕЛЬ ИКОНОК --- */}
-        <g filter="url(#cardShadow)">
-          <rect x="70" y="55" width="380" height="250" rx="20" fill="#ffffff" stroke="#e8ecf7" strokeWidth="2" />
-        </g>
-
-        {/* --- ПОИСКОВАЯ СТРОКА (Search Bar) --- */}
-        <g>
-          <rect x="94" y="94" width="332" height="36" rx="10" fill="#e8ecf7" />
-          {/* Лупа (Search Icon) */}
-          <circle cx="114" cy="112" r="5.5" stroke="#14151c" strokeWidth="1.8" opacity="0.4" fill="none" />
-          <path d="M118 116L124 122" stroke="#14151c" strokeWidth="1.8" strokeLinecap="round" opacity="0.4" />
-          
-          {/* Текст поиска 'Search icons...' */}
-          <text x="134" y="116" fontFamily="system-ui, sans-serif" fontSize="11" fontWeight="500" fill="#14151c" opacity="0.4">
-            Search icons...
-          </text>
-
-          {/* Тег категории/фильтра справа */}
-          <rect x="362" y="100" width="52" height="24" rx="6" fill="#ffffff" />
-          <text x="388" y="116" textAnchor="middle" fontFamily="system-ui, sans-serif" fontSize="10" fontWeight="600" fill="#2f5bff">
-            Vector
-          </text>
-        </g>
-
-        {/* --- СЕТКА ИКОНОК (Grid of Icon Badges) --- */}
-
-        {/* 1. Sparkle (Искорка) */}
-        <g transform="translate(94, 146)">
-          <rect width="64" height="64" rx="12" fill="#e8ecf7" />
-          <path d="M32 20C32 26.6 37.4 32 44 32C37.4 32 32 37.4 32 44C32 37.4 26.6 32 20 32C26.6 32 32 26.6 32 20Z" fill="#14151c" />
-        </g>
-
-        {/* 2. Heart (Сердце) */}
-        <g transform="translate(178, 146)">
-          <rect width="64" height="64" rx="12" fill="#e8ecf7" />
-          <path d="M32 41.5S20 33 20 25.5C20 22 22.5 19.5 26 19.5C28.5 19.5 30.5 21 32 22.5C33.5 21 35.5 19.5 38 19.5C41.5 19.5 44 22 44 25.5C44 33 32 41.5 32 41.5Z" fill="#c9d4ff" />
-        </g>
-
-        {/* 3. Layers (Слои) */}
-        <g transform="translate(262, 146)">
-          <rect width="64" height="64" rx="12" fill="#e8ecf7" />
-          <path d="M32 20L43 25.5L32 31L21 25.5L32 20Z" fill="#14151c" />
-          <path d="M21 30.5L32 36L43 30.5" stroke="#14151c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M21 35.5L32 41L43 35.5" stroke="#14151c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </g>
-
-        {/* 4. Shapes / Geometry (Геометрия) */}
-        <g transform="translate(346, 146)">
-          <rect width="64" height="64" rx="12" fill="#e8ecf7" />
-          <circle cx="28" cy="28" r="7" fill="#c9d4ff" />
-          <rect x="30" y="30" width="12" height="12" rx="3" fill="#14151c" />
-        </g>
-
-        {/* 5. Sticker / Smile (Смайлик) */}
-        <g transform="translate(94, 226)">
-          <rect width="64" height="64" rx="12" fill="#e8ecf7" />
-          <circle cx="32" cy="32" r="12" fill="none" stroke="#14151c" strokeWidth="2" />
-          <circle cx="28" cy="29" r="1.5" fill="#14151c" />
-          <circle cx="36" cy="29" r="1.5" fill="#14151c" />
-          <path d="M27 36C28.5 38 30.5 39 32 39C33.5 39 35.5 38 37 36" stroke="#14151c" strokeWidth="1.8" strokeLinecap="round" />
-        </g>
-
-        {/* 6. Active Selected Star Icon (Выбранная звездочка с узлами редактирования) */}
-        <g transform="translate(178, 226)">
-          <rect width="64" height="64" rx="12" fill="#2f5bff" />
-          {/* Иконка звезды */}
-          <path
-            d="M32 20L35.5 27L43 28L37.5 33.5L39 41L32 37.5L25 41L26.5 33.5L21 28L28.5 27L32 20Z"
-            fill="#ffffff"
-          />
-        </g>
-
-        {/* 7. Magic Wand (Волшебная палочка) */}
-        <g transform="translate(262, 226)">
-          <rect width="64" height="64" rx="12" fill="#e8ecf7" />
-          <path d="M23 41L35 29" stroke="#14151c" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M35 23V19M35 23H39M35 23L38 20" stroke="#c9d4ff" strokeWidth="1.8" strokeLinecap="round" />
-          <circle cx="23" cy="23" r="2" fill="#14151c" />
-        </g>
-
-        {/* 8. Crown / Quality Badge */}
-        <g transform="translate(346, 226)">
-          <rect width="64" height="64" rx="12" fill="#e8ecf7" />
-          <path d="M22 39L20 25L26 29L32 22L38 29L44 25L42 39H22Z" fill="#c9d4ff" />
-        </g>
-
-
-        {/* --- УЗЛЫ ВЕКТОРНОГО РЕДАКТИРОВАНИЯ И РАМКА ВЫДЕЛЕНИЯ --- */}
-        {/* Пунктирная рамка вокруг активной иконки (Звезда) */}
-        <rect
-          x="172"
-          y="220"
-          width="76"
-          height="76"
-          rx="16"
-          fill="none"
-          stroke="#2f5bff"
-          strokeWidth="2"
-          strokeDasharray="4 4"
-        />
-        {/* Векторные опорные точки (Bounding Box Handles) */}
-        <rect x="169" y="217" width="6" height="6" rx="1" fill="#ffffff" stroke="#2f5bff" strokeWidth="2" />
-        <rect x="241" y="217" width="6" height="6" rx="1" fill="#ffffff" stroke="#2f5bff" strokeWidth="2" />
-        <rect x="169" y="289" width="6" height="6" rx="1" fill="#ffffff" stroke="#2f5bff" strokeWidth="2" />
-        <rect x="241" y="289" width="6" height="6" rx="1" fill="#ffffff" stroke="#2f5bff" strokeWidth="2" />
-
-        {/* Линия связи / направляющая от узелка */}
-        <path d="M244 220L276 192" stroke="#2f5bff" strokeWidth="1.5" strokeDasharray="3 3" />
-        <circle cx="276" cy="192" r="3" fill="#2f5bff" />
-
-
-        {/* --- ПЛАВАЮЩИЙ ИНТЕРАКТИВНЫЙ КУРСОР --- */}
-        <g transform="translate(232, 270)">
-          {/* Стрелка курсора */}
-          <path
-            d="M0 0L0 28L8.5 20L17 31L22 28.5L13.5 17.5L23 15.5L0 0Z"
-            fill="#14151c"
-            stroke="#ffffff"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          {/* Бейдж размера/координат около курсора */}
-          <g transform="translate(24, 18)">
-            <rect width="48" height="20" rx="6" fill="#14151c" />
-            <text x="24" y="13" textAnchor="middle" fontFamily="system-ui, sans-serif" fontSize="9" fontWeight="700" fill="#ffffff">
-              64 × 64
-            </text>
-          </g>
-        </g>
-      </svg>
-    </div>
+      {/* Smiley */}
+      <rect x="192" y="28" width="72" height="72" rx="18" fill={SAGE_SOFT} />
+      <circle cx="214" cy="54" r="4" fill={INK} />
+      <circle cx="242" cy="54" r="4" fill={INK} />
+      <path
+        d="M214 72c6 10 22 10 28 0"
+        stroke={INK}
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
 export function TemplatesArt() {
   return (
-    <svg viewBox="0 0 320 200" className="mt-4 h-auto w-full" aria-hidden>
-      {/* Back template */}
-      <g transform="rotate(-10 88 108)">
-        <rect x="28" y="36" width="100" height="132" rx="18" fill={WHITE} />
-        <rect x="44" y="52" width="56" height="8" rx="4" fill={BLUE_SOFT} />
-        <rect x="44" y="68" width="68" height="42" rx="10" fill={MIST} />
-        <rect x="44" y="122" width="40" height="6" rx="3" fill={MIST} />
-        <rect x="44" y="136" width="28" height="6" rx="3" fill={MIST} />
+    <svg
+      viewBox="0 0 280 160"
+      className="mt-6 h-auto w-full max-w-sm"
+      fill="none"
+      aria-hidden
+    >
+      <circle cx="148" cy="84" r="72" fill={PINK_SOFT} />
+
+      {/* Back slide */}
+      <g transform="translate(36 44) rotate(-8)">
+        <rect width="88" height="112" rx="16" fill={WHITE} />
+        <rect x="14" y="18" width="48" height="7" rx="3.5" fill={LILAC} />
+        <rect x="14" y="34" width="60" height="36" rx="10" fill={SAGE_SOFT} />
+        <rect x="14" y="82" width="36" height="6" rx="3" fill={PINK_SOFT} />
       </g>
 
-      {/* Middle template */}
-      <g transform="rotate(7 248 112)">
-        <rect x="196" y="32" width="100" height="132" rx="18" fill={WHITE} />
-        <rect x="212" y="48" width="52" height="8" rx="4" fill={INK} />
-        <rect x="212" y="64" width="68" height="48" rx="10" fill={MIST} />
-        <circle cx="246" cy="140" r="10" fill={BLUE_SOFT} />
+      {/* Front cover */}
+      <g transform="translate(96 24)">
+        <rect width="96" height="124" rx="18" fill={WHITE} />
+        <rect x="16" y="22" width="52" height="9" rx="4.5" fill={INK} />
+        <rect x="16" y="38" width="36" height="6" rx="3" fill={PINK_SOFT} />
+        <rect x="16" y="56" width="64" height="44" rx="12" fill={PINK} />
+        <rect x="28" y="72" width="28" height="5" rx="2.5" fill={WHITE} />
+        <circle cx="28" cy="116" r="3.5" fill={PINK} />
+        <circle cx="40" cy="116" r="3.5" fill={LILAC} />
+        <circle cx="52" cy="116" r="3.5" fill={SAGE} />
       </g>
 
-      {/* Front cover template */}
-      <rect x="110" y="24" width="108" height="144" rx="20" fill={WHITE} />
-      <rect x="126" y="42" width="60" height="10" rx="5" fill={INK} />
-      <rect x="126" y="60" width="40" height="6" rx="3" fill={MIST} />
-      <rect x="126" y="80" width="76" height="52" rx="12" fill={BLUE} />
-      <rect x="140" y="96" width="32" height="6" rx="3" fill={WHITE} />
-      <rect x="140" y="110" width="22" height="5" rx="2.5" fill={BLUE_SOFT} />
-      <circle cx="140" cy="150" r="3.5" fill={BLUE} />
-      <circle cx="154" cy="150" r="3.5" fill={MIST} />
-      <circle cx="168" cy="150" r="3.5" fill={MIST} />
+      {/* End slide peek */}
+      <g transform="translate(188 48) rotate(7)">
+        <rect width="72" height="100" rx="14" fill={WHITE} />
+        <rect x="12" y="16" width="40" height="6" rx="3" fill={INK} />
+        <rect x="12" y="30" width="48" height="28" rx="8" fill={LILAC_SOFT} />
+        <circle cx="36" cy="78" r="10" fill={SAGE} />
+      </g>
     </svg>
   );
 }
 
 export function FormatsArt() {
   return (
-    <svg width="520" height="220" viewBox="0 0 520 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g clip-path="url(#clip0_161_214)">
-        <path d="M146 40H44C36.268 40 30 46.268 30 54V110C30 117.732 36.268 124 44 124H146C153.732 124 160 117.732 160 110V54C160 46.268 153.732 40 146 40Z" fill="white" />
-        <path d="M138 54H52C47.5817 54 44 57.5817 44 62V102C44 106.418 47.5817 110 52 110H138C142.418 110 146 106.418 146 102V62C146 57.5817 142.418 54 138 54Z" fill="#E8ECF7" />
-        <path d="M90 64H58C55.7909 64 54 65.7909 54 68C54 70.2091 55.7909 72 58 72H90C92.2091 72 94 70.2091 94 68C94 65.7909 92.2091 64 90 64Z" fill="#14151C" />
-        <path d="M106 78H58C55.7909 78 54 79.7909 54 82V94C54 96.2091 55.7909 98 58 98H106C108.209 98 110 96.2091 110 94V82C110 79.7909 108.209 78 106 78Z" fill="#2F5BFF" />
-        <path d="M50.0271 191V160.112L42.7371 164.594V156.494L50.0271 152.12H57.5331V191H50.0271ZM81.3526 191.81C78.7786 191.81 76.4656 191.207 74.4136 190.001C72.3796 188.795 70.7686 187.121 69.5806 184.979C68.3926 182.819 67.7986 180.326 67.7986 177.5V166.214C67.7986 163.154 68.3926 160.517 69.5806 158.303C70.7686 156.071 72.4426 154.361 74.6026 153.173C76.7626 151.967 79.3006 151.364 82.2166 151.364C84.1066 151.364 85.9066 151.643 87.6166 152.201C89.3266 152.759 90.8926 153.704 92.3146 155.036L87.0766 160.274C86.4286 159.626 85.6816 159.122 84.8356 158.762C83.9896 158.402 83.1166 158.222 82.2166 158.222C80.8126 158.222 79.5886 158.555 78.5446 159.221C77.5186 159.869 76.7176 160.724 76.1416 161.786C75.5836 162.83 75.3046 163.946 75.3046 165.134V170.912L74.0626 169.562C75.1786 168.428 76.4656 167.564 77.9236 166.97C79.3996 166.358 80.9206 166.052 82.4866 166.052C84.9346 166.052 87.0856 166.601 88.9396 167.699C90.8116 168.797 92.2696 170.3 93.3136 172.208C94.3756 174.116 94.9066 176.294 94.9066 178.742C94.9066 181.19 94.2856 183.404 93.0436 185.384C91.8016 187.346 90.1546 188.912 88.1026 190.082C86.0506 191.234 83.8006 191.81 81.3526 191.81ZM81.3526 184.79C82.4686 184.79 83.4856 184.52 84.4036 183.98C85.3396 183.44 86.0776 182.711 86.6176 181.793C87.1756 180.875 87.4546 179.858 87.4546 178.742C87.4546 177.626 87.1846 176.609 86.6446 175.691C86.1046 174.755 85.3756 174.017 84.4576 173.477C83.5396 172.919 82.5226 172.64 81.4066 172.64C80.2906 172.64 79.2646 172.919 78.3286 173.477C77.4106 174.017 76.6726 174.755 76.1146 175.691C75.5746 176.609 75.3046 177.626 75.3046 178.742C75.3046 179.822 75.5746 180.821 76.1146 181.739C76.6546 182.657 77.3836 183.395 78.3016 183.953C79.2196 184.511 80.2366 184.79 81.3526 184.79ZM103.55 187.76V180.416H110.894V187.76H103.55ZM103.604 172.424V165.08H110.948V172.424H103.604ZM133.165 151.364C135.739 151.364 138.043 151.967 140.077 153.173C142.129 154.379 143.749 156.062 144.937 158.222C146.125 160.364 146.719 162.848 146.719 165.674V176.96C146.719 180.02 146.125 182.666 144.937 184.898C143.749 187.112 142.075 188.822 139.915 190.028C137.755 191.216 135.217 191.81 132.301 191.81C130.411 191.81 128.611 191.531 126.901 190.973C125.209 190.397 123.643 189.452 122.203 188.138L127.441 182.9C128.089 183.548 128.836 184.052 129.682 184.412C130.546 184.772 131.419 184.952 132.301 184.952C133.705 184.952 134.92 184.628 135.946 183.98C136.99 183.314 137.791 182.459 138.349 181.415C138.925 180.353 139.213 179.228 139.213 178.04V172.262L140.455 173.612C139.357 174.746 138.07 175.619 136.594 176.231C135.118 176.825 133.597 177.122 132.031 177.122C129.583 177.122 127.423 176.573 125.551 175.475C123.697 174.377 122.239 172.874 121.177 170.966C120.133 169.058 119.611 166.88 119.611 164.432C119.611 161.984 120.232 159.779 121.474 157.817C122.716 155.837 124.363 154.271 126.415 153.119C128.467 151.949 130.717 151.364 133.165 151.364ZM133.165 158.384C132.049 158.384 131.023 158.654 130.087 159.194C129.169 159.734 128.431 160.463 127.873 161.381C127.333 162.299 127.063 163.316 127.063 164.432C127.063 165.548 127.333 166.574 127.873 167.51C128.413 168.428 129.142 169.166 130.06 169.724C130.978 170.264 131.995 170.534 133.111 170.534C134.227 170.534 135.244 170.264 136.162 169.724C137.098 169.166 137.836 168.428 138.376 167.51C138.934 166.574 139.213 165.548 139.213 164.432C139.213 163.352 138.943 162.353 138.403 161.435C137.863 160.517 137.134 159.779 136.216 159.221C135.298 158.663 134.281 158.384 133.165 158.384Z" fill="white" />
-        <path d="M311 30H209C201.268 30 195 36.268 195 44V120C195 127.732 201.268 134 209 134H311C318.732 134 325 127.732 325 120V44C325 36.268 318.732 30 311 30Z" fill="white" stroke-width="2" stroke="white" />
-        <path d="M303 44H217C212.582 44 209 47.5817 209 52V108C209 112.418 212.582 116 217 116H303C307.418 116 311 112.418 311 108V52C311 47.5817 307.418 44 303 44Z" fill="#E8ECF7" />
-        <path d="M263 54H223C220.791 54 219 55.7909 219 58C219 60.2091 220.791 62 223 62H263C265.209 62 267 60.2091 267 58C267 55.7909 265.209 54 263 54Z" fill="#14151C" />
-        <path d="M283 68H225C221.686 68 219 70.6863 219 74V98C219 101.314 221.686 104 225 104H283C286.314 104 289 101.314 289 98V74C289 70.6863 286.314 68 283 68Z" fill="#2F5BFF" />
-        <path d="M237.888 199V192.952H220.986V186.094L233.244 160.12H241.668L229.41 186.094H237.888V176.374H245.34V186.094H248.796V192.952H245.34V199H237.888ZM257.449 195.76V188.416H264.793V195.76H257.449ZM257.503 180.424V173.08H264.847V180.424H257.503ZM285.93 199.702C283.986 199.702 282.132 199.315 280.368 198.541C278.604 197.749 277.065 196.642 275.751 195.22C274.455 193.798 273.528 192.124 272.97 190.198L280.098 188.308C280.476 189.73 281.214 190.837 282.312 191.629C283.428 192.403 284.634 192.79 285.93 192.79C287.046 192.79 288.063 192.52 288.981 191.98C289.917 191.44 290.655 190.711 291.195 189.793C291.753 188.875 292.032 187.858 292.032 186.742C292.032 185.068 291.456 183.637 290.304 182.449C289.17 181.243 287.712 180.64 285.93 180.64C285.39 180.64 284.868 180.721 284.364 180.883C283.86 181.027 283.374 181.234 282.906 181.504L279.612 175.726L291.978 165.466L292.518 167.032H274.482V160.12H298.782V167.032L289.17 176.32L289.116 174.268C291.348 174.61 293.229 175.393 294.759 176.617C296.307 177.823 297.477 179.317 298.269 181.099C299.079 182.863 299.484 184.744 299.484 186.742C299.484 189.19 298.863 191.395 297.621 193.357C296.379 195.301 294.732 196.849 292.68 198.001C290.628 199.135 288.378 199.702 285.93 199.702Z" fill="white" />
-        <path d="M476 20H374C366.268 20 360 26.268 360 34V130C360 137.732 366.268 144 374 144H476C483.732 144 490 137.732 490 130V34C490 26.268 483.732 20 476 20Z" fill="white" />
-        <path d="M468 34H382C377.582 34 374 37.5817 374 42V116C374 120.418 377.582 124 382 124H468C472.418 124 476 120.418 476 116V42C476 37.5817 472.418 34 468 34Z" fill="#E8ECF7" />
-        <path d="M420 44H388C385.791 44 384 45.7909 384 48C384 50.2091 385.791 52 388 52H420C422.209 52 424 50.2091 424 48C424 45.7909 422.209 44 420 44Z" fill="#14151C" />
-        <path d="M454 58H390C386.686 58 384 60.6863 384 64V104C384 107.314 386.686 110 390 110H454C457.314 110 460 107.314 460 104V64C460 60.6863 457.314 58 454 58Z" fill="#C9D4FF" />
-        <path d="M398.406 207.702C396.462 207.702 394.608 207.315 392.844 206.541C391.08 205.749 389.541 204.642 388.227 203.22C386.931 201.798 386.004 200.124 385.446 198.198L392.574 196.308C392.952 197.73 393.69 198.837 394.788 199.629C395.904 200.403 397.11 200.79 398.406 200.79C399.522 200.79 400.539 200.52 401.457 199.98C402.393 199.44 403.131 198.711 403.671 197.793C404.229 196.875 404.508 195.858 404.508 194.742C404.508 193.068 403.932 191.637 402.78 190.449C401.646 189.243 400.188 188.64 398.406 188.64C397.866 188.64 397.344 188.721 396.84 188.883C396.336 189.027 395.85 189.234 395.382 189.504L392.088 183.726L404.454 173.466L404.994 175.032H386.958V168.12H411.258V175.032L401.646 184.32L401.592 182.268C403.824 182.61 405.705 183.393 407.235 184.617C408.783 185.823 409.953 187.317 410.745 189.099C411.555 190.863 411.96 192.744 411.96 194.742C411.96 197.19 411.339 199.395 410.097 201.357C408.855 203.301 407.208 204.849 405.156 206.001C403.104 207.135 400.854 207.702 398.406 207.702ZM421.13 203.76V196.416H428.474V203.76H421.13ZM421.184 188.424V181.08H428.528V188.424H421.184ZM454.093 207V200.952H437.191V194.094L449.449 168.12H457.873L445.615 194.094H454.093V184.374H461.545V194.094H465.001V200.952H461.545V207H454.093Z" fill="white" />
-      </g>
-      <defs>
-        <clipPath id="clip0_161_214">
-          <rect width="520" height="220" fill="white" />
-        </clipPath>
-      </defs>
+    <svg
+      viewBox="0 0 420 180"
+      className="mt-6 h-auto w-full"
+      fill="none"
+      aria-hidden
+    >
+      {/* Story — tall */}
+      <rect x="24" y="16" width="72" height="128" rx="16" fill={WHITE} />
+      <rect x="36" y="32" width="48" height="8" rx="4" fill={INK} />
+      <rect x="36" y="48" width="48" height="64" rx="10" fill={PINK} />
+      <rect x="36" y="122" width="28" height="6" rx="3" fill={PINK_SOFT} />
+
+      {/* Post — portrait */}
+      <rect x="120" y="28" width="96" height="116" rx="18" fill={WHITE} />
+      <rect x="136" y="44" width="56" height="9" rx="4.5" fill={INK} />
+      <rect x="136" y="62" width="64" height="48" rx="12" fill={LILAC} />
+      <rect x="148" y="78" width="32" height="5" rx="2.5" fill={WHITE} />
+      <circle cx="148" cy="126" r="3.5" fill={PINK} />
+      <circle cx="160" cy="126" r="3.5" fill={LILAC} />
+      <circle cx="172" cy="126" r="3.5" fill={SAGE} />
+
+      {/* Square */}
+      <rect x="240" y="40" width="88" height="88" rx="16" fill={WHITE} />
+      <rect x="254" y="54" width="44" height="7" rx="3.5" fill={INK} />
+      <rect x="254" y="70" width="60" height="36" rx="10" fill={SAGE} />
+
+      {/* Wide */}
+      <rect x="348" y="56" width="56" height="56" rx="14" fill={WHITE} />
+      <rect x="358" y="68" width="36" height="6" rx="3" fill={INK} />
+      <rect x="358" y="82" width="36" height="18" rx="6" fill={PINK_SOFT} />
     </svg>
-
-
   );
 }
 
@@ -379,14 +303,14 @@ export function SavedArt() {
         width="120"
         height="86"
         rx="18"
-        fill={WHITE}
+        fill={PINK_SOFT}
         transform="rotate(-6 96 79)"
       />
       <rect x="92" y="22" width="120" height="86" rx="18" fill={WHITE} />
-      <rect x="108" y="40" width="48" height="28" rx="8" fill={MIST} />
-      <rect x="112" y="80" width="64" height="8" rx="4" fill={BLUE_SOFT} />
-      <rect x="112" y="94" width="40" height="6" rx="3" fill={MIST} />
-      <circle cx="214" cy="108" r="22" fill={INK} />
+      <rect x="108" y="40" width="48" height="28" rx="8" fill={SAGE_SOFT} />
+      <rect x="112" y="80" width="64" height="8" rx="4" fill={LILAC} />
+      <rect x="112" y="94" width="40" height="6" rx="3" fill={PINK_SOFT} />
+      <circle cx="214" cy="108" r="22" fill={SAGE} />
       <path
         d="M204 108l7 7 14-16"
         fill="none"
@@ -401,16 +325,138 @@ export function SavedArt() {
 
 export function CleanArt() {
   return (
-    <svg width="239" height="114" viewBox="0 0 239 114" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M80 0H20C8.9543 0 0 9.84974 0 22V92C0 104.15 8.9543 114 20 114H80C91.0457 114 100 104.15 100 92V22C100 9.84974 91.0457 0 80 0Z" fill="#E8ECF7" />
-      <path d="M76 20H24C21.2386 20 19 22.2386 19 25C19 27.7614 21.2386 30 24 30H76C78.7614 30 81 27.7614 81 25C81 22.2386 78.7614 20 76 20Z" fill="white" />
-      <path d="M68 36H32C29.7909 36 28 37.7909 28 40C28 42.2091 29.7909 44 32 44H68C70.2091 44 72 42.2091 72 40C72 37.7909 70.2091 36 68 36Z" fill="black" />
-      <path d="M50 96C59.9411 96 68 87.9411 68 78C68 68.0589 59.9411 60 50 60C40.0589 60 32 68.0589 32 78C32 87.9411 40.0589 96 50 96Z" fill="#2F5BFF" />
-      <path d="M50 70V86ZM42 78H58Z" fill="black" />
-      <path d="M50 70V86M42 78H58" stroke-width="3" stroke-linecap="round" stroke="white" />
-      <path d="M128.037 74V35.12H144.453C144.831 35.12 145.335 35.138 145.965 35.174C146.613 35.192 147.189 35.246 147.693 35.336C150.015 35.696 151.914 36.461 153.39 37.631C154.884 38.801 155.982 40.277 156.684 42.059C157.386 43.823 157.737 45.794 157.737 47.972C157.737 50.15 157.377 52.13 156.657 53.912C155.955 55.676 154.857 57.143 153.363 58.313C151.887 59.483 149.997 60.248 147.693 60.608C147.189 60.68 146.613 60.734 145.965 60.77C145.317 60.806 144.813 60.824 144.453 60.824H135.381V74H128.037ZM135.381 53.966H144.129C144.507 53.966 144.921 53.948 145.371 53.912C145.821 53.876 146.235 53.804 146.613 53.696C147.603 53.426 148.368 52.976 148.908 52.346C149.448 51.698 149.817 50.987 150.015 50.213C150.231 49.421 150.339 48.674 150.339 47.972C150.339 47.27 150.231 46.532 150.015 45.758C149.817 44.966 149.448 44.255 148.908 43.625C148.368 42.977 147.603 42.518 146.613 42.248C146.235 42.14 145.821 42.068 145.371 42.032C144.921 41.996 144.507 41.978 144.129 41.978H135.381V53.966ZM163.158 74V35.12H170.61L187.512 61.04V35.12H194.964V74H187.512L170.61 48.08V74H163.158ZM218.698 74.81C216.25 74.81 213.919 74.378 211.705 73.514C209.491 72.632 207.529 71.336 205.819 69.626C204.127 67.916 202.786 65.801 201.796 63.281C200.824 60.761 200.338 57.854 200.338 54.56C200.338 50.258 201.157 46.604 202.795 43.598C204.451 40.574 206.665 38.27 209.437 36.686C212.227 35.102 215.314 34.31 218.698 34.31C223.702 34.31 227.635 35.471 230.497 37.793C233.359 40.115 235.276 43.4 236.248 47.648L228.742 48.728C228.04 46.46 226.888 44.651 225.286 43.301C223.702 41.933 221.668 41.24 219.184 41.222C216.718 41.186 214.666 41.717 213.028 42.815C211.39 43.913 210.157 45.47 209.329 47.486C208.519 49.502 208.114 51.86 208.114 54.56C208.114 57.26 208.519 59.6 209.329 61.58C210.157 63.56 211.39 65.099 213.028 66.197C214.666 67.295 216.718 67.862 219.184 67.898C220.858 67.934 222.37 67.646 223.72 67.034C225.088 66.422 226.24 65.459 227.176 64.145C228.112 62.831 228.778 61.148 229.174 59.096H223.018V53.426H237.004C237.04 53.66 237.067 54.074 237.085 54.668C237.103 55.262 237.112 55.604 237.112 55.694C237.112 59.42 236.356 62.723 234.844 65.603C233.332 68.483 231.199 70.742 228.445 72.38C225.691 74 222.442 74.81 218.698 74.81Z" fill="black" />
+    <svg
+      viewBox="0 0 280 160"
+      className="h-auto w-full max-w-sm"
+      fill="none"
+      aria-hidden
+    >
+      <circle cx="148" cy="84" r="72" fill={LILAC_SOFT} />
+
+      {/* PNG file */}
+      <rect x="48" y="36" width="88" height="108" rx="16" fill={WHITE} />
+      <path d="M104 36v28h28" fill={PINK_SOFT} />
+      <path
+        d="M104 36v28h28"
+        stroke={PINK_SOFT}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <rect x="64" y="80" width="48" height="8" rx="4" fill={INK} />
+      <rect x="64" y="96" width="36" height="6" rx="3" fill={SAGE} />
+      <rect x="64" y="116" width="40" height="14" rx="7" fill={PINK} />
+
+      {/* ZIP stack */}
+      <rect x="156" y="48" width="80" height="96" rx="16" fill={WHITE} />
+      <rect x="172" y="68" width="48" height="6" rx="3" fill={INK} />
+      <rect x="172" y="84" width="48" height="28" rx="8" fill={SAGE_SOFT} />
+      <rect x="172" y="120" width="28" height="6" rx="3" fill={LILAC} />
+
+      {/* Download arrow */}
+      <circle cx="220" cy="48" r="22" fill={PINK} />
+      <path
+        d="M220 38v16M212 48l8 8 8-8"
+        stroke={WHITE}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
+  );
+}
 
+/** Org switcher + member row — soft shapes only. */
+export function OrgArt() {
+  return (
+    <svg
+      viewBox="0 0 320 180"
+      width="320"
+      height="180"
+      className="mt-4 h-auto w-full max-w-[320px]"
+      fill="none"
+      aria-hidden
+    >
+      <circle cx="210" cy="96" r="78" fill={LILAC_SOFT} />
 
+      {/* Active org card */}
+      <rect x="36" y="36" width="168" height="108" rx="22" fill={WHITE} />
+      <circle cx="72" cy="72" r="18" fill={BLUE} />
+      <rect x="100" y="60" width="72" height="10" rx="5" fill={INK} />
+      <rect x="100" y="78" width="48" height="7" rx="3.5" fill={LILAC} />
+
+      {/* Member dots */}
+      <circle cx="68" cy="116" r="12" fill={PINK} />
+      <circle cx="92" cy="116" r="12" fill={SAGE} />
+      <circle cx="116" cy="116" r="12" fill={LILAC} />
+      <circle cx="140" cy="116" r="12" fill={PINK_SOFT} stroke={PINK} strokeWidth="2" />
+      <rect x="160" y="111" width="28" height="10" rx="5" fill={SAGE_SOFT} />
+
+      {/* Side org chips */}
+      <rect x="220" y="48" width="72" height="36" rx="14" fill={WHITE} />
+      <circle cx="242" cy="66" r="10" fill={SAGE} />
+      <rect x="258" y="61" width="24" height="10" rx="5" fill={INK} />
+
+      <rect x="220" y="96" width="72" height="36" rx="14" fill={WHITE} />
+      <circle cx="242" cy="114" r="10" fill={PINK} />
+      <rect x="258" y="109" width="24" height="10" rx="5" fill={INK} />
+    </svg>
+  );
+}
+
+/** Invite link + mail — minimal. */
+export function InviteArt() {
+  return (
+    <svg
+      viewBox="0 0 260 160"
+      width="260"
+      height="160"
+      className="mt-4 h-auto w-full max-w-[260px]"
+      fill="none"
+      aria-hidden
+    >
+      <circle cx="168" cy="84" r="64" fill={LILAC_SOFT} fillOpacity="0.55" />
+
+      {/* Envelope */}
+      <rect x="28" y="48" width="100" height="72" rx="16" fill={WHITE} />
+      <path
+        d="M40 64l38 28 38-28"
+        stroke={BLUE}
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Link pill */}
+      <rect x="120" y="72" width="112" height="40" rx="20" fill={WHITE} />
+      <rect x="136" y="86" width="56" height="12" rx="6" fill={BLUE} />
+      <circle cx="208" cy="92" r="10" fill={PINK} />
+    </svg>
+  );
+}
+
+/** Referral gift / credits — minimal. */
+export function RewardsArt() {
+  return (
+    <svg
+      viewBox="0 0 280 160"
+      width="280"
+      height="160"
+      className="h-auto w-full max-w-[280px]"
+      fill="none"
+      aria-hidden
+    >
+      <circle cx="148" cy="84" r="72" fill={PINK_SOFT} />
+
+      {/* Gift box */}
+      <rect x="88" y="68" width="88" height="64" rx="16" fill={WHITE} />
+      <rect x="88" y="52" width="88" height="28" rx="12" fill={BLUE} />
+      <rect x="126" y="52" width="12" height="80" rx="6" fill={LILAC} />
+      <rect x="88" y="78" width="88" height="10" rx="5" fill={LILAC_SOFT} />
+
+      {/* Credit chip */}
+      <rect x="196" y="40" width="56" height="56" rx="18" fill={WHITE} />
+      <circle cx="224" cy="60" r="10" fill={SAGE} />
+      <rect x="208" y="78" width="32" height="8" rx="4" fill={INK} />
+    </svg>
   );
 }

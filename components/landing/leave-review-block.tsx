@@ -55,7 +55,7 @@ export function LeaveReviewBlock() {
 
   return (
     <LandingSection id="review">
-      <LandingLayer className="bg-white">
+      <LandingLayer className="bg-land-card">
         <LandingPad>
           <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <LandingHead
@@ -65,17 +65,17 @@ export function LeaveReviewBlock() {
 
             {sent ? (
               <div className="flex min-h-[220px] flex-col justify-center rounded-[1.5rem] bg-land-mist px-6 py-8 sm:px-8">
-                <p className="text-2xl font-extrabold tracking-tight text-land-ink">
+                <p className="text-4xl font-extrabold tracking-tight text-land-ink">
                   Спасибо!
                 </p>
-                <p className="mt-2 max-w-sm text-sm leading-relaxed text-land-ink/55">
+                <p className="mt-3 max-w-sm text-base leading-relaxed text-land-ink/55">
                   Ваш отзыв добавлен в список. Вернитесь в любое время после следующей
                   карусели.
                 </p>
                 <button
                   type="button"
                   onClick={() => setSent(false)}
-                  className="mt-6 inline-flex h-11 w-fit items-center rounded-full bg-land-ink px-5 text-sm font-semibold text-white"
+                  className="mt-6 inline-flex h-11 w-fit items-center rounded-full bg-land-panel px-5 text-sm font-semibold text-white"
                 >
                   Написать другой
                 </button>
@@ -86,7 +86,7 @@ export function LeaveReviewBlock() {
                 className="flex flex-col gap-5"
               >
                 <div>
-                  <p className="text-sm font-semibold text-land-ink">Оценка</p>
+                  <p className="text-lg font-semibold text-land-ink">Оценка</p>
                   <div
                     className="mt-2 flex items-center gap-1"
                     onMouseLeave={() => setHover(0)}

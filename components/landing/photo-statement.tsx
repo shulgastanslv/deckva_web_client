@@ -4,17 +4,17 @@ import { CarouselEditorArt } from './landing-art';
 export function PhotoStatement() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
-      <div className="relative overflow-hidden rounded-[2rem] bg-white text-land-ink">
+      <div className="relative overflow-hidden rounded-[2rem] bg-land-card text-land-ink">
 
         <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center">
           <div className="px-6 pt-10 pb-6 sm:px-10 sm:py-14 lg:col-span-6 lg:py-16">
             <div>
-              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl leading-[1.15]">
+              <h2 className="text-4xl font-extrabold leading-[1.15] tracking-tight sm:text-5xl lg:text-6xl">
                 Не просто Canva.
                 <br />
               </h2>
 
-              <p className="mt-4 text-base font-normal text-land-ink/80 sm:text-lg max-w-md leading-relaxed">
+              <p className="mt-5 max-w-md text-lg font-normal leading-relaxed text-land-ink/80 sm:text-xl">
                 Забудьте про статичные слайды. Создавайте карусели, которые
                 реагируют на действия пользователя.
               </p>

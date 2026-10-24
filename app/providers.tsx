@@ -13,7 +13,7 @@ export interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
         <CanvasManagerProvider>{children}</CanvasManagerProvider>
       </ThemeProvider>
     </SessionProvider>
