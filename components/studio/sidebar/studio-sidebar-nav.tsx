@@ -59,8 +59,8 @@ export function StudioSidebarNav() {
           className={cn(
             "flex h-9 items-center gap-2.5 rounded-xl px-2.5 text-[13px] font-medium transition-colors",
             active
-              ? "bg-white text-neutral-950 shadow-sm dark:bg-muted dark:text-foreground"
-              : "text-neutral-600 hover:bg-white/70 hover:text-neutral-950 dark:text-muted-foreground dark:hover:bg-muted/60 dark:hover:text-foreground",
+              ? "bg-background text-foreground dark:bg-muted"
+              : "text-muted-foreground hover:bg-background/70 hover:text-foreground dark:hover:bg-muted/50",
           )}
         >
           <Icon

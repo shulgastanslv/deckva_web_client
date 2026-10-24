@@ -1,5 +1,6 @@
 import { LayoutGrid, List } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function StudioViewToggle({
@@ -10,33 +11,37 @@ export function StudioViewToggle({
   onChange: (view: "list" | "grid") => void;
 }) {
   return (
-    <div className="flex items-center gap-0.5">
-      <button
+    <div className="flex items-center gap-0.5 rounded-full bg-muted p-0.5">
+      <Button
         type="button"
+        size="icon-sm"
+        variant="ghost"
         aria-label="Grid view"
         onClick={() => onChange("grid")}
         className={cn(
-          "rounded-md p-1.5 transition-colors",
+          "size-7 rounded-full",
           view === "grid"
-            ? "text-neutral-950 dark:text-foreground"
-            : "text-neutral-400 hover:text-neutral-700 dark:text-muted-foreground",
+            ? "bg-background text-foreground dark:bg-background/80"
+            : "text-muted-foreground hover:text-foreground",
         )}
       >
-        <LayoutGrid className="size-4" />
-      </button>
-      <button
+        <LayoutGrid className="size-3.5" />
+      </Button>
+      <Button
         type="button"
+        size="icon-sm"
+        variant="ghost"
         aria-label="List view"
         onClick={() => onChange("list")}
         className={cn(
-          "rounded-md p-1.5 transition-colors",
+          "size-7 rounded-full",
           view === "list"
-            ? "text-neutral-950 dark:text-foreground"
-            : "text-neutral-400 hover:text-neutral-700 dark:text-muted-foreground",
+            ? "bg-background text-foreground dark:bg-background/80"
+            : "text-muted-foreground hover:text-foreground",
         )}
       >
-        <List className="size-4" />
-      </button>
+        <List className="size-3.5" />
+      </Button>
     </div>
   );
 }

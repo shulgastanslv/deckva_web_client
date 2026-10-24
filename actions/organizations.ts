@@ -6,12 +6,10 @@ import { revalidatePath } from "next/cache";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { prisma } from "@/lib/prisma";
 
-export type OrgPlan = "starter" | "business" | "enterprise";
-
 export interface OrganizationListItem {
   id: string;
   name: string;
-  plan: OrgPlan;
+  isUpgrade: boolean;
   color: string;
   role: "OWNER" | "ADMIN" | "MEMBER";
   inviteCode: string;
@@ -42,16 +40,11 @@ function pickColor(seed: string) {
   return ORG_COLORS[hash % ORG_COLORS.length];
 }
 
-function asOrgPlan(value: string): OrgPlan {
-  if (value === "business" || value === "enterprise") return value;
-  return "starter";
-}
-
 async function mapOrg(
   org: {
     id: string;
     name: string;
-    plan: string;
+    isUpgrade: boolean;
     color: string;
     inviteCode: string;
     members: Array<{ role: "OWNER" | "ADMIN" | "MEMBER"; userId: string }>;
@@ -63,7 +56,7 @@ async function mapOrg(
   return {
     id: org.id,
     name: org.name,
-    plan: asOrgPlan(org.plan),
+    isUpgrade: Boolean(org.isUpgrade),
     color: org.color,
     role: mine?.role ?? "MEMBER",
     inviteCode: org.inviteCode,
@@ -342,16 +335,12 @@ export async function joinOrganizationByInvite(
   }
 }
 
-export async function updateOrganizationPlan(
-  plan: OrgPlan,
+export async function setOrganizationUpgrade(
+  isUpgrade: boolean,
 ): Promise<ActionResult<{ organization: OrganizationListItem }>> {
   try {
     const userId = await requireUserId();
     if (!userId) return { success: false, error: "Sign in" };
-
-    if (plan !== "starter" && plan !== "business" && plan !== "enterprise") {
-      return { success: false, error: "Invalid plan" };
-    }
 
     const ensured = await ensureUserOrganization();
     if (!ensured.success) return ensured;
@@ -364,12 +353,15 @@ export async function updateOrganizationPlan(
       },
     });
     if (!membership) {
-      return { success: false, error: "Only owners and admins can change the plan" };
+      return {
+        success: false,
+        error: "Only owners and admins can change the subscription",
+      };
     }
 
     const org = await prisma.organization.update({
       where: { id: ensured.organization.id },
-      data: { plan },
+      data: { isUpgrade },
       include: {
         members: { select: { role: true, userId: true } },
         _count: { select: { members: true } },
@@ -381,7 +373,7 @@ export async function updateOrganizationPlan(
 
     return { success: true, organization: await mapOrg(org, userId) };
   } catch (err) {
-    console.error("updateOrganizationPlan error:", err);
-    return { success: false, error: "Couldn't update plan" };
+    console.error("setOrganizationUpgrade error:", err);
+    return { success: false, error: "Couldn't update subscription" };
   }
 }

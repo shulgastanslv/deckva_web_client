@@ -42,22 +42,22 @@ export function StudioCreateMenu({
       <DropdownMenuContent
         align={align}
         sideOffset={8}
-        className="min-w-[200px] rounded-xl border-border/60 bg-background p-1.5 shadow-lg"
+        className="min-w-[200px] rounded-2xl border-0 bg-muted p-1.5 shadow-none dark:bg-muted"
       >
         <DropdownMenuItem
-          className="cursor-pointer rounded-lg px-2.5 py-2 text-[13px]"
+          className="cursor-pointer rounded-xl px-2.5 py-2 text-[13px]"
           onClick={onBlank}
         >
           Blank carousel
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer rounded-lg px-2.5 py-2 text-[13px]"
+          className="cursor-pointer rounded-xl px-2.5 py-2 text-[13px]"
           onClick={onGenerate}
         >
           Generate with AI
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer rounded-lg px-2.5 py-2 text-[13px]"
+          className="cursor-pointer rounded-xl px-2.5 py-2 text-[13px]"
           onClick={onTemplates}
         >
           From template

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Gift, UserPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, UserPlus } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import { getActiveOrganization } from "@/actions/organizations";
@@ -10,22 +11,27 @@ import { StudioInviteDialog } from "@/components/studio/dialogs/studio-invite-di
 import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
-import { StudioButton } from "@/components/studio/ui/studio-button";
+import { Button } from "@/components/ui/button";
 import { planLabel } from "@/lib/studio/plans";
 
 export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
+  const router = useRouter();
   const { status } = useSession();
   const signedIn = status === "authenticated";
+  const [isUpgrade, setIsUpgrade] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteTab, setInviteTab] = useState<"invite" | "rewards">("invite");
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [plan, setPlan] = useState("starter");
 
   useEffect(() => {
-    if (!signedIn) return;
+    if (!signedIn) {
+      setIsUpgrade(false);
+      return;
+    }
     const load = async () => {
       const res = await getActiveOrganization();
-      if (res.success && res.organization) setPlan(res.organization.plan);
+      if (res.success && res.organization) {
+        setIsUpgrade(res.organization.isUpgrade);
+      }
     };
     void load();
 
@@ -41,88 +47,83 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
       window.removeEventListener("studio:open-upgrade", onOpenUpgrade);
   }, []);
 
-  const openInvite = (tab: "invite" | "rewards" = "invite") => {
+  const requireAuth = () => {
     if (!signedIn) {
       onSignIn?.();
-      return;
+      return false;
     }
-    setInviteTab(tab);
+    return true;
+  };
+
+  const openInvite = () => {
+    if (!requireAuth()) return;
     setInviteOpen(true);
   };
 
   const openUpgrade = () => {
-    if (!signedIn) {
-      onSignIn?.();
-      return;
-    }
+    if (!requireAuth()) return;
     setUpgradeOpen(true);
   };
 
   return (
     <>
-      <header className="flex shrink-0 items-center justify-between gap-4 px-6 pt-4 pb-2 sm:px-8">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <Logo
-            width={28}
-            height={28}
-            href="/studio"
-            className="shrink-0 transition-opacity hover:opacity-80"
-          />
+      <header className="flex shrink-0 items-center justify-between gap-3 px-5 pt-3 pb-1 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2">
           <button
             type="button"
-            onClick={openUpgrade}
-            className="hidden items-center rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-[12px] font-medium text-neutral-600 transition-colors hover:bg-neutral-50 sm:inline-flex dark:border-border dark:bg-background dark:text-muted-foreground dark:hover:bg-muted"
+            onClick={() => router.push("/")}
+            aria-label="Studio home"
+            className="flex shrink-0 items-center transition-opacity hover:opacity-80"
           >
-            {planLabel(plan)} plan
+            <Logo
+              width={32}
+              height={32}
+              href="/studio"
+              className="shrink-0 hover:rotate-0"
+            />
           </button>
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {signedIn ? (
-            <StudioButton
-              variant="secondary"
-              className="hidden h-8 rounded-full sm:inline-flex"
-              onClick={() => openInvite("invite")}
-            >
-              <UserPlus className="size-3.5" />
-              Invite members
-            </StudioButton>
-          ) : (
-            <StudioButton
+          <Button
+            type="button"
+            variant="secondary"
+            className="hidden h-8 gap-1.5 rounded-full bg-neutral-200/80 px-3 text-[13px] font-medium text-neutral-900 hover:bg-neutral-200 sm:inline-flex dark:bg-muted dark:text-foreground dark:hover:bg-muted/80"
+            onClick={openInvite}
+          >
+            <UserPlus className="size-3.5" />
+            Invite
+          </Button>
+
+          <Button
+            type="button"
+            className="h-8 rounded-full bg-[#4262ff] px-3.5 text-[13px] font-semibold text-white hover:bg-[#3554e8]"
+            onClick={openUpgrade}
+          >
+           Upgrade
+          </Button>
+
+          <StudioNotifications />
+
+          {!signedIn ? (
+            <Button
+              type="button"
               variant="ghost"
-              className="h-8 rounded-full"
+              className="h-8 rounded-full px-3 text-[13px]"
               onClick={onSignIn}
             >
               Sign in
-            </StudioButton>
-          )}
+            </Button>
+          ) : null}
 
-          <StudioButton
-            variant="primary"
-            className="hidden h-8 rounded-full px-3.5 sm:inline-flex"
-            onClick={openUpgrade}
-          >
-            Upgrade
-          </StudioButton>
-
-          <button
-            type="button"
-            aria-label="Rewards"
-            onClick={() => openInvite("rewards")}
-            className="hidden size-9 items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-100 sm:flex dark:text-muted-foreground dark:hover:bg-muted"
-          >
-            <Gift className="size-[18px] stroke-[1.75]" />
-          </button>
-
-          <StudioNotifications />
-          <StudioUserNav variant="header" />
+          <StudioUserNav onUpgrade={openUpgrade} />
         </div>
       </header>
 
       <StudioInviteDialog
         open={inviteOpen}
         onOpenChange={setInviteOpen}
-        initialTab={inviteTab}
+        initialTab="invite"
         onUpgrade={openUpgrade}
       />
       <StudioUpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} />

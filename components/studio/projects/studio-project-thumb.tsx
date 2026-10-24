@@ -26,7 +26,7 @@ export function StudioProjectThumb({
   return (
     <span
       className={cn(
-        "relative flex size-8 shrink-0 overflow-hidden rounded-md",
+        "relative flex size-8 shrink-0 overflow-hidden rounded-lg",
         !project.previewUrl && projectAccent(project.id),
         className,
       )}

@@ -2,59 +2,44 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import {
   getUserProjects,
   type ProjectListItem,
 } from "@/actions/projects";
-import {
-  getTemplates,
-  type TemplateListItem,
-} from "@/actions/templates";
 import { AuthModal } from "@/components/auth";
-import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import { StudioGenerateDialog } from "@/components/studio/create/studio-generate-dialog";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
 import { StudioProjectCard } from "@/components/studio/projects/studio-project-card";
 import { StudioProjectList } from "@/components/studio/projects/studio-project-list";
 import { StudioGeneratePrompt } from "@/components/studio/start/studio-generate-prompt";
-import { StudioGreeting } from "@/components/studio/start/studio-greeting";
-import { StudioStartRow } from "@/components/studio/start/studio-start-row";
-import {
-  StudioCreateTile,
-  StudioStartTile,
-} from "@/components/studio/start/studio-start-tile";
+import { StudioStartSection } from "@/components/studio/start/studio-start-section";
+import type { StartCategoryId } from "@/components/studio/start/studio-start-presets";
 import {
   StudioContent,
   StudioContentBody,
 } from "@/components/studio/ui/studio-content";
 import { StudioSectionHeader } from "@/components/studio/ui/studio-section-header";
 import { StudioViewToggle } from "@/components/studio/ui/studio-view-toggle";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 type ViewMode = "list" | "grid";
 
 export function StudioHome() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const userId = session?.user?.id;
+  const userId = session?.user?.id ?? undefined;
   const signedIn = status === "authenticated" && Boolean(userId);
   const create = useStudioCreate();
 
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
-  const [templates, setTemplates] = useState<TemplateListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<ViewMode>("list");
-  const [templateCategory, setTemplateCategory] = useState<string>("all");
+  const [startCategory, setStartCategory] = useState<StartCategoryId>("all");
 
   const fetchProjects = useCallback(async () => {
     if (!userId) return;
@@ -97,31 +82,6 @@ export function StudioHome() {
       window.removeEventListener("studio:sidebar-search", onSidebarSearch);
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const res = await getTemplates();
-      if (cancelled) return;
-      if (res.success) setTemplates(res.templates);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const categories = useMemo(() => {
-    const set = new Set(templates.map((t) => t.category).filter(Boolean));
-    return ["all", ...Array.from(set)];
-  }, [templates]);
-
-  const startTemplates = useMemo(() => {
-    const filtered =
-      templateCategory === "all"
-        ? templates
-        : templates.filter((t) => t.category === templateCategory);
-    return filtered.slice(0, 8);
-  }, [templates, templateCategory]);
-
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
     return projects
@@ -137,28 +97,20 @@ export function StudioHome() {
       );
   }, [projects, search]);
 
-  const openTemplate = (id: string) => {
-    if (status !== "authenticated") {
-      create.setAuthNeeded(true);
-      return;
-    }
-    router.push(`/studio/editor?template=${id}`);
-  };
-
-  const categoryLabel =
-    templateCategory === "all"
-      ? "Carousel templates"
-      : `Templates for ${templateCategory}`;
-
   return (
     <StudioContent>
-      <StudioContentBody className="pt-4 sm:pt-6">
-        <div className="mb-8">
-          <StudioGreeting name={session?.user?.name || session?.user?.email} />
-        </div>
+      <StudioContentBody className="pt-6 sm:pt-10">
 
+        <StudioStartSection
+          category={startCategory}
+          onCategoryChange={setStartCategory}
+          onBlank={create.openBlank}
+          onGenerate={create.openGenerate}
+          onTemplates={create.openTemplates}
+          onPreset={(theme) => create.submitGenerate(theme)}
+        />
 
-          
+        <div className="h-14 sm:h-20" aria-hidden />
 
         <section>
           <StudioSectionHeader
@@ -171,24 +123,25 @@ export function StudioHome() {
           />
 
           {!signedIn ? (
-            <div className="max-w-md py-6">
-              <p className="text-[14px] leading-relaxed text-neutral-500 dark:text-muted-foreground">
+            <div className="max-w-md py-4">
+              <p className="text-[14px] leading-relaxed text-muted-foreground">
                 Sign in to keep your carousels and jump back into drafts.
               </p>
-              <button
+              <Button
                 type="button"
-                className="mt-3 text-[13px] font-medium text-neutral-950 underline-offset-4 hover:underline dark:text-foreground"
+                variant="ghost"
+                className="mt-2 h-auto rounded-full px-0 text-[13px] font-medium text-foreground underline-offset-4 hover:bg-transparent hover:underline"
                 onClick={() => create.setAuthNeeded(true)}
               >
                 Sign in
-              </button>
+              </Button>
             </div>
           ) : loading && projects.length === 0 ? (
             <div className="flex justify-center py-16">
-              <Loader2 className="size-4 animate-spin text-neutral-400" />
+              <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
           ) : visible.length === 0 ? (
-            <p className="py-8 text-[13px] text-neutral-500 dark:text-muted-foreground">
+            <p className="py-8 text-[13px] text-muted-foreground">
               {search.trim()
                 ? "Nothing found."
                 : "No carousels yet — create one above."}
@@ -229,7 +182,7 @@ export function StudioHome() {
         theme={create.theme}
         onThemeChange={create.setTheme}
         submitting={create.submitting}
-        onSubmit={create.submitGenerate}
+        onSubmit={() => create.submitGenerate()}
       />
 
       <AuthModal

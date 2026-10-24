@@ -12,7 +12,7 @@ export function StudioContent({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 flex-col bg-white text-foreground dark:bg-background",
+        "flex h-full min-h-0 flex-col bg-background text-foreground",
         className,
       )}
     >
@@ -24,13 +24,22 @@ export function StudioContent({
 export function StudioContentBody({
   children,
   className,
+  /** Center content like Miro home (default true). */
+  centered = true,
 }: {
   children: ReactNode;
   className?: string;
+  centered?: boolean;
 }) {
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className={cn("min-h-full px-8 pt-6 pb-16 sm:px-12", className)}>
+      <div
+        className={cn(
+          "min-h-full px-6 pt-6 pb-16 sm:px-10",
+          centered && "mx-auto w-full max-w-[1080px]",
+          className,
+        )}
+      >
         {children}
       </div>
     </div>

@@ -20,7 +20,7 @@ export function StudioProjectList({
     <div className="min-w-0">
       <div
         className={cn(
-          "mb-1 grid gap-3 border-b border-neutral-100 px-2 pb-2 text-[12px] text-neutral-500 dark:border-border dark:text-muted-foreground",
+          "mb-1 grid gap-3 px-2 pb-2 text-[12px] text-muted-foreground",
           recentCols,
         )}
       >

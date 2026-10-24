@@ -33,10 +33,13 @@ export function useStudioCreate() {
     setGenerateOpen(true);
   };
 
-  const submitGenerate = () => {
-    const trimmed = theme.trim();
+  const submitGenerate = (overrideTheme?: string) => {
+    const fromArg =
+      typeof overrideTheme === "string" ? overrideTheme.trim() : "";
+    const trimmed = fromArg || theme.trim();
     if (!trimmed || submitting) return;
     if (!requireAuth()) return;
+    setTheme(trimmed);
     setSubmitting(true);
     stashStudioIntent({ type: "generate", theme: trimmed, slides: 5 });
     router.push("/studio/editor");

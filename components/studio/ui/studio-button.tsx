@@ -6,13 +6,13 @@ type StudioButtonVariant = "primary" | "secondary" | "ghost" | "create";
 
 const variants: Record<StudioButtonVariant, string> = {
   primary:
-    "bg-[#2f5bff] text-white hover:bg-[#254ae6] shadow-sm",
+    "bg-primary text-primary-foreground hover:bg-primary/90",
   secondary:
-    "border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-muted",
+    "bg-muted text-foreground hover:bg-muted/80",
   ghost:
-    "text-neutral-700 hover:bg-black/5 dark:text-foreground dark:hover:bg-muted",
+    "text-muted-foreground hover:bg-muted hover:text-foreground",
   create:
-    "bg-neutral-950 text-white hover:opacity-90 dark:bg-foreground dark:text-background",
+    "bg-foreground text-background hover:opacity-90",
 };
 
 export function StudioButton({
@@ -28,7 +28,7 @@ export function StudioButton({
     <button
       type="button"
       className={cn(
-        "inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-[13px] font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-[13px] font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
         variants[variant],
         className,
       )}

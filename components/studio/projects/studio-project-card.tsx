@@ -20,7 +20,7 @@ export function StudioProjectCard({
       <button
         type="button"
         onClick={onOpen}
-        className="relative aspect-4/5 w-full overflow-hidden rounded-xl border border-border/40 bg-muted/40 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[border-color,box-shadow] group-hover:border-border group-hover:shadow-sm"
+        className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted text-left transition-colors group-hover:bg-muted/80"
       >
         {project.previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -36,7 +36,7 @@ export function StudioProjectCard({
           </span>
         )}
         {project.isSaved ? (
-          <span className="absolute top-2 left-2 rounded-full bg-background/90 p-1 shadow-sm">
+          <span className="absolute top-2 left-2 rounded-full bg-background/90 p-1">
             <Star className="size-3 fill-current text-foreground" />
           </span>
         ) : null}

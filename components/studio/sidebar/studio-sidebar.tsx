@@ -21,7 +21,7 @@ export function StudioSidebar({
   onTemplates: () => void;
 }) {
   return (
-    <aside className="flex w-[248px] shrink-0 flex-col bg-[#f5f5f5] dark:bg-background">
+    <aside className="flex w-[252px] shrink-0 flex-col bg-muted/70 dark:bg-background">
       <div className="flex min-h-0 flex-1 flex-col pt-3">
         <StudioOrgSwitcher />
         <StudioSidebarSearch

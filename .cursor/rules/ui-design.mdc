@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+# UI design
+
+## Typography
+
+- Do **not** use italic / cursive display greetings like “Hello, Name” or “Epic work, Name” in a script/serif italic voice — that reads as AI slop.
+- Prefer clean sans UI type; expressive serif only when the product already uses it for a specific non-greeting role, and never italicized name greetings.
+
+## Buttons
+
+- All buttons are rounded (`rounded-full` or at least `rounded-xl` / `rounded-2xl`). No sharp rectangular CTAs.
+
+## Surfaces
+
+- Use borders sparingly. Prefer spacing, typography, and background contrast over `border` outlines.
+- Do **not** use box shadows (`shadow-*`). Flat surfaces only.
+
+## Themes
+
+- Every UI change must work in **light and dark** via Tailwind (`dark:` variants, semantic tokens like `bg-background`, `text-foreground`, `muted-foreground`).
+
+## Components
+
+- Prefer **shadcn** primitives from `@/components/ui/*` (Button, Dialog, DropdownMenu, Input, etc.) before custom one-offs.
+- Extend shadcn with `className` / variants; don’t reinvent the same controls.

@@ -120,26 +120,19 @@ export function AdminTemplates() {
   };
 
   return (
-    <section className="flex flex-col gap-3">
-      <div>
-        <h2 className="text-[13px] font-semibold">Templates</h2>
-        <p className="mt-1 text-[13px] text-muted-foreground">
-          Edit metadata or remove templates from the library.
-        </p>
-      </div>
-
+    <section className="flex flex-col gap-4 pt-2">
       <div className="flex flex-wrap gap-2">
         <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search templates"
-            className="h-9 pl-8"
+            className="h-9 rounded-full bg-muted/50 pl-9"
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="h-9 w-[160px]">
+          <SelectTrigger className="h-9 w-[160px] rounded-full bg-muted/50">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
@@ -151,7 +144,12 @@ export function AdminTemplates() {
             ))}
           </SelectContent>
         </Select>
-        <Button type="button" variant="secondary" className="h-9 rounded-full" onClick={() => void load()}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-9 rounded-full px-3"
+          onClick={() => void load()}
+        >
           Refresh
         </Button>
       </div>
@@ -159,14 +157,16 @@ export function AdminTemplates() {
       {message ? <p className="text-[13px] text-muted-foreground">{message}</p> : null}
 
       {loading ? (
-        <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
+        <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-muted-foreground">
           <Loader2 className="size-3.5 animate-spin" />
-          Loading templates…
+          Loading…
         </div>
       ) : templates.length === 0 ? (
-        <p className="text-[13px] text-muted-foreground">No templates found.</p>
+        <p className="py-10 text-center text-[13px] text-muted-foreground">
+          No templates found.
+        </p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-2">
           {templates.map((tpl) => {
             const draft = drafts[tpl.id] ?? {
               title: tpl.title,
@@ -177,7 +177,7 @@ export function AdminTemplates() {
             return (
               <li
                 key={tpl.id}
-                className="rounded-2xl border border-border/60 bg-background p-3"
+                className="rounded-2xl bg-muted/50 p-3.5"
               >
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-muted">

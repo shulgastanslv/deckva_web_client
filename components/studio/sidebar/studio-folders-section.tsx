@@ -132,20 +132,20 @@ export function StudioFoldersSection() {
   return (
     <div className="mt-6 px-2.5">
       <div className="mb-1.5 flex items-center justify-between px-1.5">
-        <p className="text-[12px] font-semibold text-neutral-500">Folders</p>
+        <p className="text-[12px] font-medium text-muted-foreground">Folders</p>
         <button
           type="button"
           aria-label="New folder"
           disabled={!signedIn || busy}
           onClick={startCreate}
-          className="rounded-md p-0.5 text-neutral-400 transition-colors hover:bg-white/80 hover:text-neutral-700 disabled:opacity-40"
+          className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground disabled:opacity-40"
         >
           <Plus className="size-3.5" />
         </button>
       </div>
 
       {!signedIn ? (
-        <p className="px-1.5 text-[12px] leading-relaxed text-neutral-400">
+        <p className="px-1.5 text-[12px] leading-relaxed text-muted-foreground">
           Sign in to create folders.
         </p>
       ) : (
@@ -157,7 +157,7 @@ export function StudioFoldersSection() {
                 value={draftName}
                 onChange={(e) => setDraftName(e.target.value)}
                 placeholder="Folder name"
-                className="h-8 rounded-lg border-neutral-200 bg-white px-2 text-[12px] shadow-none"
+                className="h-8 rounded-full border-0 bg-background px-3 text-[12px] shadow-none dark:bg-muted/40"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -180,7 +180,7 @@ export function StudioFoldersSection() {
           ) : null}
 
           {folders.length === 0 && !creating ? (
-            <p className="px-1.5 py-1 text-[12px] leading-relaxed text-neutral-400">
+            <p className="px-1.5 py-1 text-[12px] leading-relaxed text-muted-foreground">
               Group carousels by client or campaign.
             </p>
           ) : null}
@@ -197,7 +197,7 @@ export function StudioFoldersSection() {
                     autoFocus
                     value={renameValue}
                     onChange={(e) => setRenameValue(e.target.value)}
-                    className="h-8 rounded-lg border-neutral-200 bg-white px-2 text-[12px] shadow-none"
+                    className="h-8 rounded-full border-0 bg-background px-3 text-[12px] shadow-none dark:bg-muted/40"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -217,8 +217,8 @@ export function StudioFoldersSection() {
                 className={cn(
                   "group flex h-9 items-center gap-1 rounded-xl pr-1 transition-colors",
                   active
-                    ? "bg-white text-neutral-950 shadow-sm dark:bg-muted dark:text-foreground"
-                    : "text-neutral-600 hover:bg-white/70 hover:text-neutral-950 dark:text-muted-foreground dark:hover:bg-muted/60",
+                    ? "bg-background text-foreground dark:bg-muted"
+                    : "text-muted-foreground hover:bg-background/70 hover:text-foreground dark:hover:bg-muted/50",
                 )}
               >
                 <Link
@@ -234,14 +234,17 @@ export function StudioFoldersSection() {
                     <button
                       type="button"
                       aria-label="Folder actions"
-                      className="rounded-md p-1 text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-100 hover:text-neutral-700 focus:opacity-100 dark:hover:bg-muted"
+                      className="rounded-full p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted hover:text-foreground focus:opacity-100"
                     >
                       <MoreHorizontal className="size-3.5" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="min-w-[140px]">
+                  <DropdownMenuContent
+                    align="end"
+                    className="min-w-[140px] rounded-2xl border-0 bg-muted p-1.5 shadow-none"
+                  >
                     <DropdownMenuItem
-                      className="cursor-pointer gap-2 text-[13px]"
+                      className="cursor-pointer gap-2 rounded-xl text-[13px]"
                       onClick={() => {
                         setRenamingId(folder.id);
                         setRenameValue(folder.name);
@@ -251,7 +254,7 @@ export function StudioFoldersSection() {
                       Rename
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer gap-2 text-[13px] text-destructive"
+                      className="cursor-pointer gap-2 rounded-xl text-[13px] text-destructive"
                       onClick={() => void removeFolder(folder.id)}
                     >
                       <Trash2 className="size-3.5" />

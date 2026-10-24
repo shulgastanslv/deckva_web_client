@@ -9,8 +9,6 @@ export function formatBoardDate(iso: string) {
   }
 }
 
-export function studioGreeting(name?: string | null) {
-  const first =
-    name?.trim().split(/\s+/)[0] || name?.trim() || "there";
-  return `Hello , ${first}`;
+export function studioGreeting(_name?: string | null) {
+  return "New carousel";
 }

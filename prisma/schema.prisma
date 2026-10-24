@@ -21,12 +21,6 @@ enum OrgMemberRole {
   MEMBER
 }
 
-enum OrgPlan {
-  starter
-  business
-  enterprise
-}
-
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -59,7 +53,8 @@ model User {
 model Organization {
   id         String   @id @default(cuid())
   name       String
-  plan       OrgPlan  @default(starter)
+  /// Paid Pro subscription ($15/mo).
+  isUpgrade  Boolean  @default(false)
   color      String   @default("#7EB6FF")
   inviteCode String   @unique @default(cuid())
   createdAt  DateTime @default(now())

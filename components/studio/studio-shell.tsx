@@ -48,7 +48,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={250}>
-      <div className="flex h-dvh w-full overflow-hidden bg-[#f5f5f5] text-foreground dark:bg-background">
+      <div className="flex h-dvh w-full overflow-hidden bg-muted/70 text-foreground dark:bg-background">
         <StudioSidebar
           search={sidebarSearch}
           onSearchChange={setSidebarSearch}
@@ -57,7 +57,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
           onTemplates={create.openTemplates}
         />
 
-        <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-background dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
+        <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
           <StudioHeader onSignIn={() => setAuthOpen(true)} />
           <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
             {children}

@@ -112,19 +112,19 @@ export function StudioOrgSwitcher() {
           <button
             type="button"
             className={cn(
-              "flex w-full items-center gap-2 rounded-xl px-1.5 py-1.5 text-left transition-colors hover:bg-white/80 dark:hover:bg-muted/60",
-              open && "bg-white shadow-sm dark:bg-muted",
+              "flex w-full items-center gap-2 rounded-2xl px-1.5 py-1.5 text-left transition-colors hover:bg-background/80 dark:hover:bg-muted/60",
+              open && "bg-background dark:bg-muted",
             )}
           >
             {active ? (
               <StudioOrgAvatar name={active.name} color={active.color} />
             ) : (
-              <span className="size-7 rounded-md bg-neutral-200" />
+              <span className="size-7 rounded-full bg-muted" />
             )}
-            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-neutral-950 dark:text-foreground">
+            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
               {active?.name ?? "Organization"}
             </span>
-            <span className="flex size-6 items-center justify-center rounded-full bg-white text-neutral-500 shadow-sm dark:bg-muted">
+            <span className="flex size-6 items-center justify-center rounded-full bg-background text-muted-foreground dark:bg-muted">
               <ChevronDown className="size-3.5" />
             </span>
           </button>
@@ -133,7 +133,7 @@ export function StudioOrgSwitcher() {
         <DropdownMenuContent
           align="start"
           sideOffset={8}
-          className="w-[280px] overflow-hidden rounded-2xl border-neutral-200 p-0 shadow-xl dark:border-border"
+          className="w-[280px] overflow-hidden rounded-2xl border-0 bg-background p-0 shadow-none dark:bg-muted"
         >
           {active ? (
             <div className="flex items-center gap-2.5 px-3 py-3">
@@ -143,17 +143,17 @@ export function StudioOrgSwitcher() {
                 className="size-8 text-[12px]"
               />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold text-neutral-950 dark:text-foreground">
+                <p className="truncate text-[13px] font-semibold text-foreground">
                   {active.name}
                 </p>
-                <p className="text-[12px] text-neutral-500">
-                  {planLabel(active.plan)}
+                <p className="text-[12px] text-muted-foreground">
+                  {planLabel(active.isUpgrade)}
                 </p>
               </div>
               <button
                 type="button"
                 aria-label="Add organization"
-                className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+                className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 onClick={() => setCreating(true)}
               >
                 <Plus className="size-4" />
@@ -161,8 +161,8 @@ export function StudioOrgSwitcher() {
             </div>
           ) : null}
 
-          <div className="border-t border-neutral-100 px-3 pt-2.5 pb-1 dark:border-border">
-            <p className="text-[11px] font-semibold tracking-wide text-neutral-400 uppercase">
+          <div className="px-3 pt-1 pb-1">
+            <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
               Other organizations
             </p>
           </div>
@@ -176,12 +176,12 @@ export function StudioOrgSwitcher() {
                   type="button"
                   disabled={busy}
                   onClick={() => void switchTo(org.id)}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-muted"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-background/40"
                 >
                   <StudioOrgAvatar name={org.name} color={org.color} />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5">
-                      <span className="truncate text-[13px] font-semibold text-neutral-950 dark:text-foreground">
+                      <span className="truncate text-[13px] font-semibold text-foreground">
                         {org.name}
                       </span>
                       {org.role === "ADMIN" || org.role === "OWNER" ? (
@@ -190,8 +190,8 @@ export function StudioOrgSwitcher() {
                         </StudioBadge>
                       ) : null}
                     </span>
-                    <span className="block text-[12px] text-neutral-500">
-                      {planLabel(org.plan)}
+                    <span className="block text-[12px] text-muted-foreground">
+                      {planLabel(org.isUpgrade)}
                     </span>
                   </span>
                 </button>
@@ -204,7 +204,7 @@ export function StudioOrgSwitcher() {
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   placeholder="Organization name"
-                  className="h-8 rounded-lg text-[13px]"
+                  className="h-8 rounded-full border-0 bg-muted text-[13px] shadow-none dark:bg-background/40"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -221,12 +221,12 @@ export function StudioOrgSwitcher() {
               <button
                 type="button"
                 onClick={() => setCreating(true)}
-                className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-colors hover:bg-neutral-50 dark:hover:bg-muted"
+                className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-background/40"
               >
-                <span className="inline-flex size-7 items-center justify-center rounded-md bg-neutral-100 text-neutral-500 dark:bg-muted">
+                <span className="inline-flex size-7 items-center justify-center rounded-full bg-muted text-muted-foreground dark:bg-background/40">
                   <Plus className="size-3.5" />
                 </span>
-                <span className="text-[13px] font-medium text-neutral-700 dark:text-foreground">
+                <span className="text-[13px] font-medium text-foreground">
                   Add organization
                 </span>
               </button>
