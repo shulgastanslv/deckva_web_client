@@ -90,6 +90,7 @@ import { applyList, applySelectionStyle, writeFormattedText, type ListKind } fro
 import type { TextStyles } from "@/lib/canvas/text-flow";
 import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
 import { SelectObjectArt } from "@/components/canvas/canvas_icons";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 type TextAlign = "left" | "center" | "right" | "justify";
 
@@ -132,98 +133,16 @@ interface InspectedProperties {
   shadowOffsetY: number;
 }
 
-const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-
-/** Shared shell for inspector fields — border only, fully rounded, no fill. */
-const fieldShell =
-  "flex items-center rounded-full bg-muted/40";
+/** Shared shell for inspector fields — muted pill, fully rounded. */
+const fieldShell = "flex items-center rounded-full bg-muted/40";
 
 const btnRound = "rounded-full";
-
-function normalizeHex(raw: string): string | null {
-  let value = raw.trim();
-  if (!value) return null;
-  if (!value.startsWith("#")) value = `#${value}`;
-  if (!HEX_RE.test(value)) return null;
-  if (value.length === 4) {
-    const [, r, g, b] = value;
-    value = `#${r}${r}${g}${g}${b}${b}`;
-  }
-  return value.toLowerCase();
-}
-
-function toPickerHex(value: string): string {
-  const normalized = normalizeHex(value.slice(0, 7));
-  return normalized ?? "#000000";
-}
 
 function clampNumber(value: number, min?: number, max?: number): number {
   let next = value;
   if (min != null) next = Math.max(min, next);
   if (max != null) next = Math.min(max, next);
   return next;
-}
-
-function ColorField({
-  label,
-  value,
-  onChange,
-  trailing,
-}: {
-  label: string;
-  value: string;
-  onChange: (hex: string) => void;
-  trailing?: React.ReactNode;
-}) {
-  const display = value === "transparent" ? "" : value;
-  const [draft, setDraft] = useState(display);
-
-  useEffect(() => {
-    setDraft(display);
-  }, [display]);
-
-  const commit = () => {
-    if (!draft.trim()) return;
-    const next = normalizeHex(draft);
-    if (next) {
-      onChange(next);
-      setDraft(next);
-    } else {
-      setDraft(display);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
-      <div className={`${fieldShell} h-9 gap-2 px-2`}>
-        <input
-          type="color"
-          value={toPickerHex(value || "#000000")}
-          onChange={(e) => {
-            onChange(e.target.value);
-            setDraft(e.target.value);
-          }}
-          className="size-6 shrink-0 cursor-pointer rounded-full border border-border bg-transparent p-0"
-          title={label}
-        />
-        <Input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.currentTarget.blur();
-            }
-          }}
-          placeholder="#000000"
-          spellCheck={false}
-          className="h-7 flex-1 border-0 bg-transparent px-1 font-mono text-[13px] uppercase shadow-none focus-visible:ring-0 dark:bg-transparent"
-        />
-        {trailing}
-      </div>
-    </div>
-  );
 }
 
 function NumberField({
@@ -1003,36 +922,8 @@ export function RightSidebar({
               </div>
               {formValues && (
                 <>
-                  <CollapsibleGroup id="rs-multi-fill" title="Fill and stroke">
-                    <ColorField
-                      label="Fill"
-                      value={formValues.fill}
-                      onChange={(hex) => {
-                        setFormValues((prev) =>
-                          prev ? { ...prev, fill: hex, gradientFrom: null, gradientTo: null } : null,
-                        );
-                        updateSelected({
-                          fill: hex,
-                          swibpSlot: "",
-                        } as unknown as Partial<FabricObject>);
-                      }}
-                    />
-                    <ColorField
-                      label="Stroke"
-                      value={formValues.stroke}
-                      onChange={(hex) => updateProp("stroke", hex)}
-                    />
-                    <NumberField
-                      label="Thickness"
-                      value={formValues.strokeWidth}
-                      onChange={(v) => updateProp("strokeWidth", v)}
-                      min={0}
-                      max={40}
-                      unit="px"
-                    />
-                  </CollapsibleGroup>
                   {sharedText && (
-                    <CollapsibleGroup id="rs-multi-text" title="Text">
+                    <CollapsibleGroup id="rs-multi-text" title="Text" defaultOpen>
                       <div className="flex flex-col gap-1.5">
                         <span className="text-[13px] text-muted-foreground">AI rewrite</span>
                         <AiTextAssist manager={manager} />
@@ -1112,7 +1003,35 @@ export function RightSidebar({
                       </div>
                     </CollapsibleGroup>
                   )}
-                  <CollapsibleGroup id="rs-multi-look" title="Appearance">
+                  <CollapsibleGroup id="rs-multi-color" title="Color" defaultOpen>
+                    <ColorPicker
+                      label="Fill"
+                      value={formValues.fill}
+                      onChange={(hex) => {
+                        setFormValues((prev) =>
+                          prev ? { ...prev, fill: hex, gradientFrom: null, gradientTo: null } : null,
+                        );
+                        updateSelected({
+                          fill: hex,
+                          swibpSlot: "",
+                        } as unknown as Partial<FabricObject>);
+                      }}
+                    />
+                    <ColorPicker
+                      label="Stroke"
+                      value={formValues.stroke}
+                      onChange={(hex) => updateProp("stroke", hex)}
+                    />
+                    <NumberField
+                      label="Thickness"
+                      value={formValues.strokeWidth}
+                      onChange={(v) => updateProp("strokeWidth", v)}
+                      min={0}
+                      max={40}
+                      unit="px"
+                    />
+                  </CollapsibleGroup>
+                  <CollapsibleGroup id="rs-multi-look" title="Appearance" defaultOpen={false}>
                     <NumberField
                       label="Opacity"
                       value={Math.round(formValues.opacity * 100)}
@@ -1747,19 +1666,19 @@ export function RightSidebar({
                     </div>
                     {formValues.gradientFrom && formValues.gradientTo ? (
                       <>
-                        <ColorField
+                        <ColorPicker
                           label="Start"
                           value={formValues.gradientFrom}
                           onChange={(hex) => setGradient(hex, formValues.gradientTo || "#ffffff")}
                         />
-                        <ColorField
+                        <ColorPicker
                           label="End"
                           value={formValues.gradientTo}
                           onChange={(hex) => setGradient(formValues.gradientFrom || "#111111", hex)}
                         />
                       </>
                     ) : (
-                      <ColorField
+                      <ColorPicker
                         label={isText ? "Text color" : "Fill color"}
                         value={formValues.fill}
                         onChange={(hex) => {
@@ -1778,7 +1697,7 @@ export function RightSidebar({
                   </p>
                 )}
                 {isText && (
-                  <ColorField
+                  <ColorPicker
                     label="Text background"
                     value={
                       formValues.backgroundColor === "transparent"
@@ -1804,7 +1723,7 @@ export function RightSidebar({
               </CollapsibleGroup>
 
               <CollapsibleGroup id="rs-stroke" title="Stroke">
-                <ColorField
+                <ColorPicker
                   label="Stroke color"
                   value={formValues.stroke}
                   onChange={(hex) => updateProp("stroke", hex)}
@@ -1907,7 +1826,7 @@ export function RightSidebar({
               >
                 {formValues.hasShadow ? (
                   <div className="flex flex-col gap-3">
-                    <ColorField
+                    <ColorPicker
                       label="Shadow color"
                       value={formValues.shadowColor.slice(0, 7)}
                       onChange={(hex) => updateShadowProp("shadowColor", hex)}

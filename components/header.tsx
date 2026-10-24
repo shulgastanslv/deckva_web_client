@@ -314,7 +314,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             >
               <ArrowUp className="w-3.5 h-3.5" />
               <span>Export</span>
-              <span className="text-ы font-normal text-primary-foreground/70">
+              <span className="text-[12px] font-normal text-primary-foreground/70">
                 [{slideCount}] · PNG
               </span>
             </button>
@@ -480,7 +480,14 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
           setIsAuthModalOpen(true);
         }}
       />
-      <ExportModal open={showExport} onOpenChange={setShowExport} />
+      <ExportModal
+        open={showExport}
+        onOpenChange={setShowExport}
+        onNeedAuth={() => {
+          setShowExport(false);
+          setIsAuthModalOpen(true);
+        }}
+      />
       <HelpDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
       <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
       <ProfileSettingsDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />

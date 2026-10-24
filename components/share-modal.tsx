@@ -13,10 +13,26 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Check, Copy, Loader2, Link2 } from "lucide-react";
+import { FaFacebook, FaLinkedin, FaTelegram, FaWhatsapp, FaXTwitter } from "react-icons/fa6";
+import { SiThreads } from "react-icons/si";
 import { setProjectPublic } from "@/actions/projects";
-import { ShareProjectArt } from "@/components/canvas/canvas_icons";
 import { useProject } from "@/hooks/use-project";
 import { useSession } from "next-auth/react";
+import { useCanvasStore } from "@/store/useCanvasStore";
+import {
+  SOCIAL_NETWORKS,
+  socialShareUrl,
+  type SocialNetwork,
+} from "@/lib/share/social";
+
+const NETWORK_ICONS: Record<SocialNetwork, React.ElementType> = {
+  x: FaXTwitter,
+  telegram: FaTelegram,
+  linkedin: FaLinkedin,
+  threads: SiThreads,
+  facebook: FaFacebook,
+  whatsapp: FaWhatsapp,
+};
 
 interface ShareModalProps {
   open: boolean;
@@ -32,6 +48,7 @@ export function ShareModal({
 }: ShareModalProps) {
   const { status } = useSession();
   const { currentProjectId, persist } = useProject();
+  const projectTitle = useCanvasStore((s) => s.projectTitle);
   const [copied, setCopied] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -124,10 +141,24 @@ export function ShareModal({
     }
   };
 
+  const openSocial = async (network: SocialNetwork) => {
+    const id = projectId ?? (await ensureSavedAndPublic());
+    if (!id || typeof window === "undefined") return;
+    const url = `${window.location.origin}/view/${id}`;
+    window.open(
+      socialShareUrl(network, {
+        url,
+        text: `${projectTitle} — carousel`,
+      }),
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm rounded-2xl p-5 border-border">
-        <DialogHeader className="space-y-1.5 text-left border-b border-border/40 pb-3">
+      <DialogContent className="max-w-sm rounded-2xl border-border p-5">
+        <DialogHeader className="space-y-1.5 border-b border-border/40 pb-3 text-left">
           <DialogTitle className="text-[13px] font-semibold tracking-tight">
             Share Project
           </DialogTitle>
@@ -144,7 +175,7 @@ export function ShareModal({
             </p>
           ) : (
             <>
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-muted/20 px-3 py-2.5">
+              <div className="flex items-center justify-between gap-3 rounded-2xl bg-muted/30 px-3 py-2.5">
                 <div className="min-w-0">
                   <Label htmlFor="share-public" className="text-[13px] font-medium">
                     Public link
@@ -165,39 +196,59 @@ export function ShareModal({
                 <Input
                   readOnly
                   value={shareUrl || "Save the project to get a link"}
-                  className="h-8 text-[13px] font-mono bg-muted/40 border-border/60 rounded-xl"
+                  className="h-8 rounded-full border-border/60 bg-muted/40 font-mono text-[13px]"
                 />
                 <Button
                   size="sm"
                   onClick={() => void handleCopy()}
                   disabled={busy}
-                  className="h-8 px-3 text-[13px] rounded-xl shrink-0 gap-1.5"
+                  className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-[13px]"
                 >
                   {busy ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : copied ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      <Check className="h-3.5 w-3.5 text-emerald-500" />
                       <span>Copied</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="h-3.5 w-3.5" />
                       <span>Copy</span>
                     </>
                   )}
                 </Button>
               </div>
 
+              <div className="grid grid-cols-3 gap-1.5">
+                {SOCIAL_NETWORKS.map((network) => {
+                  const Icon = NETWORK_ICONS[network.id];
+                  return (
+                    <Button
+                      key={network.id}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-9 rounded-full text-[13px]"
+                      disabled={busy}
+                      onClick={() => void openSocial(network.id)}
+                    >
+                      <Icon className="size-3.5" />
+                      {network.label}
+                    </Button>
+                  );
+                })}
+              </div>
+
               {!projectId && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 text-[13px] rounded-xl gap-1.5"
+                  className="h-8 gap-1.5 rounded-full text-[13px]"
                   disabled={busy}
                   onClick={() => void ensureSavedAndPublic()}
                 >
-                  <Link2 className="w-3.5 h-3.5" />
+                  <Link2 className="h-3.5 w-3.5" />
                   Save and create link
                 </Button>
               )}

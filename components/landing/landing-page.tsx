@@ -248,7 +248,7 @@ export function LandingPage() {
         id="product"
         className="relative z-20 -mt-10 py-0 sm:py-0 lg:-mt-40"
       >
-          <LandingGrid>
+          <LandingGrid className="md:grid-cols-12">
             <LandingLayer className="bg-land-card/80 backdrop-blur-xl md:col-span-7 md:row-span-2">
               <LandingPad>
                 <p className="text-lg font-bold text-land-ink">Генерация карусели</p>

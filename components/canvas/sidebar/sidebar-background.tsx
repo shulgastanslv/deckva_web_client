@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScreenSplit } from "@/components/canvas/sidebar/screen-split";
 import { BackgroundPattern } from "@/components/canvas/sidebar/background-pattern";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { BackgroundSlideSets } from "@/components/canvas/sidebar/background-slide-sets";
 
 type Tab = "color" | "gradient" | "image";
@@ -216,17 +217,19 @@ export function SidebarBackground() {
                 className="aspect-square rounded-full border border-border/40 transition-transform hover:scale-110 active:scale-95"
               />
             ))}
-            <label
+            <div
               title="Custom color"
-              className="relative flex aspect-square cursor-pointer items-center justify-center rounded-full border border-dashed border-border/80 bg-muted/30 transition-transform hover:scale-110"
+              className="relative flex aspect-square items-center justify-center rounded-full border border-dashed border-border/80 bg-muted/30 transition-transform hover:scale-110"
             >
-              <input
-                type="color"
-                className="absolute inset-0 cursor-pointer opacity-0"
-                onChange={(e) => applySolid(e.target.value)}
+              <ColorPicker
+                compact
+                value="#888888"
+                onChange={(hex) => applySolid(hex)}
+                title="Custom color"
+                className="absolute inset-0 flex items-center justify-center [&_button]:size-full [&_button]:rounded-full [&_button]:ring-0 [&_button]:hover:scale-100"
               />
-              <Plus className="h-3 w-3 text-muted-foreground" />
-            </label>
+              <Plus className="pointer-events-none relative z-10 h-3 w-3 text-muted-foreground" />
+            </div>
           </div>
         </TabsContent>
 
@@ -375,22 +378,27 @@ export function SidebarBackground() {
         </p>
         <div className="flex flex-col">
           {PALETTE_SLOTS.map((slot) => (
-            <label
+            <div
               key={slot.id}
-              className="flex cursor-pointer items-center gap-2.5 rounded-full px-2 py-2 hover:bg-muted/30"
+              className="rounded-full px-2 py-1.5 hover:bg-muted/30"
             >
-              <input
-                type="color"
+              <ColorPicker
+                compact
                 value={shownPalette[slot.id]}
-                onChange={(e) => setProjectSlot(slot.id, e.target.value)}
-                aria-label={slot.label}
-                className="size-7 shrink-0 cursor-pointer rounded-full border border-border/50 bg-transparent p-0"
+                onChange={(hex) => setProjectSlot(slot.id, hex)}
+                title={slot.label}
+                caption={
+                  <>
+                    <span className="flex-1 text-[13px] text-foreground">
+                      {slot.label}
+                    </span>
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                      {shownPalette[slot.id]}
+                    </span>
+                  </>
+                }
               />
-              <span className="flex-1 text-foreground">{slot.label}</span>
-              <span className="font-mono text-[10px] uppercase text-muted-foreground">
-                {shownPalette[slot.id]}
-              </span>
-            </label>
+            </div>
           ))}
         </div>
       </CollapsibleGroup>

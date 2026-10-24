@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { Slider } from "@/components/ui/slider";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { cn } from "@/lib/utils";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import {
@@ -112,27 +113,29 @@ export function BackgroundPattern() {
       </div>
       {patternId ? (
         <div className="flex flex-col gap-1.5 px-0.5 pt-1">
-          <label className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="w-9 shrink-0 text-[10px] text-muted-foreground">Color</span>
-            <input
-              type="color"
+            <ColorPicker
+              compact
               value={patternColor}
-              aria-label="Pattern color"
-              onChange={(event) => {
-                const color = event.target.value;
+              title="Pattern color"
+              onChange={(color) => {
                 colorDirty.current = true;
                 setPatternColor(color);
                 paintPattern(patternId, patternScale, patternOpacity, color, false);
               }}
-              onBlur={() => {
+              onCommit={() => {
                 if (!colorDirty.current) return;
                 colorDirty.current = false;
                 manager?.commit();
               }}
-              className="size-6 shrink-0 cursor-pointer rounded-full border border-border/50 bg-transparent p-0"
+              caption={
+                <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                  {patternColor}
+                </span>
+              }
             />
-            <span className="font-mono text-[10px] uppercase text-muted-foreground">{patternColor}</span>
-          </label>
+          </div>
           <PatternSlider
             label="Size"
             min={0.7}
