@@ -144,6 +144,76 @@ const fieldShell = "flex items-center rounded-full bg-muted/40";
 
 const btnRound = "rounded-full";
 
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[13px] font-medium text-muted-foreground">
+      {children}
+    </span>
+  );
+}
+
+function Segmented<T extends string>({
+  value,
+  options,
+  onChange,
+  className,
+}: {
+  value: T;
+  options: ReadonlyArray<{ id: T; label?: string; icon?: React.ElementType; title?: string }>;
+  onChange: (id: T) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex rounded-full bg-muted/50 p-1 dark:bg-muted/40",
+        className,
+      )}
+    >
+      {options.map((opt) => {
+        const Icon = opt.icon;
+        const active = value === opt.id;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            title={opt.title ?? opt.label}
+            onClick={() => onChange(opt.id)}
+            className={cn(
+              "flex h-7 flex-1 items-center justify-center gap-1 rounded-full text-[13px] transition-colors",
+              active
+                ? "bg-background text-foreground dark:bg-background/80"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {Icon ? <Icon className="size-4" /> : null}
+            {opt.label ? <span>{opt.label}</span> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ToolCluster({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-0.5 rounded-full bg-muted/40 p-1",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 function clampNumber(value: number, min?: number, max?: number): number {
   let next = value;
   if (min != null) next = Math.max(min, next);
@@ -213,7 +283,7 @@ function NumberField({
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <FieldLabel>{label}</FieldLabel>
       <div className={`${fieldShell} h-8 w-[4.75rem] px-2`}>
         <Input
           type="text"
@@ -266,7 +336,7 @@ function DimInput({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <FieldLabel>{label}</FieldLabel>
       <div className={`${fieldShell} h-9 px-3`}>
         <Input
           type="text"
@@ -821,100 +891,129 @@ export function RightSidebar({
     group: isCode ? "Code" : "Group",
   };
 
-  const alignIcons: Record<TextAlign, React.ElementType> = {
-    left: AlignLeft,
-    center: AlignCenter,
-    right: AlignRight,
-    justify: AlignJustify,
-  };
+  const panelTitle = isMulti
+    ? "Selection"
+    : formValues
+      ? (typeLabel[formValues.type] ?? formValues.type)
+      : "Properties";
+
+  const textAlignOptions = (
+    [
+      { id: "left" as const, icon: AlignLeft, title: "Align left" },
+      { id: "center" as const, icon: AlignCenter, title: "Align center" },
+      { id: "right" as const, icon: AlignRight, title: "Align right" },
+      { id: "justify" as const, icon: AlignJustify, title: "Justify" },
+    ]
+  );
 
   return (
-    <div className="relative flex h-full overflow-hidden border-l border-border bg-background">
+    <div className="relative flex h-full overflow-hidden bg-background">
       <div
         className={`flex flex-col overflow-y-auto transition-all duration-200 ease-in-out ${
           isRightCollapsed ? "w-0 opacity-0" : "w-72 opacity-100"
         }`}
       >
-        <div className="flex h-11 shrink-0 items-center border-b border-border/60 px-3.5">
-          <span className="truncate text-[13px] font-semibold text-foreground">
-            {isMulti
-              ? "Selection"
-              : formValues
-                ? (typeLabel[formValues.type] ?? formValues.type)
-                : "Properties"}
-          </span>
+        <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
+          <div className="min-w-0">
+            <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
+              {panelTitle}
+            </span>
+            {isMulti ? (
+              <span className="block truncate text-[11px] text-muted-foreground">
+                {selectedCount} objects
+              </span>
+            ) : null}
+          </div>
+          {formValues ? (
+            <Button
+              type="button"
+              variant={formValues.isLocked ? "secondary" : "ghost"}
+              size="icon"
+              className={`size-8 shrink-0 ${btnRound}`}
+              onClick={handleToggleLock}
+              title={formValues.isLocked ? "Unlock" : "Lock"}
+            >
+              {formValues.isLocked ? (
+                <Lock className="size-3.5" />
+              ) : (
+                <Unlock className="size-3.5" />
+              )}
+            </Button>
+          ) : null}
         </div>
 
         <ScrollArea className="flex-1">
           {isMulti ? (
-            <div className="flex flex-col gap-3 px-3 py-3">
-              <p className="text-[13px] text-muted-foreground">
-                {selectedCount} objects selected
-              </p>
-              <div className="grid grid-cols-4 gap-1">
-                {(
-                  [
-                    ["left", "Align left", AlignHorizontalJustifyStart],
-                    ["center", "Align center", AlignHorizontalJustifyCenter],
-                    ["right", "Align right", AlignHorizontalJustifyEnd],
-                    ["distribute-x", "Equal horizontal gaps", AlignHorizontalSpaceBetween],
-                    ["top", "Align top", AlignVerticalJustifyStart],
-                    ["middle", "Align middle", AlignVerticalJustifyCenter],
-                    ["bottom", "Align bottom", AlignVerticalJustifyEnd],
-                    ["distribute-y", "Equal vertical gaps", AlignVerticalSpaceBetween],
-                  ] as const
-                ).map(([mode, label, Icon]) => (
+            <div className="flex flex-col gap-1 pb-4 pt-1">
+              <div className="space-y-3 px-3 pb-2">
+                <div className="space-y-2">
+                  <FieldLabel>Align</FieldLabel>
+                  <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/40 p-1.5">
+                    {(
+                      [
+                        ["left", "Align left", AlignHorizontalJustifyStart],
+                        ["center", "Align center", AlignHorizontalJustifyCenter],
+                        ["right", "Align right", AlignHorizontalJustifyEnd],
+                        ["distribute-x", "Equal horizontal gaps", AlignHorizontalSpaceBetween],
+                        ["top", "Align top", AlignVerticalJustifyStart],
+                        ["middle", "Align middle", AlignVerticalJustifyCenter],
+                        ["bottom", "Align bottom", AlignVerticalJustifyEnd],
+                        ["distribute-y", "Equal vertical gaps", AlignVerticalSpaceBetween],
+                      ] as const
+                    ).map(([mode, label, Icon]) => (
+                      <Button
+                        key={mode}
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        title={label}
+                        className={`size-8 ${btnRound}`}
+                        onClick={() => alignSelection(mode)}
+                      >
+                        <Icon className="size-4" />
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-1.5">
                   <Button
-                    key={mode}
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className={`h-8 flex-1 text-[13px] ${btnRound}`}
+                    onClick={groupSelected}
+                  >
+                    Group
+                  </Button>
+                  <Button
                     type="button"
                     variant="ghost"
-                    size="icon"
-                    title={label}
-                    className={`size-8 ${btnRound}`}
-                    onClick={() => alignSelection(mode)}
+                    size="sm"
+                    className={`h-8 flex-1 bg-muted/40 text-[13px] ${btnRound}`}
+                    onClick={copyStyle}
                   >
-                    <Icon className="size-4" />
+                    Copy style
                   </Button>
-                ))}
-              </div>
-              <div className="flex gap-1.5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 flex-1 text-[13px] ${btnRound}`}
-                  onClick={groupSelected}
-                >
-                  Group
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 flex-1 text-[13px] ${btnRound}`}
-                  onClick={copyStyle}
-                >
-                  Copy style
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 flex-1 text-[13px] ${btnRound}`}
-                  disabled={!copiedStyle}
-                  onClick={pasteStyle}
-                >
-                  Paste style
-                </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 flex-1 bg-muted/40 text-[13px] ${btnRound}`}
+                    disabled={!copiedStyle}
+                    onClick={pasteStyle}
+                  >
+                    Paste
+                  </Button>
+                </div>
               </div>
               {formValues && (
                 <>
                   {sharedText && (
-                    <CollapsibleGroup id="rs-multi-text" title="Text" defaultOpen>
-                      <div className="flex gap-1.5">
+                    <CollapsibleGroup id="rs-multi-text" title="Typography" defaultOpen>
+                      <ToolCluster>
                         <Button
                           type="button"
-                          variant={formValues.isBold ? "secondary" : "outline"}
+                          variant={formValues.isBold ? "secondary" : "ghost"}
                           size="icon"
                           className={`size-8 ${btnRound}`}
                           onClick={() => toggleTextStyle("bold")}
@@ -923,7 +1022,7 @@ export function RightSidebar({
                         </Button>
                         <Button
                           type="button"
-                          variant={formValues.isItalic ? "secondary" : "outline"}
+                          variant={formValues.isItalic ? "secondary" : "ghost"}
                           size="icon"
                           className={`size-8 ${btnRound}`}
                           onClick={() => toggleTextStyle("italic")}
@@ -932,14 +1031,14 @@ export function RightSidebar({
                         </Button>
                         <Button
                           type="button"
-                          variant={formValues.isUnderline ? "secondary" : "outline"}
+                          variant={formValues.isUnderline ? "secondary" : "ghost"}
                           size="icon"
                           className={`size-8 ${btnRound}`}
                           onClick={() => toggleTextStyle("underline")}
                         >
                           <Underline className="size-4" />
                         </Button>
-                      </div>
+                      </ToolCluster>
                       <FontSelect
                         value={formValues.fontFamily ?? "Inter"}
                         onChange={(family) => {
@@ -949,7 +1048,7 @@ export function RightSidebar({
                         }}
                       />
                       <NumberField
-                        label="Font size"
+                        label="Size"
                         value={formValues.fontSize ?? 32}
                         onChange={(v) => updateProp("fontSize", v)}
                         min={8}
@@ -965,25 +1064,11 @@ export function RightSidebar({
                         step={0.05}
                         decimals={2}
                       />
-                      <div className="flex rounded-full border border-border bg-transparent p-1">
-                        {(["left", "center", "right", "justify"] as const).map((align) => {
-                          const Icon = alignIcons[align];
-                          return (
-                            <button
-                              key={align}
-                              type="button"
-                              onClick={() => updateProp("textAlign", align)}
-                              className={`flex h-7 flex-1 items-center justify-center rounded-full transition-colors ${
-                                formValues.textAlign === align
-                                  ? "bg-muted text-foreground"
-                                  : "text-muted-foreground hover:text-foreground"
-                              }`}
-                            >
-                              <Icon className="size-4" />
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <Segmented
+                        value={formValues.textAlign ?? "left"}
+                        options={textAlignOptions}
+                        onChange={(align) => updateProp("textAlign", align)}
+                      />
                     </CollapsibleGroup>
                   )}
                   <CollapsibleGroup id="rs-multi-color" title="Color" defaultOpen>
@@ -1006,7 +1091,7 @@ export function RightSidebar({
                       onChange={(hex) => updateProp("stroke", hex)}
                     />
                     <NumberField
-                      label="Thickness"
+                      label="Stroke width"
                       value={formValues.strokeWidth}
                       onChange={(v) => updateProp("strokeWidth", v)}
                       min={0}
@@ -1024,7 +1109,7 @@ export function RightSidebar({
                       unit="%"
                     />
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[13px] text-muted-foreground">Blend</span>
+                      <FieldLabel>Blend</FieldLabel>
                       <select
                         value={
                           BLEND_MODES.some((mode) => mode.id === formValues.blendMode)
@@ -1043,181 +1128,141 @@ export function RightSidebar({
                         ))}
                       </select>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[13px] text-muted-foreground">Shadow</span>
-                      <Button
-                        type="button"
-                        variant={formValues.hasShadow ? "secondary" : "outline"}
+                    <div className="flex items-center justify-between gap-2 rounded-full bg-muted/40 px-3 py-1.5">
+                      <FieldLabel>Shadow</FieldLabel>
+                      <Switch
                         size="sm"
-                        className={`h-8 ${btnRound}`}
-                        onClick={() => toggleShadow(!formValues.hasShadow)}
-                      >
-                        {formValues.hasShadow ? "On" : "Off"}
-                      </Button>
+                        checked={formValues.hasShadow}
+                        onCheckedChange={toggleShadow}
+                        aria-label="Enable shadow"
+                      />
                     </div>
-                    <Button
-                      type="button"
-                      variant={formValues.isLocked ? "secondary" : "outline"}
-                      size="sm"
-                      className={`h-8 ${btnRound}`}
-                      onClick={handleToggleLock}
-                    >
-                      {formValues.isLocked ? "Unlock" : "Lock"}
-                    </Button>
                   </CollapsibleGroup>
                 </>
               )}
             </div>
           ) : !formValues ? (
-            <div className="flex flex-col items-center justify-center gap-3 px-5 py-14 text-center text-muted-foreground">
-              <SelectObjectArt className="h-auto w-full max-w-[160px]" />
-              <p className="text-[13px] leading-snug">
-                Select an object on the canvas to change its properties
-              </p>
+            <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+              <SelectObjectArt className="h-auto w-full max-w-[140px] opacity-80" />
+              <div className="space-y-1">
+                <p className="text-[13px] font-medium text-foreground">Nothing selected</p>
+                <p className="text-[13px] leading-snug text-muted-foreground">
+                  Click an object on the canvas to edit it
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="flex flex-col pb-3">
-              {canImportImage && (
-                <div className="border-b border-border/60 px-3 py-3">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Upload className="size-4" />
-                    Import image
-                  </Button>
+            <div className="flex flex-col gap-1 pb-4 pt-1">
+              <div className="space-y-2 px-3 pb-2">
+                <div className="flex items-center gap-1.5">
+                  <ToolCluster className="flex-1 justify-center">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={`size-8 ${btnRound}`}
+                      onClick={handleCenterH}
+                      title="Center horizontally"
+                    >
+                      <AlignHorizontalDistributeCenter className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={`size-8 ${btnRound}`}
+                      onClick={handleCenterV}
+                      title="Center vertically"
+                    >
+                      <AlignVerticalDistributeCenter className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={`size-8 ${btnRound}`}
+                      onClick={handleBringForward}
+                      title="Bring forward"
+                    >
+                      <BringToFront className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={`size-8 ${btnRound}`}
+                      onClick={handleSendBackwards}
+                      title="Send backwards"
+                    >
+                      <SendToBack className="size-4" />
+                    </Button>
+                  </ToolCluster>
                 </div>
-              )}
-              <div className="flex items-center gap-1 px-2.5 py-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className={`size-8 ${btnRound}`}
-                  onClick={handleCenterH}
-                  title="Center horizontally"
-                >
-                  <AlignHorizontalDistributeCenter className="size-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className={`size-8 ${btnRound}`}
-                  onClick={handleCenterV}
-                  title="Center vertically"
-                >
-                  <AlignVerticalDistributeCenter className="size-4" />
-                </Button>
-                <div className="mx-1.5 h-5 w-px bg-border/70" />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className={`size-8 ${btnRound}`}
-                  onClick={handleBringForward}
-                  title="Bring forward"
-                >
-                  <BringToFront className="size-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className={`size-8 ${btnRound}`}
-                  onClick={handleSendBackwards}
-                  title="Send backwards"
-                >
-                  <SendToBack className="size-4" />
-                </Button>
-                <div className="mx-1.5 h-5 w-px bg-border/70" />
-                <Button
-                  type="button"
-                  variant={formValues.isLocked ? "secondary" : "ghost"}
-                  size="icon"
-                  className={`size-8 ${btnRound}`}
-                  onClick={handleToggleLock}
-                  title={formValues.isLocked ? "Unlock" : "Lock"}
-                >
-                  {formValues.isLocked ? (
-                    <Lock className="size-4" />
-                  ) : (
-                    <Unlock className="size-4" />
+                <div className="flex gap-1.5">
+                  {canUngroup(selectedObject) && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className={`h-8 flex-1 text-[13px] ${btnRound}`}
+                      onClick={ungroupSelected}
+                    >
+                      Ungroup
+                    </Button>
                   )}
-                </Button>
-              </div>
-              <div className="flex gap-1.5 border-b border-border/60 px-2.5 pb-2">
-                {canUngroup(selectedObject) && (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
-                    className={`h-8 flex-1 text-[13px] ${btnRound}`}
-                    onClick={ungroupSelected}
+                    className={`h-8 flex-1 bg-muted/40 text-[13px] ${btnRound}`}
+                    onClick={copyStyle}
                   >
-                    Ungroup
+                    Copy style
                   </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 flex-1 bg-muted/40 text-[13px] ${btnRound}`}
+                    disabled={!copiedStyle}
+                    onClick={pasteStyle}
+                  >
+                    Paste
+                  </Button>
+                </div>
+                {canImportImage && (
+                  <>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="size-4" />
+                      Import image
+                    </Button>
+                  </>
                 )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 flex-1 text-[13px] ${btnRound}`}
-                  onClick={copyStyle}
-                >
-                  Copy style
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={`h-8 flex-1 text-[13px] ${btnRound}`}
-                  disabled={!copiedStyle}
-                  onClick={pasteStyle}
-                >
-                  Paste style
-                </Button>
               </div>
 
-              {codeGroup ? <CodeBlockInspector group={codeGroup} /> : null}
-
-              <CollapsibleGroup id="rs-position" title="Size and angle">
-                <div className="grid grid-cols-2 gap-2.5">
-                  <DimInput
-                    label="Width"
-                    value={formValues.width}
-                    onChange={setWidth}
-                  />
-                  <DimInput
-                    label="Height"
-                    value={formValues.height}
-                    onChange={setHeight}
-                  />
+              {codeGroup ? (
+                <div className="px-3 pb-1">
+                  <CodeBlockInspector group={codeGroup} />
                 </div>
-                <NumberField
-                  label="Rotation"
-                  value={formValues.angle}
-                  onChange={(v) => updateProp("angle", v)}
-                  min={-180}
-                  max={360}
-                  unit="°"
-                />
-              </CollapsibleGroup>
+              ) : null}
 
               {isImage && (
-                <CollapsibleGroup id="rs-image" title="Image">
+                <CollapsibleGroup id="rs-image" title="Image" defaultOpen>
                   {cropping ? (
-                    <>
+                    <div className="space-y-3 rounded-2xl bg-muted/40 p-3">
                       <p className="text-[13px] leading-snug text-muted-foreground">
                         Drag the picture to move it inside the frame.
                       </p>
@@ -1234,9 +1279,9 @@ export function RightSidebar({
                       <div className="flex gap-2">
                         <Button
                           type="button"
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className={`h-9 flex-1 ${btnRound}`}
+                          className={`h-9 flex-1 bg-background/70 ${btnRound}`}
                           onClick={() => manager?.crop.cancel()}
                         >
                           Cancel
@@ -1250,191 +1295,191 @@ export function RightSidebar({
                           Done
                         </Button>
                       </div>
-                    </>
+                    </div>
                   ) : (
+                    <div className="flex gap-1.5">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className={`h-9 flex-1 justify-center gap-2 text-[13px] ${btnRound}`}
+                        onClick={() => selectedObject && manager?.crop.start(selectedObject)}
+                        disabled={imageToolBusy}
+                      >
+                        <Crop className="size-4" />
+                        Crop
+                      </Button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className={`h-9 flex-1 justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={imageToolBusy}
+                      >
+                        <Upload className="size-4" />
+                        Replace
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <FieldLabel>Enhance</FieldLabel>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="default"
                       size="sm"
                       className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                      onClick={() => selectedObject && manager?.crop.start(selectedObject)}
-                      disabled={imageToolBusy}
+                      onClick={() => void removeBackground()}
+                      disabled={!canEnhance}
                     >
-                      <Crop className="size-4" />
-                      Crop
+                      {enhanceBusy === "remove-bg" ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <WandSparkles className="size-4" />
+                      )}
+                      {enhanceBusy === "remove-bg" ? "Removing background…" : "Remove background"}
                     </Button>
-                  )}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={imageToolBusy}
-                  >
-                    <Upload className="size-4" />
-                    Replace Image
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="default"
-                    size="sm"
-                    className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                    onClick={() => void removeBackground()}
-                    disabled={!canEnhance}
-                  >
-                    {enhanceBusy === "remove-bg" ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <WandSparkles className="size-4" />
-                    )}
-                    {enhanceBusy === "remove-bg" ? "Removing background…" : "Remove background"}
-                  </Button>
-                  <div className="flex gap-1">
-                    {([2, 3, 4] as UpscaleScale[]).map((value) => (
-                      <button
-                        key={value}
+                    <div className="flex gap-1.5">
+                      <Segmented
+                        value={String(enhanceScale)}
+                        options={([2, 3, 4] as UpscaleScale[]).map((value) => ({
+                          id: String(value),
+                          label: `${value}×`,
+                        }))}
+                        onChange={(id) => setEnhanceScale(Number(id) as UpscaleScale)}
+                        className="flex-1"
+                      />
+                      <Button
                         type="button"
-                        disabled={imageToolBusy}
-                        onClick={() => setEnhanceScale(value)}
-                        className={cn(
-                          "h-8 flex-1 rounded-full text-[13px] tabular-nums transition-colors disabled:opacity-40",
-                          enhanceScale === value
-                            ? "bg-foreground text-background"
-                            : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
-                        )}
+                        variant="ghost"
+                        size="sm"
+                        className={`h-9 shrink-0 gap-1.5 bg-muted/40 px-3 text-[13px] ${btnRound}`}
+                        onClick={() => void upscale()}
+                        disabled={!canEnhance}
+                        title={`Upscale ${enhanceScale}×`}
                       >
-                        {value}×
-                      </button>
-                    ))}
+                        {enhanceBusy === "upscale" ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <ScanSearch className="size-4" />
+                        )}
+                        Upscale
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className={`h-9 w-full justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
+                      onClick={() => void magicLayer()}
+                      disabled={!canEnhance}
+                    >
+                      {enhanceBusy === "magic-layer" ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Layers2 className="size-4" />
+                      )}
+                      {enhanceBusy === "magic-layer" ? "Splitting layers…" : "Magic layer"}
+                    </Button>
+                    {enhanceError ? (
+                      <p className="text-[13px] leading-snug text-destructive">
+                        {enhanceError}
+                      </p>
+                    ) : null}
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                    onClick={() => void upscale()}
-                    disabled={!canEnhance}
-                  >
-                    {enhanceBusy === "upscale" ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <ScanSearch className="size-4" />
-                    )}
-                    {enhanceBusy === "upscale" ? "Upscaling…" : `Upscale ${enhanceScale}×`}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                    onClick={() => void magicLayer()}
-                    disabled={!canEnhance}
-                  >
-                    {enhanceBusy === "magic-layer" ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Layers2 className="size-4" />
-                    )}
-                    {enhanceBusy === "magic-layer" ? "Splitting layers…" : "Magic layer"}
-                  </Button>
-                  {enhanceError && (
-                    <p className="text-[13px] text-destructive leading-snug">
-                      {enhanceError}
-                    </p>
-                  )}
                 </CollapsibleGroup>
               )}
 
               {isText && (
-                <CollapsibleGroup id="rs-text" title="Text">
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[13px] text-muted-foreground">
-                      Content
-                    </span>
-                    <textarea
-                      rows={3}
-                      value={formValues.text ?? ""}
-                      onChange={(e) => updateProp("text", e.target.value)}
-                      className="resize-none rounded-2xl border border-border bg-transparent p-3 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
-                    />
-                    <p
-                      className={`text-[13px] leading-snug ${
-                        textLengthStatus("Instagram", (formValues.text ?? "").trim().length).tooLong
-                          ? "text-destructive"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {textLengthNote("Instagram", (formValues.text ?? "").trim().length)}
-                    </p>
-                  </div>
+                <CollapsibleGroup id="rs-text" title="Typography" defaultOpen>
+                  <textarea
+                    rows={3}
+                    value={formValues.text ?? ""}
+                    onChange={(e) => updateProp("text", e.target.value)}
+                    placeholder="Text content"
+                    className="resize-none rounded-2xl bg-muted/40 p-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+                  />
+                  <p
+                    className={cn(
+                      "text-[12px] leading-snug",
+                      textLengthStatus("Instagram", (formValues.text ?? "").trim().length).tooLong
+                        ? "text-destructive"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {textLengthNote("Instagram", (formValues.text ?? "").trim().length)}
+                  </p>
 
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[13px] text-muted-foreground">Style</span>
-                    <div className="flex gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <ToolCluster className="shrink-0">
                       <Button
                         type="button"
-                        variant={formValues.isBold ? "secondary" : "outline"}
+                        variant={formValues.isBold ? "secondary" : "ghost"}
                         size="icon"
                         className={`size-8 ${btnRound}`}
                         onClick={() => toggleTextStyle("bold")}
+                        title="Bold"
                       >
                         <Bold className="size-4" />
                       </Button>
                       <Button
                         type="button"
-                        variant={formValues.isItalic ? "secondary" : "outline"}
+                        variant={formValues.isItalic ? "secondary" : "ghost"}
                         size="icon"
                         className={`size-8 ${btnRound}`}
                         onClick={() => toggleTextStyle("italic")}
+                        title="Italic"
                       >
                         <Italic className="size-4" />
                       </Button>
                       <Button
                         type="button"
-                        variant={
-                          formValues.isUnderline ? "secondary" : "outline"
-                        }
+                        variant={formValues.isUnderline ? "secondary" : "ghost"}
                         size="icon"
                         className={`size-8 ${btnRound}`}
                         onClick={() => toggleTextStyle("underline")}
+                        title="Underline"
                       >
                         <Underline className="size-4" />
                       </Button>
-                    </div>
+                    </ToolCluster>
+                    <Segmented
+                      value={formValues.textAlign ?? "left"}
+                      options={textAlignOptions}
+                      onChange={(align) => updateProp("textAlign", align)}
+                      className="flex-1"
+                    />
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[13px] text-muted-foreground">List</span>
-                    <div className="flex gap-1.5">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className={`h-8 flex-1 gap-1.5 text-[13px] ${btnRound}`}
-                        onClick={() => applyTextList("bullet")}
-                      >
-                        <List className="size-3.5" />
-                        Bulleted
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className={`h-8 flex-1 gap-1.5 text-[13px] ${btnRound}`}
-                        onClick={() => applyTextList("number")}
-                      >
-                        <ListOrdered className="size-3.5" />
-                        Numbered
-                      </Button>
-                    </div>
+                  <div className="flex gap-1.5">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 flex-1 gap-1.5 bg-muted/40 text-[13px] ${btnRound}`}
+                      onClick={() => applyTextList("bullet")}
+                    >
+                      <List className="size-3.5" />
+                      Bullets
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 flex-1 gap-1.5 bg-muted/40 text-[13px] ${btnRound}`}
+                      onClick={() => applyTextList("number")}
+                    >
+                      <ListOrdered className="size-3.5" />
+                      Numbers
+                    </Button>
                   </div>
 
                   <FontSelect
@@ -1470,9 +1515,9 @@ export function RightSidebar({
                         </Button>
                         <Button
                           type="button"
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className={`h-7 flex-1 text-[13px] ${btnRound}`}
+                          className={`h-7 flex-1 bg-background/60 text-[13px] ${btnRound}`}
                           disabled={markedSlideIds.length === 0}
                           title={
                             markedSlideIds.length === 0
@@ -1500,7 +1545,7 @@ export function RightSidebar({
                   )}
 
                   <NumberField
-                    label="Font size"
+                    label="Size"
                     value={formValues.fontSize ?? 32}
                     onChange={(v) => {
                       updateProp("fontSize", v);
@@ -1510,7 +1555,6 @@ export function RightSidebar({
                     max={140}
                     unit="px"
                   />
-
                   <NumberField
                     label="Line height"
                     value={formValues.lineHeight ?? 1.16}
@@ -1520,7 +1564,6 @@ export function RightSidebar({
                     step={0.05}
                     decimals={2}
                   />
-
                   <NumberField
                     label="Letter spacing"
                     value={formValues.charSpacing ?? 0}
@@ -1548,9 +1591,9 @@ export function RightSidebar({
                         </Button>
                         <Button
                           type="button"
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className={`h-7 flex-1 text-[13px] ${btnRound}`}
+                          className={`h-7 flex-1 bg-background/60 text-[13px] ${btnRound}`}
                           disabled={markedSlideIds.length === 0}
                           title={
                             markedSlideIds.length === 0
@@ -1573,89 +1616,55 @@ export function RightSidebar({
                       </div>
                     </div>
                   )}
-
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[13px] text-muted-foreground">
-                      Alignment
-                    </span>
-                    <div className="flex rounded-full border border-border bg-transparent p-1">
-                      {(
-                        ["left", "center", "right", "justify"] as const
-                      ).map((align) => {
-                        const Icon = alignIcons[align];
-                        return (
-                          <button
-                            key={align}
-                            type="button"
-                            onClick={() => updateProp("textAlign", align)}
-                            className={`flex h-7 flex-1 items-center justify-center rounded-full transition-colors ${
-                              formValues.textAlign === align
-                                ? "bg-muted text-foreground"
-                                : "text-muted-foreground hover:text-foreground"
-                            }`}
-                          >
-                            <Icon className="size-4" />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
                 </CollapsibleGroup>
               )}
 
-              <CollapsibleGroup id="rs-fill" title="Fill">
+              <CollapsibleGroup
+                id="rs-fill"
+                title="Color"
+                defaultOpen={!isImage}
+              >
                 {!isImage ? (
                   <>
-                    <div className="grid grid-cols-4 gap-1">
+                    <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/30 p-1.5">
                       {PALETTE_SLOTS.map((slot) => (
                         <button
                           key={slot.id}
                           type="button"
                           title={slot.label}
                           onClick={() => assignFillSlot(slot.id)}
-                          className={`flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] ${
+                          className={cn(
+                            "flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] transition-colors",
                             boundSlot === slot.id
-                              ? "bg-muted text-foreground"
-                              : "text-muted-foreground hover:bg-muted/40"
-                          }`}
+                              ? "bg-background text-foreground"
+                              : "text-muted-foreground hover:bg-muted/50",
+                          )}
                         >
                           <span
-                            className="size-4 rounded-full border border-border/40"
+                            className="size-4 rounded-full ring-1 ring-border/50"
                             style={{ backgroundColor: palette[slot.id] }}
                           />
                           {slot.label}
                         </button>
                       ))}
                     </div>
-                    <div className="flex rounded-full border border-border bg-transparent p-1">
-                      <button
-                        type="button"
-                        onClick={clearGradient}
-                        className={`flex h-7 flex-1 items-center justify-center rounded-full text-[13px] transition-colors ${
-                          formValues.gradientFrom
-                            ? "text-muted-foreground hover:text-foreground"
-                            : "bg-muted text-foreground"
-                        }`}
-                      >
-                        Solid
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setGradient(
-                            formValues.gradientFrom || formValues.fill || "#111111",
-                            formValues.gradientTo || "#ffffff",
-                          )
+                    <Segmented
+                      value={formValues.gradientFrom ? "gradient" : "solid"}
+                      options={[
+                        { id: "solid", label: "Solid" },
+                        { id: "gradient", label: "Gradient" },
+                      ]}
+                      onChange={(mode) => {
+                        if (mode === "solid") {
+                          clearGradient();
+                          return;
                         }
-                        className={`flex h-7 flex-1 items-center justify-center rounded-full text-[13px] transition-colors ${
-                          formValues.gradientFrom
-                            ? "bg-muted text-foreground"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        Gradient
-                      </button>
-                    </div>
+                        setGradient(
+                          formValues.gradientFrom || formValues.fill || "#111111",
+                          formValues.gradientTo || "#ffffff",
+                        );
+                      }}
+                    />
                     {formValues.gradientFrom && formValues.gradientTo ? (
                       <>
                         <ColorPicker
@@ -1671,7 +1680,7 @@ export function RightSidebar({
                       </>
                     ) : (
                       <ColorPicker
-                        label={isText ? "Text color" : "Fill color"}
+                        label={isText ? "Text color" : "Fill"}
                         value={formValues.fill}
                         onChange={(hex) => {
                           setFormValues((prev) => (prev ? { ...prev, fill: hex } : null));
@@ -1683,14 +1692,10 @@ export function RightSidebar({
                       />
                     )}
                   </>
-                ) : (
-                  <p className="text-[13px] text-muted-foreground">
-                    The image has no fill — replace the file in the section above.
-                  </p>
-                )}
+                ) : null}
                 {isText && (
                   <ColorPicker
-                    label="Text background"
+                    label="Background"
                     value={
                       formValues.backgroundColor === "transparent"
                         ? ""
@@ -1703,25 +1708,20 @@ export function RightSidebar({
                         variant="ghost"
                         size="sm"
                         className={`h-7 px-2 text-[13px] ${btnRound}`}
-                        onClick={() =>
-                          updateProp("backgroundColor", "transparent")
-                        }
+                        onClick={() => updateProp("backgroundColor", "transparent")}
                       >
-                        Reset
+                        Clear
                       </Button>
                     }
                   />
                 )}
-              </CollapsibleGroup>
-
-              <CollapsibleGroup id="rs-stroke" title="Stroke">
                 <ColorPicker
-                  label="Stroke color"
+                  label="Stroke"
                   value={formValues.stroke}
                   onChange={(hex) => updateProp("stroke", hex)}
                 />
                 <NumberField
-                  label="Thickness"
+                  label="Stroke width"
                   value={formValues.strokeWidth}
                   onChange={(v) => updateProp("strokeWidth", v)}
                   min={0}
@@ -1730,50 +1730,34 @@ export function RightSidebar({
                 />
               </CollapsibleGroup>
 
-              <CollapsibleGroup id="rs-appearance" title="Appearance">
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[13px] text-muted-foreground">Blend</span>
-                  <select
-                    value={
-                      BLEND_MODES.some((mode) => mode.id === formValues.blendMode)
-                        ? formValues.blendMode
-                        : "source-over"
-                    }
-                    onChange={(e) => updateProp("blendMode", e.target.value, "globalCompositeOperation")}
-                    className="h-9 w-full rounded-full bg-muted/40 px-3 text-[13px] text-foreground outline-none"
-                  >
-                    {BLEND_MODES.map((mode) => (
-                      <option key={mode.id} value={mode.id}>
-                        {mode.label}
-                      </option>
-                    ))}
-                  </select>
+              <CollapsibleGroup
+                id="rs-position"
+                title="Size & rotate"
+                defaultOpen={!isText && !isImage}
+              >
+                <div className="grid grid-cols-2 gap-2.5">
+                  <DimInput
+                    label="Width"
+                    value={formValues.width}
+                    onChange={setWidth}
+                  />
+                  <DimInput
+                    label="Height"
+                    value={formValues.height}
+                    onChange={setHeight}
+                  />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[13px] text-muted-foreground">Mask</span>
-                  <div className="flex rounded-full border border-border bg-transparent p-1">
-                    {(
-                      [
-                        ["none", "None"],
-                        ["circle", "Circle"],
-                        ["rounded", "Rounded"],
-                      ] as const
-                    ).map(([kind, label]) => (
-                      <button
-                        key={kind}
-                        type="button"
-                        onClick={() => setMask(kind)}
-                        className={`flex h-7 flex-1 items-center justify-center rounded-full text-[13px] transition-colors ${
-                          (formValues.mask ?? "none") === kind
-                            ? "bg-muted text-foreground"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <NumberField
+                  label="Rotation"
+                  value={formValues.angle}
+                  onChange={(v) => updateProp("angle", v)}
+                  min={-180}
+                  max={360}
+                  unit="°"
+                />
+              </CollapsibleGroup>
+
+              <CollapsibleGroup id="rs-appearance" title="Appearance" defaultOpen={false}>
                 <NumberField
                   label="Opacity"
                   value={Math.round(formValues.opacity * 100)}
@@ -1782,7 +1766,6 @@ export function RightSidebar({
                   max={100}
                   unit="%"
                 />
-
                 {canHaveRadius && (
                   <NumberField
                     label="Corner radius"
@@ -1793,7 +1776,6 @@ export function RightSidebar({
                     unit="px"
                   />
                 )}
-
                 <NumberField
                   label="Padding"
                   value={formValues.padding}
@@ -1802,11 +1784,44 @@ export function RightSidebar({
                   max={60}
                   unit="px"
                 />
+                <div className="flex flex-col gap-1.5">
+                  <FieldLabel>Mask</FieldLabel>
+                  <Segmented
+                    value={(formValues.mask ?? "none") as MaskKind}
+                    options={[
+                      { id: "none" as MaskKind, label: "None" },
+                      { id: "circle" as MaskKind, label: "Circle" },
+                      { id: "rounded" as MaskKind, label: "Round" },
+                    ]}
+                    onChange={setMask}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <FieldLabel>Blend</FieldLabel>
+                  <select
+                    value={
+                      BLEND_MODES.some((mode) => mode.id === formValues.blendMode)
+                        ? formValues.blendMode
+                        : "source-over"
+                    }
+                    onChange={(e) =>
+                      updateProp("blendMode", e.target.value, "globalCompositeOperation")
+                    }
+                    className="h-9 w-full rounded-full bg-muted/40 px-3 text-[13px] text-foreground outline-none"
+                  >
+                    {BLEND_MODES.map((mode) => (
+                      <option key={mode.id} value={mode.id}>
+                        {mode.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </CollapsibleGroup>
 
               <CollapsibleGroup
                 id="rs-effects"
                 title="Shadow"
+                defaultOpen={false}
                 headerRight={
                   <Switch
                     size="sm"
@@ -1819,7 +1834,7 @@ export function RightSidebar({
                 {formValues.hasShadow ? (
                   <div className="flex flex-col gap-3">
                     <ColorPicker
-                      label="Shadow color"
+                      label="Color"
                       value={formValues.shadowColor.slice(0, 7)}
                       onChange={(hex) => updateShadowProp("shadowColor", hex)}
                     />
@@ -1832,7 +1847,7 @@ export function RightSidebar({
                       unit="px"
                     />
                     <NumberField
-                      label="Vertical offset"
+                      label="Offset"
                       value={formValues.shadowOffsetY}
                       onChange={(v) => updateShadowProp("shadowOffsetY", v)}
                       min={-30}
@@ -1842,7 +1857,7 @@ export function RightSidebar({
                   </div>
                 ) : (
                   <p className="text-[13px] text-muted-foreground">
-                    Enable the switch on the right to add a shadow.
+                    Turn on the switch to add a drop shadow.
                   </p>
                 )}
               </CollapsibleGroup>
@@ -1851,7 +1866,7 @@ export function RightSidebar({
         </ScrollArea>
       </div>
 
-      <aside className="flex w-10 shrink-0 flex-col items-center justify-start border-l border-border/50 py-3">
+      <aside className="flex w-10 shrink-0 flex-col items-center justify-start bg-muted/20 py-3">
         <Button
           variant="ghost"
           size="icon"
