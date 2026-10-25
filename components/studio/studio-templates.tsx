@@ -1,15 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import {
-  getTemplateCategories,
-  getTemplates,
-  type TemplateListItem,
-} from "@/actions/templates";
+import { getTemplates, type TemplateListItem } from "@/actions/templates";
+import { TEMPLATE_CATEGORIES } from "@/lib/templates/categories";
 import { AuthModal } from "@/components/auth";
 import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
 import {
@@ -25,7 +22,6 @@ export function StudioTemplates() {
   const [authOpen, setAuthOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
-  const [categories, setCategories] = useState<string[]>([]);
   const [templates, setTemplates] = useState<TemplateListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [openingId, setOpeningId] = useState<string | null>(null);
@@ -43,16 +39,11 @@ export function StudioTemplates() {
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
     try {
-      const [listRes, catsRes] = await Promise.all([
-        getTemplates({
-          category: category === "all" ? undefined : category,
-          search: search.trim() || undefined,
-        }),
-        getTemplateCategories(),
-      ]);
-      if (listRes.success) setTemplates(listRes.templates);
-      else setTemplates([]);
-      if (catsRes.success) setCategories(catsRes.categories);
+      const listRes = await getTemplates({
+        category: category === "all" ? undefined : category,
+        search: search.trim() || undefined,
+      });
+      setTemplates(listRes.success ? listRes.templates : []);
     } finally {
       setLoading(false);
     }
@@ -64,8 +55,6 @@ export function StudioTemplates() {
     }, search ? 220 : 0);
     return () => window.clearTimeout(t);
   }, [fetchTemplates, search]);
-
-  const tabs = useMemo(() => ["all", ...categories], [categories]);
 
   const openTemplate = (id: string) => {
     if (status !== "authenticated") {
@@ -85,13 +74,16 @@ export function StudioTemplates() {
         searchPlaceholder="Search templates"
         tabs={
           <>
-            {tabs.map((tab) => (
+            <StudioTab active={category === "all"} onClick={() => setCategory("all")}>
+              All
+            </StudioTab>
+            {TEMPLATE_CATEGORIES.map((tab) => (
               <StudioTab
                 key={tab}
                 active={category === tab}
                 onClick={() => setCategory(tab)}
               >
-                {tab === "all" ? "All" : tab}
+                {tab}
               </StudioTab>
             ))}
           </>

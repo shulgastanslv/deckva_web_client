@@ -18,8 +18,10 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { THUMB_TARGET_WIDTH } from "@/lib/canvas/thumbnail";
 import { renderSlidesToImages } from "@/lib/export/carousel";
 import { cn } from "@/lib/utils";
-import { PLATFORMS, type PlatformId } from "@/lib/platforms";
-import { PlatformIcon } from "@/components/icons/platform-icons";
+import {
+  TEMPLATE_CATEGORIES,
+  type TemplateCategory,
+} from "@/lib/templates/categories";
 
 interface PublishTemplateDialogProps {
   open: boolean;
@@ -76,7 +78,7 @@ export function PublishTemplateDialog({
   const slides = useCanvasStore((s) => s.slides);
 
   const [title, setTitle] = useState(projectTitle);
-  const [category, setCategory] = useState<PlatformId>("Other");
+  const [category, setCategory] = useState<TemplateCategory>(TEMPLATE_CATEGORIES[0]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -110,7 +112,7 @@ export function PublishTemplateDialog({
   const handleOpenChange = (next: boolean) => {
     if (next) {
       setTitle(useCanvasStore.getState().projectTitle);
-      setCategory("Other");
+      setCategory(TEMPLATE_CATEGORIES[0]);
       setDone(false);
       setError(null);
       setLoading(false);
@@ -223,21 +225,20 @@ export function PublishTemplateDialog({
               />
 
               <div className="flex flex-wrap gap-1.5">
-                {PLATFORMS.map((item) => (
+                {TEMPLATE_CATEGORIES.map((item) => (
                   <button
-                    key={item.id}
+                    key={item}
                     type="button"
                     disabled={loading}
-                    onClick={() => setCategory(item.id)}
+                    onClick={() => setCategory(item)}
                     className={cn(
-                      "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] transition-colors",
-                      category === item.id
+                      "inline-flex h-8 items-center rounded-full px-3 text-[13px] transition-colors",
+                      category === item
                         ? "bg-foreground text-background"
                         : "bg-muted/50 text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    <PlatformIcon id={item.id} className="size-3.5" />
-                    {item.label}
+                    {item}
                   </button>
                 ))}
               </div>

@@ -20,13 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PLATFORMS } from "@/lib/platforms";
+import { isTemplateCategory, TEMPLATE_CATEGORIES } from "@/lib/templates/categories";
 import { cn } from "@/lib/utils";
-
-const CATEGORIES = [
-  "Built-in",
-  ...PLATFORMS.map((platform) => platform.id),
-] as const;
 
 export function AdminTemplates() {
   const [templates, setTemplates] = useState<TemplateListItem[]>([]);
@@ -48,7 +43,6 @@ export function AdminTemplates() {
       const res = await getTemplates({
         category: category === "all" ? undefined : category,
         search: search.trim() || undefined,
-        files: false,
       });
       if (!res.success) {
         setTemplates([]);
@@ -80,8 +74,8 @@ export function AdminTemplates() {
   const categoryOptions = useMemo(() => {
     const extras = templates
       .map((tpl) => tpl.category)
-      .filter((value) => !CATEGORIES.includes(value as (typeof CATEGORIES)[number]));
-    return [...CATEGORIES, ...Array.from(new Set(extras))];
+      .filter((value) => !isTemplateCategory(value));
+    return [...TEMPLATE_CATEGORIES, ...new Set(extras)];
   }, [templates]);
 
   const save = async (id: string) => {
@@ -136,20 +130,12 @@ export function AdminTemplates() {
         setMessage("That file is not valid JSON");
         return;
       }
-      const res = await importTemplateJson({
-        json,
-        sourceKey: `upload:${file.name}`,
-        badge: "Imported",
-      });
+      const res = await importTemplateJson({ json, badge: "Imported" });
       if (!res.success) {
         setMessage("Import failed");
         return;
       }
-      setMessage(
-        res.action === "updated"
-          ? `Updated template from ${file.name}`
-          : `Imported ${file.name}`,
-      );
+      setMessage(`Imported ${file.name}`);
       await load();
     } finally {
       setSeeding(false);
@@ -314,7 +300,6 @@ export function AdminTemplates() {
                         {tpl.authorName ? ` · ${tpl.authorName}` : ""}
                         {" · "}
                         {new Date(tpl.createdAt).toLocaleDateString()}
-                        {tpl.builtin ? " · Built-in" : ""}
                       </p>
                       <div className="flex gap-1.5">
                         <Button

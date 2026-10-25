@@ -9,18 +9,10 @@ import { emailIsAdmin } from "@/lib/auth-role";
 import { prisma } from "@/lib/prisma";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
 import {
-  isBuiltinTemplateId,
-  listBuiltinCategories,
-  listBuiltinTemplateSummaries,
-  readBuiltinTemplate,
-} from "@/lib/templates/catalog";
-import {
   isRatioKey,
   parseImportedTemplate,
   parseTemplateCanvasJSON,
 } from "@/lib/templates/parse";
-
-const BUILTIN_CATEGORY = "Built-in";
 
 export interface PublishTemplateInput {
   title: string;
@@ -41,7 +33,6 @@ export interface TemplateListItem {
   aspectRatio: string;
   slideCount: number;
   createdAt: string;
-  builtin: boolean;
   authorId: string | null;
   authorName: string | null;
 }
@@ -83,12 +74,10 @@ export async function getTemplates(options?: {
   category?: string;
   search?: string;
   mine?: boolean;
-  files?: boolean;
 }): Promise<ActionResult<{ templates: TemplateListItem[] }>> {
   try {
     const search = options?.search?.trim();
     const category = options?.category?.trim();
-    const includeFiles = options?.files !== false && !options?.mine;
     const filters: Prisma.Sql[] = [Prisma.sql`TRUE`];
 
     if (options?.mine) {
@@ -101,9 +90,6 @@ export async function getTemplates(options?: {
 
     if (category && category !== "all") {
       filters.push(Prisma.sql`category = ${category}`);
-    }
-    if (includeFiles) {
-      filters.push(Prisma.sql`COALESCE(t."canvasJSON"->>'sourceKey', '') NOT LIKE 'seed:%'`);
     }
     if (search) {
       const pattern = containsPattern(search);
@@ -136,35 +122,21 @@ export async function getTemplates(options?: {
       ORDER BY t."createdAt" DESC
     `;
 
-    const fromDatabase: TemplateListItem[] = rows.map((row) => ({
-      id: row.id,
-      title: row.title,
-      category: row.category,
-      badge: row.badge,
-      previewUrl: row.previewUrl,
-      aspectRatio: row.aspectRatio,
-      slideCount: Number(row.slideCount) || 1,
-      createdAt: new Date(row.createdAt).toISOString(),
-      builtin: row.category === BUILTIN_CATEGORY,
-      authorId: row.authorId,
-      authorName: row.authorName,
-    }));
-
-    const fromFiles = includeFiles
-      ? await listBuiltinTemplateSummaries({ category, search })
-      : [];
-
-    const templates: TemplateListItem[] = [
-      ...fromFiles.map((row) => ({
-        ...row,
-        builtin: true,
-        authorId: null,
-        authorName: null,
+    return {
+      success: true,
+      templates: rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        category: row.category,
+        badge: row.badge,
+        previewUrl: row.previewUrl,
+        aspectRatio: row.aspectRatio,
+        slideCount: Number(row.slideCount) || 1,
+        createdAt: new Date(row.createdAt).toISOString(),
+        authorId: row.authorId,
+        authorName: row.authorName,
       })),
-      ...fromDatabase,
-    ];
-
-    return { success: true, templates };
+    };
   } catch (err) {
     console.error("getTemplates error:", err);
     return { success: false, error: "Couldn't load templates" };
@@ -176,12 +148,6 @@ export async function getTemplateById(
 ): Promise<ActionResult<{ template: TemplateDetail }>> {
   try {
     if (!templateId) return { success: false, error: "templateId is required" };
-
-    if (isBuiltinTemplateId(templateId)) {
-      const template = await readBuiltinTemplate(templateId);
-      if (!template) return { success: false, error: "Template not found" };
-      return { success: true, template };
-    }
 
     const row = await prisma.template.findUnique({
       where: { id: templateId },
@@ -257,29 +223,6 @@ export async function publishTemplate(
   }
 }
 
-
-export async function getTemplateCategories(): Promise<
-  ActionResult<{ categories: string[] }>
-> {
-  try {
-    const [rows, fileCategories] = await Promise.all([
-      prisma.$queryRaw<Array<{ category: string }>>`
-        SELECT DISTINCT category
-        FROM "Template"
-        WHERE COALESCE("canvasJSON"->>'sourceKey', '') NOT LIKE 'seed:%'
-        ORDER BY category ASC
-      `,
-      listBuiltinCategories(),
-    ]);
-    const categories = [
-      ...new Set([...fileCategories, ...rows.map((row) => row.category)]),
-    ].sort((a, b) => a.localeCompare(b, "ru"));
-    return { success: true, categories };
-  } catch (err) {
-    console.error("getTemplateCategories error:", err);
-    return { success: false, error: "Couldn't load categories" };
-  }
-}
 
 async function requireUser() {
   const session = await getServerSession(authOptions);
@@ -429,14 +372,12 @@ export async function deleteTemplate(
   }
 }
 
-/** Admin: import one carousel/template JSON blob. */
 export async function importTemplateJson(input: {
   json: unknown;
   title?: string;
   category?: string;
   badge?: string | null;
-  sourceKey?: string | null;
-}): Promise<ActionResult<{ templateId: string; action: "created" | "updated" }>> {
+}): Promise<ActionResult<{ templateId: string }>> {
   try {
     const user = await requireUser();
     if (!user || !isAdminUser(user)) {
@@ -446,88 +387,39 @@ export async function importTemplateJson(input: {
     const parsed = parseImportedTemplate(input.json);
     if (!parsed.ok) return { success: false, error: "Invalid template" };
 
+    const record =
+      input.json && typeof input.json === "object" && !Array.isArray(input.json)
+        ? (input.json as Record<string, unknown>)
+        : {};
+    const fromFile = typeof record.category === "string" ? record.category.trim() : "";
     const title = (input.title?.trim() || parsed.template.title || "Imported template").trim();
-    const upserted = await upsertImportedTemplate({
-      title,
-      category: input.category?.trim() || BUILTIN_CATEGORY,
-      badge: input.badge ?? "Imported",
-      aspectRatio: parsed.template.aspectRatio ?? "4:5",
-      slides: parsed.template.slides,
-      thumbnails: parsed.template.thumbnails,
-      previewUrl: parsed.template.previewUrl ?? parsed.template.thumbnails[0] ?? null,
-      sourceKey: input.sourceKey ?? null,
-      authorId: user.id,
+    const category = input.category?.trim() || fromFile;
+    if (!category) return { success: false, error: "Enter a category" };
+
+    const aspectRatio = parsed.template.aspectRatio ?? "4:5";
+    const created = await prisma.template.create({
+      data: {
+        title,
+        category,
+        badge: input.badge?.trim() || null,
+        aspectRatio,
+        previewUrl: parsed.template.previewUrl ?? parsed.template.thumbnails[0] ?? null,
+        canvasJSON: {
+          slides: parsed.template.slides,
+          thumbnails: parsed.template.thumbnails,
+          aspectRatio,
+        } as unknown as Prisma.InputJsonValue,
+        authorId: user.id,
+      },
+      select: { id: true },
     });
 
     revalidatePath("/");
     revalidatePath("/studio/templates");
     revalidatePath("/admin");
-    return { success: true, templateId: upserted.id, action: upserted.action };
+    return { success: true, templateId: created.id };
   } catch (err) {
     console.error("importTemplateJson error:", err);
     return { success: false, error: "Couldn't import that template" };
   }
-}
-
-async function findTemplateIdBySourceKey(sourceKey: string): Promise<string | null> {
-  const rows = await prisma.$queryRaw<Array<{ id: string }>>`
-    SELECT id
-    FROM "Template"
-    WHERE "canvasJSON"->>'sourceKey' = ${sourceKey}
-    LIMIT 1
-  `;
-  return rows[0]?.id ?? null;
-}
-
-async function upsertImportedTemplate(input: {
-  title: string;
-  category?: string;
-  badge?: string | null;
-  aspectRatio: RatioKey;
-  slides: unknown[];
-  thumbnails: Array<string | null>;
-  previewUrl?: string | null;
-  sourceKey?: string | null;
-  authorId?: string | null;
-}): Promise<{ id: string; action: "created" | "updated" }> {
-  const sourceKey = input.sourceKey?.trim() || null;
-  const canvasJSON = {
-    slides: input.slides,
-    thumbnails: input.thumbnails,
-    aspectRatio: input.aspectRatio,
-    ...(sourceKey ? { sourceKey } : {}),
-  } as unknown as Prisma.InputJsonValue;
-
-  if (sourceKey) {
-    const existingId = await findTemplateIdBySourceKey(sourceKey);
-    if (existingId) {
-      await prisma.template.update({
-        where: { id: existingId },
-        data: {
-          title: input.title,
-          category: input.category?.trim() || BUILTIN_CATEGORY,
-          badge: input.badge ?? null,
-          aspectRatio: input.aspectRatio,
-          previewUrl: input.previewUrl ?? null,
-          canvasJSON,
-          authorId: input.authorId ?? null,
-        },
-      });
-      return { id: existingId, action: "updated" };
-    }
-  }
-
-  const created = await prisma.template.create({
-    data: {
-      title: input.title,
-      category: input.category?.trim() || BUILTIN_CATEGORY,
-      badge: input.badge ?? null,
-      aspectRatio: input.aspectRatio,
-      previewUrl: input.previewUrl ?? null,
-      canvasJSON,
-      authorId: input.authorId ?? null,
-    },
-    select: { id: true },
-  });
-  return { id: created.id, action: "created" };
 }
