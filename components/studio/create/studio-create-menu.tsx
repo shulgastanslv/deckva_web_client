@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 
 export function StudioCreateMenu({
   onBlank,
-  onGenerate,
   onTemplates,
   className,
   label = "Create",
@@ -21,7 +20,6 @@ export function StudioCreateMenu({
   triggerClassName,
 }: {
   onBlank: () => void;
-  onGenerate: () => void;
   onTemplates: () => void;
   className?: string;
   label?: string;
@@ -49,12 +47,6 @@ export function StudioCreateMenu({
           onClick={onBlank}
         >
           Blank carousel
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer rounded-xl px-2.5 py-2 text-[13px]"
-          onClick={onGenerate}
-        >
-          Generate with AI
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer rounded-xl px-2.5 py-2 text-[13px]"

@@ -15,11 +15,20 @@ interface FontSelectProps {
   value: string;
   onChange: (family: string) => void;
   disabled?: boolean;
+  /** Dense trigger for floating toolbars (no label, fixed width). */
+  compact?: boolean;
+  className?: string;
 }
 
 const MAX_VISIBLE = 80;
 
-export function FontSelect({ value, onChange, disabled }: FontSelectProps) {
+export function FontSelect({
+  value,
+  onChange,
+  disabled,
+  compact = false,
+  className,
+}: FontSelectProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -93,15 +102,26 @@ export function FontSelect({ value, onChange, disabled }: FontSelectProps) {
   };
 
   return (
-    <div ref={rootRef} className="relative flex flex-col gap-1.5">
-      <span className="text-[13px] text-muted-foreground">Font</span>
+    <div
+      ref={rootRef}
+      className={cn(
+        "relative flex flex-col",
+        compact ? "gap-0" : "gap-1.5",
+        className,
+      )}
+    >
+      {!compact && (
+        <span className="text-[13px] text-muted-foreground">Font</span>
+      )}
       <button
         type="button"
         disabled={disabled || loadingFont}
         onClick={() => setOpen((v) => !v)}
+        title={compact ? current : undefined}
         className={cn(
-          "flex h-9 w-full items-center gap-2 rounded-full bg-muted/40 px-3 text-left text-[13px] transition-colors",
+          "flex items-center gap-2 rounded-full bg-muted/40 text-left text-[13px] transition-colors",
           "hover:bg-muted/60 disabled:opacity-60",
+          compact ? "h-8 w-[7.5rem] px-2.5" : "h-9 w-full px-3",
         )}
       >
         <span
@@ -118,7 +138,14 @@ export function FontSelect({ value, onChange, disabled }: FontSelectProps) {
       </button>
 
       {open && (
-        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-2xl border border-border/60 bg-popover text-popover-foreground shadow-lg">
+        <div
+          className={cn(
+            "absolute z-50 overflow-hidden rounded-2xl border border-border/60 bg-popover text-popover-foreground",
+            compact
+              ? "left-0 top-[calc(100%+6px)] w-64"
+              : "left-0 right-0 top-[calc(100%+4px)]",
+          )}
+        >
           <div className="relative border-b border-border/40 p-2">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <input

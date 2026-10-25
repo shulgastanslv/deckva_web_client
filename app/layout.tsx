@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s · Deckva",
   },
   description:
-    "Deckva — AI-студия для каруселей в соцсетях. Тема превращается в слайды, вы правите их на холсте и экспортируете в PNG или ZIP.",
+    "Deckva — студия каруселей для соцсетей. Соберите слайды на холсте, отредактируйте и экспортируйте в PNG или ZIP.",
   keywords: [
     "Deckva",
     "карусель",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     "Instagram",
     "студия",
     "редактор слайдов",
-    "генератор каруселей",
+    "редактор каруселей",
     "соцсети",
     "carousel",
     "carousel maker",
@@ -51,13 +51,13 @@ export const metadata: Metadata = {
     siteName: "Deckva",
     title: "Deckva — студия каруселей",
     description:
-      "AI-студия для каруселей: тема → слайды → правка на холсте → экспорт.",
+      "Шаблоны, холст и экспорт. Карусели для Instagram и других соцсетей.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Deckva — студия каруселей",
     description:
-      "AI-студия для каруселей: тема → слайды → правка на холсте → экспорт.",
+      "Шаблоны, холст и экспорт. Карусели для Instagram и других соцсетей.",
   },
 };
 

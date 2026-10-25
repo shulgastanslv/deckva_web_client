@@ -19,7 +19,7 @@ export function FreeBlock() {
       <Reveal>
         <LandingHead
           title="Цена"
-          text="Один платёж — студия, генерация и экспорт без водяного знака. Без пробного периода и без логотипа на обложке."
+          text="Один платёж — студия и экспорт без водяного знака. Без пробного периода и без логотипа на обложке."
         />
       </Reveal>
 
@@ -31,7 +31,7 @@ export function FreeBlock() {
                 Откройте студию и начните
               </h3>
               <p className="mt-4 max-w-xs text-lg leading-relaxed text-land-ink/55">
-                Холст, генерация и загрузка — за $15. Используйте сколько угодно раз.
+                Холст, шаблоны и экспорт — за $15. Используйте сколько угодно раз.
               </p>
               <div className="mt-5 flex justify-center">
                 <FreeArt />
@@ -54,7 +54,7 @@ export function FreeBlock() {
                   Один платёж
                 </h3>
                 <p className="mt-3 max-w-xs text-lg leading-relaxed text-white/70">
-                  Генерируйте, редактируйте и экспортируйте. Без ежемесячной подписки.
+                  Редактируйте и экспортируйте. Без ежемесячной подписки.
                 </p>
               </div>
             </LandingPad>

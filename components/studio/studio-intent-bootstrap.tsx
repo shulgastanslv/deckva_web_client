@@ -3,12 +3,6 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
-import {
-  beginGenerateSession,
-  endGenerateSession,
-} from "@/lib/ai/generate-session";
-import { DEFAULT_GENERATE_OPTIONS } from "@/lib/ai/generate-options";
-import { runCarouselGenerate } from "@/lib/ai/run-carousel-generate";
 import { takeStudioIntent } from "@/lib/studio/pending-intent";
 import { useApplyTemplate } from "@/hooks/use-apply-template";
 import { useProject } from "@/hooks/use-project";
@@ -58,35 +52,6 @@ export function StudioIntentBootstrap() {
         if (wantsNew || intent?.type === "new") {
           await newProject();
           stripQuery("new");
-          return;
-        }
-
-        if (intent?.type === "generate") {
-          const theme = intent.theme.trim();
-          if (!theme) return;
-          const abort = beginGenerateSession();
-          try {
-            await runCarouselGenerate({
-              theme,
-              slides: intent.slides ?? 5,
-              setId: intent.setId,
-              options: DEFAULT_GENERATE_OPTIONS,
-              store: useCanvasStore,
-              slidesController,
-              signal: abort.signal,
-            });
-          } catch (error) {
-            if (abort.signal.aborted) return;
-            const message =
-              error instanceof Error ? error.message : "Couldn't generate";
-            useCanvasStore.getState().setGenerate({
-              genStatus: "error",
-              genError: message,
-              genPhase: message,
-            });
-          } finally {
-            endGenerateSession(abort);
-          }
         }
       } catch (error) {
         console.error(error);

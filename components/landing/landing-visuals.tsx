@@ -28,34 +28,6 @@ const ICON_SET = [
   "/icons/Image_perspective_matte-1.png",
 ] as const;
 
-/** Prompt composer — step “write the topic”. */
-export function PromptMock() {
-  return (
-    <div className="w-full max-w-md rounded-[1.4rem] bg-white p-4 shadow-[0_20px_50px_rgba(28,32,58,0.12)]">
-      <div className="flex items-center gap-2 text-[13px] font-semibold text-[#8b90a0]">
-        <Sparkles className="size-3.5 text-[#2f5bff]" />
-        Generate
-      </div>
-      <div className="mt-3 rounded-2xl bg-[#f4f5f9] p-4 text-[13px] leading-relaxed text-[#14151c]">
-        Explain a product launch in 6 frames. Calm, for founders, no jargon.
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {["6 slides", "Night", "Calm tone"].map((chip) => (
-          <span
-            key={chip}
-            className="rounded-full bg-[#e4ebff] px-3 py-1 text-[13px] font-semibold text-[#1a2f86]"
-          >
-            {chip}
-          </span>
-        ))}
-      </div>
-      <div className="mt-4 flex h-10 items-center justify-center rounded-full bg-[#2f5bff] text-[13px] font-semibold text-white">
-        Create a carousel
-      </div>
-    </div>
-  );
-}
-
 /** Phone with a live Threads UI post (pass `posts` to customize). */
 export function PhoneCarouselMock({
   start = 0,

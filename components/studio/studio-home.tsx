@@ -10,14 +10,11 @@ import {
   type ProjectListItem,
 } from "@/actions/projects";
 import { AuthModal } from "@/components/auth";
-import { StudioGenerateDialog } from "@/components/studio/create/studio-generate-dialog";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
 import { StudioProjectCard } from "@/components/studio/projects/studio-project-card";
 import { StudioProjectList } from "@/components/studio/projects/studio-project-list";
-import { StudioGeneratePrompt } from "@/components/studio/start/studio-generate-prompt";
 import { StudioStartSection } from "@/components/studio/start/studio-start-section";
-import type { StartCategoryId } from "@/components/studio/start/studio-start-presets";
 import {
   StudioContent,
   StudioContentBody,
@@ -39,7 +36,6 @@ export function StudioHome() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<ViewMode>("list");
-  const [startCategory, setStartCategory] = useState<StartCategoryId>("all");
 
   const fetchProjects = useCallback(async () => {
     if (!userId) return;
@@ -102,12 +98,8 @@ export function StudioHome() {
       <StudioContentBody className="pt-6 sm:pt-10">
 
         <StudioStartSection
-          category={startCategory}
-          onCategoryChange={setStartCategory}
           onBlank={create.openBlank}
-          onGenerate={create.openGenerate}
           onTemplates={create.openTemplates}
-          onPreset={(theme) => create.submitGenerate(theme)}
         />
 
         <div className="h-14 sm:h-20" aria-hidden />
@@ -172,18 +164,6 @@ export function StudioHome() {
           )}
         </section>
       </StudioContentBody>
-
-      <StudioGenerateDialog
-        open={create.generateOpen}
-        onOpenChange={(open) => {
-          if (!open) create.closeGenerate();
-          else create.setGenerateOpen(true);
-        }}
-        theme={create.theme}
-        onThemeChange={create.setTheme}
-        submitting={create.submitting}
-        onSubmit={() => create.submitGenerate()}
-      />
 
       <AuthModal
         isOpen={create.authNeeded}

@@ -38,7 +38,6 @@ import {
   List,
   ListOrdered,
 } from "lucide-react";
-import { AiTextAssist } from "@/components/canvas/ai-text-assist";
 import { useSelectedObject } from "@/hooks/use-selected-object";
 import {
   FabricImage,
@@ -940,10 +939,6 @@ export function RightSidebar({
                 <>
                   {sharedText && (
                     <CollapsibleGroup id="rs-multi-text" title="Text" defaultOpen>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[13px] text-muted-foreground">AI rewrite</span>
-                        <AiTextAssist manager={manager} />
-                      </div>
                       <div className="flex gap-1.5">
                         <Button
                           type="button"
@@ -1388,18 +1383,6 @@ export function RightSidebar({
                     >
                       {textLengthNote("Instagram", (formValues.text ?? "").trim().length)}
                     </p>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[13px] text-muted-foreground">AI rewrite</span>
-                    <AiTextAssist
-                      manager={manager}
-                      onApplied={(texts) => {
-                        const next = texts[0];
-                        if (typeof next !== "string") return;
-                        setFormValues((prev) => (prev ? { ...prev, text: next } : null));
-                      }}
-                    />
                   </div>
 
                   <div className="flex flex-col gap-1.5">

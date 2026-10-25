@@ -10,9 +10,8 @@ import { CanvasToolbar } from "@/components/canvas/canvas-toolbar";
 import { CanvasChromeRestore } from "@/components/canvas/canvas-chrome-restore";
 import { ElementsToolbar } from "@/components/canvas/elements-toolbar";
 import { CanvasView } from "@/components/canvas/canvas-view";
-import { ReferencePanel } from "@/components/canvas/reference-panel";
+import { SelectionToolbar } from "@/components/canvas/selection-toolbar";
 import { AutoFlowPrompt } from "@/components/canvas/auto-flow-prompt";
-import { GenerateOverlay } from "@/components/canvas/generate-overlay";
 import { RightSidebar } from "@/components/canvas/right-sidebar";
 import { PreviewModal } from "@/components/canvas/preview-modal";
 import type { NavId } from "@/components/canvas/left-sidebar";
@@ -89,29 +88,9 @@ export default function CarouselEditor() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewSlideId, setPreviewSlideId] = useState<number>(0);
   const [focusMode, setFocusMode] = useState(false);
-  const [focusInspector, setFocusInspector] = useState(false);
   /** Hide only canvas toolbar + slide navigator (sidebars stay). */
   const [canvasChrome, setCanvasChrome] = useState(true);
   const manager = useCanvasManager();
-
-  useEffect(() => {
-    if (!focusMode || !manager) return;
-
-    setFocusInspector(manager.getActiveObject() != null);
-    const openForClick = (event: { target?: unknown }) => {
-      if (useCanvasStore.getState().handActive) return;
-      if (!event.target) setFocusInspector(false);
-    };
-    manager.canvas.on("mouse:down", openForClick);
-    const unsubscribe = manager.on("selection", (object) => {
-      if (object) setFocusInspector(true);
-    });
-
-    return () => {
-      manager.canvas.off("mouse:down", openForClick);
-      unsubscribe();
-    };
-  }, [focusMode, manager]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -204,23 +183,14 @@ export default function CarouselEditor() {
 
             <div className="relative flex min-h-0 flex-1">
               <CanvasView />
-              <GenerateOverlay />
+              {focusMode && <SelectionToolbar />}
               {focusMode && (
                 <ElementsToolbar onExit={() => setFocusMode(false)} />
               )}
               {!focusMode && !canvasChrome && (
                 <CanvasChromeRestore onShow={() => setCanvasChrome(true)} />
               )}
-              {!focusMode && <ReferencePanel />}
               {!focusMode && <AutoFlowPrompt />}
-              {focusMode && focusInspector && (
-                <div className="absolute inset-y-0 right-0 z-20 shadow-xl">
-                  <RightSidebar
-                    isRightCollapsed={false}
-                    setIsRightCollapsed={() => setFocusInspector(false)}
-                  />
-                </div>
-              )}
             </div>
             {!focusMode && canvasChrome && <SlideNavigator />}
           </main>

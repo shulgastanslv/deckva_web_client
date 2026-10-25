@@ -1,8 +1,6 @@
 const STORAGE_KEY = "swibp:studio-intent";
 
-export type StudioIntent =
-  | { type: "generate"; theme: string; slides?: number; setId?: string }
-  | { type: "new" };
+export type StudioIntent = { type: "new" };
 
 export function stashStudioIntent(intent: StudioIntent): void {
   if (typeof window === "undefined") return;
@@ -20,7 +18,7 @@ export function takeStudioIntent(): StudioIntent | null {
     if (!raw) return null;
     sessionStorage.removeItem(STORAGE_KEY);
     const parsed = JSON.parse(raw) as StudioIntent;
-    if (!parsed || typeof parsed !== "object" || !("type" in parsed)) return null;
+    if (!parsed || typeof parsed !== "object" || parsed.type !== "new") return null;
     return parsed;
   } catch {
     return null;

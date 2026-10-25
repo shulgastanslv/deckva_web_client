@@ -15,13 +15,11 @@ export function StudioSidebarSearch({
   search,
   onSearchChange,
   onBlank,
-  onGenerate,
   onTemplates,
 }: {
   search: string;
   onSearchChange: (value: string) => void;
   onBlank: () => void;
-  onGenerate: () => void;
   onTemplates: () => void;
 }) {
   return (
@@ -57,12 +55,6 @@ export function StudioSidebarSearch({
             onClick={onBlank}
           >
             Blank carousel
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer rounded-xl text-[13px]"
-            onClick={onGenerate}
-          >
-            Generate with AI
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer rounded-xl text-[13px]"

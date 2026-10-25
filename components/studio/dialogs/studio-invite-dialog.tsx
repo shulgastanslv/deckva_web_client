@@ -259,8 +259,8 @@ export function StudioInviteDialog({
                   <Gift className="size-3.5" />
                 </span>
                 <span>
-                  <strong className="font-semibold">You get:</strong> bonus AI
-                  credits and early feature access for every referral.
+                  <strong className="font-semibold">You get:</strong> early
+                  feature access for every referral.
                 </span>
               </li>
               <li className="flex items-start gap-3 text-[13px] text-neutral-700 dark:text-foreground">

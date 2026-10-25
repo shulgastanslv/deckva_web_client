@@ -5,7 +5,6 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { useAttachCanvas, useCanvasManager } from "@/context/canvas-manager";
 import { clampZoom } from "@/components/canvas/zoom-controls";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GenerateCanvasSkeleton } from "@/components/canvas/generate-canvas-skeleton";
 import { cn } from "@/lib/utils";
 
 const PADDING = 48;
@@ -384,13 +383,6 @@ export function CanvasView() {
         >
           <canvas ref={canvasElementRef} />
         </div>
-        <GenerateCanvasSkeleton
-          frame={
-            frame
-              ? { width: frame.width, height: frame.height, left: frame.left, top: frame.top }
-              : null
-          }
-        />
       </div>
       {isLoadingProject && (
         <div

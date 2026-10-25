@@ -27,9 +27,6 @@ export function useStudioCreate() {
   const router = useRouter();
   const { status } = useSession();
   const [authNeeded, setAuthNeeded] = useState(false);
-  const [generateOpen, setGenerateOpen] = useState(false);
-  const [theme, setTheme] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
   const requireAuth = () => {
     if (status === "authenticated") return true;
@@ -46,43 +43,10 @@ export function useStudioCreate() {
 
   const openTemplates = () => router.push("/studio/templates");
 
-  const openGenerate = async () => {
-    if (!requireAuth()) return;
-    if (!(await requireCarouselSlot())) return;
-    setGenerateOpen(true);
-  };
-
-  const submitGenerate = async (overrideTheme?: string) => {
-    const fromArg =
-      typeof overrideTheme === "string" ? overrideTheme.trim() : "";
-    const trimmed = fromArg || theme.trim();
-    if (!trimmed || submitting) return;
-    if (!requireAuth()) return;
-    if (!(await requireCarouselSlot())) return;
-    setTheme(trimmed);
-    setSubmitting(true);
-    stashStudioIntent({ type: "generate", theme: trimmed, slides: 5 });
-    router.push("/studio/editor");
-  };
-
-  const closeGenerate = () => {
-    setGenerateOpen(false);
-    setTheme("");
-    setSubmitting(false);
-  };
-
   return {
     authNeeded,
     setAuthNeeded,
-    generateOpen,
-    setGenerateOpen,
-    theme,
-    setTheme,
-    submitting,
     openBlank,
     openTemplates,
-    openGenerate,
-    submitGenerate,
-    closeGenerate,
   };
 }

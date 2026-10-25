@@ -3,7 +3,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 
 import { AuthModal } from "@/components/auth";
-import { StudioGenerateDialog } from "@/components/studio/create/studio-generate-dialog";
 import { StudioHeader } from "@/components/studio/header/studio-header";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioSidebar } from "@/components/studio/sidebar/studio-sidebar";
@@ -54,7 +53,6 @@ export function StudioShell({ children }: { children: ReactNode }) {
           search={sidebarSearch}
           onSearchChange={setSidebarSearch}
           onBlank={create.openBlank}
-          onGenerate={create.openGenerate}
           onTemplates={create.openTemplates}
         />
 
@@ -65,18 +63,6 @@ export function StudioShell({ children }: { children: ReactNode }) {
             {children}
           </div>
         </div>
-
-        <StudioGenerateDialog
-          open={create.generateOpen}
-          onOpenChange={(open) => {
-            if (!open) create.closeGenerate();
-            else create.setGenerateOpen(true);
-          }}
-          theme={create.theme}
-          onThemeChange={create.setTheme}
-          submitting={create.submitting}
-          onSubmit={create.submitGenerate}
-        />
 
         <AuthModal
           isOpen={authOpen}

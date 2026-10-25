@@ -20,7 +20,6 @@ const PEACH = "#f5c9a8";
 const SKY = "#9ec9f5";
 
 export type StudioIconName =
-  | "spark"
   | "fire"
   | "layers"
   | "list"
@@ -60,42 +59,6 @@ function Scene({
       {title ? <title>{title}</title> : null}
       {children}
     </svg>
-  );
-}
-
-/** Stacked slides + AI chip */
-export function StudioIconSpark(props: IconProps) {
-  return (
-    <Scene {...props}>
-      <rect x="42" y="30" width="56" height="72" rx="10" fill={WHITE} opacity="0.55" />
-      <rect x="52" y="22" width="56" height="72" rx="10" fill={WHITE} />
-      <rect x="60" y="34" width="40" height="6" rx="3" fill={INK} opacity="0.85" />
-      <rect x="60" y="46" width="28" height="4" rx="2" fill={LINE} />
-      <rect x="60" y="56" width="40" height="22" rx="6" fill={BLUE} opacity="0.9" />
-      <rect x="68" y="26" width="56" height="72" rx="10" fill={WHITE} />
-      <rect x="76" y="38" width="40" height="6" rx="3" fill={INK} />
-      <rect x="76" y="50" width="32" height="4" rx="2" fill={LINE} />
-      <rect x="76" y="62" width="40" height="20" rx="6" fill={LILAC} />
-      <rect x="88" y="18" width="44" height="18" rx="9" fill={LILAC} />
-      <path
-        d="M100 23C100 25.8 102.2 28 105 28C102.2 28 100 30.2 100 33C100 30.2 97.8 28 95 28C97.8 28 100 25.8 100 23Z"
-        fill={WHITE}
-      />
-      <text
-        x="112"
-        y="30"
-        fill={WHITE}
-        fontSize="8"
-        fontWeight="700"
-        fontFamily="system-ui,sans-serif"
-      >
-        AI
-      </text>
-      <line x1="68" y1="40" x2="52" y2="28" stroke={LILAC} strokeWidth="1.5" />
-      <circle cx="50" cy="26" r="3.5" fill={YELLOW} />
-      <line x1="124" y1="72" x2="138" y2="58" stroke={LILAC} strokeWidth="1.5" />
-      <circle cx="140" cy="56" r="3.5" fill={GREEN} />
-    </Scene>
   );
 }
 
@@ -527,7 +490,6 @@ export function StudioIconPro(props: IconProps) {
 }
 
 const ICONS: Record<StudioIconName, (props: IconProps) => ReactElement> = {
-  spark: StudioIconSpark,
   fire: StudioIconFire,
   layers: StudioIconLayers,
   list: StudioIconList,

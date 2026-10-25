@@ -12,7 +12,6 @@ import {
 } from "@/actions/projects";
 import { AuthModal } from "@/components/auth";
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
-import { StudioGenerateDialog } from "@/components/studio/create/studio-generate-dialog";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
 import { StudioProjectCard } from "@/components/studio/projects/studio-project-card";
@@ -156,7 +155,6 @@ export function StudioProjects() {
             <StudioViewToggle view={view} onChange={setView} />
             <StudioCreateMenu
               onBlank={create.openBlank}
-              onGenerate={create.openGenerate}
               onTemplates={create.openTemplates}
             />
           </div>
@@ -258,23 +256,11 @@ export function StudioProjects() {
             <p className="mt-2 text-[13px] text-neutral-500 dark:text-muted-foreground">
               {search.trim()
                 ? "Try another search."
-                : "Create a blank carousel or generate one with AI."}
+                : "Create a blank carousel or start from a template."}
             </p>
           </div>
         ) : null}
       </StudioContentBody>
-
-      <StudioGenerateDialog
-        open={create.generateOpen}
-        onOpenChange={(open) => {
-          if (!open) create.closeGenerate();
-          else create.setGenerateOpen(true);
-        }}
-        theme={create.theme}
-        onThemeChange={create.setTheme}
-        submitting={create.submitting}
-        onSubmit={create.submitGenerate}
-      />
 
       <AuthModal
         isOpen={create.authNeeded}

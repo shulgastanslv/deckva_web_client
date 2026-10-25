@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, Search, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FolderSync, Loader2, Search, Trash2, Upload } from "lucide-react";
 
 import {
   deleteTemplate,
   getTemplates,
+  importBuiltinTemplates,
+  importTemplateJson,
   updateTemplateMeta,
   type TemplateListItem,
 } from "@/actions/templates";
@@ -33,7 +35,9 @@ export function AdminTemplates() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [drafts, setDrafts] = useState<
     Record<string, { title: string; category: string; badge: string }>
   >({});
@@ -119,6 +123,60 @@ export function AdminTemplates() {
     }
   };
 
+  const syncFromDisk = async () => {
+    setSeeding(true);
+    setMessage(null);
+    try {
+      const res = await importBuiltinTemplates();
+      if (!res.success) {
+        setMessage("Import failed");
+        return;
+      }
+      const errNote =
+        res.errors.length > 0 ? ` · ${res.errors.length} file error(s)` : "";
+      setMessage(
+        `Synced templates: +${res.created} new, ${res.updated} updated${errNote}`,
+      );
+      await load();
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const onUploadJson = async (file: File | undefined) => {
+    if (!file) return;
+    setSeeding(true);
+    setMessage(null);
+    try {
+      const text = await file.text();
+      let json: unknown;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        setMessage("That file is not valid JSON");
+        return;
+      }
+      const res = await importTemplateJson({
+        json,
+        sourceKey: `upload:${file.name}`,
+        badge: "Imported",
+      });
+      if (!res.success) {
+        setMessage("Import failed");
+        return;
+      }
+      setMessage(
+        res.action === "updated"
+          ? `Updated template from ${file.name}`
+          : `Imported ${file.name}`,
+      );
+      await load();
+    } finally {
+      setSeeding(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <section className="flex flex-col gap-4 pt-2">
       <div className="flex flex-wrap gap-2">
@@ -152,6 +210,37 @@ export function AdminTemplates() {
         >
           Refresh
         </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="h-9 rounded-full px-3"
+          disabled={seeding}
+          onClick={() => void syncFromDisk()}
+        >
+          {seeding ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <FolderSync className="size-3.5" />
+          )}
+          Sync templates/
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="h-9 rounded-full px-3"
+          disabled={seeding}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload className="size-3.5" />
+          Upload JSON
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={(event) => void onUploadJson(event.target.files?.[0])}
+        />
       </div>
 
       {message ? <p className="text-[13px] text-muted-foreground">{message}</p> : null}

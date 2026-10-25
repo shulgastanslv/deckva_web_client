@@ -11,13 +11,11 @@ export function StudioSidebar({
   search,
   onSearchChange,
   onBlank,
-  onGenerate,
   onTemplates,
 }: {
   search: string;
   onSearchChange: (value: string) => void;
   onBlank: () => void;
-  onGenerate: () => void;
   onTemplates: () => void;
 }) {
   return (
@@ -28,7 +26,6 @@ export function StudioSidebar({
           search={search}
           onSearchChange={onSearchChange}
           onBlank={onBlank}
-          onGenerate={onGenerate}
           onTemplates={onTemplates}
         />
         <Suspense fallback={<div className="px-2.5" aria-hidden />}>

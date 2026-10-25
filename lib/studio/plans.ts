@@ -6,7 +6,6 @@ export const FREE_CAROUSEL_LIMIT = 3;
 export const PRO_FEATURES = [
   "Unlimited private carousels",
   "High-resolution exports",
-  "Priority AI generation",
   "Folders & brand kits",
   "Invite teammates",
 ] as const;

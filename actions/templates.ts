@@ -10,8 +10,14 @@ import { prisma } from "@/lib/prisma";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
 import {
   isRatioKey,
+  parseImportedTemplate,
   parseTemplateCanvasJSON,
 } from "@/lib/templates/parse";
+import {
+  BUILTIN_CATEGORY,
+  seedBuiltinTemplates,
+  upsertImportedTemplate,
+} from "@/lib/templates/seed";
 
 export interface PublishTemplateInput {
   title: string;
@@ -388,5 +394,77 @@ export async function deleteTemplate(
   } catch (err) {
     console.error("deleteTemplate error:", err);
     return { success: false, error: "Couldn't delete the template" };
+  }
+}
+
+/** Admin: sync `templates/*.json` into Built-in gallery. */
+export async function importBuiltinTemplates(): Promise<
+  ActionResult<{
+    created: number;
+    updated: number;
+    skipped: number;
+    errors: Array<{ file: string; error: string }>;
+  }>
+> {
+  try {
+    const user = await requireUser();
+    if (!user || !isAdminUser(user)) {
+      return { success: false, error: "Admin only" };
+    }
+
+    const result = await seedBuiltinTemplates({ authorId: user.id, replace: true });
+    revalidatePath("/");
+    revalidatePath("/studio/templates");
+    revalidatePath("/admin");
+    return {
+      success: true,
+      created: result.created,
+      updated: result.updated,
+      skipped: result.skipped,
+      errors: result.errors,
+    };
+  } catch (err) {
+    console.error("importBuiltinTemplates error:", err);
+    return { success: false, error: "Couldn't import templates" };
+  }
+}
+
+/** Admin: import one carousel/template JSON blob. */
+export async function importTemplateJson(input: {
+  json: unknown;
+  title?: string;
+  category?: string;
+  badge?: string | null;
+  sourceKey?: string | null;
+}): Promise<ActionResult<{ templateId: string; action: "created" | "updated" }>> {
+  try {
+    const user = await requireUser();
+    if (!user || !isAdminUser(user)) {
+      return { success: false, error: "Admin only" };
+    }
+
+    const parsed = parseImportedTemplate(input.json);
+    if (!parsed.ok) return { success: false, error: "Invalid template" };
+
+    const title = (input.title?.trim() || parsed.template.title || "Imported template").trim();
+    const upserted = await upsertImportedTemplate({
+      title,
+      category: input.category?.trim() || BUILTIN_CATEGORY,
+      badge: input.badge ?? "Imported",
+      aspectRatio: parsed.template.aspectRatio ?? "4:5",
+      slides: parsed.template.slides,
+      thumbnails: parsed.template.thumbnails,
+      previewUrl: parsed.template.previewUrl ?? parsed.template.thumbnails[0] ?? null,
+      sourceKey: input.sourceKey ?? null,
+      authorId: user.id,
+    });
+
+    revalidatePath("/");
+    revalidatePath("/studio/templates");
+    revalidatePath("/admin");
+    return { success: true, templateId: upserted.id, action: upserted.action };
+  } catch (err) {
+    console.error("importTemplateJson error:", err);
+    return { success: false, error: "Couldn't import that template" };
   }
 }

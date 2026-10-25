@@ -15,7 +15,7 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "Студия",
   description:
-    "Студия Deckva: генерация каруселей, правка слоёв на холсте, шаблоны, папки и экспорт слайдов в PNG или ZIP.",
+    "Студия Deckva: правка слоёв на холсте, шаблоны, папки и экспорт слайдов в PNG или ZIP.",
   keywords: [
     "Deckva",
     "студия",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Deckva · Студия",
     description:
-      "Рабочее пространство Deckva: проекты, генерация, холст и экспорт каруселей.",
+      "Рабочее пространство Deckva: проекты, холст и экспорт каруселей.",
     siteName: "Deckva",
     locale: "ru_BY",
     type: "website",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Deckva · Студия",
     description:
-      "Рабочее пространство Deckva: проекты, генерация, холст и экспорт каруселей.",
+      "Рабочее пространство Deckva: проекты, холст и экспорт каруселей.",
   },
 };
 

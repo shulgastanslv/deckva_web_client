@@ -59,15 +59,12 @@ const GROUPS: { title: string; rows: Shortcut[] }[] = [
   {
     title: "Panels",
     rows: [
-      { label: "AI", keys: "1" },
-      { label: "Tools", keys: "2" },
-      { label: "Elements", keys: "3" },
-      { label: "Projects", keys: "4" },
-      { label: "Layers", keys: "5" },
-      { label: "Templates", keys: "6" },
-      { label: "Background", keys: "7" },
-      { label: "Filter", keys: "8" },
-      { label: "Icons", keys: "9" },
+      { label: "Tools", keys: "1" },
+      { label: "Elements", keys: "2" },
+      { label: "Layers", keys: "3" },
+      { label: "Background", keys: "4" },
+      { label: "Filter", keys: "5" },
+      { label: "Icons", keys: "6" },
     ],
   },
 ];
