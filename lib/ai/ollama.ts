@@ -173,3 +173,82 @@ export async function completeOllamaThemes(input: {
     clear();
   }
 }
+
+const OLLAMA_VISION_MODEL =
+  process.env.OLLAMA_VISION_MODEL?.trim() || OLLAMA_MODEL;
+
+export function ollamaVisionModel(): string {
+  return OLLAMA_VISION_MODEL;
+}
+
+/** Strip `data:image/...;base64,` so Ollama gets raw base64. */
+export function toOllamaImageBase64(dataUrlOrBase64: string): string {
+  const trimmed = dataUrlOrBase64.trim();
+  const comma = trimmed.indexOf(",");
+  if (trimmed.startsWith("data:") && comma >= 0) {
+    return trimmed.slice(comma + 1);
+  }
+  return trimmed;
+}
+
+/** Recreate carousel copy from reference slide screenshots (vision). */
+export async function completeOllamaFromReferences(input: {
+  images: string[];
+  slides: number;
+  options: CarouselGenerateOptions;
+  signal?: AbortSignal;
+}): Promise<unknown> {
+  const images = input.images.map(toOllamaImageBase64).filter(Boolean).slice(0, 8);
+  if (images.length === 0) {
+    throw new Error("At least one reference image is required");
+  }
+
+  const ollama = client();
+  const clear = withAbort(ollama, input.signal);
+  const { temperature, topP, numCtx, keepAlive } = carouselPromptConfig;
+
+  try {
+    const response = await ollama.chat({
+      model: OLLAMA_VISION_MODEL,
+      stream: false,
+      format: "json",
+      keep_alive: keepAlive,
+      options: {
+        temperature,
+        top_p: topP,
+        num_predict: carouselNumPredict(input.slides, input.options.sentences),
+        num_ctx: Math.max(numCtx, 8192),
+      },
+      messages: [
+        {
+          role: "system",
+          content: [
+            carouselSystemPrompt(input.options),
+            "",
+            "VISION TASK",
+            "- The user attached reference carousel / slide screenshots.",
+            "- Infer topic, tone, structure, and visual hierarchy from the images.",
+            "- Recreate a fresh carousel inspired by those references — do not OCR verbatim if text is unclear; invent clear copy that matches the vibe.",
+            "- Match the language visible in the references when readable; otherwise use English.",
+          ].join("\n"),
+        },
+        {
+          role: "user",
+          content: [
+            `Recreate a carousel from these ${images.length} reference image(s).`,
+            `Slides: ${input.slides}`,
+            `Sentences per slide: ${input.options.sentences}`,
+          ].join("\n"),
+          images,
+        },
+      ],
+    });
+    const content = response.message?.content;
+    if (typeof content !== "string" || !content.trim()) {
+      throw new Error("Empty Ollama vision response");
+    }
+    return extractJsonObject(content);
+  } finally {
+    clear();
+  }
+}

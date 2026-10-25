@@ -799,6 +799,37 @@ export class ObjectFactory {
     return group;
   }
 
+  /** Horizontal progress dots for “slide N of total”. */
+  addProgressDots(total = 5, active = 0, y?: number): Group {
+    const count = Math.min(12, Math.max(2, Math.round(total)));
+    const index = Math.min(count - 1, Math.max(0, Math.round(active)));
+    const gap = 28;
+    const r = 7;
+    const width = (count - 1) * gap;
+    const center = this.getLogicalCenter();
+    const dots = Array.from({ length: count }, (_, i) => {
+      return new Circle({
+        left: -width / 2 + i * gap,
+        top: 0,
+        radius: r,
+        originX: "center",
+        originY: "center",
+        fill: i === index ? this.slotColor("accent", "#111111") : "#d4d4d8",
+        selectable: false,
+        evented: false,
+      });
+    });
+    const group = new Group(dots, {
+      left: center.x,
+      top: y ?? center.y + this.getLogicalSize().height * 0.38,
+      originX: "center",
+      originY: "center",
+    });
+    this.mark(group, { swibpRole: "progress" });
+    this.addToCanvas(group);
+    return group;
+  }
+
   addText(text: string, x?: number, y?: number) {
     const pos = this.getPosition(x, y);
     const textbox = new Textbox(text, {

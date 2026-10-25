@@ -9,7 +9,10 @@ export interface ViewportSlice {
   canvasDimensions: { width: number; height: number };
   /** Split view: show reference image panel beside the canvas */
   isReferenceOpen: boolean;
+  /** @deprecated Prefer `referenceImages` — kept for single-image callers */
   referenceImageUrl: string | null;
+  /** Dropped / uploaded reference images (data URLs or blob URLs) */
+  referenceImages: string[];
   /** When on, overflow past slide bounds prompts a new slide */
   autoFlowEnabled: boolean;
   setZoom: (zoom: number) => void;
@@ -20,6 +23,10 @@ export interface ViewportSlice {
   setReferenceOpen: (open: boolean) => void;
   toggleReferenceOpen: () => void;
   setReferenceImageUrl: (url: string | null) => void;
+  setReferenceImages: (urls: string[]) => void;
+  addReferenceImages: (urls: string[]) => void;
+  removeReferenceImage: (index: number) => void;
+  clearReferenceImages: () => void;
   setAutoFlowEnabled: (enabled: boolean) => void;
   toggleAutoFlow: () => void;
 }
@@ -31,6 +38,7 @@ export const createViewportSlice: StateCreator<ViewportSlice, [], [], ViewportSl
   canvasDimensions: CANVAS_RATIOS["4:5"] || { width: 1080, height: 1350 },
   isReferenceOpen: false,
   referenceImageUrl: null,
+  referenceImages: [],
   autoFlowEnabled: true,
 
   setZoom: (zoom) => set({ zoom }),
@@ -44,7 +52,27 @@ export const createViewportSlice: StateCreator<ViewportSlice, [], [], ViewportSl
   setCanvasDimensions: (canvasDimensions) => set({ canvasDimensions }),
   setReferenceOpen: (isReferenceOpen) => set({ isReferenceOpen }),
   toggleReferenceOpen: () => set((s) => ({ isReferenceOpen: !s.isReferenceOpen })),
-  setReferenceImageUrl: (referenceImageUrl) => set({ referenceImageUrl }),
+  setReferenceImageUrl: (referenceImageUrl) =>
+    set({
+      referenceImageUrl,
+      referenceImages: referenceImageUrl ? [referenceImageUrl] : [],
+    }),
+  setReferenceImages: (referenceImages) =>
+    set({
+      referenceImages,
+      referenceImageUrl: referenceImages[0] ?? null,
+    }),
+  addReferenceImages: (urls) =>
+    set((s) => {
+      const next = [...s.referenceImages, ...urls].slice(0, 12);
+      return { referenceImages: next, referenceImageUrl: next[0] ?? null };
+    }),
+  removeReferenceImage: (index) =>
+    set((s) => {
+      const next = s.referenceImages.filter((_, i) => i !== index);
+      return { referenceImages: next, referenceImageUrl: next[0] ?? null };
+    }),
+  clearReferenceImages: () => set({ referenceImages: [], referenceImageUrl: null }),
   setAutoFlowEnabled: (autoFlowEnabled) => set({ autoFlowEnabled }),
   toggleAutoFlow: () => set((s) => ({ autoFlowEnabled: !s.autoFlowEnabled })),
 });

@@ -517,6 +517,24 @@ export function SidebarTools() {
           </button>
         </div>
       </CollapsibleGroup>
+
+      <CollapsibleGroup id="tools-progress" title="Progress dots">
+        <div className="space-y-2">
+          <p className="px-0.5 text-[12px] leading-snug text-muted-foreground">
+            Slide position indicator for the bottom of the frame.
+          </p>
+          <button
+            type="button"
+            disabled={!manager}
+            onClick={() =>
+              manager?.objects.addProgressDots(slideTotal, slideIndex)
+            }
+            className={cn(actionButton, "w-full")}
+          >
+            Place · {slideIndex + 1}/{slideTotal}
+          </button>
+        </div>
+      </CollapsibleGroup>
     </div>
   );
 }

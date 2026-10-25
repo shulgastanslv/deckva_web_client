@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { Header } from "@/components/header";
 import { LeftSidebar, RAIL_SHORTCUTS } from "@/components/canvas/left-sidebar";
 import { CanvasToolbar } from "@/components/canvas/canvas-toolbar";
+import { CanvasChromeRestore } from "@/components/canvas/canvas-chrome-restore";
 import { ElementsToolbar } from "@/components/canvas/elements-toolbar";
 import { CanvasView } from "@/components/canvas/canvas-view";
 import { ReferencePanel } from "@/components/canvas/reference-panel";
@@ -89,6 +90,8 @@ export default function CarouselEditor() {
   const [previewSlideId, setPreviewSlideId] = useState<number>(0);
   const [focusMode, setFocusMode] = useState(false);
   const [focusInspector, setFocusInspector] = useState(false);
+  /** Hide only canvas toolbar + slide navigator (sidebars stay). */
+  const [canvasChrome, setCanvasChrome] = useState(true);
   const manager = useCanvasManager();
 
   useEffect(() => {
@@ -128,6 +131,14 @@ export default function CarouselEditor() {
       if (focusMode && event.key === "Escape" && !event.defaultPrevented && !manager?.crop.active) {
         event.preventDefault();
         setFocusMode(false);
+        return;
+      }
+
+      // Toggle canvas toolbar + slide navigator (not full focus mode).
+      if (event.key === "\\" && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        event.preventDefault();
+        if (focusMode) return;
+        setCanvasChrome((open) => !open);
         return;
       }
 
@@ -187,13 +198,18 @@ export default function CarouselEditor() {
                 : {}
             }
           >
-            {!focusMode && <CanvasToolbar />}
+            {!focusMode && canvasChrome && (
+              <CanvasToolbar onHideChrome={() => setCanvasChrome(false)} />
+            )}
 
             <div className="relative flex min-h-0 flex-1">
               <CanvasView />
               <GenerateOverlay />
               {focusMode && (
                 <ElementsToolbar onExit={() => setFocusMode(false)} />
+              )}
+              {!focusMode && !canvasChrome && (
+                <CanvasChromeRestore onShow={() => setCanvasChrome(true)} />
               )}
               {!focusMode && <ReferencePanel />}
               {!focusMode && <AutoFlowPrompt />}
@@ -206,7 +222,7 @@ export default function CarouselEditor() {
                 </div>
               )}
             </div>
-            {!focusMode && <SlideNavigator />}
+            {!focusMode && canvasChrome && <SlideNavigator />}
           </main>
 
           {!focusMode && (
