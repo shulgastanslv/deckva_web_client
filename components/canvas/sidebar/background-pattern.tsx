@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useCanvasManager } from "@/context/canvas-manager";
-import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { PillSlider } from "@/components/ui/pill-slider";
 import { cn } from "@/lib/utils";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import {
@@ -26,40 +26,6 @@ function PatternSwatch({ id }: { id: BackgroundPatternId }) {
   }, [id]);
 
   return <canvas ref={ref} width={96} height={64} className="h-full w-full" />;
-}
-
-function PatternSlider({
-  label,
-  min,
-  max,
-  step,
-  value,
-  onChange,
-  onCommit,
-}: {
-  label: string;
-  min: number;
-  max: number;
-  step: number;
-  value: number;
-  onChange: (value: number) => void;
-  onCommit: (value: number) => void;
-}) {
-  return (
-    <label className="flex items-center gap-2">
-      <span className="w-9 shrink-0 text-[10px] text-muted-foreground">{label}</span>
-      <Slider
-        aria-label={label}
-        value={[value]}
-        min={min}
-        max={max}
-        step={step}
-        onValueChange={([next]) => onChange(next ?? value)}
-        onValueCommit={([next]) => onCommit(next ?? value)}
-        className="py-0.5"
-      />
-    </label>
-  );
 }
 
 export function BackgroundPattern() {
@@ -136,31 +102,33 @@ export function BackgroundPattern() {
               }
             />
           </div>
-          <PatternSlider
+          <PillSlider
             label="Size"
             min={0.7}
             max={2}
             step={0.05}
             value={patternScale}
-            onChange={(scale) => {
+            formatValue={(n) => n.toFixed(2)}
+            onValueChange={(scale) => {
               setPatternScale(scale);
               paintPattern(patternId, scale, patternOpacity, patternColor, false);
             }}
-            onCommit={(scale) =>
+            onValueCommit={(scale) =>
               paintPattern(patternId, scale, patternOpacity, patternColor, true)
             }
           />
-          <PatternSlider
+          <PillSlider
             label="Tone"
             min={0.08}
             max={0.72}
             step={0.02}
             value={patternOpacity}
-            onChange={(opacity) => {
+            formatValue={(n) => n.toFixed(2)}
+            onValueChange={(opacity) => {
               setPatternOpacity(opacity);
               paintPattern(patternId, patternScale, opacity, patternColor, false);
             }}
-            onCommit={(opacity) =>
+            onValueCommit={(opacity) =>
               paintPattern(patternId, patternScale, opacity, patternColor, true)
             }
           />

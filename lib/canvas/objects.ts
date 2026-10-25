@@ -22,6 +22,12 @@ import "./fabric-props";
 import { isFrameKind, type FrameKind } from "@/lib/canvas/frames";
 import { MOCKUP_SCALE, renderDeviceMockup } from "@/lib/canvas/device-mockup";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import {
+  buildCodeBlockGroup,
+  DEFAULT_CODE_OPTIONS,
+  rebuildCodeBlock,
+  type CodeBlockOptions,
+} from "@/lib/canvas/code-block";
 
 export type { SlideNumberStyle };
 export { formatSlideNumber };
@@ -969,6 +975,26 @@ export class ObjectFactory {
     return line;
   }
 
+  addCodeBlock(
+    options: Partial<CodeBlockOptions> = {},
+    x?: number,
+    y?: number,
+  ): Group {
+    const pos = this.getPosition(x, y);
+    const group = buildCodeBlockGroup({ ...DEFAULT_CODE_OPTIONS, ...options });
+    group.set({ left: pos.left, top: pos.top });
+    this.addToCanvas(group);
+    return group;
+  }
+
+  updateCodeBlock(group: Group, options: CodeBlockOptions): Group {
+    const next = rebuildCodeBlock(group, options);
+    this.canvas.remove(group);
+    this.canvas.add(next);
+    this.canvas.setActiveObject(next);
+    this.canvas.renderAll();
+    return next;
+  }
 
   private addToCanvas(obj: FabricObject) {
     this.canvas.add(obj);

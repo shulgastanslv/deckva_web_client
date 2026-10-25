@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Filter, Library, RotateCcw } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
+import { PillSlider } from "@/components/ui/pill-slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -79,28 +79,6 @@ const PRESETS: { id: string; label: string; values: FilterPresetValues }[] = [
     },
   },
 ];
-
-function Control({
-  label,
-  valueLabel,
-  children,
-}: {
-  label: string;
-  valueLabel: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[13px] font-medium text-foreground">{label}</span>
-        <span className="tabular-nums text-[13px] text-muted-foreground/70">
-          {valueLabel}
-        </span>
-      </div>
-      {children}
-    </div>
-  );
-}
 
 export function SidebarFilters() {
   const manager = useCanvasManager();
@@ -262,168 +240,135 @@ export function SidebarFilters() {
       </div>
 
       <TabsContent value="slide">
-        <div className="flex flex-col gap-3">
-          <Control label="Vignette" valueLabel={`${Math.round(vignette * 100)}%`}>
-            <Slider
-              value={[vignette * 100]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={([val]) => {
-                setActivePreset(null);
-                const v = (val ?? 0) / 100;
-                setVignette(v);
-                manager?.effects.setVignette(v);
-              }}
-              className="py-0.5"
-            />
-          </Control>
-
-          <Control label="Grain" valueLabel={`${Math.round(noise * 100)}%`}>
-            <Slider
-              value={[noise * 100]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={([val]) => {
-                setActivePreset(null);
-                const v = (val ?? 0) / 100;
-                setNoise(v);
-                void manager?.effects.setNoise(v);
-              }}
-              className="py-0.5"
-            />
-          </Control>
-
-          <Control
+        <div className="flex flex-col gap-2">
+          <PillSlider
+            label="Vignette"
+            value={vignette * 100}
+            min={0}
+            max={100}
+            step={1}
+            formatValue={(n) => `${Math.round(n)}%`}
+            onValueChange={(val) => {
+              setActivePreset(null);
+              const v = val / 100;
+              setVignette(v);
+              manager?.effects.setVignette(v);
+            }}
+          />
+          <PillSlider
+            label="Grain"
+            value={noise * 100}
+            min={0}
+            max={100}
+            step={1}
+            formatValue={(n) => `${Math.round(n)}%`}
+            onValueChange={(val) => {
+              setActivePreset(null);
+              const v = val / 100;
+              setNoise(v);
+              void manager?.effects.setNoise(v);
+            }}
+          />
+          <PillSlider
             label="Warmth"
-            valueLabel={
-              Math.abs(warmth) < 0.01
-                ? "0"
-                : `${warmth > 0 ? "+" : ""}${Math.round(warmth * 100)}`
+            value={warmth * 100}
+            min={-100}
+            max={100}
+            step={1}
+            formatValue={(n) =>
+              Math.abs(n) < 1 ? "0" : `${n > 0 ? "+" : ""}${Math.round(n)}`
             }
-          >
-            <Slider
-              value={[warmth * 100]}
-              min={-100}
-              max={100}
-              step={1}
-              onValueChange={([val]) => {
-                setActivePreset(null);
-                const v = (val ?? 0) / 100;
-                setWarmth(v);
-                manager?.effects.setWarmth(v);
-              }}
-              className="py-0.5"
-            />
-          </Control>
+            onValueChange={(val) => {
+              setActivePreset(null);
+              const v = val / 100;
+              setWarmth(v);
+              manager?.effects.setWarmth(v);
+            }}
+          />
         </div>
       </TabsContent>
 
       <TabsContent value="image">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {!hasImageTarget && (
             <p className="text-[13px] text-muted-foreground">
               Select an image or use an image background.
             </p>
           )}
-
-          <Control label="Blur" valueLabel={`${blur}px`}>
-            <Slider
-              value={[blur]}
-              min={0}
-              max={40}
-              step={1}
-              disabled={!hasImageTarget}
-              onValueChange={([val]) => {
-                setActivePreset(null);
-                const v = val ?? 0;
-                setBlur(v);
-                applyImage({ blur: v });
-              }}
-              className="py-0.5"
-            />
-          </Control>
-
-          <Control
+          <PillSlider
+            label="Blur"
+            value={blur}
+            min={0}
+            max={40}
+            step={1}
+            disabled={!hasImageTarget}
+            formatValue={(n) => `${Math.round(n)}px`}
+            onValueChange={(val) => {
+              setActivePreset(null);
+              setBlur(val);
+              applyImage({ blur: val });
+            }}
+          />
+          <PillSlider
             label="Brightness"
-            valueLabel={`${brightness >= 0 ? "+" : ""}${Math.round(brightness * 100)}`}
-          >
-            <Slider
-              value={[brightness * 100]}
-              min={-100}
-              max={100}
-              step={1}
-              disabled={!hasImageTarget}
-              onValueChange={([val]) => {
-                setActivePreset(null);
-                const v = (val ?? 0) / 100;
-                setBrightness(v);
-                applyImage({ brightness: v });
-              }}
-              className="py-0.5"
-            />
-          </Control>
-
-          <Control
+            value={brightness * 100}
+            min={-100}
+            max={100}
+            step={1}
+            disabled={!hasImageTarget}
+            formatValue={(n) => `${n >= 0 ? "+" : ""}${Math.round(n)}`}
+            onValueChange={(val) => {
+              setActivePreset(null);
+              const v = val / 100;
+              setBrightness(v);
+              applyImage({ brightness: v });
+            }}
+          />
+          <PillSlider
             label="Contrast"
-            valueLabel={`${contrast >= 0 ? "+" : ""}${Math.round(contrast * 100)}`}
-          >
-            <Slider
-              value={[contrast * 100]}
-              min={-100}
-              max={100}
-              step={1}
-              disabled={!hasImageTarget}
-              onValueChange={([val]) => {
-                setActivePreset(null);
-                const v = (val ?? 0) / 100;
-                setContrast(v);
-                applyImage({ contrast: v });
-              }}
-              className="py-0.5"
-            />
-          </Control>
-
-          <Control
+            value={contrast * 100}
+            min={-100}
+            max={100}
+            step={1}
+            disabled={!hasImageTarget}
+            formatValue={(n) => `${n >= 0 ? "+" : ""}${Math.round(n)}`}
+            onValueChange={(val) => {
+              setActivePreset(null);
+              const v = val / 100;
+              setContrast(v);
+              applyImage({ contrast: v });
+            }}
+          />
+          <PillSlider
             label="Saturation"
-            valueLabel={`${saturation >= 0 ? "+" : ""}${Math.round(saturation * 100)}`}
-          >
-            <Slider
-              value={[saturation * 100]}
-              min={-100}
-              max={100}
-              step={1}
-              disabled={!hasImageTarget}
-              onValueChange={([val]) => {
-                setActivePreset(null);
-                const v = (val ?? 0) / 100;
-                setSaturation(v);
-                applyImage({ saturation: v });
-              }}
-              className="py-0.5"
-            />
-          </Control>
-
-          <Control
+            value={saturation * 100}
+            min={-100}
+            max={100}
+            step={1}
+            disabled={!hasImageTarget}
+            formatValue={(n) => `${n >= 0 ? "+" : ""}${Math.round(n)}`}
+            onValueChange={(val) => {
+              setActivePreset(null);
+              const v = val / 100;
+              setSaturation(v);
+              applyImage({ saturation: v });
+            }}
+          />
+          <PillSlider
             label="Hue"
-            valueLabel={`${hue >= 0 ? "+" : ""}${Math.round(hue * 100)}`}
-          >
-            <Slider
-              value={[hue * 100]}
-              min={-100}
-              max={100}
-              step={1}
-              disabled={!hasImageTarget}
-              onValueChange={([val]) => {
-                setActivePreset(null);
-                const v = (val ?? 0) / 100;
-                setHue(v);
-                applyImage({ hue: v });
-              }}
-              className="py-0.5"
-            />
-          </Control>
+            value={hue * 100}
+            min={-100}
+            max={100}
+            step={1}
+            disabled={!hasImageTarget}
+            formatValue={(n) => `${n >= 0 ? "+" : ""}${Math.round(n)}`}
+            onValueChange={(val) => {
+              setActivePreset(null);
+              const v = val / 100;
+              setHue(v);
+              applyImage({ hue: v });
+            }}
+          />
         </div>
       </TabsContent>
     </Tabs>

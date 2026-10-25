@@ -12,6 +12,15 @@ const EXTRA = [
   "swibpName",
   "swibpId",
   "swibpLocked",
+  "swibpCode",
+  "swibpCodeLang",
+  "swibpCodeTheme",
+  "swibpCodePadding",
+  "swibpCodeRadius",
+  "swibpCodeFontSize",
+  "swibpCodeChrome",
+  "swibpCodeLineNumbers",
+  "swibpCodeFilename",
 ];
 
 for (const key of EXTRA) {

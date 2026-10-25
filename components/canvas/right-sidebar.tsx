@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Slider } from "@/components/ui/slider";
+import { PillSlider } from "@/components/ui/pill-slider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -44,6 +44,7 @@ import {
   FabricImage,
   type FabricObject,
   type FabricText,
+  type Group,
   Rect,
   Shadow as FabricShadow,
 } from "fabric";
@@ -91,6 +92,8 @@ import type { TextStyles } from "@/lib/canvas/text-flow";
 import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
 import { SelectObjectArt } from "@/components/canvas/canvas_icons";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { CodeBlockInspector } from "@/components/canvas/code-block-inspector";
+import { isCodeBlock } from "@/lib/canvas/code-block";
 
 type TextAlign = "left" | "center" | "right" | "justify";
 
@@ -166,58 +169,66 @@ function NumberField({
   decimals?: number;
   showSlider?: boolean;
 }) {
-  const format = (n: number) =>
+  const formatCore = (n: number) =>
     decimals > 0 ? n.toFixed(decimals) : String(Math.round(n));
-  const [draft, setDraft] = useState(format(value));
+  const format = (n: number) => {
+    const core = formatCore(n);
+    return unit ? `${core}${unit}` : core;
+  };
+
+  const [draft, setDraft] = useState(formatCore(value));
 
   useEffect(() => {
-    setDraft(format(value));
+    setDraft(formatCore(value));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from external value only
   }, [value, decimals]);
+
+  if (showSlider && min != null && max != null) {
+    return (
+      <PillSlider
+        label={label}
+        value={clampNumber(value, min, max)}
+        onValueChange={(next) => onChange(clampNumber(next, min, max))}
+        min={min}
+        max={max}
+        step={step}
+        formatValue={format}
+      />
+    );
+  }
 
   const commit = () => {
     const parsed = Number(draft.replace(",", "."));
     if (!Number.isFinite(parsed)) {
-      setDraft(format(value));
+      setDraft(formatCore(value));
       return;
     }
     const next = clampNumber(parsed, min, max);
     onChange(next);
-    setDraft(format(next));
+    setDraft(formatCore(next));
   };
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[13px] text-muted-foreground">{label}</span>
-        <div className={`${fieldShell} h-8 w-[4.75rem] px-2`}>
-          <Input
-            type="text"
-            inputMode="decimal"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onBlur={commit}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.currentTarget.blur();
-            }}
-            className="h-7 flex-1 border-0 bg-transparent px-0.5 text-right font-mono text-[13px] tabular-nums shadow-none focus-visible:ring-0 dark:bg-transparent"
-          />
-          {unit ? (
-            <span className="shrink-0 pl-0.5 text-[13px] text-muted-foreground">
-              {unit}
-            </span>
-          ) : null}
-        </div>
-      </div>
-      {showSlider && min != null && max != null ? (
-        <Slider
-          value={[clampNumber(value, min, max)]}
-          onValueChange={([val]) => onChange(val ?? min)}
-          min={min}
-          max={max}
-          step={step}
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <div className={`${fieldShell} h-8 w-[4.75rem] px-2`}>
+        <Input
+          type="text"
+          inputMode="decimal"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+          }}
+          className="h-7 flex-1 border-0 bg-transparent px-0.5 text-right font-mono text-[13px] tabular-nums shadow-none focus-visible:ring-0 dark:bg-transparent"
         />
-      ) : null}
+        {unit ? (
+          <span className="shrink-0 pl-0.5 text-[13px] text-muted-foreground">
+            {unit}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -819,6 +830,11 @@ export function RightSidebar({
 
   const isRect = formValues?.type === "rect";
   const isImage = formValues?.type === "image";
+  const codeGroup =
+    selectedObject && isCodeBlock(selectedObject)
+      ? (selectedObject as Group)
+      : null;
+  const isCode = Boolean(codeGroup);
   const canHaveRadius = isRect || isImage;
   const canImportImage = canFillShape(formValues?.type);
 
@@ -831,7 +847,7 @@ export function RightSidebar({
     "i-text": "Text",
     textbox: "Text",
     path: "Shape",
-    group: "Group",
+    group: isCode ? "Code" : "Group",
   };
 
   const alignIcons: Record<TextAlign, React.ElementType> = {
@@ -1205,6 +1221,8 @@ export function RightSidebar({
                   Paste style
                 </Button>
               </div>
+
+              {codeGroup ? <CodeBlockInspector group={codeGroup} /> : null}
 
               <CollapsibleGroup id="rs-position" title="Size and angle">
                 <div className="grid grid-cols-2 gap-2.5">

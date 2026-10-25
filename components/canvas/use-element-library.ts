@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   AlignLeft,
   Circle,
+  Code2,
   Diamond,
   Ellipse,
   Hexagon,
@@ -126,6 +127,12 @@ export function useElementLibrary() {
           { label: "Paragraph", icon: AlignLeft, action: () => manager?.objects.addParagraph() },
           { label: "Text", icon: Pencil, action: () => manager?.objects.addText("New text") },
           { label: "Quote", icon: Quote, action: () => manager?.objects.addQuote() },
+          {
+            label: "Code",
+            icon: Code2,
+            title: "Code block",
+            action: () => manager?.objects.addCodeBlock(),
+          },
         ],
       },
       {
