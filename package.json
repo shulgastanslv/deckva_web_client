@@ -11,7 +11,6 @@
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {
-    "@imgly/background-removal": "^1.7.0",
     "@phosphor-icons/react": "^2.1.10",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
@@ -34,7 +33,6 @@
     "next-auth": "^4.24.15",
     "next-themes": "^0.4.6",
     "nodemailer": "^7.0.13",
-    "onnxruntime-web": "^1.21.0",
     "pg": "^8.23.0",
     "radix-ui": "^1.6.7",
     "react": "19.2.8",

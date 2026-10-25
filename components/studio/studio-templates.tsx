@@ -90,7 +90,7 @@ export function StudioTemplates() {
         }
       />
 
-      <StudioContentBody>
+      <StudioContentBody centered={true} >
         {loading && templates.length === 0 ? (
           <div className="flex justify-center py-20">
             <Loader2 className="size-4 animate-spin text-muted-foreground" />

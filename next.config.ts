@@ -9,8 +9,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
-  // Keep ONNX runtime out of the Node server bundle (client-only ML).
-  serverExternalPackages: ["@imgly/background-removal", "onnxruntime-web"],
 };
 
 export default nextConfig;

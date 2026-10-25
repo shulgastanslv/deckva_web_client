@@ -31,12 +31,14 @@ import {
   PanelRightOpen,
   Upload,
   Crop,
+  Layers2,
   WandSparkles,
   Loader2,
   Lock,
   Unlock,
   List,
   ListOrdered,
+  ScanSearch,
 } from "lucide-react";
 import { useSelectedObject } from "@/hooks/use-selected-object";
 import {
@@ -48,11 +50,13 @@ import {
   Shadow as FabricShadow,
 } from "fabric";
 import { useCanvasManager } from "@/context/canvas-manager";
+import { useImageTools } from "@/components/canvas/use-image-tools";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { canFillShape } from "@/lib/canvas/objects";
 import { iconFill } from "@/lib/canvas/recolor-icon";
-import { removeImageBackground } from "@/lib/image/remove-background";
 import { FontSelect } from "@/components/canvas/font-select";
+import type { UpscaleScale } from "@/lib/image/deckva-tools";
+import { cn } from "@/lib/utils";
 import {
   loadGoogleFont,
   normalizeFontFamily,
@@ -292,9 +296,17 @@ export function RightSidebar({
     null,
   );
   const [imageUrlInput, setImageUrlInput] = useState("");
-  const [bgRemoving, setBgRemoving] = useState(false);
-  const [bgProgress, setBgProgress] = useState<string | null>(null);
-  const [bgError, setBgError] = useState<string | null>(null);
+  const {
+    canRun: canEnhance,
+    busy: enhanceBusy,
+    error: enhanceError,
+    scale: enhanceScale,
+    setScale: setEnhanceScale,
+    removeBackground,
+    upscale,
+    magicLayer,
+  } = useImageTools();
+  const imageToolBusy = Boolean(enhanceBusy);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const palette = useCanvasStore((s) => s.palette);
   const markedSlideIds = useCanvasStore((s) => s.markedSlideIds);
@@ -306,9 +318,6 @@ export function RightSidebar({
     if (!selectedObject) {
       setFormValues(null);
       setImageUrlInput("");
-      setBgRemoving(false);
-      setBgProgress(null);
-      setBgError(null);
       return;
     }
 
@@ -628,43 +637,6 @@ export function RightSidebar({
       })
       .catch((err) => console.error(err));
     e.target.value = "";
-  };
-
-  const handleRemoveBackground = async () => {
-    if (!selectedObject || selectedObject.type !== "image") return;
-
-    const imgObj = selectedObject as unknown as FabricImage;
-    const src =
-      (typeof imgObj.getSrc === "function" ? imgObj.getSrc() : "") ||
-      formValues?.src ||
-      "";
-    if (!src) {
-      setBgError("No image source");
-      return;
-    }
-
-    setBgRemoving(true);
-    setBgError(null);
-    setBgProgress("Preparing the model…");
-
-    try {
-      const result = await removeImageBackground(src, {
-        onProgress: ({ key, current, total }) => {
-          const pct = total > 0 ? Math.round((current / total) * 100) : 0;
-          setBgProgress(
-            pct >= 100 ? "Processing…" : `Loading ${key}: ${pct}%`,
-          );
-        },
-      });
-      changeImageSource(result);
-      setBgProgress(null);
-    } catch (err) {
-      console.error(err);
-      setBgError("Couldn't remove the background. Try again.");
-      setBgProgress(null);
-    } finally {
-      setBgRemoving(false);
-    }
   };
 
   const handleCenterH = () => {
@@ -1286,7 +1258,7 @@ export function RightSidebar({
                       size="sm"
                       className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
                       onClick={() => selectedObject && manager?.crop.start(selectedObject)}
-                      disabled={bgRemoving}
+                      disabled={imageToolBusy}
                     >
                       <Crop className="size-4" />
                       Crop
@@ -1305,7 +1277,7 @@ export function RightSidebar({
                     size="sm"
                     className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={bgRemoving}
+                    disabled={imageToolBusy}
                   >
                     <Upload className="size-4" />
                     Upload file
@@ -1316,7 +1288,7 @@ export function RightSidebar({
                       onChange={(e) => setImageUrlInput(e.target.value)}
                       placeholder="Image URL"
                       className="h-9 border border-border bg-transparent px-3 text-[13px] dark:bg-transparent"
-                      disabled={bgRemoving}
+                      disabled={imageToolBusy}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && imageUrlInput.trim()) {
                           changeImageSource(imageUrlInput.trim());
@@ -1328,7 +1300,7 @@ export function RightSidebar({
                       variant="secondary"
                       size="sm"
                       className={`h-9 px-3 text-[13px] ${btnRound}`}
-                      disabled={bgRemoving || !imageUrlInput.trim()}
+                      disabled={imageToolBusy || !imageUrlInput.trim()}
                       onClick={() => changeImageSource(imageUrlInput.trim())}
                     >
                       OK
@@ -1339,24 +1311,67 @@ export function RightSidebar({
                     variant="secondary"
                     size="sm"
                     className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                    onClick={() => void handleRemoveBackground()}
-                    disabled={bgRemoving}
+                    onClick={() => void removeBackground()}
+                    disabled={!canEnhance}
                   >
-                    {bgRemoving ? (
+                    {enhanceBusy === "remove-bg" ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
                       <WandSparkles className="size-4" />
                     )}
-                    {bgRemoving ? "Removing background…" : "Remove background"}
+                    {enhanceBusy === "remove-bg" ? "Removing background…" : "Remove background"}
                   </Button>
-                  {bgProgress && (
-                    <p className="text-[13px] text-muted-foreground leading-snug">
-                      {bgProgress}
-                    </p>
-                  )}
-                  {bgError && (
+                  <div className="flex gap-1">
+                    {([2, 3, 4] as UpscaleScale[]).map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        disabled={imageToolBusy}
+                        onClick={() => setEnhanceScale(value)}
+                        className={cn(
+                          "h-8 flex-1 rounded-full text-[13px] tabular-nums transition-colors disabled:opacity-40",
+                          enhanceScale === value
+                            ? "bg-foreground text-background"
+                            : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
+                        )}
+                      >
+                        {value}×
+                      </button>
+                    ))}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
+                    onClick={() => void upscale()}
+                    disabled={!canEnhance}
+                  >
+                    {enhanceBusy === "upscale" ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <ScanSearch className="size-4" />
+                    )}
+                    {enhanceBusy === "upscale" ? "Upscaling…" : `Upscale ${enhanceScale}×`}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
+                    onClick={() => void magicLayer()}
+                    disabled={!canEnhance}
+                  >
+                    {enhanceBusy === "magic-layer" ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Layers2 className="size-4" />
+                    )}
+                    {enhanceBusy === "magic-layer" ? "Splitting layers…" : "Magic layer"}
+                  </Button>
+                  {enhanceError && (
                     <p className="text-[13px] text-destructive leading-snug">
-                      {bgError}
+                      {enhanceError}
                     </p>
                   )}
                 </CollapsibleGroup>

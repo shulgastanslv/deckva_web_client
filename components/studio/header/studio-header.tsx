@@ -71,7 +71,7 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
 
   return (
     <>
-      <header className="flex shrink-0 items-center justify-between gap-3 px-5 pt-3 pb-1 sm:px-6">
+      <header className="flex shrink-0 items-center justify-between gap-3 px-5 pt-3 pb-1 sm:px-6 bg-background dark:bg-muted/20">
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
           <button
             type="button"

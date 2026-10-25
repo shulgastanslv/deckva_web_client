@@ -11,17 +11,21 @@ import {
   Heading2,
   Hexagon,
   ImagePlus,
+  Layers2,
   Link2,
   Loader2,
   Minimize2,
   Minus,
   MousePointer2,
   Quote,
+  ScanSearch,
   SeparatorHorizontal,
+  Sparkles,
   Square,
   Star,
   Triangle,
   Type,
+  WandSparkles,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
@@ -45,7 +49,9 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useElementLibrary } from "@/components/canvas/use-element-library";
+import { useImageTools } from "@/components/canvas/use-image-tools";
 import { clampZoom } from "@/components/canvas/zoom-controls";
+import type { UpscaleScale } from "@/lib/image/deckva-tools";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
 interface ElementsToolbarProps {
@@ -266,6 +272,25 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   const setZoom = useCanvasStore((s) => s.setZoom);
   const [shapeId, setShapeId] = useState(SHAPES[0].id);
   const [textId, setTextId] = useState(TEXTS[0].id);
+  const {
+    canRun: canEnhance,
+    busy: enhanceBusy,
+    error: enhanceError,
+    scale: enhanceScale,
+    setScale: setEnhanceScale,
+    removeBackground,
+    upscale,
+    magicLayer,
+  } = useImageTools();
+  const enhanceDisabled = !canEnhance;
+  const EnhanceIcon =
+    enhanceBusy === "remove-bg"
+      ? Loader2
+      : enhanceBusy === "upscale"
+        ? Loader2
+        : enhanceBusy === "magic-layer"
+          ? Loader2
+          : Sparkles;
 
   const actions = useMemo(() => {
     const map = new Map<string, () => void>();
@@ -432,6 +457,66 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             }
           >
             <ImagePlus className="size-4" />
+          </RailTool>
+
+          <RailTool
+            label="Enhance"
+            hint={
+              enhanceBusy
+                ? "Working…"
+                : enhanceError
+                  ? enhanceError
+                  : "Remove BG, upscale, magic layer — select an image"
+            }
+            disabled={enhanceDisabled && !enhanceBusy}
+            onClick={() => void removeBackground()}
+            menu={
+              <CornerMenu label="Enhance options" disabled={Boolean(enhanceBusy)}>
+                <DropdownMenuContent side="top" align="center" sideOffset={10} className="w-56!">
+                  <DropdownMenuItem
+                    disabled={enhanceDisabled}
+                    onSelect={() => void removeBackground()}
+                    className="gap-2"
+                  >
+                    <WandSparkles />
+                    Remove background
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Upscale</DropdownMenuLabel>
+                  {([2, 3, 4] as UpscaleScale[]).map((value) => (
+                    <DropdownMenuItem
+                      key={value}
+                      disabled={enhanceDisabled}
+                      onSelect={() => {
+                        setEnhanceScale(value);
+                        void upscale(value);
+                      }}
+                      className="gap-2"
+                    >
+                      <ScanSearch />
+                      Upscale {value}×
+                      {enhanceScale === value && (
+                        <DropdownMenuShortcut className="tracking-normal">active</DropdownMenuShortcut>
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    disabled={enhanceDisabled}
+                    onSelect={() => void magicLayer()}
+                    className="gap-2"
+                  >
+                    <Layers2 />
+                    Magic layer
+                  </DropdownMenuItem>
+                  {enhanceError && (
+                    <p className="px-2 pb-1.5 text-[13px] text-destructive">{enhanceError}</p>
+                  )}
+                </DropdownMenuContent>
+              </CornerMenu>
+            }
+          >
+            <EnhanceIcon className={cn("size-4", enhanceBusy && "animate-spin")} />
           </RailTool>
 
           <BarDivider />

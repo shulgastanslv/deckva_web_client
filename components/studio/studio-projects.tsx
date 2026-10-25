@@ -179,7 +179,7 @@ export function StudioProjects() {
         }
       />
 
-      <StudioContentBody>
+      <StudioContentBody centered={true} >
         {!signedIn ? (
           <div className="max-w-sm py-8">
             <p

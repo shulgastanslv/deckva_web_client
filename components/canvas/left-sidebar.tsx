@@ -9,6 +9,7 @@ import {
   PanelLeftOpen,
   Settings,
   ShapesIcon,
+  Sparkles,
   StickyNoteIcon,
   ToolCase,
 } from "lucide-react";

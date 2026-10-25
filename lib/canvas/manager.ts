@@ -126,6 +126,23 @@ export class CanvasManager {
     this.events.emit("selection", this.getActiveObject());
   }
 
+  /**
+   * Async multi-step mutations as one undo step (skips intermediate object:added/modified commits).
+   */
+  async runBatched(run: () => void | Promise<void>): Promise<void> {
+    if (this.disposed) return;
+    this.silentDepth++;
+    try {
+      await run();
+    } finally {
+      this.silentDepth--;
+    }
+    if (this.disposed) return;
+    this.canvas.requestRenderAll();
+    this.commit();
+    this.events.emit("selection", this.getActiveObject());
+  }
+
   /** Records the current document as a new history step and notifies subscribers. */
   commit(): void {
     if (this.silentDepth > 0) return;
