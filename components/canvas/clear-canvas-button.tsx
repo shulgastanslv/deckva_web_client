@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eraser } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +15,7 @@ import {
 import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
+/** Wipe the whole carousel back to one empty slide (not the image pixel eraser). */
 export function ClearCanvasButton() {
   const slides = useSlidesController();
   const [open, setOpen] = useState(false);
@@ -41,9 +42,9 @@ export function ClearCanvasButton() {
           variant="ghost"
           size="icon"
           className="h-8 w-8 rounded-full text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-          title="Clear canvas"
+          title="Clear all slides"
         >
-          <Eraser className="w-3.5 h-3.5" />
+          <Trash2 className="size-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent>

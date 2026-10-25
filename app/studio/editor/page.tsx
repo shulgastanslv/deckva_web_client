@@ -107,9 +107,18 @@ export default function CarouselEditor() {
         return;
       }
 
-      if (focusMode && event.key === "Escape" && !event.defaultPrevented && !manager?.crop.active) {
-        event.preventDefault();
-        setFocusMode(false);
+      if (event.key === "Escape" && !event.defaultPrevented) {
+        if (manager?.crop.active) return;
+        const store = useCanvasStore.getState();
+        if (store.eraserActive) {
+          event.preventDefault();
+          store.setEraserActive(false);
+          return;
+        }
+        if (focusMode) {
+          event.preventDefault();
+          setFocusMode(false);
+        }
         return;
       }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Hand, MousePointer2, ZoomIn, ZoomOut } from "lucide-react";
+import { Eraser, Hand, MousePointer2, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
@@ -17,6 +17,8 @@ export function ZoomControls() {
   const setZoom = useCanvasStore((s) => s.setZoom);
   const handActive = useCanvasStore((s) => s.handActive);
   const setHandActive = useCanvasStore((s) => s.setHandActive);
+  const eraserActive = useCanvasStore((s) => s.eraserActive);
+  const setEraserActive = useCanvasStore((s) => s.setEraserActive);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -30,13 +32,27 @@ export function ZoomControls() {
           el.isContentEditable);
       if (typing) return;
       const key = event.key.toLowerCase();
-      if (key !== "v" && key !== "h") return;
-      event.preventDefault();
-      setHandActive(key === "h");
+      if (key === "v") {
+        event.preventDefault();
+        setHandActive(false);
+        setEraserActive(false);
+        return;
+      }
+      if (key === "h") {
+        event.preventDefault();
+        setHandActive(true);
+        return;
+      }
+      if (key === "e") {
+        event.preventDefault();
+        setEraserActive(!useCanvasStore.getState().eraserActive);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [setHandActive]);
+  }, [setHandActive, setEraserActive]);
+
+  const selectActive = !handActive && !eraserActive;
 
   return (
     <div className="flex shrink-0 items-center gap-1 rounded-full bg-muted/40 p-0.5">
@@ -44,13 +60,16 @@ export function ZoomControls() {
         variant="ghost"
         size="icon"
         className={`h-8 w-8 rounded-full ${
-          handActive
-            ? "text-muted-foreground hover:text-foreground"
-            : "bg-background text-foreground shadow-2xs"
+          selectActive
+            ? "bg-background text-foreground"
+            : "text-muted-foreground hover:text-foreground"
         }`}
-        onClick={() => setHandActive(false)}
+        onClick={() => {
+          setHandActive(false);
+          setEraserActive(false);
+        }}
         title="Select. Move and edit objects (V)"
-        aria-pressed={!handActive}
+        aria-pressed={selectActive}
       >
         <MousePointer2 className="size-3.5" />
       </Button>
@@ -59,7 +78,7 @@ export function ZoomControls() {
         size="icon"
         className={`h-8 w-8 rounded-full ${
           handActive
-            ? "bg-background text-foreground shadow-2xs"
+            ? "bg-background text-foreground"
             : "text-muted-foreground hover:text-foreground"
         }`}
         onClick={() => setHandActive(true)}
@@ -67,6 +86,20 @@ export function ZoomControls() {
         aria-pressed={handActive}
       >
         <Hand className="size-3.5" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className={`h-8 w-8 rounded-full ${
+          eraserActive
+            ? "bg-background text-foreground"
+            : "text-muted-foreground hover:text-foreground"
+        }`}
+        onClick={() => setEraserActive(!eraserActive)}
+        title="Eraser. Brush away pixels on images (E)"
+        aria-pressed={eraserActive}
+      >
+        <Eraser className="size-3.5" />
       </Button>
       <Button
         variant="ghost"
@@ -93,7 +126,7 @@ export function ZoomControls() {
         title="Zoom in"
       >
         <ZoomIn className="size-3.5" />
-      </Button> 
+      </Button>
     </div>
   );
 }

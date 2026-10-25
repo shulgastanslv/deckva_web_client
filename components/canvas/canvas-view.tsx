@@ -70,6 +70,7 @@ export function CanvasView() {
   const zoom = useCanvasStore((s) => s.zoom);
   const isLoadingProject = useCanvasStore((s) => s.isLoadingProject);
   const handActive = useCanvasStore((s) => s.handActive);
+  const eraserActive = useCanvasStore((s) => s.eraserActive);
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const [spaceDown, setSpaceDown] = useState(false);
   const [grabbing, setGrabbing] = useState(false);
@@ -180,6 +181,15 @@ export function CanvasView() {
 
   useEffect(() => {
     if (!manager) return;
+    if (eraserActive) manager.eraser.enable();
+    else manager.eraser.disable();
+    return () => manager.eraser.disable();
+  }, [manager, eraserActive]);
+
+  useEffect(() => {
+    if (!manager) return;
+    // Eraser owns hit-testing/cursors unless Space is held to pan.
+    if (eraserActive && !spaceDown) return;
     const canvas = manager.canvas;
     const previous = {
       selection: canvas.selection,
@@ -200,8 +210,14 @@ export function CanvasView() {
       canvas.defaultCursor = previous.defaultCursor;
       canvas.hoverCursor = previous.hoverCursor;
       canvas.setCursor(previous.defaultCursor);
+      if (eraserActive && !panning) {
+        canvas.selection = false;
+        canvas.defaultCursor = "cell";
+        canvas.hoverCursor = "cell";
+        canvas.setCursor("cell");
+      }
     };
-  }, [manager, panning, grabbing]);
+  }, [manager, panning, grabbing, eraserActive, spaceDown]);
 
   useEffect(() => {
     const container = containerRef.current;

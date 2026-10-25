@@ -318,6 +318,7 @@ export function SelectionToolbar() {
   const manager = useCanvasManager();
   const selectedObject = useCanvasStore((s) => s.selectedObject);
   const handActive = useCanvasStore((s) => s.handActive);
+  const eraserActive = useCanvasStore((s) => s.eraserActive);
   const zoom = useCanvasStore((s) => s.zoom);
   const copiedStyle = useSyncExternalStore(
     subscribeCopiedStyle,
@@ -333,7 +334,7 @@ export function SelectionToolbar() {
   const textObj = textTarget(active);
   const showText = textObj != null;
   const cropping = Boolean(manager?.crop.active);
-  const visible = Boolean(manager && active && !handActive && !cropping);
+  const visible = Boolean(manager && active && !handActive && !eraserActive && !cropping);
 
   const refresh = useCallback(() => {
     if (!manager || !active) {

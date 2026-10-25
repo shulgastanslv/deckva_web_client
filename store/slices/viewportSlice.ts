@@ -5,6 +5,8 @@ export interface ViewportSlice {
   zoom: number;
   /** Drag the view instead of objects. */
   handActive: boolean;
+  /** Brush-erase pixels on images. */
+  eraserActive: boolean;
   currentRatio: RatioKey;
   canvasDimensions: { width: number; height: number };
   /** Split view: show reference image panel beside the canvas */
@@ -18,6 +20,8 @@ export interface ViewportSlice {
   setZoom: (zoom: number) => void;
   setHandActive: (active: boolean) => void;
   toggleHand: () => void;
+  setEraserActive: (active: boolean) => void;
+  toggleEraser: () => void;
   setCurrentRatio: (ratio: RatioKey) => void;
   setCanvasDimensions: (dim: { width: number; height: number }) => void;
   setReferenceOpen: (open: boolean) => void;
@@ -34,6 +38,7 @@ export interface ViewportSlice {
 export const createViewportSlice: StateCreator<ViewportSlice, [], [], ViewportSlice> = (set) => ({
   zoom: 100,
   handActive: false,
+  eraserActive: false,
   currentRatio: "4:5",
   canvasDimensions: CANVAS_RATIOS["4:5"] || { width: 1080, height: 1350 },
   isReferenceOpen: false,
@@ -42,8 +47,22 @@ export const createViewportSlice: StateCreator<ViewportSlice, [], [], ViewportSl
   autoFlowEnabled: true,
 
   setZoom: (zoom) => set({ zoom }),
-  setHandActive: (handActive) => set({ handActive }),
-  toggleHand: () => set((s) => ({ handActive: !s.handActive })),
+  setHandActive: (handActive) =>
+    set(handActive ? { handActive: true, eraserActive: false } : { handActive: false }),
+  toggleHand: () =>
+    set((s) =>
+      s.handActive
+        ? { handActive: false }
+        : { handActive: true, eraserActive: false },
+    ),
+  setEraserActive: (eraserActive) =>
+    set(eraserActive ? { eraserActive: true, handActive: false } : { eraserActive: false }),
+  toggleEraser: () =>
+    set((s) =>
+      s.eraserActive
+        ? { eraserActive: false }
+        : { eraserActive: true, handActive: false },
+    ),
   setCurrentRatio: (currentRatio) =>
     set({
       currentRatio,

@@ -1280,35 +1280,11 @@ export function RightSidebar({
                     disabled={imageToolBusy}
                   >
                     <Upload className="size-4" />
-                    Upload file
+                    Replace Image
                   </Button>
-                  <div className="flex gap-2">
-                    <Input
-                      value={imageUrlInput}
-                      onChange={(e) => setImageUrlInput(e.target.value)}
-                      placeholder="Image URL"
-                      className="h-9 border border-border bg-transparent px-3 text-[13px] dark:bg-transparent"
-                      disabled={imageToolBusy}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && imageUrlInput.trim()) {
-                          changeImageSource(imageUrlInput.trim());
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      className={`h-9 px-3 text-[13px] ${btnRound}`}
-                      disabled={imageToolBusy || !imageUrlInput.trim()}
-                      onClick={() => changeImageSource(imageUrlInput.trim())}
-                    >
-                      OK
-                    </Button>
-                  </div>
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="default"
                     size="sm"
                     className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
                     onClick={() => void removeBackground()}
@@ -1341,7 +1317,7 @@ export function RightSidebar({
                   </div>
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
                     className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
                     onClick={() => void upscale()}
@@ -1356,7 +1332,7 @@ export function RightSidebar({
                   </Button>
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
                     className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
                     onClick={() => void magicLayer()}

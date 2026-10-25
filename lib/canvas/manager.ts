@@ -13,6 +13,7 @@ import { captureCanvasThumbnail } from "./thumbnail";
 import { recolorIcon } from "./recolor-icon";
 import { withRemoteImageCors } from "./image-cors";
 import { ImageCropSession } from "./crop-session";
+import { ImageEraserSession } from "./eraser-session";
 import { refreshMask } from "./object-appearance";
 import { fitCanvasJSON, fitGeometry, type FrameSize } from "./fit-frame";
 import { isAutoFlowSkippable } from "./auto-flow";
@@ -47,6 +48,7 @@ export class CanvasManager {
   readonly effects: EffectsManager;
   readonly layouts: LayoutManager;
   readonly crop: ImageCropSession;
+  readonly eraser: ImageEraserSession;
 
   private readonly history = new HistoryStack<CanvasState>();
   private readonly events = new Emitter<CanvasManagerEvents>();
@@ -69,6 +71,11 @@ export class CanvasManager {
     this.effects = new EffectsManager(this.canvas);
     this.layouts = new LayoutManager(this.canvas);
     this.crop = new ImageCropSession(this.canvas, (changed) => {
+      if (this.disposed || this.silentDepth > 0) return;
+      if (changed) this.commit();
+      this.events.emit("selection", this.getActiveObject());
+    });
+    this.eraser = new ImageEraserSession(this.canvas, (changed) => {
       if (this.disposed || this.silentDepth > 0) return;
       if (changed) this.commit();
       this.events.emit("selection", this.getActiveObject());
@@ -444,6 +451,7 @@ export class CanvasManager {
     }
     this.loadAbort?.abort();
     this.loadAbort = null;
+    this.eraser.disable();
     this.events.clear();
     this.grid.dispose();
     this.core.dispose();
@@ -467,6 +475,8 @@ export class CanvasManager {
 
     this.silentDepth++;
     this.crop.cancel();
+    const keepEraser = this.eraser.active;
+    this.eraser.disable();
     try {
       this.canvas.discardActiveObject();
       if (state) {
@@ -476,6 +486,7 @@ export class CanvasManager {
       }
       if (this.disposed || abort.signal.aborted || !this.canvas.contextTop) return;
       stabilizeGroups(this.canvas.getObjects());
+      if (keepEraser) this.eraser.enable();
       if (!this.canvas.backgroundColor) {
         this.canvas.backgroundColor = DEFAULT_BACKGROUND;
       }

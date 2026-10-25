@@ -6,6 +6,7 @@ import {
   Circle,
   Diamond,
   Ellipse,
+  Eraser,
   Hand,
   Heading1,
   Heading2,
@@ -268,6 +269,8 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
 
   const handActive = useCanvasStore((s) => s.handActive);
   const setHandActive = useCanvasStore((s) => s.setHandActive);
+  const eraserActive = useCanvasStore((s) => s.eraserActive);
+  const setEraserActive = useCanvasStore((s) => s.setEraserActive);
   const zoom = useCanvasStore((s) => s.zoom);
   const setZoom = useCanvasStore((s) => s.setZoom);
   const [shapeId, setShapeId] = useState(SHAPES[0].id);
@@ -282,15 +285,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
     upscale,
     magicLayer,
   } = useImageTools();
-  const enhanceDisabled = !canEnhance;
-  const EnhanceIcon =
-    enhanceBusy === "remove-bg"
-      ? Loader2
-      : enhanceBusy === "upscale"
-        ? Loader2
-        : enhanceBusy === "magic-layer"
-          ? Loader2
-          : Sparkles;
+  const EnhanceIcon = enhanceBusy ? Loader2 : Sparkles;
 
   const actions = useMemo(() => {
     const map = new Map<string, () => void>();
@@ -318,12 +313,19 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
       if (key === "v") {
         event.preventDefault();
         setHandActive(false);
+        setEraserActive(false);
+        return;
+      }
+      if (key === "e") {
+        event.preventDefault();
+        setEraserActive(!useCanvasStore.getState().eraserActive);
         return;
       }
 
       const shape = SHAPES.find((tool) => tool.key === key);
       if (shape) {
         event.preventDefault();
+        setEraserActive(false);
         setShapeId(shape.id);
         actions.get(shape.label)?.();
         return;
@@ -331,13 +333,14 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
       const text = TEXTS.find((tool) => tool.key === key);
       if (text) {
         event.preventDefault();
+        setEraserActive(false);
         setTextId(text.id);
         actions.get(text.label)?.();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [actions, manager, setHandActive]);
+  }, [actions, manager, setEraserActive, setHandActive]);
 
   const onImageDragOver = (event: DragEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -368,9 +371,12 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             label="Move"
             hint="Select and move objects"
             shortcut="V"
-            active={!handActive}
+            active={!handActive && !eraserActive}
             disabled={!manager}
-            onClick={() => setHandActive(false)}
+            onClick={() => {
+              setHandActive(false);
+              setEraserActive(false);
+            }}
           >
             <MousePointer2 className="size-4" />
           </RailTool>
@@ -383,6 +389,16 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             onClick={() => setHandActive(!handActive)}
           >
             <Hand className="size-4" />
+          </RailTool>
+          <RailTool
+            label="Eraser"
+            hint="Brush away pixels on images"
+            shortcut="E"
+            active={eraserActive}
+            disabled={!manager}
+            onClick={() => setEraserActive(!eraserActive)}
+          >
+            <Eraser className="size-4" />
           </RailTool>
 
           <BarDivider />
@@ -468,13 +484,13 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   ? enhanceError
                   : "Remove BG, upscale, magic layer — select an image"
             }
-            disabled={enhanceDisabled && !enhanceBusy}
+            disabled={!canEnhance}
             onClick={() => void removeBackground()}
             menu={
               <CornerMenu label="Enhance options" disabled={Boolean(enhanceBusy)}>
                 <DropdownMenuContent side="top" align="center" sideOffset={10} className="w-56!">
                   <DropdownMenuItem
-                    disabled={enhanceDisabled}
+                    disabled={!canEnhance}
                     onSelect={() => void removeBackground()}
                     className="gap-2"
                   >
@@ -486,7 +502,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   {([2, 3, 4] as UpscaleScale[]).map((value) => (
                     <DropdownMenuItem
                       key={value}
-                      disabled={enhanceDisabled}
+                      disabled={!canEnhance}
                       onSelect={() => {
                         setEnhanceScale(value);
                         void upscale(value);
@@ -502,7 +518,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   ))}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    disabled={enhanceDisabled}
+                    disabled={!canEnhance}
                     onSelect={() => void magicLayer()}
                     className="gap-2"
                   >
