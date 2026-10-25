@@ -1,12 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FolderSync, Loader2, Search, Trash2, Upload } from "lucide-react";
+import { Loader2, Search, Trash2, Upload } from "lucide-react";
 
 import {
   deleteTemplate,
   getTemplates,
-  importBuiltinTemplates,
   importTemplateJson,
   updateTemplateMeta,
   type TemplateListItem,
@@ -49,6 +48,7 @@ export function AdminTemplates() {
       const res = await getTemplates({
         category: category === "all" ? undefined : category,
         search: search.trim() || undefined,
+        files: false,
       });
       if (!res.success) {
         setTemplates([]);
@@ -123,26 +123,6 @@ export function AdminTemplates() {
     }
   };
 
-  const syncFromDisk = async () => {
-    setSeeding(true);
-    setMessage(null);
-    try {
-      const res = await importBuiltinTemplates();
-      if (!res.success) {
-        setMessage("Import failed");
-        return;
-      }
-      const errNote =
-        res.errors.length > 0 ? ` · ${res.errors.length} file error(s)` : "";
-      setMessage(
-        `Synced templates: +${res.created} new, ${res.updated} updated${errNote}`,
-      );
-      await load();
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   const onUploadJson = async (file: File | undefined) => {
     if (!file) return;
     setSeeding(true);
@@ -209,20 +189,6 @@ export function AdminTemplates() {
           onClick={() => void load()}
         >
           Refresh
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="h-9 rounded-full px-3"
-          disabled={seeding}
-          onClick={() => void syncFromDisk()}
-        >
-          {seeding ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <FolderSync className="size-3.5" />
-          )}
-          Sync templates/
         </Button>
         <Button
           type="button"

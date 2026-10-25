@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test \"lib/**/*.test.ts\"",
-    "seed:templates": "tsx scripts/seed-templates.ts",
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {
