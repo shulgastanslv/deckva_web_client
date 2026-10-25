@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { UPGRADE_REQUIRED } from "@/lib/studio/plans";
 import { prisma } from "@/lib/prisma";
 
 export interface OrganizationListItem {
@@ -308,6 +309,12 @@ export async function joinOrganizationByInvite(
 
     const existing = org.members.find((m) => m.userId === userId);
     if (!existing) {
+      if (!org.isUpgrade) {
+        return {
+          success: false,
+          error: `${UPGRADE_REQUIRED} — invites need a Pro workspace`,
+        };
+      }
       await prisma.organizationMember.create({
         data: { userId, organizationId: org.id, role: "MEMBER" },
       });

@@ -8,6 +8,10 @@ import { ensureUserOrganization } from "@/actions/organizations";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { prisma } from "@/lib/prisma";
 import {
+  FREE_CAROUSEL_LIMIT,
+  freeCarouselLimitMessage,
+} from "@/lib/studio/plans";
+import {
   CANVAS_RATIOS,
   type FabricCanvasJSON,
   type RatioKey,
@@ -173,7 +177,22 @@ export async function createProject(input?: {
     if (!userId) return { success: false, error: "Sign in" };
 
     const org = await ensureUserOrganization();
-    const organizationId = org.success ? org.organization.id : null;
+    if (!org.success) {
+      return { success: false, error: "Couldn't ensure organization" };
+    }
+    const organizationId = org.organization.id;
+
+    if (!org.organization.isUpgrade) {
+      const count = await prisma.project.count({
+        where: { organizationId },
+      });
+      if (count >= FREE_CAROUSEL_LIMIT) {
+        return {
+          success: false,
+          error: `Upgrade to Pro — ${freeCarouselLimitMessage()}`,
+        };
+      }
+    }
 
     const aspectRatio = input?.aspectRatio ?? "4:5";
     const dims = CANVAS_RATIOS[aspectRatio] ?? CANVAS_RATIOS["4:5"];
@@ -182,7 +201,7 @@ export async function createProject(input?: {
     const project = await prisma.project.create({
       data: {
         userId,
-        organizationId: organizationId ?? undefined,
+        organizationId,
         title,
         aspectRatio,
         width: dims.width,

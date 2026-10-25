@@ -23,12 +23,6 @@ async function requireUserId(): Promise<string | null> {
   return session?.user?.id ?? null;
 }
 
-async function requireActiveOrgId(): Promise<string | null> {
-  const ensured = await ensureUserOrganization();
-  if (!ensured.success) return null;
-  return ensured.organization.id;
-}
-
 export async function getUserFolders(): Promise<
   ActionResult<{ folders: FolderListItem[] }>
 > {
@@ -36,8 +30,11 @@ export async function getUserFolders(): Promise<
     const userId = await requireUserId();
     if (!userId) return { success: false, error: "Sign in" };
 
-    const organizationId = await requireActiveOrgId();
-    if (!organizationId) return { success: false, error: "No organization" };
+    const ensured = await ensureUserOrganization();
+    if (!ensured.success) {
+      return { success: false, error: "Couldn't load organization" };
+    }
+    const organizationId = ensured.organization.id;
 
     const folders = await prisma.folder.findMany({
       where: { userId, organizationId },
@@ -67,9 +64,18 @@ export async function createFolder(
     const userId = await requireUserId();
     if (!userId) return { success: false, error: "Sign in" };
 
-    const organizationId = await requireActiveOrgId();
-    if (!organizationId) return { success: false, error: "No organization" };
+    const ensured = await ensureUserOrganization();
+    if (!ensured.success) {
+      return { success: false, error: "Couldn't load organization" };
+    }
+    if (!ensured.organization.isUpgrade) {
+      return {
+        success: false,
+        error: "Upgrade to Pro to create folders",
+      };
+    }
 
+    const organizationId = ensured.organization.id;
     const trimmed = name?.trim() || "Untitled folder";
 
     const folder = await prisma.folder.create({

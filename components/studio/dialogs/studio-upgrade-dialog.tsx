@@ -45,11 +45,15 @@ export function StudioUpgradeDialog({
     setError(null);
     try {
       const res = await setOrganizationUpgrade(true);
-      if (!res.success) {
+      if (res.success === false) {
         setError(res.error);
         return;
       }
       setOrg(res.organization);
+      try {
+        sessionStorage.removeItem("studio:upgrade-banner-dismissed");
+      } catch {
+      }
       window.dispatchEvent(new CustomEvent("studio:org-changed"));
       onOpenChange(false);
     } finally {
@@ -61,25 +65,25 @@ export function StudioUpgradeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="gap-0 overflow-hidden rounded-2xl border-neutral-200 bg-white p-0 sm:max-w-[420px] dark:border-border dark:bg-background"
+        className="gap-0 overflow-hidden rounded-2xl border-0 bg-white p-0 sm:max-w-[350px] dark:bg-background"
       >
-        <div className="flex items-center justify-end px-4 pt-3">
+        <div className="relative flex items-center justify-end px-4 pt-3">
           <button
             type="button"
             aria-label="Close"
             onClick={() => onOpenChange(false)}
-            className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-muted"
+            className="absolute top-3 right-3 z-10 rounded-full p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-muted"
           >
             <X className="size-4" />
           </button>
         </div>
 
         <div className="px-6 pb-6">
-          <div className="mx-auto h-[120px] w-[150px]">
+          <div className="mx-auto h-[140px] w-full max-w-[220px]">
             <StudioIconPro />
           </div>
 
-          <DialogTitle className="mt-2 text-center text-[20px] font-bold tracking-tight text-neutral-950 dark:text-foreground">
+          <DialogTitle className="mt-1 text-center text-[22px] font-bold tracking-tight text-neutral-950 dark:text-foreground">
             {alreadyPro ? "You're on Pro" : "Go Pro"}
           </DialogTitle>
           <p className="mt-1.5 text-center text-[13px] leading-relaxed text-neutral-500 dark:text-muted-foreground">
@@ -89,7 +93,7 @@ export function StudioUpgradeDialog({
           </p>
 
           <div className="mt-5 flex items-baseline justify-center gap-1">
-            <span className="text-[36px] font-bold tracking-tight text-neutral-950 dark:text-foreground">
+            <span className="text-[40px] font-bold tracking-tight text-neutral-950 dark:text-foreground">
               ${STUDIO_PRO_PRICE}
             </span>
             <span className="text-[14px] text-neutral-500 dark:text-muted-foreground">

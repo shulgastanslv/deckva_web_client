@@ -21,7 +21,13 @@ import { Input } from "@/components/ui/input";
 import { planLabel } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
-export function StudioOrgSwitcher() {
+export function StudioOrgSwitcher({
+  variant = "sidebar",
+  className,
+}: {
+  variant?: "sidebar" | "header";
+  className?: string;
+}) {
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const [open, setOpen] = useState(false);
@@ -96,8 +102,10 @@ export function StudioOrgSwitcher() {
 
   if (!signedIn) return null;
 
+  const isHeader = variant === "header";
+
   return (
-    <div className="px-3 pb-2">
+    <div className={cn(isHeader ? "min-w-0" : "px-3 pb-2", className)}>
       <DropdownMenu
         open={open}
         onOpenChange={(next) => {
@@ -112,21 +120,46 @@ export function StudioOrgSwitcher() {
           <button
             type="button"
             className={cn(
-              "flex w-full items-center gap-2 rounded-2xl px-1.5 py-1.5 text-left transition-colors hover:bg-background/80 dark:hover:bg-muted/60",
-              open && "bg-background dark:bg-muted",
+              "flex items-center gap-2 text-left transition-colors",
+              isHeader
+                ? cn(
+                    "max-w-[min(100%,14rem)] rounded-full px-1.5 py-1 hover:bg-muted/80",
+                    open && "bg-muted",
+                  )
+                : cn(
+                    "w-full rounded-2xl px-1.5 py-1.5 hover:bg-background/80 dark:hover:bg-muted/60",
+                    open && "bg-background dark:bg-muted",
+                  ),
             )}
           >
             {active ? (
-              <StudioOrgAvatar name={active.name} color={active.color} />
+              <StudioOrgAvatar
+                name={active.name}
+                color={active.color}
+                className={isHeader ? "size-6 rounded-md text-[10px]" : undefined}
+              />
             ) : (
-              <span className="size-7 rounded-full bg-muted" />
+              <span
+                className={cn(
+                  "rounded-md bg-muted",
+                  isHeader ? "size-6" : "size-7 rounded-full",
+                )}
+              />
             )}
-            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+            <span
+              className={cn(
+                "min-w-0 truncate font-semibold text-foreground",
+                isHeader ? "text-[13px]" : "flex-1 text-[13px]",
+              )}
+            >
               {active?.name ?? "Organization"}
             </span>
-            <span className="flex size-6 items-center justify-center rounded-full bg-background text-muted-foreground dark:bg-muted">
-              <ChevronDown className="size-3.5" />
-            </span>
+            <ChevronDown
+              className={cn(
+                "shrink-0 text-muted-foreground",
+                isHeader ? "size-3.5 opacity-70" : "size-3.5",
+              )}
+            />
           </button>
         </DropdownMenuTrigger>
 

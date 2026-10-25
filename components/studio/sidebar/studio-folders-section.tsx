@@ -19,6 +19,7 @@ import {
   renameFolder,
   type FolderListItem,
 } from "@/actions/folders";
+import { getActiveOrganization } from "@/actions/organizations";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { isUpgradeRequiredError } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 export function StudioFoldersSection() {
@@ -35,6 +37,7 @@ export function StudioFoldersSection() {
   const activeFolderId = searchParams.get("folder");
 
   const [folders, setFolders] = useState<FolderListItem[]>([]);
+  const [isUpgrade, setIsUpgrade] = useState(false);
   const [creating, setCreating] = useState(false);
   const [draftName, setDraftName] = useState("");
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -46,10 +49,15 @@ export function StudioFoldersSection() {
   const refresh = useCallback(async () => {
     if (!signedIn) {
       setFolders([]);
+      setIsUpgrade(false);
       return;
     }
-    const res = await getUserFolders();
-    if (res.success) setFolders(res.folders);
+    const [foldersRes, orgRes] = await Promise.all([
+      getUserFolders(),
+      getActiveOrganization(),
+    ]);
+    if (foldersRes.success) setFolders(foldersRes.folders);
+    if (orgRes.success) setIsUpgrade(orgRes.organization.isUpgrade);
   }, [signedIn]);
 
   useEffect(() => {
@@ -72,8 +80,16 @@ export function StudioFoldersSection() {
     window.dispatchEvent(new CustomEvent("studio:folders-changed"));
   };
 
+  const openUpgrade = () => {
+    window.dispatchEvent(new CustomEvent("studio:open-upgrade"));
+  };
+
   const startCreate = () => {
     if (!signedIn || busy) return;
+    if (!isUpgrade) {
+      openUpgrade();
+      return;
+    }
     setCreating(true);
     setDraftName("");
   };
@@ -89,6 +105,9 @@ export function StudioFoldersSection() {
         setDraftName("");
         await refresh();
         notifyChanged();
+      } else if ("error" in res && isUpgradeRequiredError(res.error)) {
+        setCreating(false);
+        openUpgrade();
       }
     } finally {
       setBusy(false);
@@ -181,7 +200,9 @@ export function StudioFoldersSection() {
 
           {folders.length === 0 && !creating ? (
             <p className="px-1.5 py-1 text-[12px] leading-relaxed text-muted-foreground">
-              Group carousels by client or campaign.
+              {isUpgrade
+                ? "Group carousels by client or campaign."
+                : "Folders are a Pro feature."}
             </p>
           ) : null}
 

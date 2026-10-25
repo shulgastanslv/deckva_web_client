@@ -43,11 +43,12 @@ function Scene({
   children,
   className,
   title,
+  viewBox = "0 0 160 128",
   ...props
 }: IconProps & { children: ReactNode }) {
   return (
     <svg
-      viewBox="0 0 160 128"
+      viewBox={viewBox}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden={title ? undefined : true}
@@ -461,58 +462,66 @@ export function StudioIconCarousel(props: IconProps) {
   );
 }
 
-/** Pro — carousel slides + dollar coins */
+/** Pro — stacked coins for upgrade dialog */
 export function StudioIconPro(props: IconProps) {
   return (
-    <Scene {...props}>
-      {/* back slides */}
-      <rect x="28" y="36" width="40" height="64" rx="10" fill={BLUE_SOFT} opacity="0.85" />
-      <rect x="42" y="28" width="44" height="68" rx="10" fill={LILAC} opacity="0.9" />
-      {/* front slide */}
-      <rect x="56" y="22" width="48" height="72" rx="11" fill={WHITE} />
-      <rect x="66" y="36" width="28" height="5" rx="2.5" fill={INK} />
-      <rect x="66" y="46" width="20" height="3.5" rx="1.75" fill={LINE} />
-      <rect x="66" y="56" width="28" height="18" rx="5" fill={BLUE} />
-      <rect x="70" y="82" width="8" height="4" rx="2" fill={LINE} />
-      <rect x="82" y="82" width="8" height="4" rx="2" fill={LINE} />
-      <rect x="94" y="82" width="8" height="4" rx="2" fill={BLUE_DK} />
+    <Scene viewBox="0 0 200 140" {...props}>
+      {/* soft ground */}
+      <ellipse cx="100" cy="118" rx="72" ry="10" fill={BLUE_SOFT} opacity="0.55" />
 
-      {/* dollar coin — large */}
-      <circle cx="122" cy="48" r="22" fill={YELLOW} />
-      <circle cx="122" cy="48" r="17" fill="#f0c84a" />
-      <circle cx="122" cy="48" r="14" fill={YELLOW} />
+      {/* back coin — green */}
+      <circle cx="58" cy="76" r="34" fill={GREEN} />
+      <circle cx="58" cy="76" r="26" fill="#7bc498" />
+      <circle cx="58" cy="76" r="22" fill={GREEN} />
       <text
-        x="122"
-        y="54"
+        x="58"
+        y="85"
         textAnchor="middle"
         fill={INK}
-        fontSize="18"
+        fontSize="26"
         fontWeight="800"
         fontFamily="system-ui,sans-serif"
       >
         $
       </text>
 
-      {/* small coin */}
-      <circle cx="38" cy="88" r="12" fill={GREEN} />
-      <circle cx="38" cy="88" r="9" fill="#7bc498" />
+      {/* front coin — yellow */}
+      <circle cx="112" cy="56" r="46" fill={YELLOW} />
+      <circle cx="112" cy="56" r="36" fill="#f0c84a" />
+      <circle cx="112" cy="56" r="30" fill={YELLOW} />
       <text
-        x="38"
-        y="92"
+        x="112"
+        y="69"
         textAnchor="middle"
         fill={INK}
-        fontSize="11"
+        fontSize="38"
         fontWeight="800"
         fontFamily="system-ui,sans-serif"
       >
         $
       </text>
 
-      {/* spark */}
+      {/* small coin — brand blue */}
+      <circle cx="156" cy="96" r="20" fill={BLUE_SOFT} />
+      <circle cx="156" cy="96" r="15" fill={BLUE_DK} />
+      <text
+        x="156"
+        y="102"
+        textAnchor="middle"
+        fill={WHITE}
+        fontSize="15"
+        fontWeight="800"
+        fontFamily="system-ui,sans-serif"
+      >
+        $
+      </text>
+
+      {/* spark accents */}
       <path
-        d="M108 22C108 24.8 110.2 27 113 27C110.2 27 108 29.2 108 32C108 29.2 105.8 27 103 27C105.8 27 108 24.8 108 22Z"
+        d="M148 28C148 31.3 150.7 34 154 34C150.7 34 148 36.7 148 40C148 36.7 145.3 34 142 34C145.3 34 148 31.3 148 28Z"
         fill={CORAL}
       />
+      <circle cx="42" cy="42" r="4" fill={LILAC} />
     </Scene>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import { getActiveOrganization } from "@/actions/organizations";
@@ -10,9 +10,9 @@ import Logo from "@/components/logo";
 import { StudioInviteDialog } from "@/components/studio/dialogs/studio-invite-dialog";
 import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
+import { StudioOrgSwitcher } from "@/components/studio/org/studio-org-switcher";
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
 import { Button } from "@/components/ui/button";
-import { planLabel } from "@/lib/studio/plans";
 
 export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
   const router = useRouter();
@@ -57,6 +57,10 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
 
   const openInvite = () => {
     if (!requireAuth()) return;
+    if (!isUpgrade) {
+      setUpgradeOpen(true);
+      return;
+    }
     setInviteOpen(true);
   };
 
@@ -68,7 +72,7 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
   return (
     <>
       <header className="flex shrink-0 items-center justify-between gap-3 px-5 pt-3 pb-1 sm:px-6">
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={() => router.push("/")}
@@ -95,13 +99,19 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
             Invite
           </Button>
 
-          <Button
-            type="button"
-            className="h-8 rounded-full bg-[#4262ff] px-3.5 text-[13px] font-semibold text-white hover:bg-[#3554e8]"
-            onClick={openUpgrade}
-          >
-           Upgrade
-          </Button>
+          {!isUpgrade ? (
+            <Button
+              type="button"
+              className="h-8 rounded-full bg-[#4262ff] px-3.5 text-[13px] font-semibold text-white hover:bg-[#3554e8]"
+              onClick={openUpgrade}
+            >
+              Upgrade
+            </Button>
+          ) : (
+            <span className="hidden h-8 items-center rounded-full bg-[#4262ff]/12 px-3 text-[12px] font-semibold text-[#4262ff] sm:inline-flex">
+              Pro
+            </span>
+          )}
 
           <StudioNotifications />
 
@@ -116,7 +126,7 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
             </Button>
           ) : null}
 
-          <StudioUserNav onUpgrade={openUpgrade} />
+          <StudioUserNav onUpgrade={openUpgrade} isUpgrade={isUpgrade} />
         </div>
       </header>
 

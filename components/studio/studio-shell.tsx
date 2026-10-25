@@ -7,6 +7,7 @@ import { StudioGenerateDialog } from "@/components/studio/create/studio-generate
 import { StudioHeader } from "@/components/studio/header/studio-header";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioSidebar } from "@/components/studio/sidebar/studio-sidebar";
+import { StudioUpgradeBanner } from "@/components/studio/ui/studio-upgrade-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function StudioShell({ children }: { children: ReactNode }) {
@@ -59,6 +60,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
 
         <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
           <StudioHeader onSignIn={() => setAuthOpen(true)} />
+          <StudioUpgradeBanner />
           <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
             {children}
           </div>

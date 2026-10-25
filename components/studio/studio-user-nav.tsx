@@ -33,9 +33,11 @@ const itemClass =
 
 export function StudioUserNav({
   onUpgrade,
+  isUpgrade = false,
 }: {
   variant?: "header" | "rail";
   onUpgrade?: () => void;
+  isUpgrade?: boolean;
 }) {
   const { data: session, status } = useSession();
   const { resolvedTheme, setTheme } = useTheme();
@@ -96,7 +98,7 @@ export function StudioUserNav({
           side="bottom"
           align="end"
           sideOffset={10}
-          className="w-[240px] overflow-hidden rounded-2xl border-0 bg-white p-0 dark:bg-background dark:ring-1 dark:ring-border"
+          className="w-[220px] overflow-hidden rounded-2xl border-0 bg-white p-0 dark:bg-background dark:ring-1 dark:ring-border"
         >
           <div className="flex items-center gap-2.5 px-3.5 py-3">
             <StudioAvatar letter={userLetter} className="size-8 text-[12px]" />
@@ -107,7 +109,7 @@ export function StudioUserNav({
 
           <DropdownMenuSeparator className="mx-0 my-0 bg-neutral-200/80 dark:bg-border" />
 
-          <div className="py-1">
+          <div>
             <DropdownMenuItem
               className={itemClass}
               onClick={() => setProfileOpen(true)}
@@ -130,11 +132,13 @@ export function StudioUserNav({
 
           <DropdownMenuSeparator className="mx-0 my-0 bg-neutral-200/80 dark:bg-border" />
 
-          <div className="py-1">
-            <DropdownMenuItem className={itemClass} onClick={handleUpgrade}>
-              <ArrowUpCircle className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-              Upgrade
-            </DropdownMenuItem>
+          <div>
+            {!isUpgrade ? (
+              <DropdownMenuItem className={itemClass} onClick={handleUpgrade}>
+                <ArrowUpCircle className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
+                Upgrade
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem
               className={itemClass}
               onClick={() => setSocialOpen(true)}
