@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       theme,
       setId: set.id,
       palette,
-      handle: "@swibp",
+      handle: "@deckva",
       title: result.title,
       slides: result.slides,
       options,

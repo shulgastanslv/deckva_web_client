@@ -20,21 +20,51 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Swibp | carousel maker",
-  description: "Swibp | carousel maker by swibp",
-  keywords: ["carousel", "maker", "swibp", "carousel maker", "carousel maker by swibp"],
-  authors: [{ name: "Swibp", url: "https://swibp.io" }],
+  applicationName: "Deckva",
+  title: {
+    default: "Deckva — студия каруселей",
+    template: "%s · Deckva",
+  },
+  description:
+    "Deckva — AI-студия для каруселей в соцсетях. Тема превращается в слайды, вы правите их на холсте и экспортируете в PNG или ZIP.",
+  keywords: [
+    "Deckva",
+    "карусель",
+    "карусели",
+    "Instagram",
+    "студия",
+    "редактор слайдов",
+    "генератор каруселей",
+    "соцсети",
+    "carousel",
+    "carousel maker",
+  ],
+  authors: [{ name: "Deckva", url: "https://deckva.by" }],
+  creator: "Deckva",
+  publisher: "Deckva",
   icons: {
     icon: "/browser.svg",
   },
-  creator: "Swibp",
-  publisher: "Swibp",
+  openGraph: {
+    type: "website",
+    locale: "ru_BY",
+    siteName: "Deckva",
+    title: "Deckva — студия каруселей",
+    description:
+      "AI-студия для каруселей: тема → слайды → правка на холсте → экспорт.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deckva — студия каруселей",
+    description:
+      "AI-студия для каруселей: тема → слайды → правка на холсте → экспорт.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="ru"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} h-full antialiased`}
     >
@@ -42,9 +72,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <span className={`${montserrat.className} sr-only`} aria-hidden>
           .
         </span>
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

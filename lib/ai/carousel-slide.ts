@@ -83,7 +83,7 @@ export function buildCarouselSlide(input: {
   const background = spec.background ?? palette.background;
   const contentW = Math.round(width * CONTENT_WIDTH_RATIO);
   const centerX = width / 2;
-  const handle = (input.handle || "@swibp").replace(/^@/, "");
+  const handle = (input.handle || "@deckva").replace(/^@/, "");
   const heading = spec.heading.replace(/^\s*\[?\d+\]?\s*[\/.]\s*/i, "").trim();
   const body = spec.body?.trim() || "";
 

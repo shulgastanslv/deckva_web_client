@@ -7,16 +7,34 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Swibp | Carousel Generator",
-  description: "Swibp | Carousel Generator by swibp",
+  title: "Главная",
+  description:
+    "Deckva — студия каруселей для соцсетей. Сгенерируйте историю по слайдам, отредактируйте в редакторе и экспортируйте без водяных знаков.",
   keywords: [
-    "carousel",
-    "generator",
-    "swibp",
+    "Deckva",
+    "генератор каруселей",
+    "Instagram карусель",
+    "редактор слайдов",
+    "студия контента",
     "carousel generator",
-    "carousel generator by swibp",
   ],
-  authors: [{ name: "Swibp", url: "https://swibp.io" }],
+  authors: [{ name: "Deckva", url: "https://deckva.by" }],
+  creator: "Deckva",
+  publisher: "Deckva",
+  openGraph: {
+    title: "Deckva — генератор каруселей",
+    description:
+      "Тема → слайды → студия. Создавайте карусели для Instagram и других соцсетей.",
+    siteName: "Deckva",
+    locale: "ru_BY",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deckva — генератор каруселей",
+    description:
+      "Тема → слайды → студия. Создавайте карусели для Instagram и других соцсетей.",
+  },
 };
 
 export default function MarketingLayout({

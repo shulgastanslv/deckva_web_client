@@ -7,8 +7,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Swibp Admin",
-  description: "Studio admin desk",
+  title: "Админка",
+  description:
+    "Админ-панель Deckva: управление студией, пользователями и служебными настройками.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function AdminLayout({
@@ -17,9 +22,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className={`${inter.variable} ${inter.className} h-dvh antialiased`}
-    >
+    <div className={`${inter.variable} ${inter.className} h-dvh antialiased`}>
       {children}
     </div>
   );

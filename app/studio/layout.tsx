@@ -13,21 +13,38 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Swibp | Carousel Generator",
-  description: "Swibp | carousel maker by swibp",
+  title: "Студия",
+  description:
+    "Студия Deckva: генерация каруселей, правка слоёв на холсте, шаблоны, папки и экспорт слайдов в PNG или ZIP.",
   keywords: [
-    "carousel",
-    "maker",
-    "swibp",
-    "carousel maker",
-    "carousel maker by swibp",
+    "Deckva",
+    "студия",
+    "редактор каруселей",
+    "холст",
+    "шаблоны",
+    "экспорт PNG",
+    "carousel editor",
   ],
-  authors: [{ name: "Swibp", url: "https://swibp.io" }],
+  authors: [{ name: "Deckva", url: "https://deckva.by" }],
+  creator: "Deckva",
+  publisher: "Deckva",
   icons: {
     icon: "/browser.svg",
   },
-  creator: "Swibp",
-  publisher: "Swibp",
+  openGraph: {
+    title: "Deckva · Студия",
+    description:
+      "Рабочее пространство Deckva: проекты, генерация, холст и экспорт каруселей.",
+    siteName: "Deckva",
+    locale: "ru_BY",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Deckva · Студия",
+    description:
+      "Рабочее пространство Deckva: проекты, генерация, холст и экспорт каруселей.",
+  },
 };
 
 export default function StudioLayout({

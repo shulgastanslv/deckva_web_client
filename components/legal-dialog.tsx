@@ -16,8 +16,8 @@ const TERMS: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "The service",
     paragraphs: [
-      "Swibp is a studio for designing, saving, and exporting carousel slides. These terms cover the website, the editor, accounts, templates, sharing, and export.",
-      "By creating an account or using the studio, you agree to these terms. If you do not agree, do not use Swibp.",
+      "Deckva is a studio for designing, saving, and exporting carousel slides. These terms cover the website, the editor, accounts, templates, sharing, and export.",
+      "By creating an account or using the studio, you agree to these terms. If you do not agree, do not use Deckva.",
     ],
   },
   {
@@ -30,24 +30,24 @@ const TERMS: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "Your work",
     paragraphs: [
-      "You keep the rights to the text, images, and designs you create or upload. Swibp does not claim ownership of your projects.",
-      "You give Swibp a limited permission to store, display, and process that work so the studio can save it, show it back to you, generate a preview, and export or share it when you ask.",
+      "You keep the rights to the text, images, and designs you create or upload. Deckva does not claim ownership of your projects.",
+      "You give Deckva a limited permission to store, display, and process that work so the studio can save it, show it back to you, generate a preview, and export or share it when you ask.",
       "You confirm that you have the rights you need for anything you upload, including photos, icons, and fonts, and that your work does not infringe someone else's rights.",
     ],
   },
   {
     heading: "Acceptable use",
     paragraphs: [
-      "Do not use Swibp to break the law, to harm other people, or to upload malware. Do not attempt to access another person's account, projects, or private data.",
+      "Do not use Deckva to break the law, to harm other people, or to upload malware. Do not attempt to access another person's account, projects, or private data.",
       "Do not overload the service, scrape it in a way that degrades it for others, or bypass a limit that is there to protect the studio.",
-      "Built-in templates are for use inside Swibp. Do not present them as your own stock library outside the product.",
+      "Built-in templates are for use inside Deckva. Do not present them as your own stock library outside the product.",
     ],
   },
   {
     heading: "Other services",
     paragraphs: [
       "Sign-in can go through Google. Fonts can load from Google Fonts. Icons can come from IconScout, and placing an SVG icon can spend a download on that account. Carousel generation runs locally through Ollama on your machine.",
-      "Those services have their own terms. Swibp is not responsible for an outage or a change on their side.",
+      "Those services have their own terms. Deckva is not responsible for an outage or a change on their side.",
     ],
   },
   {
@@ -60,19 +60,19 @@ const TERMS: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "Ending use",
     paragraphs: [
-      "You can stop using Swibp at any time and delete projects from the projects panel. We can suspend access if an account is used in a way that breaks these terms or puts the service or other people at risk.",
+      "You can stop using Deckva at any time and delete projects from the projects panel. We can suspend access if an account is used in a way that breaks these terms or puts the service or other people at risk.",
     ],
   },
   {
     heading: "Liability",
     paragraphs: [
-      "To the extent the law allows, Swibp is not liable for lost work, lost profits, or indirect damage arising from the use of the studio. Nothing in these terms limits liability that the law does not allow us to limit.",
+      "To the extent the law allows, Deckva is not liable for lost work, lost profits, or indirect damage arising from the use of the studio. Nothing in these terms limits liability that the law does not allow us to limit.",
     ],
   },
   {
     heading: "Changes",
     paragraphs: [
-      `These terms were last updated on ${UPDATED}. If the terms change in a material way, the updated text will appear here. Continuing to use Swibp after that update means you accept the new terms.`,
+      `These terms were last updated on ${UPDATED}. If the terms change in a material way, the updated text will appear here. Continuing to use Deckva after that update means you accept the new terms.`,
     ],
   },
 ];
@@ -81,7 +81,7 @@ const PRIVACY: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "Who this covers",
     paragraphs: [
-      "This policy explains what Swibp collects when you use the carousel studio, why it is collected, and the choices you have. It applies to the account, the editor, saved projects, and the messages we show in the product.",
+      "This policy explains what Deckva collects when you use the carousel studio, why it is collected, and the choices you have. It applies to the account, the editor, saved projects, and the messages we show in the product.",
     ],
   },
   {
@@ -130,13 +130,13 @@ const PRIVACY: { heading: string; paragraphs: string[] }[] = [
     heading: "Your choices",
     paragraphs: [
       "You can edit your project, turn sharing off, and sign out. You can choose not to upload an image or not to use icon search, fonts beyond the ones already on the slide, or AI generation.",
-      "If the law where you live gives you a right to access, correct, or delete personal information, write to the address you use to reach Swibp and we will respond.",
+      "If the law where you live gives you a right to access, correct, or delete personal information, write to the address you use to reach Deckva and we will respond.",
     ],
   },
   {
     heading: "Children",
     paragraphs: [
-      "Swibp is not directed at children under 16, and we do not knowingly create accounts for them. If you believe a child has given us personal information, contact us and we will delete it.",
+      "Deckva is not directed at children under 16, and we do not knowingly create accounts for them. If you believe a child has given us personal information, contact us and we will delete it.",
     ],
   },
   {
@@ -151,7 +151,7 @@ const PRIVACY: { heading: string; paragraphs: string[] }[] = [
 const COPY: Record<LegalKind, { title: string; intro: string; sections: { heading: string; paragraphs: string[] }[] }> = {
   terms: {
     title: "Terms of Service",
-    intro: "The rules for using the Swibp studio.",
+    intro: "The rules for using the Deckva studio.",
     sections: TERMS,
   },
   privacy: {

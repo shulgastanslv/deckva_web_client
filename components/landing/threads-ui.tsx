@@ -101,7 +101,7 @@ export const DEMO_THREADS_POSTS: ThreadsPostData[] = [
   },
   {
     id: "ship",
-    author: "swibp",
+    author: "deckva",
     avatar: DEMO_AVATAR,
     verified: true,
     time: "2h",

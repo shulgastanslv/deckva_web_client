@@ -9,7 +9,7 @@ const MODE_HINT: Record<RewriteMode, string> = {
 
 export function rewriteSystemPrompt(mode: RewriteMode): string {
   return [
-    "You rewrite carousel text blocks for Swibp.",
+    "You rewrite carousel text blocks for Deckva.",
     'JSON only: {"texts":["..."]}',
     "Return exactly one rewritten string per input, same order.",
     MODE_HINT[mode],

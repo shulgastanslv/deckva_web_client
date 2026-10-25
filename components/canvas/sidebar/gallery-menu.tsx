@@ -116,7 +116,7 @@ export function GalleryMenu({
             <p className="text-[13px] leading-snug font-semibold tracking-tight text-foreground">{title}</p>
           )}
           <p className="mt-1 text-[13px] text-muted-foreground">
-            {createdBy ? `View more by ${createdBy}` : "View more by Swibp"}
+            {createdBy ? `Ещё от ${createdBy}` : "Ещё от Deckva"}
           </p>
           {visible.length > 0 ? (
             <div className="mt-2 flex flex-wrap gap-1.5">

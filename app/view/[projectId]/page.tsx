@@ -4,8 +4,8 @@ import { getPublicCarousel } from "@/actions/projects";
 import { CarouselView, ViewHeader } from "@/components/carousel-view";
 
 export const metadata: Metadata = {
-  title: "Swibp — carousel",
-  description: "A shared Swibp carousel.",
+  title: "Карусель",
+  description: "Публичная карусель, созданная в Deckva.",
 };
 
 export default async function ViewPage({

@@ -55,7 +55,7 @@ const LEGAL = {
   status: "Плательщик налога на профессиональный доход",
   fullName: "Шульга Станислав",
   unp: "XXXXXXXXX",
-  email: "hello@swibp.io",
+  email: "hello@deckva.by",
   country: "Республика Беларусь",
 } as const;
 
@@ -72,7 +72,7 @@ const NAV = [
 const FAQ = [
   {
     value: "what",
-    q: "Что такое Swibp?",
+    q: "Что такое Deckva?",
     a: "Студия для каруселей. Тема становится последовательностью слайдов, затем вы редактируете их на холсте и экспортируете слайды.",
   },
   {
@@ -88,7 +88,7 @@ const FAQ = [
   {
     value: "vs-canva",
     q: "В чем отличие от Canva?",
-    a: "Canva начинает с пустого макета. Swibp сначала строит историю по слайдам, затем вы завершаете внешний вид в своей студии: слои, шаблоны, экспорт.",
+    a: "Canva начинает с пустого макета. Deckva сначала строит историю по слайдам, затем вы завершаете внешний вид в своей студии: слои, шаблоны, экспорт.",
   },
   {
     value: "pricing",
@@ -517,13 +517,13 @@ export function LandingPage() {
               href="/"
               className="text-sm font-semibold tracking-tight text-land-ink"
             >
-              swibp.by
+              deckva.by
             </Link>
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-land-ink/45">
               Студия для каруселей. Тема → слайды → экспорт.
             </p>
             <p className="mt-4 text-sm text-land-ink/45">
-              © {new Date().getFullYear()} Swibp.by
+              © {new Date().getFullYear()} Deckva
             </p>
           </div>
 

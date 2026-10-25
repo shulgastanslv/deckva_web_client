@@ -135,7 +135,7 @@ export function LeaveReviewBlock() {
                     rows={5}
                     required
                     minLength={4}
-                    placeholder="Что мы должны знать о Swibp?"
+                    placeholder="Что мы должны знать о Deckva?"
                     className="mt-2 min-h-[140px] w-full resize-y rounded-2xl border border-land-ink/10 bg-land-mist/50 px-4 py-3 text-base leading-relaxed text-land-ink outline-none placeholder:text-land-ink/35 focus:border-land-blue/40 focus:ring-3 focus:ring-land-blue/15"
                   />
                 </div>

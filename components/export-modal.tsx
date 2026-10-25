@@ -300,7 +300,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
       );
       const result = await nativeShareFiles(files, {
         title: projectTitle,
-        text: "Carousel from Swibp",
+        text: "Карусель из Deckva",
       });
       if (result === "unavailable") {
         setError("This device can't share image files. Download instead.");

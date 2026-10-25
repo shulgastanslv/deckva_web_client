@@ -16,13 +16,13 @@ export const THREAD_SHOTS = [
 const HERO_POST_A: ThreadsPostData[] = [
   {
     id: "hero-a",
-    author: "swibp",
+    author: "deckva",
     avatar: "/post_logo.jpg",
     verified: true,
     time: "1h",
     liked: true,
     topic: "Примеры",
-    text: "Примеры каруселей, которые были созданы в Swibp.",
+    text: "Примеры каруселей, которые были созданы в Deckva.",
     media: [
       "/landing/slide-cover.jpg",
       "/landing/slide-mid.jpg",
@@ -37,11 +37,11 @@ const HERO_POST_A: ThreadsPostData[] = [
 const HERO_POST_B: ThreadsPostData[] = [
   {
     id: "hero-b",
-    author: "swibp",
+    author: "deckva",
     avatar: "/post_logo.jpg",
     time: "3h",
     topic: "Примеры",
-    text: "Примеры каруселей, которые были созданы в Swibp.",
+    text: "Примеры каруселей, которые были созданы в Deckva.",
     media: [
       "/landing/slide-mid.jpg",
       "/landing/slide-end.jpg",
