@@ -422,7 +422,7 @@ export class ObjectFactory {
   async addSvgIcon(svg: string, options?: { maxSize?: number }): Promise<void> {
     const parsed = await loadSVGFromString(svg);
     const parts = parsed.objects.filter((obj): obj is FabricObject => Boolean(obj));
-    if (parts.length === 0) throw new Error("IconScout SVG had no shapes");
+    if (parts.length === 0) throw new Error("SVG icon had no shapes");
     const icon = util.groupSVGElements(parts, parsed.options);
     const maxSize = options?.maxSize ?? 280;
     const scale = Math.min(maxSize / (icon.width || 1), maxSize / (icon.height || 1), 1);

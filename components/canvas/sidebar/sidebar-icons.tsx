@@ -1,37 +1,43 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, LayoutGrid, Search, X } from "lucide-react";
+import { LayoutGrid, Loader2, Search, X } from "lucide-react";
 
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import { useCanvasManager } from "@/context/canvas-manager";
-import type { IconScoutAsset, IconScoutHit, IconScoutPage } from "@/lib/iconscout";
+import type { PixabayHit, PixabayImageType, PixabayPage } from "@/lib/pixabay";
 import {
   RECENT_PREVIEW,
   RECENT_STORAGE_KEY,
   readRecentIcons,
   rememberIcon,
   type RecentIcon,
-} from "@/lib/iconscout-recent";
+} from "@/lib/pixabay-recent";
 import { cn } from "@/lib/utils";
 
-const ASSETS = [
-  { id: "icon" as const, label: "Icons" },
+const TYPES = [
+  { id: "vector" as const, label: "Vectors" },
   { id: "illustration" as const, label: "Illustrations" },
-  { id: "3d" as const, label: "3D" },
+  { id: "photo" as const, label: "Photos" },
 ];
+
+type IconHit = Pick<PixabayHit, "id" | "name" | "previewUrl" | "pageUrl"> & {
+  type: PixabayImageType;
+};
 
 async function searchIcons(
   query: string,
-  asset: IconScoutAsset,
+  type: PixabayImageType,
   page: number,
+  order: "popular" | "latest",
   signal: AbortSignal,
-): Promise<IconScoutPage> {
-  const url = new URL("/api/iconscout/search", window.location.origin);
-  url.searchParams.set("q", query);
-  url.searchParams.set("asset", asset);
+): Promise<PixabayPage> {
+  const url = new URL("/api/pixabay/search", window.location.origin);
+  if (query) url.searchParams.set("q", query);
+  url.searchParams.set("type", type);
   url.searchParams.set("page", String(page));
+  url.searchParams.set("order", order);
 
   const res = await fetch(url, { signal, cache: "no-store" });
   const data: unknown = await res.json().catch(() => null);
@@ -42,24 +48,34 @@ async function searchIcons(
         : "Search failed";
     throw new Error(error);
   }
-  return data as IconScoutPage;
+  return data as PixabayPage;
 }
 
-async function downloadSvg(uuid: string): Promise<string> {
-  const res = await fetch("/api/iconscout/svg", {
+async function downloadAsset(
+  id: string,
+  type: PixabayImageType,
+): Promise<{ kind: "svg"; svg: string } | { kind: "image"; dataUrl: string }> {
+  const res = await fetch("/api/pixabay/asset", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ uuid }),
+    body: JSON.stringify({ id, type }),
   });
   const data: unknown = await res.json().catch(() => null);
-  if (!res.ok || !data || typeof data !== "object" || typeof (data as { svg?: unknown }).svg !== "string") {
+  if (!res.ok || !data || typeof data !== "object") {
     const error =
       data && typeof data === "object" && typeof (data as { error?: unknown }).error === "string"
         ? (data as { error: string }).error
-        : "Couldn't download the SVG";
+        : "Couldn't download the asset";
     throw new Error(error);
   }
-  return (data as { svg: string }).svg;
+  const kind = (data as { kind?: unknown }).kind;
+  if (kind === "svg" && typeof (data as { svg?: unknown }).svg === "string") {
+    return { kind: "svg", svg: (data as { svg: string }).svg };
+  }
+  if (kind === "image" && typeof (data as { dataUrl?: unknown }).dataUrl === "string") {
+    return { kind: "image", dataUrl: (data as { dataUrl: string }).dataUrl };
+  }
+  throw new Error("Couldn't download the asset");
 }
 
 function IconTile({
@@ -68,7 +84,7 @@ function IconTile({
   disabled,
   onClick,
 }: {
-  item: IconScoutHit;
+  item: IconHit;
   busy: boolean;
   disabled: boolean;
   onClick: () => void;
@@ -97,8 +113,8 @@ function IconTile({
 export function SidebarIcons() {
   const manager = useCanvasManager();
   const [query, setQuery] = useState("");
-  const [asset, setAsset] = useState<IconScoutAsset>("icon");
-  const [items, setItems] = useState<IconScoutHit[]>([]);
+  const [imageType, setImageType] = useState<PixabayImageType>("vector");
+  const [items, setItems] = useState<IconHit[]>([]);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -108,6 +124,7 @@ export function SidebarIcons() {
   const [error, setError] = useState<string | null>(null);
   const [recent, setRecent] = useState<RecentIcon[]>([]);
   const [showAllRecent, setShowAllRecent] = useState(false);
+  const [browseLatest, setBrowseLatest] = useState(false);
   const searchGen = useRef(0);
 
   useEffect(() => {
@@ -116,7 +133,7 @@ export function SidebarIcons() {
 
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) {
+    if (q.length < 2 && !browseLatest) {
       setItems([]);
       setPage(1);
       setLastPage(1);
@@ -134,10 +151,24 @@ export function SidebarIcons() {
     setError(null);
 
     const timer = window.setTimeout(() => {
-      void searchIcons(q, asset, 1, controller.signal)
+      void searchIcons(
+        q.length >= 2 ? q : "",
+        imageType,
+        1,
+        browseLatest && q.length < 2 ? "latest" : "popular",
+        controller.signal,
+      )
         .then((result) => {
           if (gen !== searchGen.current) return;
-          setItems(result.items);
+          setItems(
+            result.items.map((item) => ({
+              id: item.id,
+              name: item.name,
+              previewUrl: item.previewUrl,
+              pageUrl: item.pageUrl,
+              type: imageType,
+            })),
+          );
           setPage(result.page);
           setLastPage(result.lastPage);
           setTotal(result.total);
@@ -159,17 +190,33 @@ export function SidebarIcons() {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [query, asset]);
+  }, [query, imageType, browseLatest]);
 
   const loadMore = async () => {
     const q = query.trim();
-    if (paging || loading || q.length < 2 || page >= lastPage) return;
+    if (paging || loading || page >= lastPage) return;
+    if (q.length < 2 && !browseLatest) return;
     setPaging(true);
     try {
-      const result = await searchIcons(q, asset, page + 1, new AbortController().signal);
+      const result = await searchIcons(
+        q.length >= 2 ? q : "",
+        imageType,
+        page + 1,
+        browseLatest && q.length < 2 ? "latest" : "popular",
+        new AbortController().signal,
+      );
       setItems((current) => {
         const seen = new Set(current.map((item) => item.id));
-        return [...current, ...result.items.filter((item) => !seen.has(item.id))];
+        const next = result.items
+          .filter((item) => !seen.has(item.id))
+          .map((item) => ({
+            id: item.id,
+            name: item.name,
+            previewUrl: item.previewUrl,
+            pageUrl: item.pageUrl,
+            type: imageType,
+          }));
+        return [...current, ...next];
       });
       setPage(result.page);
       setLastPage(result.lastPage);
@@ -189,24 +236,19 @@ export function SidebarIcons() {
     });
   };
 
-  const addHit = async (hit: IconScoutHit, kind: IconScoutAsset) => {
+  const addHit = async (hit: IconHit) => {
     if (!manager || loadingId) return;
     setLoadingId(hit.id);
     setError(null);
     try {
-      if (kind === "icon") {
-        try {
-          const svg = await downloadSvg(hit.id);
-          await manager.objects.addSvgIcon(svg, { maxSize: 280 });
-        } catch {
-          // CDN preview works when api-download is slow; no download credit.
-          await manager.objects.addImage(hit.previewUrl, { maxSize: 280 });
-        }
+      const asset = await downloadAsset(hit.id, hit.type);
+      if (asset.kind === "svg") {
+        await manager.objects.addSvgIcon(asset.svg, { maxSize: 280 });
       } else {
-        await manager.objects.addImage(hit.previewUrl, { maxSize: 280 });
+        await manager.objects.addImage(asset.dataUrl, { maxSize: 280 });
       }
       manager.commit();
-      remember({ ...hit, asset: kind });
+      remember(hit);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Couldn't add that image");
@@ -216,7 +258,7 @@ export function SidebarIcons() {
   };
 
   const visibleRecent = showAllRecent ? recent : recent.slice(0, RECENT_PREVIEW);
-  const searching = query.trim().length >= 2;
+  const searching = query.trim().length >= 2 || browseLatest;
 
   return (
     <div className="flex min-w-0 flex-col gap-4 overflow-hidden p-1.5">
@@ -226,8 +268,11 @@ export function SidebarIcons() {
           <input
             type="text"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search IconScout..."
+            onChange={(event) => {
+              setBrowseLatest(false);
+              setQuery(event.target.value);
+            }}
+            placeholder="Search Pixabay..."
             className="h-8 w-full min-w-0 rounded-lg bg-muted/30 pl-8 pr-8 text-[13px] text-foreground outline-none placeholder:text-muted-foreground/50 focus:bg-muted/45"
           />
           {query ? (
@@ -240,13 +285,28 @@ export function SidebarIcons() {
             </button>
           ) : null}
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            setQuery("");
+            setBrowseLatest(true);
+          }}
+          className={cn(
+            "h-8 shrink-0 rounded-full px-3 text-[13px] font-medium transition-colors",
+            browseLatest && !query.trim()
+              ? "bg-foreground text-background"
+              : "bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+          )}
+        >
+          Latest
+        </button>
         <FilterMenu
           icon={LayoutGrid}
-          value={asset}
+          value={imageType}
           onChange={(id) => {
-            if (ASSETS.some((item) => item.id === id)) setAsset(id as IconScoutAsset);
+            if (TYPES.some((item) => item.id === id)) setImageType(id as PixabayImageType);
           }}
-          groups={[{ label: "Type", options: ASSETS.map((item) => ({ id: item.id, label: item.label })) }]}
+          groups={[{ label: "Type", options: TYPES.map((item) => ({ id: item.id, label: item.label })) }]}
         />
       </div>
 
@@ -264,14 +324,14 @@ export function SidebarIcons() {
               item={item}
               busy={loadingId === item.id}
               disabled={loadingId !== null}
-              onClick={() => void addHit(item, item.asset)}
+              onClick={() => void addHit(item)}
             />
           ))}
         </GallerySection>
       ) : null}
 
       <div className="flex min-w-0 flex-col gap-1.5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-[13px] font-medium text-muted-foreground/80">Results</span>
           <span className="tabular-nums text-[13px] text-muted-foreground/40">
             {searching ? `${items.length}${total > items.length ? ` / ${total}` : ""}` : ""}
@@ -284,7 +344,9 @@ export function SidebarIcons() {
           </div>
         ) : !searching ? (
           recent.length === 0 ? (
-            <p className="py-12 text-center text-[13px] text-muted-foreground">Search icons, illustrations, or 3D.</p>
+            <p className="py-12 text-center text-[13px] text-muted-foreground">
+              Search vectors, illustrations, or photos.
+            </p>
           ) : null
         ) : items.length === 0 ? (
           <p className="py-12 text-center text-[13px] text-muted-foreground">Nothing matched.</p>
@@ -297,7 +359,7 @@ export function SidebarIcons() {
                   item={item}
                   busy={loadingId === item.id}
                   disabled={loadingId !== null}
-                  onClick={() => void addHit(item, asset)}
+                  onClick={() => void addHit(item)}
                 />
               ))}
             </div>
@@ -306,13 +368,25 @@ export function SidebarIcons() {
                 type="button"
                 disabled={paging}
                 onClick={() => void loadMore()}
-                className="mt-2 h-8 rounded-lg bg-muted/30 text-[13px] font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+                className="mt-2 h-8 rounded-full bg-muted/30 text-[13px] font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
               >
                 {paging ? "Loading…" : "Load more"}
               </button>
             ) : null}
           </>
         )}
+
+        <p className="pt-1 text-center text-[11px] text-muted-foreground/50">
+          Images from{" "}
+          <a
+            href="https://pixabay.com/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline-offset-2 hover:text-muted-foreground hover:underline"
+          >
+            Pixabay
+          </a>
+        </p>
       </div>
     </div>
   );
