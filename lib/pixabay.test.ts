@@ -76,7 +76,7 @@ test("readPixabayPage maps hits and pagination", () => {
   ]);
 });
 
-test("readPixabayAsset prefers vectorURL when present", () => {
+test("readPixabayAsset prefers CDN sizes before get/ URLs", () => {
   const asset = readPixabayAsset({
     hits: [
       {
@@ -84,15 +84,26 @@ test("readPixabayAsset prefers vectorURL when present", () => {
         pageURL: "https://pixabay.com/en/icon-10/",
         type: "vector",
         tags: "icon, arrow",
-        previewURL: "https://cdn.pixabay.com/photo/icon-10_150.jpg",
+        previewURL: "https://cdn.pixabay.com/photo/2014/04/03/00/32/icon-10_150.jpg",
         largeImageURL: "https://pixabay.com/get/icon-10_1280.jpg",
         vectorURL: "https://cdn.pixabay.com/photo/icon-10.svg",
       },
     ],
   });
   assert.equal(asset?.vectorUrl, "https://cdn.pixabay.com/photo/icon-10.svg");
-  assert.equal(asset?.imageUrl, "https://pixabay.com/get/icon-10_1280.jpg");
   assert.equal(asset?.name, "Icon");
+  assert.equal(asset?.imageUrls[0], "https://cdn.pixabay.com/photo/2014/04/03/00/32/icon-10_1280.jpg");
+  assert.ok(asset?.imageUrls.includes("https://cdn.pixabay.com/photo/2014/04/03/00/32/icon-10_640.jpg"));
+  assert.ok(asset?.imageUrls.includes("https://pixabay.com/get/icon-10_1280.jpg"));
+});
+
+test("cdnSizeVariants upgrades preview sizes", async () => {
+  const { cdnSizeVariants } = await import("./pixabay");
+  assert.deepEqual(cdnSizeVariants("https://cdn.pixabay.com/photo/a/b_150.png"), [
+    "https://cdn.pixabay.com/photo/a/b_1280.png",
+    "https://cdn.pixabay.com/photo/a/b_640.png",
+    "https://cdn.pixabay.com/photo/a/b_150.png",
+  ]);
 });
 
 test("sanitizeIconSvg drops scripts and keeps the drawing", () => {

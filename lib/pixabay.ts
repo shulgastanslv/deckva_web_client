@@ -27,7 +27,8 @@ export interface PixabayAssetUrls {
   pageUrl: string;
   previewUrl: string;
   vectorUrl: string | null;
-  imageUrl: string | null;
+  /** Preferred download candidates (CDN first; get/ URLs last — they rate-limit). */
+  imageUrls: string[];
 }
 
 const IMAGE_TYPES = new Set<string>(["vector", "illustration", "photo"]);
@@ -100,12 +101,35 @@ function readHit(row: Record<string, unknown>): PixabayHit | null {
   };
 }
 
+/** Prefer stable CDN sizes over pixabay.com/get/* (those 429 under server download). */
+export function cdnSizeVariants(previewUrl: string): string[] {
+  if (!isPixabayUrl(previewUrl) || !previewUrl.includes("cdn.pixabay.com")) return [];
+  const variants: string[] = [];
+  for (const size of ["_1280", "_640", "_150"] as const) {
+    const next = previewUrl.replace(/_(?:150|180|340|640|960|1280)(\.[a-z0-9]+)$/i, `${size}$1`);
+    if (isPixabayUrl(next) && !variants.includes(next)) variants.push(next);
+  }
+  if (!variants.includes(previewUrl)) variants.push(previewUrl);
+  return variants;
+}
+
+function uniqueUrls(...values: Array<string | null | undefined>): string[] {
+  const out: string[] = [];
+  for (const value of values) {
+    if (!value || !isPixabayUrl(value) || out.includes(value)) continue;
+    out.push(value);
+  }
+  return out;
+}
+
 function readAssetUrls(row: Record<string, unknown>): PixabayAssetUrls | null {
   const hit = readHit(row);
   if (!hit) return null;
 
   const vectorUrl = readString(row.vectorURL);
-  const imageUrl = readString(row.largeImageURL, row.webformatURL, row.previewURL);
+  const large = readString(row.largeImageURL);
+  const web = readString(row.webformatURL);
+  const preview = readString(row.previewURL) ?? hit.previewUrl;
 
   return {
     id: hit.id,
@@ -113,7 +137,7 @@ function readAssetUrls(row: Record<string, unknown>): PixabayAssetUrls | null {
     pageUrl: hit.pageUrl,
     previewUrl: hit.previewUrl,
     vectorUrl: vectorUrl && isPixabayUrl(vectorUrl) ? vectorUrl : null,
-    imageUrl: imageUrl && isPixabayUrl(imageUrl) ? imageUrl : null,
+    imageUrls: uniqueUrls(...cdnSizeVariants(preview), large, web, preview),
   };
 }
 
@@ -211,18 +235,45 @@ export async function downloadPixabayBytes(
     throw new Error("Invalid Pixabay URL");
   }
   const res = await fetch(url, {
-    headers: { "User-Agent": "deckva/1.0", Accept: "*/*" },
+    headers: {
+      Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+      Referer: "https://pixabay.com/",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    },
     cache: "no-store",
+    redirect: "follow",
     signal: signal ?? AbortSignal.timeout(TIMEOUT_MS),
   });
-  if (!res.ok || !isPixabayUrl(res.url)) {
-    throw new Error("Couldn't download Pixabay asset");
+  // Followed redirects may leave pixabay hosts; keep the original allowlist on the request URL.
+  if (!res.ok) {
+    throw new Error(`Pixabay download failed (${res.status})`);
+  }
+  const contentType = res.headers.get("content-type") || "application/octet-stream";
+  if (!contentType.startsWith("image/") && !contentType.includes("svg") && !contentType.includes("octet-stream")) {
+    throw new Error("Pixabay didn't return an image");
   }
   return {
     bytes: await res.arrayBuffer(),
-    contentType: res.headers.get("content-type") || "application/octet-stream",
+    contentType,
     finalUrl: res.url,
   };
+}
+
+/** Try each candidate until one downloads; surfaces the last error. */
+export async function downloadFirstPixabayBytes(
+  urls: string[],
+  signal?: AbortSignal,
+): Promise<{ bytes: ArrayBuffer; contentType: string; finalUrl: string }> {
+  let lastError: Error | null = null;
+  for (const url of urls) {
+    try {
+      return await downloadPixabayBytes(url, signal);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error("Couldn't download Pixabay asset");
+    }
+  }
+  throw lastError ?? new Error("Couldn't download Pixabay asset");
 }
 
 export function bytesToDataUrl(bytes: ArrayBuffer, contentType: string): string {

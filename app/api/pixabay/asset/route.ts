@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import {
   buildPixabaySearchUrl,
   bytesToDataUrl,
-  downloadPixabayBytes,
+  downloadFirstPixabayBytes,
   isPixabayId,
   pixabayApiKey,
   pixabayFetchJson,
@@ -46,7 +46,9 @@ export async function POST(request: Request) {
       const message =
         typeof payload === "string" && payload.trim()
           ? payload.trim().slice(0, 200)
-          : "Couldn't fetch Pixabay asset";
+          : res.status === 429
+            ? "Pixabay rate limit exceeded — try again in a minute"
+            : "Couldn't fetch Pixabay asset";
       return NextResponse.json({ error: message }, { status: res.status === 429 ? 429 : 502 });
     }
 
@@ -56,24 +58,35 @@ export async function POST(request: Request) {
     }
 
     if (asset.vectorUrl) {
-      const file = await downloadPixabayBytes(asset.vectorUrl);
-      const text = Buffer.from(file.bytes).toString("utf8");
-      const svg = sanitizeIconSvg(text);
-      if (svg) {
-        return NextResponse.json({ kind: "svg", svg, pageUrl: asset.pageUrl, name: asset.name });
+      try {
+        const file = await downloadFirstPixabayBytes([asset.vectorUrl]);
+        const text = Buffer.from(file.bytes).toString("utf8");
+        const svg = sanitizeIconSvg(text);
+        if (svg) {
+          return NextResponse.json({ kind: "svg", svg, pageUrl: asset.pageUrl, name: asset.name });
+        }
+      } catch {
+        // Free API keys usually have no vectorURL; fall through to raster.
       }
     }
 
-    if (!asset.imageUrl) {
+    if (asset.imageUrls.length === 0) {
       return NextResponse.json({ error: "Pixabay didn't return a downloadable image" }, { status: 502 });
     }
 
-    const file = await downloadPixabayBytes(asset.imageUrl);
+    const file = await downloadFirstPixabayBytes(asset.imageUrls);
     const dataUrl = bytesToDataUrl(file.bytes, file.contentType);
     return NextResponse.json({ kind: "image", dataUrl, pageUrl: asset.pageUrl, name: asset.name });
   } catch (err) {
     console.error("pixabay asset:", err);
     const timedOut = err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError");
+    const message = err instanceof Error ? err.message : "Couldn't download the Pixabay asset";
+    if (message.includes("429") || /rate limit/i.test(message)) {
+      return NextResponse.json(
+        { error: "Pixabay rate limit exceeded — try again in a minute" },
+        { status: 429 },
+      );
+    }
     return NextResponse.json(
       { error: timedOut ? "Pixabay download timed out" : "Couldn't download the Pixabay asset" },
       { status: 502 },
