@@ -262,8 +262,8 @@ export function LandingPage() {
 
         <div className="relative z-10 mx-auto grid min-h-[85vh] max-w-6xl items-center gap-10 px-4 pb-36 pt-10 sm:gap-12 sm:px-6 sm:pb-44 sm:pt-14 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pb-52 lg:pt-16">
           <div>
-            <h1 className="max-w-xl text-6xl font-extrabold tracking-tight leading-[0.95] sm:text-7xl lg:text-8xl">
-              AI Редактор Каруселей
+            <h1 className="max-w-xl text-6xl font-extrabold tracking-tight leading-[0.95] sm:text-7xl lg:text-7xl">
+              Редактор Каруселей
             </h1>
             <TextGenerateEffect
               words="Создайте карусель за пару минут и экспортируйте готовые картинки."
