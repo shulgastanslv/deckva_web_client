@@ -180,7 +180,8 @@ export function StudioOrgSwitcher({
                   {active.name}
                 </p>
                 <p className="text-[12px] text-muted-foreground">
-                  {planLabel(active.isUpgrade)}
+                  {planLabel(active.isUpgrade)} · {active.memberCount}{" "}
+                  {active.memberCount === 1 ? "member" : "members"}
                 </p>
               </div>
               <button
@@ -224,7 +225,8 @@ export function StudioOrgSwitcher({
                       ) : null}
                     </span>
                     <span className="block text-[12px] text-muted-foreground">
-                      {planLabel(org.isUpgrade)}
+                      {org.memberCount}{" "}
+                      {org.memberCount === 1 ? "member" : "members"}
                     </span>
                   </span>
                 </button>

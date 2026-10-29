@@ -6,106 +6,47 @@ import {
   LandingHead,
   LandingSection,
 } from "@/components/landing/landing-shell";
+import { cn } from "@/lib/utils";
 
 const PHOTOS = [
-  "/threads/function.png",
-  "/threads/gotoit.png",
-  "/threads/lua.png",
-  "/threads/memcashed.png",
-  "/threads/rainbow.png",
-  "/threads/redis.png",
-  "/threads/redis2.png",
-  "/threads/vlan.png",
-  "/threads/yandexmap.png",
-] as const;
-
-const PINS = [
   {
-    name: "theshulya",
-    time: "2h",
-    views: "186K",
-    comment: "Cover, middle, ending. I posted the carousel as it came out.",
-    aspect: "aspect-[3/4]",
-    focus: "object-left",
-  },
-  {
-    name: "theshulya",
-    time: "5h",
-    views: "42.1K",
-    comment: "Launch thread. The frames were already in order.",
-    aspect: "aspect-square",
-    focus: "object-center",
-  },
-  {
-    name: "theshulya",
-    time: "1d",
-    views: "91K",
-    comment: "One story, and this feed actually got the views.",
-    aspect: "aspect-[4/5]",
-    focus: "object-center",
-  },
-  {
-    name: "theshulya",
-    time: "1d",
-    views: "128K",
-    comment: "No watermark. The views showed up overnight.",
-    aspect: "aspect-[3/4]",
-    focus: "object-right",
-  },
-  {
-    name: "theshulya",
-    time: "2d",
-    views: "240K",
-    comment: "I stopped building slides by hand. This is the result.",
+    src: "/reviews/878241688_18157030825560582_6425025260815163360_n.jpg",
     aspect: "aspect-[4/5]",
   },
   {
-    name: "theshulya",
-    time: "2d",
-    views: "64K",
-    comment: "The canvas was the post. Exported and published.",
-    aspect: "aspect-square",
-  },
+    src: "/reviews/873549208_17919352497462090_7013222084347737390_n.jpg",
+    aspect: "aspect-[4/5]",
+  },  
   {
-    name: "theshulya",
-    time: "3d",
-    views: "18.6K",
-    comment: "Replaced the Sunday layout with one prompt.",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    name: "theshulya",
-    time: "4d",
-    views: "33K",
-    comment: "Twelve slides before lunch. The order held.",
+    src: "/reviews/871021504_18653741251040809_7233068040570664666_n.jpg",
     aspect: "aspect-[4/5]",
   },
   {
-    name: "theshulya",
-    time: "5d",
-    views: "512K",
-    comment: "Icons on the cover. I never left the studio.",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    name: "theshulya",
-    time: "6d",
-    views: "77.4K",
-    comment: "The ZIP went straight into the thread.",
-    aspect: "aspect-square",
-  },
-  {
-    name: "theshulya",
-    time: "1w",
-    views: "29K",
-    comment: "Same story, shorter caption. Still a swipe.",
+    src: "/reviews/865838892_18117300367988507_5436190163512693482_n.jpg",
     aspect: "aspect-[4/5]",
   },
   {
-    name: "theshulya",
-    time: "1w",
-    views: "154K",
-    comment: "Clean export. The views match what I saw on the canvas.",
+    src: "/reviews/5.jpg",
+    aspect: "aspect-[4/5]",
+  },
+  {
+    src: "/reviews/6.jpg",
+    aspect: "aspect-[4/5]",
+  },
+  {
+    src: "/reviews/7.jpg",
+    aspect: "aspect-[3/4]",
+  },
+  {
+    src: "/reviews/8.jpg",
+    aspect: "aspect-[3/4]",
+  },
+  {
+    src: "/reviews/9.jpg",
+    aspect: "aspect-[3/4]",
+  },
+  {
+    src: "/reviews/10.jpg",
     aspect: "aspect-[3/4]",
   },
 ] as const;
@@ -114,57 +55,59 @@ const PREVIEW = 6;
 
 export function ReviewsBlock() {
   const [open, setOpen] = useState(false);
-  const visible = open ? PINS : PINS.slice(0, PREVIEW);
+  const [active, setActive] = useState<number | null>(null);
+  const visible = open ? PHOTOS : PHOTOS.slice(0, PREVIEW);
 
   return (
     <LandingSection id="reviews">
       <LandingHead
-        eyebrow="Отзывы"
-        title="Карусели, которые люди опубликовали"
+        title="Отзывы"
+        text="Карусели, которые собрали в студии."
       />
 
       <ul className="columns-1 gap-3 min-[480px]:columns-2 lg:columns-3">
-        {visible.map((pin, index) => (
-          <li key={index} className="mb-3 break-inside-avoid">
-            <article className="overflow-hidden rounded-2xl bg-land-card">
-              <div className="p-2.5">
-                <div className="flex items-center gap-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={PHOTOS[index % PHOTOS.length]}
-                    alt=""
-                    className="size-8 rounded-full object-cover"
-                  />
-                  <p className="min-w-0 text-[13px] leading-none">
-                    <span className="font-semibold">{pin.name}</span>
-                    <span className="text-land-ink/45"> · {pin.time}</span>
-                  </p>
-                </div>
+        {visible.map((photo, index) => {
+          const shown = active === index;
+          return (
+            <li
+              key={`${photo.src}-${index}`}
+              className="mb-3 break-inside-avoid"
+            >
+              <button
+                type="button"
+                className={cn(
+                  "group relative block w-full overflow-hidden rounded-2xl bg-land-card text-left",
+                  photo.aspect,
+                )}
+                onMouseEnter={() => setActive(index)}
+                onMouseLeave={() => setActive(null)}
+                onFocus={() => setActive(index)}
+                onBlur={() => setActive(null)}
+                onClick={() =>
+                  setActive((current) => (current === index ? null : index))
+                }
+                aria-expanded={shown}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo.src}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
+                />
+
                 <div
-                  className={`relative mt-2 overflow-hidden rounded-xl ${pin.aspect}`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={PHOTOS[index % PHOTOS.length]}
-                    alt=""
-                    className={`absolute inset-0 h-full w-full object-cover object-top ${"focus" in pin ? pin.focus : ""}`}
-                  />
-                  <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1">
-                    <span className="size-1.5 rounded-full bg-white" />
-                    <span className="size-1.5 rounded-full bg-white/45" />
-                    <span className="size-1.5 rounded-full bg-white/45" />
-                  </div>
-                </div>
-                <p className="mt-2 text-[13px] text-land-ink/45">
-                  {pin.views} views
-                </p>
-              </div>
-              <p className="border-t border-land-ink/8 px-2.5 py-2.5 text-[13px] leading-snug text-land-ink">
-                “{pin.comment}”
-              </p>
-            </article>
-          </li>
-        ))}
+                  className={cn(
+                    "absolute inset-0 bg-land-ink/45 transition-opacity duration-200",
+                    shown
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100",
+                  )}
+                />
+
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
       <button
@@ -172,7 +115,7 @@ export function ReviewsBlock() {
         onClick={() => setOpen((value) => !value)}
         className="mt-4 inline-flex h-11 items-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground"
       >
-        {open ? "Показать меньше" : "Показать " + visible.length + " отзывов"}
+        {open ? "Свернуть" : `Показать ещё ${PHOTOS.length - PREVIEW}`}
       </button>
     </LandingSection>
   );

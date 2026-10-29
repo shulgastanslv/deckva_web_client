@@ -37,28 +37,31 @@ export async function submitFeedback(input: {
   const userId = session?.user?.id;
   if (!userId) return { success: false, error: "Sign in to send feedback" };
 
-  const message = input.message.trim();
-  if (message.length < MESSAGE_MIN) {
-    return { success: false, error: "Write a short note first" };
-  }
-  if (message.length > MESSAGE_MAX) {
-    return { success: false, error: "That message is too long" };
-  }
-
   const raw = Array.isArray(input.images) ? input.images : [];
   if (raw.length > IMAGE_MAX) {
-    return { success: false, error: `You can attach up to ${IMAGE_MAX} images` };
+    return { success: false, error: `Можно прикрепить до ${IMAGE_MAX} слайдов` };
   }
 
   const images: string[] = [];
   for (const item of raw) {
     if (typeof item !== "string" || !isDataImage(item)) {
-      return { success: false, error: "Only PNG, JPEG, WebP, or GIF images" };
+      return { success: false, error: "Только PNG, JPEG, WebP или GIF" };
     }
     if (approxBytes(item) > IMAGE_BYTES_MAX) {
-      return { success: false, error: "One of the images is too large (2 MB max)" };
+      return { success: false, error: "Один из файлов слишком большой (макс. 2 МБ)" };
     }
     images.push(item);
+  }
+
+  let message = input.message.trim();
+  if (!message && images.length > 0) {
+    message = `Карусель · ${images.length} слайд${images.length === 1 ? "" : images.length < 5 ? "а" : "ов"}`;
+  }
+  if (message.length < MESSAGE_MIN) {
+    return { success: false, error: "Добавьте карусель или короткий текст" };
+  }
+  if (message.length > MESSAGE_MAX) {
+    return { success: false, error: "Сообщение слишком длинное" };
   }
 
   try {

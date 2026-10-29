@@ -2,6 +2,20 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
+/** Section / hero-scale title — modern big type */
+export const landTitle =
+  "text-5xl font-extrabold tracking-tight leading-[1.05] sm:text-5xl lg:text-5xl";
+
+/** Card / block title */
+export const landCardTitle =
+  "text-3xl font-extrabold tracking-tight leading-[1.1] sm:text-3xl";
+
+/** Section subtitle under LandingHead */
+export const landSub = "text-xl leading-snug sm:text-2xl";
+
+/** Card body / supporting line */
+export const landCardSub = "text-lg leading-snug sm:text-xl";
+
 /** Shared layout primitives — keep section rhythm identical across the landing. */
 export function LandingSection({
   id,
@@ -37,11 +51,11 @@ export function LandingHead({
   light?: boolean;
 }) {
   return (
-    <div className="mb-8 max-w-2xl sm:mb-10">
+    <div className="mb-8 max-w-3xl sm:mb-10">
       {eyebrow ? (
         <p
           className={cn(
-            "text-xl font-bold tracking-wide",
+            "text-base font-semibold tracking-wide sm:text-lg",
             light ? "text-white/70" : "text-land-blue"
           )}
         >
@@ -50,7 +64,8 @@ export function LandingHead({
       ) : null}
       <h2
         className={cn(
-          "mt-2 text-5xl font-extrabold tracking-tight sm:text-6xl",
+          landTitle,
+          eyebrow ? "mt-2" : null,
           light ? "text-white" : "text-land-ink"
         )}
       >
@@ -59,7 +74,8 @@ export function LandingHead({
       {text ? (
         <p
           className={cn(
-            "mt-4 text-xl leading-relaxed",
+            "mt-4 max-w-2xl",
+            landSub,
             light ? "text-white/75" : "text-land-ink/55"
           )}
         >

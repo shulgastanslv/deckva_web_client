@@ -6,6 +6,7 @@ import { Prisma } from "@/lib/generated/prisma/client";
 
 import { ensureUserOrganization } from "@/actions/organizations";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 import {
   FREE_CAROUSEL_LIMIT,
@@ -182,9 +183,9 @@ export async function createProject(input?: {
     }
     const organizationId = org.organization.id;
 
-    if (!org.organization.isUpgrade) {
+    if (!(await userHasPro(userId))) {
       const count = await prisma.project.count({
-        where: { organizationId },
+        where: { userId },
       });
       if (count >= FREE_CAROUSEL_LIMIT) {
         return {

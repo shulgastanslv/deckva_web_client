@@ -503,7 +503,7 @@ function StatusBar() {
 
 function ThreadsHeader() {
   return (
-    <header className="relative flex h-11 shrink-0 items-center justify-center border-b border-neutral-100/80 bg-white px-3">
+    <header className="relative isolate z-10 flex h-11 shrink-0 items-center justify-center border-b border-neutral-100 bg-white px-3 [transform:translateZ(0)]">
       <ChevronLeft
         className="absolute left-2 top-1/2 size-[22px] -translate-y-1/2 text-neutral-950"
         strokeWidth={2}

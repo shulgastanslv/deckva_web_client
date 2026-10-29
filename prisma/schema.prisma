@@ -21,6 +21,26 @@ enum OrgMemberRole {
   MEMBER
 }
 
+enum SubscriptionStatus {
+  NONE
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum BillingPaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum BillingPaymentKind {
+  SUBSCRIPTION
+  CARD_VERIFY
+  REFUND
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -34,27 +54,34 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  /// Personal Pro subscription (15 BYN / month).
+  subscriptionStatus   SubscriptionStatus @default(NONE)
+  subscriptionEndsAt   DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  bepaidCustomerId     String?
+
   activeOrganizationId String?
   activeOrganization   Organization? @relation("UserActiveOrganization", fields: [activeOrganizationId], references: [id], onDelete: SetNull)
 
-  projects      Project[]
-  folders       Folder[]
-  memberships   OrganizationMember[]
-  savedProjects SavedProject[]
-  authTokens    AuthToken[]
-  templates     Template[]
-  news          News[]
-  notifications Notification[]
-  feedbacks     Feedback[]
+  projects        Project[]
+  folders         Folder[]
+  memberships     OrganizationMember[]
+  savedProjects   SavedProject[]
+  authTokens      AuthToken[]
+  templates       Template[]
+  news            News[]
+  notifications   Notification[]
+  feedbacks       Feedback[]
+  paymentMethods  PaymentMethod[]
+  billingPayments BillingPayment[]
 
   @@index([activeOrganizationId])
+  @@index([subscriptionStatus])
 }
 
 model Organization {
   id         String   @id @default(cuid())
   name       String
-  /// Paid Pro subscription ($15/mo).
-  isUpgrade  Boolean  @default(false)
   color      String   @default("#7EB6FF")
   inviteCode String   @unique @default(cuid())
   createdAt  DateTime @default(now())
@@ -64,6 +91,50 @@ model Organization {
   folders        Folder[]
   projects       Project[]
   activeForUsers User[]               @relation("UserActiveOrganization")
+}
+
+/// Saved card for recurring Pro billing. PAN/CVV are never stored — only token + display fields.
+model PaymentMethod {
+  id               String   @id @default(cuid())
+  brand            String
+  last4            String
+  expMonth         Int
+  expYear          Int
+  /// Provider token (bePaid card token or sandbox token).
+  providerToken    String
+  providerCustomer String?
+  isDefault        Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  payments BillingPayment[]
+
+  @@index([userId])
+}
+
+model BillingPayment {
+  id          String               @id @default(cuid())
+  amount      Int
+  currency    String               @default("BYN")
+  status      BillingPaymentStatus @default(PENDING)
+  kind        BillingPaymentKind   @default(SUBSCRIPTION)
+  description String?
+  providerRef String?
+  failureReason String?
+  paidAt      DateTime?
+  createdAt   DateTime             @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  paymentMethodId String?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([status])
 }
 
 model OrganizationMember {

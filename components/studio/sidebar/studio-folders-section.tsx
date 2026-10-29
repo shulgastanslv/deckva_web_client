@@ -57,7 +57,7 @@ export function StudioFoldersSection() {
       getActiveOrganization(),
     ]);
     if (foldersRes.success) setFolders(foldersRes.folders);
-    if (orgRes.success) setIsUpgrade(orgRes.organization.isUpgrade);
+    if (orgRes.success) setIsUpgrade(Boolean(orgRes.organization?.isUpgrade));
   }, [signedIn]);
 
   useEffect(() => {

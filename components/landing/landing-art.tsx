@@ -181,38 +181,61 @@ export function CarouselEditorArt() {
 }
 
 
+
 export function IconsArt() {
   return (
     <svg
-      viewBox="0 0 280 140"
-      className="mt-6 h-auto w-full max-w-sm"
+      viewBox="0 0 320 180"
+      className="mt-6 h-auto w-full max-w-md"
       fill="none"
       aria-hidden
     >
-      {/* Heart */}
-      <rect x="16" y="28" width="72" height="72" rx="18" fill={PINK_SOFT} />
-      <path
-        d="M52 76s-16-10-16-20c0-5 4-9 9-9 3.5 0 6 2 7 4 1-2 3.5-4 7-4 5 0 9 4 9 9 0 10-16 20-16 20Z"
-        fill={PINK}
-      />
+      <circle cx="168" cy="96" r="78" fill={LILAC_SOFT} />
 
-      {/* Star */}
-      <rect x="104" y="28" width="72" height="72" rx="18" fill={LILAC_SOFT} />
+      {/* Search chip */}
+      <rect x="48" y="18" width="200" height="36" rx="18" fill={WHITE} />
+      <circle cx="70" cy="36" r="8" stroke={INK} strokeWidth="2.5" fill="none" />
       <path
-        d="M140 44l6.5 13 14.5 2-10.5 10 2.5 14.5-13-7-13 7 2.5-14.5-10.5-10 14.5-2L140 44Z"
-        fill={LILAC}
-      />
-
-      {/* Smiley */}
-      <rect x="192" y="28" width="72" height="72" rx="18" fill={SAGE_SOFT} />
-      <circle cx="214" cy="54" r="4" fill={INK} />
-      <circle cx="242" cy="54" r="4" fill={INK} />
-      <path
-        d="M214 72c6 10 22 10 28 0"
+        d="M76 42l6 6"
         stroke={INK}
-        strokeWidth="3.5"
+        strokeWidth="2.5"
         strokeLinecap="round"
       />
+      <rect x="90" y="32" width="96" height="8" rx="4" fill={LILAC_SOFT} />
+
+      {/* Heart tile */}
+      <g transform="translate(36 68)">
+        <rect width="72" height="72" rx="20" fill={PINK_SOFT} />
+        <path
+          d="M36 54s-14-9-14-18c0-4.5 3.5-8 8-8 3 0 5.5 1.8 6 3.5.5-1.7 3-3.5 6-3.5 4.5 0 8 3.5 8 8 0 9-14 18-14 18Z"
+          fill={PINK}
+        />
+      </g>
+
+      {/* Star tile */}
+      <g transform="translate(124 62)">
+        <rect width="80" height="80" rx="22" fill={WHITE} />
+        <path
+          d="M40 22l7.5 15.2 16.8 2.4-12.2 11.9 2.9 16.7L40 60.2 25 68.2l2.9-16.7L15.7 39.6l16.8-2.4L40 22Z"
+          fill={LILAC}
+        />
+      </g>
+
+      {/* Smile tile */}
+      <g transform="translate(220 74)">
+        <rect width="68" height="68" rx="18" fill={SAGE_SOFT} />
+        <circle cx="24" cy="28" r="4" fill={INK} />
+        <circle cx="44" cy="28" r="4" fill={INK} />
+        <path
+          d="M22 42c5 8 19 8 24 0"
+          stroke={INK}
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </g>
+
+      {/* Accent pill */}
+      <rect x="124" y="152" width="72" height="14" rx="7" fill={BLUE} />
     </svg>
   );
 }

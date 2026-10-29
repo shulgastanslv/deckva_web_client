@@ -1,49 +1,35 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   User,
-  Send,
   ChevronRight,
   LogOut,
   ArrowUp,
-  ArrowUpCircle,
   Copy,
   Check,
   SlidersHorizontal,
   Share,
-  GalleryHorizontalEndIcon,
   Globe,
   Undo2,
   Redo2,
-  Layers2,
   Loader2,
-  Save,
   CloudOff,
   Focus,
   MessageSquareText,
-  Moon,
-  Sun,
-  Share2,
   Shield,
-  Home,
-  Play,
-  PlayCircleIcon,
   PlayIcon,
 } from "lucide-react";
 import { NotificationsMenu } from "@/components/notifications-menu";
 import Link from "next/link";
 import Logo from "@/components/logo";
 import { useSession, signOut } from "next-auth/react";
-import { useTheme } from "next-themes";
 import { AuthModal } from "@/components/auth";
-import { SocialSubscribeDialog } from "@/components/social-subscribe-dialog";
 import { HelpDialog } from "@/components/help-dialog";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { ProfileSettingsDialog } from "@/components/profile-settings-dialog";
 import { PublishTemplateDialog } from "@/components/publish-template-dialog";
-import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -63,8 +49,6 @@ import {
   copyImageToClipboard,
   renderSlidesToImages,
 } from "@/lib/export/carousel";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 const accountItemClass =
   "cursor-pointer gap-2.5 rounded-none px-3.5 py-2.5 text-[14px] text-neutral-900 focus:bg-neutral-100 dark:text-foreground dark:focus:bg-muted";
@@ -79,26 +63,15 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
-  const [isSocialOpen, setIsSocialOpen] = useState(false);
-  const authOpenRef = useRef(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isPublishOpen, setIsPublishOpen] = useState(false);
-  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const { data: session, status } = useSession();
-  const { resolvedTheme, setTheme } = useTheme();
-  const [themeMounted, setThemeMounted] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copying, setCopying] = useState(false);
-
-  useEffect(() => {
-    setThemeMounted(true);
-  }, []);
-
-  const isDark = themeMounted && resolvedTheme === "dark";
 
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
@@ -123,25 +96,6 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
     window.addEventListener("core:auth-link", onAuthLink);
     return () => window.removeEventListener("swicorebp:auth-link", onAuthLink);
   }, []);
-
-  useEffect(() => {
-    authOpenRef.current = isAuthModalOpen;
-  }, [isAuthModalOpen]);
-
-  useEffect(() => {
-    if (status !== "authenticated") return;
-    if (window.localStorage.getItem("core:social-prompt")) return;
-    const timer = window.setTimeout(() => {
-      if (authOpenRef.current) return;
-      setIsSocialOpen(true);
-    }, 1200);
-    return () => window.clearTimeout(timer);
-  }, [status]);
-
-  const closeSocial = (open: boolean) => {
-    setIsSocialOpen(open);
-    if (!open) window.localStorage.setItem("core:social-prompt", "1");
-  };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -402,37 +356,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                     onClick={() => setIsProfileOpen(true)}
                   >
                     <User className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className={accountItemClass}
-                    onClick={() => setTheme(isDark ? "light" : "dark")}
-                  >
-                    {isDark ? (
-                      <Sun className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                    ) : (
-                      <Moon className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                    )}
-                    Theme
-                  </DropdownMenuItem>
-                </div>
-
-                <DropdownMenuSeparator className="mx-0 my-0 bg-neutral-200/80 dark:bg-border" />
-
-                <div className="py-1">
-                  <DropdownMenuItem
-                    className={accountItemClass}
-                    onClick={() => setIsUpgradeOpen(true)}
-                  >
-                    <ArrowUpCircle className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                    Upgrade
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className={accountItemClass}
-                    onClick={() => setIsSocialOpen(true)}
-                  >
-                    <Share2 className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                    Socials
+                    Account
                   </DropdownMenuItem>
                   {session.user?.role === "ADMIN" ? (
                     <DropdownMenuItem asChild className={accountItemClass}>
@@ -442,12 +366,6 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                       </Link>
                     </DropdownMenuItem>
                   ) : null}
-                  <DropdownMenuItem asChild className={accountItemClass}>
-                    <Link href="/">
-                      <Home className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                      Back to home
-                    </Link>
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     className={accountItemClass}
                     onClick={() => signOut({ callbackUrl: "/" })}
@@ -474,7 +392,6 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
           }
         }}
       />
-      <SocialSubscribeDialog open={isSocialOpen} onOpenChange={closeSocial} />
       <ShareModal
         open={showShare}
         onOpenChange={setShowShare}
@@ -494,7 +411,6 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
       <HelpDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
       <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
       <ProfileSettingsDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
-      <StudioUpgradeDialog open={isUpgradeOpen} onOpenChange={setIsUpgradeOpen} />
       <PublishTemplateDialog
         open={isPublishOpen}
         onOpenChange={setIsPublishOpen}

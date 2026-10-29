@@ -14,7 +14,7 @@ async function requireCarouselSlot(): Promise<boolean> {
     getActiveOrganization(),
     getUserProjects(),
   ]);
-  if (orgRes.success && orgRes.organization.isUpgrade) return true;
+  if (orgRes.success && orgRes.organization?.isUpgrade) return true;
   const count = projectsRes.success ? projectsRes.projects.length : 0;
   if (count >= FREE_CAROUSEL_LIMIT) {
     window.dispatchEvent(new CustomEvent("studio:open-upgrade"));

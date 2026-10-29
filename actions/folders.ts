@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { ensureUserOrganization } from "@/actions/organizations";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 
 export interface FolderListItem {
@@ -68,7 +69,7 @@ export async function createFolder(
     if (!ensured.success) {
       return { success: false, error: "Couldn't load organization" };
     }
-    if (!ensured.organization.isUpgrade) {
+    if (!(await userHasPro(userId))) {
       return {
         success: false,
         error: "Upgrade to Pro to create folders",

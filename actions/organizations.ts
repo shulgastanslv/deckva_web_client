@@ -4,13 +4,15 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { orgOwnerHasPro, userHasPro } from "@/lib/billing/entitlements";
 import { UPGRADE_REQUIRED } from "@/lib/studio/plans";
 import { prisma } from "@/lib/prisma";
 
 export interface OrganizationListItem {
   id: string;
-  name: string;
+  /** Current user's personal Pro status (subscription is per-user, not per-org). */
   isUpgrade: boolean;
+  name: string;
   color: string;
   role: "OWNER" | "ADMIN" | "MEMBER";
   inviteCode: string;
@@ -45,7 +47,6 @@ async function mapOrg(
   org: {
     id: string;
     name: string;
-    isUpgrade: boolean;
     color: string;
     inviteCode: string;
     members: Array<{ role: "OWNER" | "ADMIN" | "MEMBER"; userId: string }>;
@@ -57,7 +58,7 @@ async function mapOrg(
   return {
     id: org.id,
     name: org.name,
-    isUpgrade: Boolean(org.isUpgrade),
+    isUpgrade: await userHasPro(userId),
     color: org.color,
     role: mine?.role ?? "MEMBER",
     inviteCode: org.inviteCode,
@@ -309,10 +310,10 @@ export async function joinOrganizationByInvite(
 
     const existing = org.members.find((m) => m.userId === userId);
     if (!existing) {
-      if (!org.isUpgrade) {
+      if (!(await orgOwnerHasPro(org.id))) {
         return {
           success: false,
-          error: `${UPGRADE_REQUIRED} — invites need a Pro workspace`,
+          error: `${UPGRADE_REQUIRED} — invites need a Pro owner`,
         };
       }
       await prisma.organizationMember.create({
@@ -342,45 +343,3 @@ export async function joinOrganizationByInvite(
   }
 }
 
-export async function setOrganizationUpgrade(
-  isUpgrade: boolean,
-): Promise<ActionResult<{ organization: OrganizationListItem }>> {
-  try {
-    const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-
-    const ensured = await ensureUserOrganization();
-    if (!ensured.success) return ensured;
-
-    const membership = await prisma.organizationMember.findFirst({
-      where: {
-        userId,
-        organizationId: ensured.organization.id,
-        role: { in: ["OWNER", "ADMIN"] },
-      },
-    });
-    if (!membership) {
-      return {
-        success: false,
-        error: "Only owners and admins can change the subscription",
-      };
-    }
-
-    const org = await prisma.organization.update({
-      where: { id: ensured.organization.id },
-      data: { isUpgrade },
-      include: {
-        members: { select: { role: true, userId: true } },
-        _count: { select: { members: true } },
-      },
-    });
-
-    revalidatePath("/studio");
-    revalidatePath("/studio/projects");
-
-    return { success: true, organization: await mapOrg(org, userId) };
-  } catch (err) {
-    console.error("setOrganizationUpgrade error:", err);
-    return { success: false, error: "Couldn't update subscription" };
-  }
-}

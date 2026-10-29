@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Menu } from "lucide-react";
+import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
 import { WhiteLogo } from "@/components/logo";
 import { AuthModal } from "@/components/auth";
@@ -18,11 +19,8 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Spotlight } from "@/components/ui/spotlight";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import { FloatingNav } from "@/components/ui/floating-navbar";
@@ -35,21 +33,24 @@ import { LeaveReviewBlock } from "@/components/landing/leave-review-block";
 import {
   FeedArt,
   GenerateArt,
-  InviteArt,
-  OrgArt,
-  RewardsArt,
+  IconsArt,
   StudioArt,
   TemplatesArt,
 } from "@/components/landing/landing-art";
+import { StudioVideo } from "@/components/landing/studio-video";
 import { DualPhonesMock } from "@/components/landing/landing-visuals";
 import {
   LandingHead,
   LandingLayer,
   LandingPad,
   LandingSection,
-  LandingGrid,
+  landCardTitle,
+  landCardSub,
+  landTitle,
+  landSub,
 } from "@/components/landing/landing-shell";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { SOCIAL_LINKS } from "@/lib/social";
 
 const LEGAL = {
   status: "Плательщик налога на профессиональный доход",
@@ -60,67 +61,117 @@ const LEGAL = {
 } as const;
 
 const NAV = [
-  { name: "Что это?", link: "#product" },
   { name: "Студия", link: "#studio" },
-  { name: "Команда", link: "#team" },
-  { name: "Цена", link: "#pricing" },
-  { name: "Отзывы", link: "#reviews" },
-  { name: "Обратная связь", link: "#review" },
-  { name: "FAQ", link: "#faq" },
+  { name: "Возможности", link: "#product" },
+  { name: "Примеры", link: "#reviews" },
+  { name: "Тариф", link: "#pricing" },
+  { name: "Вопросы", link: "#faq" },
 ];
 
 const FAQ = [
   {
     value: "what",
     q: "Что такое Deckva?",
-    a: "Студия для каруселей. Начинаете с пустого холста или шаблона, правите слайды и экспортируете их.",
+    a: "Студия для каруселей в соцсетях. Собираете слайды на холсте и экспортируете готовые картинки.",
   },
   {
     value: "how-start",
-    q: "Как начать карусель?",
-    a: "Откройте студию и создайте пустую карусель или выберите шаблон. Слайды сразу в пропорциях поста.",
+    q: "С чего начать?",
+    a: "Откройте студию: пустой холст или шаблон. Слайды сразу в пропорциях поста.",
   },
   {
     value: "edit",
-    q: "Что можно менять в редакторе?",
+    q: "Что можно менять?",
     a: "Текст, фото, иконки, фон, слои и порядок слайдов.",
   },
   {
     value: "vs-canva",
-    q: "В чем отличие от Canva?",
-    a: "Deckva собран вокруг карусели: несколько слайдов в формате поста, слои, шаблоны и экспорт.",
+    q: "Чем отличается от Canva?",
+    a: "Deckva заточен под карусель: несколько слайдов в формате поста, слои и экспорт без сборки ленты где-то ещё.",
   },
   {
     value: "pricing",
-    q: "Сколько это стоит?",
-    a: "15$. Один платёж: редактирование холста и экспорт PNG или ZIP. Слайды без водяного знака.",
-  },
-  {
-    value: "who",
-    q: "Для кого это?",
-    a: "Социальные команды, основатели, редакторы, маркетологи — любой, кто объясняет идею как карусель, а не один квадрат.",
-  },
-  {
-    value: "how-to-use",
-    q: "Как использовать?",
-    a: "1. Создайте пустую карусель или откройте шаблон. 2. Правьте текст, фото, иконки, фон и порядок слайдов. 3. Экспортируйте слайды в PNG или ZIP.",
+    q: "Сколько стоит?",
+    a: "15 Br в месяц. Редактирование и экспорт PNG или ZIP без водяного знака.",
   },
   {
     value: "how-to-export",
     q: "Как экспортировать?",
-    a: "Вы экспортируете слайды в PNG или ZIP. PNG — один файл, ZIP — все слайды в одном архиве.",
+    a: "PNG — один слайд. ZIP — вся карусель одним архивом.",
   },
   {
-    value: "orgs",
-    q: "Что такое организация?",
-    a: "Это общее пространство для команды: проекты, роли и активная студия. Один аккаунт может состоять в нескольких организациях и переключаться между ними.",
+    value: "formats",
+    q: "Какие форматы поддерживаются?",
+    a: "Пост, квадрат, история и широкий кадр. Можно переключать пропорции под площадку.",
   },
   {
-    value: "invite",
-    q: "Как пригласить человека?",
-    a: "Отправьте email-приглашение или скопируйте invite-ссылку организации. Человек заходит в студию по ссылке и сразу попадает в вашу команду. За новых пользователей можно получать бонусы.",
+    value: "watermark",
+    q: "Есть ли водяной знак?",
+    a: "В Pro — нет. Экспортируете чистые слайды без логотипа Deckva.",
+  },
+  {
+    value: "trial",
+    q: "Есть пробный период?",
+    a: "Нет отдельного триала. Подписка отменяется в любой момент.",
+  },
+  {
+    value: "cancel",
+    q: "Как отменить подписку?",
+    a: "В настройках аккаунта. Доступ Pro сохраняется до конца оплаченного периода.",
+  },
+  {
+    value: "templates",
+    q: "Можно начать с шаблона?",
+    a: "Да. Выберите шаблон с готовой структурой или пустой холст.",
+  },
+  {
+    value: "icons",
+    q: "Откуда брать иконки?",
+    a: "Библиотека иконок встроена в студию — добавляете на слайд в один клик.",
+  },
+  {
+    value: "save",
+    q: "Сохраняются ли проекты?",
+    a: "Да. Карусели остаются в аккаунте — можно вернуться и продолжить.",
+  },
+  {
+    value: "devices",
+    q: "На каких устройствах работает?",
+    a: "В браузере на компьютере. Для точной вёрстки лучше большой экран.",
+  },
+  {
+    value: "who",
+    q: "Для кого сервис?",
+    a: "Для редакторов, маркетологов и авторов, которым нужна карусель, а не один квадрат.",
   },
 ];
+
+const SOCIAL = [
+  {
+    key: "threads",
+    name: "Threads",
+    href: SOCIAL_LINKS.threads,
+    Icon: FaThreads,
+  },
+  {
+    key: "telegram",
+    name: "Telegram",
+    href: SOCIAL_LINKS.telegram,
+    Icon: FaTelegram,
+  },
+  {
+    key: "instagram",
+    name: "Instagram",
+    href: SOCIAL_LINKS.instagram,
+    Icon: FaInstagram,
+  },
+  {
+    key: "tiktok",
+    name: "TikTok",
+    href: SOCIAL_LINKS.tiktok,
+    Icon: FaTiktok,
+  },
+] as const;
 
 export function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
@@ -129,7 +180,7 @@ export function LandingPage() {
 
   return (
     <div className="relative bg-land-mist">
-      <FloatingNav navItems={NAV} ctaHref="/studio" ctaLabel="Studio" />
+      <FloatingNav navItems={NAV} ctaHref="/studio" ctaLabel="Студия" />
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
       <section className="relative overflow-hidden bg-land-blue text-white">
@@ -166,7 +217,7 @@ export function LandingPage() {
                   variant="ghost"
                   size="icon"
                   className="text-white hover:bg-white/10 hover:text-white md:hidden"
-                  aria-label="Menu"
+                  aria-label="Меню"
                 >
                   <Menu />
                 </Button>
@@ -189,7 +240,7 @@ export function LandingPage() {
                       variant="outline"
                       className="mt-3 h-10 rounded-full"
                     >
-                      <Link href="/studio">Projects</Link>
+                      <Link href="/studio">Проекты</Link>
                     </Button>
                   ) : (
                     <Button
@@ -197,7 +248,7 @@ export function LandingPage() {
                       className="mt-3 h-10 rounded-full"
                       onClick={() => setAuthOpen(true)}
                     >
-                      Sign in
+                      Войти
                     </Button>
                   )}
                   <Button asChild className="h-10 rounded-full">
@@ -209,34 +260,32 @@ export function LandingPage() {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-16 pt-6 sm:gap-10 sm:px-6 sm:pb-20 sm:pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:pb-24">
+        <div className="relative z-10 mx-auto grid min-h-[85vh] max-w-6xl items-center gap-10 px-4 pb-36 pt-10 sm:gap-12 sm:px-6 sm:pb-44 sm:pt-14 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pb-52 lg:pt-16">
           <div>
-            <h1 className="max-w-xl text-7xl font-extrabold tracking-tight">
-              Создайте карусель
-              <br />
-             за пару минут
+            <h1 className="max-w-xl text-6xl font-extrabold tracking-tight leading-[0.95] sm:text-7xl lg:text-8xl">
+              AI-редактор каруселей
             </h1>
             <TextGenerateEffect
-              words="Пустой холст или шаблон. Дальше правите слайды сами."
+              words="Создайте карусель за пару минут и экспортируйте готовые картинки."
               duration={0.35}
-              className="mt-4 text-lg font-medium text-white/90 sm:text-2xl"
+              className="mt-5 text-2xl font-medium text-white/90 sm:text-3xl"
               spanClassName="text-white/90"
             />
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/75 sm:text-base">
-              Слайды уже в формате поста. Текст, фон, иконки и порядок — в редакторе, без сборки карусели в другом инструменте.
+            <p className={`mt-4 max-w-md text-white/75 ${landSub}`}>
+              Текст, фон, иконки и порядок — в одном холсте.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button
                 asChild
                 className="h-11 rounded-full bg-white px-5 text-land-blue hover:bg-white/90"
               >
-                <Link href="/studio">Открыть студию</Link>
+                <Link href="/studio">Открыть</Link>
               </Button>
               <a
-                href="#product"
+                href="#studio"
                 className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-medium text-white hover:bg-white/10"
               >
-                Как это работает
+                Смотреть студию
               </a>
             </div>
           </div>
@@ -244,116 +293,80 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* 1. Studio overlaps hero */}
       <LandingSection
-        id="product"
-        className="relative z-20 -mt-10 py-0 sm:py-0 lg:-mt-40"
+        id="studio"
+        className="relative z-20 -mt-20 py-0 sm:-mt-28 sm:py-0 lg:-mt-32"
       >
-          <LandingGrid className="md:grid-cols-12">
-            <LandingLayer className="bg-land-card/80 backdrop-blur-xl md:col-span-7 md:row-span-2">
+        <Reveal>
+          <div className="overflow-hidden rounded-[2rem] bg-land-card sm:rounded-[2.5rem]">
+            <StudioVideo />
+          </div>
+        </Reveal>
+      </LandingSection>
+
+      {/* 2. Capabilities */}
+      <LandingSection id="product">
+        <Reveal>
+          <LandingHead
+            title="Быстро и просто"
+            text="От шаблона до экспорта — без сборки ленты в другом инструменте."
+          />
+        </Reveal>
+
+        <RevealStagger className="grid gap-3 sm:gap-4 md:grid-cols-12">
+          <RevealItem className="md:col-span-7 md:row-span-2">
+            <LandingLayer className="h-full bg-land-card">
               <LandingPad>
-                <p className="text-lg font-bold text-land-ink">Шаблоны</p>
-                <h2 className="mt-2 text-4xl font-extrabold tracking-tight text-land-ink">
-                  Начните со слайдов
-                </h2>
-                <p className="mt-2 text-base leading-relaxed text-land-ink/55 max-w-sm">
-                  Пустой холст или готовый шаблон — дальше правите текст, фон и порядок.
+                <h3 className={`${landCardTitle} text-land-ink`}>Шаблоны</h3>
+                <p className={`mt-3 max-w-md text-land-ink/55 ${landCardSub}`}>
+                  Готовый набор слайдов или пустой холст — дальше правите
+                  текст, фон и порядок.
                 </p>
                 <div className="mt-6 flex justify-center">
                   <GenerateArt />
                 </div>
               </LandingPad>
             </LandingLayer>
+          </RevealItem>
 
-            <LandingLayer className="bg-land-card/80 backdrop-blur-xl md:col-span-5">
+          <RevealItem className="md:col-span-5">
+            <LandingLayer className="h-full bg-land-card">
               <LandingPad className="sm:p-7">
-                <p className="text-lg font-bold text-land-blue">Редактор</p>
-                <h3 className="mt-2 text-xl font-extrabold tracking-tight text-land-ink">
-                  Пост, а не файл
-                </h3>
-                <p className="mt-2 text-base leading-relaxed text-land-ink/55 max-w-sm">
-                  Уже в пропорциях поста, а не один квадрат.
+                <h3 className={`${landCardTitle} text-land-ink`}>Формат</h3>
+                <p className={`mt-3 max-w-md text-land-ink/55 ${landCardSub}`}>
+                  Пропорции ленты заданы сразу — без подгонки после экспорта.
                 </p>
                 <div className="mt-4 flex justify-center">
                   <FeedArt />
                 </div>
               </LandingPad>
             </LandingLayer>
+          </RevealItem>
 
-            <LandingLayer className="bg-land-panel text-white md:col-span-5">
+          <RevealItem className="md:col-span-5">
+            <LandingLayer className="h-full bg-land-panel text-white">
               <LandingPad className="sm:p-7">
-                <p className="text-lg font-bold text-white/60">Студия</p>
-                <h3 className="mt-2 text-xl font-extrabold tracking-tight">
-                  Редактор на холсте
-                </h3>
-                <p className="mt-2 text-base leading-relaxed text-white/70 max-w-sm">
-                  Текст, фон, и порядок слайдов — вы завершаете его.
+                <h3 className={landCardTitle}>Редактор</h3>
+                <p className={`mt-3 max-w-md text-white/70 ${landCardSub}`}>
+                  Текст, фон, слои и порядок слайдов — до финала в одной
+                  студии.
                 </p>
                 <div className="mt-4">
                   <StudioArt />
                 </div>
               </LandingPad>
             </LandingLayer>
-          </LandingGrid>
-      </LandingSection>
-
-
-      <Reveal>
-        <PhotoStatement />
-      </Reveal>
-
-      <Reveal>
-        <FreeBlock />
-      </Reveal>
-
-      <Reveal>
-        <ReviewsBlock />
-      </Reveal>
-
-      <Reveal>
-        <LeaveReviewBlock />
-      </Reveal>
-
-      <LandingSection id="studio">
-        <RevealStagger className="grid gap-3 sm:gap-4 md:grid-cols-12">
-          <RevealItem className="md:col-span-12">
-            <LandingLayer className="bg-land-card">
-              <LandingPad>
-                <div className="grid items-center gap-8 md:grid-cols-[1fr_auto] md:gap-12">
-                  <div>
-                    <p className="text-lg font-bold text-land-blue">Студия</p>
-                    <h2 className="mt-2 max-w-md text-3xl font-extrabold tracking-tight text-land-ink sm:text-4xl">
-                      Редактор на холсте
-                    </h2>
-                    <p className="mt-3 max-w-sm text-base leading-relaxed text-land-ink/55">
-                      Слайды уже в формате поста. Текст и слои — рядом.
-                    </p>
-                    <Link
-                      href="/studio"
-                      className="mt-6 inline-flex h-10 items-center rounded-full bg-land-panel px-5 text-sm font-semibold text-white"
-                    >
-                      Открыть
-                    </Link>
-                  </div>
-                  <div className="flex justify-center md:justify-end">
-                    <StudioArt />
-                  </div>
-                </div>
-              </LandingPad>
-            </LandingLayer>
           </RevealItem>
 
           <RevealItem className="md:col-span-6">
             <LandingLayer className="h-full bg-land-card">
-              <LandingPad className="flex h-full flex-col justify-between gap-10">
-                <div>
-                  <p className="text-lg font-bold text-land-blue">Иконки</p>
-                  <p className="mt-2 max-w-xs text-sm leading-relaxed text-land-ink/55">
-                    Иконки и смайлы прямо в студии — клик, и они на слайде.
-                  </p>
-                </div>
-                <p className="text-[100px] font-extrabold leading-[1.05] tracking-tight text-land-ink">
-                  2+ млн
+              <LandingPad>
+                <h3 className={`${landCardTitle} text-land-ink`}>Иконки</h3>
+                <p className={`mt-3 max-w-sm text-land-ink/55 ${landCardSub}`}>
+                  Иконки и смайлы прямо в студии — клик, и они на слайде.
                 </p>
+                <IconsArt />
               </LandingPad>
             </LandingLayer>
           </RevealItem>
@@ -361,12 +374,11 @@ export function LandingPage() {
           <RevealItem className="md:col-span-6">
             <LandingLayer className="h-full bg-land-card">
               <LandingPad>
-                <p className="text-lg font-bold text-land-blue">Шаблоны</p>
-                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-land-ink sm:text-3xl">
-                  Готовый ритм
-                </h2>
-                <p className="mt-2 max-w-xs text-sm leading-relaxed text-land-ink/55">
-                  Обложка и конец на месте. Вы меняете слова.
+                <h3 className={`${landCardTitle} text-land-ink`}>
+                  Готовые шаблоны
+                </h3>
+                <p className={`mt-3 max-w-sm text-land-ink/55 ${landCardSub}`}>
+                  Обложка и финал уже выстроены — остаётся заменить текст.
                 </p>
                 <TemplatesArt />
               </LandingPad>
@@ -375,85 +387,34 @@ export function LandingPage() {
         </RevealStagger>
       </LandingSection>
 
-      <LandingSection id="team">
-        <Reveal>
-          <LandingHead
-            title="Команда"
-            text="Организация — общее пространство. Инвайт — способ собрать людей в одну студию."
-          />
-        </Reveal>
+      {/* 3. Positioning */}
+      <Reveal>
+        <PhotoStatement />
+      </Reveal>
 
-        <RevealStagger className="grid gap-3 sm:gap-4 md:grid-cols-12">
-          <RevealItem className="md:col-span-7">
-            <LandingLayer className="h-full bg-land-panel text-white">
-              <LandingPad className="flex h-full flex-col justify-between gap-8">
-                <div>
-                  <p className="text-lg font-bold text-white/60">Организации</p>
-                  <h2 className="mt-3 max-w-md text-4xl font-extrabold tracking-tight sm:text-5xl">
-                    Одна студия на всю команду
-                  </h2>
-                  <p className="mt-4 max-w-sm text-base leading-relaxed text-white/70 sm:text-lg">
-                    Проекты и роли в одном месте. Переключайтесь между
-                    организациями — клиент, агентство, личный аккаунт.
-                  </p>
-                </div>
-                <div className="flex justify-center sm:justify-start">
-                </div>
-              </LandingPad>
-            </LandingLayer>
-          </RevealItem>
+      {/* 4. Proof */}
+      <Reveal>
+        <ReviewsBlock />
+      </Reveal>
 
-          <RevealItem className="md:col-span-5">
-            <LandingLayer className="h-full bg-land-blue text-white">
-              <LandingPad className="flex h-full flex-col justify-between gap-8">
-                <div>
-                  <p className="text-lg font-bold text-white/70">Инвайты</p>
-                  <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                    Ссылка или email
-                  </h2>
-                  <p className="mt-3 max-w-xs text-base leading-relaxed text-white/75">
-                    Скопируйте invite-ссылку или отправьте приглашение на почту.
-                    Человек заходит — и сразу в вашей организации.
-                  </p>
-                </div>
-                <div className="flex justify-center sm:justify-start">
-                </div>
-              </LandingPad>
-            </LandingLayer>
-          </RevealItem>
+      {/* 5. Pricing */}
+      <Reveal>
+        <FreeBlock />
+      </Reveal>
 
-          <RevealItem className="md:col-span-12">
-            <LandingLayer className="bg-land-card">
-              <LandingPad>
-                <div className="grid items-center gap-8 md:grid-cols-[1.2fr_0.8fr] md:gap-12">
-                  <div>
-                    <p className="text-lg font-bold text-land-blue">Награды</p>
-                    <h2 className="mt-2 max-w-lg text-4xl font-extrabold tracking-tight text-land-ink sm:text-5xl">
-                      Пригласили — получили бонус
-                    </h2>
-                    <p className="mt-4 max-w-md text-base leading-relaxed text-land-ink/55 sm:text-lg">
-                      За новые аккаунты — ранний доступ к фичам. Им — стартовый
-                      набор шаблонов.
-                    </p>
-                  </div>
-                  <div className="flex justify-center md:justify-end">
-                  </div>
-                </div>
-              </LandingPad>
-            </LandingLayer>
-          </RevealItem>
-        </RevealStagger>
-      </LandingSection>
+      {/* 6. Feedback — only for signed-in */}
+      <Reveal>
+        <LeaveReviewBlock />
+      </Reveal>
 
+      {/* 7. FAQ */}
       <LandingSection id="faq">
         <Reveal>
           <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:gap-12">
             <div>
-              <h2 className="text-3xl font-extrabold tracking-tight text-land-ink sm:text-4xl">
-                FAQ
-              </h2>
-              <p className="mt-3 max-w-xs text-sm text-land-ink/55">
-                Генерация, редактирование, экспорт, и ваш аккаунт — в кратком изложении.
+              <h2 className={`${landTitle} text-land-ink`}>Вопросы</h2>
+              <p className={`mt-4 max-w-xs text-land-ink/55 ${landSub}`}>
+                О старте, правках и экспорте.
               </p>
             </div>
             <Accordion type="single" collapsible defaultValue="what">
@@ -476,7 +437,7 @@ export function LandingPage() {
         </Reveal>
       </LandingSection>
 
-
+      {/* 8. Final CTA */}
       <LandingSection className="pb-16 pt-4 sm:pb-20 sm:pt-6">
         <Reveal>
           <LandingLayer className="bg-land-blue text-white">
@@ -484,30 +445,48 @@ export function LandingPage() {
               <div className="absolute -right-10 top-8 size-40 rounded-full bg-white/20 blur-3xl" />
               <div className="absolute bottom-20 left-[40%] size-28 rounded-full bg-white/20 blur-2xl" />
               <div className="relative z-10 pb-4 sm:pb-16">
-                <h2 className="max-w-md text-3xl font-extrabold tracking-tight sm:text-5xl">
-                  У вас есть тема.
+                <h2 className={`max-w-xl ${landTitle}`}>
+                  Соберите карусель
                   <br />
-                  И карусель уже готова.
+                  за пару минут
                 </h2>
-                <p className="mt-4 max-w-sm text-sm text-white/75 sm:text-base">
-                  Откройте студию и начните создавать карусель.
+                <p className={`mt-4 max-w-md text-white/75 ${landSub}`}>
+                  Откройте студию и доведите слайды до публикации.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
                   <Link
                     href="/studio"
                     className="inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-semibold text-land-blue"
                   >
-                    Создать
+                    Открыть
                   </Link>
                 </div>
               </div>
               <div className="relative z-10 -mx-10 overflow-hidden">
-                <div className="absolute inset-x-10 h-full top-4 rounded-full bg-land-panel/25 blur-xl" />
+                <div className="absolute inset-x-10 top-4 h-full rounded-full bg-land-panel/25 blur-xl" />
                 <DualPhonesMock />
               </div>
             </div>
           </LandingLayer>
         </Reveal>
+      </LandingSection>
+
+      {/* 9. Social */}
+      <LandingSection className="pb-10 pt-0 sm:pb-12 sm:pt-0">
+        <div className="flex items-center justify-center gap-5 sm:gap-8">
+          {SOCIAL.map(({ key, name, href, Icon }) => (
+            <a
+              key={key}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={name}
+              className="grid size-12 place-items-center rounded-full text-land-ink transition-colors hover:bg-land-card hover:text-land-blue sm:size-14"
+            >
+              <Icon className="size-6 sm:size-7" aria-hidden />
+            </a>
+          ))}
+        </div>
       </LandingSection>
 
       <footer>
@@ -520,7 +499,7 @@ export function LandingPage() {
               deckva.by
             </Link>
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-land-ink/45">
-              Студия для каруселей. Тема → слайды → экспорт.
+              Студия для каруселей в социальных сетях.
             </p>
             <p className="mt-4 text-sm text-land-ink/45">
               © {new Date().getFullYear()} Deckva

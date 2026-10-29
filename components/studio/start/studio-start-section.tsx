@@ -6,6 +6,21 @@ import {
   StudioCreateTile,
   StudioStartTile,
 } from "@/components/studio/start/studio-start-tile";
+import type { StudioIconName } from "@/components/studio/ui/studio-icons";
+
+const START_ICONS: { title: string; iconName: StudioIconName }[] = [
+  { title: "Fire", iconName: "fire" },
+  { title: "Layers", iconName: "layers" },
+  { title: "List", iconName: "list" },
+  { title: "Chart", iconName: "chart" },
+  { title: "Trophy", iconName: "trophy" },
+  { title: "Rocket", iconName: "rocket" },
+  { title: "Image", iconName: "image" },
+  { title: "Message", iconName: "message" },
+  { title: "Check", iconName: "check" },
+  { title: "Wand", iconName: "wand" },
+  { title: "Carousel", iconName: "carousel" },
+];
 
 export function StudioStartSection({
   onBlank,
@@ -30,11 +45,14 @@ export function StudioStartSection({
 
       <StudioStartRow>
         <StudioCreateTile onClick={onBlank} />
-        <StudioStartTile
-          title="From template"
-          iconName="carousel"
-          onClick={onTemplates}
-        />
+        {START_ICONS.map(({ title, iconName }) => (
+          <StudioStartTile
+            key={iconName}
+            title={title}
+            iconName={iconName}
+            onClick={iconName === "carousel" ? onTemplates : onBlank}
+          />
+        ))}
       </StudioStartRow>
     </section>
   );

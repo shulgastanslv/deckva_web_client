@@ -3,21 +3,30 @@ import type { ReactElement, ReactNode, SVGProps } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Miro-like micro-illustrations for studio starters.
- * Soft pastels + simple geometry — not badge icons.
+ * Studio micro-illustrations — soft multi-hue palette, one visual scale.
+ * Soft fills read on tile bg #ebeaf2 / dark:muted.
  */
-const INK = "#14151c";
-const LINE = "#c5c8d4";
+const INK = "#1a1b24";
+const LINE = "#c8cedd";
 const WHITE = "#ffffff";
-const BLUE = "#7b8cff";
-const BLUE_DK = "#2f5bff";
-const BLUE_SOFT = "#c9d4ff";
-const YELLOW = "#f5d56a";
-const CORAL = "#f3a89a";
-const GREEN = "#8fd4a8";
-const LILAC = "#c4b5f5";
-const PEACH = "#f5c9a8";
-const SKY = "#9ec9f5";
+
+const BLUE = "#6b86f7";
+const BLUE_SOFT = "#d4dcfb";
+const CORAL = "#f07a6a";
+const CORAL_SOFT = "#fdd9d3";
+const TEAL = "#3db8a8";
+const TEAL_SOFT = "#d0efe9";
+const AMBER = "#e8a23a";
+const AMBER_SOFT = "#fce8c4";
+const VIOLET = "#8b7cf0";
+const VIOLET_SOFT = "#e2ddfb";
+const ROSE = "#e86b9a";
+const ROSE_SOFT = "#f9d6e4";
+const SAGE = "#6aaa78";
+const SAGE_SOFT = "#d8ebd9";
+
+/** Shared canvas — every icon uses the same viewBox and visual scale. */
+const VIEW = "0 0 160 128";
 
 export type StudioIconName =
   | "fire"
@@ -31,8 +40,7 @@ export type StudioIconName =
   | "check"
   | "plus"
   | "wand"
-  | "carousel"
-  | "pro";
+  | "carousel";
 
 type IconProps = SVGProps<SVGSVGElement> & {
   title?: string;
@@ -42,7 +50,7 @@ function Scene({
   children,
   className,
   title,
-  viewBox = "0 0 160 128",
+  viewBox = VIEW,
   ...props
 }: IconProps & { children: ReactNode }) {
   return (
@@ -66,32 +74,39 @@ function Scene({
 export function StudioIconFire(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="28" y="30" width="44" height="58" rx="9" fill={WHITE} />
-      <rect x="36" y="42" width="28" height="5" rx="2.5" fill={CORAL} />
-      <rect x="36" y="52" width="20" height="3.5" rx="1.75" fill={LINE} />
-      <rect x="36" y="60" width="24" height="3.5" rx="1.75" fill={LINE} />
+      <rect x="22" y="28" width="44" height="72" rx="10" fill={WHITE} />
+      <rect x="30" y="40" width="28" height="5" rx="2.5" fill={CORAL_SOFT} />
+      <rect x="30" y="50" width="20" height="3.5" rx="1.75" fill={LINE} />
+      <rect x="30" y="58" width="24" height="3.5" rx="1.75" fill={LINE} />
       <path
-        d="M40 70L52 82M52 70L40 82"
+        d="M34 78L50 94M50 78L34 94"
         stroke={CORAL}
         strokeWidth="3"
         strokeLinecap="round"
       />
-      <rect x="88" y="30" width="44" height="58" rx="9" fill={WHITE} />
-      <rect x="96" y="42" width="28" height="5" rx="2.5" fill={GREEN} />
-      <rect x="96" y="52" width="20" height="3.5" rx="1.75" fill={LINE} />
-      <rect x="96" y="60" width="24" height="3.5" rx="1.75" fill={LINE} />
+
       <path
-        d="M98 76L104 82L116 70"
-        stroke={GREEN}
-        strokeWidth="3"
+        d="M74 64H86"
+        stroke={LINE}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M82 58L90 64L82 70"
+        stroke={LINE}
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M76 52H84" stroke={LINE} strokeWidth="2" strokeLinecap="round" />
+
+      <rect x="94" y="28" width="44" height="72" rx="10" fill={WHITE} />
+      <rect x="102" y="40" width="28" height="5" rx="2.5" fill={TEAL} />
+      <rect x="102" y="50" width="20" height="3.5" rx="1.75" fill={LINE} />
+      <rect x="102" y="58" width="24" height="3.5" rx="1.75" fill={LINE} />
       <path
-        d="M80 48L84 52L80 56"
-        stroke={LINE}
-        strokeWidth="2"
+        d="M106 84L114 92L130 72"
+        stroke={TEAL}
+        strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -103,24 +118,42 @@ export function StudioIconFire(props: IconProps) {
 export function StudioIconLayers(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="22" y="36" width="36" height="28" rx="7" fill={WHITE} />
-      <rect x="28" y="44" width="20" height="4" rx="2" fill={INK} />
-      <rect x="28" y="52" width="14" height="3" rx="1.5" fill={LINE} />
-      <rect x="62" y="24" width="36" height="28" rx="7" fill={BLUE} />
-      <rect x="68" y="32" width="20" height="4" rx="2" fill={WHITE} />
-      <rect x="68" y="40" width="14" height="3" rx="1.5" fill={BLUE_SOFT} />
-      <rect x="62" y="64" width="36" height="28" rx="7" fill={YELLOW} />
-      <rect x="68" y="72" width="20" height="4" rx="2" fill={INK} opacity="0.7" />
-      <rect x="68" y="80" width="14" height="3" rx="1.5" fill={INK} opacity="0.25" />
-      <rect x="102" y="44" width="36" height="28" rx="7" fill={WHITE} />
-      <rect x="108" y="52" width="20" height="4" rx="2" fill={INK} />
-      <rect x="108" y="60" width="14" height="3" rx="1.5" fill={LINE} />
+      <rect x="18" y="48" width="34" height="32" rx="8" fill={WHITE} />
+      <rect x="24" y="56" width="18" height="4" rx="2" fill={INK} opacity="0.8" />
+      <rect x="24" y="64" width="12" height="3" rx="1.5" fill={LINE} />
+
       <path
-        d="M58 50H62M98 38H102M98 78H102"
+        d="M52 64H60"
         stroke={LINE}
         strokeWidth="1.75"
         strokeLinecap="round"
       />
+
+      <rect x="60" y="22" width="40" height="32" rx="8" fill={VIOLET_SOFT} />
+      <rect x="68" y="30" width="22" height="4" rx="2" fill={VIOLET} />
+      <rect x="68" y="38" width="14" height="3" rx="1.5" fill={WHITE} opacity="0.7" />
+
+      <path
+        d="M80 54V62"
+        stroke={LINE}
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+
+      <rect x="60" y="62" width="40" height="32" rx="8" fill={BLUE} />
+      <rect x="68" y="70" width="22" height="4" rx="2" fill={WHITE} />
+      <rect x="68" y="78" width="14" height="3" rx="1.5" fill={WHITE} opacity="0.55" />
+
+      <path
+        d="M100 78H108"
+        stroke={LINE}
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+
+      <rect x="108" y="48" width="34" height="32" rx="8" fill={WHITE} />
+      <rect x="114" y="56" width="18" height="4" rx="2" fill={INK} opacity="0.8" />
+      <rect x="114" y="64" width="12" height="3" rx="1.5" fill={LINE} />
     </Scene>
   );
 }
@@ -128,26 +161,26 @@ export function StudioIconLayers(props: IconProps) {
 /** Numbered tip rows */
 export function StudioIconList(props: IconProps) {
   const rows = [
-    { c: BLUE_DK, ink: WHITE, w: 48 },
-    { c: YELLOW, ink: INK, w: 42 },
-    { c: GREEN, ink: INK, w: 36 },
-    { c: LILAC, ink: WHITE, w: 30 },
+    { c: BLUE, ink: WHITE, w: 52 },
+    { c: TEAL, ink: WHITE, w: 44 },
+    { c: AMBER, ink: WHITE, w: 38 },
+    { c: ROSE, ink: WHITE, w: 30 },
   ] as const;
 
   return (
     <Scene {...props}>
-      <rect x="36" y="20" width="88" height="88" rx="12" fill={WHITE} />
+      <rect x="34" y="18" width="92" height="92" rx="14" fill={WHITE} />
       {rows.map((row, i) => {
-        const y = 32 + i * 18;
+        const y = 30 + i * 20;
         return (
           <g key={i}>
-            <rect x="46" y={y} width="14" height="14" rx="4" fill={row.c} />
+            <rect x="44" y={y} width="16" height="16" rx="5" fill={row.c} />
             <text
-              x="53"
-              y={y + 10}
+              x="52"
+              y={y + 11.5}
               textAnchor="middle"
               fill={row.ink}
-              fontSize="8"
+              fontSize="9"
               fontWeight="700"
               fontFamily="system-ui,sans-serif"
             >
@@ -160,12 +193,12 @@ export function StudioIconList(props: IconProps) {
               height="4"
               rx="2"
               fill={INK}
-              opacity="0.8"
+              opacity="0.72"
             />
             <rect
               x="66"
-              y={y + 9}
-              width={row.w - 12}
+              y={y + 10}
+              width={Math.max(row.w - 14, 14)}
               height="3"
               rx="1.5"
               fill={LINE}
@@ -181,24 +214,25 @@ export function StudioIconList(props: IconProps) {
 export function StudioIconChart(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="24" y="26" width="52" height="76" rx="10" fill={WHITE} />
+      <rect x="20" y="24" width="52" height="80" rx="12" fill={WHITE} />
       <text
-        x="50"
-        y="58"
+        x="46"
+        y="64"
         textAnchor="middle"
-        fill={BLUE_DK}
-        fontSize="20"
+        fill={BLUE}
+        fontSize="22"
         fontWeight="800"
         fontFamily="system-ui,sans-serif"
       >
         3×
       </text>
-      <rect x="36" y="68" width="28" height="4" rx="2" fill={LINE} />
-      <rect x="36" y="76" width="20" height="3" rx="1.5" fill={LINE} />
-      <rect x="88" y="34" width="12" height="60" rx="4" fill={BLUE_SOFT} />
-      <rect x="104" y="50" width="12" height="44" rx="4" fill={BLUE} />
-      <rect x="120" y="26" width="12" height="68" rx="4" fill={BLUE_DK} />
-      <rect x="136" y="42" width="12" height="52" rx="4" fill={LILAC} />
+      <rect x="32" y="74" width="28" height="4" rx="2" fill={LINE} />
+      <rect x="32" y="82" width="18" height="3" rx="1.5" fill={LINE} />
+
+      <rect x="84" y="64" width="14" height="40" rx="4" fill={AMBER_SOFT} />
+      <rect x="102" y="48" width="14" height="56" rx="4" fill={TEAL_SOFT} />
+      <rect x="120" y="36" width="14" height="68" rx="4" fill={BLUE_SOFT} />
+      <rect x="138" y="28" width="14" height="76" rx="4" fill={VIOLET} />
     </Scene>
   );
 }
@@ -207,22 +241,25 @@ export function StudioIconChart(props: IconProps) {
 export function StudioIconTrophy(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="22" y="38" width="34" height="44" rx="8" fill={PEACH} />
-      <circle cx="39" cy="54" r="7" fill={WHITE} opacity="0.9" />
-      <rect x="30" y="66" width="18" height="3" rx="1.5" fill={INK} opacity="0.35" />
-      <rect x="63" y="26" width="34" height="44" rx="8" fill={WHITE} />
-      <rect x="71" y="38" width="18" height="4" rx="2" fill={INK} />
-      <rect x="71" y="46" width="14" height="3" rx="1.5" fill={LINE} />
-      <rect x="71" y="54" width="18" height="8" rx="3" fill={YELLOW} />
-      <rect x="104" y="38" width="34" height="44" rx="8" fill={GREEN} opacity="0.85" />
+      <rect x="18" y="36" width="36" height="56" rx="10" fill={AMBER_SOFT} />
+      <circle cx="36" cy="54" r="8" fill={AMBER} />
+      <rect x="26" y="70" width="20" height="3" rx="1.5" fill={WHITE} opacity="0.85" />
+      <rect x="26" y="78" width="14" height="3" rx="1.5" fill={WHITE} opacity="0.55" />
+
+      <rect x="62" y="24" width="36" height="56" rx="10" fill={WHITE} />
+      <rect x="70" y="36" width="20" height="4" rx="2" fill={INK} opacity="0.8" />
+      <rect x="70" y="44" width="14" height="3" rx="1.5" fill={LINE} />
+      <rect x="70" y="56" width="20" height="12" rx="5" fill={ROSE} />
+
+      <rect x="106" y="36" width="36" height="56" rx="10" fill={TEAL} />
       <path
-        d="M115 56L120 61L131 50"
+        d="M116 56L122 62L134 48"
         stroke={WHITE}
-        strokeWidth="2.5"
+        strokeWidth="2.75"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <rect x="112" y="68" width="18" height="3" rx="1.5" fill={WHITE} opacity="0.7" />
+      <rect x="114" y="72" width="20" height="3" rx="1.5" fill={WHITE} opacity="0.75" />
     </Scene>
   );
 }
@@ -230,20 +267,20 @@ export function StudioIconTrophy(props: IconProps) {
 /** Launch timeline */
 export function StudioIconRocket(props: IconProps) {
   const bars = [
-    { x: 28, c: YELLOW, h: 28 },
-    { x: 52, c: BLUE, h: 40 },
-    { x: 76, c: LILAC, h: 34 },
-    { x: 100, c: CORAL, h: 48 },
-    { x: 124, c: GREEN, h: 36 },
+    { x: 22, c: SAGE_SOFT, h: 26 },
+    { x: 46, c: TEAL_SOFT, h: 40 },
+    { x: 70, c: BLUE_SOFT, h: 32 },
+    { x: 94, c: VIOLET, h: 52 },
+    { x: 118, c: CORAL_SOFT, h: 36 },
   ] as const;
 
   return (
     <Scene {...props}>
       <line
-        x1="28"
-        y1="64"
-        x2="140"
-        y2="64"
+        x1="22"
+        y1="88"
+        x2="142"
+        y2="88"
         stroke={LINE}
         strokeWidth="2"
         strokeLinecap="round"
@@ -252,7 +289,7 @@ export function StudioIconRocket(props: IconProps) {
         <g key={b.x}>
           <rect
             x={b.x}
-            y={64 - b.h}
+            y={88 - b.h}
             width="16"
             height={b.h}
             rx="5"
@@ -260,7 +297,7 @@ export function StudioIconRocket(props: IconProps) {
           />
           <circle
             cx={b.x + 8}
-            cy="64"
+            cy="88"
             r="3.5"
             fill={WHITE}
             stroke={LINE}
@@ -268,11 +305,11 @@ export function StudioIconRocket(props: IconProps) {
           />
         </g>
       ))}
-      <rect x="118" y="18" width="28" height="14" rx="7" fill={BLUE_DK} />
+      <rect x="108" y="18" width="34" height="16" rx="8" fill={CORAL} />
       <path
-        d="M128 22L132 25L128 28M132 25H140"
+        d="M118 23L124 26L118 29M124 26H134"
         stroke={WHITE}
-        strokeWidth="1.6"
+        strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -284,20 +321,24 @@ export function StudioIconRocket(props: IconProps) {
 export function StudioIconImage(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="24" y="22" width="50" height="40" rx="8" fill={WHITE} />
-      <circle cx="36" cy="36" r="5" fill={SKY} />
+      <rect x="22" y="18" width="52" height="40" rx="10" fill={WHITE} />
+      <circle cx="36" cy="32" r="5" fill={AMBER_SOFT} />
       <path
-        d="M28 54L40 44L48 50L58 42L70 52V54C70 56.2 68.2 58 66 58H32C29.8 58 28 56.2 28 54Z"
+        d="M28 50L38 38L46 46L56 34L70 48V50C70 52.2 68.2 54 66 54H32C29.8 54 28 52.2 28 50Z"
         fill={BLUE}
       />
-      <rect x="86" y="22" width="50" height="40" rx="8" fill={LILAC} />
-      <rect x="96" y="34" width="30" height="5" rx="2.5" fill={WHITE} opacity="0.9" />
-      <rect x="96" y="44" width="20" height="4" rx="2" fill={WHITE} opacity="0.55" />
-      <rect x="24" y="70" width="50" height="36" rx="8" fill={YELLOW} />
-      <rect x="34" y="84" width="30" height="5" rx="2.5" fill={INK} opacity="0.45" />
-      <rect x="86" y="70" width="50" height="36" rx="8" fill={WHITE} />
-      <rect x="96" y="80" width="30" height="4" rx="2" fill={INK} />
-      <rect x="96" y="88" width="18" height="3" rx="1.5" fill={LINE} />
+
+      <rect x="86" y="18" width="52" height="40" rx="10" fill={TEAL_SOFT} />
+      <rect x="96" y="30" width="30" height="5" rx="2.5" fill={TEAL} />
+      <rect x="96" y="40" width="20" height="4" rx="2" fill={WHITE} opacity="0.7" />
+
+      <rect x="22" y="70" width="52" height="40" rx="10" fill={VIOLET} />
+      <rect x="32" y="84" width="30" height="5" rx="2.5" fill={WHITE} opacity="0.95" />
+      <rect x="32" y="94" width="18" height="3" rx="1.5" fill={WHITE} opacity="0.5" />
+
+      <rect x="86" y="70" width="52" height="40" rx="10" fill={WHITE} />
+      <rect x="96" y="82" width="30" height="4" rx="2" fill={INK} opacity="0.75" />
+      <rect x="96" y="90" width="18" height="3" rx="1.5" fill={LINE} />
     </Scene>
   );
 }
@@ -306,24 +347,32 @@ export function StudioIconImage(props: IconProps) {
 export function StudioIconMessage(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="18" y="34" width="52" height="48" rx="12" fill={WHITE} />
-      <circle cx="32" cy="48" r="6" fill={BLUE_SOFT} />
-      <rect x="42" y="44" width="20" height="3.5" rx="1.75" fill={INK} />
-      <rect x="42" y="51" width="14" height="3" rx="1.5" fill={LINE} />
-      <rect x="28" y="62" width="32" height="10" rx="4" fill={LINE} opacity="0.55" />
-      <path d="M78 58H90" stroke={LINE} strokeWidth="2" strokeLinecap="round" />
+      <rect x="16" y="30" width="52" height="60" rx="12" fill={WHITE} />
+      <circle cx="32" cy="46" r="7" fill={ROSE_SOFT} />
+      <rect x="44" y="42" width="16" height="3.5" rx="1.75" fill={INK} opacity="0.8" />
+      <rect x="44" y="50" width="10" height="3" rx="1.5" fill={LINE} />
+      <rect x="28" y="64" width="28" height="14" rx="6" fill={ROSE_SOFT} />
+
       <path
-        d="M86 52L94 58L86 64"
+        d="M74 60H84"
+        stroke={LINE}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M80 54L88 60L80 66"
         stroke={LINE}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <rect x="100" y="28" width="28" height="36" rx="6" fill={BLUE_SOFT} />
-      <rect x="112" y="40" width="28" height="36" rx="6" fill={WHITE} />
-      <rect x="124" y="52" width="28" height="36" rx="6" fill={BLUE_DK} />
-      <rect x="130" y="62" width="16" height="3" rx="1.5" fill={WHITE} />
-      <rect x="130" y="69" width="12" height="2.5" rx="1.25" fill={BLUE_SOFT} />
+
+      {/* Stacked slides — offset, no messy overlap */}
+      <rect x="92" y="26" width="30" height="42" rx="7" fill={BLUE_SOFT} />
+      <rect x="104" y="40" width="30" height="42" rx="7" fill={WHITE} />
+      <rect x="116" y="54" width="30" height="42" rx="7" fill={BLUE} />
+      <rect x="122" y="66" width="16" height="3" rx="1.5" fill={WHITE} />
+      <rect x="122" y="74" width="12" height="2.5" rx="1.25" fill={BLUE_SOFT} />
     </Scene>
   );
 }
@@ -331,43 +380,43 @@ export function StudioIconMessage(props: IconProps) {
 /** Checklist slide */
 export function StudioIconCheck(props: IconProps) {
   const rows = [
-    { y: 48, done: true },
-    { y: 64, done: true },
-    { y: 80, done: false },
-    { y: 96, done: false },
+    { y: 42, done: true, color: TEAL },
+    { y: 58, done: true, color: TEAL },
+    { y: 74, done: false, color: LINE },
+    { y: 90, done: false, color: LINE },
   ] as const;
 
   return (
     <Scene {...props}>
-      <rect x="40" y="18" width="80" height="92" rx="12" fill={WHITE} />
-      <rect x="52" y="30" width="48" height="6" rx="3" fill={INK} />
+      <rect x="38" y="16" width="84" height="96" rx="14" fill={WHITE} />
+      <rect x="50" y="28" width="52" height="6" rx="3" fill={INK} opacity="0.8" />
       {rows.map((row) => (
         <g key={row.y}>
           <rect
-            x="52"
+            x="50"
             y={row.y}
-            width="12"
-            height="12"
-            rx="3.5"
-            fill={row.done ? GREEN : LINE}
+            width="14"
+            height="14"
+            rx="4"
+            fill={row.color}
           />
           {row.done ? (
             <path
-              d={`M55 ${row.y + 6}L57.5 ${row.y + 8.5}L61 ${row.y + 4}`}
+              d={`M53.5 ${row.y + 7}L56.5 ${row.y + 10}L60.5 ${row.y + 4.5}`}
               stroke={WHITE}
-              strokeWidth="1.8"
+              strokeWidth="1.9"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           ) : null}
           <rect
             x="70"
-            y={row.y + 3}
-            width={row.done ? 36 : 28}
+            y={row.y + 4}
+            width={row.done ? 38 : 28}
             height="5"
             rx="2.5"
             fill={row.done ? INK : LINE}
-            opacity={row.done ? 0.75 : 1}
+            opacity={row.done ? 0.72 : 1}
           />
         </g>
       ))}
@@ -378,12 +427,12 @@ export function StudioIconCheck(props: IconProps) {
 export function StudioIconPlus(props: IconProps) {
   return (
     <Scene {...props}>
+      <rect x="40" y="24" width="80" height="80" rx="16" fill={BLUE_SOFT} />
       <path
         d="M80 44V84M60 64H100"
-        stroke={INK}
+        stroke={BLUE}
         strokeWidth="3.5"
         strokeLinecap="round"
-        className="dark:stroke-foreground"
       />
     </Scene>
   );
@@ -392,21 +441,22 @@ export function StudioIconPlus(props: IconProps) {
 export function StudioIconWand(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="48" y="28" width="64" height="72" rx="12" fill={WHITE} />
+      <rect x="36" y="20" width="88" height="88" rx="14" fill={WHITE} />
       <path
-        d="M68 78L92 48"
+        d="M56 88L104 40"
         stroke={INK}
         strokeWidth="3.5"
         strokeLinecap="round"
       />
       <path
-        d="M92 36V42M92 36H98M92 36L98 30"
-        stroke={BLUE_DK}
+        d="M104 28V38M104 28H114M104 28L114 18"
+        stroke={VIOLET}
         strokeWidth="2.5"
         strokeLinecap="round"
       />
-      <circle cx="62" cy="44" r="4" fill={YELLOW} />
-      <circle cx="108" cy="70" r="3" fill={LILAC} />
+      <circle cx="52" cy="42" r="5" fill={AMBER} />
+      <circle cx="112" cy="78" r="4" fill={ROSE} />
+      <circle cx="64" cy="70" r="3" fill={TEAL_SOFT} />
     </Scene>
   );
 }
@@ -414,77 +464,17 @@ export function StudioIconWand(props: IconProps) {
 export function StudioIconCarousel(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="28" y="32" width="32" height="56" rx="8" fill={BLUE_SOFT} />
-      <rect x="48" y="26" width="36" height="64" rx="9" fill={WHITE} />
-      <rect x="56" y="40" width="20" height="4" rx="2" fill={INK} />
-      <rect x="56" y="50" width="14" height="3" rx="1.5" fill={LINE} />
-      <rect x="56" y="60" width="20" height="14" rx="4" fill={BLUE} />
-      <rect x="72" y="32" width="32" height="56" rx="8" fill={LILAC} opacity="0.85" />
-      <rect x="100" y="38" width="28" height="48" rx="7" fill={YELLOW} opacity="0.9" />
-    </Scene>
-  );
-}
+      {/* Side cards tucked behind — clipped visually by center */}
+      <rect x="16" y="36" width="28" height="56" rx="9" fill={CORAL_SOFT} />
+      <rect x="116" y="36" width="28" height="56" rx="9" fill={TEAL_SOFT} />
 
-/** Pro — stacked coins for upgrade dialog */
-export function StudioIconPro(props: IconProps) {
-  return (
-    <Scene viewBox="0 0 200 140" {...props}>
-      {/* soft ground */}
-      <ellipse cx="100" cy="118" rx="72" ry="10" fill={BLUE_SOFT} opacity="0.55" />
-
-      {/* back coin — green */}
-      <circle cx="58" cy="76" r="34" fill={GREEN} />
-      <circle cx="58" cy="76" r="26" fill="#7bc498" />
-      <circle cx="58" cy="76" r="22" fill={GREEN} />
-      <text
-        x="58"
-        y="85"
-        textAnchor="middle"
-        fill={INK}
-        fontSize="26"
-        fontWeight="800"
-        fontFamily="system-ui,sans-serif"
-      >
-        $
-      </text>
-
-      {/* front coin — yellow */}
-      <circle cx="112" cy="56" r="46" fill={YELLOW} />
-      <circle cx="112" cy="56" r="36" fill="#f0c84a" />
-      <circle cx="112" cy="56" r="30" fill={YELLOW} />
-      <text
-        x="112"
-        y="69"
-        textAnchor="middle"
-        fill={INK}
-        fontSize="38"
-        fontWeight="800"
-        fontFamily="system-ui,sans-serif"
-      >
-        $
-      </text>
-
-      {/* small coin — brand blue */}
-      <circle cx="156" cy="96" r="20" fill={BLUE_SOFT} />
-      <circle cx="156" cy="96" r="15" fill={BLUE_DK} />
-      <text
-        x="156"
-        y="102"
-        textAnchor="middle"
-        fill={WHITE}
-        fontSize="15"
-        fontWeight="800"
-        fontFamily="system-ui,sans-serif"
-      >
-        $
-      </text>
-
-      {/* spark accents */}
-      <path
-        d="M148 28C148 31.3 150.7 34 154 34C150.7 34 148 36.7 148 40C148 36.7 145.3 34 142 34C145.3 34 148 31.3 148 28Z"
-        fill={CORAL}
-      />
-      <circle cx="42" cy="42" r="4" fill={LILAC} />
+      {/* Center card on top */}
+      <rect x="48" y="20" width="64" height="88" rx="12" fill={WHITE} />
+      <rect x="58" y="36" width="36" height="5" rx="2.5" fill={INK} opacity="0.8" />
+      <rect x="58" y="46" width="24" height="3.5" rx="1.75" fill={LINE} />
+      <rect x="58" y="60" width="36" height="28" rx="8" fill={VIOLET} />
+      <rect x="66" y="70" width="20" height="4" rx="2" fill={WHITE} opacity="0.9" />
+      <rect x="66" y="78" width="14" height="3" rx="1.5" fill={WHITE} opacity="0.5" />
     </Scene>
   );
 }
@@ -502,7 +492,6 @@ const ICONS: Record<StudioIconName, (props: IconProps) => ReactElement> = {
   plus: StudioIconPlus,
   wand: StudioIconWand,
   carousel: StudioIconCarousel,
-  pro: StudioIconPro,
 };
 
 export function StudioIcon({

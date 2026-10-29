@@ -37,7 +37,7 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
       getUserProjects(),
     ]);
 
-    if (!orgRes.success || orgRes.organization.isUpgrade) {
+    if (!orgRes.success || orgRes.organization?.isUpgrade) {
       setVisible(false);
       return;
     }

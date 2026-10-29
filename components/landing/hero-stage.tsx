@@ -55,21 +55,35 @@ const HERO_POST_B: ThreadsPostData[] = [
 export function PhoneFrame({
   children,
   className,
+  size = "default",
 }: {
   children: ReactNode;
   className?: string;
+  size?: "default" | "hero";
 }) {
+  const hero = size === "hero";
   return (
     <div
       className={cn(
-        "relative mx-auto h-[520px] w-[260px] overflow-hidden rounded-[2.75rem] border-[7px] border-land-panel bg-land-panel shadow-2xl sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px]",
-        "before:pointer-events-none before:absolute before:left-0 before:top-0 before:z-20 before:h-full before:w-full before:bg-gradient-to-tr before:from-white/5 before:to-transparent",
-        "after:absolute after:-left-[10px] after:top-24 after:h-12 after:w-1 after:rounded-l-md after:bg-neutral-800",
-        className
+        "relative mx-auto overflow-hidden border-land-panel bg-land-panel",
+        hero
+          ? "h-[520px] w-[260px] rounded-[2.75rem] border-[7px] sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px] lg:h-[640px] lg:w-[320px]"
+          : "h-[520px] w-[260px] rounded-[2.75rem] border-[7px] shadow-2xl sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px]",
+        className,
       )}
     >
-      <div className="absolute left-1/2 top-0 z-30 h-7 w-32 -translate-x-1/2 rounded-b-2xl bg-black" />
-      <div className="h-full w-full overflow-hidden rounded-[2.2rem] bg-black">
+      <div
+        className={cn(
+          "absolute left-1/2 top-0 z-30 -translate-x-1/2 rounded-b-2xl bg-black",
+          hero ? "h-6 w-28 sm:h-7 sm:w-32" : "h-7 w-32",
+        )}
+      />
+      <div
+        className={cn(
+          "h-full w-full overflow-hidden bg-black",
+          hero ? "rounded-[2.1rem] sm:rounded-[2.2rem]" : "rounded-[2.2rem]",
+        )}
+      >
         {children}
       </div>
     </div>
@@ -80,13 +94,23 @@ export function PhoneFrame({
 export function ThreadsPhone({
   posts = HERO_POST_A,
   className,
+  size = "default",
+  compact,
 }: {
   posts?: ThreadsPostData[];
   className?: string;
+  size?: "default" | "hero";
+  compact?: boolean;
 }) {
   return (
-    <PhoneFrame className={className}>
-      <ThreadsUI posts={posts} />
+    <PhoneFrame className={className} size={size}>
+      <ThreadsUI
+        posts={posts}
+        compact={compact ?? false}
+        autoplay={size === "hero"}
+        showReplyBar={size !== "hero"}
+        showTabBar={size !== "hero"}
+      />
     </PhoneFrame>
   );
 }
@@ -97,49 +121,32 @@ export function HeroStage() {
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start start", "end start"],
+    offset: ["start end", "end start"],
   });
 
-  const yBack = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const yFront = useTransform(scrollYProgress, [0, 1], [0, -50]);
-  const rotBack = useTransform(scrollYProgress, [0, 1], [-8, -12]);
-  const rotFront = useTransform(scrollYProgress, [0, 1], [6, 2]);
+  const yBack = useTransform(scrollYProgress, [0, 1], [20, -40]);
+  const yFront = useTransform(scrollYProgress, [0, 1], [12, -28]);
 
   return (
-    <section
+    <div
       ref={ref}
-      className="relative flex items-center justify-center overflow-hidden py-0 sm:py-4 lg:py-8"
+      className="relative flex items-center justify-center overflow-visible"
     >
-      <div className="relative mx-auto h-[440px] w-full max-w-4xl sm:h-[640px] lg:h-[720px]">
+      <div className="relative mx-auto h-[560px] w-full max-w-xl sm:h-[640px] lg:h-[700px]">
         <motion.div
-          className="absolute left-[6%] top-8 z-10 hidden scale-[0.72] opacity-80 sm:block lg:scale-90"
-          style={reduce ? undefined : { y: yBack, rotate: rotBack }}
+          className="absolute left-[-4%] top-10 z-10 hidden origin-top rotate-[-8deg] sm:block"
+          style={reduce ? undefined : { y: yBack }}
         >
-          <motion.div
-            animate={reduce ? undefined : { y: [0, -15, 0] }}
-            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <ThreadsPhone posts={HERO_POST_B} />
-          </motion.div>
+          <ThreadsPhone posts={HERO_POST_B} size="hero" className="opacity-80" />
         </motion.div>
 
         <motion.div
-          className="absolute left-1/2 top-0 z-20 origin-top -translate-x-1/2 scale-[0.62] sm:left-auto sm:right-[6%] sm:translate-x-0 sm:scale-[0.78] lg:scale-100"
-          style={reduce ? { rotate: 16 } : { y: yFront, rotate: rotFront }}
+          className="absolute left-1/2 top-0 z-20 origin-top -translate-x-1/2 rotate-[6deg] sm:left-auto sm:right-[-2%] sm:translate-x-0"
+          style={reduce ? undefined : { y: yFront }}
         >
-          <motion.div
-            animate={reduce ? undefined : { y: [0, 15, 0] }}
-            transition={{
-              duration: 7,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          >
-            <ThreadsPhone posts={HERO_POST_A} />
-          </motion.div>
+          <ThreadsPhone posts={HERO_POST_A} size="hero" />
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 }

@@ -10,7 +10,6 @@ import Logo from "@/components/logo";
 import { StudioInviteDialog } from "@/components/studio/dialogs/studio-invite-dialog";
 import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
-import { StudioOrgSwitcher } from "@/components/studio/org/studio-org-switcher";
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +29,7 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
     const load = async () => {
       const res = await getActiveOrganization();
       if (res.success && res.organization) {
-        setIsUpgrade(res.organization.isUpgrade);
+        setIsUpgrade(Boolean(res.organization?.isUpgrade));
       }
     };
     void load();
@@ -118,15 +117,15 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
           {!signedIn ? (
             <Button
               type="button"
-              variant="ghost"
-              className="h-8 rounded-full px-3 text-[13px]"
+              variant="secondary"
+              className="rounded-full"
               onClick={onSignIn}
             >
               Sign in
             </Button>
-          ) : null}
-
-          <StudioUserNav onUpgrade={openUpgrade} isUpgrade={isUpgrade} />
+          ) :
+            <StudioUserNav />
+          }
         </div>
       </header>
 

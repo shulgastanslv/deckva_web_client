@@ -1,23 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import {
-  ArrowUpCircle,
-  CircleUserRound,
-  Home,
-  LogOut,
-  Moon,
-  Share2,
-  Shield,
-  Sun,
-} from "lucide-react";
+import { CircleUserRound, LogOut, Shield } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { useTheme } from "next-themes";
 
 import { AuthModal } from "@/components/auth";
 import { ProfileSettingsDialog } from "@/components/profile-settings-dialog";
-import { SocialSubscribeDialog } from "@/components/social-subscribe-dialog";
 import { StudioAvatar } from "@/components/studio/ui/studio-avatar";
 import {
   DropdownMenu,
@@ -31,36 +20,16 @@ import { cn } from "@/lib/utils";
 const itemClass =
   "cursor-pointer gap-2.5 rounded-none px-3.5 py-2.5 text-[14px] text-neutral-900 focus:bg-neutral-100 dark:text-foreground dark:focus:bg-muted";
 
-export function StudioUserNav({
-  onUpgrade,
-  isUpgrade = false,
-}: {
-  variant?: "header" | "rail";
-  onUpgrade?: () => void;
-  isUpgrade?: boolean;
-}) {
+export function StudioUserNav() {
   const { data: session, status } = useSession();
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [socialOpen, setSocialOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === "dark";
   const signedIn = status === "authenticated" && Boolean(session?.user);
   const userEmail = session?.user?.email ?? "";
   const userName = session?.user?.name?.trim() || userEmail || "Account";
   const userLetter = (userName[0] || "U").toUpperCase();
-
-  const handleUpgrade = () => {
-    if (onUpgrade) onUpgrade();
-    else window.dispatchEvent(new CustomEvent("studio:open-upgrade"));
-  };
 
   if (!signedIn) {
     return (
@@ -109,42 +78,13 @@ export function StudioUserNav({
 
           <DropdownMenuSeparator className="mx-0 my-0 bg-neutral-200/80 dark:bg-border" />
 
-          <div>
+          <div className="py-1">
             <DropdownMenuItem
               className={itemClass}
-              onClick={() => setProfileOpen(true)}
+              onClick={() => setAccountOpen(true)}
             >
               <CircleUserRound className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className={itemClass}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-            >
-              {isDark ? (
-                <Sun className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-              ) : (
-                <Moon className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-              )}
-              Theme
-            </DropdownMenuItem>
-          </div>
-
-          <DropdownMenuSeparator className="mx-0 my-0 bg-neutral-200/80 dark:bg-border" />
-
-          <div>
-            {!isUpgrade ? (
-              <DropdownMenuItem className={itemClass} onClick={handleUpgrade}>
-                <ArrowUpCircle className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                Upgrade
-              </DropdownMenuItem>
-            ) : null}
-            <DropdownMenuItem
-              className={itemClass}
-              onClick={() => setSocialOpen(true)}
-            >
-              <Share2 className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-              Socials
+              Account
             </DropdownMenuItem>
             {session?.user?.role === "ADMIN" ? (
               <DropdownMenuItem asChild className={itemClass}>
@@ -154,12 +94,6 @@ export function StudioUserNav({
                 </Link>
               </DropdownMenuItem>
             ) : null}
-            <DropdownMenuItem asChild className={itemClass}>
-              <Link href="/">
-                <Home className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                Back to home
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem
               className={itemClass}
               onClick={() => signOut({ callbackUrl: "/" })}
@@ -171,8 +105,7 @@ export function StudioUserNav({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ProfileSettingsDialog open={profileOpen} onOpenChange={setProfileOpen} />
-      <SocialSubscribeDialog open={socialOpen} onOpenChange={setSocialOpen} />
+      <ProfileSettingsDialog open={accountOpen} onOpenChange={setAccountOpen} />
     </>
   );
 }
