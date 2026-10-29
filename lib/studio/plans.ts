@@ -10,7 +10,7 @@ export const PRO_FEATURES = [
   "Unlimited private carousels",
   "High-resolution exports",
   "Folders & brand kits",
-  "Invite teammates",
+  "Priority support",
 ] as const;
 
 /** Server / client shared message when a Pro-only action is blocked. */
@@ -25,7 +25,7 @@ export function isUpgradeRequiredError(error: string | null | undefined) {
 }
 
 export function freeCarouselLimitMessage(limit = FREE_CAROUSEL_LIMIT) {
-  return `You've reached the limit of ${limit} editable carousels. Unlock unlimited carousels, guest access, and more.`;
+  return `You've reached the limit of ${limit} editable carousels. Unlock unlimited carousels and more.`;
 }
 
 export function addBillingMonth(from = new Date()): Date {

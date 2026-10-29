@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import { StudioButton } from "@/components/studio/ui/studio-button";
 import {
@@ -33,7 +33,7 @@ export function StudioCreateMenu({
           variant="create"
           className={cn(triggerClassName, className)}
         >
-          <Plus className="size-3.5 stroke-[2.5]" />
+          <ChevronDown className="size-3.5 stroke-[2.5]" />
           {label}
         </StudioButton>
       </DropdownMenuTrigger>

@@ -18,6 +18,7 @@ import { getTemplates, type TemplateListItem } from "@/actions/templates";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { CANVAS_RATIOS } from "@/lib/types";
 import { PLATFORMS, type PlatformId } from "@/lib/platforms";
+import { PLATFORM_TEMPLATE_CATEGORY } from "@/lib/templates/categories";
 import { PlatformIcon } from "@/components/icons/platform-icons";
 import { cn } from "@/lib/utils";
 
@@ -44,8 +45,12 @@ export function NewProjectModal({ open, onOpenChange }: NewProjectModalProps) {
 
   const visibleTemplates = useMemo(() => {
     if (formatId === "Other") return templates;
+    const category = PLATFORM_TEMPLATE_CATEGORY[formatId];
     return templates.filter(
-      (t) => t.category === formatId || t.aspectRatio === format.ratio,
+      (t) =>
+        (category != null && t.category === category) ||
+        t.category === formatId ||
+        t.aspectRatio === format.ratio,
     );
   }, [templates, formatId, format.ratio]);
 

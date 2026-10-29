@@ -18,9 +18,9 @@ export function StudioPageHeader({
   tabs?: ReactNode;
 }) {
   return (
-    <header className="shrink-0 px-8 pt-2 pb-1 sm:px-10">
+    <header className="mb-6 shrink-0">
       <div className="flex items-center justify-between gap-6">
-        <h1 className="text-[28px] font-bold tracking-tight text-neutral-950 dark:text-foreground">
+        <h1 className="text-[28px] font-bold tracking-tight text-foreground">
           {title}
         </h1>
         <div className="flex items-center gap-3">
@@ -29,7 +29,7 @@ export function StudioPageHeader({
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={searchPlaceholder}
-              className="h-9 w-44 rounded-full border-neutral-200 bg-neutral-50 px-3.5 text-[13px] shadow-none placeholder:text-neutral-400 focus-visible:ring-1 sm:w-56 dark:border-border dark:bg-muted/40"
+              className="h-9 w-44 rounded-full border-border/60 bg-muted/40 px-3.5 text-[13px] shadow-none placeholder:text-muted-foreground focus-visible:ring-1 sm:w-56"
             />
           ) : null}
           {actions}

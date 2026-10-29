@@ -1,21 +1,18 @@
-"use server";
+﻿"use server";
 
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
-import { orgOwnerHasPro, userHasPro } from "@/lib/billing/entitlements";
-import { UPGRADE_REQUIRED } from "@/lib/studio/plans";
+import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 
 export interface OrganizationListItem {
   id: string;
-  /** Current user's personal Pro status (subscription is per-user, not per-org). */
   isUpgrade: boolean;
   name: string;
   color: string;
   role: "OWNER" | "ADMIN" | "MEMBER";
-  inviteCode: string;
   memberCount: number;
 }
 
@@ -48,7 +45,6 @@ async function mapOrg(
     id: string;
     name: string;
     color: string;
-    inviteCode: string;
     members: Array<{ role: "OWNER" | "ADMIN" | "MEMBER"; userId: string }>;
     _count: { members: number };
   },
@@ -61,7 +57,6 @@ async function mapOrg(
     isUpgrade: await userHasPro(userId),
     color: org.color,
     role: mine?.role ?? "MEMBER",
-    inviteCode: org.inviteCode,
     memberCount: org._count.members,
   };
 }
@@ -288,58 +283,3 @@ export async function getActiveOrganization(): Promise<
     return { success: false, error: "Couldn't load organization" };
   }
 }
-
-export async function joinOrganizationByInvite(
-  inviteCode: string,
-): Promise<ActionResult<{ organization: OrganizationListItem }>> {
-  try {
-    const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-
-    const code = inviteCode.trim();
-    if (!code) return { success: false, error: "Invite code required" };
-
-    const org = await prisma.organization.findUnique({
-      where: { inviteCode: code },
-      include: {
-        members: { select: { role: true, userId: true } },
-        _count: { select: { members: true } },
-      },
-    });
-    if (!org) return { success: false, error: "Invalid invite link" };
-
-    const existing = org.members.find((m) => m.userId === userId);
-    if (!existing) {
-      if (!(await orgOwnerHasPro(org.id))) {
-        return {
-          success: false,
-          error: `${UPGRADE_REQUIRED} — invites need a Pro owner`,
-        };
-      }
-      await prisma.organizationMember.create({
-        data: { userId, organizationId: org.id, role: "MEMBER" },
-      });
-    }
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { activeOrganizationId: org.id },
-    });
-
-    const refreshed = await prisma.organization.findUniqueOrThrow({
-      where: { id: org.id },
-      include: {
-        members: { select: { role: true, userId: true } },
-        _count: { select: { members: true } },
-      },
-    });
-
-    revalidatePath("/studio");
-
-    return { success: true, organization: await mapOrg(refreshed, userId) };
-  } catch (err) {
-    console.error("joinOrganizationByInvite error:", err);
-    return { success: false, error: "Couldn't join organization" };
-  }
-}
-

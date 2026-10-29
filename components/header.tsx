@@ -238,7 +238,6 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
           >
             <PlayIcon className="w-5 h-5" />
           </Button>
-          
         </div>
 
         <div className="flex items-center gap-1">
@@ -299,7 +298,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
               <SlidersHorizontal className="w-3 h-3" />
             </button>
           </div>
-
+              
           <div className="h-4 w-px bg-border/60 mx-0.5" />
 
           {status === "authenticated" ? (
@@ -358,14 +357,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                     <User className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
                     Account
                   </DropdownMenuItem>
-                  {session.user?.role === "ADMIN" ? (
-                    <DropdownMenuItem asChild className={accountItemClass}>
-                      <Link href="/admin">
-                        <Shield className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                        Admin panel
-                      </Link>
-                    </DropdownMenuItem>
-                  ) : null}
+                 
                   <DropdownMenuItem
                     className={accountItemClass}
                     onClick={() => signOut({ callbackUrl: "/" })}

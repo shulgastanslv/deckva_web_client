@@ -10,19 +10,19 @@ import { cn } from "@/lib/utils";
 
 const PHOTOS = [
   {
-    src: "/reviews/878241688_18157030825560582_6425025260815163360_n.jpg",
+    src: "/reviews/1.jpg",
     aspect: "aspect-[4/5]",
   },
   {
-    src: "/reviews/873549208_17919352497462090_7013222084347737390_n.jpg",
+    src: "/reviews/2.jpg",
     aspect: "aspect-[4/5]",
   },  
   {
-    src: "/reviews/871021504_18653741251040809_7233068040570664666_n.jpg",
+    src: "/reviews/3.jpg",
     aspect: "aspect-[4/5]",
   },
   {
-    src: "/reviews/865838892_18117300367988507_5436190163512693482_n.jpg",
+    src: "/reviews/4.jpg",
     aspect: "aspect-[4/5]",
   },
   {

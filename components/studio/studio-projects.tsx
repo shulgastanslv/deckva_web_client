@@ -145,41 +145,41 @@ export function StudioProjects() {
 
   return (
     <StudioContent>
-      <StudioPageHeader
-        title={pageTitle}
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search projects"
-        actions={
-          <div className="flex items-center gap-2.5">
-            <StudioViewToggle view={view} onChange={setView} />
-            <StudioCreateMenu
-              onBlank={create.openBlank}
-              onTemplates={create.openTemplates}
-            />
-          </div>
-        }
-        tabs={
-          !folderId ? (
-            <>
-              <StudioTab
-                active={filter === "all"}
-                onClick={() => setFilterAndUrl("all")}
-              >
-                All
-              </StudioTab>
-              <StudioTab
-                active={filter === "starred"}
-                onClick={() => setFilterAndUrl("starred")}
-              >
-                Starred
-              </StudioTab>
-            </>
-          ) : undefined
-        }
-      />
+      <StudioContentBody className="pt-6 sm:pt-10">
+        <StudioPageHeader
+          title={pageTitle}
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search projects"
+          actions={
+            <div className="flex items-center gap-2.5">
+              <StudioViewToggle view={view} onChange={setView} />
+              <StudioCreateMenu
+                onBlank={create.openBlank}
+                onTemplates={create.openTemplates}
+              />
+            </div>
+          }
+          tabs={
+            !folderId ? (
+              <>
+                <StudioTab
+                  active={filter === "all"}
+                  onClick={() => setFilterAndUrl("all")}
+                >
+                  All
+                </StudioTab>
+                <StudioTab
+                  active={filter === "starred"}
+                  onClick={() => setFilterAndUrl("starred")}
+                >
+                  Starred
+                </StudioTab>
+              </>
+            ) : undefined
+          }
+        />
 
-      <StudioContentBody centered={true} >
         {!signedIn ? (
           <div className="max-w-sm py-8">
             <p

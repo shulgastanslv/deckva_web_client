@@ -67,30 +67,30 @@ export function StudioTemplates() {
 
   return (
     <StudioContent>
-      <StudioPageHeader
-        title="Templates"
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search templates"
-        tabs={
-          <>
-            <StudioTab active={category === "all"} onClick={() => setCategory("all")}>
-              All
-            </StudioTab>
-            {TEMPLATE_CATEGORIES.map((tab) => (
-              <StudioTab
-                key={tab}
-                active={category === tab}
-                onClick={() => setCategory(tab)}
-              >
-                {tab}
+      <StudioContentBody className="pt-6 sm:pt-10">
+        <StudioPageHeader
+          title="Templates"
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search templates"
+          tabs={
+            <>
+              <StudioTab active={category === "all"} onClick={() => setCategory("all")}>
+                All
               </StudioTab>
-            ))}
-          </>
-        }
-      />
+              {TEMPLATE_CATEGORIES.map((tab) => (
+                <StudioTab
+                  key={tab}
+                  active={category === tab}
+                  onClick={() => setCategory(tab)}
+                >
+                  {tab}
+                </StudioTab>
+              ))}
+            </>
+          }
+        />
 
-      <StudioContentBody centered={true} >
         {loading && templates.length === 0 ? (
           <div className="flex justify-center py-20">
             <Loader2 className="size-4 animate-spin text-muted-foreground" />

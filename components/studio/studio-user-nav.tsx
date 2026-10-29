@@ -86,14 +86,7 @@ export function StudioUserNav() {
               <CircleUserRound className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
               Account
             </DropdownMenuItem>
-            {session?.user?.role === "ADMIN" ? (
-              <DropdownMenuItem asChild className={itemClass}>
-                <Link href="/admin">
-                  <Shield className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                  Admin panel
-                </Link>
-              </DropdownMenuItem>
-            ) : null}
+           
             <DropdownMenuItem
               className={itemClass}
               onClick={() => signOut({ callbackUrl: "/" })}

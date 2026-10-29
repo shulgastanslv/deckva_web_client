@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { ChevronRight } from "lucide-react";
 
 import { getActiveOrganization } from "@/actions/organizations";
 import Logo from "@/components/logo";
-import { StudioInviteDialog } from "@/components/studio/dialogs/studio-invite-dialog";
 import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
@@ -18,8 +17,8 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const [isUpgrade, setIsUpgrade] = useState(false);
-  const [inviteOpen, setInviteOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (!signedIn) {
@@ -46,25 +45,11 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
       window.removeEventListener("studio:open-upgrade", onOpenUpgrade);
   }, []);
 
-  const requireAuth = () => {
+  const openUpgrade = () => {
     if (!signedIn) {
       onSignIn?.();
-      return false;
-    }
-    return true;
-  };
-
-  const openInvite = () => {
-    if (!requireAuth()) return;
-    if (!isUpgrade) {
-      setUpgradeOpen(true);
       return;
     }
-    setInviteOpen(true);
-  };
-
-  const openUpgrade = () => {
-    if (!requireAuth()) return;
     setUpgradeOpen(true);
   };
 
@@ -88,15 +73,12 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            className="hidden h-8 gap-1.5 rounded-full bg-neutral-200/80 px-3 text-[13px] font-medium text-neutral-900 hover:bg-neutral-200 sm:inline-flex dark:bg-muted dark:text-foreground dark:hover:bg-muted/80"
-            onClick={openInvite}
-          >
-            <UserPlus className="size-3.5" />
-            Invite
-          </Button>
+
+          {session?.user?.role === "ADMIN" ? (
+            <Button variant="secondary" className="h-8 rounded-full">
+              Admin panel <ChevronRight className="size-4" />
+            </Button>
+          ) : null}
 
           {!isUpgrade ? (
             <Button
@@ -123,18 +105,12 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
             >
               Sign in
             </Button>
-          ) :
+          ) : (
             <StudioUserNav />
-          }
+          )}
         </div>
       </header>
 
-      <StudioInviteDialog
-        open={inviteOpen}
-        onOpenChange={setInviteOpen}
-        initialTab="invite"
-        onUpgrade={openUpgrade}
-      />
       <StudioUpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} />
     </>
   );

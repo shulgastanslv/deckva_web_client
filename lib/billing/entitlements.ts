@@ -132,14 +132,3 @@ export async function userHasPro(userId: string): Promise<boolean> {
   return isProStatus(user.subscriptionStatus, user.subscriptionEndsAt);
 }
 
-/** True if any OWNER of the org currently has Pro (used for invite joins). */
-export async function orgOwnerHasPro(organizationId: string): Promise<boolean> {
-  const owners = await prisma.organizationMember.findMany({
-    where: { organizationId, role: "OWNER" },
-    select: { userId: true },
-  });
-  for (const owner of owners) {
-    if (await userHasPro(owner.userId)) return true;
-  }
-  return false;
-}
