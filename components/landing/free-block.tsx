@@ -24,32 +24,28 @@ const FORMATS = [
     ratio: "4:5",
     frame: "aspect-[4/5]",
     Icon: FaInstagram,
-    tile: "bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af]",
-    icon: "text-white",
+    icon: "text-land-ink",
   },
   {
     name: "Threads",
     ratio: "4:5",
     frame: "aspect-[4/5]",
     Icon: FaThreads,
-    tile: "bg-white",
-    icon: "text-neutral-950",
+    icon: "text-land-ink",
   },
   {
     name: "TikTok",
     ratio: "9:16",
     frame: "aspect-[9/16]",
     Icon: FaTiktok,
-    tile: "bg-neutral-950",
-    icon: "text-[#69C9D0]",
+    icon: "text-land-ink",
   },
   {
     name: "Telegram",
     ratio: "1:1",
     frame: "aspect-square",
     Icon: FaTelegram,
-    tile: "bg-[#2AABEE]",
-    icon: "text-white",
+    icon: "text-land-ink",
   },
 ] as const;
 
@@ -109,10 +105,10 @@ export function FreeBlock() {
                 Один проект — несколько пропорций под площадки.
               </p>
               <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:items-end">
-                {FORMATS.map(({ name, ratio, frame, Icon, tile, icon }) => (
+                {FORMATS.map(({ name, ratio, frame, Icon, icon }) => (
                   <li key={name} className="flex flex-col items-center gap-3">
                     <div
-                      className={`relative w-full max-w-[7.5rem] overflow-hidden rounded-2xl ${tile} ${frame}`}
+                      className={`relative w-full max-w-[7.5rem] overflow-hidden rounded-3xl ${frame} bg-white`}
                     >
                       <div className="absolute inset-0 grid place-items-center">
                         <Icon className={`size-8 sm:size-9 ${icon}`} aria-hidden />
