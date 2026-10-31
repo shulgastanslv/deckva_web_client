@@ -99,5 +99,13 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
       isLoadingProject: false,
       lastSavedAt: null,
     });
+
+    // Brand kit lives in localStorage — only available in the browser.
+    if (typeof window !== "undefined") {
+      void import("@/lib/studio/brand-kit").then(({ applyBrandKitToStore }) => {
+        applyBrandKitToStore({ paintBackground: true });
+        get().markSaved();
+      });
+    }
   },
 });

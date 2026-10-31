@@ -6,6 +6,7 @@ import {
   FolderIcon,
   HomeIcon,
   LayoutTemplateIcon,
+  PaletteIcon,
   StarIcon,
 } from "lucide-react";
 
@@ -47,6 +48,12 @@ export function StudioSidebarNav() {
       label: "Templates",
       icon: LayoutTemplateIcon,
       active: pathname.startsWith("/studio/templates"),
+    },
+    {
+      href: "/studio/brand-kit",
+      label: "Brand kit",
+      icon: PaletteIcon,
+      active: pathname.startsWith("/studio/brand-kit"),
     },
   ];
 

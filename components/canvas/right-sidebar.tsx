@@ -93,7 +93,6 @@ import {
 import { applyList, applySelectionStyle, writeFormattedText, type ListKind } from "@/lib/canvas/text-format";
 import type { TextStyles } from "@/lib/canvas/text-flow";
 import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
-import { SelectObjectArt } from "@/components/canvas/canvas_icons";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { CodeBlockInspector } from "@/components/canvas/code-block-inspector";
 import { isCodeBlock } from "@/lib/canvas/code-block";
@@ -365,6 +364,10 @@ export function RightSidebar({
   const [formValues, setFormValues] = useState<InspectedProperties | null>(
     null,
   );
+
+  useEffect(() => {
+    if (selectedObject) setIsRightCollapsed(false);
+  }, [selectedObject, setIsRightCollapsed]);
   const [imageUrlInput, setImageUrlInput] = useState("");
   const {
     canRun: canEnhance,
@@ -906,6 +909,8 @@ export function RightSidebar({
     ]
   );
 
+  if (!selectedObject) return null;
+
   return (
     <div className="relative flex h-full overflow-hidden bg-background">
       <div
@@ -1141,17 +1146,7 @@ export function RightSidebar({
                 </>
               )}
             </div>
-          ) : !formValues ? (
-            <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-              <SelectObjectArt className="h-auto w-full max-w-[140px] opacity-80" />
-              <div className="space-y-1">
-                <p className="text-[13px] font-medium text-foreground">Nothing selected</p>
-                <p className="text-[13px] leading-snug text-muted-foreground">
-                  Click an object on the canvas to edit it
-                </p>
-              </div>
-            </div>
-          ) : (
+          ) : !formValues ? null : (
             <div className="flex flex-col gap-1 pb-4 pt-1">
               <div className="space-y-2 px-3 pb-2">
                 <div className="flex items-center gap-1.5">

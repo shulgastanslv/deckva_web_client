@@ -9,7 +9,6 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import {
   isObjectOutOfBounds,
   moveObjectBoundingRectTo,
-  PLACE_PADDING,
   placeObjectOnNewSlide,
   resolveAutoFlowTargets,
 } from "@/lib/canvas/auto-flow";
@@ -24,6 +23,8 @@ export function AutoFlowPrompt() {
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
   const autoFlowEnabled = useCanvasStore((s) => s.autoFlowEnabled);
+  const autoFlowEdgeTolerance = useCanvasStore((s) => s.autoFlowEdgeTolerance);
+  const autoFlowPadding = useCanvasStore((s) => s.autoFlowPadding);
   const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
 
   const [pending, setPending] = useState<FabricObject | null>(null);
@@ -41,7 +42,7 @@ export function AutoFlowPrompt() {
       if (!target || busy.current) return;
 
       const { width, height } = canvasDimensions;
-      if (isObjectOutOfBounds(target, width, height)) {
+      if (isObjectOutOfBounds(target, width, height, autoFlowEdgeTolerance)) {
         if (dismissedFor.current.has(target)) return;
         setPending(target);
       } else {
@@ -55,12 +56,21 @@ export function AutoFlowPrompt() {
     return () => {
       manager.canvas.off("object:modified", onModified);
     };
-  }, [manager, autoFlowEnabled, canvasDimensions]);
+  }, [manager, autoFlowEnabled, autoFlowEdgeTolerance, canvasDimensions]);
 
   if (!pending || !autoFlowEnabled || !manager) return null;
 
+  const flowOpts = {
+    edgeTolerance: autoFlowEdgeTolerance,
+    padding: autoFlowPadding,
+  };
   const continuing = Boolean(
-    continuationForText(pending, canvasDimensions.width, canvasDimensions.height),
+    continuationForText(
+      pending,
+      canvasDimensions.width,
+      canvasDimensions.height,
+      flowOpts,
+    ),
   );
 
   const dismiss = () => {
@@ -82,7 +92,10 @@ export function AutoFlowPrompt() {
       manager.canvas.discardActiveObject();
 
       const { width, height } = canvasDimensions;
-      const split = targets.length === 1 ? continuationForText(targets[0]!, width, height) : null;
+      const split =
+        targets.length === 1
+          ? continuationForText(targets[0]!, width, height, flowOpts)
+          : null;
       if (split && targets[0]) {
         const textObj = targets[0];
         const clone = await textObj.clone();
@@ -93,7 +106,7 @@ export function AutoFlowPrompt() {
         await slidesController.add();
 
         writeTextPart(clone, split.restText, split.restStyles);
-        moveObjectBoundingRectTo(clone, split.left, PLACE_PADDING);
+        moveObjectBoundingRectTo(clone, split.left, autoFlowPadding);
         manager.canvas.add(clone);
         manager.canvas.setActiveObject(clone);
         manager.canvas.requestRenderAll();
@@ -112,7 +125,7 @@ export function AutoFlowPrompt() {
       await slidesController.add();
 
       for (const cloned of clones) {
-        placeObjectOnNewSlide(cloned, width, height);
+        placeObjectOnNewSlide(cloned, width, height, autoFlowPadding);
         manager.canvas.add(cloned);
       }
       if (clones.length === 1) {
@@ -129,7 +142,7 @@ export function AutoFlowPrompt() {
 
   return (
     <div className="pointer-events-none absolute bottom-20 left-1/2 z-30 -translate-x-1/2 px-3">
-      <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-border/60 bg-background/95 px-3 py-2 shadow-lg backdrop-blur-md">
+      <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-border/60 bg-background/95 px-3 py-2 backdrop-blur-md">
         <Layers className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         <p className="max-w-[280px] text-[13px] text-foreground">
           {continuing

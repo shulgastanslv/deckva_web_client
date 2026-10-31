@@ -9,9 +9,8 @@ import {
   PanelLeftOpen,
   Settings,
   ShapesIcon,
-  Sparkles,
-  StickyNoteIcon,
   ToolCase,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,7 +20,7 @@ import { SidebarSettings } from "@/components/canvas/sidebar/sidebar-settings";
 import { SidebarBackground } from "@/components/canvas/sidebar/sidebar-background";
 import { SidebarFilters } from "./sidebar/sidebar-filters";
 import { LegalDialog, type LegalKind } from "@/components/legal-dialog";
-import { SidebarIcons } from "./sidebar/sidebar-icons";
+import { SidebarAssets } from "./sidebar/sidebar-assets";
 import { SidebarTools } from "./sidebar/sidebar-tools";
 import {
   Tooltip,
@@ -35,7 +34,7 @@ export type NavId =
   | "layers"
   | "settings"
   | "filters"
-  | "icons"
+  | "assets"
   | "background"
   | "tools"
 
@@ -45,7 +44,7 @@ export const RAIL_SHORTCUTS: NavId[] = [
   "layers",
   "background",
   "filters",
-  "icons",
+  "assets",
 ];
 
 interface LeftSidebarProps {
@@ -78,7 +77,7 @@ const PANEL_TITLES: Record<NavId, string> = {
   elements: "Canvas Elements",
   layers: "Layers",
   settings: "Settings",
-  icons: "Icons",
+  assets: "Assets",
   filters: "Filters",
   background: "Background",
   tools: "Tools",
@@ -100,7 +99,7 @@ export function LeftSidebar({
     { id: "layers", icon: <LayersIcon className="size-[18px] stroke-[1.5]" />, label: "Layers" },
     { id: "background", icon: <ImageIcon className="size-[18px] stroke-[1.5]" />, label: "Background" },
     { id: "filters", icon: <FilterIcon className="size-[18px] stroke-[1.5]" />, label: "Filter" },
-    { id: "icons", icon: <StickyNoteIcon className="size-[18px] stroke-[1.5]" />, label: "Icons" },
+    { id: "assets", icon: <Package className="size-[18px] stroke-[1.5]" />, label: "Assets" },
   ];
 
   return (
@@ -174,7 +173,7 @@ export function LeftSidebar({
           {activeNav === "elements" && <SidebarElements />}
           {activeNav === "layers" && <SidebarLayers />}
           {activeNav === "filters" && <SidebarFilters />}
-          {activeNav === "icons" && <SidebarIcons />}
+          {activeNav === "assets" && <SidebarAssets />}
           {activeNav === "settings" && (
             <SidebarSettings
               showDotGrid={showDotGrid}

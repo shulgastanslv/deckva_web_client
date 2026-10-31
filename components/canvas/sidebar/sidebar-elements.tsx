@@ -59,14 +59,14 @@ export function SidebarElements() {
             if (file) addImageFromFile(file);
           }}
           className={cn(
-            "flex h-9 w-full items-center gap-2 rounded-xl border border-dashed px-3 text-left transition-colors disabled:opacity-40",
+            "flex min-h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-6 text-center transition-colors disabled:opacity-40",
             isDragging
               ? "border-foreground/30 bg-muted"
               : "border-border/70 hover:border-foreground/20 hover:bg-muted/60",
           )}
         >
-          <ImagePlus className="size-4 shrink-0 text-muted-foreground" />
-          <span className="flex-1 truncate text-foreground/80">Upload or drop</span>
+          <ImagePlus className="size-5 shrink-0 text-muted-foreground" />
+          <span className="font-medium text-foreground/80">Upload or drop</span>
           <span className="text-[13px] text-muted-foreground">PNG, JPG</span>
         </button>
 
@@ -129,33 +129,6 @@ export function SidebarElements() {
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          disabled={!manager}
-          title="Puts the picture on the selected device screen. Double-click a device to pick one."
-          onClick={() => frameInputRef.current?.click()}
-          onDragOver={(e) => {
-            e.preventDefault();
-            if (manager) setFrameDragging(true);
-          }}
-          onDragLeave={() => setFrameDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setFrameDragging(false);
-            const file = e.dataTransfer.files?.[0];
-            if (file) fillFrameFromFile(file);
-          }}
-          className={cn(
-            "flex h-9 w-full items-center gap-2 rounded-xl border border-dashed px-3 text-left transition-colors disabled:opacity-40",
-            frameDragging
-              ? "border-foreground/30 bg-muted"
-              : "border-border/70 hover:border-foreground/20 hover:bg-muted/60",
-          )}
-        >
-          <ImagePlus className="size-4 shrink-0 text-muted-foreground" />
-          <span className="flex-1 truncate text-foreground/80">Add image</span>
-          <span className="text-[13px] text-muted-foreground">PNG, JPG</span>
-        </button>
       </CollapsibleGroup>
 
       {sections.map((section) => (

@@ -427,10 +427,11 @@ export function StudioIconCheck(props: IconProps) {
 export function StudioIconPlus(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="40" y="24" width="80" height="80" rx="16" fill={BLUE_SOFT} />
+      <rect x="40" y="24" width="80" height="80" rx="16" fill={BLUE} />
       <path
         d="M80 44V84M60 64H100"
-        stroke={BLUE}
+        stroke={WHITE}
+        opacity="0.72"
         strokeWidth="3.5"
         strokeLinecap="round"
       />

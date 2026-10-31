@@ -99,10 +99,6 @@ export function StudioTemplates() {
           <div className="py-16 text-center">
             <p
               className="text-[22px] text-neutral-950 dark:text-foreground"
-              style={{
-                fontFamily:
-                  "var(--font-studio-serif), ui-serif, Georgia, serif",
-              }}
             >
               No templates
             </p>

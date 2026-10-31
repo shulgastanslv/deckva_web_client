@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { UploadCloud, Loader2, Plus, ImageIcon } from "lucide-react";
+import { UploadCloud, Loader2, Plus, ImageIcon, Palette } from "lucide-react";
 import {
   SOLID_PRESETS,
   GRADIENT_PRESETS,
@@ -27,6 +27,12 @@ import { BackgroundPattern } from "@/components/canvas/sidebar/background-patter
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { BackgroundSlideSets } from "@/components/canvas/sidebar/background-slide-sets";
+import {
+  BRAND_KIT_CHANGED,
+  applyBrandKitToStore,
+  loadBrandKit,
+  type BrandKit,
+} from "@/lib/studio/brand-kit";
 
 type Tab = "color" | "gradient" | "image";
 
@@ -93,10 +99,18 @@ export function SidebarBackground() {
   const currentSlideId = useCanvasStore((s) => s.currentSlideId);
   const [paletteScope, setPaletteScope] = useState<"all" | "marked" | "slide">("all");
   const [slidePalette, setSlidePalette] = useState<ProjectPalette | null>(null);
+  const [brandKit, setBrandKit] = useState<BrandKit | null>(null);
 
   useEffect(() => {
     setSlidePalette((current) => (current ? useCanvasStore.getState().palette : current));
   }, [currentSlideId]);
+
+  useEffect(() => {
+    const refresh = () => setBrandKit(loadBrandKit());
+    refresh();
+    window.addEventListener(BRAND_KIT_CHANGED, refresh);
+    return () => window.removeEventListener(BRAND_KIT_CHANGED, refresh);
+  }, []);
 
   const shownPalette = paletteScope === "slide" && slidePalette ? slidePalette : projectPalette;
 
@@ -286,15 +300,15 @@ export function SidebarBackground() {
                 if (file) applyImageFile(file);
               }}
               className={cn(
-                "flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-sm border border-dashed p-4 text-center transition-colors",
+                "flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-6 text-center transition-colors",
                 isDragging
                   ? "border-foreground/40 bg-muted/40"
                   : "border-border/80 bg-muted/20 hover:bg-muted/35",
               )}
             >
-              <UploadCloud className="h-4 w-4 text-muted-foreground" />
-              <span className="text-[13px] font-medium">Upload</span>
-              <span className="text-[13px] text-muted-foreground">Drop or click</span>
+              <UploadCloud className="h-5 w-5 text-muted-foreground" />
+              <span className="text-[13px] font-medium">Upload or drop</span>
+              <span className="text-[13px] text-muted-foreground">PNG, JPG</span>
             </div>
 
             <div className="flex min-w-0 flex-col gap-1.5">
@@ -343,6 +357,54 @@ export function SidebarBackground() {
       <CollapsibleGroup id="background-pattern" title="Pattern">
         <BackgroundPattern />
       </CollapsibleGroup>
+
+      {brandKit ? (
+        <CollapsibleGroup id="background-brand" title="Brand kit" defaultOpen>
+          <div className="flex items-center gap-2 rounded-2xl bg-muted/30 p-2">
+            <div className="flex flex-1 items-center gap-1.5">
+              {PALETTE_SLOTS.map((slot) => (
+                <button
+                  key={slot.id}
+                  type="button"
+                  title={`${slot.label} ${brandKit.palette[slot.id]}`}
+                  onClick={() => {
+                    if (slot.id === "background") applySolid(brandKit.palette.background);
+                    else setProjectSlot(slot.id, brandKit.palette[slot.id]);
+                  }}
+                  className="h-7 w-7 rounded-full border border-border/40 transition-transform hover:scale-105"
+                  style={{ backgroundColor: brandKit.palette[slot.id] }}
+                />
+              ))}
+            </div>
+            <Button
+              type="button"
+              size="xs"
+              variant="secondary"
+              className="rounded-full gap-1"
+              onClick={() => {
+                applyBrandKitToStore({
+                  kit: brandKit,
+                  paintBackground: true,
+                  canvas: manager?.canvas ?? null,
+                });
+                if (manager) {
+                  for (const slot of PALETTE_SLOTS) {
+                    if (slot.id === "background") continue;
+                    paintSlotOnCanvas(manager.canvas, slot.id, brandKit.palette[slot.id]);
+                  }
+                  manager.commit();
+                }
+              }}
+            >
+              <Palette className="size-3" />
+              Apply
+            </Button>
+          </div>
+          <p className="text-[11px] leading-snug text-muted-foreground">
+            Apply loads palette and type styles from studio Brand kit onto this carousel.
+          </p>
+        </CollapsibleGroup>
+      ) : null}
 
       <CollapsibleGroup id="background-palette" title="Palette">
         <div className="flex rounded-full bg-muted/50 p-0.5">

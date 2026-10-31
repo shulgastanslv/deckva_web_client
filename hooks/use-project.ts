@@ -11,8 +11,9 @@ import {
   saveProjectThumbnails,
   updateProjectTitle,
 } from "@/actions/projects";
-import { useSlidesController } from "@/context/canvas-manager";
+import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { renderMissingThumbnails } from "@/lib/canvas/thumbnail";
+import { applyBrandKitToStore } from "@/lib/studio/brand-kit";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import type { RatioKey } from "@/lib/types";
 import type { DocumentMeta } from "@/lib/canvas/document";
@@ -102,6 +103,7 @@ function scheduleThumbnailHydration(projectId: string | null, persistToDb: boole
 export function useProject() {
   const { status } = useSession();
   const slidesController = useSlidesController();
+  const manager = useCanvasManager();
   const loadSeq = useRef(0);
   const saveWithThumbnail = useRef(false);
   const saveFlight = useRef<Promise<PersistResult> | null>(null);
@@ -243,6 +245,11 @@ export function useProject() {
       slidesController?.saveCurrent();
       useCanvasStore.getState().loadProjectState(res.project);
       await slidesController?.loadCurrent();
+      applyBrandKitToStore({
+        paintBackground: true,
+        canvas: manager?.canvas ?? null,
+      });
+      await slidesController?.loadCurrent();
       useCanvasStore.getState().markSaved();
       setProjectInUrl(res.projectId);
       notifyProjectsChanged();
@@ -250,7 +257,7 @@ export function useProject() {
 
       return res;
     },
-    [slidesController, status],
+    [slidesController, manager, status],
   );
 
   const rename = useCallback(

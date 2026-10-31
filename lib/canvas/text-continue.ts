@@ -64,19 +64,22 @@ export function continuationForText(
   obj: FabricObject,
   _slideW: number,
   slideH: number,
+  options?: { edgeTolerance?: number; padding?: number },
 ): TextContinuation | null {
   if (!isFlowText(obj) || !obj.getHeightOfLine) return null;
   const text = obj.text ?? "";
   const lines = obj.textLines ?? [];
   if (!text || lines.length < 2) return null;
 
+  const edge = options?.edgeTolerance ?? EDGE_TOLERANCE;
+  const padding = options?.padding ?? PLACE_PADDING;
   const rect = getSceneBoundingRect(obj);
-  const overflowsBottom = rect.top + rect.height > slideH + EDGE_TOLERANCE;
+  const overflowsBottom = rect.top + rect.height > slideH + edge;
   if (!overflowsBottom) return null;
 
   const scaleY = obj.scaleY ?? 1;
   const heights = lines.map((_, index) => obj.getHeightOfLine!(index) * scaleY);
-  const room = slideH - PLACE_PADDING - rect.top;
+  const room = slideH - padding - rect.top;
   const keep = continuationKeepCount(heights, room);
   if (keep == null) return null;
 

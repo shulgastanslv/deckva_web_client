@@ -1,5 +1,6 @@
 import { StateCreator } from "zustand";
 import { RatioKey, CANVAS_RATIOS } from "@/lib/types";
+import { EDGE_TOLERANCE, PLACE_PADDING } from "@/lib/canvas/auto-flow";
 
 export interface ViewportSlice {
   zoom: number;
@@ -9,14 +10,12 @@ export interface ViewportSlice {
   eraserActive: boolean;
   currentRatio: RatioKey;
   canvasDimensions: { width: number; height: number };
-  /** Split view: show reference image panel beside the canvas */
-  isReferenceOpen: boolean;
-  /** @deprecated Prefer `referenceImages` — kept for single-image callers */
-  referenceImageUrl: string | null;
-  /** Dropped / uploaded reference images (data URLs or blob URLs) */
-  referenceImages: string[];
   /** When on, overflow past slide bounds prompts a new slide */
   autoFlowEnabled: boolean;
+  /** How far past the slide edge before Auto Flow prompts (px). */
+  autoFlowEdgeTolerance: number;
+  /** Inset when placing flowed objects on the next slide (px). */
+  autoFlowPadding: number;
   setZoom: (zoom: number) => void;
   setHandActive: (active: boolean) => void;
   toggleHand: () => void;
@@ -24,15 +23,10 @@ export interface ViewportSlice {
   toggleEraser: () => void;
   setCurrentRatio: (ratio: RatioKey) => void;
   setCanvasDimensions: (dim: { width: number; height: number }) => void;
-  setReferenceOpen: (open: boolean) => void;
-  toggleReferenceOpen: () => void;
-  setReferenceImageUrl: (url: string | null) => void;
-  setReferenceImages: (urls: string[]) => void;
-  addReferenceImages: (urls: string[]) => void;
-  removeReferenceImage: (index: number) => void;
-  clearReferenceImages: () => void;
   setAutoFlowEnabled: (enabled: boolean) => void;
   toggleAutoFlow: () => void;
+  setAutoFlowEdgeTolerance: (px: number) => void;
+  setAutoFlowPadding: (px: number) => void;
 }
 
 export const createViewportSlice: StateCreator<ViewportSlice, [], [], ViewportSlice> = (set) => ({
@@ -41,10 +35,9 @@ export const createViewportSlice: StateCreator<ViewportSlice, [], [], ViewportSl
   eraserActive: false,
   currentRatio: "4:5",
   canvasDimensions: CANVAS_RATIOS["4:5"] || { width: 1080, height: 1350 },
-  isReferenceOpen: false,
-  referenceImageUrl: null,
-  referenceImages: [],
   autoFlowEnabled: true,
+  autoFlowEdgeTolerance: EDGE_TOLERANCE,
+  autoFlowPadding: PLACE_PADDING,
 
   setZoom: (zoom) => set({ zoom }),
   setHandActive: (handActive) =>
@@ -69,29 +62,14 @@ export const createViewportSlice: StateCreator<ViewportSlice, [], [], ViewportSl
       canvasDimensions: CANVAS_RATIOS[currentRatio] || { width: 1080, height: 1350 },
     }),
   setCanvasDimensions: (canvasDimensions) => set({ canvasDimensions }),
-  setReferenceOpen: (isReferenceOpen) => set({ isReferenceOpen }),
-  toggleReferenceOpen: () => set((s) => ({ isReferenceOpen: !s.isReferenceOpen })),
-  setReferenceImageUrl: (referenceImageUrl) =>
-    set({
-      referenceImageUrl,
-      referenceImages: referenceImageUrl ? [referenceImageUrl] : [],
-    }),
-  setReferenceImages: (referenceImages) =>
-    set({
-      referenceImages,
-      referenceImageUrl: referenceImages[0] ?? null,
-    }),
-  addReferenceImages: (urls) =>
-    set((s) => {
-      const next = [...s.referenceImages, ...urls].slice(0, 12);
-      return { referenceImages: next, referenceImageUrl: next[0] ?? null };
-    }),
-  removeReferenceImage: (index) =>
-    set((s) => {
-      const next = s.referenceImages.filter((_, i) => i !== index);
-      return { referenceImages: next, referenceImageUrl: next[0] ?? null };
-    }),
-  clearReferenceImages: () => set({ referenceImages: [], referenceImageUrl: null }),
   setAutoFlowEnabled: (autoFlowEnabled) => set({ autoFlowEnabled }),
   toggleAutoFlow: () => set((s) => ({ autoFlowEnabled: !s.autoFlowEnabled })),
+  setAutoFlowEdgeTolerance: (autoFlowEdgeTolerance) =>
+    set({
+      autoFlowEdgeTolerance: Math.max(0, Math.min(64, Math.round(autoFlowEdgeTolerance))),
+    }),
+  setAutoFlowPadding: (autoFlowPadding) =>
+    set({
+      autoFlowPadding: Math.max(0, Math.min(200, Math.round(autoFlowPadding))),
+    }),
 });

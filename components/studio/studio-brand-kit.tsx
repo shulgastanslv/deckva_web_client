@@ -13,15 +13,20 @@ import {
 import { StudioPageHeader } from "@/components/studio/ui/studio-page-header";
 import { Button } from "@/components/ui/button";
 import { ColorPicker } from "@/components/ui/color-picker";
-import { Input } from "@/components/ui/input";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import {
+  PALETTE_SLOTS,
+  TEXT_STYLES,
+  type PaletteSlot,
+  type TextStyleId,
+} from "@/lib/canvas/document";
 import {
   BRAND_KIT_STORAGE_KEY,
   defaultBrandKit,
   readBrandKit,
+  updateBrandTextStyle,
   writeBrandKit,
   type BrandKit,
-  type BrandKitColor,
   type BrandKitLogo,
 } from "@/lib/studio/brand-kit";
 import { cn } from "@/lib/utils";
@@ -29,7 +34,7 @@ import { cn } from "@/lib/utils";
 export function StudioBrandKit() {
   const { status } = useSession();
   const [authOpen, setAuthOpen] = useState(false);
-  const [kit, setKit] = useState<BrandKit>(defaultBrandKit);
+  const [kit, setKit] = useState<BrandKit>(() => defaultBrandKit());
   const [ready, setReady] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,40 +48,15 @@ export function StudioBrandKit() {
     writeBrandKit(next);
   };
 
-  const updateColor = (id: string, patch: Partial<BrandKitColor>) => {
+  const setPaletteSlot = (slot: PaletteSlot, hex: string) => {
     persist({
       ...kit,
-      colors: kit.colors.map((color) =>
-        color.id === id ? { ...color, ...patch } : color,
-      ),
+      palette: { ...kit.palette, [slot]: hex },
     });
   };
 
-  const addColor = () => {
-    const id = `color-${Date.now()}`;
-    persist({
-      ...kit,
-      colors: [...kit.colors, { id, name: "Color", hex: "#64748b" }],
-    });
-  };
-
-  const removeColor = (id: string) => {
-    if (kit.colors.length <= 1) return;
-    persist({ ...kit, colors: kit.colors.filter((c) => c.id !== id) });
-  };
-
-  const setFontAt = (index: number, family: string) => {
-    const fonts = [...kit.fonts];
-    fonts[index] = family;
-    persist({ ...kit, fonts });
-  };
-
-  const addFont = () => {
-    persist({ ...kit, fonts: [...kit.fonts, "Inter"] });
-  };
-
-  const removeFont = (index: number) => {
-    persist({ ...kit, fonts: kit.fonts.filter((_, i) => i !== index) });
+  const setTextStyleFont = (id: TextStyleId, fontFamily: string) => {
+    persist(updateBrandTextStyle(kit, id, { fontFamily }));
   };
 
   const addLogos = async (files: FileList | null) => {
@@ -100,6 +80,14 @@ export function StudioBrandKit() {
 
   const removeLogo = (id: string) => {
     persist({ ...kit, logos: kit.logos.filter((logo) => logo.id !== id) });
+  };
+
+  const openLogoPicker = () => {
+    if (status !== "authenticated") {
+      setAuthOpen(true);
+      return;
+    }
+    logoInputRef.current?.click();
   };
 
   if (!ready) {
@@ -131,99 +119,50 @@ export function StudioBrandKit() {
 
         <div className="flex flex-col gap-10">
           <section className="space-y-4">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <h2 className="text-[15px] font-semibold text-foreground">Colors</h2>
-                <p className="mt-1 text-[13px] text-muted-foreground">
-                  Palette slots you reuse across carousels.
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="h-8 rounded-full text-[13px]"
-                onClick={addColor}
-              >
-                <Plus className="size-3.5" />
-                Add color
-              </Button>
+            <div>
+              <h2 className="text-[15px] font-semibold text-foreground">Colors</h2>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                Palette slots you reuse across carousels.
+              </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              {kit.colors.map((color) => (
+              {PALETTE_SLOTS.map((slot) => (
                 <div
-                  key={color.id}
-                  className="flex items-end gap-2 rounded-2xl bg-muted/30 p-3"
+                  key={slot.id}
+                  className="rounded-2xl bg-muted/30 p-3"
                 >
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <Input
-                      value={color.name}
-                      onChange={(e) => updateColor(color.id, { name: e.target.value })}
-                      className="h-8 rounded-full border-0 bg-background/70 text-[13px] shadow-none"
-                    />
-                    <ColorPicker
-                      value={color.hex}
-                      onChange={(hex) => updateColor(color.id, { hex })}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 shrink-0 rounded-full text-muted-foreground"
-                    disabled={kit.colors.length <= 1}
-                    onClick={() => removeColor(color.id)}
-                    title="Remove color"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </Button>
+                  <ColorPicker
+                    label={slot.label}
+                    value={kit.palette[slot.id]}
+                    onChange={(hex) => setPaletteSlot(slot.id, hex)}
+                  />
                 </div>
               ))}
             </div>
           </section>
 
           <section className="space-y-4">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <h2 className="text-[15px] font-semibold text-foreground">Fonts</h2>
-                <p className="mt-1 text-[13px] text-muted-foreground">
-                  Brand typefaces for headings and body.
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="h-8 rounded-full text-[13px]"
-                onClick={addFont}
-              >
-                <Plus className="size-3.5" />
-                Add font
-              </Button>
+            <div>
+              <h2 className="text-[15px] font-semibold text-foreground">Fonts</h2>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                Type styles for headings, subtitles, and body.
+              </p>
             </div>
             <div className="flex flex-col gap-2">
-              {kit.fonts.map((font, index) => (
+              {TEXT_STYLES.map((style) => (
                 <div
-                  key={`${font}-${index}`}
-                  className="flex items-center gap-2 rounded-2xl bg-muted/30 p-2"
+                  key={style.id}
+                  className="flex flex-col gap-2 rounded-2xl bg-muted/30 p-3 sm:flex-row sm:items-center"
                 >
+                  <span className="w-24 shrink-0 text-[13px] font-medium text-foreground">
+                    {style.label}
+                  </span>
                   <div className="min-w-0 flex-1">
                     <FontSelect
-                      value={font}
-                      onChange={(family) => setFontAt(index, family)}
+                      value={kit.textStyles[style.id].fontFamily}
+                      onChange={(family) => setTextStyleFont(style.id, family)}
                     />
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 shrink-0 rounded-full text-muted-foreground"
-                    disabled={kit.fonts.length <= 1}
-                    onClick={() => removeFont(index)}
-                    title="Remove font"
-                  >
-                    <X className="size-3.5" />
-                  </Button>
                 </div>
               ))}
             </div>
@@ -242,13 +181,7 @@ export function StudioBrandKit() {
                 variant="secondary"
                 size="sm"
                 className="h-8 rounded-full text-[13px]"
-                onClick={() => {
-                  if (status !== "authenticated") {
-                    setAuthOpen(true);
-                    return;
-                  }
-                  logoInputRef.current?.click();
-                }}
+                onClick={openLogoPicker}
               >
                 <ImagePlus className="size-3.5" />
                 Upload
@@ -268,13 +201,7 @@ export function StudioBrandKit() {
             {kit.logos.length === 0 ? (
               <button
                 type="button"
-                onClick={() => {
-                  if (status !== "authenticated") {
-                    setAuthOpen(true);
-                    return;
-                  }
-                  logoInputRef.current?.click();
-                }}
+                onClick={openLogoPicker}
                 className={cn(
                   "flex h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border/70 bg-muted/20 text-[13px] text-muted-foreground transition-colors",
                   "hover:border-foreground/20 hover:bg-muted/40 hover:text-foreground",

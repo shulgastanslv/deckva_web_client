@@ -31,9 +31,8 @@ export function StudioStartTile({
         className={cn(
           "relative aspect-[5/4] w-full overflow-hidden rounded-xl transition-colors",
           blank
-            ? "bg-background ring-1 ring-black/[0.06] dark:ring-white/10"
-            : "bg-[#ebeaf2] dark:bg-muted/70",
-          !blank && "group-hover:bg-[#e3e2ec] dark:group-hover:bg-muted",
+            ? "bg-muted/50"
+            : "bg-muted/50 group-hover:bg-muted/70",
         )}
       >
         {previewUrl ? (

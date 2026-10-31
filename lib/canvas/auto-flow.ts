@@ -43,11 +43,13 @@ export function flowRectOntoSlide(
   let left: number;
   let top: number;
 
+  const edge = EDGE_TOLERANCE;
+
   if (rect.width >= maxW) {
     left = (slideW - rect.width) / 2;
-  } else if (rect.left + rect.width > slideW + EDGE_TOLERANCE) {
+  } else if (rect.left + rect.width > slideW + edge) {
     left = padding;
-  } else if (rect.left < -EDGE_TOLERANCE) {
+  } else if (rect.left < -edge) {
     left = slideW - padding - rect.width;
   } else {
     left = Math.min(
@@ -58,9 +60,9 @@ export function flowRectOntoSlide(
 
   if (rect.height >= maxH) {
     top = (slideH - rect.height) / 2;
-  } else if (rect.top + rect.height > slideH + EDGE_TOLERANCE) {
+  } else if (rect.top + rect.height > slideH + edge) {
     top = padding;
-  } else if (rect.top < -EDGE_TOLERANCE) {
+  } else if (rect.top < -edge) {
     top = slideH - padding - rect.height;
   } else {
     top = Math.min(
@@ -97,9 +99,10 @@ export function isObjectOutOfBounds(
   obj: FabricObject,
   slideW: number,
   slideH: number,
+  tolerance = EDGE_TOLERANCE,
 ): boolean {
   if (isAutoFlowSkippable(obj)) return false;
-  return rectIsOutOfBounds(getSceneBoundingRect(obj), slideW, slideH);
+  return rectIsOutOfBounds(getSceneBoundingRect(obj), slideW, slideH, tolerance);
 }
 
 export function resolveAutoFlowTargets(obj: FabricObject): FabricObject[] {
@@ -127,8 +130,9 @@ export function placeObjectOnNewSlide(
   obj: FabricObject,
   slideW: number,
   slideH: number,
+  padding = PLACE_PADDING,
 ): void {
   const rect = getSceneBoundingRect(obj);
-  const { left, top } = flowRectOntoSlide(rect, slideW, slideH);
+  const { left, top } = flowRectOntoSlide(rect, slideW, slideH, padding);
   moveObjectBoundingRectTo(obj, left, top);
 }

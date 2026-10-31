@@ -10,6 +10,11 @@ import {
   loadGoogleFont,
   normalizeFontFamily,
 } from "@/lib/fonts/google-fonts";
+import {
+  BRAND_KIT_CHANGED,
+  brandKitFonts,
+  loadBrandKit,
+} from "@/lib/studio/brand-kit";
 
 interface FontSelectProps {
   value: string;
@@ -33,11 +38,19 @@ export function FontSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [families, setFamilies] = useState<string[]>([]);
+  const [brandFonts, setBrandFonts] = useState<string[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const [loadingFont, setLoadingFont] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const current = normalizeFontFamily(value);
+
+  useEffect(() => {
+    const refresh = () => setBrandFonts(brandKitFonts(loadBrandKit()));
+    refresh();
+    window.addEventListener(BRAND_KIT_CHANGED, refresh);
+    return () => window.removeEventListener(BRAND_KIT_CHANGED, refresh);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -62,17 +75,20 @@ export function FontSelect({
     const q = query.trim().toLowerCase();
     const system = getSystemFonts();
     const popular = getPopularGoogleFonts();
+    const brand = brandFonts;
 
     if (!q) {
       const rest = families
         .filter(
           (f) =>
             !system.includes(f as (typeof system)[number]) &&
-            !popular.includes(f as (typeof popular)[number]),
+            !popular.includes(f as (typeof popular)[number]) &&
+            !brand.includes(f),
         )
         .slice(0, MAX_VISIBLE);
       return {
         groups: [
+          ...(brand.length > 0 ? [{ label: "Brand kit", items: brand }] : []),
           { label: "System", items: [...system] },
           { label: "Popular", items: [...popular] },
           { label: "Google Fonts", items: rest },
@@ -80,14 +96,14 @@ export function FontSelect({
       };
     }
 
-    const matched = (families.length > 0 ? families : [...system, ...popular])
+    const matched = (families.length > 0 ? families : [...brand, ...system, ...popular])
       .filter((f) => f.toLowerCase().includes(q))
       .slice(0, MAX_VISIBLE);
 
     return {
       groups: [{ label: `Found (${matched.length})`, items: matched }],
     };
-  }, [query, families]);
+  }, [query, families, brandFonts]);
 
   const applyFont = async (family: string) => {
     setLoadingFont(true);
