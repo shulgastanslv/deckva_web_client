@@ -10,6 +10,8 @@ export type StudioGenerateIntent = {
   language: string;
   aspectRatio: RatioKey;
   slidesCount: number;
+  /** Cover image URL; empty string = gray placeholder on slide 1. */
+  cover: string;
 };
 
 export type StudioIntent = { type: "new" } | StudioGenerateIntent;
@@ -30,7 +32,10 @@ function parseIntent(raw: string): StudioIntent | null {
       ) {
         return null;
       }
-      return parsed;
+      return {
+        ...parsed,
+        cover: typeof parsed.cover === "string" ? parsed.cover : "",
+      };
     }
     return null;
   } catch {

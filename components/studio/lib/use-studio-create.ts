@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { getActiveOrganization } from "@/actions/organizations";
 import { createProject, getUserProjects } from "@/actions/projects";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
+import { stashPendingCover } from "@/lib/studio/pending-cover";
 import { stashStudioIntent } from "@/lib/studio/pending-intent";
 import { FREE_CAROUSEL_LIMIT } from "@/lib/studio/plans";
 import type { RatioKey } from "@/lib/types";
@@ -58,7 +59,12 @@ export function useStudioCreate() {
 
   const openTemplates = () => router.push("/studio/templates");
 
-  const generateFromPrompt = async (topic: string) => {
+  const generateFromPrompt = async (input: {
+    topic: string;
+    cover?: string;
+  }) => {
+    const topic = input.topic.trim();
+    const cover = input.cover?.trim() ?? "";
     setGenerateError(null);
     if (!requireAuth()) return;
     if (!(await requireCarouselSlot())) return;
@@ -79,14 +85,18 @@ export function useStudioCreate() {
         session?.user?.name || session?.user?.email?.split("@")[0],
       );
 
+      // Keep http(s) covers in the intent; data URLs live in memory (sessionStorage quota).
+      const intentCover = cover.startsWith("data:") ? "" : cover;
+      stashPendingCover(created.projectId, cover);
       stashStudioIntent({
         type: "generate",
         projectId: created.projectId,
-        topic: topic.trim(),
+        topic,
         handle,
         language: inferPromptLanguage(topic),
         aspectRatio,
         slidesCount: 7,
+        cover: intentCover,
       });
 
       // Show the editor fallback immediately across the navigation.

@@ -31,9 +31,9 @@ import { PhotoStatement } from "@/components/landing/photo-statement";
 import { ReviewsBlock } from "@/components/landing/reviews-block";
 import { LeaveReviewBlock } from "@/components/landing/leave-review-block";
 import {
+  BrandKitArt,
   FeedArt,
   GenerateArt,
-  IconsArt,
   StudioArt,
   TemplatesArt,
 } from "@/components/landing/landing-art";
@@ -72,22 +72,27 @@ const FAQ = [
   {
     value: "what",
     q: "Что такое Deckva?",
-    a: "Студия для каруселей в соцсетях. Собираете слайды на холсте и экспортируете готовые картинки.",
+    a: "Студия для каруселей в соцсетях. Собираете слайды на холсте, генерируете с AI или стартуете с шаблона — и экспортируете готовые картинки.",
   },
   {
     value: "how-start",
     q: "С чего начать?",
-    a: "Откройте студию: пустой холст или шаблон. Слайды сразу в пропорциях поста.",
+    a: "Откройте студию: опишите тему в промпте, возьмите шаблон или пустой холст. Слайды сразу в пропорциях поста.",
+  },
+  {
+    value: "ai",
+    q: "Как работает AI-генерация?",
+    a: "Пишете тему — Deckva собирает карусель со структурой слайдов. Потом правите текст, обложку и порядок в редакторе.",
   },
   {
     value: "edit",
     q: "Что можно менять?",
-    a: "Текст, фото, иконки, фон, слои и порядок слайдов.",
+    a: "Текст, фото, фон, слои, brand kit и порядок слайдов.",
   },
   {
     value: "vs-canva",
     q: "Чем отличается от Canva?",
-    a: "Deckva заточен под карусель: несколько слайдов в формате поста, слои и экспорт без сборки ленты где-то ещё.",
+    a: "Deckva заточен под карусель: несколько слайдов в формате поста, AI-старт, слои и экспорт без сборки ленты где-то ещё.",
   },
   {
     value: "pricing",
@@ -122,12 +127,17 @@ const FAQ = [
   {
     value: "templates",
     q: "Можно начать с шаблона?",
-    a: "Да. Выберите шаблон с готовой структурой или пустой холст.",
+    a: "Да. Выберите шаблон с готовой структурой, AI-промпт или пустой холст.",
   },
   {
     value: "assets",
     q: "Куда загружать свои картинки?",
-    a: "В редакторе есть панель Assets — загружаете логотипы и фото и переиспользуете на слайдах.",
+    a: "В панели Assets — логотипы и фото, которые переиспользуете на слайдах.",
+  },
+  {
+    value: "brand-kit",
+    q: "Что такое Brand kit?",
+    a: "Палитра, шрифты и логотипы бренда. Один раз настроили — применяете к новым каруселям.",
   },
   {
     value: "save",
@@ -263,17 +273,14 @@ export function LandingPage() {
         <div className="relative z-10 mx-auto grid min-h-[85vh] max-w-6xl items-center gap-10 px-4 pb-36 pt-10 sm:gap-12 sm:px-6 sm:pb-44 sm:pt-14 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pb-52 lg:pt-16">
           <div>
             <h1 className="max-w-xl text-6xl font-extrabold tracking-tight leading-[0.95] sm:text-7xl lg:text-7xl">
-              Редактор Каруселей
+              AI-редактор каруселей
             </h1>
             <TextGenerateEffect
-              words="Создайте карусель за пару минут и экспортируйте готовые картинки."
+              words="Опишите тему — AI соберёт карусель. Дальше правите и экспортируете."
               duration={0.35}
-              className="mt-5 text-2xl font-medium text-white/90 sm:text-3xl"
+              className="mt-5 text-xl font-medium text-white/90 sm:text-2xl"
               spanClassName="text-white/90"
             />
-            <p className={`mt-4 max-w-md text-white/75 ${landSub}`}>
-              Текст, фон, иконки и порядок — в одном холсте.
-            </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button
                 asChild
@@ -308,7 +315,7 @@ export function LandingPage() {
         <Reveal>
           <LandingHead
             title="Быстро и просто"
-            text="От шаблона до экспорта — без сборки ленты в другом инструменте."
+            text="От промпта или шаблона до экспорта — без сборки ленты в другом инструменте."
           />
         </Reveal>
 
@@ -316,10 +323,12 @@ export function LandingPage() {
           <RevealItem className="md:col-span-7 md:row-span-2">
             <LandingLayer className="h-full bg-land-card">
               <LandingPad>
-                <h3 className={`${landCardTitle} text-land-ink`}>Шаблоны</h3>
+                <h3 className={`${landCardTitle} text-land-ink`}>
+                  AI-генерация
+                </h3>
                 <p className={`mt-3 max-w-md text-land-ink/55 ${landCardSub}`}>
-                  Готовый набор слайдов или пустой холст — дальше правите
-                  текст, фон и порядок.
+                  Опишите тему — получите готовую карусель. Дальше правите
+                  текст, обложку и порядок слайдов.
                 </p>
                 <div className="mt-6 flex justify-center">
                   <GenerateArt />
@@ -360,11 +369,14 @@ export function LandingPage() {
           <RevealItem className="md:col-span-6">
             <LandingLayer className="h-full bg-land-card">
               <LandingPad>
-                <h3 className={`${landCardTitle} text-land-ink`}>Иконки</h3>
+                <h3 className={`${landCardTitle} text-land-ink`}>
+                  Assets и Brand kit
+                </h3>
                 <p className={`mt-3 max-w-sm text-land-ink/55 ${landCardSub}`}>
-                  Иконки и смайлы прямо в студии — клик, и они на слайде.
+                  Логотипы и фото в Assets. Палитра, шрифты и марки — в Brand
+                  kit, чтобы стиль не разъезжался.
                 </p>
-                <IconsArt />
+                <BrandKitArt />
               </LandingPad>
             </LandingLayer>
           </RevealItem>
@@ -449,7 +461,7 @@ export function LandingPage() {
                   за пару минут
                 </h2>
                 <p className={`mt-4 max-w-md text-white/75 ${landSub}`}>
-                  Откройте студию и доведите слайды до публикации.
+                  Промпт, шаблон или пустой холст — дальше правки и экспорт.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
                   <Link

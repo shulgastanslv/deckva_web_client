@@ -182,7 +182,8 @@ export function CarouselEditorArt() {
 
 
 
-export function IconsArt() {
+/** Assets library + brand kit (palette, type, logo). */
+export function BrandKitArt() {
   return (
     <svg
       viewBox="0 0 320 180"
@@ -192,50 +193,43 @@ export function IconsArt() {
     >
       <circle cx="168" cy="96" r="78" fill={LILAC_SOFT} />
 
-      {/* Search chip */}
-      <rect x="48" y="18" width="200" height="36" rx="18" fill={WHITE} />
-      <circle cx="70" cy="36" r="8" stroke={INK} strokeWidth="2.5" fill="none" />
-      <path
-        d="M76 42l6 6"
-        stroke={INK}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <rect x="90" y="32" width="96" height="8" rx="4" fill={LILAC_SOFT} />
-
-      {/* Heart tile */}
-      <g transform="translate(36 68)">
-        <rect width="72" height="72" rx="20" fill={PINK_SOFT} />
-        <path
-          d="M36 54s-14-9-14-18c0-4.5 3.5-8 8-8 3 0 5.5 1.8 6 3.5.5-1.7 3-3.5 6-3.5 4.5 0 8 3.5 8 8 0 9-14 18-14 18Z"
-          fill={PINK}
-        />
+      {/* Asset tiles */}
+      <g transform="translate(28 48)">
+        <rect width="64" height="64" rx="16" fill={WHITE} />
+        <rect x="12" y="12" width="40" height="28" rx="8" fill={PINK_SOFT} />
+        <rect x="12" y="46" width="28" height="6" rx="3" fill={INK} />
+      </g>
+      <g transform="translate(56 92)">
+        <rect width="56" height="56" rx="14" fill={WHITE} />
+        <circle cx="28" cy="24" r="12" fill={SAGE} />
+        <rect x="12" y="42" width="32" height="5" rx="2.5" fill={LILAC} />
       </g>
 
-      {/* Star tile */}
-      <g transform="translate(124 62)">
-        <rect width="80" height="80" rx="22" fill={WHITE} />
-        <path
-          d="M40 22l7.5 15.2 16.8 2.4-12.2 11.9 2.9 16.7L40 60.2 25 68.2l2.9-16.7L15.7 39.6l16.8-2.4L40 22Z"
-          fill={LILAC}
-        />
-      </g>
+      {/* Brand kit card */}
+      <g transform="translate(132 36)">
+        <rect width="156" height="116" rx="22" fill={WHITE} />
+        <rect x="18" y="18" width="52" height="8" rx="4" fill={INK} />
+        <rect x="18" y="32" width="36" height="5" rx="2.5" fill={LILAC_SOFT} />
 
-      {/* Smile tile */}
-      <g transform="translate(220 74)">
-        <rect width="68" height="68" rx="18" fill={SAGE_SOFT} />
-        <circle cx="24" cy="28" r="4" fill={INK} />
-        <circle cx="44" cy="28" r="4" fill={INK} />
+        {/* Palette */}
+        <circle cx="30" cy="62" r="12" fill={BLUE} />
+        <circle cx="54" cy="62" r="12" fill={PINK} />
+        <circle cx="78" cy="62" r="12" fill={SAGE} />
+        <circle cx="102" cy="62" r="12" fill={LILAC} />
+
+        {/* Type rows */}
+        <rect x="18" y="88" width="72" height="7" rx="3.5" fill={INK} />
+        <rect x="18" y="100" width="48" height="5" rx="2.5" fill={PINK_SOFT} />
+
+        {/* Logo mark */}
+        <rect x="110" y="84" width="28" height="28" rx="8" fill={SAGE_SOFT} />
         <path
-          d="M22 42c5 8 19 8 24 0"
+          d="M118 98h12M124 92v12"
           stroke={INK}
-          strokeWidth="3"
+          strokeWidth="2.5"
           strokeLinecap="round"
         />
       </g>
-
-      {/* Accent pill */}
-      <rect x="124" y="152" width="72" height="14" rx="7" fill={BLUE} />
     </svg>
   );
 }

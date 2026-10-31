@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import { saveProject } from "@/actions/projects";
 import type { GenerateCarouselResult } from "@/lib/ai/generate";
+import { takePendingCover } from "@/lib/studio/pending-cover";
 import {
   peekStudioIntent,
   takeStudioIntent,
@@ -60,7 +61,8 @@ export function StudioIntentBootstrap() {
               slidesCount: intent.slidesCount,
               language: intent.language,
               handle: intent.handle,
-              cover: "",
+              cover:
+                takePendingCover(intent.projectId) || intent.cover || "",
             }),
           });
 
