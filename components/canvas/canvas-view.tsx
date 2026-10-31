@@ -69,6 +69,7 @@ export function CanvasView() {
   const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
   const zoom = useCanvasStore((s) => s.zoom);
   const isLoadingProject = useCanvasStore((s) => s.isLoadingProject);
+  const isGeneratingCarousel = useCanvasStore((s) => s.isGeneratingCarousel);
   const handActive = useCanvasStore((s) => s.handActive);
   const eraserActive = useCanvasStore((s) => s.eraserActive);
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
@@ -400,14 +401,16 @@ export function CanvasView() {
           <canvas ref={canvasElementRef} />
         </div>
       </div>
-      {isLoadingProject && (
+      {(isLoadingProject || isGeneratingCarousel) && (
         <div
           className="absolute inset-0 z-20 flex items-center justify-center bg-muted/40"
           aria-busy="true"
-          aria-label="Loading project"
+          aria-label={
+            isGeneratingCarousel ? "Generating carousel" : "Loading project"
+          }
         >
           <div
-            className="flex flex-col gap-4 bg-background p-8 shadow-2xl ring-1 ring-border/20"
+            className="flex flex-col gap-4 bg-background p-8 ring-1 ring-border/20"
             style={{
               aspectRatio: `${canvasDimensions.width} / ${canvasDimensions.height}`,
               width: frame && frame.width > 0 ? frame.width : undefined,
@@ -420,6 +423,11 @@ export function CanvasView() {
             <Skeleton className="min-h-24 w-full flex-1 rounded-md" />
             <Skeleton className="h-4 w-full rounded-md" />
             <Skeleton className="h-4 w-4/5 rounded-md" />
+            {isGeneratingCarousel ? (
+              <p className="text-center text-[13px] text-muted-foreground">
+                Generating carousel…
+              </p>
+            ) : null}
           </div>
         </div>
       )}

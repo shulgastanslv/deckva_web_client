@@ -15,6 +15,7 @@ import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid"
 import { StudioProjectCard } from "@/components/studio/projects/studio-project-card";
 import { StudioProjectList } from "@/components/studio/projects/studio-project-list";
 import { StudioStartSection } from "@/components/studio/start/studio-start-section";
+import { StudioPrompt } from "@/components/studio/studio-prompt";
 import {
   StudioContent,
   StudioContentBody,
@@ -96,6 +97,11 @@ export function StudioHome() {
   return (
     <StudioContent>
       <StudioContentBody className="pt-6 sm:pt-10">
+        <StudioPrompt
+          onSubmit={create.generateFromPrompt}
+          busy={create.generating}
+          error={create.generateError}
+        />
 
         <StudioStartSection
           onBlank={create.openBlank}

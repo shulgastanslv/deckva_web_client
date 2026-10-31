@@ -39,7 +39,7 @@ export function StudioSidebarNav() {
     },
     {
       href: "/studio/projects",
-      label: "Projects",
+      label: "Browse",
       icon: FolderIcon,
       active: pathname.startsWith("/studio/projects") && !starred,
     },

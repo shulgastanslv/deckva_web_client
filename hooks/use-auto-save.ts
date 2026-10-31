@@ -26,7 +26,15 @@ export function useAutoSave(persist: Persist) {
     const tick = () => {
       timer = 0;
       const state = useCanvasStore.getState();
-      if (cancelled || !state.autoSave || !state.isDirty || state.isLoadingProject) return;
+      if (
+        cancelled ||
+        !state.autoSave ||
+        !state.isDirty ||
+        state.isLoadingProject ||
+        state.isGeneratingCarousel
+      ) {
+        return;
+      }
       void persistRef.current({ thumbnail: false }).then((res) => {
         if (cancelled || res.success || res.error === "Sign in to save") return;
         if (!useCanvasStore.getState().isDirty || !useCanvasStore.getState().autoSave) return;
@@ -40,7 +48,14 @@ export function useAutoSave(persist: Persist) {
     };
 
     const unsubscribe = useCanvasStore.subscribe((state, previous) => {
-      if (!state.autoSave || !state.isDirty || state.isLoadingProject) return;
+      if (
+        !state.autoSave ||
+        !state.isDirty ||
+        state.isLoadingProject ||
+        state.isGeneratingCarousel
+      ) {
+        return;
+      }
       if (state.editRevision === previous.editRevision && state.autoSave === previous.autoSave) return;
       schedule();
     });

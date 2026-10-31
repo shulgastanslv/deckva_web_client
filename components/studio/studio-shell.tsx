@@ -56,9 +56,9 @@ export function StudioShell({ children }: { children: ReactNode }) {
           onTemplates={create.openTemplates}
         />
 
+        <StudioUpgradeBanner />
         <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
           <StudioHeader onSignIn={() => setAuthOpen(true)} />
-          <StudioUpgradeBanner />
           <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
             {children}
           </div>

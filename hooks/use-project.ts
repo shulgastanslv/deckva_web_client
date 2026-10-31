@@ -153,7 +153,11 @@ export function useProject() {
         return { success: true as const };
       } finally {
         if (seq === loadSeq.current) {
-          useCanvasStore.getState().setLoadingProject(false);
+          const state = useCanvasStore.getState();
+          // Keep the canvas fallback up while AI generation owns the overlay.
+          if (!state.isGeneratingCarousel) {
+            state.setLoadingProject(false);
+          }
         }
       }
     },

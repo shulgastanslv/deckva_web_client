@@ -7,6 +7,8 @@ export interface ProjectSlice {
   isDirty: boolean;
   isSaving: boolean;
   isLoadingProject: boolean;
+  /** AI carousel generation overlay (keeps the canvas fallback visible). */
+  isGeneratingCarousel: boolean;
   lastSavedAt: string | null;
   /** Bumps on every edit so a save can tell new work arrived while it was in flight. */
   editRevision: number;
@@ -16,6 +18,7 @@ export interface ProjectSlice {
   setDirty: (dirty: boolean) => void;
   setSaving: (saving: boolean) => void;
   setLoadingProject: (loading: boolean) => void;
+  setGeneratingCarousel: (generating: boolean) => void;
   markSaved: () => void;
   loadProjectState: (payload: {
     id: string;
@@ -51,6 +54,7 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
   isDirty: false,
   isSaving: false,
   isLoadingProject: false,
+  isGeneratingCarousel: false,
   lastSavedAt: null,
   editRevision: 0,
 
@@ -64,6 +68,12 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
     })),
   setSaving: (isSaving) => set({ isSaving }),
   setLoadingProject: (isLoadingProject) => set({ isLoadingProject }),
+  setGeneratingCarousel: (isGeneratingCarousel) =>
+    set(
+      isGeneratingCarousel
+        ? { isGeneratingCarousel: true, isLoadingProject: true }
+        : { isGeneratingCarousel: false, isLoadingProject: false },
+    ),
   markSaved: () => set({ isDirty: false, lastSavedAt: new Date().toISOString() }),
 
   loadProjectState: ({ id, title, aspectRatio, slides, document }) => {
@@ -97,6 +107,7 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
       isDirty: false,
       isSaving: false,
       isLoadingProject: false,
+      isGeneratingCarousel: false,
       lastSavedAt: null,
     });
 

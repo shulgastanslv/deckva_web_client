@@ -16,6 +16,7 @@ import { RightSidebar } from "@/components/canvas/right-sidebar";
 import { PreviewModal } from "@/components/canvas/preview-modal";
 import type { NavId } from "@/components/canvas/left-sidebar";
 import { StudioIntentBootstrap } from "@/components/studio/studio-intent-bootstrap";
+import { peekStudioIntent } from "@/lib/studio/pending-intent";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
 import { useAutoSave } from "@/hooks/use-auto-save";
@@ -36,10 +37,16 @@ function ProjectBootstrap() {
 
   useEffect(() => {
     if (!slidesController) return;
-
-    const storeId = useCanvasStore.getState().currentProjectId;
-    if (storeId) return;
     if (!projectId) return;
+
+    const store = useCanvasStore.getState();
+    if (store.currentProjectId || store.isGeneratingCarousel) return;
+
+    // Generate intent owns the first load — keep the canvas fallback for AI.
+    const intent = peekStudioIntent();
+    if (intent?.type === "generate" && intent.projectId === projectId) {
+      return;
+    }
 
     void loadProject(projectId);
   }, [projectId, slidesController, loadProject]);
@@ -157,9 +164,9 @@ export default function CarouselEditor() {
         )}
 
         <Suspense fallback={null}>
+          <StudioIntentBootstrap />
           <ProjectBootstrap />
           <AuthLinkHandler />
-          <StudioIntentBootstrap />
         </Suspense>
 
         <div className="flex min-h-0 flex-1">
