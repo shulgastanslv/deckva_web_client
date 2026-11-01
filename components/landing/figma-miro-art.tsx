@@ -4,7 +4,7 @@ function Canvas({ children }: { children: ReactNode }) {
   return (
     <div
       aria-hidden
-      className="flex h-64 w-full items-center overflow-hidden bg-[#f6f7f9] px-4 sm:h-80 sm:px-7 [background-image:radial-gradient(circle,rgba(28,29,38,0.14)_1px,transparent_1px)] [background-size:18px_18px]"
+      className="flex h-72 w-full items-center overflow-hidden bg-[#f6f7f9] px-4 sm:h-80 sm:px-7 [background-image:radial-gradient(circle,rgba(28,29,38,0.14)_1px,transparent_1px)] [background-size:18px_18px]"
     >
       {children}
     </div>
@@ -45,39 +45,78 @@ function SoftLink({ flip = false }: { flip?: boolean }) {
         strokeWidth="1.75"
         strokeLinecap="round"
       />
-      <circle cx="36" cy="40" r="2.3" fill="#7aa6ff" />
     </svg>
   );
 }
 
+function SlideFace({
+  image,
+  accent,
+  className = "",
+}: {
+  image: string;
+  accent: string;
+  className?: string;
+}) {
+  return (
+    <div className={`overflow-hidden rounded-xl bg-white ${className}`}>
+      <div className="h-12 sm:h-16" style={{ backgroundColor: image }} />
+      <div className="px-2 py-1.5 sm:py-2">
+        <div className="h-1.5 w-3/5 rounded-full bg-[#1c1d26]/75" />
+        <div className="mt-1.5 h-1 w-full rounded-full bg-[#1c1d26]/15" />
+        <div className="mt-1 h-1 w-4/5 rounded-full bg-[#1c1d26]/12" />
+        <div
+          className="mt-2 h-3.5 w-9 rounded-full"
+          style={{ backgroundColor: accent }}
+        />
+      </div>
+    </div>
+  );
+}
+
 const SLIDES = [
-  { wash: "#e4ecff", plate: "#8eafff" },
-  { wash: "#ffe3ee", plate: "#ff9ec4" },
-  { wash: "#ddf7e8", plate: "#7ed9ae" },
+  { image: "#8eafff", accent: "#2f5fe0" },
+  { image: "#ff9ec4", accent: "#e24b86" },
+  { image: "#7ed9ae", accent: "#1f9d62" },
 ] as const;
 
-/** A Figma frame arriving on the slide. */
+/** A Figma frame arriving in the editor. */
 export function FigmaImportArt() {
   return (
     <Canvas>
       <LogoTile />
       <SoftLink />
-      <div className="min-w-0 flex-1 rounded-[1.35rem] border border-[#1c1d26]/8 bg-white p-2.5 sm:p-3.5">
-        <div className="flex flex-col gap-1.5">
-          <div className="rounded-xl bg-[#f3f6ff] px-2.5 py-2">
-            <div className="h-1.5 w-2/5 rounded-full bg-[#8eafff]" />
-            <div className="mt-1.5 h-1.5 w-3/5 rounded-full bg-[#1c1d26]/10" />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[1.25rem] border border-[#1c1d26]/8 bg-white">
+        <div className="flex items-center gap-2 border-b border-[#1c1d26]/8 px-2.5 py-1.5">
+          <FigmaMark className="h-3.5 w-2.5 shrink-0" />
+          <div className="h-1.5 w-14 rounded-full bg-[#1c1d26]/25" />
+          <div className="ml-auto h-4 w-9 rounded-full bg-[#1c1d26]" />
+        </div>
+        <div className="flex min-h-0 flex-1">
+          <div className="hidden w-[4.75rem] shrink-0 flex-col gap-1 border-r border-[#1c1d26]/8 bg-[#fafbfc] p-1.5 sm:flex">
+            {[
+              { tone: "#8eafff", width: "w-8", on: true },
+              { tone: "#ff9ec4", width: "w-10", on: false },
+              { tone: "#7ed9ae", width: "w-7", on: false },
+            ].map((layer) => (
+              <div
+                key={layer.tone}
+                className={`flex items-center gap-1 rounded-md px-1 py-1 ${layer.on ? "bg-[#e7eeff]" : ""}`}
+              >
+                <div
+                  className="size-3 shrink-0 rounded-[3px]"
+                  style={{ backgroundColor: layer.tone }}
+                />
+                <div className={`h-1 rounded-full bg-[#1c1d26]/25 ${layer.width}`} />
+              </div>
+            ))}
           </div>
-          <div className="flex items-end gap-1 rounded-xl bg-[#f7f8fb] px-2.5 py-2">
-            <div className="h-2 flex-1 rounded-sm bg-[#d5e2ff]" />
-            <div className="h-3.5 flex-1 rounded-sm bg-[#b7cdff]" />
-            <div className="h-2.5 flex-1 rounded-sm bg-[#d5e2ff]" />
-            <div className="h-5 flex-1 rounded-sm bg-[#8eafff]" />
-          </div>
-          <div className="grid grid-cols-3 gap-1.5">
-            <div className="h-7 rounded-lg bg-[#ffe7a3]" />
-            <div className="h-7 rounded-lg bg-[#ffd0e4]" />
-            <div className="h-7 rounded-lg bg-[#c9f5de]" />
+          <div className="flex flex-1 items-center justify-center bg-[#eef1f6] p-2 sm:p-3">
+            <SlideFace
+              image={SLIDES[0].image}
+              accent={SLIDES[0].accent}
+              className="w-[7.5rem] border border-[#1c1d26]/8 sm:w-[8.5rem]"
+            />
           </div>
         </div>
       </div>
@@ -85,25 +124,18 @@ export function FigmaImportArt() {
   );
 }
 
-/** Slides leaving the board as a Figma file. */
+/** Finished slides leaving for a Figma file. */
 export function FigmaExportArt() {
   return (
     <Canvas>
       <div className="flex min-w-0 flex-1 gap-1.5 sm:gap-2">
         {SLIDES.map((slide) => (
-          <div
-            key={slide.wash}
-            className="min-w-0 flex-1 rounded-2xl border border-[#1c1d26]/8 bg-white p-1.5"
-          >
-            <div className="h-8 rounded-lg sm:h-11" style={{ backgroundColor: slide.wash }}>
-              <div
-                className="h-1/2 rounded-t-lg"
-                style={{ backgroundColor: slide.plate }}
-              />
-            </div>
-            <div className="mt-1.5 h-1 rounded-full bg-[#1c1d26]/12" />
-            <div className="mt-1 h-1 w-4/5 rounded-full bg-[#1c1d26]/8" />
-          </div>
+          <SlideFace
+            key={slide.image}
+            image={slide.image}
+            accent={slide.accent}
+            className="min-w-0 flex-1 border border-[#1c1d26]/8"
+          />
         ))}
       </div>
       <SoftLink flip />
