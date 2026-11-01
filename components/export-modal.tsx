@@ -22,6 +22,8 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
 import { useSession } from "next-auth/react";
 import { setProjectPublic } from "@/actions/projects";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 import {
   copyImageToClipboard,
@@ -198,14 +200,14 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
       if (!id) {
         const res = await persist();
         if (!res.success || !("projectId" in res) || !res.projectId) {
-          setError("Save the project first");
+          setError(messages.errors.saveFirst);
           return null;
         }
         id = res.projectId;
       }
       const pub = await setProjectPublic(id, true);
       if (!pub.success) {
-        setError("Couldn't create a public link");
+        setError(messages.errors.publicLink);
         return null;
       }
       const url = `${window.location.origin}/view/${id}`;
@@ -248,8 +250,9 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
       return rendered;
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return null;
-      console.error(err);
-      setError(err instanceof Error ? err.message : "Export failed");
+      const message = err instanceof Error ? err.message : messages.errors.exportFailed;
+      reportError(err, message);
+      setError(message);
       return null;
     } finally {
       setExporting(false);
@@ -279,7 +282,9 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't copy");
+      const message = err instanceof Error ? err.message : messages.errors.copy;
+      reportError(err, message);
+      setError(message);
     }
   };
 

@@ -1,4 +1,6 @@
 import type { CanvasState } from "./types";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import type { SlideItem } from "../types";
 
 /** The part of `CanvasManager` the slide logic depends on. */
@@ -159,7 +161,7 @@ export class SlidesController {
     this.queue = run.catch((error) => {
       if (this.disposed || this.canvas.isDisposed) return;
       if (error instanceof DOMException && error.name === "AbortError") return;
-      console.error("Slide operation failed:", error);
+      reportError(error, messages.errors.slideOperation);
     });
     return run;
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -12,14 +12,8 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import {
-  createFolder,
-  deleteFolder,
-  getUserFolders,
-  renameFolder,
-  type FolderListItem,
-} from "@/actions/folders";
-import { getActiveOrganization } from "@/actions/organizations";
+import { createFolder, deleteFolder, renameFolder } from "@/actions/folders";
+import { useActiveOrganization, useUserFolders } from "@/lib/studio/queries";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,49 +26,20 @@ import { cn } from "@/lib/utils";
 
 export function StudioFoldersSection() {
   const { status } = useSession();
+  const signedIn = status === "authenticated";
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeFolderId = searchParams.get("folder");
 
-  const [folders, setFolders] = useState<FolderListItem[]>([]);
-  const [isUpgrade, setIsUpgrade] = useState(false);
+  const foldersQuery = useUserFolders(signedIn);
+  const organization = useActiveOrganization(signedIn);
+  const folders = foldersQuery.data?.folders ?? [];
+  const isUpgrade = Boolean(organization.data?.organization?.isUpgrade);
   const [creating, setCreating] = useState(false);
   const [draftName, setDraftName] = useState("");
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [busy, setBusy] = useState(false);
-
-  const signedIn = status === "authenticated";
-
-  const refresh = useCallback(async () => {
-    if (!signedIn) {
-      setFolders([]);
-      setIsUpgrade(false);
-      return;
-    }
-    const [foldersRes, orgRes] = await Promise.all([
-      getUserFolders(),
-      getActiveOrganization(),
-    ]);
-    if (foldersRes.success) setFolders(foldersRes.folders);
-    if (orgRes.success) setIsUpgrade(Boolean(orgRes.organization?.isUpgrade));
-  }, [signedIn]);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  useEffect(() => {
-    const onChanged = () => {
-      void refresh();
-    };
-    window.addEventListener("studio:folders-changed", onChanged);
-    window.addEventListener("studio:org-changed", onChanged);
-    return () => {
-      window.removeEventListener("studio:folders-changed", onChanged);
-      window.removeEventListener("studio:org-changed", onChanged);
-    };
-  }, [refresh]);
 
   const notifyChanged = () => {
     window.dispatchEvent(new CustomEvent("studio:folders-changed"));
@@ -103,7 +68,6 @@ export function StudioFoldersSection() {
       if (res.success) {
         setCreating(false);
         setDraftName("");
-        await refresh();
         notifyChanged();
       } else if ("error" in res && isUpgradeRequiredError(res.error)) {
         setCreating(false);
@@ -126,7 +90,6 @@ export function StudioFoldersSection() {
       const res = await renameFolder(id, name);
       if (res.success) {
         setRenamingId(null);
-        await refresh();
         notifyChanged();
       }
     } finally {
@@ -140,7 +103,6 @@ export function StudioFoldersSection() {
     try {
       const res = await deleteFolder(id);
       if (res.success) {
-        await refresh();
         notifyChanged();
       }
     } finally {

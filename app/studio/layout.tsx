@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 
+import { StudioSessionCache } from "@/components/studio/studio-session-cache";
+
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
   variable: "--font-studio-sans",
@@ -56,6 +58,7 @@ export default function StudioLayout({
     <div
       className={`${inter.variable} ${instrumentSerif.variable} ${inter.className} h-dvh antialiased`}
     >
+      <StudioSessionCache />
       {children}
     </div>
   );

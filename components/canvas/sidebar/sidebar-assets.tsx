@@ -6,6 +6,8 @@ import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import {
   ASSETS_STORAGE_KEY,
   readUserAssets,
@@ -114,7 +116,8 @@ export function SidebarAssets() {
       }
       persist(next);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't add that file");
+      setError(messages.errors.addFile);
+      reportError(err, messages.errors.addFile);
     }
   };
 
@@ -126,8 +129,8 @@ export function SidebarAssets() {
       await manager.objects.addImage(item.dataUrl, { maxSize: 480 });
       manager.commit();
     } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : "Couldn't add that asset");
+      reportError(err, messages.errors.addAsset);
+      setError(messages.errors.addAsset);
     } finally {
       setLoadingId(null);
     }

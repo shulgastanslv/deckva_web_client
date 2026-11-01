@@ -1,5 +1,6 @@
 "use server"
 
+import { messages } from "@/lib/messages";
 import bcrypt from "bcryptjs";
 import { getServerSession } from "next-auth";
 
@@ -30,7 +31,7 @@ export async function getProfile(): Promise<
 > {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return { success: false, error: "Sign in" };
+    if (!session?.user?.id) return { success: false, error: messages.errors.signIn };
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -43,7 +44,7 @@ export async function getProfile(): Promise<
         createdAt: true,
       },
     });
-    if (!user) return { success: false, error: "Account not found" };
+    if (!user) return { success: false, error: messages.errors.accountNotFound };
 
     return {
       success: true,
@@ -56,7 +57,7 @@ export async function getProfile(): Promise<
     };
   } catch (err) {
     console.error("getProfile error:", err);
-    return { success: false, error: "Couldn't load profile" };
+    return { success: false, error: messages.errors.loadProfile };
   }
 }
 
@@ -67,20 +68,20 @@ export async function updateProfile(input: {
 }): Promise<ProfileResult<{ name: string | null }>> {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return { success: false, error: "Sign in" };
+    if (!session?.user?.id) return { success: false, error: messages.errors.signIn };
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { id: true, name: true, password: true },
     });
-    if (!user) return { success: false, error: "Account not found" };
+    if (!user) return { success: false, error: messages.errors.accountNotFound };
 
     const data: { name?: string; password?: string } = {};
 
     if (typeof input.name === "string") {
       const name = input.name.trim();
-      if (!name) return { success: false, error: "Enter a name" };
-      if (name.length > 80) return { success: false, error: "Name is too long" };
+      if (!name) return { success: false, error: messages.errors.enterName };
+      if (name.length > 80) return { success: false, error: messages.errors.nameTooLong };
       data.name = name;
     }
 
@@ -89,21 +90,21 @@ export async function updateProfile(input: {
     if (wantsPassword) {
       const next = input.newPassword?.trim() ?? "";
       if (next.length < 6) {
-        return { success: false, error: "Password must be at least 6 characters" };
+        return { success: false, error: messages.errors.passwordTooShort };
       }
       if (user.password) {
         const current = input.currentPassword ?? "";
         if (!current) {
-          return { success: false, error: "Enter your current password" };
+          return { success: false, error: messages.errors.currentPassword };
         }
         const ok = await bcrypt.compare(current, user.password);
-        if (!ok) return { success: false, error: "Current password is incorrect" };
+        if (!ok) return { success: false, error: messages.errors.currentPasswordIncorrect };
       }
       data.password = await bcrypt.hash(next, 10);
     }
 
     if (Object.keys(data).length === 0) {
-      return { success: false, error: "Nothing to update" };
+      return { success: false, error: messages.errors.nothingToUpdate };
     }
 
     const updated = await prisma.user.update({
@@ -115,7 +116,7 @@ export async function updateProfile(input: {
     return { success: true, name: updated.name };
   } catch (err) {
     console.error("updateProfile error:", err);
-    return { success: false, error: "Couldn't update profile" };
+    return { success: false, error: messages.errors.updateProfile };
   }
 }
 
@@ -125,7 +126,7 @@ export async function deleteAccount(input: {
 }): Promise<ProfileResult> {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return { success: false, error: "Sign in" };
+    if (!session?.user?.id) return { success: false, error: messages.errors.signIn };
 
     if (input.confirm.trim().toUpperCase() !== "DELETE") {
       return { success: false, error: 'Type DELETE to confirm' };
@@ -135,22 +136,22 @@ export async function deleteAccount(input: {
       where: { id: session.user.id },
       select: { id: true, password: true },
     });
-    if (!user) return { success: false, error: "Account not found" };
+    if (!user) return { success: false, error: messages.errors.accountNotFound };
 
     if (user.password) {
       const password = input.password ?? "";
       if (!password) {
-        return { success: false, error: "Enter your password" };
+        return { success: false, error: messages.errors.enterPassword };
       }
       const ok = await bcrypt.compare(password, user.password);
-      if (!ok) return { success: false, error: "Password is incorrect" };
+      if (!ok) return { success: false, error: messages.errors.passwordIncorrect };
     }
 
     await prisma.user.delete({ where: { id: user.id } });
     return { success: true };
   } catch (err) {
     console.error("deleteAccount error:", err);
-    return { success: false, error: "Couldn't delete account" };
+    return { success: false, error: messages.errors.deleteAccount };
   }
 }
 
@@ -158,11 +159,11 @@ export async function registerUser({ name, email, password }: RegisterInput) {
   try {
     const normalized = normalizeEmail(email);
     if (!isValidEmail(normalized) || !password) {
-      return { error: "Enter a valid email and a password" };
+      return { error: messages.errors.validEmailAndPassword };
     }
 
     if (password.length < 6) {
-      return { error: "Password must be at least 6 characters" };
+      return { error: messages.errors.passwordTooShort };
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -170,7 +171,7 @@ export async function registerUser({ name, email, password }: RegisterInput) {
     });
 
     if (existingUser) {
-      return { error: "An account with this email already exists" };
+      return { error: messages.errors.accountExists };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -200,6 +201,6 @@ export async function registerUser({ name, email, password }: RegisterInput) {
     };
   } catch (err) {
     console.error("Register user error:", err);
-    return { error: "Something went wrong on the server" };
+    return { error: messages.errors.serverError };
   }
 }

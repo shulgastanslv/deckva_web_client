@@ -1,15 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Bell, Check, ChevronDown, Loader2, X } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
+import { markNotificationsRead, type NotificationItem } from "@/actions/admin";
+import { messages } from "@/lib/messages";
 import {
-  listMyNotifications,
-  markNotificationsRead,
-  type NotificationItem,
-} from "@/actions/admin";
+  fetchMyNotifications,
+  markNotificationCacheRead,
+  useMyNotifications,
+} from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
 
 type Filter = "unread" | "all";
@@ -51,7 +54,7 @@ function NotificationsPanel({
     <div className="flex h-[min(440px,calc(100dvh-32px))] w-[360px] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.14)] dark:border-border dark:bg-background">
       <div className="flex items-center justify-between px-5 pt-4 pb-1">
         <h2 className="text-[16px] font-bold text-neutral-950 dark:text-foreground">
-          Notifications
+          {messages.notifications.title}
         </h2>
         <button
           type="button"
@@ -110,10 +113,10 @@ function NotificationsPanel({
                   "var(--font-studio-serif), ui-serif, Georgia, serif",
               }}
             >
-              No notifications yet
+              {messages.notifications.emptyTitle}
             </p>
             <p className="mt-3 max-w-[260px] text-[13px] leading-relaxed text-neutral-500 dark:text-muted-foreground">
-              Updates about your carousels and workspace will show up here.
+              {messages.notifications.emptyBody}
             </p>
           </div>
         ) : (
@@ -151,42 +154,23 @@ export function StudioNotifications({
 }: {
   className?: string;
 }) {
+  const queryClient = useQueryClient();
   const { status } = useSession();
+  const signedIn = status === "authenticated";
+  const notifications = useMyNotifications(signedIn);
+  const items = notifications.data?.items ?? [];
+  const unread = notifications.data?.unread ?? 0;
+  const loading = signedIn && !notifications.data && !notifications.isError;
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
-  const [items, setItems] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [unread, setUnread] = useState(0);
   const [coords, setCoords] = useState<{ top: number; right: number } | null>(
     null,
   );
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
-  const refresh = useCallback(async () => {
-    if (status !== "authenticated") {
-      setItems([]);
-      setUnread(0);
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await listMyNotifications();
-      if (res.success) {
-        setItems(res.items);
-        setUnread(res.unread);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [status]);
-
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  useEffect(() => {
-    if (!open) return;
+    if (!open || !signedIn) return;
 
     const place = () => {
       const el = triggerRef.current;
@@ -200,11 +184,18 @@ export function StudioNotifications({
     };
 
     place();
-    void refresh();
-    void markNotificationsRead().then(() => {
-      setUnread(0);
-      setItems((prev) => prev.map((item) => ({ ...item, read: true })));
-    });
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetchMyNotifications(queryClient);
+        if (cancelled || res.unread === 0) return;
+        const marked = await markNotificationsRead();
+        if (cancelled || !marked.success) return;
+        markNotificationCacheRead(queryClient);
+      } catch {
+        // The list query keeps the last good result. The server already logged the failure.
+      }
+    })();
 
     const onPointer = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -226,12 +217,13 @@ export function StudioNotifications({
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onResize, true);
     return () => {
+      cancelled = true;
       window.removeEventListener("mousedown", onPointer);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onResize, true);
     };
-  }, [open, refresh]);
+  }, [open, signedIn, queryClient]);
 
   return (
     <>

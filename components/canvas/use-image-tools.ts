@@ -16,6 +16,8 @@ import {
   type UpscaleScale,
 } from "@/lib/image/deckva-tools";
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 
 export type ImageToolId = "remove-bg" | "upscale" | "magic-layer";
 
@@ -47,8 +49,9 @@ export function useImageTools() {
         const src = getActiveImageSource(image);
         await action(image, src);
       } catch (err) {
-        console.error(err);
-        setError(err instanceof Error ? err.message : "Couldn't run the image tool");
+        const message = err instanceof Error ? err.message : messages.errors.imageTool;
+        reportError(err, message);
+        setError(message);
       } finally {
         setBusy(null);
       }

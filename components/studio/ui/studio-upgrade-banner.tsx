@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowUpCircle, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import { getActiveOrganization } from "@/actions/organizations";
-import { getUserProjects } from "@/actions/projects";
+import { useActiveOrganization, useUserProjects } from "@/lib/studio/queries";
 import {
   FREE_CAROUSEL_LIMIT,
   freeCarouselLimitMessage,
@@ -17,48 +16,20 @@ const DISMISS_KEY = "studio:upgrade-banner-dismissed";
 export function StudioUpgradeBanner({ className }: { className?: string }) {
   const { status } = useSession();
   const signedIn = status === "authenticated";
-  const [visible, setVisible] = useState(false);
+  const organization = useActiveOrganization(signedIn);
+  const projects = useUserProjects("", signedIn);
+  const [dismissed, setDismissed] = useState(false);
 
-  const refresh = useCallback(async () => {
-    if (!signedIn) {
-      setVisible(false);
-      return;
-    }
-    if (
-      typeof window !== "undefined" &&
-      sessionStorage.getItem(DISMISS_KEY) === "1"
-    ) {
-      setVisible(false);
-      return;
-    }
-
-    const [orgRes, projectsRes] = await Promise.all([
-      getActiveOrganization(),
-      getUserProjects(),
-    ]);
-
-    if (!orgRes.success || orgRes.organization?.isUpgrade) {
-      setVisible(false);
-      return;
-    }
-
-    const count = projectsRes.success ? projectsRes.projects.length : 0;
-    setVisible(count >= FREE_CAROUSEL_LIMIT);
-  }, [signedIn]);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  useEffect(() => {
-    const onChanged = () => void refresh();
-    window.addEventListener("studio:org-changed", onChanged);
-    window.addEventListener("core:projects-changed", onChanged);
-    return () => {
-      window.removeEventListener("studio:org-changed", onChanged);
-      window.removeEventListener("core:projects-changed", onChanged);
-    };
-  }, [refresh]);
+  const ready = organization.isSuccess && projects.isSuccess;
+  const overLimit =
+    ready &&
+    !organization.data.organization?.isUpgrade &&
+    projects.data.projects.length >= FREE_CAROUSEL_LIMIT;
+  const visible =
+    signedIn &&
+    !dismissed &&
+    overLimit &&
+    (typeof window === "undefined" || sessionStorage.getItem(DISMISS_KEY) !== "1");
 
   if (!visible) return null;
 
@@ -68,7 +39,7 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
 
   const dismiss = () => {
     sessionStorage.setItem(DISMISS_KEY, "1");
-    setVisible(false);
+    setDismissed(true);
   };
 
   return (

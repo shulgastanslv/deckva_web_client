@@ -1,3 +1,4 @@
+import { messages } from "@/lib/messages";
 ﻿"use server";
 
 import { getServerSession } from "next-auth";
@@ -67,7 +68,7 @@ export async function ensureUserOrganization(): Promise<
 > {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -78,7 +79,7 @@ export async function ensureUserOrganization(): Promise<
         activeOrganizationId: true,
       },
     });
-    if (!user) return { success: false, error: "User not found" };
+    if (!user) return { success: false, error: messages.errors.userNotFound };
 
     let memberships = await prisma.organizationMember.findMany({
       where: { userId },
@@ -160,7 +161,7 @@ export async function ensureUserOrganization(): Promise<
     };
   } catch (err) {
     console.error("ensureUserOrganization error:", err);
-    return { success: false, error: "Couldn't load organization" };
+    return { success: false, error: messages.errors.loadOrganization };
   }
 }
 
@@ -172,7 +173,7 @@ export async function getUserOrganizations(): Promise<
 > {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     await ensureUserOrganization();
 
@@ -205,7 +206,7 @@ export async function getUserOrganizations(): Promise<
     };
   } catch (err) {
     console.error("getUserOrganizations error:", err);
-    return { success: false, error: "Couldn't load organizations" };
+    return { success: false, error: messages.errors.loadOrganizations };
   }
 }
 
@@ -214,7 +215,7 @@ export async function createOrganization(
 ): Promise<ActionResult<{ organization: OrganizationListItem }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const trimmed = name?.trim() || "New organization";
     const org = await prisma.organization.create({
@@ -240,7 +241,7 @@ export async function createOrganization(
     return { success: true, organization: await mapOrg(org, userId) };
   } catch (err) {
     console.error("createOrganization error:", err);
-    return { success: false, error: "Couldn't create organization" };
+    return { success: false, error: messages.errors.createOrganization };
   }
 }
 
@@ -249,12 +250,12 @@ export async function setActiveOrganization(
 ): Promise<ActionResult<{ organizationId: string }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const membership = await prisma.organizationMember.findFirst({
       where: { userId, organizationId },
     });
-    if (!membership) return { success: false, error: "Organization not found" };
+    if (!membership) return { success: false, error: messages.errors.organizationNotFound };
 
     await prisma.user.update({
       where: { id: userId },
@@ -267,7 +268,7 @@ export async function setActiveOrganization(
     return { success: true, organizationId };
   } catch (err) {
     console.error("setActiveOrganization error:", err);
-    return { success: false, error: "Couldn't switch organization" };
+    return { success: false, error: messages.errors.switchOrganization };
   }
 }
 
@@ -280,6 +281,6 @@ export async function getActiveOrganization(): Promise<
     return { success: true, organization: ensured.organization };
   } catch (err) {
     console.error("getActiveOrganization error:", err);
-    return { success: false, error: "Couldn't load organization" };
+    return { success: false, error: messages.errors.loadOrganization };
   }
 }

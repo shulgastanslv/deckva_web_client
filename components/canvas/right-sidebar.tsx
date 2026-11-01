@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import { PillSlider } from "@/components/ui/pill-slider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -708,7 +710,7 @@ export function RightSidebar({
         changeImageSource(dataUrl);
         setImageUrlInput("");
       })
-      .catch((err) => console.error(err));
+      .catch((err) => reportError(err, messages.errors.addImage));
     e.target.value = "";
   };
 

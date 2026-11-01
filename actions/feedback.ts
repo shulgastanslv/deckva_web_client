@@ -1,5 +1,6 @@
 "use server";
 
+import { messages } from "@/lib/messages";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
@@ -35,7 +36,7 @@ export async function submitFeedback(input: {
 }): Promise<{ success: true } | { success: false; error: string }> {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
-  if (!userId) return { success: false, error: "Sign in to send feedback" };
+  if (!userId) return { success: false, error: messages.errors.signInFeedback };
 
   const raw = Array.isArray(input.images) ? input.images : [];
   if (raw.length > IMAGE_MAX) {
@@ -45,10 +46,10 @@ export async function submitFeedback(input: {
   const images: string[] = [];
   for (const item of raw) {
     if (typeof item !== "string" || !isDataImage(item)) {
-      return { success: false, error: "Только PNG, JPEG, WebP или GIF" };
+      return { success: false, error: messages.errors.feedbackImages };
     }
     if (approxBytes(item) > IMAGE_BYTES_MAX) {
-      return { success: false, error: "Один из файлов слишком большой (макс. 2 МБ)" };
+      return { success: false, error: messages.errors.feedbackTooLarge };
     }
     images.push(item);
   }
@@ -58,10 +59,10 @@ export async function submitFeedback(input: {
     message = `Карусель · ${images.length} слайд${images.length === 1 ? "" : images.length < 5 ? "а" : "ов"}`;
   }
   if (message.length < MESSAGE_MIN) {
-    return { success: false, error: "Добавьте карусель или короткий текст" };
+    return { success: false, error: messages.errors.feedbackEmpty };
   }
   if (message.length > MESSAGE_MAX) {
-    return { success: false, error: "Сообщение слишком длинное" };
+    return { success: false, error: messages.errors.feedbackTooLong };
   }
 
   try {
@@ -71,7 +72,7 @@ export async function submitFeedback(input: {
     return { success: true };
   } catch (err) {
     console.error("submitFeedback:", err);
-    return { success: false, error: "Couldn't save feedback" };
+    return { success: false, error: messages.errors.saveFeedback };
   }
 }
 
@@ -79,13 +80,13 @@ export async function listFeedbacks(): Promise<
   { success: true; items: FeedbackItem[] } | { success: false; error: string }
 > {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+  if (!session?.user?.id) return { success: false, error: messages.errors.unauthorized };
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { role: true },
   });
-  if (user?.role !== "ADMIN") return { success: false, error: "Unauthorized" };
+  if (user?.role !== "ADMIN") return { success: false, error: messages.errors.unauthorized };
 
   try {
     const rows = await prisma.feedback.findMany({
@@ -106,6 +107,6 @@ export async function listFeedbacks(): Promise<
     };
   } catch (err) {
     console.error("listFeedbacks:", err);
-    return { success: false, error: "Couldn't load feedback" };
+    return { success: false, error: messages.errors.loadFeedback };
   }
 }

@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { NotAvailablePhone } from "@/components/not-available-phone";
+import { useMediaQuery } from "@/hooks/use-media-query";
+
+const PHONE_QUERY = "(max-width: 767px)";
 
 export function StudioPhoneGate({ children }: { children: ReactNode }) {
-  const [isPhone, setIsPhone] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 767px)");
-    const update = () => setIsPhone(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
+  const isPhone = useMediaQuery(PHONE_QUERY);
 
   if (isPhone === null) return <div className="h-dvh bg-background" />;
   if (isPhone) return <NotAvailablePhone />;

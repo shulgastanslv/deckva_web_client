@@ -1,15 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
 import {
   createOrganization,
-  getUserOrganizations,
   setActiveOrganization,
-  type OrganizationListItem,
 } from "@/actions/organizations";
+import { studioKeys, useUserOrganizations } from "@/lib/studio/queries";
 import { StudioOrgAvatar } from "@/components/studio/org/studio-org-avatar";
 import { StudioBadge } from "@/components/studio/ui/studio-badge";
 import {
@@ -28,36 +28,16 @@ export function StudioOrgSwitcher({
   variant?: "sidebar" | "header";
   className?: string;
 }) {
+  const queryClient = useQueryClient();
   const { status } = useSession();
   const signedIn = status === "authenticated";
+  const organizations = useUserOrganizations(signedIn);
+  const orgs = organizations.data?.organizations ?? [];
+  const activeId = organizations.data?.activeOrganizationId ?? null;
   const [open, setOpen] = useState(false);
-  const [orgs, setOrgs] = useState<OrganizationListItem[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
-
-  const refresh = useCallback(async () => {
-    if (!signedIn) {
-      setOrgs([]);
-      setActiveId(null);
-      return;
-    }
-    const res = await getUserOrganizations();
-    if (!res.success) return;
-    setOrgs(res.organizations);
-    setActiveId(res.activeOrganizationId);
-  }, [signedIn]);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  useEffect(() => {
-    const onChanged = () => void refresh();
-    window.addEventListener("studio:org-changed", onChanged);
-    return () => window.removeEventListener("studio:org-changed", onChanged);
-  }, [refresh]);
 
   const active = orgs.find((o) => o.id === activeId) ?? orgs[0] ?? null;
 
@@ -70,7 +50,9 @@ export function StudioOrgSwitcher({
     try {
       const res = await setActiveOrganization(id);
       if (res.success) {
-        setActiveId(id);
+        queryClient.setQueryData(studioKeys.organizations, (current: typeof organizations.data) =>
+          current ? { ...current, activeOrganizationId: id } : current,
+        );
         setOpen(false);
         window.dispatchEvent(new CustomEvent("studio:org-changed"));
         window.dispatchEvent(new CustomEvent("studio:folders-changed"));
@@ -90,7 +72,6 @@ export function StudioOrgSwitcher({
         setCreating(false);
         setDraft("");
         setOpen(false);
-        await refresh();
         window.dispatchEvent(new CustomEvent("studio:org-changed"));
         window.dispatchEvent(new CustomEvent("studio:folders-changed"));
         window.dispatchEvent(new CustomEvent("core:projects-changed"));

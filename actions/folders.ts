@@ -1,5 +1,6 @@
 "use server";
 
+import { messages } from "@/lib/messages";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
@@ -29,11 +30,11 @@ export async function getUserFolders(): Promise<
 > {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const ensured = await ensureUserOrganization();
     if (!ensured.success) {
-      return { success: false, error: "Couldn't load organization" };
+      return { success: false, error: messages.errors.loadOrganization };
     }
     const organizationId = ensured.organization.id;
 
@@ -54,7 +55,7 @@ export async function getUserFolders(): Promise<
     };
   } catch (err) {
     console.error("getUserFolders error:", err);
-    return { success: false, error: "Couldn't load folders" };
+    return { success: false, error: messages.errors.loadFolders };
   }
 }
 
@@ -63,16 +64,16 @@ export async function createFolder(
 ): Promise<ActionResult<{ folder: FolderListItem }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const ensured = await ensureUserOrganization();
     if (!ensured.success) {
-      return { success: false, error: "Couldn't load organization" };
+      return { success: false, error: messages.errors.loadOrganization };
     }
     if (!(await userHasPro(userId))) {
       return {
         success: false,
-        error: "Upgrade to Pro to create folders",
+        error: messages.errors.upgradeFolders,
       };
     }
 
@@ -98,7 +99,7 @@ export async function createFolder(
     };
   } catch (err) {
     console.error("createFolder error:", err);
-    return { success: false, error: "Couldn't create folder" };
+    return { success: false, error: messages.errors.createFolder };
   }
 }
 
@@ -108,17 +109,17 @@ export async function renameFolder(
 ): Promise<ActionResult<{ folder: FolderListItem }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const trimmed = name.trim();
     if (!folderId || !trimmed) {
-      return { success: false, error: "Name is required" };
+      return { success: false, error: messages.errors.nameRequired };
     }
 
     const existing = await prisma.folder.findFirst({
       where: { id: folderId, userId },
     });
-    if (!existing) return { success: false, error: "Folder not found" };
+    if (!existing) return { success: false, error: messages.errors.folderNotFound };
 
     const folder = await prisma.folder.update({
       where: { id: folderId },
@@ -140,7 +141,7 @@ export async function renameFolder(
     };
   } catch (err) {
     console.error("renameFolder error:", err);
-    return { success: false, error: "Couldn't rename folder" };
+    return { success: false, error: messages.errors.renameFolder };
   }
 }
 
@@ -149,13 +150,13 @@ export async function deleteFolder(
 ): Promise<ActionResult> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-    if (!folderId) return { success: false, error: "folderId is required" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!folderId) return { success: false, error: messages.errors.folderIdRequired };
 
     const existing = await prisma.folder.findFirst({
       where: { id: folderId, userId },
     });
-    if (!existing) return { success: false, error: "Folder not found" };
+    if (!existing) return { success: false, error: messages.errors.folderNotFound };
 
     await prisma.folder.delete({ where: { id: folderId } });
 
@@ -165,7 +166,7 @@ export async function deleteFolder(
     return { success: true };
   } catch (err) {
     console.error("deleteFolder error:", err);
-    return { success: false, error: "Couldn't delete folder" };
+    return { success: false, error: messages.errors.deleteFolder };
   }
 }
 
@@ -175,19 +176,19 @@ export async function moveProjectToFolder(
 ): Promise<ActionResult> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const project = await prisma.project.findFirst({
       where: { id: projectId, userId },
     });
-    if (!project) return { success: false, error: "Project not found" };
+    if (!project) return { success: false, error: messages.errors.projectNotFound };
 
     if (folderId) {
       const folder = await prisma.folder.findFirst({
         where: { id: folderId, userId },
       });
-      if (!folder) return { success: false, error: "Folder not found" };
+      if (!folder) return { success: false, error: messages.errors.folderNotFound };
     }
 
     await prisma.project.update({
@@ -201,6 +202,6 @@ export async function moveProjectToFolder(
     return { success: true };
   } catch (err) {
     console.error("moveProjectToFolder error:", err);
-    return { success: false, error: "Couldn't move project" };
+    return { success: false, error: messages.errors.moveProject };
   }
 }

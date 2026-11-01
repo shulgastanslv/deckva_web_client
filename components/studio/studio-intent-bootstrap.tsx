@@ -16,6 +16,8 @@ import { useApplyTemplate } from "@/hooks/use-apply-template";
 import { useProject } from "@/hooks/use-project";
 import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 
 function notifyProjectsChanged() {
   window.dispatchEvent(new CustomEvent("core:projects-changed"));
@@ -73,13 +75,13 @@ export function StudioIntentBootstrap() {
               typeof payload === "object" &&
               typeof (payload as { error?: unknown }).error === "string"
                 ? (payload as { error: string }).error
-                : "Couldn't generate the carousel";
+                : messages.errors.generateCarousel;
             throw new Error(message);
           }
 
           const result = payload as GenerateCarouselResult;
           if (!result?.slides?.length || !result.aspectRatio) {
-            throw new Error("AI returned an empty carousel");
+            throw new Error(messages.errors.emptyCarousel);
           }
 
           await applyPayload({
@@ -101,13 +103,16 @@ export function StudioIntentBootstrap() {
             })),
           });
           if (!saved.success) {
-            throw new Error("Couldn't save the carousel");
+            throw new Error(messages.errors.saveCarousel);
           }
 
           useCanvasStore.getState().markSaved();
           notifyProjectsChanged();
         } catch (error) {
-          console.error(error);
+          reportError(
+            error,
+            error instanceof Error ? error.message : messages.errors.generateCarousel,
+          );
           // Leave the blank project open so the user can keep editing.
           await loadProject(intent.projectId);
         } finally {
@@ -156,7 +161,7 @@ export function StudioIntentBootstrap() {
           stripQuery("new");
         }
       } catch (error) {
-        console.error(error);
+        reportError(error, messages.errors.openEditor);
       }
     })();
   }, [

@@ -1,4 +1,6 @@
 import type { CanvasManager } from "./manager";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import {
   canCopySelection,
   hasRememberedSelection,
@@ -76,7 +78,7 @@ export function bindKeyboardShortcuts(
     if (images.length > 0) {
       e.preventDefault();
       void pasteImageFiles(manager.objects, images).catch((error) => {
-        console.error(error);
+        reportError(error, messages.errors.pasteImage);
       });
       return;
     }

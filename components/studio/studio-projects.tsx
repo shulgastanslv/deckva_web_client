@@ -1,15 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import { getUserFolders, type FolderListItem } from "@/actions/folders";
 import {
-  getUserProjects,
-  type ProjectListItem,
-} from "@/actions/projects";
+  useInvalidateStudioProjects,
+  useUserFolders,
+  useUserProjects,
+} from "@/lib/studio/queries";
 import { AuthModal } from "@/components/auth";
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
@@ -34,12 +34,21 @@ export function StudioProjects() {
   const create = useStudioCreate();
 
   const folderId = searchParams.get("folder");
+  const projectsQuery = useUserProjects(folderId ?? "", signedIn);
+  const foldersQuery = useUserFolders(signedIn);
+  const projects = useMemo(
+    () => projectsQuery.data?.projects ?? [],
+    [projectsQuery.data],
+  );
+  const folders = useMemo(
+    () => foldersQuery.data?.folders ?? [],
+    [foldersQuery.data],
+  );
+  const loading = signedIn && !projectsQuery.data && !projectsQuery.isError;
+  const refreshProjects = useInvalidateStudioProjects();
   const [filter, setFilter] = useState<"all" | "starred">(
     searchParams.get("filter") === "starred" ? "starred" : "all",
   );
-  const [projects, setProjects] = useState<ProjectListItem[]>([]);
-  const [folders, setFolders] = useState<FolderListItem[]>([]);
-  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"list" | "grid">("list");
 
@@ -56,56 +65,6 @@ export function StudioProjects() {
     return () =>
       window.removeEventListener("studio:sidebar-search", onSidebarSearch);
   }, []);
-
-  const fetchProjects = useCallback(async () => {
-    if (!userId) return;
-    setLoading(true);
-    try {
-      const res = await getUserProjects(
-        folderId ? { folderId } : undefined,
-      );
-      if (res.success) setProjects(res.projects);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, folderId]);
-
-  const fetchFolders = useCallback(async () => {
-    if (!userId) return;
-    const res = await getUserFolders();
-    if (res.success) setFolders(res.folders);
-  }, [userId]);
-
-  useEffect(() => {
-    if (userId) {
-      void fetchProjects();
-      void fetchFolders();
-    } else {
-      setProjects([]);
-      setFolders([]);
-      setLoading(false);
-    }
-  }, [userId, fetchProjects, fetchFolders]);
-
-  useEffect(() => {
-    const onChanged = () => {
-      if (userId) void fetchProjects();
-    };
-    window.addEventListener("core:projects-changed", onChanged);
-    window.addEventListener("studio:org-changed", onChanged);
-    return () => {
-      window.removeEventListener("core:projects-changed", onChanged);
-      window.removeEventListener("studio:org-changed", onChanged);
-    };
-  }, [userId, fetchProjects]);
-
-  useEffect(() => {
-    const onFolders = () => {
-      if (userId) void fetchFolders();
-    };
-    window.addEventListener("studio:folders-changed", onFolders);
-    return () => window.removeEventListener("studio:folders-changed", onFolders);
-  }, [userId, fetchFolders]);
 
   const activeFolder = useMemo(
     () => folders.find((f) => f.id === folderId) ?? null,
@@ -214,7 +173,7 @@ export function StudioProjects() {
                 onOpen={(id) =>
                   router.push(`/studio/editor?project=${id}`)
                 }
-                onChanged={fetchProjects}
+                onChanged={refreshProjects}
               />
             </div>
           )
@@ -230,7 +189,7 @@ export function StudioProjects() {
                 onOpen={() =>
                   router.push(`/studio/editor?project=${project.id}`)
                 }
-                onChanged={fetchProjects}
+                onChanged={refreshProjects}
               />
             ))}
           </StudioBoardGrid>

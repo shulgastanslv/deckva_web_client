@@ -1,5 +1,7 @@
 import { ActiveSelection, type Canvas, type FabricObject } from "fabric";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import type { ObjectFactory } from "./objects";
 
 const PASTE_NUDGE = 20;
@@ -72,7 +74,7 @@ export async function pasteImageFiles(
       const url = await fileToDataUrl(file);
       await objects.addImage(url, { dx: nudge, dy: nudge });
     } catch (error) {
-      console.error(error);
+      reportError(error, messages.errors.pasteImage);
     }
   }
 }
@@ -82,7 +84,7 @@ export async function pasteImageUrl(objects: ObjectFactory, url: string): Promis
   try {
     await objects.addImage(url, { dx: nudge, dy: nudge });
   } catch (error) {
-    console.error(error);
+    reportError(error, messages.errors.pasteImage);
     const center = objects.getLogicalCenter();
     objects.addText(url, center.x + nudge, center.y + nudge);
   }
