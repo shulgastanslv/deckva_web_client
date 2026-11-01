@@ -30,7 +30,6 @@ import {
   PRO_FEATURES,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
-import type { LandingStats } from "@/actions/landing-stats";
 
 const LEGAL = {
   status: "Professional income tax payer",
@@ -221,11 +220,7 @@ const SOCIAL = [
   },
 ] as const;
 
-function formatCount(value: number) {
-  return new Intl.NumberFormat("en").format(value);
-}
-
-export function LandingPage({ stats }: { stats: LandingStats | null }) {
+export function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -249,22 +244,20 @@ export function LandingPage({ stats }: { stats: LandingStats | null }) {
 
       <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
         <div className="relative mx-auto flex max-w-[1200px] items-center justify-between gap-2 rounded-full border border-white/50 bg-white/70 px-2.5 py-2 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:px-4">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-10 rounded-full text-land-ink hover:bg-land-ink/10 hover:text-land-ink md:hidden"
-            aria-label={menuOpen ? "Close menu" : "Menu"}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            <Menu />
-          </Button>
-          <Logo
-            width={32}
-            height={32}
-            className="absolute left-1/2 -translate-x-1/2 text-land-ink md:static md:translate-x-0"
-          />
+          <div className="flex items-center gap-0.5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-10 rounded-full text-land-ink hover:bg-land-ink/10 hover:text-land-ink md:hidden"
+              aria-label={menuOpen ? "Close menu" : "Menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <Menu />
+            </Button>
+            <Logo width={32} height={32} className="text-land-ink" />
+          </div>
 
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 text-sm font-medium text-land-ink/70 md:flex">
             {NAV.map((item) => (
@@ -274,16 +267,15 @@ export function LandingPage({ stats }: { stats: LandingStats | null }) {
             ))}
           </nav>
 
-          <div className="hidden items-center gap-1.5 md:flex">
+          <div className="flex items-center gap-1.5">
             <ThemeSwitcher className="h-10 w-10 text-land-ink hover:bg-land-ink/10 hover:text-land-ink" />
             <Button
               asChild
-              className="h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90"
+              className="hidden h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90 md:inline-flex"
             >
               <a href="/studio">Open</a>
             </Button>
           </div>
-          <div className="size-10 md:hidden" aria-hidden />
         </div>
       </header>
 
@@ -300,17 +292,14 @@ export function LandingPage({ stats }: { stats: LandingStats | null }) {
               <p className="text-xs font-medium tracking-[0.16em] text-black/40 uppercase dark:text-white/40">
                 Menu
               </p>
-              <div className="flex items-center gap-1">
-                <ThemeSwitcher className="size-9 text-[#14151c] hover:bg-black/5 dark:text-[#eef0f6] dark:hover:bg-white/10" />
-                <button
-                  type="button"
-                  aria-label="Close menu"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex size-9 items-center justify-center rounded-xl bg-[#f0f1f4] text-[#14151c] dark:bg-white/10 dark:text-[#eef0f6]"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
+              <button
+                type="button"
+                aria-label="Close menu"
+                onClick={() => setMenuOpen(false)}
+                className="flex size-9 items-center justify-center rounded-xl bg-[#f0f1f4] text-[#14151c] dark:bg-white/10 dark:text-[#eef0f6]"
+              >
+                <X className="size-4" />
+              </button>
             </div>
             <div className="mt-4">
               {MENU_GROUPS.map((group) => {
@@ -803,25 +792,8 @@ export function LandingPage({ stats }: { stats: LandingStats | null }) {
         </ul>
       </LandingSection>
 
-      <LandingSection>
-        <ul className="mx-auto flex max-w-3xl flex-col items-center gap-14 text-center sm:gap-16">
-          {[
-            [stats?.users, "People using Deckva"],
-            [stats?.templates, "Templates"],
-            [stats?.projects, "Projects created"],
-          ].map(([value, label]) => (
-            <li key={String(label)}>
-              <p className="text-5xl font-medium tracking-tight text-land-ink sm:text-7xl">
-                {typeof value === "number" ? formatCount(value) : "—"}
-              </p>
-              <p className={`mt-3 ${landSub}`}>{label}</p>
-            </li>
-          ))}
-        </ul>
-      </LandingSection>
-
-      <footer className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 lg:px-[120px]">
-        <div className="mx-auto max-w-[1440px] rounded-[2rem] bg-[#0c0d11] px-6 py-10 text-white sm:px-10 sm:py-14 lg:rounded-[2.5rem]">
+      <footer className="bg-[#0e0f12] text-white">
+        <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
             {FOOTER_COLUMNS.map((column) => (
               <div key={column.title}>

@@ -1,12 +1,10 @@
 import { Suspense } from "react";
 import { LandingPage } from "@/components/landing/landing-page";
-import { getLandingStats } from "@/actions/landing-stats";
 
-export default async function Landing() {
-  const stats = await getLandingStats();
+export default function Landing() {
   return (
     <Suspense fallback={null}>
-      <LandingPage stats={stats} />
+      <LandingPage />
     </Suspense>
   );
 }
