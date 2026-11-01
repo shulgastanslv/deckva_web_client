@@ -243,13 +243,13 @@ export function LandingPage() {
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
       <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
-        <div className="relative mx-auto flex max-w-[1200px] items-center justify-between gap-2 rounded-full border border-white/50 bg-white/70 px-2.5 py-2 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:px-4">
-          <div className="flex items-center gap-0.5">
+        <div className="mx-auto flex max-w-[1200px] items-center gap-2 rounded-full border border-white/50 bg-white/70 px-2 py-1.5 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:gap-3 sm:px-3">
+          <div className="flex min-w-0 items-center gap-1">
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="size-10 rounded-full text-land-ink hover:bg-land-ink/10 hover:text-land-ink md:hidden"
+              className="size-10 rounded-full text-land-ink hover:bg-land-ink/10 hover:text-land-ink lg:hidden"
               aria-label={menuOpen ? "Close menu" : "Menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((open) => !open)}
@@ -257,37 +257,52 @@ export function LandingPage() {
               <Menu />
             </Button>
             <Logo width={32} height={32} className="text-land-ink" />
+            <nav className="ml-5 hidden items-center gap-5 text-sm font-medium text-land-ink/75 lg:flex">
+              {NAV.map((item) => (
+                <a key={item.link} href={item.link} className="hover:text-land-ink">
+                  {item.name}
+                </a>
+              ))}
+            </nav>
           </div>
 
-          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 text-sm font-medium text-land-ink/70 md:flex">
-            {NAV.map((item) => (
-              <a key={item.link} href={item.link} className="hover:text-land-ink">
-                {item.name}
-              </a>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
             <ThemeSwitcher className="h-10 w-10 text-land-ink hover:bg-land-ink/10 hover:text-land-ink" />
+            {signedIn ? (
+              <a
+                href="/studio"
+                className="hidden px-2 text-sm font-medium text-land-ink/80 hover:text-land-ink sm:inline"
+              >
+                Projects
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="hidden px-2 text-sm font-medium text-land-ink/80 hover:text-land-ink sm:inline"
+                onClick={() => setAuthOpen(true)}
+              >
+                Sign in
+              </button>
+            )}
             <Button
               asChild
-              className="hidden h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90 md:inline-flex"
+              className="h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90"
             >
-              <a href="/studio">Open</a>
+              <a href="/studio">Open studio</a>
             </Button>
           </div>
         </div>
       </header>
 
       {menuOpen ? (
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <button
             type="button"
             aria-label="Close menu"
             className="fixed inset-0 z-[60] bg-black/25 backdrop-blur-[2px]"
             onClick={() => setMenuOpen(false)}
           />
-          <div className="fixed inset-x-3 z-[65] top-[calc(4.75rem+env(safe-area-inset-top))] max-h-[min(36rem,calc(100dvh-6.5rem))] overflow-auto rounded-[1.75rem] bg-white p-5 text-[#14151c] dark:bg-[#1c1d26] dark:text-[#eef0f6]">
+          <div className="fixed inset-x-3 z-[65] top-[calc(4.75rem+env(safe-area-inset-top))] max-h-[min(36rem,calc(100dvh-6.5rem))] overflow-auto rounded-[1.75rem] bg-white p-5 text-[#14151c] lg:hidden dark:bg-[#1c1d26] dark:text-[#eef0f6]">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium tracking-[0.16em] text-black/40 uppercase dark:text-white/40">
                 Menu
@@ -382,12 +397,11 @@ export function LandingPage() {
       <section className="relative overflow-hidden bg-land-blue text-white">
         <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
           <div className="flex w-full max-w-xl flex-col items-center text-center lg:w-[24rem] lg:shrink-0 lg:items-start lg:text-left">
-            <h1 className="max-w-[10ch] text-6xl font-semibold tracking-tight leading-[0.92] sm:text-7xl lg:text-8xl">
-              Slides from a sentence
+            <h1 className="text-6xl font-semibold tracking-tight leading-[0.92] sm:text-7xl lg:text-8xl">
+              One sentence
             </h1>
-            <p className="mt-6 max-w-lg text-xl leading-snug text-white/80 sm:text-2xl">
-              Write what the post is about. The slides follow, in order. You
-              edit them, then download the file.
+            <p className="mt-6 max-w-sm text-xl leading-snug text-white/80 sm:text-2xl">
+              The slides follow, in order.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 lg:justify-start">
               <Button
