@@ -11,7 +11,6 @@ import {
   markNotificationCacheRead,
   useMyNotifications,
 } from "@/lib/studio/queries";
-import { NotificationsArt } from "@/components/canvas/canvas_icons";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -71,10 +70,9 @@ export function NotificationsMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {items.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 px-2 py-5 text-center">
-            <NotificationsArt className="h-auto w-full max-w-[120px]" />
-            <p className="text-[13px] text-muted-foreground">{messages.notifications.emptyMenu}</p>
-          </div>
+          <p className="px-2 py-5 text-center text-[13px] text-muted-foreground">
+            {messages.notifications.emptyMenu}
+          </p>
         ) : (
           <ul className="max-h-80 space-y-2 overflow-y-auto">
             {items.map((item) => (

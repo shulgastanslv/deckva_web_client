@@ -82,7 +82,7 @@ export function GalleryMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="size-5 rounded-full bg-background backdrop-blur-sm text-muted-foreground opacity-0 ring-1 ring-border/60 transition-opacity group-hover:opacity-100 hover:text-foreground"
+          className="size-5 rounded-full bg-background text-muted-foreground opacity-100 ring-1 ring-border/60 transition-opacity hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
           onClick={(event) => event.stopPropagation()}
         >
           <MoreHorizontal className="h-3.5 w-3.5" />

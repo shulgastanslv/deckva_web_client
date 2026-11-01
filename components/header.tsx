@@ -166,8 +166,8 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
 
   return (
     <>
-      <header className="h-13 w-full flex items-center justify-between px-4 bg-background/80 backdrop-blur-md border-b border-border/60 text-[13px] z-20 shrink-0 gap-4 select-none">
-        <div className="flex items-center gap-2 min-w-0">
+      <header className="z-20 flex w-full shrink-0 flex-wrap items-center gap-x-1 gap-y-1 bg-transparent px-2 py-1.5 text-[13px] select-none sm:h-13 sm:flex-nowrap sm:justify-between sm:gap-4 sm:px-4 sm:py-0">
+        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-1">
           <Logo width={30} height={30} href="/studio" />
           <ChevronRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
           <input
@@ -178,7 +178,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             onKeyDown={(e) => {
               if (e.key === "Enter") (e.target as HTMLInputElement).blur();
             }}
-            className="bg-muted/60 font-medium text-foreground text-[13px] px-2.5 py-1 rounded-full border border-transparent hover:border-border/50 focus:border-border/60 focus:bg-muted/40 focus:outline-none transition-colors w-28 sm:w-40 truncate"
+            className="min-w-0 flex-1 truncate rounded-full border border-transparent bg-muted/60 px-2.5 py-1 text-[13px] font-medium text-foreground transition-colors hover:border-border/50 focus:border-border/60 focus:bg-muted/40 focus:outline-none sm:w-40 sm:flex-none"
             placeholder="Project name..."
           />
           {isDirty && (
@@ -198,34 +198,36 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
 
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex max-w-full items-center gap-0.5 overflow-x-auto">
           <div className="flex items-center p-0.5 rounded-full">
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50 hidden sm:inline-flex"
+              className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50"
               onClick={handleUndo}
-              title="Undo (Ctrl+Z)"
+              title="Undo"
             >
               <Undo2 className="w-3.5 h-3.5" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50 hidden sm:inline-flex"
+              className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50"
               onClick={handleRedo}
-              title="Redo (Ctrl+Y)"
+              title="Redo"
             >
               <Redo2 className="w-3.5 h-3.5" />
             </Button>
           </div>
-          <CommandsKbd />
+          <div className="hidden md:block">
+            <CommandsKbd />
+          </div>
           <div className="h-4 w-px bg-border/60 mx-0.5 hidden sm:block" />
           <Button
             variant="default"
             size="sm"
             onClick={onFocus}
-            className="h-9 px-3 text-[13px] font-medium gap-1.5 rounded-full shadow-2xs hover:shadow-xs transition-all"
+            className="h-9 rounded-full px-2 text-[13px] font-medium gap-1.5 sm:px-3"
           >
             <Focus className="w-3 h-3 fill-current text-primary-foreground" />
             <span className="hidden sm:inline">Focus</span>
@@ -241,7 +243,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
           </Button>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="ml-auto flex max-w-full items-center gap-0.5 overflow-x-auto sm:ml-0">
           <Button
             variant="ghost"
             onClick={() => setShowShare(true)}
@@ -256,14 +258,14 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             variant="secondary"
             size="sm"
             onClick={openPublish}
-            className="h-9 px-3 text-[13px] font-medium gap-1.5 rounded-full shadow-2xs hover:shadow-xs transition-all"
+            className="h-9 rounded-full px-2.5 text-[13px] font-medium gap-1.5 sm:px-3"
             title="Publish as Template"
           >
             <Globe className="w-3.5 h-3.5" />
-            <span>Publish</span>
+            <span className="hidden sm:inline">Publish</span>
           </Button>
 
-          <div className="flex items-center h-8 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full pl-2.5 pr-0.5 shadow-2xs transition-all gap-1">
+          <div className="flex h-8 items-center gap-1 rounded-full bg-primary pr-2.5 pl-2.5 text-primary-foreground transition-all hover:bg-primary/90 sm:pr-0.5">
             <button
               type="button"
               onClick={() => setShowExport(true)}
@@ -271,7 +273,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             >
               <ArrowUp className="w-3.5 h-3.5" />
               <span>Export</span>
-              <span className="text-[12px] font-normal text-primary-foreground/70">
+              <span className="hidden text-[12px] font-normal text-primary-foreground/70 sm:inline">
                 [{slideCount}] · PNG
               </span>
             </button>
@@ -280,7 +282,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
               title="Copy current slide"
               onClick={() => void handleCopySlide()}
               disabled={copying}
-              className="h-6 w-6 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground flex items-center justify-center transition-colors active:scale-95 disabled:opacity-60"
+              className="hidden h-6 w-6 items-center justify-center rounded-full bg-primary-foreground/15 text-primary-foreground transition-colors hover:bg-primary-foreground/25 disabled:opacity-60 sm:flex"
             >
               {copying ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -294,13 +296,13 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
               type="button"
               title="Export settings"
               onClick={() => setShowExport(true)}
-              className="h-6 w-6 rounded-full bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground flex items-center justify-center transition-colors active:scale-95"
+              className="hidden h-6 w-6 items-center justify-center rounded-full bg-primary-foreground/15 text-primary-foreground transition-colors hover:bg-primary-foreground/25 sm:flex"
             >
               <SlidersHorizontal className="w-3 h-3" />
             </button>
           </div>
               
-          <div className="h-4 w-px bg-border/60 mx-0.5" />
+          <div className="mx-0.5 hidden h-4 w-px bg-border/60 sm:block" />
 
           {status === "authenticated" ? (
             <DropdownMenu>

@@ -15,13 +15,14 @@ import { AutoFlowPrompt } from "@/components/canvas/auto-flow-prompt";
 import { RightSidebar } from "@/components/canvas/right-sidebar";
 import { PreviewModal } from "@/components/canvas/preview-modal";
 import type { NavId } from "@/components/canvas/left-sidebar";
+import { EditorPhoneDock } from "@/components/canvas/editor-phone-dock";
 import { StudioIntentBootstrap } from "@/components/studio/studio-intent-bootstrap";
 import { peekStudioIntent } from "@/lib/studio/pending-intent";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
-import { StudioPhoneGate } from "@/components/studio-phone-gate";
+import { cn } from "@/lib/utils";
 
 const SlideNavigator = dynamic(
   () => import("@/components/canvas/slide-navigator").then((mod) => mod.SlideNavigator),
@@ -97,6 +98,7 @@ export default function CarouselEditor() {
   const [focusMode, setFocusMode] = useState(false);
   /** Hide only canvas toolbar + slide navigator (sidebars stay). */
   const [canvasChrome, setCanvasChrome] = useState(true);
+  const [phoneSheet, setPhoneSheet] = useState<"library" | "style" | null>(null);
   const manager = useCanvasManager();
 
   useEffect(() => {
@@ -115,6 +117,11 @@ export default function CarouselEditor() {
       }
 
       if (event.key === "Escape" && !event.defaultPrevented) {
+        if (phoneSheet) {
+          event.preventDefault();
+          setPhoneSheet(null);
+          return;
+        }
         if (manager?.crop.active) return;
         const store = useCanvasStore.getState();
         if (store.eraserActive) {
@@ -144,33 +151,63 @@ export default function CarouselEditor() {
       event.preventDefault();
       setActiveNav(next);
       setIsLeftCollapsed(false);
+      if (window.matchMedia("(max-width: 767px)").matches) {
+        setPhoneSheet("library");
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [focusMode, manager]);
+  }, [focusMode, manager, phoneSheet]);
+
+  const glass =
+    "border border-white/60 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/75";
+  const sheetSolid =
+    "max-md:bg-white dark:max-md:bg-[#14151c]";
+  const sheetFrame =
+    "max-md:fixed max-md:inset-x-2 max-md:z-40 max-md:overflow-hidden max-md:rounded-t-3xl max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:h-[min(72dvh,calc(100dvh-8.5rem))] md:static md:h-full md:shrink-0 md:overflow-hidden md:rounded-3xl";
 
   return (
-    <StudioPhoneGate>
-      <div className="flex h-screen w-full flex-col overflow-hidden bg-background font-sans text-foreground select-none">
-        {!focusMode && (
+    <div
+      className={cn(
+        "flex h-dvh w-full flex-col overflow-hidden font-sans text-foreground select-none",
+        focusMode
+          ? "bg-background"
+          : "gap-2 bg-[#e6e8ef] p-2 dark:bg-[#0c0d12] sm:gap-3 sm:p-3",
+      )}
+    >
+      {!focusMode && (
+        <div className={cn("shrink-0 overflow-hidden rounded-[1.75rem]", glass)}>
           <Header
             onPreview={() => {
               const storeCurrentId = useCanvasStore.getState().currentSlideId;
               setPreviewSlideId(storeCurrentId);
               setShowPreviewModal(true);
             }}
-            onFocus={() => setFocusMode(true)}
+            onFocus={() => {
+              setPhoneSheet(null);
+              setFocusMode(true);
+            }}
           />
-        )}
+        </div>
+      )}
 
-        <Suspense fallback={null}>
-          <StudioIntentBootstrap />
-          <ProjectBootstrap />
-          <AuthLinkHandler />
-        </Suspense>
+      <Suspense fallback={null}>
+        <StudioIntentBootstrap />
+        <ProjectBootstrap />
+        <AuthLinkHandler />
+      </Suspense>
 
-        <div className="flex min-h-0 flex-1">
-          {!focusMode && (
+      <div className={cn("flex min-h-0 flex-1", !focusMode && "gap-2 sm:gap-3")}>
+        {!focusMode && (
+          <div
+            className={cn(
+              sheetFrame,
+              "md:bg-white dark:md:bg-[#14151c]",
+              sheetSolid,
+              phoneSheet === "library" ? "max-md:flex" : "max-md:hidden",
+              "md:flex",
+            )}
+          >
             <LeftSidebar
               activeNav={activeNav}
               setActiveNav={setActiveNav}
@@ -179,52 +216,95 @@ export default function CarouselEditor() {
               showDotGrid={showDotGrid}
               setShowDotGrid={setShowDotGrid}
             />
+          </div>
+        )}
+
+        <main
+          className={cn(
+            "relative flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/50",
+            !focusMode && "rounded-3xl",
+          )}
+          style={
+            showDotGrid
+              ? {
+                  backgroundImage:
+                    "radial-gradient(var(--border) 1px, transparent 1px)",
+                  backgroundSize: "24px 24px",
+                }
+              : {}
+          }
+        >
+          {!focusMode && canvasChrome && (
+            <CanvasToolbar onHideChrome={() => setCanvasChrome(false)} />
           )}
 
-          <main
-            className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/50"
-            style={
-              showDotGrid
-                ? {
-                    backgroundImage:
-                      "radial-gradient(var(--border) 1px, transparent 1px)",
-                    backgroundSize: "24px 24px",
-                  }
-                : {}
-            }
-          >
-            {!focusMode && canvasChrome && (
-              <CanvasToolbar onHideChrome={() => setCanvasChrome(false)} />
+          <div className="relative flex min-h-0 flex-1">
+            <CanvasView />
+            {focusMode && <SelectionToolbar />}
+            {focusMode && (
+              <ElementsToolbar onExit={() => setFocusMode(false)} />
             )}
+            {!focusMode && !canvasChrome && (
+              <CanvasChromeRestore onShow={() => setCanvasChrome(true)} />
+            )}
+            {!focusMode && <AutoFlowPrompt />}
+            {!focusMode && phoneSheet ? (
+              <button
+                type="button"
+                aria-label="Close panel"
+                className="absolute inset-0 z-30 md:hidden"
+                onClick={() => setPhoneSheet(null)}
+              />
+            ) : null}
+          </div>
+          {!focusMode && canvasChrome && <SlideNavigator />}
+        </main>
 
-            <div className="relative flex min-h-0 flex-1">
-              <CanvasView />
-              {focusMode && <SelectionToolbar />}
-              {focusMode && (
-                <ElementsToolbar onExit={() => setFocusMode(false)} />
-              )}
-              {!focusMode && !canvasChrome && (
-                <CanvasChromeRestore onShow={() => setCanvasChrome(true)} />
-              )}
-              {!focusMode && <AutoFlowPrompt />}
+        {!focusMode && (
+          <div
+            className={cn(
+              sheetFrame,
+              sheetSolid,
+              "md:bg-transparent dark:md:bg-transparent",
+              phoneSheet === "style" ? "max-md:flex" : "max-md:hidden",
+              "md:flex",
+            )}
+          >
+            <div className="relative h-full min-h-0 w-full">
+              <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-[13px] text-muted-foreground md:hidden">
+                Select an object on the slide to change its style.
+              </p>
+              <div className="relative z-10 flex h-full min-h-0 w-full">
+                <RightSidebar
+                  isRightCollapsed={isRightCollapsed}
+                  setIsRightCollapsed={setIsRightCollapsed}
+                />
+              </div>
             </div>
-            {!focusMode && canvasChrome && <SlideNavigator />}
-          </main>
-
-          {!focusMode && (
-            <RightSidebar
-              isRightCollapsed={isRightCollapsed}
-              setIsRightCollapsed={setIsRightCollapsed}
-            />
-          )}
-        </div>
-
-        <PreviewModal
-          open={showPreviewModal}
-          initialSlideId={previewSlideId}
-          onClose={() => setShowPreviewModal(false)}
-        />
+          </div>
+        )}
       </div>
-    </StudioPhoneGate>
+
+      {!focusMode && (
+        <EditorPhoneDock
+          libraryOpen={phoneSheet === "library"}
+          styleOpen={phoneSheet === "style"}
+          onLibrary={() => {
+            setIsLeftCollapsed(false);
+            setPhoneSheet((current) => (current === "library" ? null : "library"));
+          }}
+          onStyle={() => {
+            setIsRightCollapsed(false);
+            setPhoneSheet((current) => (current === "style" ? null : "style"));
+          }}
+        />
+      )}
+
+      <PreviewModal
+        open={showPreviewModal}
+        initialSlideId={previewSlideId}
+        onClose={() => setShowPreviewModal(false)}
+      />
+    </div>
   );
 }

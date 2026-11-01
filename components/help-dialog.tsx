@@ -1,6 +1,5 @@
 "use client";
 
-import { HelpArt } from "@/components/canvas/canvas_icons";
 import {
   Dialog,
   DialogContent,
@@ -25,12 +24,9 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm gap-0 rounded-2xl border-border p-5">
         <DialogHeader className="space-y-1.5 border-b border-border/40 pb-3 text-left">
-          <div className="flex items-center gap-2.5">
-            <HelpArt className="size-8 shrink-0" />
-            <DialogTitle className="text-[13px] font-semibold tracking-tight">
-              Help
-            </DialogTitle>
-          </div>
+          <DialogTitle className="text-[13px] font-semibold tracking-tight">
+            Help
+          </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed text-muted-foreground">
             One slide at a time. The strip under the canvas is the carousel.
           </DialogDescription>

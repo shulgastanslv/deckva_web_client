@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import { StudioHome } from "@/components/studio/studio-home";
 import { StudioShell } from "@/components/studio/studio-shell";
-import { StudioPhoneGate } from "@/components/studio-phone-gate";
 
 /** Deep-link: open studio and fire the upgrade dialog. */
 export default function StudioUpgradeRoute() {
@@ -20,10 +19,8 @@ export default function StudioUpgradeRoute() {
   }, [router]);
 
   return (
-    <StudioPhoneGate>
-      <StudioShell>
-        <StudioHome />
-      </StudioShell>
-    </StudioPhoneGate>
+    <StudioShell>
+      <StudioHome />
+    </StudioShell>
   );
 }

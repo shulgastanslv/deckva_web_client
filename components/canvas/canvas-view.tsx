@@ -382,7 +382,7 @@ export function CanvasView() {
       >
         <div
           ref={stageRef}
-          className="absolute bg-white shadow-2xl ring-1 ring-border/20"
+          className="absolute bg-white shadow-2xl ring-1 ring-border/20 touch-none"
           style={
             frame
               ? { width: frame.width, height: frame.height, left: frame.left, top: frame.top }
@@ -415,8 +415,8 @@ export function CanvasView() {
               aspectRatio: `${canvasDimensions.width} / ${canvasDimensions.height}`,
               width: frame && frame.width > 0 ? frame.width : undefined,
               height: frame && frame.height > 0 ? frame.height : undefined,
-              maxWidth: "calc(100% - 96px)",
-              maxHeight: "calc(100% - 96px)",
+              maxWidth: "calc(100% - 32px)",
+              maxHeight: "calc(100% - 32px)",
             }}
           >
             <Skeleton className="h-8 w-2/3 rounded-md" />

@@ -284,7 +284,7 @@ export function StudioPrompt({
                   }}
                 >
                   <Monitor className="size-3.5" />
-                  From computer
+                  From device
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer gap-2 rounded-xl px-2.5 py-2 text-[13px]"
