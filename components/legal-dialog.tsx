@@ -46,7 +46,7 @@ const TERMS: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "Other services",
     paragraphs: [
-      "Sign-in can go through Google. Fonts can load from Google Fonts. Icons, vectors, and photos can come from Pixabay under the Pixabay Content License.",
+      "Sign-in can go through Google. Fonts can load from Google Fonts.",
       "Those services have their own terms. Deckva is not responsible for an outage or a change on their side.",
     ],
   },
@@ -115,7 +115,7 @@ const PRIVACY: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "Processors",
     paragraphs: [
-      "The database that holds accounts and projects is hosted for us. Google handles Google sign-in. Google Fonts serves typefaces you pick, so a font request includes the family name. Pixabay serves media search and downloads when you use that panel.",
+      "The database that holds accounts and projects is hosted for us. Google handles Google sign-in. Google Fonts serves typefaces you pick, so a font request includes the family name.",
       "Those providers process data under their own policies, only for the feature you used.",
     ],
   },
@@ -129,7 +129,7 @@ const PRIVACY: { heading: string; paragraphs: string[] }[] = [
   {
     heading: "Your choices",
     paragraphs: [
-      "You can edit your project, turn sharing off, and sign out. You can choose not to upload an image or not to use icon search or fonts beyond the ones already on the slide.",
+      "You can edit your project, turn sharing off, and sign out. You can choose not to upload an image or not to use fonts beyond the ones already on the slide.",
       "If the law where you live gives you a right to access, correct, or delete personal information, write to the address you use to reach Deckva and we will respond.",
     ],
   },
