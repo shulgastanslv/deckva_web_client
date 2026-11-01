@@ -214,6 +214,66 @@ const FAQ = [
     q: "Where do I use it?",
     a: "In the browser, on a computer or a phone.",
   },
+  {
+    value: "figma-in",
+    q: "Can I import from Figma?",
+    a: "Yes. Bring a frame onto the slide. The picture, the type, and the order stay editable in the same project.",
+  },
+  {
+    value: "figma-out",
+    q: "Can I export back to Figma?",
+    a: "Yes. Send the carousel back, or download a PNG of one slide and a ZIP of the set. The file has no watermark.",
+  },
+  {
+    value: "background",
+    q: "What does Remove background do?",
+    a: "Select a picture. The subject stays, and the backdrop goes. The slide itself does not change.",
+  },
+  {
+    value: "magic",
+    q: "What is Magic layer?",
+    a: "It splits one picture into layers you can move, like separate pieces on the same slide.",
+  },
+  {
+    value: "upscale",
+    q: "How far can I upscale?",
+    a: "2×, 3×, or 4×. The sharper image stays on the slide.",
+  },
+  {
+    value: "ratios",
+    q: "Which frame sizes are there?",
+    a: "4:5 for a feed, 1:1 for a square, 9:16 for a story, and 16:9 for a wide frame. The sequence stays one project.",
+  },
+  {
+    value: "count",
+    q: "How many slides does a topic make?",
+    a: "From four to ten, in order. You can add, delete, and move slides after that.",
+  },
+  {
+    value: "language",
+    q: "What language are the slides?",
+    a: "The language follows the words you type. A Russian sentence comes back in Russian. An English sentence comes back in English.",
+  },
+  {
+    value: "template",
+    q: "Can I start from a template?",
+    a: "Yes. A template, a topic, or an empty project. A topic already lays the slides out. A template gives you a shape to fill.",
+  },
+  {
+    value: "pro",
+    q: "What is on Pro that is not free?",
+    a: `Unlimited private carousels, high-resolution exports, folders and brand kits, and priority support. The first ${FREE_CAROUSEL_LIMIT} carousels stay free.`,
+  },
+  {
+    value: "cancel",
+    q: "What happens if I cancel?",
+    a: "Pro stops renewing. Access stays until the end of the paid period. The projects stay in your account.",
+  },
+  {
+    value: "edit",
+    q: "Can I change a generated carousel?",
+    a: "Yes. Rewrite a line, swap the cover, move a slide, or run Remove background, Magic layer, and Upscale on a picture.",
+  },
 ];
 
 const FOOTER_COLUMNS = [
