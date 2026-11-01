@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Check, Menu } from "lucide-react";
+import { Check, ChevronRight, Menu, X } from "lucide-react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
 import Logo from "@/components/logo";
@@ -14,12 +14,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { HeroStage } from "@/components/landing/hero-stage";
 import { Reveal } from "@/components/landing/reveal";
 import { LeaveReviewBlock } from "@/components/landing/leave-review-block";
@@ -36,6 +30,7 @@ import {
   PRO_FEATURES,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
+import type { LandingStats } from "@/actions/landing-stats";
 
 const LEGAL = {
   status: "Professional income tax payer",
@@ -52,6 +47,30 @@ const NAV = [
   { name: "Price", link: "#pricing" },
   { name: "Questions", link: "#faq" },
 ];
+
+const MENU_GROUPS = [
+  {
+    title: "Product",
+    links: [
+      { name: "See it", href: "#studio" },
+      { name: "The post", href: "#post" },
+      { name: "Examples", href: "#reviews" },
+    ],
+  },
+  {
+    title: "Make",
+    links: [
+      { name: "Starting lines", href: "#start" },
+      { name: "AI generation", href: "#generate" },
+      { name: "Shapes", href: "#make" },
+    ],
+  },
+] as const;
+
+const MENU_LINKS = [
+  { name: "Price", href: "#pricing" },
+  { name: "Questions", href: "#faq" },
+] as const;
 
 const sectionTitle =
   "max-w-3xl text-4xl font-medium tracking-tight text-land-ink sm:text-5xl sm:leading-[1.08]";
@@ -202,22 +221,52 @@ const SOCIAL = [
   },
 ] as const;
 
-export function LandingPage() {
+function formatCount(value: number) {
+  return new Intl.NumberFormat("en").format(value);
+}
+
+export function LandingPage({ stats }: { stats: LandingStats | null }) {
   const [authOpen, setAuthOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [prompt, setPrompt] = useState(0);
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const activePrompt = PROMPTS[prompt];
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
   return (
     <div className="relative bg-land-mist">
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
-      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-2 rounded-full border border-white/50 bg-white/70 px-2.5 py-2 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:px-4">
-          <Logo width={32} height={32} />
+      <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
+        <div className="relative mx-auto flex max-w-[1200px] items-center justify-between gap-2 rounded-full border border-white/50 bg-white/70 px-2.5 py-2 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:px-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-10 rounded-full text-land-ink hover:bg-land-ink/10 hover:text-land-ink md:hidden"
+            aria-label={menuOpen ? "Close menu" : "Menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <Menu />
+          </Button>
+          <Logo
+            width={32}
+            height={32}
+            className="absolute left-1/2 -translate-x-1/2 text-land-ink md:static md:translate-x-0"
+          />
 
-          <nav className="hidden items-center gap-6 text-sm font-medium text-land-ink/70 md:flex">
+          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 text-sm font-medium text-land-ink/70 md:flex">
             {NAV.map((item) => (
               <a key={item.link} href={item.link} className="hover:text-land-ink">
                 {item.name}
@@ -225,66 +274,121 @@ export function LandingPage() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1.5">
+          <div className="hidden items-center gap-1.5 md:flex">
             <ThemeSwitcher className="h-10 w-10 text-land-ink hover:bg-land-ink/10 hover:text-land-ink" />
             <Button
               asChild
               className="h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90"
             >
-              <a href="/studio">
-                <span className="sm:hidden">Studio</span>
-                <span className="hidden sm:inline">Open</span>
-              </a>
+              <a href="/studio">Open</a>
             </Button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-10 rounded-full text-land-ink hover:bg-land-ink/10 hover:text-land-ink md:hidden"
-                  aria-label="Menu"
-                >
-                  <Menu />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[min(100%,20rem)]">
-                <div className="flex flex-col gap-1 px-3 pt-14 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-                  {NAV.map((item) => (
-                    <SheetClose asChild key={item.link}>
-                      <a
-                        href={item.link}
-                        className="rounded-2xl px-3 py-3.5 text-base font-medium"
-                      >
-                        {item.name}
-                      </a>
-                    </SheetClose>
-                  ))}
-                  {signedIn ? (
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="mt-3 h-11 rounded-full"
-                    >
-                      <a href="/studio">Projects</a>
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      className="mt-3 h-11 rounded-full"
-                      onClick={() => setAuthOpen(true)}
-                    >
-                      Sign in
-                    </Button>
-                  )}
-                  <Button asChild className="h-11 rounded-full">
-                    <a href="/studio">Open studio</a>
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
           </div>
+          <div className="size-10 md:hidden" aria-hidden />
         </div>
       </header>
+
+      {menuOpen ? (
+        <div className="md:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="fixed inset-0 z-[60] bg-black/25 backdrop-blur-[2px]"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div className="fixed inset-x-3 z-[65] top-[calc(4.75rem+env(safe-area-inset-top))] max-h-[min(36rem,calc(100dvh-6.5rem))] overflow-auto rounded-[1.75rem] bg-white p-5 text-[#14151c] dark:bg-[#1c1d26] dark:text-[#eef0f6]">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium tracking-[0.16em] text-black/40 uppercase dark:text-white/40">
+                Menu
+              </p>
+              <div className="flex items-center gap-1">
+                <ThemeSwitcher className="size-9 text-[#14151c] hover:bg-black/5 dark:text-[#eef0f6] dark:hover:bg-white/10" />
+                <button
+                  type="button"
+                  aria-label="Close menu"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex size-9 items-center justify-center rounded-xl bg-[#f0f1f4] text-[#14151c] dark:bg-white/10 dark:text-[#eef0f6]"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            </div>
+            <div className="mt-4">
+              {MENU_GROUPS.map((group) => {
+                const open = openGroup === group.title;
+                return (
+                  <div
+                    key={group.title}
+                    className="border-b border-black/10 dark:border-white/10"
+                  >
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between py-4 text-left text-base font-medium"
+                      aria-expanded={open}
+                      onClick={() => setOpenGroup(open ? null : group.title)}
+                    >
+                      {group.title}
+                      <ChevronRight
+                        className={`size-4 transition-transform ${open ? "rotate-90" : ""}`}
+                      />
+                    </button>
+                    {open ? (
+                      <ul className="pb-3">
+                        {group.links.map((item) => (
+                          <li key={item.href}>
+                            <a
+                              href={item.href}
+                              className="block py-2 text-sm text-black/60 dark:text-white/60"
+                              onClick={() => setMenuOpen(false)}
+                            >
+                              {item.name}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                );
+              })}
+              {MENU_LINKS.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="block border-b border-black/10 py-4 text-base font-medium dark:border-white/10"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+            {signedIn ? (
+              <a
+                href="/studio"
+                className="mt-6 block text-center text-base font-medium"
+                onClick={() => setMenuOpen(false)}
+              >
+                Projects
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="mt-6 block w-full text-center text-base font-medium"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setAuthOpen(true);
+                }}
+              >
+                Sign in
+              </button>
+            )}
+            <a
+              href="/studio"
+              className="mt-4 flex h-12 items-center justify-center rounded-2xl border border-black/15 text-sm font-semibold dark:border-white/20"
+            >
+              Open studio
+            </a>
+          </div>
+        </div>
+      ) : null}
 
       <section className="relative overflow-hidden bg-land-blue text-white">
         <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
@@ -699,8 +803,25 @@ export function LandingPage() {
         </ul>
       </LandingSection>
 
-      <footer className="bg-[#0e0f12] text-white">
-        <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
+      <LandingSection>
+        <ul className="mx-auto flex max-w-3xl flex-col items-center gap-14 text-center sm:gap-16">
+          {[
+            [stats?.users, "People using Deckva"],
+            [stats?.templates, "Templates"],
+            [stats?.projects, "Projects created"],
+          ].map(([value, label]) => (
+            <li key={String(label)}>
+              <p className="text-5xl font-medium tracking-tight text-land-ink sm:text-7xl">
+                {typeof value === "number" ? formatCount(value) : "—"}
+              </p>
+              <p className={`mt-3 ${landSub}`}>{label}</p>
+            </li>
+          ))}
+        </ul>
+      </LandingSection>
+
+      <footer className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 lg:px-[120px]">
+        <div className="mx-auto max-w-[1440px] rounded-[2rem] bg-[#0c0d11] px-6 py-10 text-white sm:px-10 sm:py-14 lg:rounded-[2.5rem]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
             {FOOTER_COLUMNS.map((column) => (
               <div key={column.title}>
