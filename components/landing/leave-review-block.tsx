@@ -137,7 +137,7 @@ export function LeaveReviewBlock() {
                           aria-pressed={rating === value}
                           onMouseEnter={() => setHover(value)}
                           onClick={() => setRating(value)}
-                          className="grid size-10 place-items-center rounded-full transition-colors hover:bg-land-mist"
+                          className="grid size-11 place-items-center rounded-full transition-colors hover:bg-land-mist"
                         >
                           <Star
                             className={cn(

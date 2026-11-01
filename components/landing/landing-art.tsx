@@ -15,7 +15,7 @@ const PINK_SOFT = "#fceae3";
 
 export function FreeArt() {
   return (
-    <svg width="360" height="260" viewBox="0 0 360 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 360 260" className="mx-auto h-auto w-full max-w-[360px]" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <path d="M193 220C248.228 220 293 175.228 293 120C293 64.7715 248.228 20 193 20C137.772 20 93 64.7715 93 120C93 175.228 137.772 220 193 220Z" fill="#E8ECF7" />
       <path d="M284 36H102C88.7452 36 78 46.7452 78 60V180C78 193.255 88.7452 204 102 204H284C297.255 204 308 193.255 308 180V60C308 46.7452 297.255 36 284 36Z" fill="white" />
       <path d="M230 52H108C100.268 52 94 58.268 94 66C94 73.732 100.268 80 108 80H230C237.732 80 244 73.732 244 66C244 58.268 237.732 52 230 52Z" fill="#E8ECF7" />
@@ -38,7 +38,7 @@ export function FreeArt() {
 
 export function GenerateArt() {
   return (
-    <svg width="400" height="240" viewBox="0 0 400 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 400 240" className="mx-auto h-auto w-full max-w-[400px]" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <path d="M210 216C258.601 216 298 176.601 298 128C298 79.3989 258.601 40 210 40C161.399 40 122 79.3989 122 128C122 176.601 161.399 216 210 216Z" fill="#E8ECF7" />
       <path d="M115 72H37C25.9543 72 17 80.9543 17 92V148C17 159.046 25.9543 168 37 168H115C126.046 168 135 159.046 135 148V92C135 80.9543 126.046 72 115 72Z" fill="white" />
       <path d="M37 102C41.4183 102 45 98.4183 45 94C45 89.5817 41.4183 86 37 86C32.5817 86 29 89.5817 29 94C29 98.4183 32.5817 102 37 102Z" fill="#2F5BFF" />
@@ -74,7 +74,7 @@ export function GenerateArt() {
 
 export function FeedArt() {
   return (
-    <svg width="220" height="250" viewBox="0 0 220 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 220 250" className="mx-auto h-auto w-full max-w-[220px]" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <path d="M144 8H76C60.536 8 48 20.536 48 36V210C48 225.464 60.536 238 76 238H144C159.464 238 172 225.464 172 210V36C172 20.536 159.464 8 144 8Z" fill="black" />
       <path d="M142 22H78C66.9543 22 58 30.9543 58 42V200C58 211.046 66.9543 220 78 220H142C153.046 220 162 211.046 162 200V42C162 30.9543 153.046 22 142 22Z" fill="#E8ECF7" />
       <path d="M138 36H82C75.3726 36 70 42.3527 70 50.1892V196.811C70 204.647 75.3726 211 82 211H138C144.627 211 150 204.647 150 196.811V50.1892C150 42.3527 144.627 36 138 36Z" fill="white" />
@@ -148,7 +148,7 @@ export function StudioArt() {
 
 export function CarouselEditorArt() {
   return (
-    <svg width="440" height="320" viewBox="0 0 440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 440 320" className="mx-auto h-auto w-full max-w-[440px]" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <path d="M316 30H54C40.7452 30 30 40.7452 30 54V236C30 249.255 40.7452 260 54 260H316C329.255 260 340 249.255 340 236V54C340 40.7452 329.255 30 316 30Z" fill="white" />
       <path d="M72 48H60C52.268 48 46 54.268 46 62V228C46 235.732 52.268 242 60 242H72C79.732 242 86 235.732 86 228V62C86 54.268 79.732 48 72 48Z" fill="#E8ECF7" />
       <path d="M66 80C70.4183 80 74 76.4183 74 72C74 67.5817 70.4183 64 66 64C61.5817 64 58 67.5817 58 72C58 76.4183 61.5817 80 66 80Z" fill="#2F5BFF" />

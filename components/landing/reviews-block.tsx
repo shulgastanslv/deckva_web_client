@@ -65,7 +65,7 @@ export function ReviewsBlock() {
         text="Карусели, которые собрали в студии."
       />
 
-      <ul className="columns-1 gap-3 min-[480px]:columns-2 lg:columns-3">
+      <ul className="columns-2 gap-2 sm:gap-3 lg:columns-3">
         {visible.map((photo, index) => {
           const shown = active === index;
           return (
@@ -113,7 +113,7 @@ export function ReviewsBlock() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="mt-4 inline-flex h-11 items-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground"
+        className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground sm:w-auto"
       >
         {open ? "Свернуть" : `Показать ещё ${PHOTOS.length - PREVIEW}`}
       </button>

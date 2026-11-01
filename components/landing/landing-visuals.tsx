@@ -59,17 +59,17 @@ export function PhoneCarouselMock({
 /** Two phones layered for CTA — bleed out of the stage. */
 export function DualPhonesMock() {
   return (
-    <div className="relative mx-auto h-[280px] w-full max-w-[340px] sm:h-[360px] sm:max-w-[400px]">
-      <div className="absolute bottom-[-48px] left-0 z-0 origin-bottom -rotate-[9deg] sm:bottom-[-72px]">
+    <div className="relative mx-auto h-[220px] w-full max-w-[280px] sm:h-[360px] sm:max-w-[400px]">
+      <div className="absolute bottom-[-28px] left-0 z-0 origin-bottom -rotate-[8deg] sm:bottom-[-72px] sm:-rotate-[9deg]">
         <PhoneCarouselMock
           start={0}
-          className="h-[320px] w-[160px] border-[5px] shadow-none sm:h-[400px] sm:w-[200px] sm:border-[6px]"
+          className="h-[250px] w-[126px] border-[5px] shadow-none sm:h-[400px] sm:w-[200px] sm:border-[6px]"
         />
       </div>
-      <div className="absolute bottom-[-56px] right-0 z-10 origin-bottom rotate-[5deg] sm:bottom-[-80px]">
+      <div className="absolute bottom-[-36px] right-0 z-10 origin-bottom rotate-[4deg] sm:bottom-[-80px] sm:rotate-[5deg]">
         <PhoneCarouselMock
           start={1}
-          className="h-[340px] w-[170px] border-[5px] shadow-xl sm:h-[420px] sm:w-[210px] sm:border-[6px]"
+          className="h-[268px] w-[134px] border-[5px] shadow-none sm:h-[420px] sm:w-[210px] sm:border-[6px]"
         />
       </div>
     </div>

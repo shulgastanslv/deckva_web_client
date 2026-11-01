@@ -4,17 +4,17 @@ import { cn } from "@/lib/utils";
 
 /** Section / hero-scale title — modern big type */
 export const landTitle =
-  "text-5xl font-extrabold tracking-tight leading-[1.05] sm:text-5xl lg:text-5xl";
+  "text-[2.125rem] font-extrabold tracking-tight leading-[1.08] sm:text-5xl sm:leading-[1.05]";
 
 /** Card / block title */
 export const landCardTitle =
-  "text-3xl font-extrabold tracking-tight leading-[1.1] sm:text-3xl";
+  "text-2xl font-extrabold tracking-tight leading-[1.12] sm:text-3xl sm:leading-[1.1]";
 
 /** Section subtitle under LandingHead */
-export const landSub = "text-xl leading-snug sm:text-2xl";
+export const landSub = "text-lg leading-snug sm:text-2xl";
 
 /** Card body / supporting line */
-export const landCardSub = "text-lg leading-snug sm:text-xl";
+export const landCardSub = "text-base leading-relaxed sm:text-xl sm:leading-snug";
 
 /** Shared layout primitives — keep section rhythm identical across the landing. */
 export function LandingSection({
@@ -30,7 +30,7 @@ export function LandingSection({
     <section
       id={id}
       className={cn(
-        "mx-auto max-w-6xl scroll-mt-24 px-4 py-12 sm:px-6 sm:py-16",
+        "mx-auto max-w-6xl scroll-mt-20 px-4 py-10 sm:scroll-mt-24 sm:px-6 sm:py-16",
         className
       )}
     >
@@ -51,7 +51,7 @@ export function LandingHead({
   light?: boolean;
 }) {
   return (
-    <div className="mb-8 max-w-3xl sm:mb-10">
+    <div className="mb-6 max-w-3xl sm:mb-10">
       {eyebrow ? (
         <p
           className={cn(
@@ -96,7 +96,7 @@ export function LandingLayer({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[3rem] sm:rounded-[3rem]",
+        "relative overflow-hidden rounded-[1.75rem] sm:rounded-[3rem]",
         className
       )}
     >
@@ -123,6 +123,6 @@ export function LandingPad({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("p-6 sm:p-8 lg:p-10", className)}>{children}</div>
+    <div className={cn("p-5 sm:p-8 lg:p-10", className)}>{children}</div>
   );
 }

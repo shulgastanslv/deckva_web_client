@@ -193,13 +193,8 @@ export function LandingPage() {
       <FloatingNav navItems={NAV} ctaHref="/studio" ctaLabel="Студия" />
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
-      <section className="relative overflow-hidden bg-land-blue text-white">
-        <Spotlight
-          className="-top-40 left-0 md:-top-20 md:left-60"
-          fill="white"
-        />
-
-        <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
+      <header className="sticky top-0 z-40 bg-land-blue pt-[env(safe-area-inset-top)] text-white md:static">
+        <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-5">
           <WhiteLogo width={36} height={36} />
 
           <nav className="hidden items-center gap-7 text-sm font-medium text-white/85 md:flex">
@@ -226,19 +221,19 @@ export function LandingPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-white hover:bg-white/10 hover:text-white md:hidden"
+                  className="size-10 rounded-full text-white hover:bg-white/10 hover:text-white md:hidden"
                   aria-label="Меню"
                 >
                   <Menu />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[min(100%,20rem)]">
-                <div className="flex flex-col gap-1 px-4">
+                <div className="flex flex-col gap-1 px-3 pt-14 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
                   {NAV.map((item) => (
                     <SheetClose asChild key={item.link}>
                       <a
                         href={item.link}
-                        className="rounded-xl px-3 py-3 text-base font-medium"
+                        className="rounded-2xl px-3 py-3.5 text-base font-medium"
                       >
                         {item.name}
                       </a>
@@ -248,20 +243,20 @@ export function LandingPage() {
                     <Button
                       asChild
                       variant="outline"
-                      className="mt-3 h-10 rounded-full"
+                      className="mt-3 h-11 rounded-full"
                     >
                       <Link href="/studio">Проекты</Link>
                     </Button>
                   ) : (
                     <Button
                       variant="outline"
-                      className="mt-3 h-10 rounded-full"
+                      className="mt-3 h-11 rounded-full"
                       onClick={() => setAuthOpen(true)}
                     >
                       Войти
                     </Button>
                   )}
-                  <Button asChild className="h-10 rounded-full">
+                  <Button asChild className="h-11 rounded-full">
                     <Link href="/studio">Открыть студию</Link>
                   </Button>
                 </div>
@@ -269,28 +264,35 @@ export function LandingPage() {
             </Sheet>
           </div>
         </div>
+      </header>
 
-        <div className="relative z-10 mx-auto grid min-h-[85vh] max-w-6xl items-center gap-10 px-4 pb-36 pt-10 sm:gap-12 sm:px-6 sm:pb-44 sm:pt-14 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pb-52 lg:pt-16">
+      <section className="relative overflow-hidden bg-land-blue text-white">
+        <Spotlight
+          className="-top-40 left-0 md:-top-20 md:left-60"
+          fill="white"
+        />
+
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-24 pt-6 sm:min-h-[85vh] sm:gap-12 sm:px-6 sm:pb-44 sm:pt-14 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pb-52 lg:pt-16">
           <div>
-            <h1 className="max-w-xl text-6xl font-extrabold tracking-tight leading-[0.95] sm:text-7xl lg:text-7xl">
+            <h1 className="max-w-xl text-[2.5rem] font-extrabold tracking-tight leading-[0.98] sm:text-6xl sm:leading-[0.95] lg:text-7xl">
               AI-редактор каруселей
             </h1>
             <TextGenerateEffect
               words="Опишите тему — AI соберёт карусель. Дальше правите и экспортируете."
               duration={0.35}
-              className="mt-5 text-xl font-medium text-white/90 sm:text-2xl"
+              className="mt-4 text-lg font-medium text-white/90 sm:mt-5 sm:text-2xl"
               spanClassName="text-white/90"
             />
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-7 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center">
               <Button
                 asChild
-                className="h-11 rounded-full bg-white px-5 text-land-blue hover:bg-white/90"
+                className="h-12 w-full rounded-full bg-white px-5 text-land-blue hover:bg-white/90 min-[420px]:w-auto"
               >
                 <Link href="/studio">Открыть</Link>
               </Button>
               <a
                 href="#studio"
-                className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-medium text-white hover:bg-white/10"
+                className="inline-flex h-12 w-full items-center justify-center rounded-full border border-white/30 px-5 text-sm font-medium text-white hover:bg-white/10 min-[420px]:w-auto"
               >
                 Смотреть студию
               </a>
@@ -303,7 +305,7 @@ export function LandingPage() {
       {/* 1. Studio overlaps hero */}
       <LandingSection
         id="studio"
-        className="relative z-20 -mt-20 py-0 sm:-mt-28 sm:py-0 lg:-mt-32"
+        className="relative z-20 -mt-14 py-0 sm:-mt-28 sm:py-0 lg:-mt-32"
       >
           <div className="overflow-hidden rounded-[2rem] bg-land-card sm:rounded-[2.5rem]">
             <StudioVideo />
@@ -434,7 +436,7 @@ export function LandingPage() {
                   value={item.value}
                   className="border-land-ink/10"
                 >
-                  <AccordionTrigger className="py-4 text-left text-base font-semibold text-land-ink hover:no-underline">
+                  <AccordionTrigger className="min-h-12 items-center py-4 text-left text-[15px] font-semibold leading-snug text-land-ink hover:no-underline sm:text-base">
                     {item.q}
                   </AccordionTrigger>
                   <AccordionContent className="text-land-ink/55">
@@ -451,7 +453,7 @@ export function LandingPage() {
       <LandingSection className="pb-16 pt-4 sm:pb-20 sm:pt-6">
         <Reveal>
           <LandingLayer className="bg-land-blue text-white">
-            <div className="relative grid items-end gap-8 px-6 pt-12 sm:gap-10 sm:px-12 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="relative grid items-end gap-6 px-5 pt-10 sm:gap-10 sm:px-12 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="absolute -right-10 top-8 size-40 rounded-full bg-white/20 blur-3xl" />
               <div className="absolute bottom-20 left-[40%] size-28 rounded-full bg-white/20 blur-2xl" />
               <div className="relative z-10 pb-4 sm:pb-16">
@@ -463,16 +465,16 @@ export function LandingPage() {
                 <p className={`mt-4 max-w-md text-white/75 ${landSub}`}>
                   Промпт, шаблон или пустой холст — дальше правки и экспорт.
                 </p>
-                <div className="mt-8 flex flex-wrap gap-3">
+                <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
                   <Link
                     href="/studio"
-                    className="inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-semibold text-land-blue"
+                    className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-land-blue sm:w-auto"
                   >
                     Открыть
                   </Link>
                 </div>
               </div>
-              <div className="relative z-10 -mx-10 overflow-hidden">
+              <div className="relative z-10 overflow-hidden sm:-mx-10">
                 <div className="absolute inset-x-10 top-4 h-full rounded-full bg-land-panel/25 blur-xl" />
                 <DualPhonesMock />
               </div>
@@ -500,7 +502,7 @@ export function LandingPage() {
       </LandingSection>
 
       <footer>
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_auto_1.2fr] lg:items-start">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 pt-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-6 lg:grid-cols-[1fr_auto_1.2fr] lg:items-start">
           <div>
             <Link
               href="/"

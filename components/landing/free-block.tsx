@@ -82,7 +82,7 @@ export function FreeBlock() {
             <LandingPad className="flex h-full flex-col justify-between">
               <p className={`${landCardTitle} text-white/70`}>Цена</p>
               <div className="mt-6 flex items-start gap-2">
-                <p className="text-8xl font-extrabold tracking-tight leading-none sm:text-9xl">
+                <p className="text-7xl font-extrabold tracking-tight leading-none sm:text-8xl lg:text-9xl">
                   15
                 </p>
                 <BelarusRubleIcon className="mt-3 size-10 shrink-0 text-white sm:mt-4 sm:size-12" />
@@ -108,7 +108,7 @@ export function FreeBlock() {
                 {FORMATS.map(({ name, ratio, frame, Icon, icon }) => (
                   <li key={name} className="flex flex-col items-center gap-3">
                     <div
-                      className={`relative w-full max-w-[7.5rem] overflow-hidden rounded-3xl ${frame} bg-white`}
+                      className={`relative w-full max-w-[5.75rem] overflow-hidden rounded-3xl sm:max-w-[7.5rem] ${frame} bg-white`}
                     >
                       <div className="absolute inset-0 grid place-items-center">
                         <Icon className={`size-8 sm:size-9 ${icon}`} aria-hidden />
