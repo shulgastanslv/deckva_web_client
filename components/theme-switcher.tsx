@@ -15,7 +15,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
     setMounted(true);
   }, []);
 
-  const dark = resolvedTheme === "dark";
+  const dark = mounted && resolvedTheme === "dark";
 
   return (
     <Button
@@ -26,9 +26,21 @@ export function ThemeSwitcher({ className }: { className?: string }) {
         "h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50",
         className,
       )}
-      title={dark ? "Switch to light" : "Switch to dark"}
-      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-      onClick={() => setTheme(dark ? "light" : "dark")}
+      title={
+        mounted
+          ? dark
+            ? "Switch to light"
+            : "Switch to dark"
+          : "Toggle theme"
+      }
+      aria-label={
+        mounted
+          ? dark
+            ? "Switch to light theme"
+            : "Switch to dark theme"
+          : "Toggle theme"
+      }
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
       {!mounted ? (
         <Moon className="size-4 opacity-0" />

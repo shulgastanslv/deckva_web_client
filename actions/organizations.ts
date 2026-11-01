@@ -1,6 +1,6 @@
-import { messages } from "@/lib/messages";
-﻿"use server";
+"use server";
 
+import { messages } from "@/lib/messages";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 

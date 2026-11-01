@@ -22,7 +22,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Spotlight } from "@/components/ui/spotlight";
-import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import { FloatingNav } from "@/components/ui/floating-navbar";
 import { HeroStage } from "@/components/landing/hero-stage";
 import { Reveal, RevealItem, RevealStagger } from "@/components/landing/reveal";
@@ -211,10 +210,10 @@ export function LandingPage() {
               asChild
               className="h-10 rounded-full bg-white px-4 text-land-blue hover:bg-white/90"
             >
-              <Link href="/studio">
+              <a href="/studio">
                 <span className="sm:hidden">Студия</span>
                 <span className="hidden sm:inline">Открыть</span>
-              </Link>
+              </a>
             </Button>
             <Sheet>
               <SheetTrigger asChild>
@@ -245,7 +244,7 @@ export function LandingPage() {
                       variant="outline"
                       className="mt-3 h-11 rounded-full"
                     >
-                      <Link href="/studio">Проекты</Link>
+                      <a href="/studio">Проекты</a>
                     </Button>
                   ) : (
                     <Button
@@ -257,7 +256,7 @@ export function LandingPage() {
                     </Button>
                   )}
                   <Button asChild className="h-11 rounded-full">
-                    <Link href="/studio">Открыть студию</Link>
+                    <a href="/studio">Открыть студию</a>
                   </Button>
                 </div>
               </SheetContent>
@@ -273,22 +272,19 @@ export function LandingPage() {
         />
 
         <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-24 pt-6 sm:min-h-[85vh] sm:gap-12 sm:px-6 sm:pb-44 sm:pt-14 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pb-52 lg:pt-16">
-          <div>
+          <div className="relative z-30">
             <h1 className="max-w-xl text-[2.5rem] font-extrabold tracking-tight leading-[0.98] sm:text-6xl sm:leading-[0.95] lg:text-7xl">
               AI-редактор каруселей
             </h1>
-            <TextGenerateEffect
-              words="Опишите тему — AI соберёт карусель. Дальше правите и экспортируете."
-              duration={0.35}
-              className="mt-4 text-lg font-medium text-white/90 sm:mt-5 sm:text-2xl"
-              spanClassName="text-white/90"
-            />
+            <p className="mt-4 max-w-xl text-lg font-medium leading-snug text-white/90 sm:mt-5 sm:text-2xl">
+              Опишите тему — AI соберёт карусель. Дальше правите и экспортируете.
+            </p>
             <div className="mt-7 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap min-[420px]:items-center">
               <Button
                 asChild
                 className="h-12 w-full rounded-full bg-white px-5 text-land-blue hover:bg-white/90 min-[420px]:w-auto"
               >
-                <Link href="/studio">Открыть</Link>
+                <a href="/studio">Открыть</a>
               </Button>
               <a
                 href="#studio"
@@ -466,12 +462,12 @@ export function LandingPage() {
                   Промпт, шаблон или пустой холст — дальше правки и экспорт.
                 </p>
                 <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
-                  <Link
+                  <a
                     href="/studio"
                     className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-land-blue sm:w-auto"
                   >
                     Открыть
-                  </Link>
+                  </a>
                 </div>
               </div>
               <div className="relative z-10 overflow-hidden sm:-mx-10">
