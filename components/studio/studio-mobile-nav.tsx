@@ -6,18 +6,18 @@ import {
   FolderIcon,
   HomeIcon,
   LayoutTemplateIcon,
-  MenuIcon,
   PaletteIcon,
+  Plus,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 export function StudioMobileNav({
-  moreOpen,
-  onMore,
+  drawerOpen,
+  onCreate,
 }: {
-  moreOpen: boolean;
-  onMore: () => void;
+  drawerOpen: boolean;
+  onCreate: () => void;
 }) {
   const pathname = usePathname();
 
@@ -53,7 +53,7 @@ export function StudioMobileNav({
       aria-label="Studio"
       className={cn(
         "flex shrink-0 items-stretch justify-around rounded-full bg-white pb-[env(safe-area-inset-bottom)] md:hidden dark:bg-[#14151c]",
-        moreOpen && "invisible",
+        drawerOpen && "invisible",
       )}
     >
       {items.map(({ href, label, icon: Icon, active }) => (
@@ -72,15 +72,13 @@ export function StudioMobileNav({
       ))}
       <button
         type="button"
-        onClick={onMore}
-        aria-expanded={moreOpen}
-        className={cn(
-          "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium",
-          moreOpen ? "text-foreground" : "text-muted-foreground",
-        )}
+        onClick={onCreate}
+        aria-label="New project"
+        className="flex min-w-0 flex-1 items-center justify-center text-foreground"
       >
-        <MenuIcon className="size-5 stroke-[1.75]" />
-        More
+        <span className="flex size-9 items-center justify-center rounded-full bg-foreground text-background">
+          <Plus className="size-5 stroke-[2]" />
+        </span>
       </button>
     </nav>
   );

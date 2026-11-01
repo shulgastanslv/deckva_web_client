@@ -120,8 +120,8 @@ export function StudioShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <StudioMobileNav
-            moreOpen={navOpen}
-            onMore={() => setNavOpen((open) => !open)}
+            drawerOpen={navOpen}
+            onCreate={create.openBlank}
           />
         </div>
 
