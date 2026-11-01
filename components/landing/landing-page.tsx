@@ -15,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { FigmaExportArt, FigmaImportArt } from "@/components/landing/figma-miro-art";
 import { HeroStage } from "@/components/landing/hero-stage";
 import { LeaveReviewBlock } from "@/components/landing/leave-review-block";
 import { StudioVideo } from "@/components/landing/studio-video";
@@ -834,7 +835,7 @@ export function LandingPage() {
         </p>
         <ul className="mt-8 grid gap-4 lg:grid-cols-2">
           <li className="overflow-hidden rounded-[1.75rem] bg-land-card">
-            <Place className="h-52 w-full" />
+            <FigmaImportArt />
             <div className="p-6">
               <h3 className="text-2xl font-medium tracking-tight text-land-ink">
                 Import
@@ -845,7 +846,7 @@ export function LandingPage() {
             </div>
           </li>
           <li className="overflow-hidden rounded-[1.75rem] bg-land-card">
-            <Place className="h-52 w-full" />
+            <FigmaExportArt />
             <div className="p-6">
               <h3 className="text-2xl font-medium tracking-tight text-land-ink">
                 Export
