@@ -448,7 +448,7 @@ export function LandingPage() {
       {/* 8. Final CTA */}
       <LandingSection className="pb-16 pt-4 sm:pb-20 sm:pt-6">
         <Reveal>
-          <LandingLayer className="bg-land-blue text-white">
+          <LandingLayer className="overflow-visible bg-land-blue text-white">
             <div className="relative grid items-end gap-6 px-5 pt-10 sm:gap-10 sm:px-12 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="absolute -right-10 top-8 size-40 rounded-full bg-white/20 blur-3xl" />
               <div className="absolute bottom-20 left-[40%] size-28 rounded-full bg-white/20 blur-2xl" />

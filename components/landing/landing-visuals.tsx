@@ -51,29 +51,50 @@ export function PhoneCarouselMock({
   );
 }
 
-/** One upright iPhone, large enough that the post and slide stay intact. */
+/** Two iPhones leaning apart in the closing block. */
 export function DualPhonesMock() {
   return (
-    <div className="flex justify-center">
-      <PhoneCarouselMock
-        posts={[
-          {
-            id: "cta",
-            author: "deckva",
-            avatar: "/post_logo.jpg",
-            verified: true,
-            time: "2h",
-            text: "Карусель из одной мысли — уже по порядку.",
-            media: ["/reviews/2.jpg", "/reviews/6.jpg", "/reviews/8.jpg"],
-            likes: "128",
-            replies: "14",
-            reposts: "9",
-            liked: true,
-          },
-        ]}
-        compact
-        className="w-[min(78vw,280px)]"
-      />
+    <div className="mx-auto flex w-full max-w-[440px] items-end justify-center">
+      <div className="origin-bottom -rotate-[8deg]">
+        <PhoneCarouselMock
+          posts={[
+            {
+              id: "cta-left",
+              author: "deckva",
+              avatar: "/post_logo.jpg",
+              time: "3h",
+              text: "Первый кадр останавливает ленту.",
+              media: ["/reviews/6.jpg", "/reviews/8.jpg", "/reviews/2.jpg"],
+              likes: "97",
+              replies: "12",
+              reposts: "6",
+            },
+          ]}
+          compact
+          className="w-[132px] sm:w-[188px]"
+        />
+      </div>
+      <div className="origin-bottom -ml-6 rotate-[7deg] sm:-ml-8">
+        <PhoneCarouselMock
+          posts={[
+            {
+              id: "cta-right",
+              author: "deckva",
+              avatar: "/post_logo.jpg",
+              verified: true,
+              time: "2h",
+              text: "Карусель из одной мысли — уже по порядку.",
+              media: ["/reviews/2.jpg", "/reviews/3.jpg", "/reviews/4.jpg"],
+              likes: "128",
+              replies: "14",
+              reposts: "9",
+              liked: true,
+            },
+          ]}
+          compact
+          className="w-[142px] sm:w-[200px]"
+        />
+      </div>
     </div>
   );
 }

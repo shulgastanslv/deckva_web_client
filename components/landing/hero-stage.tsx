@@ -20,6 +20,20 @@ export const THREAD_SHOTS = [
   "/reviews/3.jpg",
 ] as const;
 
+const HERO_POST_B: ThreadsPostData[] = [
+  {
+    id: "hero-b",
+    author: "deckva",
+    avatar: "/post_logo.jpg",
+    time: "3h",
+    text: "Карусель из одной мысли — уже по порядку.",
+    media: ["/reviews/6.jpg", "/reviews/8.jpg", "/reviews/4.jpg"],
+    likes: "97",
+    replies: "12",
+    reposts: "6",
+  },
+];
+
 const HERO_POST_A: ThreadsPostData[] = [
   {
     id: "hero-a",
@@ -46,6 +60,9 @@ export function PhoneFrame({
   size?: "default" | "hero";
 }) {
   const { width, height, screen } = IPHONE_17_PRO;
+  // Glass corner is a circle (~230px on the source frame). A single % radius
+  // uses the tall side for the vertical curve and pulls the UI off the bezel.
+  const bleed = 12;
   return (
     <div
       className={cn("relative mx-auto w-[270px]", className)}
@@ -54,11 +71,11 @@ export function PhoneFrame({
       <div
         className="absolute overflow-hidden bg-white"
         style={{
-          left: `${(screen.x / width) * 100}%`,
-          top: `${(screen.y / height) * 100}%`,
-          width: `${(screen.width / width) * 100}%`,
-          height: `${(screen.height / height) * 100}%`,
-          borderRadius: "11.5%",
+          left: `${((screen.x - bleed) / width) * 100}%`,
+          top: `${((screen.y - bleed) / height) * 100}%`,
+          width: `${((screen.width + bleed * 2) / width) * 100}%`,
+          height: `${((screen.height + bleed * 2) / height) * 100}%`,
+          borderRadius: "17.5% / 8.1%",
         }}
       >
         <div className="h-full w-full">{children}</div>
@@ -101,11 +118,15 @@ export function ThreadsPhone({
 
 export function HeroStage() {
   return (
-    <div className="pointer-events-none flex justify-center">
+    <div className="pointer-events-none relative mx-auto w-full max-w-[420px]">
+      <ThreadsPhone
+        posts={HERO_POST_B}
+        className="absolute left-[14%] top-5 w-[68%] origin-center -rotate-6 sm:left-[8%]"
+      />
       <ThreadsPhone
         posts={HERO_POST_A}
         size="hero"
-        className="w-[min(86vw,300px)]"
+        className="relative z-10 ml-[20%] w-[78%] sm:ml-[18%] sm:w-[80%]"
       />
     </div>
   );
