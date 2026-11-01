@@ -4,14 +4,14 @@ import { cn } from "@/lib/utils";
 
 /** Section / hero-scale title — modern big type */
 export const landTitle =
-  "text-[2.125rem] font-extrabold tracking-tight leading-[1.08] sm:text-5xl sm:leading-[1.05]";
+  "text-3xl font-semibold tracking-tight leading-[1.12] sm:text-4xl sm:leading-[1.08]";
 
 /** Card / block title */
 export const landCardTitle =
   "text-2xl font-extrabold tracking-tight leading-[1.12] sm:text-3xl sm:leading-[1.1]";
 
 /** Section subtitle under LandingHead */
-export const landSub = "text-lg leading-snug sm:text-2xl";
+export const landSub = "text-base leading-relaxed text-land-ink/55 sm:text-lg";
 
 /** Card body / supporting line */
 export const landCardSub = "text-base leading-relaxed sm:text-xl sm:leading-snug";

@@ -26,7 +26,7 @@ const HERO_POST_B: ThreadsPostData[] = [
     author: "deckva",
     avatar: "/post_logo.jpg",
     time: "3h",
-    text: "Карусель из одной мысли — уже по порядку.",
+    text: "One idea, already in order.",
     media: ["/reviews/6.jpg", "/reviews/8.jpg", "/reviews/4.jpg"],
     likes: "97",
     replies: "12",
@@ -42,8 +42,8 @@ const HERO_POST_A: ThreadsPostData[] = [
     verified: true,
     time: "1h",
     liked: true,
-    topic: "Примеры",
-    text: "Примеры каруселей, которые были созданы в Deckva.",
+    topic: "Examples",
+    text: "Carousels made in Deckva.",
     media: ["/reviews/1.jpg", "/reviews/2.jpg", "/reviews/3.jpg"],
     likes: "214",
     replies: "31",
@@ -118,7 +118,7 @@ export function ThreadsPhone({
 
 export function HeroStage() {
   return (
-    <div className="pointer-events-none relative mx-auto w-full max-w-[420px]">
+    <div className="pointer-events-none relative mx-auto w-full max-w-[420px] lg:mx-0 lg:ml-auto">
       <ThreadsPhone
         posts={HERO_POST_B}
         className="absolute left-[14%] top-5 w-[68%] origin-center -rotate-6 sm:left-[8%]"

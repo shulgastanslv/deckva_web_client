@@ -7,33 +7,32 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Главная",
+  title: "Home",
   description:
-    "Deckva собирает карусель как один пост: тема, слайды в формате ленты и файл без водяного знака.",
+    "Deckva turns a topic into one carousel: slides in feed ratio and a file with no watermark.",
   keywords: [
     "Deckva",
-    "редактор каруселей",
-    "Instagram карусель",
-    "редактор слайдов",
-    "студия контента",
     "carousel editor",
+    "Instagram carousel",
+    "slide editor",
+    "social carousel",
   ],
   authors: [{ name: "Deckva", url: "https://deckva.by" }],
   creator: "Deckva",
   publisher: "Deckva",
   openGraph: {
-    title: "Deckva — карусель без сборки по частям",
+    title: "Deckva — one carousel, not a folder",
     description:
-      "Тема становится лентой слайдов. Правки и файл для публикации — в одном проекте.",
+      "A topic becomes the slides. Edit them and download a file you can post, in one project.",
     siteName: "Deckva",
-    locale: "ru_BY",
+    locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deckva — карусель без сборки по частям",
+    title: "Deckva — one carousel, not a folder",
     description:
-      "Тема становится лентой слайдов. Правки и файл для публикации — в одном проекте.",
+      "A topic becomes the slides. Edit them and download a file you can post, in one project.",
   },
 };
 

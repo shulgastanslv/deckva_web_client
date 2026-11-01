@@ -3,52 +3,23 @@
 import { useState } from "react";
 
 import {
-  LandingHead,
   LandingSection,
+  landSub,
+  landTitle,
 } from "@/components/landing/landing-shell";
 import { cn } from "@/lib/utils";
 
 const PHOTOS = [
-  {
-    src: "/reviews/1.jpg",
-    aspect: "aspect-[4/5]",
-  },
-  {
-    src: "/reviews/2.jpg",
-    aspect: "aspect-[4/5]",
-  },  
-  {
-    src: "/reviews/3.jpg",
-    aspect: "aspect-[4/5]",
-  },
-  {
-    src: "/reviews/4.jpg",
-    aspect: "aspect-[4/5]",
-  },
-  {
-    src: "/reviews/5.jpg",
-    aspect: "aspect-[4/5]",
-  },
-  {
-    src: "/reviews/6.jpg",
-    aspect: "aspect-[4/5]",
-  },
-  {
-    src: "/reviews/7.jpg",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    src: "/reviews/8.jpg",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    src: "/reviews/9.jpg",
-    aspect: "aspect-[3/4]",
-  },
-  {
-    src: "/reviews/10.jpg",
-    aspect: "aspect-[3/4]",
-  },
+  "/reviews/1.jpg",
+  "/reviews/2.jpg",
+  "/reviews/3.jpg",
+  "/reviews/4.jpg",
+  "/reviews/5.jpg",
+  "/reviews/6.jpg",
+  "/reviews/7.jpg",
+  "/reviews/8.jpg",
+  "/reviews/9.jpg",
+  "/reviews/10.jpg",
 ] as const;
 
 const PREVIEW = 6;
@@ -60,25 +31,19 @@ export function ReviewsBlock() {
 
   return (
     <LandingSection id="reviews">
-      <LandingHead
-        title="Что получается"
-        text="Карусели, которые уже можно публиковать. Собраны в студии."
-      />
+      <h2 className={`${landTitle} text-land-ink`}>What you get</h2>
+      <p className={`mt-3 max-w-lg ${landSub}`}>
+        Carousels made in the studio, ready to post.
+      </p>
 
-      <ul className="columns-2 gap-2 sm:gap-3 lg:columns-3">
-        {visible.map((photo, index) => {
+      <ul className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3">
+        {visible.map((src, index) => {
           const shown = active === index;
           return (
-            <li
-              key={`${photo.src}-${index}`}
-              className="mb-3 break-inside-avoid"
-            >
+            <li key={src}>
               <button
                 type="button"
-                className={cn(
-                  "group relative block w-full overflow-hidden rounded-2xl bg-land-card text-left",
-                  photo.aspect,
-                )}
+                className="group relative block aspect-[4/5] w-full overflow-hidden rounded-3xl bg-land-card text-left"
                 onMouseEnter={() => setActive(index)}
                 onMouseLeave={() => setActive(null)}
                 onFocus={() => setActive(index)}
@@ -90,7 +55,7 @@ export function ReviewsBlock() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={photo.src}
+                  src={src}
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
                 />
@@ -115,7 +80,7 @@ export function ReviewsBlock() {
         onClick={() => setOpen((value) => !value)}
         className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground sm:w-auto"
       >
-        {open ? "Свернуть" : `Показать ещё ${PHOTOS.length - PREVIEW}`}
+        {open ? "Show less" : `Show ${PHOTOS.length - PREVIEW} more`}
       </button>
     </LandingSection>
   );
