@@ -5,6 +5,7 @@ import {
   Text,
   type FabricObject,
 } from "fabric";
+import { hasRole, type ObjectRole } from "./roles";
 
 export type CodeLang =
   | "plain"
@@ -391,7 +392,7 @@ type CodeMeta = FabricObject & {
 
 export function isCodeBlock(obj: FabricObject | null | undefined): obj is Group {
   if (!obj || obj.type !== "group") return false;
-  return (obj as CodeMeta).swibpRole === "code";
+  return hasRole(obj, "code");
 }
 
 export function readCodeOptions(obj: FabricObject): CodeBlockOptions {
@@ -427,7 +428,7 @@ export function readCodeOptions(obj: FabricObject): CodeBlockOptions {
 
 function writeCodeMeta(group: Group, options: CodeBlockOptions) {
   group.set({
-    swibpRole: "code",
+    swibpRole: "code" satisfies ObjectRole,
     swibpCode: options.code,
     swibpCodeLang: options.lang,
     swibpCodeTheme: options.theme,

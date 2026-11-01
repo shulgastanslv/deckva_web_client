@@ -381,6 +381,7 @@ export function SelectionToolbar() {
     canvas.on("selection:created", onSelection);
     canvas.on("selection:updated", onSelection);
     canvas.on("selection:cleared", onSelection);
+    const unsubscribeEdit = manager.on("edit", () => refresh());
 
     const scroller = canvas.getElement()?.closest(".overflow-auto");
     scroller?.addEventListener("scroll", scheduleRefresh, { passive: true });
@@ -395,6 +396,7 @@ export function SelectionToolbar() {
       canvas.off("selection:created", onSelection);
       canvas.off("selection:updated", onSelection);
       canvas.off("selection:cleared", onSelection);
+      unsubscribeEdit();
       scroller?.removeEventListener("scroll", scheduleRefresh);
       window.removeEventListener("resize", scheduleRefresh);
     };

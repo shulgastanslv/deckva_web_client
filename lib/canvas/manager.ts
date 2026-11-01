@@ -9,6 +9,7 @@ import { ObjectFactory } from "./objects";
 import { EffectsManager } from "./effects";
 import { LayoutManager } from "./layouts";
 import { Emitter } from "./events";
+import { activateFor, roleOf } from "./roles";
 import { captureCanvasThumbnail } from "./thumbnail";
 import { recolorIcon } from "./recolor-icon";
 import { withRemoteImageCors } from "./image-cors";
@@ -28,6 +29,11 @@ export interface CanvasManagerEvents {
   /** The whole document was replaced via `loadState` (e.g. slide switch). */
   load: CanvasState;
   selection: FabricObject | null;
+  /**
+   * An in-place edit recorded by `edit()` or an object-factory update.
+   * Pointer drags stay on Fabric's `object:modified`.
+   */
+  edit: FabricObject | null;
 }
 
 /**
@@ -36,8 +42,9 @@ export interface CanvasManagerEvents {
  * Feature modules are exposed as-is (`manager.objects.addCircle()`), the manager itself
  * only owns what spans the whole document: state load/save, history, events, selection.
  *
- * Any mutation that does not fire Fabric's `object:added|modified|removed`
- * (background, reordering, etc.) must be followed by `commit()`.
+ * Pointer drags commit through Fabric's `object:added|modified|removed`.
+ * Inspector and role updates go through `edit()` — do not
+ * `canvas.fire("object:modified")` to save the document.
  */
 export class CanvasManager {
   readonly canvas: Canvas;
@@ -66,7 +73,7 @@ export class CanvasManager {
     this.core = new CanvasCore(canvasElement);
     this.canvas = this.core.canvas;
     this.grid = new GridManager(this.canvas);
-    this.objects = new ObjectFactory(this.canvas);
+    this.objects = new ObjectFactory(this.canvas, (target) => this.publishEdit(target));
     this.io = new ImportExportManager(this.canvas);
     this.effects = new EffectsManager(this.canvas);
     this.layouts = new LayoutManager(this.canvas);
@@ -146,8 +153,33 @@ export class CanvasManager {
     }
     if (this.disposed) return;
     this.canvas.requestRenderAll();
-    this.commit();
+    this.publishEdit();
     this.events.emit("selection", this.getActiveObject());
+  }
+
+  /**
+   * One inspector change. Records history and emits `edit` without pretending
+   * the pointer just finished a drag.
+   */
+  edit(run: () => void): void {
+    if (this.disposed) return;
+    this.silentDepth++;
+    try {
+      run();
+    } finally {
+      this.silentDepth--;
+    }
+    if (this.disposed) return;
+    this.canvas.requestRenderAll();
+    this.publishEdit();
+    this.events.emit("selection", this.getActiveObject());
+  }
+
+  /** Saves an in-place edit and refreshes listeners that don't watch pointer events. */
+  private publishEdit(target?: FabricObject | null): void {
+    if (this.disposed || this.silentDepth > 0) return;
+    this.commit();
+    this.events.emit("edit", target === undefined ? this.getActiveObject() : target);
   }
 
   /** Records the current document as a new history step and notifies subscribers. */
@@ -504,7 +536,6 @@ export class CanvasManager {
   }
 
   private bindCanvasEvents(): void {
-    // Callers also fire "object:modified" manually without a payload.
     const onMutation = (e?: { target?: FabricObject }) => {
       if (e?.target?.excludeFromExport) return;
       this.commit();
@@ -517,9 +548,10 @@ export class CanvasManager {
 
     this.canvas.on("mouse:dblclick", (e) => {
       if (this.crop.active) return;
-      const target = e.target as FabricObject & { swibpRole?: string } | undefined;
-      if (target?.swibpRole === "split") this.objects.pickSplitImage();
-      else if (target?.swibpRole === "frame") this.objects.pickFrameImage(target);
+      const target = e.target;
+      const activate = activateFor(target ? roleOf(target) : null);
+      if (activate === "split") this.objects.pickSplitImage();
+      else if (activate === "frame" && target) this.objects.pickFrameImage(target);
       else if (target) this.objects.pickShapeImage(target);
     });
 

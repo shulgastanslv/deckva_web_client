@@ -8,6 +8,7 @@ import {
   util,
 } from "fabric";
 import { LayoutManager } from "./layouts";
+import { isPinnedRole } from "./roles";
 import { splitFrame, type CanvasSplit } from "./splits";
 
 type Bounds = {
@@ -323,7 +324,7 @@ export class GridManager {
     this.canvas.on("object:moving", (e) => {
       const obj = e.target;
       if (!obj || obj.excludeFromExport) return;
-      if ((obj as FabricObject & { swibpRole?: string }).swibpRole === "split") return;
+      if (isPinnedRole(obj)) return;
 
       const guidesActive = true;
       const gridSnapActive = this.snapToGrid && this.isGridVisible;
