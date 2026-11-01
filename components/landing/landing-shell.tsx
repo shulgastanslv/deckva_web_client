@@ -30,7 +30,7 @@ export function LandingSection({
     <section
       id={id}
       className={cn(
-        "mx-auto max-w-6xl scroll-mt-28 px-4 py-10 sm:px-6 sm:py-16",
+        "mx-auto w-full max-w-[1440px] scroll-mt-28 px-6 py-12 sm:px-10 sm:py-16 lg:px-[120px] lg:py-20",
         className
       )}
     >
