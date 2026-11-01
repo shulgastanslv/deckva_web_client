@@ -28,6 +28,10 @@ export function StudioHome() {
   const userId = session?.user?.id ?? undefined;
   const signedIn = status === "authenticated" && Boolean(userId);
   const create = useStudioCreate();
+  const rawName = session?.user?.name?.trim() || "";
+  const helloName = rawName
+    ? rawName.split(/\s+/)[0]
+    : session?.user?.email?.split("@")[0] || null;
 
   const projectsQuery = useUserProjects("", signedIn);
   const projects = useMemo(
@@ -68,6 +72,7 @@ export function StudioHome() {
     <StudioContent>
       <StudioContentBody className="pt-6 sm:pt-10">
         <StudioStartSection
+          name={signedIn ? helloName : null}
           onBlank={create.openBlank}
           onTemplates={create.openTemplates}
           onGenerate={create.generateFromPrompt}

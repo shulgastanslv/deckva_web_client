@@ -238,7 +238,7 @@ export function SlideNavigator() {
           title="Move left"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
-          Left
+          <span className="hidden sm:inline">Left</span>
         </Button>
         <Button
           variant="ghost"
@@ -248,7 +248,7 @@ export function SlideNavigator() {
           disabled={!canGoNext}
           title="Move right"
         >
-          Right
+          <span className="hidden sm:inline">Right</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </Button>
         <Button
@@ -259,7 +259,7 @@ export function SlideNavigator() {
           title="Duplicate slide"
         >
           <Copy className="h-3.5 w-3.5" />
-          Duplicate
+          <span className="hidden sm:inline">Duplicate</span>
         </Button>
         <Button
           variant="ghost"
@@ -270,7 +270,7 @@ export function SlideNavigator() {
           title="Delete slide"
         >
           <Trash2 className="h-3.5 w-3.5" />
-          Delete
+          <span className="hidden sm:inline">Delete</span>
         </Button>
       </div>
     </footer>

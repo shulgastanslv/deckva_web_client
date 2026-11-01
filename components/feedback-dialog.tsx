@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 
 import { submitFeedback } from "@/actions/feedback";
-import { FeedbackArt } from "@/components/canvas/canvas_icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

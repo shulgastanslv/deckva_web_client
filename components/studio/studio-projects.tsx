@@ -16,7 +16,6 @@ import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
 import { StudioProjectCard } from "@/components/studio/projects/studio-project-card";
 import { StudioProjectList } from "@/components/studio/projects/studio-project-list";
-import { StudioCreateTile } from "@/components/studio/start/studio-start-tile";
 import {
   StudioContent,
   StudioContentBody,
@@ -179,9 +178,6 @@ export function StudioProjects() {
           )
         ) : (
           <StudioBoardGrid>
-            {filter === "all" && !search.trim() && !folderId ? (
-              <StudioCreateTile onClick={create.openBlank} />
-            ) : null}
             {visible.map((project) => (
               <StudioProjectCard
                 key={project.id}

@@ -166,7 +166,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
 
   return (
     <>
-      <header className="z-20 flex w-full shrink-0 flex-wrap items-center gap-x-1 gap-y-1 border-b border-border/60 bg-background/80 px-2 py-1.5 text-[13px] backdrop-blur-md select-none sm:h-13 sm:flex-nowrap sm:justify-between sm:gap-4 sm:px-4 sm:py-0">
+      <header className="z-20 flex w-full shrink-0 flex-wrap items-center gap-x-1 gap-y-1 bg-transparent px-2 py-1.5 text-[13px] select-none sm:h-13 sm:flex-nowrap sm:justify-between sm:gap-4 sm:px-4 sm:py-0">
         <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-1">
           <Logo width={30} height={30} href="/studio" />
           <ChevronRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />

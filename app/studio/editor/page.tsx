@@ -159,23 +159,36 @@ export default function CarouselEditor() {
     return () => window.removeEventListener("keydown", onKey);
   }, [focusMode, manager, phoneSheet]);
 
+  const glass =
+    "border border-white/60 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/75";
+  const sheetSolid =
+    "max-md:bg-white dark:max-md:bg-[#14151c]";
   const sheetFrame =
-    "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:overflow-hidden max-md:rounded-t-3xl max-md:bg-background max-md:bottom-[calc(3.5rem+env(safe-area-inset-bottom))] max-md:h-[min(70dvh,calc(100dvh-8rem))] md:static md:flex md:h-full md:shrink-0";
+    "max-md:fixed max-md:inset-x-2 max-md:z-40 max-md:overflow-hidden max-md:rounded-t-3xl max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:h-[min(72dvh,calc(100dvh-8.5rem))] md:static md:h-full md:shrink-0 md:overflow-hidden md:rounded-3xl";
 
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-background font-sans text-foreground select-none">
+    <div
+      className={cn(
+        "flex h-dvh w-full flex-col overflow-hidden font-sans text-foreground select-none",
+        focusMode
+          ? "bg-background"
+          : "gap-2 bg-[#e6e8ef] p-2 dark:bg-[#0c0d12] sm:gap-3 sm:p-3",
+      )}
+    >
       {!focusMode && (
-        <Header
-          onPreview={() => {
-            const storeCurrentId = useCanvasStore.getState().currentSlideId;
-            setPreviewSlideId(storeCurrentId);
-            setShowPreviewModal(true);
-          }}
-          onFocus={() => {
-            setPhoneSheet(null);
-            setFocusMode(true);
-          }}
-        />
+        <div className={cn("shrink-0 overflow-hidden rounded-[1.75rem]", glass)}>
+          <Header
+            onPreview={() => {
+              const storeCurrentId = useCanvasStore.getState().currentSlideId;
+              setPreviewSlideId(storeCurrentId);
+              setShowPreviewModal(true);
+            }}
+            onFocus={() => {
+              setPhoneSheet(null);
+              setFocusMode(true);
+            }}
+          />
+        </div>
       )}
 
       <Suspense fallback={null}>
@@ -184,12 +197,15 @@ export default function CarouselEditor() {
         <AuthLinkHandler />
       </Suspense>
 
-      <div className="flex min-h-0 flex-1">
+      <div className={cn("flex min-h-0 flex-1", !focusMode && "gap-2 sm:gap-3")}>
         {!focusMode && (
           <div
             className={cn(
               sheetFrame,
+              "md:bg-white dark:md:bg-[#14151c]",
+              sheetSolid,
               phoneSheet === "library" ? "max-md:flex" : "max-md:hidden",
+              "md:flex",
             )}
           >
             <LeftSidebar
@@ -204,7 +220,10 @@ export default function CarouselEditor() {
         )}
 
         <main
-          className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/50"
+          className={cn(
+            "relative flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/50",
+            !focusMode && "rounded-3xl",
+          )}
           style={
             showDotGrid
               ? {
@@ -245,7 +264,10 @@ export default function CarouselEditor() {
           <div
             className={cn(
               sheetFrame,
+              sheetSolid,
+              "md:bg-transparent dark:md:bg-transparent",
               phoneSheet === "style" ? "max-md:flex" : "max-md:hidden",
+              "md:flex",
             )}
           >
             <div className="relative h-full min-h-0 w-full">

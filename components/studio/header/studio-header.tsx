@@ -43,7 +43,7 @@ export function StudioHeader({
 
   return (
     <>
-      <header className="flex shrink-0 items-center justify-between gap-2 bg-background px-3 pt-3 pb-1 sm:gap-3 sm:px-6 dark:bg-muted/20">
+      <header className="flex shrink-0 items-center justify-between gap-2 rounded-full border border-white/60 bg-white/70 px-3 py-1.5 backdrop-blur-xl sm:gap-3 sm:px-4 dark:border-white/10 dark:bg-[#14151c]/75">
         <div className="flex min-w-0 items-center gap-1 sm:gap-2">
           {onMenu ? (
             <button

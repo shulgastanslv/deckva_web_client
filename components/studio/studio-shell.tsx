@@ -66,14 +66,16 @@ export function StudioShell({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={250}>
-      <div className="flex h-dvh w-full overflow-hidden bg-muted/70 text-foreground dark:bg-background">
-        <div className="hidden md:flex">
-          <StudioSidebar
-            search={sidebarSearch}
-            onSearchChange={setSidebarSearch}
-            onBlank={create.openBlank}
-            onTemplates={create.openTemplates}
-          />
+      <div className="flex h-dvh w-full gap-2 overflow-hidden bg-[#e6e8ef] p-2 text-foreground sm:gap-3 sm:p-3 dark:bg-[#0c0d12]">
+        <div className="hidden h-full md:flex">
+          <div className="flex h-full overflow-hidden rounded-3xl bg-white dark:bg-[#14151c]">
+            <StudioSidebar
+              search={sidebarSearch}
+              onSearchChange={setSidebarSearch}
+              onBlank={create.openBlank}
+              onTemplates={create.openTemplates}
+            />
+          </div>
         </div>
 
         {navOpen ? (
@@ -84,7 +86,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
               className="absolute inset-0 bg-black/55"
               onClick={() => setNavOpen(false)}
             />
-            <div className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col overflow-hidden bg-muted/70 dark:bg-background">
+            <div className="absolute inset-y-2 left-2 flex w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-3xl bg-white dark:bg-[#14151c]">
               <div className="flex justify-end px-2 pt-2">
                 <button
                   type="button"
@@ -106,14 +108,16 @@ export function StudioShell({ children }: { children: ReactNode }) {
           </div>
         ) : null}
 
-        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background md:m-2 md:ml-0 md:rounded-2xl">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-2 sm:gap-3">
           <StudioHeader
             onSignIn={() => setAuthOpen(true)}
             onMenu={() => setNavOpen(true)}
           />
-          <StudioUpgradeBanner />
-          <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-            {children}
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-3xl bg-background">
+            <StudioUpgradeBanner />
+            <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
+              {children}
+            </div>
           </div>
           <StudioMobileNav
             moreOpen={navOpen}

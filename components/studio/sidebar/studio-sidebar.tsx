@@ -24,7 +24,7 @@ export function StudioSidebar({
   return (
     <aside
       className={cn(
-        "flex w-[252px] shrink-0 flex-col bg-muted/70 dark:bg-background",
+        "flex h-full w-[252px] shrink-0 flex-col bg-transparent",
         className,
       )}
     >

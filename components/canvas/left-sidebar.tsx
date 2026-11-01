@@ -103,8 +103,8 @@ export function LeftSidebar({
   ];
 
   return (
-    <div className="flex h-full min-h-0 w-full overflow-hidden border-border bg-background max-md:border-0 md:w-auto md:border-r">
-      <aside className="flex w-12 shrink-0 flex-col items-center justify-between border-r border-border/50 bg-muted/20 py-3">
+    <div className="flex h-full min-h-0 w-full overflow-hidden bg-transparent md:w-auto">
+      <aside className="flex w-12 shrink-0 flex-col items-center justify-between bg-transparent py-3">
         <TooltipProvider delayDuration={300}>
           <div className="flex flex-col gap-1.5">
             {navItems.map(({ id, icon: Icon, label }, index) => (
