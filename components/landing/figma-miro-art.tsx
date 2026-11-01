@@ -37,11 +37,11 @@ function SoftLink({ flip = false }: { flip?: boolean }) {
     : "M2 22C28 22 38 30 44 40C52 52 58 56 70 56";
 
   return (
-    <svg viewBox="0 0 72 72" className="h-16 w-11 shrink-0 sm:h-20 sm:w-16">
+    <svg viewBox="0 0 72 72" className="h-16 w-10 shrink-0 sm:h-20 sm:w-14">
       <path
         d={d}
         fill="none"
-        stroke="#7aa6ff"
+        stroke="#b7c9f5"
         strokeWidth="1.75"
         strokeLinecap="round"
       />
@@ -59,25 +59,24 @@ function SlideFace({
   className?: string;
 }) {
   return (
-    <div className={`overflow-hidden rounded-xl bg-white ${className}`}>
-      <div className="h-12 sm:h-16" style={{ backgroundColor: image }} />
-      <div className="px-2 py-1.5 sm:py-2">
-        <div className="h-1.5 w-3/5 rounded-full bg-[#1c1d26]/75" />
-        <div className="mt-1.5 h-1 w-full rounded-full bg-[#1c1d26]/15" />
-        <div className="mt-1 h-1 w-4/5 rounded-full bg-[#1c1d26]/12" />
-        <div
-          className="mt-2 h-3.5 w-9 rounded-full"
-          style={{ backgroundColor: accent }}
-        />
+    <div
+      className={`flex aspect-[4/5] w-full flex-col overflow-hidden rounded-xl border border-[#1c1d26]/8 bg-white ${className}`}
+    >
+      <div className="min-h-0 flex-[3]" style={{ backgroundColor: image }} />
+      <div className="flex flex-[2] flex-col justify-center gap-1 px-1.5 sm:px-2">
+        <div className="h-1 w-3/5 rounded-full bg-[#1c1d26]/35" />
+        <div className="h-0.5 w-full rounded-full bg-[#1c1d26]/12" />
+        <div className="h-0.5 w-4/5 rounded-full bg-[#1c1d26]/10" />
+        <div className="mt-0.5 h-2 w-2/5 rounded-full" style={{ backgroundColor: accent }} />
       </div>
     </div>
   );
 }
 
 const SLIDES = [
-  { image: "#8eafff", accent: "#2f5fe0" },
-  { image: "#ff9ec4", accent: "#e24b86" },
-  { image: "#7ed9ae", accent: "#1f9d62" },
+  { image: "#dce6ff", accent: "#b7c8f6" },
+  { image: "#ffe4ef", accent: "#f3c0d4" },
+  { image: "#e3f6ec", accent: "#b7e0cb" },
 ] as const;
 
 /** A Figma frame arriving in the editor. */
@@ -90,14 +89,14 @@ export function FigmaImportArt() {
         <div className="flex items-center gap-2 border-b border-[#1c1d26]/8 px-2.5 py-1.5">
           <FigmaMark className="h-3.5 w-2.5 shrink-0" />
           <div className="h-1.5 w-14 rounded-full bg-[#1c1d26]/25" />
-          <div className="ml-auto h-4 w-9 rounded-full bg-[#1c1d26]" />
+          <div className="ml-auto h-4 w-9 rounded-full bg-[#dce6ff]" />
         </div>
         <div className="flex min-h-0 flex-1">
           <div className="hidden w-[4.75rem] shrink-0 flex-col gap-1 border-r border-[#1c1d26]/8 bg-[#fafbfc] p-1.5 sm:flex">
             {[
-              { tone: "#8eafff", width: "w-8", on: true },
-              { tone: "#ff9ec4", width: "w-10", on: false },
-              { tone: "#7ed9ae", width: "w-7", on: false },
+              { tone: SLIDES[0].image, width: "w-8", on: true },
+              { tone: SLIDES[1].image, width: "w-10", on: false },
+              { tone: SLIDES[2].image, width: "w-7", on: false },
             ].map((layer) => (
               <div
                 key={layer.tone}
@@ -111,12 +110,10 @@ export function FigmaImportArt() {
               </div>
             ))}
           </div>
-          <div className="flex flex-1 items-center justify-center bg-[#eef1f6] p-2 sm:p-3">
-            <SlideFace
-              image={SLIDES[0].image}
-              accent={SLIDES[0].accent}
-              className="w-[7.5rem] border border-[#1c1d26]/8 sm:w-[8.5rem]"
-            />
+          <div className="flex flex-1 items-center justify-center bg-[#f3f5f8] p-3 sm:p-4">
+            <div className="w-[6.25rem] sm:w-[8.25rem]">
+              <SlideFace image={SLIDES[0].image} accent={SLIDES[0].accent} />
+            </div>
           </div>
         </div>
       </div>
@@ -128,14 +125,9 @@ export function FigmaImportArt() {
 export function FigmaExportArt() {
   return (
     <Canvas>
-      <div className="flex min-w-0 flex-1 gap-1.5 sm:gap-2">
+      <div className="grid min-w-0 flex-1 grid-cols-3 items-center gap-1.5 sm:gap-2.5">
         {SLIDES.map((slide) => (
-          <SlideFace
-            key={slide.image}
-            image={slide.image}
-            accent={slide.accent}
-            className="min-w-0 flex-1 border border-[#1c1d26]/8"
-          />
+          <SlideFace key={slide.image} image={slide.image} accent={slide.accent} />
         ))}
       </div>
       <SoftLink flip />
