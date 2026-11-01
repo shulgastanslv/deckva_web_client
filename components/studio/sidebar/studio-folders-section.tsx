@@ -15,11 +15,10 @@ import { useSession } from "next-auth/react";
 import {
   createFolder,
   deleteFolder,
-  getUserFolders,
   renameFolder,
   type FolderListItem,
 } from "@/actions/folders";
-import { getActiveOrganization } from "@/actions/organizations";
+import { readActiveOrganization, readUserFolders } from "@/lib/studio/reads";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,8 +52,8 @@ export function StudioFoldersSection() {
       return;
     }
     const [foldersRes, orgRes] = await Promise.all([
-      getUserFolders(),
-      getActiveOrganization(),
+      readUserFolders(),
+      readActiveOrganization(),
     ]);
     if (foldersRes.success) setFolders(foldersRes.folders);
     if (orgRes.success) setIsUpgrade(Boolean(orgRes.organization?.isUpgrade));
@@ -103,7 +102,6 @@ export function StudioFoldersSection() {
       if (res.success) {
         setCreating(false);
         setDraftName("");
-        await refresh();
         notifyChanged();
       } else if ("error" in res && isUpgradeRequiredError(res.error)) {
         setCreating(false);
@@ -126,7 +124,6 @@ export function StudioFoldersSection() {
       const res = await renameFolder(id, name);
       if (res.success) {
         setRenamingId(null);
-        await refresh();
         notifyChanged();
       }
     } finally {
@@ -140,7 +137,6 @@ export function StudioFoldersSection() {
     try {
       const res = await deleteFolder(id);
       if (res.success) {
-        await refresh();
         notifyChanged();
       }
     } finally {

@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import {
-  getUserProjects,
-  type ProjectListItem,
-} from "@/actions/projects";
+import { type ProjectListItem } from "@/actions/projects";
+import { readUserProjects } from "@/lib/studio/reads";
 import { AuthModal } from "@/components/auth";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
@@ -41,7 +39,7 @@ export function StudioHome() {
     if (!userId) return;
     setLoading(true);
     try {
-      const res = await getUserProjects();
+      const res = await readUserProjects();
       if (res.success) setProjects(res.projects);
     } finally {
       setLoading(false);

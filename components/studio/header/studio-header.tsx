@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChevronRight } from "lucide-react";
 
-import { getActiveOrganization } from "@/actions/organizations";
+import { readActiveOrganization } from "@/lib/studio/reads";
 import Logo from "@/components/logo";
 import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
@@ -14,11 +14,10 @@ import { Button } from "@/components/ui/button";
 
 export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
   const router = useRouter();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const signedIn = status === "authenticated";
   const [isUpgrade, setIsUpgrade] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const { data: session } = useSession();
 
   useEffect(() => {
     if (!signedIn) {
@@ -26,7 +25,7 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
       return;
     }
     const load = async () => {
-      const res = await getActiveOrganization();
+      const res = await readActiveOrganization();
       if (res.success && res.organization) {
         setIsUpgrade(Boolean(res.organization?.isUpgrade));
       }

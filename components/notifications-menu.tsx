@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 
-import { listMyNotifications, markNotificationsRead, type NotificationItem } from "@/actions/admin";
+import { markNotificationsRead, type NotificationItem } from "@/actions/admin";
+import { forgetCachedRead } from "@/lib/studio/read-cache";
+import { readMyNotifications } from "@/lib/studio/reads";
 import { NotificationsArt } from "@/components/canvas/canvas_icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +21,7 @@ export function NotificationsMenu() {
   const [unread, setUnread] = useState(0);
 
   const load = () => {
-    void listMyNotifications().then((res) => {
+    void readMyNotifications().then((res) => {
       if (!res.success) return;
       setItems(res.items);
       setUnread(res.unread);
@@ -34,10 +36,18 @@ export function NotificationsMenu() {
     <DropdownMenu
       onOpenChange={(open) => {
         if (!open) return;
-        load();
-        if (unread > 0) {
-          void markNotificationsRead().then(() => setUnread(0));
-        }
+        void readMyNotifications().then((res) => {
+          if (!res.success) return;
+          setItems(res.items);
+          setUnread(res.unread);
+          if (res.unread === 0) return;
+          void markNotificationsRead().then((marked) => {
+            if (!marked.success) return;
+            forgetCachedRead("notifications");
+            setUnread(0);
+            setItems((prev) => prev.map((item) => ({ ...item, read: true })));
+          });
+        });
       }}
     >
       <DropdownMenuTrigger asChild>

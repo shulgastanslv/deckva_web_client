@@ -1,15 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Bell, Check, ChevronDown, Loader2, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import {
-  listMyNotifications,
-  markNotificationsRead,
-  type NotificationItem,
-} from "@/actions/admin";
+import { markNotificationsRead, type NotificationItem } from "@/actions/admin";
+import { forgetCachedRead } from "@/lib/studio/read-cache";
+import { readMyNotifications } from "@/lib/studio/reads";
 import { cn } from "@/lib/utils";
 
 type Filter = "unread" | "all";
@@ -163,30 +161,31 @@ export function StudioNotifications({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
-  const refresh = useCallback(async () => {
+  useEffect(() => {
     if (status !== "authenticated") {
       setItems([]);
       setUnread(0);
+      setLoading(false);
       return;
     }
+    let cancelled = false;
     setLoading(true);
-    try {
-      const res = await listMyNotifications();
-      if (res.success) {
+    void readMyNotifications()
+      .then((res) => {
+        if (cancelled || !res.success) return;
         setItems(res.items);
         setUnread(res.unread);
-      }
-    } finally {
-      setLoading(false);
-    }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [status]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  useEffect(() => {
-    if (!open) return;
+    if (!open || status !== "authenticated") return;
 
     const place = () => {
       const el = triggerRef.current;
@@ -200,10 +199,15 @@ export function StudioNotifications({
     };
 
     place();
-    void refresh();
-    void markNotificationsRead().then(() => {
-      setUnread(0);
-      setItems((prev) => prev.map((item) => ({ ...item, read: true })));
+    let cancelled = false;
+    void readMyNotifications().then((res) => {
+      if (cancelled || !res.success || res.unread === 0) return;
+      void markNotificationsRead().then((marked) => {
+        if (cancelled || !marked.success) return;
+        forgetCachedRead("notifications");
+        setUnread(0);
+        setItems((prev) => prev.map((item) => ({ ...item, read: true })));
+      });
     });
 
     const onPointer = (event: MouseEvent) => {
@@ -226,12 +230,13 @@ export function StudioNotifications({
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onResize, true);
     return () => {
+      cancelled = true;
       window.removeEventListener("mousedown", onPointer);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onResize, true);
     };
-  }, [open, refresh]);
+  }, [open, status]);
 
   return (
     <>

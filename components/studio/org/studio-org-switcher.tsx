@@ -6,10 +6,10 @@ import { useSession } from "next-auth/react";
 
 import {
   createOrganization,
-  getUserOrganizations,
   setActiveOrganization,
   type OrganizationListItem,
 } from "@/actions/organizations";
+import { readUserOrganizations } from "@/lib/studio/reads";
 import { StudioOrgAvatar } from "@/components/studio/org/studio-org-avatar";
 import { StudioBadge } from "@/components/studio/ui/studio-badge";
 import {
@@ -43,7 +43,7 @@ export function StudioOrgSwitcher({
       setActiveId(null);
       return;
     }
-    const res = await getUserOrganizations();
+    const res = await readUserOrganizations();
     if (!res.success) return;
     setOrgs(res.organizations);
     setActiveId(res.activeOrganizationId);
@@ -90,7 +90,6 @@ export function StudioOrgSwitcher({
         setCreating(false);
         setDraft("");
         setOpen(false);
-        await refresh();
         window.dispatchEvent(new CustomEvent("studio:org-changed"));
         window.dispatchEvent(new CustomEvent("studio:folders-changed"));
         window.dispatchEvent(new CustomEvent("core:projects-changed"));

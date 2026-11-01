@@ -4,8 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowUpCircle, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import { getActiveOrganization } from "@/actions/organizations";
-import { getUserProjects } from "@/actions/projects";
+import { readActiveOrganization, readUserProjects } from "@/lib/studio/reads";
 import {
   FREE_CAROUSEL_LIMIT,
   freeCarouselLimitMessage,
@@ -33,8 +32,8 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
     }
 
     const [orgRes, projectsRes] = await Promise.all([
-      getActiveOrganization(),
-      getUserProjects(),
+      readActiveOrganization(),
+      readUserProjects(),
     ]);
 
     if (!orgRes.success || orgRes.organization?.isUpgrade) {

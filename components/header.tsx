@@ -94,7 +94,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
       if (detail?.verify || detail?.reset) setIsAuthModalOpen(true);
     };
     window.addEventListener("core:auth-link", onAuthLink);
-    return () => window.removeEventListener("swicorebp:auth-link", onAuthLink);
+    return () => window.removeEventListener("core:auth-link", onAuthLink);
   }, []);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-import { getActiveOrganization } from "@/actions/organizations";
-import { createProject, getUserProjects } from "@/actions/projects";
+import { createProject } from "@/actions/projects";
+import { readActiveOrganization, readUserProjects } from "@/lib/studio/reads";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
 import { stashPendingCover } from "@/lib/studio/pending-cover";
 import { stashStudioIntent } from "@/lib/studio/pending-intent";
@@ -15,8 +15,8 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 
 async function requireCarouselSlot(): Promise<boolean> {
   const [orgRes, projectsRes] = await Promise.all([
-    getActiveOrganization(),
-    getUserProjects(),
+    readActiveOrganization(),
+    readUserProjects(),
   ]);
   if (orgRes.success && orgRes.organization?.isUpgrade) return true;
   const count = projectsRes.success ? projectsRes.projects.length : 0;

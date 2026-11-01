@@ -5,11 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import { getUserFolders, type FolderListItem } from "@/actions/folders";
-import {
-  getUserProjects,
-  type ProjectListItem,
-} from "@/actions/projects";
+import { type FolderListItem } from "@/actions/folders";
+import { type ProjectListItem } from "@/actions/projects";
+import { readUserFolders, readUserProjects } from "@/lib/studio/reads";
 import { AuthModal } from "@/components/auth";
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
@@ -61,9 +59,7 @@ export function StudioProjects() {
     if (!userId) return;
     setLoading(true);
     try {
-      const res = await getUserProjects(
-        folderId ? { folderId } : undefined,
-      );
+      const res = await readUserProjects(folderId ? { folderId } : undefined);
       if (res.success) setProjects(res.projects);
     } finally {
       setLoading(false);
@@ -72,7 +68,7 @@ export function StudioProjects() {
 
   const fetchFolders = useCallback(async () => {
     if (!userId) return;
-    const res = await getUserFolders();
+    const res = await readUserFolders();
     if (res.success) setFolders(res.folders);
   }, [userId]);
 

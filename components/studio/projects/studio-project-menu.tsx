@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Check,
   Copy,
@@ -11,11 +11,8 @@ import {
   Trash2,
 } from "lucide-react";
 
-import {
-  getUserFolders,
-  moveProjectToFolder,
-  type FolderListItem,
-} from "@/actions/folders";
+import { moveProjectToFolder, type FolderListItem } from "@/actions/folders";
+import { readUserFolders } from "@/lib/studio/reads";
 import {
   deleteProject,
   duplicateProject,
@@ -47,12 +44,11 @@ export function StudioProjectMenu({
   const [draft, setDraft] = useState(project.title);
   const [folders, setFolders] = useState<FolderListItem[]>([]);
 
-  useEffect(() => {
-    void (async () => {
-      const res = await getUserFolders();
+  const loadFolders = () => {
+    void readUserFolders().then((res) => {
       if (res.success) setFolders(res.folders);
-    })();
-  }, []);
+    });
+  };
 
   const commitRename = async () => {
     const next = draft.trim();
@@ -74,10 +70,7 @@ export function StudioProjectMenu({
         if (!open) setRenaming(false);
         if (open) {
           setDraft(project.title);
-          void (async () => {
-            const res = await getUserFolders();
-            if (res.success) setFolders(res.folders);
-          })();
+          loadFolders();
         }
       }}
     >
