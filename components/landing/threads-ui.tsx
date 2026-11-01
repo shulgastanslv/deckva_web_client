@@ -70,7 +70,7 @@ export const DEMO_THREADS_POSTS: ThreadsPostData[] = [
     topic: "Programming",
     text: "AI: 'Finished Recursion Function'\nFunction:",
     showTranslate: true,
-    media: ["/threads/function.png"],
+    media: ["/reviews/1.jpg"],
     likes: "148",
     replies: "33",
     liked: true,
@@ -107,11 +107,7 @@ export const DEMO_THREADS_POSTS: ThreadsPostData[] = [
     time: "2h",
     topic: "Design",
     text: "A carousel from one thought. Cover, middle, ending — already in order.",
-    media: [
-      "/landing/slide-cover.jpg",
-      "/landing/slide-mid.jpg",
-      "/landing/slide-end.jpg",
-    ],
+    media: ["/reviews/2.jpg", "/reviews/3.jpg", "/reviews/4.jpg"],
     likes: "128",
     replies: "14",
     reposts: "9",
@@ -123,11 +119,7 @@ export const DEMO_THREADS_POSTS: ThreadsPostData[] = [
     avatar: DEMO_AVATAR,
     time: "5h",
     text: "First frame stops the scroll. The rest keep the thread.",
-    media: [
-      "/landing/slide-mid.jpg",
-      "/landing/slide-end.jpg",
-      "/landing/slide-cover.jpg",
-    ],
+    media: ["/reviews/6.jpg", "/reviews/8.jpg", "/reviews/7.jpg"],
     likes: "86",
     replies: "7",
   },
@@ -137,7 +129,7 @@ export const DEMO_THREADS_POSTS: ThreadsPostData[] = [
     avatar: DEMO_AVATAR,
     time: "1d",
     text: "Six slides. One ZIP. Straight into the thread.",
-    media: ["/covers/first.jpg", "/covers/second.jpg", "/covers/third.jpg"],
+    media: ["/reviews/9.jpg", "/reviews/10.jpg", "/reviews/3.jpg"],
     likes: "214",
     replies: "31",
     reposts: "18",
@@ -221,7 +213,7 @@ function MediaCarousel({ media, index }: { media: string[]; index: number }) {
   }
 
   return (
-    <div className="relative mt-2.5 aspect-square w-full overflow-hidden rounded-[16px] border border-black/[0.08] bg-neutral-100">
+    <div className="relative mt-2.5 aspect-[4/5] w-full overflow-hidden rounded-[16px] border border-black/[0.08] bg-neutral-100">
       <motion.img
         key={frame}
         src={frame}
@@ -329,16 +321,10 @@ export function ThreadsPost({
   const reposts = formatCount(post.reposts);
 
   return (
-    <article className={cn("relative flex gap-3 px-4 pt-3 pb-3.5", className)}>
-      <div className="relative flex w-9 shrink-0 flex-col items-center">
-        <Avatar src={post.avatar} name={post.author} />
-        {showThreadLine ? (
-          <div className="mt-2 w-px flex-1 bg-neutral-200" aria-hidden />
-        ) : null}
-      </div>
-
-      <div className="min-w-0 flex-1 pr-0.5">
-        <div className="flex min-w-0 items-center gap-0.5">
+    <article className={cn("px-3.5 pt-3 pb-3", className)}>
+      <div className="flex min-w-0 items-center gap-2">
+        <Avatar src={post.avatar} name={post.author} size="sm" />
+        <div className="flex min-w-0 flex-1 items-center gap-0.5">
           <span className="truncate text-[14px] font-semibold tracking-tight text-neutral-950">
             {post.author}
           </span>
@@ -366,26 +352,28 @@ export function ThreadsPost({
               {post.time}
             </span>
           ) : null}
-          <MoreHorizontal className="ml-1 size-4 shrink-0 text-neutral-400" />
         </div>
-
-        <p className="mt-1 whitespace-pre-wrap text-[14px] leading-[1.4] text-neutral-900">
-          {post.text}
-          {post.showTranslate ? <TranslateLink /> : null}
-        </p>
-
-        {post.media && post.media.length > 0 ? (
-          <MediaCarousel media={post.media} index={index} />
-        ) : null}
-
-        <ActionRow
-          likes={likes}
-          replies={replies}
-          reposts={reposts}
-          liked={post.liked}
-          insights
-        />
       </div>
+
+      <p className="mt-2 whitespace-pre-wrap text-[14px] leading-[1.35] text-neutral-900">
+        {post.text}
+        {post.showTranslate ? <TranslateLink /> : null}
+      </p>
+
+      {post.media && post.media.length > 0 ? (
+        <MediaCarousel media={post.media} index={index} />
+      ) : null}
+
+      <ActionRow
+        likes={likes}
+        replies={replies}
+        reposts={reposts}
+        liked={post.liked}
+        insights
+      />
+      {showThreadLine ? (
+        <div className="mx-auto mt-3 h-px w-8 bg-neutral-200" aria-hidden />
+      ) : null}
     </article>
   );
 }
@@ -448,7 +436,7 @@ function ThreadsReply({
 
 function StatusBar() {
   return (
-    <div className="flex h-[44px] shrink-0 items-end justify-between bg-white px-5 pb-1.5 pt-2">
+    <div className="flex h-8 shrink-0 items-end justify-between bg-white px-5 pb-1 pt-1.5">
       <span className="min-w-[54px] text-[15px] font-semibold tracking-[-0.02em] text-neutral-950">
         9:41
       </span>
@@ -503,7 +491,7 @@ function StatusBar() {
 
 function ThreadsHeader() {
   return (
-    <header className="relative isolate z-10 flex h-11 shrink-0 items-center justify-center border-b border-neutral-100 bg-white px-3 [transform:translateZ(0)]">
+    <header className="relative isolate z-10 flex h-9 shrink-0 items-center justify-center border-b border-neutral-100 bg-white px-3 [transform:translateZ(0)]">
       <ChevronLeft
         className="absolute left-2 top-1/2 size-[22px] -translate-y-1/2 text-neutral-950"
         strokeWidth={2}
@@ -623,7 +611,7 @@ export function ThreadsUI({
   const comments = main?.comments ?? [];
   const feedTail = posts.slice(1);
   const reply = showReplyBar && !compact;
-  const tabs = showTabBar && !compact;
+  const tabs = showTabBar;
 
   return (
     <div
@@ -653,7 +641,7 @@ export function ThreadsUI({
               />
             ) : null}
 
-            {!compact && (comments.length > 0 || main) ? <ThreadsFilterBar /> : null}
+            {!compact && comments.length > 0 ? <ThreadsFilterBar /> : null}
 
             {!compact
               ? comments.map((item) => (

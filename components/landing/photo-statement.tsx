@@ -9,7 +9,7 @@ export function PhotoStatement() {
     <section className="mx-auto max-w-6xl px-4 py-8 font-sans sm:px-6">
       <div className="relative overflow-hidden rounded-[2rem] bg-land-card text-land-ink">
         <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center">
-          <div className="px-6 pb-6 pt-10 sm:px-10 sm:py-14 lg:col-span-6 lg:py-16">
+          <div className="px-5 pb-2 pt-8 sm:px-10 sm:py-14 lg:col-span-6 lg:py-16">
             <div>
               <h2 className={`max-w-lg ${landTitle}`}>
                 Это не клон Canva
@@ -23,14 +23,14 @@ export function PhotoStatement() {
               <div className="mt-8 flex items-center gap-4">
                 <a
                   href="/studio"
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-land-blue px-7 text-sm font-bold text-white hover:opacity-80"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-full bg-land-blue px-7 text-sm font-bold text-white hover:opacity-80 sm:w-auto"
                 >
                   Открыть
                 </a>
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-center px-6 pb-10 sm:px-10 lg:col-span-6 lg:p-12 lg:pl-0">
+          <div className="flex items-center justify-center px-5 pb-8 sm:px-10 lg:col-span-6 lg:p-12 lg:pl-0">
             <div className="flex w-full justify-center transition-transform duration-300 hover:scale-[1.02]">
               <CarouselEditorArt />
             </div>

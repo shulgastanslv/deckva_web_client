@@ -45,31 +45,54 @@ export function PhoneCarouselMock({
     [DEMO_THREADS_POSTS[start % DEMO_THREADS_POSTS.length]].filter(Boolean);
 
   return (
-    <PhoneFrame
-      className={
-        className ??
-        "h-[380px] w-[200px] border-[6px] sm:h-[420px] sm:w-[210px]"
-      }
-    >
-      <ThreadsUI posts={feed} compact={compact} showReplyBar={false} showTabBar={false} />
+    <PhoneFrame className={className ?? "w-[210px]"}>
+      <ThreadsUI posts={feed} compact={compact} showReplyBar={false} showTabBar />
     </PhoneFrame>
   );
 }
 
-/** Two phones layered for CTA — bleed out of the stage. */
+/** Two iPhones leaning apart in the closing block. */
 export function DualPhonesMock() {
   return (
-    <div className="relative mx-auto h-[280px] w-full max-w-[340px] sm:h-[360px] sm:max-w-[400px]">
-      <div className="absolute bottom-[-48px] left-0 z-0 origin-bottom -rotate-[9deg] sm:bottom-[-72px]">
+    <div className="mx-auto flex w-full max-w-[440px] items-end justify-center">
+      <div className="origin-bottom -rotate-[8deg]">
         <PhoneCarouselMock
-          start={0}
-          className="h-[320px] w-[160px] border-[5px] shadow-none sm:h-[400px] sm:w-[200px] sm:border-[6px]"
+          posts={[
+            {
+              id: "cta-left",
+              author: "deckva",
+              avatar: "/post_logo.jpg",
+              time: "3h",
+              text: "Первый кадр останавливает ленту.",
+              media: ["/reviews/6.jpg", "/reviews/8.jpg", "/reviews/2.jpg"],
+              likes: "97",
+              replies: "12",
+              reposts: "6",
+            },
+          ]}
+          compact
+          className="w-[132px] sm:w-[188px]"
         />
       </div>
-      <div className="absolute bottom-[-56px] right-0 z-10 origin-bottom rotate-[5deg] sm:bottom-[-80px]">
+      <div className="origin-bottom -ml-6 rotate-[7deg] sm:-ml-8">
         <PhoneCarouselMock
-          start={1}
-          className="h-[340px] w-[170px] border-[5px] shadow-xl sm:h-[420px] sm:w-[210px] sm:border-[6px]"
+          posts={[
+            {
+              id: "cta-right",
+              author: "deckva",
+              avatar: "/post_logo.jpg",
+              verified: true,
+              time: "2h",
+              text: "Карусель из одной мысли — уже по порядку.",
+              media: ["/reviews/2.jpg", "/reviews/3.jpg", "/reviews/4.jpg"],
+              likes: "128",
+              replies: "14",
+              reposts: "9",
+              liked: true,
+            },
+          ]}
+          compact
+          className="w-[142px] sm:w-[200px]"
         />
       </div>
     </div>

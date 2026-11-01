@@ -58,6 +58,7 @@ export const FloatingNav = ({
         }}
         className={cn(
           "fixed top-6 inset-x-0 z-[5000] mx-auto hidden max-w-fit items-center justify-center md:flex",
+          !visible && "pointer-events-none",
           className
         )}
       >

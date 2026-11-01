@@ -23,9 +23,9 @@ function readFileAsDataUrl(file: File): Promise<string> {
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") resolve(reader.result);
-      else reject(new Error("Не удалось прочитать файл"));
+      else reject(new Error("Couldn't read that file"));
     };
-    reader.onerror = () => reject(new Error("Не удалось прочитать файл"));
+    reader.onerror = () => reject(new Error("Couldn't read that file"));
     reader.readAsDataURL(file);
   });
 }
@@ -56,13 +56,13 @@ export function LeaveReviewBlock() {
     for (const file of list) {
       if (next.length >= IMAGE_MAX) break;
       if (!file.type.startsWith("image/")) {
-        setError("Нужны изображения слайдов");
+        setError("Slide images only");
         continue;
       }
       try {
         next.push(await readFileAsDataUrl(file));
       } catch {
-        setError("Не удалось прочитать изображение");
+        setError("Couldn't read that image");
       }
     }
     setImages(next.slice(0, IMAGE_MAX));
@@ -76,7 +76,7 @@ export function LeaveReviewBlock() {
     setBusy(true);
     setError(null);
     const res = await submitFeedback({
-      message: `[${rating}/5] Карусель`,
+      message: `[${rating}/5] Carousel`,
       images,
     });
     setBusy(false);
@@ -96,22 +96,22 @@ export function LeaveReviewBlock() {
         <LandingPad>
           <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <LandingHead
-              title="Оставить отзыв"
-              text="Загрузите карусель — слайды, которые собрали в студии."
+              title="Leave a review"
+              text="Upload a carousel you made in the studio."
             />
 
             {sent ? (
               <div className="flex min-h-[220px] flex-col justify-center rounded-[1.5rem] bg-land-mist px-6 py-8 sm:px-8">
-                <p className={`${landTitle} text-land-ink`}>Спасибо</p>
+                <p className={`${landTitle} text-land-ink`}>Thanks</p>
                 <p className={`mt-4 max-w-sm text-land-ink/55 ${landCardSub}`}>
-                  Карусель получена. Можно отправить ещё одну позже.
+                  Got it. You can send another one later.
                 </p>
                 <button
                   type="button"
                   onClick={() => setSent(false)}
                   className="mt-6 inline-flex h-11 w-fit items-center rounded-full bg-land-panel px-5 text-sm font-semibold text-white"
                 >
-                  Отправить ещё
+                  Send another
                 </button>
               </div>
             ) : (
@@ -121,7 +121,7 @@ export function LeaveReviewBlock() {
               >
                 <div>
                   <p className="text-2xl font-semibold tracking-tight text-land-ink sm:text-3xl">
-                    Оценка
+                    Rating
                   </p>
                   <div
                     className="mt-2 flex items-center gap-1"
@@ -133,11 +133,11 @@ export function LeaveReviewBlock() {
                         <button
                           key={value}
                           type="button"
-                          aria-label={`${value} звёзд`}
+                          aria-label={`${value} stars`}
                           aria-pressed={rating === value}
                           onMouseEnter={() => setHover(value)}
                           onClick={() => setRating(value)}
-                          className="grid size-10 place-items-center rounded-full transition-colors hover:bg-land-mist"
+                          className="grid size-11 place-items-center rounded-full transition-colors hover:bg-land-mist"
                         >
                           <Star
                             className={cn(
@@ -159,7 +159,7 @@ export function LeaveReviewBlock() {
 
                 <div>
                   <p className="text-sm font-semibold text-land-ink">
-                    Карусель
+                    Carousel
                   </p>
                   <input
                     ref={inputRef}
@@ -200,10 +200,10 @@ export function LeaveReviewBlock() {
                       <ImagePlus className="size-5" />
                     </span>
                     <span className="text-base font-semibold text-land-ink">
-                      Перетащите слайды сюда
+                      Drop slides here
                     </span>
                     <span className="max-w-xs text-sm text-land-ink/55">
-                      PNG или JPEG, до {IMAGE_MAX} кадров карусели
+                      PNG or JPEG, up to {IMAGE_MAX} slides
                     </span>
                   </button>
 
@@ -222,7 +222,7 @@ export function LeaveReviewBlock() {
                           />
                           <button
                             type="button"
-                            aria-label="Убрать слайд"
+                            aria-label="Remove slide"
                             onClick={() =>
                               setImages((current) =>
                                 current.filter((_, i) => i !== index),
@@ -252,11 +252,11 @@ export function LeaveReviewBlock() {
                     {busy ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      "Отправить карусель"
+                      "Send carousel"
                     )}
                   </button>
                   <p className="text-sm text-land-ink/45">
-                    {images.length}/{IMAGE_MAX} слайдов
+                    {images.length}/{IMAGE_MAX} slides
                   </p>
                 </div>
 

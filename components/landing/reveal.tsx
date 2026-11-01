@@ -1,20 +1,68 @@
 "use client";
 
-import type { ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
+const ease = [0.22, 1, 0.36, 1] as const;
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 32 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.85, ease: EASE },
-  },
-};
+function useShown(ref: RefObject<HTMLElement | null>, reduce: boolean | null) {
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    if (reduce) {
+      setShown(true);
+      return;
+    }
+    const el = ref.current;
+    if (!el) return;
+
+    let stopped = false;
+    const show = () => {
+      if (stopped) return;
+      stopped = true;
+      setShown(true);
+    };
+    const inView = () => {
+      const box = el.getBoundingClientRect();
+      return box.top < window.innerHeight * 0.92 && box.bottom > 0;
+    };
+
+    if (inView()) show();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) show();
+      },
+      { threshold: 0.12 },
+    );
+    observer.observe(el);
+    const onScroll = () => {
+      if (inView()) show();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // If the observer never fires, anything already on screen still appears.
+    const fallback = window.setTimeout(() => {
+      if (inView()) show();
+    }, 700);
+
+    return () => {
+      stopped = true;
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(fallback);
+    };
+  }, [reduce, ref]);
+
+  return shown || reduce === true;
+}
 
 export function Reveal({
   children,
@@ -26,63 +74,48 @@ export function Reveal({
   delay?: number;
 }) {
   const reduce = useReducedMotion();
-
-  if (reduce) {
-    return <div className={className}>{children}</div>;
-  }
+  const ref = useRef<HTMLDivElement>(null);
+  const shown = useShown(ref, reduce);
 
   return (
     <motion.div
+      ref={ref}
       className={cn("w-full", className)}
-      initial={{ opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.14, margin: "0px 0px -40px 0px" }}
-      transition={{
-        duration: 0.85,
-        ease: EASE,
-        delay,
-      }}
+      initial={false}
+      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
+      transition={
+        reduce
+          ? { duration: 0 }
+          : { duration: 0.75, delay, ease }
+      }
     >
       {children}
     </motion.div>
   );
 }
 
-/** Parent for staggered children — put grid/flex classes here. */
 export function RevealStagger({
   children,
   className,
-  stagger = 0.12,
+  stagger = 0.08,
 }: {
   children: ReactNode;
   className?: string;
   stagger?: number;
 }) {
-  const reduce = useReducedMotion();
-
-  if (reduce) {
-    return <div className={className}>{children}</div>;
-  }
-
   return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount: 0.1, margin: "0px 0px -48px 0px" }}
-      variants={{
-        hidden: {},
-        show: {
-          transition: { staggerChildren: stagger, delayChildren: 0.06 },
-        },
-      }}
-    >
-      {children}
-    </motion.div>
+    <div className={className}>
+      {Array.isArray(children)
+        ? children.map((child, index) => (
+            <Reveal key={index} delay={index * stagger} className="contents">
+              {child}
+            </Reveal>
+          ))
+        : children}
+    </div>
   );
 }
 
-/** One block/text unit inside RevealStagger. Pass grid col-span here. */
 export function RevealItem({
   children,
   className,
@@ -90,15 +123,19 @@ export function RevealItem({
   children: ReactNode;
   className?: string;
 }) {
+  return <Reveal className={className}>{children}</Reveal>;
+}
+
+export function useSectionReveal(delay = 0) {
   const reduce = useReducedMotion();
-
-  if (reduce) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div className={className} variants={itemVariants}>
-      {children}
-    </motion.div>
-  );
+  const ref = useRef<HTMLElement>(null);
+  const shown = useShown(ref, reduce);
+  return {
+    ref,
+    initial: false as const,
+    animate: shown ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 },
+    transition: reduce
+      ? { duration: 0 }
+      : { duration: 0.75, delay, ease },
+  };
 }
