@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { useSession } from "next-auth/react";
 import { Check, ChevronRight, Menu, X } from "lucide-react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
@@ -15,7 +16,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { HeroStage } from "@/components/landing/hero-stage";
-import { Reveal } from "@/components/landing/reveal";
 import { LeaveReviewBlock } from "@/components/landing/leave-review-block";
 import { StudioVideo } from "@/components/landing/studio-video";
 import {
@@ -228,6 +228,15 @@ export function LandingPage() {
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const activePrompt = PROMPTS[prompt];
+  const reduceMotion = useReducedMotion();
+  const rise = {
+    hidden: { opacity: 0, y: 22 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduceMotion ? 0 : 0.75, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -396,14 +405,36 @@ export function LandingPage() {
 
       <section className="relative overflow-hidden bg-land-blue text-white">
         <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
-          <div className="flex w-full max-w-xl flex-col items-start text-left lg:w-[28rem] lg:shrink-0">
-            <h1 className="max-w-[14ch] text-5xl font-semibold tracking-tight leading-[0.96] sm:text-6xl lg:text-7xl">
+          <motion.div
+            className="flex w-full max-w-xl flex-col items-start text-left lg:w-[28rem] lg:shrink-0"
+            initial={reduceMotion ? false : "hidden"}
+            animate="show"
+            variants={{
+              hidden: {},
+              show: {
+                transition: {
+                  staggerChildren: reduceMotion ? 0 : 0.12,
+                  delayChildren: reduceMotion ? 0 : 0.05,
+                },
+              },
+            }}
+          >
+            <motion.h1
+              variants={rise}
+              className="max-w-[14ch] text-5xl font-semibold tracking-tight leading-[0.96] sm:text-6xl lg:text-7xl"
+            >
               Your post, from one line
-            </h1>
-            <p className="mt-6 max-w-md text-xl leading-snug text-white/80">
+            </motion.h1>
+            <motion.p
+              variants={rise}
+              className="mt-6 max-w-md text-xl leading-snug text-white/80"
+            >
               Name what it is about. The slides arrive in order, ready to edit and download.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3">
+            </motion.p>
+            <motion.div
+              variants={rise}
+              className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3"
+            >
               <Button
                 asChild
                 className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
@@ -416,9 +447,20 @@ export function LandingPage() {
               >
                 See it
               </a>
-            </div>
-          </div>
-          <HeroStage />
+            </motion.div>
+          </motion.div>
+          <motion.div
+            className="w-full max-w-[28rem] sm:max-w-[36rem]"
+            initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { duration: 0.85, delay: 0.18, ease: [0.22, 1, 0.36, 1] }
+            }
+          >
+            <HeroStage />
+          </motion.div>
         </div>
       </section>
 
@@ -750,14 +792,9 @@ export function LandingPage() {
         </ul>
       </LandingSection>
 
-      {/* 6. Feedback — only for signed-in */}
-      <Reveal>
-        <LeaveReviewBlock />
-      </Reveal>
+      <LeaveReviewBlock />
 
-      {/* 7. FAQ */}
       <LandingSection id="faq">
-        <Reveal>
           <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:gap-12">
             <div>
               <h2 className={`${landTitle} text-land-ink`}>Questions</h2>
@@ -782,7 +819,6 @@ export function LandingPage() {
               ))}
             </Accordion>
           </div>
-        </Reveal>
       </LandingSection>
 
       <LandingSection>

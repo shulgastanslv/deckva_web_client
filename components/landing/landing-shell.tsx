@@ -1,5 +1,9 @@
-import type { ReactNode } from "react";
+"use client";
 
+import type { ReactNode } from "react";
+import { motion } from "motion/react";
+
+import { useSectionReveal } from "@/components/landing/reveal";
 import { cn } from "@/lib/utils";
 
 /** Section / hero-scale title — modern big type */
@@ -26,16 +30,18 @@ export function LandingSection({
   className?: string;
   children: ReactNode;
 }) {
+  const motionProps = useSectionReveal();
   return (
-    <section
+    <motion.section
       id={id}
+      {...motionProps}
       className={cn(
         "mx-auto w-full max-w-[1440px] scroll-mt-28 px-6 py-12 sm:px-10 sm:py-16 lg:px-[120px] lg:py-20",
         className
       )}
     >
       {children}
-    </section>
+    </motion.section>
   );
 }
 
