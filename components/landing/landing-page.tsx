@@ -62,6 +62,8 @@ const MENU_GROUPS = [
       { name: "The example", href: "#post" },
       { name: "Shapes", href: "#make" },
       { name: "Ratios", href: "#ratios" },
+      { name: "Figma", href: "#figma" },
+      { name: "The picture", href: "#picture" },
       { name: "AI generation", href: "#generate" },
     ],
   },
@@ -232,6 +234,8 @@ const FOOTER_COLUMNS = [
       { name: "The example", href: "#post" },
       { name: "Shapes", href: "#make" },
       { name: "Ratios", href: "#ratios" },
+      { name: "Figma", href: "#figma" },
+      { name: "The picture", href: "#picture" },
       { name: "AI generation", href: "#generate" },
       { name: "Price", href: "#pricing" },
     ],
@@ -761,6 +765,66 @@ export function LandingPage() {
             ))}
           </Accordion>
         </div>
+      </LandingSection>
+
+      <LandingSection id="figma">
+        <h2 className={sectionTitle}>From Figma, and back</h2>
+        <p className={`mt-4 max-w-xl ${landSub}`}>
+          A frame comes into the slide. The finished carousel can leave again.
+        </p>
+        <ul className="mt-8 grid gap-4 lg:grid-cols-2">
+          <li className="overflow-hidden rounded-[1.75rem] bg-land-card">
+            <Place className="h-52 w-full" />
+            <div className="p-6">
+              <h3 className="text-2xl font-medium tracking-tight text-land-ink">
+                Import
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                Bring a frame from Figma onto the slide. The picture, the type, and the order stay editable.
+              </p>
+            </div>
+          </li>
+          <li className="overflow-hidden rounded-[1.75rem] bg-land-card">
+            <Place className="h-52 w-full" />
+            <div className="p-6">
+              <h3 className="text-2xl font-medium tracking-tight text-land-ink">
+                Export
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                Send the carousel back to Figma, or take a PNG of one slide and a ZIP of the set.
+              </p>
+            </div>
+          </li>
+        </ul>
+      </LandingSection>
+
+      <LandingSection id="picture">
+        <h2 className={sectionTitle}>On the picture</h2>
+        <p className={`mt-4 max-w-xl ${landSub}`}>
+          Three tools on a selected image. The slide stays the same project.
+        </p>
+        <ul className="mt-8 grid gap-4 lg:grid-cols-3">
+          {[
+            ["Remove background", "The subject stays. The backdrop goes."],
+            ["Magic layer", "One picture splits into layers you can move."],
+            ["Upscale", "2×, 3×, or 4×. The sharper image stays on the slide."],
+          ].map(([title, text]) => (
+            <li
+              key={title}
+              className="overflow-hidden rounded-[1.75rem] bg-land-card"
+            >
+              <Place className="h-40 w-full sm:h-52" />
+              <div className="p-6">
+                <h3 className="text-2xl font-medium tracking-tight text-land-ink">
+                  {title}
+                </h3>
+                <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                  {text}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </LandingSection>
 
       <LandingSection id="reviews">
