@@ -35,7 +35,7 @@ export function StudioContentBody({
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div
         className={cn(
-          "min-h-full px-6 pt-6 pb-16 sm:px-10",
+          "min-h-full px-4 pt-4 pb-12 sm:px-6 sm:pt-6 sm:pb-16 md:px-10",
           centered && "mx-auto w-full max-w-[1080px]",
           className,
         )}

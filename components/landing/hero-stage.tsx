@@ -67,7 +67,7 @@ export function PhoneFrame({
       className={cn(
         "relative mx-auto overflow-hidden border-land-panel bg-land-panel",
         hero
-          ? "h-[520px] w-[260px] rounded-[2.75rem] border-[7px] sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px] lg:h-[640px] lg:w-[320px]"
+          ? "h-[400px] w-[200px] rounded-[2.4rem] border-[6px] sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px] lg:h-[640px] lg:w-[320px]"
           : "h-[520px] w-[260px] rounded-[2.75rem] border-[7px] shadow-2xl sm:h-[600px] sm:w-[300px] sm:rounded-[3rem] sm:border-[8px]",
         className,
       )}
@@ -132,7 +132,7 @@ export function HeroStage() {
       ref={ref}
       className="relative flex items-center justify-center overflow-visible"
     >
-      <div className="relative mx-auto h-[560px] w-full max-w-xl sm:h-[640px] lg:h-[700px]">
+      <div className="relative mx-auto h-[430px] w-full max-w-xl sm:h-[640px] lg:h-[700px]">
         <motion.div
           className="absolute left-[-4%] top-10 z-10 hidden origin-top rotate-[-8deg] sm:block"
           style={reduce ? undefined : { y: yBack }}
@@ -141,7 +141,7 @@ export function HeroStage() {
         </motion.div>
 
         <motion.div
-          className="absolute left-1/2 top-0 z-20 origin-top -translate-x-1/2 rotate-[6deg] sm:left-auto sm:right-[-2%] sm:translate-x-0"
+          className="absolute left-1/2 top-2 z-20 origin-top -translate-x-1/2 rotate-[4deg] sm:top-0 sm:left-auto sm:right-[-2%] sm:translate-x-0 sm:rotate-[6deg]"
           style={reduce ? undefined : { y: yFront }}
         >
           <ThreadsPhone posts={HERO_POST_A} size="hero" />

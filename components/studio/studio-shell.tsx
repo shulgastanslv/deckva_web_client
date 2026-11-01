@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 
 import { AuthModal } from "@/components/auth";
-import { StudioHeader } from "@/components/studio/header/studio-header";
+import { threadsContentOffset } from "@/components/nav/threads-chrome";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
-import { StudioSidebar } from "@/components/studio/sidebar/studio-sidebar";
+import { StudioThreadsNav } from "@/components/studio/studio-threads-nav";
 import { StudioUpgradeBanner } from "@/components/studio/ui/studio-upgrade-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 export function StudioShell({ children }: { children: ReactNode }) {
   const [authOpen, setAuthOpen] = useState(false);
@@ -48,17 +49,24 @@ export function StudioShell({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={250}>
-      <div className="flex h-dvh w-full overflow-hidden bg-muted/70 text-foreground dark:bg-background">
-        <StudioSidebar
-          search={sidebarSearch}
-          onSearchChange={setSidebarSearch}
-          onBlank={create.openBlank}
-          onTemplates={create.openTemplates}
-        />
+      <div className="relative h-dvh w-full overflow-hidden bg-background text-foreground">
+        <Suspense fallback={null}>
+          <StudioThreadsNav
+            search={sidebarSearch}
+            onSearchChange={setSidebarSearch}
+            onBlank={() => void create.openBlank()}
+            onTemplates={create.openTemplates}
+            onSignIn={() => setAuthOpen(true)}
+          />
+        </Suspense>
 
-        <StudioUpgradeBanner />
-        <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
-          <StudioHeader onSignIn={() => setAuthOpen(true)} />
+        <div
+          className={cn(
+            "flex h-full min-w-0 flex-col",
+            threadsContentOffset,
+          )}
+        >
+          <StudioUpgradeBanner />
           <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
             {children}
           </div>

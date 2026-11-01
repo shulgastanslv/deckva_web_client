@@ -297,12 +297,19 @@ export function StudioPrompt({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <p className="truncate text-[12px] text-muted-foreground">
+            <p className="min-w-0 text-[12px] leading-snug text-muted-foreground">
               {busy
                 ? "Opening editor…"
                 : readingFile
                   ? "Reading image…"
-                  : "Enter to generate · Shift+Enter for a new line"}
+                  : (
+                    <>
+                      <span className="sm:hidden">Enter to generate</span>
+                      <span className="hidden sm:inline">
+                        Enter to generate · Shift+Enter for a new line
+                      </span>
+                    </>
+                  )}
             </p>
           </div>
           <button

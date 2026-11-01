@@ -25,10 +25,10 @@ export function StudioProjectList({
         )}
       >
         <span>Name</span>
-        <span>Slides</span>
-        <span>Format</span>
-        <span>Last opened</span>
-        <span>Owner</span>
+        <span className="hidden md:block">Slides</span>
+        <span className="hidden md:block">Format</span>
+        <span className="hidden md:block">Last opened</span>
+        <span className="hidden md:block">Owner</span>
         <span />
       </div>
       <div>

@@ -4,17 +4,17 @@ import { cn } from "@/lib/utils";
 
 /** Section / hero-scale title — modern big type */
 export const landTitle =
-  "text-5xl font-extrabold tracking-tight leading-[1.05] sm:text-5xl lg:text-5xl";
+  "text-4xl font-extrabold tracking-tight leading-[1.05] sm:text-5xl";
 
 /** Card / block title */
 export const landCardTitle =
-  "text-3xl font-extrabold tracking-tight leading-[1.1] sm:text-3xl";
+  "text-2xl font-extrabold tracking-tight leading-[1.1] sm:text-3xl";
 
 /** Section subtitle under LandingHead */
-export const landSub = "text-xl leading-snug sm:text-2xl";
+export const landSub = "text-lg leading-snug sm:text-xl";
 
 /** Card body / supporting line */
-export const landCardSub = "text-lg leading-snug sm:text-xl";
+export const landCardSub = "text-base leading-snug sm:text-lg";
 
 /** Shared layout primitives — keep section rhythm identical across the landing. */
 export function LandingSection({
@@ -30,7 +30,7 @@ export function LandingSection({
     <section
       id={id}
       className={cn(
-        "mx-auto max-w-6xl scroll-mt-24 px-4 py-12 sm:px-6 sm:py-16",
+        "mx-auto max-w-6xl scroll-mt-16 px-4 py-10 sm:px-6 sm:py-16 md:scroll-mt-8",
         className
       )}
     >

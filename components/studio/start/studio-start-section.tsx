@@ -47,11 +47,11 @@ export function StudioStartSection({
 
   return (
     <section>
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <h2 className="text-[18px] font-semibold tracking-tight text-foreground">
           Start something new
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setShowStarts((open) => !open)}

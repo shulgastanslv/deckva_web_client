@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { CircleUserRound, LogOut, Shield } from "lucide-react";
+import { CircleUserRound, LogOut, User } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 
 import { AuthModal } from "@/components/auth";
@@ -20,7 +19,13 @@ import { cn } from "@/lib/utils";
 const itemClass =
   "cursor-pointer gap-2.5 rounded-none px-3.5 py-2.5 text-[14px] text-neutral-900 focus:bg-neutral-100 dark:text-foreground dark:focus:bg-muted";
 
-export function StudioUserNav() {
+export function StudioUserNav({
+  appearance = "default",
+  menuSide = "bottom",
+}: {
+  appearance?: "default" | "threads";
+  menuSide?: "top" | "bottom" | "left" | "right";
+}) {
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -30,6 +35,7 @@ export function StudioUserNav() {
   const userEmail = session?.user?.email ?? "";
   const userName = session?.user?.name?.trim() || userEmail || "Account";
   const userLetter = (userName[0] || "U").toUpperCase();
+  const threads = appearance === "threads";
 
   if (!signedIn) {
     return (
@@ -37,10 +43,19 @@ export function StudioUserNav() {
         <button
           type="button"
           onClick={() => setAuthOpen(true)}
-          className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={cn(
+            "outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            threads
+              ? "flex size-12 items-center justify-center rounded-2xl text-neutral-400 hover:text-foreground dark:text-neutral-500"
+              : "rounded-full",
+          )}
           aria-label="Sign in"
         >
-          <StudioAvatar letter="U" className="size-8 text-[12px]" />
+          {threads ? (
+            <User className="size-[26px]" strokeWidth={1.6} />
+          ) : (
+            <StudioAvatar letter="U" className="size-8 text-[12px]" />
+          )}
         </button>
         <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
       </>
@@ -54,18 +69,24 @@ export function StudioUserNav() {
           <button
             type="button"
             className={cn(
-              "rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              menuOpen && "ring-2 ring-[#4262ff]/35",
+              "outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              threads
+                ? "flex size-12 items-center justify-center rounded-2xl"
+                : "rounded-full",
+              !threads && menuOpen && "ring-2 ring-[#4262ff]/35",
             )}
             aria-label="Account"
           >
-            <StudioAvatar letter={userLetter} className="size-8 text-[12px]" />
+            <StudioAvatar
+              letter={userLetter}
+              className={threads ? "size-7 text-[11px]" : "size-8 text-[12px]"}
+            />
           </button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          side="bottom"
-          align="end"
+          side={menuSide}
+          align={menuSide === "right" ? "start" : "end"}
           sideOffset={10}
           className="w-[220px] overflow-hidden rounded-2xl border-0 bg-white p-0 dark:bg-background dark:ring-1 dark:ring-border"
         >

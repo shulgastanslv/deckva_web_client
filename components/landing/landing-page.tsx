@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { Menu } from "lucide-react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
-import { WhiteLogo } from "@/components/logo";
 import { AuthModal } from "@/components/auth";
+import { LandingThreadsNav } from "@/components/landing/landing-threads-nav";
+import { threadsContentOffset } from "@/components/nav/threads-chrome";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -15,15 +14,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Spotlight } from "@/components/ui/spotlight";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
-import { FloatingNav } from "@/components/ui/floating-navbar";
 import { HeroStage } from "@/components/landing/hero-stage";
 import { Reveal, RevealItem, RevealStagger } from "@/components/landing/reveal";
 import { FreeBlock } from "@/components/landing/free-block";
@@ -49,7 +41,7 @@ import {
   landTitle,
   landSub,
 } from "@/components/landing/landing-shell";
-import { ThemeSwitcher } from "@/components/theme-switcher";
+import { cn } from "@/lib/utils";
 import { SOCIAL_LINKS } from "@/lib/social";
 
 const LEGAL = {
@@ -147,7 +139,7 @@ const FAQ = [
   {
     value: "devices",
     q: "На каких устройствах работает?",
-    a: "В браузере на компьютере. Для точной вёрстки лучше большой экран.",
+    a: "Студия открывается в браузере, в том числе с телефона. Редактор холста — на широком экране.",
   },
   {
     value: "who",
@@ -185,12 +177,13 @@ const SOCIAL = [
 
 export function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
-  const { status } = useSession();
-  const signedIn = status === "authenticated";
 
   return (
-    <div className="relative bg-land-mist">
-      <FloatingNav navItems={NAV} ctaHref="/studio" ctaLabel="Студия" />
+    <div
+      id="top"
+      className={cn("relative bg-land-mist", threadsContentOffset)}
+    >
+      <LandingThreadsNav onSignIn={() => setAuthOpen(true)} />
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
       <section className="relative overflow-hidden bg-land-blue text-white">
@@ -199,80 +192,9 @@ export function LandingPage() {
           fill="white"
         />
 
-        <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-          <WhiteLogo width={36} height={36} />
-
-          <nav className="hidden items-center gap-7 text-sm font-medium text-white/85 md:flex">
-            {NAV.map((item) => (
-              <a key={item.link} href={item.link} className="hover:text-white">
-                {item.name}
-              </a>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <ThemeSwitcher className="h-10 w-10 text-white hover:bg-white/10 hover:text-white" />
-            <Button
-              asChild
-              className="h-10 rounded-full bg-white px-4 text-land-blue hover:bg-white/90"
-            >
-              <Link href="/studio">
-                <span className="sm:hidden">Студия</span>
-                <span className="hidden sm:inline">Открыть</span>
-              </Link>
-            </Button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/10 hover:text-white md:hidden"
-                  aria-label="Меню"
-                >
-                  <Menu />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[min(100%,20rem)]">
-                <div className="flex flex-col gap-1 px-4">
-                  {NAV.map((item) => (
-                    <SheetClose asChild key={item.link}>
-                      <a
-                        href={item.link}
-                        className="rounded-xl px-3 py-3 text-base font-medium"
-                      >
-                        {item.name}
-                      </a>
-                    </SheetClose>
-                  ))}
-                  {signedIn ? (
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="mt-3 h-10 rounded-full"
-                    >
-                      <Link href="/studio">Проекты</Link>
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      className="mt-3 h-10 rounded-full"
-                      onClick={() => setAuthOpen(true)}
-                    >
-                      Войти
-                    </Button>
-                  )}
-                  <Button asChild className="h-10 rounded-full">
-                    <Link href="/studio">Открыть студию</Link>
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
-        <div className="relative z-10 mx-auto grid min-h-[85vh] max-w-6xl items-center gap-10 px-4 pb-36 pt-10 sm:gap-12 sm:px-6 sm:pb-44 sm:pt-14 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pb-52 lg:pt-16">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pt-8 pb-24 sm:gap-12 sm:px-6 sm:pt-14 sm:pb-44 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pt-16 lg:pb-52">
           <div>
-            <h1 className="max-w-xl text-6xl font-extrabold tracking-tight leading-[0.95] sm:text-7xl lg:text-7xl">
+            <h1 className="max-w-xl text-[2.5rem] font-extrabold tracking-tight leading-[0.95] sm:text-6xl lg:text-7xl">
               AI-редактор каруселей
             </h1>
             <TextGenerateEffect
@@ -281,16 +203,16 @@ export function LandingPage() {
               className="mt-5 text-xl font-medium text-white/90 sm:text-2xl"
               spanClassName="text-white/90"
             />
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap">
               <Button
                 asChild
-                className="h-11 rounded-full bg-white px-5 text-land-blue hover:bg-white/90"
+                className="h-11 w-full rounded-full bg-white px-5 text-land-blue hover:bg-white/90 min-[420px]:w-auto"
               >
                 <Link href="/studio">Открыть</Link>
               </Button>
               <a
                 href="#studio"
-                className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-medium text-white hover:bg-white/10"
+                className="inline-flex h-11 w-full items-center justify-center rounded-full border border-white/30 px-5 text-sm font-medium text-white hover:bg-white/10 min-[420px]:w-auto"
               >
                 Смотреть студию
               </a>
@@ -472,7 +394,7 @@ export function LandingPage() {
                   </Link>
                 </div>
               </div>
-              <div className="relative z-10 -mx-10 overflow-hidden">
+              <div className="relative z-10 -mx-4 overflow-hidden sm:-mx-10">
                 <div className="absolute inset-x-10 top-4 h-full rounded-full bg-land-panel/25 blur-xl" />
                 <DualPhonesMock />
               </div>

@@ -10,7 +10,7 @@ export function StudioSectionHeader({
   trailing?: ReactNode;
 }) {
   return (
-    <div className="mb-4 flex items-center justify-between gap-4">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <h2 className="text-[18px] font-semibold tracking-tight text-foreground">
           {title}

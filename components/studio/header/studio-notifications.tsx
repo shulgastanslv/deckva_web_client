@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Bell, Check, ChevronDown, Loader2, X } from "lucide-react";
+import { Bell, Check, ChevronDown, Heart, Loader2, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import {
@@ -48,7 +48,7 @@ function NotificationsPanel({
     filter === "unread" ? items.filter((item) => !item.read) : items;
 
   return (
-    <div className="flex h-[min(440px,calc(100dvh-32px))] w-[360px] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.14)] dark:border-border dark:bg-background">
+    <div className="flex h-[min(440px,calc(100dvh-32px))] w-full flex-col overflow-hidden rounded-2xl border border-border bg-background">
       <div className="flex items-center justify-between px-5 pt-4 pb-1">
         <h2 className="text-[16px] font-bold text-neutral-950 dark:text-foreground">
           Notifications
@@ -148,8 +148,10 @@ function NotificationsPanel({
 
 export function StudioNotifications({
   className,
+  variant = "default",
 }: {
   className?: string;
+  variant?: "default" | "threads";
 }) {
   const { status } = useSession();
   const [open, setOpen] = useState(false);
@@ -157,9 +159,11 @@ export function StudioNotifications({
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [unread, setUnread] = useState(0);
-  const [coords, setCoords] = useState<{ top: number; right: number } | null>(
-    null,
-  );
+  const [coords, setCoords] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -193,10 +197,16 @@ export function StudioNotifications({
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const gap = 10;
-      setCoords({
-        top: Math.max(12, rect.bottom + gap),
-        right: Math.max(12, window.innerWidth - rect.right),
-      });
+      const width = Math.min(360, window.innerWidth - 24);
+      const height = Math.min(440, window.innerHeight - 24);
+      let top = rect.bottom + gap;
+      let left = rect.left < 96 ? rect.right + gap : rect.right - width;
+      if (rect.top > window.innerHeight * 0.55) {
+        top = rect.top - gap - height;
+      }
+      top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
+      left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
+      setCoords({ top, left, width });
     };
 
     place();
@@ -242,14 +252,32 @@ export function StudioNotifications({
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "relative flex size-9 items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-muted-foreground dark:hover:bg-muted",
-          open && "bg-neutral-100 dark:bg-muted",
+          variant === "threads"
+            ? "relative flex size-12 items-center justify-center rounded-2xl text-neutral-400 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-neutral-500"
+            : "relative flex size-9 items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-muted-foreground dark:hover:bg-muted",
+          variant === "threads" && open && "text-foreground",
+          variant !== "threads" && open && "bg-neutral-100 dark:bg-muted",
           className,
         )}
       >
-        <Bell className="size-[18px] stroke-[1.75]" />
+        {variant === "threads" ? (
+          <Heart
+            className="size-[26px]"
+            strokeWidth={1.6}
+            fill={open ? "currentColor" : "none"}
+          />
+        ) : (
+          <Bell className="size-[18px] stroke-[1.75]" />
+        )}
         {unread > 0 ? (
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#2f5bff]" />
+          <span
+            className={cn(
+              "absolute rounded-full",
+              variant === "threads"
+                ? "top-2.5 right-2.5 size-[7px] bg-[#ff3040]"
+                : "top-1.5 right-1.5 size-2 bg-[#2f5bff]",
+            )}
+          />
         ) : null}
       </button>
 
@@ -260,7 +288,8 @@ export function StudioNotifications({
               style={{
                 position: "fixed",
                 top: coords.top,
-                right: coords.right,
+                left: coords.left,
+                width: coords.width,
                 zIndex: 80,
               }}
             >
