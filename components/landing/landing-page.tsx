@@ -52,24 +52,24 @@ const NAV = [
 
 const REASONS = [
   {
-    title: "One post",
-    text: "Slides are already in feed order and in the right ratio. You don’t slice them out of a layout after export.",
+    title: "The post, not the frames",
+    text: "Figma hands you frames. Canva hands you pages. You export them and line the feed up yourself. Here the slides are already one post: the order, the ratio, and the file.",
   },
   {
-    title: "Start from a topic",
-    text: "A topic or a template sets the structure. You edit the words, the cover, and the order.",
+    title: "A topic, not a blank file",
+    text: "Figma starts from an empty frame. Canva starts from a template search. A topic here builds the slide structure. You edit the words, the cover, and the order.",
   },
   {
-    title: "A file you can post",
-    text: "A PNG of one slide, or a ZIP of the carousel. No Deckva logo, and no second editor.",
+    title: "A file for the feed",
+    text: "You don’t leave with a design file to slice later. A PNG of one slide, or a ZIP of the carousel, with no watermark.",
   },
 ] as const;
 
 const FAQ = [
   {
     value: "why",
-    q: "Why not build the slides in another editor?",
-    a: "There, a carousel is several separate layouts. Here the post is the slides: ratio, order, and a file to publish, in one project.",
+    q: "How is this different from Figma or Canva?",
+    a: "Those tools are for any design. A carousel there is still separate frames or pages you export and assemble. Here the post is the project: feed ratio, slide order, and a PNG or ZIP.",
   },
   {
     value: "output",
@@ -242,9 +242,12 @@ export function LandingPage() {
 
       <LandingSection id="why">
         <Reveal>
-          <h2 className={`${landTitle} text-land-ink`}>Why this</h2>
-          <p className={`mt-3 max-w-lg ${landSub}`}>
-            A carousel should be one post, not a folder of layouts.
+          <h2 className={`${landTitle} max-w-xl text-land-ink`}>
+            Better than Figma or Canva
+          </h2>
+          <p className={`mt-3 max-w-xl ${landSub}`}>
+            For a carousel. They design anything. This job is several slides,
+            one post, and one file.
           </p>
           <ol className="mt-8 grid gap-8 sm:grid-cols-3 sm:gap-6">
             {REASONS.map((reason) => (
