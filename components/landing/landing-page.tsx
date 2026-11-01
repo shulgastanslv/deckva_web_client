@@ -396,14 +396,14 @@ export function LandingPage() {
 
       <section className="relative overflow-hidden bg-land-blue text-white">
         <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
-          <div className="flex w-full max-w-xl flex-col items-center text-center lg:w-[24rem] lg:shrink-0 lg:items-start lg:text-left">
-            <h1 className="text-6xl font-semibold tracking-tight leading-[0.92] sm:text-7xl lg:text-8xl">
-              One sentence
+          <div className="flex w-full max-w-xl flex-col items-start text-left lg:w-[28rem] lg:shrink-0">
+            <h1 className="max-w-[14ch] text-5xl font-semibold tracking-tight leading-[0.96] sm:text-6xl lg:text-7xl">
+              Your post, from one line
             </h1>
-            <p className="mt-6 max-w-sm text-xl leading-snug text-white/80 sm:text-2xl">
-              The slides follow, in order.
+            <p className="mt-6 max-w-md text-xl leading-snug text-white/80">
+              Name what it is about. The slides arrive in order, ready to edit and download.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 lg:justify-start">
+            <div className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3">
               <Button
                 asChild
                 className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
