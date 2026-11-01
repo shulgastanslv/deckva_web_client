@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Check, Menu } from "lucide-react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
@@ -145,6 +144,37 @@ const FAQ = [
   },
 ];
 
+const FOOTER_COLUMNS = [
+  {
+    title: "Product",
+    links: [
+      { name: "Open studio", href: "/studio" },
+      { name: "See it", href: "#studio" },
+      { name: "The post", href: "#post" },
+      { name: "Examples", href: "#reviews" },
+      { name: "Questions", href: "#faq" },
+    ],
+  },
+  {
+    title: "Make",
+    links: [
+      { name: "Starting lines", href: "#start" },
+      { name: "AI generation", href: "#generate" },
+      { name: "Shapes", href: "#make" },
+      { name: "Price", href: "#pricing" },
+    ],
+  },
+  {
+    title: "Find us",
+    links: [
+      { name: "Threads", href: SOCIAL_LINKS.threads },
+      { name: "Telegram", href: SOCIAL_LINKS.telegram },
+      { name: "Instagram", href: SOCIAL_LINKS.instagram },
+      { name: "TikTok", href: SOCIAL_LINKS.tiktok },
+    ],
+  },
+] as const;
+
 const SOCIAL = [
   {
     key: "threads",
@@ -257,8 +287,8 @@ export function LandingPage() {
       </header>
 
       <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-12 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-16 lg:pb-24">
-          <div className="flex w-full max-w-xl flex-col items-center text-center lg:items-start lg:text-left">
+        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
+          <div className="flex w-full max-w-xl flex-col items-center text-center lg:w-[24rem] lg:shrink-0 lg:items-start lg:text-left">
             <h1 className="max-w-[10ch] text-6xl font-semibold tracking-tight leading-[0.92] sm:text-7xl lg:text-8xl">
               Slides from a sentence
             </h1>
@@ -669,61 +699,71 @@ export function LandingPage() {
         </ul>
       </LandingSection>
 
-      <footer>
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 pt-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-6 lg:grid-cols-[1fr_auto_1.2fr] lg:items-start">
-          <div>
-            <Link
-              href="/"
-              className="text-sm font-semibold tracking-tight text-land-ink"
-            >
-              deckva.by
-            </Link>
-            <p className="mt-2 max-w-xs text-sm leading-relaxed text-land-ink/45">
-              Write the topic. Shape the slides. Post the file.
-            </p>
-            <p className="mt-4 text-sm text-land-ink/45">
-              © {new Date().getFullYear()} Deckva
-            </p>
-          </div>
-
-          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-land-ink/55 lg:justify-center">
-            {NAV.map((item) => (
-              <a
-                key={item.link}
-                href={item.link}
-                className="hover:text-land-ink"
-              >
-                {item.name}
-              </a>
+      <footer className="bg-[#0e0f12] text-white">
+        <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+            {FOOTER_COLUMNS.map((column) => (
+              <div key={column.title}>
+                <p className="text-sm font-semibold">{column.title}</p>
+                <ul className="mt-4 space-y-3">
+                  {column.links.map((item) => (
+                    <li key={item.name}>
+                      <a
+                        href={item.href}
+                        className="text-sm text-white/65 hover:text-white"
+                        {...(item.href.startsWith("http")
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
+                        {item.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </nav>
-
-          <div className="text-sm leading-relaxed text-land-ink/55">
-            <p className="font-semibold text-land-ink">{LEGAL.status}</p>
-            <p className="mt-1">{LEGAL.country}</p>
-            <dl className="mt-3 space-y-1.5">
-              <div className="flex flex-wrap gap-x-2">
-                <dt className="text-land-ink/45">Name</dt>
-                <dd className="font-medium text-land-ink">{LEGAL.fullName}</dd>
-              </div>
-              <div className="flex flex-wrap gap-x-2">
-                <dt className="text-land-ink/45">Tax ID</dt>
-                <dd className="font-medium tabular-nums text-land-ink">
-                  {LEGAL.unp}
-                </dd>
-              </div>
-              <div className="flex flex-wrap gap-x-2">
-                <dt className="text-land-ink/45">Email</dt>
-                <dd>
+            <div>
+              <p className="text-sm font-semibold">Details</p>
+              <ul className="mt-4 space-y-3 text-sm text-white/65">
+                <li>{LEGAL.status}</li>
+                <li>{LEGAL.country}</li>
+                <li className="text-white/90">{LEGAL.fullName}</li>
+                <li className="tabular-nums">Tax ID {LEGAL.unp}</li>
+                <li>
                   <a
                     href={`mailto:${LEGAL.email}`}
-                    className="font-medium text-land-ink hover:text-land-blue"
+                    className="hover:text-white"
                   >
                     {LEGAL.email}
                   </a>
-                </dd>
-              </div>
-            </dl>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-14 flex flex-wrap items-center gap-5 border-t border-white/15 pt-6">
+            {SOCIAL.map(({ key, name, href, Icon }) => (
+              <a
+                key={key}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={name}
+                className="text-white/75 hover:text-white"
+              >
+                <Icon className="size-4" />
+              </a>
+            ))}
+          </div>
+
+          <div className="mt-6 flex flex-col gap-4 border-t border-white/15 pt-6 text-sm text-white/65 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <Logo width={22} height={22} className="text-white" />
+              <span>Deckva © {new Date().getFullYear()}</span>
+            </div>
+            <a href={`mailto:${LEGAL.email}`} className="hover:text-white">
+              {LEGAL.email}
+            </a>
           </div>
         </div>
       </footer>

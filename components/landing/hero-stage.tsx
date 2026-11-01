@@ -118,15 +118,15 @@ export function ThreadsPhone({
 
 export function HeroStage() {
   return (
-    <div className="pointer-events-none relative mx-auto flex w-full max-w-[520px] items-center justify-center">
+    <div className="pointer-events-none relative mx-auto w-full max-w-[28rem] sm:max-w-[36rem]">
       <ThreadsPhone
         posts={HERO_POST_B}
-        className="w-[46%] origin-center -rotate-6"
+        className="absolute top-6 left-[4%] w-[66%] origin-center -rotate-6 sm:top-8 sm:left-[5%] sm:w-[62%]"
       />
       <ThreadsPhone
         posts={HERO_POST_A}
         size="hero"
-        className="relative z-10 -ml-[10%] w-[52%]"
+        className="relative z-10 ml-auto w-[86%] sm:w-[78%]"
       />
     </div>
   );
