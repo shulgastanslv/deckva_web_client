@@ -40,8 +40,8 @@ export default function StudioHomePage() {
     <StudioShell>
       <Suspense fallback={null}>
         <StudioHomeRedirects />
+        <StudioHome />
       </Suspense>
-      <StudioHome />
     </StudioShell>
   );
 }
