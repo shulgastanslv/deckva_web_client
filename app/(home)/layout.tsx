@@ -9,7 +9,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Главная",
   description:
-    "Deckva — студия каруселей для соцсетей. Соберите слайды на холсте, отредактируйте и экспортируйте без водяных знаков.",
+    "Deckva собирает карусель как один пост: тема, слайды в формате ленты и файл без водяного знака.",
   keywords: [
     "Deckva",
     "редактор каруселей",
@@ -22,18 +22,18 @@ export const metadata: Metadata = {
   creator: "Deckva",
   publisher: "Deckva",
   openGraph: {
-    title: "Deckva — студия каруселей",
+    title: "Deckva — карусель без сборки по частям",
     description:
-      "Шаблоны, холст и экспорт. Карусели для Instagram и других соцсетей.",
+      "Тема становится лентой слайдов. Правки и файл для публикации — в одном проекте.",
     siteName: "Deckva",
     locale: "ru_BY",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deckva — студия каруселей",
+    title: "Deckva — карусель без сборки по частям",
     description:
-      "Шаблоны, холст и экспорт. Карусели для Instagram и других соцсетей.",
+      "Тема становится лентой слайдов. Правки и файл для публикации — в одном проекте.",
   },
 };
 

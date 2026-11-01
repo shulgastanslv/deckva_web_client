@@ -61,8 +61,8 @@ export function ReviewsBlock() {
   return (
     <LandingSection id="reviews">
       <LandingHead
-        title="Отзывы"
-        text="Карусели, которые собрали в студии."
+        title="Что получается"
+        text="Карусели, которые уже можно публиковать. Собраны в студии."
       />
 
       <ul className="columns-2 gap-2 sm:gap-3 lg:columns-3">
