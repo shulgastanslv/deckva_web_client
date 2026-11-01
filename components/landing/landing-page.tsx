@@ -43,33 +43,53 @@ const LEGAL = {
 } as const;
 
 const NAV = [
-  { name: "Studio", link: "#studio" },
-  { name: "Why", link: "#why" },
+  { name: "See it", link: "#studio" },
+  { name: "The post", link: "#post" },
   { name: "Examples", link: "#reviews" },
   { name: "Price", link: "#pricing" },
   { name: "Questions", link: "#faq" },
 ];
 
-const REASONS = [
+const STARTS = [
+  "Product launch",
+  "How it works",
+  "Seven mistakes",
+  "Before and after",
+  "A checklist",
+  "This week’s tips",
+  "A short story",
+  "What changed",
+] as const;
+
+const STEPS = [
   {
-    title: "The post, not the frames",
-    text: "Figma hands you frames. Canva hands you pages. You export them and line the feed up yourself. Here the slides are already one post: the order, the ratio, and the file.",
+    title: "The topic sets the slides",
+    text: "You name the post. The slides arrive in order, already in the ratio of a feed.",
   },
   {
-    title: "A topic, not a blank file",
-    text: "Figma starts from an empty frame. Canva starts from a template search. A topic here builds the slide structure. You edit the words, the cover, and the order.",
+    title: "You keep editing",
+    text: "Words, cover, and order stay in the same project. Change them until the post is the one you want.",
   },
   {
-    title: "A file for the feed",
-    text: "You don’t leave with a design file to slice later. A PNG of one slide, or a ZIP of the carousel, with no watermark.",
+    title: "You download the post",
+    text: "A PNG of one slide, or a ZIP of the carousel. The file has no watermark.",
   },
+] as const;
+
+const JOBS = [
+  ["Launch", "The offer, the proof, the next step."],
+  ["How-to", "One step on each slide."],
+  ["Checklist", "A list people save."],
+  ["Story", "A beginning, a turn, an end."],
+  ["Tips", "A short run of useful points."],
+  ["Before and after", "What changed, and why."],
 ] as const;
 
 const FAQ = [
   {
-    value: "why",
-    q: "How is this different from Figma or Canva?",
-    a: "Those tools are for any design. A carousel there is still separate frames or pages you export and assemble. Here the post is the project: feed ratio, slide order, and a PNG or ZIP.",
+    value: "project",
+    q: "What is a project?",
+    a: "One carousel. The slides, their order, and the file you download all live in that project.",
   },
   {
     value: "output",
@@ -79,7 +99,7 @@ const FAQ = [
   {
     value: "start",
     q: "Where does a post start?",
-    a: "A topic, a template, or a blank canvas. A topic gives you the slide structure. Then you edit the text, the cover, and the order.",
+    a: "A topic, a template, or an empty project. A topic gives you the slide structure. Then you edit the text, the cover, and the order.",
   },
   {
     value: "price",
@@ -203,14 +223,17 @@ export function LandingPage() {
       </header>
 
       <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[calc(5rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(6rem+env(safe-area-inset-top))] sm:pb-20 lg:grid-cols-2 lg:gap-12 lg:pb-24">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[calc(5rem+env(safe-area-inset-top))] pb-10 sm:px-6 sm:pt-[calc(6rem+env(safe-area-inset-top))] sm:pb-14 lg:grid-cols-2 lg:gap-12">
           <div className="max-w-md">
-            <h1 className="text-4xl font-semibold tracking-tight leading-[1.05] sm:text-5xl">
-              One carousel, not a folder
+            <p className="text-sm font-medium text-white/70">
+              Where a topic becomes a post
+            </p>
+            <h1 className="mt-3 text-5xl font-semibold tracking-tight leading-[1.02] sm:text-6xl">
+              Carousel studio
             </h1>
             <p className="mt-4 max-w-sm text-base leading-relaxed text-white/80 sm:text-lg">
-              A topic becomes the slides. Edit the words and the order here,
-              then download a file you can post.
+              Write what the post is about. The slides follow, in order. You
+              edit them, then download the file.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Button
@@ -223,44 +246,74 @@ export function LandingPage() {
                 href="#studio"
                 className="text-sm font-medium text-white/75 hover:text-white"
               >
-                See how it works
+                See it
               </a>
             </div>
           </div>
           <HeroStage />
         </div>
+        <div className="relative z-10 overflow-hidden pb-8">
+          <ul className="flex w-max gap-2 motion-safe:animate-marquee">
+            {[...STARTS, ...STARTS].map((name, index) => (
+              <li key={`${name}-${index}`} aria-hidden={index >= STARTS.length}>
+                <a
+                  href="/studio"
+                  className="inline-flex h-10 items-center rounded-full bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/15"
+                >
+                  {name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
-      <LandingSection
-        id="studio"
-        className="relative z-20 -mt-8 py-0 sm:-mt-12 sm:py-0"
-      >
-        <div className="overflow-hidden rounded-3xl bg-land-card">
+      <LandingSection id="studio" className="relative z-20">
+        <h2 className={`${landTitle} text-land-ink`}>See it come together</h2>
+        <p className={`mt-3 max-w-lg ${landSub}`}>
+          One project, from the topic you write to the file you download.
+        </p>
+        <div className="mt-6 overflow-hidden rounded-3xl bg-land-card">
           <StudioVideo />
         </div>
       </LandingSection>
 
-      <LandingSection id="why">
+      <LandingSection id="post">
         <Reveal>
           <h2 className={`${landTitle} max-w-xl text-land-ink`}>
-            Better than Figma or Canva
+            From the topic to the file
           </h2>
           <p className={`mt-3 max-w-xl ${landSub}`}>
-            For a carousel. They design anything. This job is several slides,
-            one post, and one file.
+            The studio is the whole post. The slides, the edits, and the
+            download stay in one project.
           </p>
           <ol className="mt-8 grid gap-8 sm:grid-cols-3 sm:gap-6">
-            {REASONS.map((reason) => (
-              <li key={reason.title}>
+            {STEPS.map((step) => (
+              <li key={step.title}>
                 <h3 className="text-lg font-semibold tracking-tight text-land-ink">
-                  {reason.title}
+                  {step.title}
                 </h3>
                 <p className="mt-2 text-base leading-relaxed text-land-ink/60">
-                  {reason.text}
+                  {step.text}
                 </p>
               </li>
             ))}
           </ol>
+          <ul className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-3">
+            {JOBS.map(([title, text]) => (
+              <li
+                key={title}
+                className="flex min-h-36 flex-col justify-between rounded-3xl bg-land-card p-5 sm:min-h-40 sm:p-6"
+              >
+                <h3 className="text-lg font-semibold tracking-tight text-land-ink">
+                  {title}
+                </h3>
+                <p className="mt-6 text-sm leading-relaxed text-land-ink/55">
+                  {text}
+                </p>
+              </li>
+            ))}
+          </ul>
         </Reveal>
       </LandingSection>
 
@@ -279,11 +332,11 @@ export function LandingPage() {
             </p>
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-land-ink">
-                A month, instead of building the feed by hand
+                A month in the studio
               </h2>
               <p className="mt-2 max-w-md text-base leading-relaxed text-land-ink/55">
-                Edits stay in the same project. Export has no watermark.
-                Cancel any time.
+                Keep editing the same project. Download a file with no
+                watermark. Cancel any time.
               </p>
             </div>
             <a
@@ -311,7 +364,7 @@ export function LandingPage() {
                 Before you open the studio.
               </p>
             </div>
-            <Accordion type="single" collapsible defaultValue="why">
+            <Accordion type="single" collapsible defaultValue="project">
               {FAQ.map((item) => (
                 <AccordionItem
                   key={item.value}
@@ -329,6 +382,22 @@ export function LandingPage() {
             </Accordion>
           </div>
         </Reveal>
+      </LandingSection>
+
+      <LandingSection className="pb-4 sm:pb-6">
+        <p className="max-w-xl text-4xl font-semibold tracking-tight text-land-ink sm:text-6xl sm:leading-[1.05]">
+          Write it.
+          <br />
+          Shape it.
+          <br />
+          Post it.
+        </p>
+        <a
+          href="/studio"
+          className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-land-blue px-6 text-sm font-semibold text-white hover:bg-land-blue/90"
+        >
+          Open studio
+        </a>
       </LandingSection>
 
       <LandingSection>
@@ -362,7 +431,7 @@ export function LandingPage() {
               deckva.by
             </Link>
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-land-ink/45">
-              One carousel: the slides, the edits, and a file you can post.
+              Write the topic. Shape the slides. Post the file.
             </p>
             <p className="mt-4 text-sm text-land-ink/45">
               © {new Date().getFullYear()} Deckva

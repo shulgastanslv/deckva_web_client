@@ -31,9 +31,9 @@ export function ReviewsBlock() {
 
   return (
     <LandingSection id="reviews">
-      <h2 className={`${landTitle} text-land-ink`}>What you get</h2>
+      <h2 className={`${landTitle} text-land-ink`}>Posts from the studio</h2>
       <p className={`mt-3 max-w-lg ${landSub}`}>
-        Carousels made in the studio, ready to post.
+        Carousels that already left as a file.
       </p>
 
       <ul className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-3">

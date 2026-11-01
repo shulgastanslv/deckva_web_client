@@ -21,18 +21,18 @@ export const metadata: Metadata = {
   creator: "Deckva",
   publisher: "Deckva",
   openGraph: {
-    title: "Deckva — one carousel, not a folder",
+    title: "Deckva — carousel studio",
     description:
-      "A topic becomes the slides. Edit them and download a file you can post, in one project.",
+      "Write the topic. The slides follow. Edit them and download the post.",
     siteName: "Deckva",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deckva — one carousel, not a folder",
+    title: "Deckva — carousel studio",
     description:
-      "A topic becomes the slides. Edit them and download a file you can post, in one project.",
+      "Write the topic. The slides follow. Edit them and download the post.",
   },
 };
 
