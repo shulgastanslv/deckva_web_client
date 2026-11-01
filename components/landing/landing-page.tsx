@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Menu } from "lucide-react";
+import { Check, Menu } from "lucide-react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
-import { WhiteLogo } from "@/components/logo";
+import Logo from "@/components/logo";
 import { AuthModal } from "@/components/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,11 @@ import {
 } from "@/components/landing/landing-shell";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { SOCIAL_LINKS } from "@/lib/social";
+import {
+  FREE_CAROUSEL_LIMIT,
+  PRO_FEATURES,
+  STUDIO_PRO_PRICE,
+} from "@/lib/studio/plans";
 
 const LEGAL = {
   status: "Professional income tax payer",
@@ -178,23 +183,23 @@ export function LandingPage() {
     <div className="relative bg-land-mist">
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
-      <header className="fixed inset-x-0 top-0 z-50 bg-land-blue pt-[env(safe-area-inset-top)] text-white">
-        <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-5">
-          <WhiteLogo width={36} height={36} />
+      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-2 rounded-full border border-white/50 bg-white/70 px-2.5 py-2 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:px-4">
+          <Logo width={32} height={32} />
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-white/85 md:flex">
+          <nav className="hidden items-center gap-6 text-sm font-medium text-land-ink/70 md:flex">
             {NAV.map((item) => (
-              <a key={item.link} href={item.link} className="hover:text-white">
+              <a key={item.link} href={item.link} className="hover:text-land-ink">
                 {item.name}
               </a>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
-            <ThemeSwitcher className="h-10 w-10 text-white hover:bg-white/10 hover:text-white" />
+          <div className="flex items-center gap-1.5">
+            <ThemeSwitcher className="h-10 w-10 text-land-ink hover:bg-land-ink/10 hover:text-land-ink" />
             <Button
               asChild
-              className="h-10 rounded-full bg-white px-4 text-land-blue hover:bg-white/90"
+              className="h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90"
             >
               <a href="/studio">
                 <span className="sm:hidden">Studio</span>
@@ -206,7 +211,7 @@ export function LandingPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-10 rounded-full text-white hover:bg-white/10 hover:text-white md:hidden"
+                  className="size-10 rounded-full text-land-ink hover:bg-land-ink/10 hover:text-land-ink md:hidden"
                   aria-label="Menu"
                 >
                   <Menu />
@@ -252,16 +257,16 @@ export function LandingPage() {
       </header>
 
       <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[calc(5rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(6rem+env(safe-area-inset-top))] sm:pb-20 lg:grid-cols-2 lg:gap-12 lg:pb-24">
-          <div>
-            <h1 className="max-w-xl text-6xl font-semibold tracking-tight leading-[0.94] sm:text-7xl lg:text-8xl">
-              Carousel studio
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-12 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-16 lg:pb-24">
+          <div className="flex w-full max-w-xl flex-col items-center text-center lg:items-start lg:text-left">
+            <h1 className="max-w-[10ch] text-6xl font-semibold tracking-tight leading-[0.92] sm:text-7xl lg:text-8xl">
+              Slides from a sentence
             </h1>
             <p className="mt-6 max-w-lg text-xl leading-snug text-white/80 sm:text-2xl">
               Write what the post is about. The slides follow, in order. You
               edit them, then download the file.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 lg:justify-start">
               <Button
                 asChild
                 className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
@@ -521,22 +526,91 @@ export function LandingPage() {
       </LandingSection>
 
       <LandingSection id="pricing">
-        <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-          <div>
-            <h2 className={sectionTitle}>15 Br, unmarked slides</h2>
-            <p className={`mt-4 max-w-xl ${landSub}`}>
-              15 Br a month. No logo on the slides. Cancel whenever you want,
-              and the project stays until the paid period ends.
+        <h2 className={sectionTitle}>Price</h2>
+        <ul className="mt-8 grid gap-4 lg:grid-cols-2">
+          <li className="flex flex-col rounded-[1.75rem] bg-white p-6 text-land-ink dark:bg-[#2a2c38] sm:p-8">
+            <p className="text-sm font-medium text-land-ink/50">Free</p>
+            <p className="mt-3 flex items-baseline gap-2 text-land-ink">
+              <span className="text-5xl font-medium tracking-tight">0</span>
+              <span className="text-lg">Br</span>
             </p>
+            <ul className="mt-6 flex-1 space-y-3 text-base text-land-ink/75">
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-land-blue" strokeWidth={2.5} />
+                {FREE_CAROUSEL_LIMIT} editable carousels
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-land-blue" strokeWidth={2.5} />
+                Generation from a topic
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-land-blue" strokeWidth={2.5} />
+                Edit the slides, then download
+              </li>
+            </ul>
             <a
               href="/studio"
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-land-ink px-5 text-sm font-semibold text-land-mist"
+              className="mt-8 inline-flex h-11 items-center justify-center self-stretch rounded-full bg-[#14151c] px-5 text-sm font-semibold text-white dark:bg-white dark:text-[#14151c]"
             >
               Open studio
             </a>
-          </div>
-          <Place className="min-h-56 rounded-[1.75rem]" />
-        </div>
+          </li>
+          <li className="flex flex-col rounded-[1.75rem] bg-land-ink p-6 text-land-mist sm:p-8">
+            <p className="text-sm font-medium text-land-mist/60">Pro</p>
+            <p className="mt-3 flex items-baseline gap-2">
+              <span className="text-5xl font-medium tracking-tight">
+                {STUDIO_PRO_PRICE}
+              </span>
+              <span className="text-lg">Br / month</span>
+            </p>
+            <ul className="mt-6 flex-1 space-y-3 text-base text-land-mist/80">
+              {PRO_FEATURES.map((feature) => (
+                <li key={feature} className="flex items-start gap-2">
+                  <Check className="mt-0.5 size-4 shrink-0" strokeWidth={2.5} />
+                  {feature}
+                </li>
+              ))}
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0" strokeWidth={2.5} />
+                Cancel any time
+              </li>
+            </ul>
+            <a
+              href="/studio"
+              className="mt-8 inline-flex h-11 items-center justify-center rounded-full bg-land-mist px-5 text-sm font-semibold text-land-ink"
+            >
+              Open studio
+            </a>
+          </li>
+        </ul>
+
+        <h2 id="generate" className={`${sectionTitle} mt-16 scroll-mt-28 sm:mt-20`}>
+          AI generation
+        </h2>
+        <p className={`mt-4 max-w-xl ${landSub}`}>
+          A topic goes in. Ordered slides come back. You change them before
+          the file leaves.
+        </p>
+        <ul className="mt-8 grid gap-4 lg:grid-cols-3">
+          {[
+            ["01", "The topic", "One sentence about the post. The language follows the words you type."],
+            ["02", "The slides", "Four to ten frames, in order, at the ratio of a feed."],
+            ["03", "The file", "Rewrite a line, swap the cover, move a slide. Download PNG or ZIP."],
+          ].map(([step, title, text]) => (
+            <li
+              key={title}
+              className="flex min-h-56 flex-col rounded-[1.75rem] bg-white p-6 dark:bg-[#2a2c38] sm:p-8"
+            >
+              <p className="text-sm font-medium text-land-blue">{step}</p>
+              <h3 className="mt-6 text-2xl font-medium tracking-tight text-land-ink">
+                {title}
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                {text}
+              </p>
+            </li>
+          ))}
+        </ul>
       </LandingSection>
 
       {/* 6. Feedback — only for signed-in */}
