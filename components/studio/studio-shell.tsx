@@ -68,7 +68,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
     <TooltipProvider delayDuration={250}>
       <div className="flex h-dvh w-full gap-2 overflow-hidden bg-[#e6e8ef] p-2 text-foreground sm:gap-3 sm:p-3 dark:bg-[#0c0d12]">
         <div className="hidden h-full md:flex">
-          <div className="flex h-full overflow-hidden rounded-3xl bg-white dark:bg-[#14151c]">
+          <div className="flex h-full overflow-hidden bg-white dark:bg-[#14151c]">
             <StudioSidebar
               search={sidebarSearch}
               onSearchChange={setSidebarSearch}
@@ -86,7 +86,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
               className="absolute inset-0 bg-black/55"
               onClick={() => setNavOpen(false)}
             />
-            <div className="absolute inset-y-2 left-2 flex w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-3xl bg-white dark:bg-[#14151c]">
+            <div className="absolute inset-y-2 left-2 flex w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden bg-white dark:bg-[#14151c]">
               <div className="flex justify-end px-2 pt-2">
                 <button
                   type="button"
@@ -113,7 +113,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
             onSignIn={() => setAuthOpen(true)}
             onMenu={() => setNavOpen(true)}
           />
-          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-3xl bg-background">
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background">
             <StudioUpgradeBanner />
             <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
               {children}
