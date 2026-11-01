@@ -45,33 +45,35 @@ export function PhoneCarouselMock({
     [DEMO_THREADS_POSTS[start % DEMO_THREADS_POSTS.length]].filter(Boolean);
 
   return (
-    <PhoneFrame
-      className={
-        className ??
-        "h-[380px] w-[200px] border-[6px] sm:h-[420px] sm:w-[210px]"
-      }
-    >
-      <ThreadsUI posts={feed} compact={compact} showReplyBar={false} showTabBar={false} />
+    <PhoneFrame className={className ?? "w-[210px]"}>
+      <ThreadsUI posts={feed} compact={compact} showReplyBar={false} showTabBar />
     </PhoneFrame>
   );
 }
 
-/** Two phones layered for CTA — bleed out of the stage. */
+/** One upright iPhone, large enough that the post and slide stay intact. */
 export function DualPhonesMock() {
   return (
-    <div className="relative mx-auto h-[220px] w-full max-w-[280px] sm:h-[360px] sm:max-w-[400px]">
-      <div className="absolute bottom-[-28px] left-0 z-0 origin-bottom -rotate-[8deg] sm:bottom-[-72px] sm:-rotate-[9deg]">
-        <PhoneCarouselMock
-          start={0}
-          className="h-[250px] w-[126px] border-[5px] shadow-none sm:h-[400px] sm:w-[200px] sm:border-[6px]"
-        />
-      </div>
-      <div className="absolute bottom-[-36px] right-0 z-10 origin-bottom rotate-[4deg] sm:bottom-[-80px] sm:rotate-[5deg]">
-        <PhoneCarouselMock
-          start={1}
-          className="h-[268px] w-[134px] border-[5px] shadow-none sm:h-[420px] sm:w-[210px] sm:border-[6px]"
-        />
-      </div>
+    <div className="flex justify-center">
+      <PhoneCarouselMock
+        posts={[
+          {
+            id: "cta",
+            author: "deckva",
+            avatar: "/post_logo.jpg",
+            verified: true,
+            time: "2h",
+            text: "Карусель из одной мысли — уже по порядку.",
+            media: ["/reviews/2.jpg", "/reviews/6.jpg", "/reviews/8.jpg"],
+            likes: "128",
+            replies: "14",
+            reposts: "9",
+            liked: true,
+          },
+        ]}
+        compact
+        className="w-[min(78vw,280px)]"
+      />
     </div>
   );
 }

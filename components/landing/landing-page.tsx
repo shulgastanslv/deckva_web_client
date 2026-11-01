@@ -271,7 +271,7 @@ export function LandingPage() {
           fill="white"
         />
 
-        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-24 pt-6 sm:min-h-[85vh] sm:gap-12 sm:px-6 sm:pb-44 sm:pt-14 lg:min-h-[90vh] lg:grid-cols-[1.05fr_0.95fr] lg:pb-52 lg:pt-16">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-16 pt-6 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:pb-24 lg:pt-16">
           <div className="relative z-30">
             <h1 className="max-w-xl text-[2.5rem] font-extrabold tracking-tight leading-[0.98] sm:text-6xl sm:leading-[0.95] lg:text-7xl">
               AI-редактор каруселей
@@ -301,7 +301,7 @@ export function LandingPage() {
       {/* 1. Studio overlaps hero */}
       <LandingSection
         id="studio"
-        className="relative z-20 -mt-14 py-0 sm:-mt-28 sm:py-0 lg:-mt-32"
+        className="relative z-20 -mt-8 py-0 sm:-mt-12 sm:py-0"
       >
           <div className="overflow-hidden rounded-[2rem] bg-land-card sm:rounded-[2.5rem]">
             <StudioVideo />
@@ -470,8 +470,7 @@ export function LandingPage() {
                   </a>
                 </div>
               </div>
-              <div className="relative z-10 overflow-hidden sm:-mx-10">
-                <div className="absolute inset-x-10 top-4 h-full rounded-full bg-land-panel/25 blur-xl" />
+              <div className="relative z-10 flex justify-center pb-2">
                 <DualPhonesMock />
               </div>
             </div>
