@@ -50,92 +50,6 @@ const NAV = [
   { name: "Questions", link: "#faq" },
 ];
 
-const STARTS = [
-  "Product launch",
-  "How it works",
-  "Seven mistakes",
-  "Before and after",
-  "A checklist",
-  "This week’s tips",
-  "A short story",
-  "What changed",
-] as const;
-
-const WAYS = [
-  {
-    title: "Any topic, a set of slides",
-    text: "Write the subject. The slides come back in order, in the ratio of a feed.",
-  },
-  {
-    title: "Every slide stays editable",
-    text: "Change the words, the cover, and the order in the same project.",
-  },
-  {
-    title: "The download is the post",
-    text: "A PNG of one slide, or a ZIP of the carousel. No watermark on the file.",
-  },
-] as const;
-
-const MOVES = [
-  {
-    title: "Write",
-    text: "Name the post. The structure shows up on the slides.",
-  },
-  {
-    title: "Shape",
-    text: "Rewrite a line, swap the cover, move a slide.",
-  },
-  {
-    title: "Post",
-    text: "Download the file when the carousel is the one you want.",
-  },
-] as const;
-
-const BLOCKS = [
-  {
-    title: "Launch",
-    text: "The offer, the proof, then the next step.",
-    span: "sm:col-span-2 lg:col-span-7",
-    shot: "h-52 sm:h-64",
-  },
-  {
-    title: "How-to",
-    text: "One step on each slide.",
-    span: "lg:col-span-5",
-    shot: "h-52 sm:h-64",
-  },
-  {
-    title: "Checklist",
-    text: "A list people save.",
-    span: "lg:col-span-4",
-    shot: "h-40 sm:h-48",
-  },
-  {
-    title: "Story",
-    text: "A beginning, a turn, an end.",
-    span: "lg:col-span-4",
-    shot: "h-40 sm:h-48",
-  },
-  {
-    title: "Tips",
-    text: "A short run of useful points.",
-    span: "lg:col-span-4",
-    shot: "h-40 sm:h-48",
-  },
-  {
-    title: "Before and after",
-    text: "What changed, on two beats.",
-    span: "sm:col-span-2 lg:col-span-8",
-    shot: "h-44 sm:h-52",
-  },
-  {
-    title: "A series",
-    text: "The same shape, a new topic.",
-    span: "lg:col-span-4",
-    shot: "h-44 sm:h-52",
-  },
-] as const;
-
 function Place({ className }: { className?: string }) {
   return (
     <div
@@ -283,19 +197,16 @@ export function LandingPage() {
       </header>
 
       <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[calc(5rem+env(safe-area-inset-top))] pb-10 sm:px-6 sm:pt-[calc(6rem+env(safe-area-inset-top))] sm:pb-14 lg:grid-cols-2 lg:gap-12">
-          <div className="max-w-md">
-            <p className="text-sm font-medium text-white/70">
-              Where a topic becomes a post
-            </p>
-            <h1 className="mt-3 text-5xl font-semibold tracking-tight leading-[1.02] sm:text-6xl">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-4 pt-[calc(5rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(6rem+env(safe-area-inset-top))] sm:pb-20 lg:grid-cols-2 lg:gap-12 lg:pb-24">
+          <div>
+            <h1 className="max-w-xl text-6xl font-semibold tracking-tight leading-[0.94] sm:text-7xl lg:text-8xl">
               Carousel studio
             </h1>
-            <p className="mt-4 max-w-sm text-base leading-relaxed text-white/80 sm:text-lg">
+            <p className="mt-6 max-w-lg text-xl leading-snug text-white/80 sm:text-2xl">
               Write what the post is about. The slides follow, in order. You
               edit them, then download the file.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Button
                 asChild
                 className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
@@ -312,20 +223,6 @@ export function LandingPage() {
           </div>
           <HeroStage />
         </div>
-        <div className="relative z-10 overflow-hidden pb-8">
-          <ul className="flex w-max gap-2 motion-safe:animate-marquee">
-            {[...STARTS, ...STARTS].map((name, index) => (
-              <li key={`${name}-${index}`} aria-hidden={index >= STARTS.length}>
-                <a
-                  href="/studio"
-                  className="inline-flex h-10 items-center rounded-full bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/15"
-                >
-                  {name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
       </section>
 
       <LandingSection id="studio" className="relative z-20">
@@ -340,77 +237,70 @@ export function LandingPage() {
 
       <LandingSection id="post">
         <Reveal>
-          <h2 className={`${landTitle} max-w-xl text-land-ink`}>
-            From a topic. Into a post.
-          </h2>
-          <p className={`mt-3 max-w-xl ${landSub}`}>
-            Start with what the post is about. The studio lays out the slides.
-            You take them from there.
-          </p>
-          <ul className="mt-8 grid gap-3 lg:grid-cols-3">
-            {WAYS.map((item) => (
-              <li
-                key={item.title}
-                className="overflow-hidden rounded-3xl bg-land-card"
-              >
-                <Place className="aspect-[4/3] w-full" />
-                <div className="p-5 sm:p-6">
-                  <h3 className="text-lg font-semibold tracking-tight text-land-ink">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-base leading-relaxed text-land-ink/60">
-                    {item.text}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-      </LandingSection>
-
-      <LandingSection>
-        <Reveal>
-          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
-            <div>
+          <div className="grid gap-3 lg:grid-cols-12">
+            <div className="lg:col-span-5 lg:py-6">
               <h2 className={`${landTitle} text-land-ink`}>
-                The whole post stays in one project
+                From a topic. Into a post.
               </h2>
-              <p className={`mt-3 max-w-md ${landSub}`}>
-                The topic, the slides, the edits, and the file live together.
-                You download when the carousel is finished.
+              <p className={`mt-3 ${landSub}`}>
+                Start with what the post is about. The studio lays out the
+                slides. You take them from there.
               </p>
             </div>
-            <Place className="aspect-[4/3] w-full rounded-3xl" />
-          </div>
-        </Reveal>
-      </LandingSection>
+            <Place className="min-h-56 rounded-3xl lg:col-span-7 lg:min-h-72" />
 
-      <LandingSection>
-        <Reveal>
-          <h2 className={`${landTitle} max-w-xl text-land-ink`}>
-            You work the slides
-          </h2>
-          <p className={`mt-3 max-w-xl ${landSub}`}>
-            Write the topic, change what came back, then take the file.
-          </p>
-          <ul className="mt-8 grid gap-3 lg:grid-cols-3">
-            {MOVES.map((item) => (
-              <li
-                key={item.title}
-                className="overflow-hidden rounded-3xl bg-land-card"
-              >
-                <Place className="aspect-[5/4] w-full" />
-                <div className="p-5 sm:p-6">
-                  <h3 className="text-lg font-semibold tracking-tight text-land-ink">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-base leading-relaxed text-land-ink/60">
-                    {item.text}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+            <div className="rounded-3xl bg-land-card p-5 sm:p-7 lg:col-span-4">
+              <h3 className="text-lg font-semibold tracking-tight text-land-ink">
+                Any topic, a set of slides
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                Write the subject. The slides come back in order, in the ratio
+                of a feed.
+              </p>
+            </div>
+            <div className="grid overflow-hidden rounded-3xl bg-land-card sm:grid-cols-[1.1fr_0.9fr] lg:col-span-5">
+              <div className="p-5 sm:p-7">
+                <h3 className="text-lg font-semibold tracking-tight text-land-ink">
+                  Every slide stays editable
+                </h3>
+                <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                  Change the words, the cover, and the order in the same
+                  project.
+                </p>
+              </div>
+              <Place className="min-h-40" />
+            </div>
+            <div className="flex flex-col justify-between rounded-3xl bg-land-panel p-5 text-white sm:p-7 lg:col-span-3">
+              <h3 className="text-lg font-semibold tracking-tight">
+                The download is the post
+              </h3>
+              <p className="mt-4 text-base leading-relaxed text-white/70">
+                A PNG of one slide, or a ZIP of the carousel. No watermark on
+                the file.
+              </p>
+            </div>
+
+            <div className="grid items-center gap-6 rounded-3xl bg-land-card p-5 sm:grid-cols-2 sm:p-8 lg:col-span-7">
+              <div>
+                <h3 className="text-2xl font-semibold tracking-tight text-land-ink">
+                  The whole post stays in one project
+                </h3>
+                <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                  The topic, the slides, the edits, and the file live together.
+                </p>
+              </div>
+              <Place className="aspect-[4/3] rounded-2xl" />
+            </div>
+            <div className="flex flex-col justify-end rounded-3xl bg-land-card p-5 sm:p-8 lg:col-span-5">
+              <h3 className="text-2xl font-semibold tracking-tight text-land-ink">
+                The file is yours
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                No logo on the slides. The project stays in your account.
+                Cancel the month whenever you want.
+              </p>
+            </div>
+          </div>
         </Reveal>
       </LandingSection>
 
@@ -422,36 +312,61 @@ export function LandingPage() {
           <p className={`mt-3 max-w-xl ${landSub}`}>
             A shape you already know, a new topic inside it.
           </p>
-          <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-12">
-            {BLOCKS.map((item) => (
-              <li
-                key={item.title}
-                className={`overflow-hidden rounded-3xl bg-land-card ${item.span}`}
-              >
-                <Place className={`${item.shot} w-full`} />
-                <div className="p-5 sm:p-6">
+          <div className="mt-8 grid gap-3 lg:grid-cols-12">
+            <div className="grid overflow-hidden rounded-3xl bg-land-card lg:col-span-8 lg:grid-cols-2">
+              <div className="flex flex-col justify-between gap-8 p-5 sm:p-7">
+                <div>
                   <h3 className="text-lg font-semibold tracking-tight text-land-ink">
-                    {item.title}
+                    Launch
                   </h3>
                   <p className="mt-2 text-base leading-relaxed text-land-ink/60">
-                    {item.text}
+                    The offer, the proof, then the next step.
                   </p>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-      </LandingSection>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight text-land-ink">
+                    How-to
+                  </h3>
+                  <p className="mt-2 text-base leading-relaxed text-land-ink/60">
+                    One step on each slide.
+                  </p>
+                </div>
+              </div>
+              <Place className="min-h-52" />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:col-span-4 lg:grid-cols-1">
+              <div className="rounded-3xl bg-land-card p-5 sm:p-6">
+                <h3 className="text-lg font-semibold tracking-tight text-land-ink">
+                  Checklist
+                </h3>
+                <p className="mt-2 text-base leading-relaxed text-land-ink/60">
+                  A list people save.
+                </p>
+              </div>
+              <div className="rounded-3xl bg-land-panel p-5 text-white sm:p-6">
+                <h3 className="text-lg font-semibold tracking-tight">Story</h3>
+                <p className="mt-2 text-base leading-relaxed text-white/70">
+                  A beginning, a turn, an end.
+                </p>
+              </div>
+            </div>
 
-      <LandingSection>
-        <Reveal>
-          <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-            <Place className="aspect-[16/10] w-full rounded-3xl" />
-            <div>
-              <h2 className={`${landTitle} text-land-ink`}>The file is yours</h2>
-              <p className={`mt-3 ${landSub}`}>
-                No logo on the slides. The project stays in your account.
-                Cancel the month whenever you want.
+            <div className="rounded-3xl bg-land-card p-5 sm:p-6 lg:col-span-3">
+              <h3 className="text-lg font-semibold tracking-tight text-land-ink">
+                Tips
+              </h3>
+              <p className="mt-2 text-base leading-relaxed text-land-ink/60">
+                A short run of useful points.
+              </p>
+            </div>
+            <Place className="min-h-28 rounded-3xl lg:col-span-3" />
+            <div className="rounded-3xl bg-land-card p-5 sm:p-7 lg:col-span-6">
+              <h3 className="text-lg font-semibold tracking-tight text-land-ink">
+                Before and after
+              </h3>
+              <p className="mt-2 text-base leading-relaxed text-land-ink/60">
+                What changed, on two beats. The same shape works again as a
+                series, with a new topic.
               </p>
             </div>
           </div>
@@ -523,22 +438,6 @@ export function LandingPage() {
             </Accordion>
           </div>
         </Reveal>
-      </LandingSection>
-
-      <LandingSection className="pb-4 sm:pb-6">
-        <p className="max-w-xl text-4xl font-semibold tracking-tight text-land-ink sm:text-6xl sm:leading-[1.05]">
-          Write it.
-          <br />
-          Shape it.
-          <br />
-          Post it.
-        </p>
-        <a
-          href="/studio"
-          className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-land-blue px-6 text-sm font-semibold text-white hover:bg-land-blue/90"
-        >
-          Open studio
-        </a>
       </LandingSection>
 
       <LandingSection>
