@@ -4,7 +4,7 @@ function Canvas({ children }: { children: ReactNode }) {
   return (
     <div
       aria-hidden
-      className="flex h-72 w-full items-center gap-1 overflow-hidden bg-[#f4f5f7] px-4 sm:h-80 sm:gap-2 sm:px-7 [background-image:radial-gradient(circle,rgba(28,29,38,0.16)_1px,transparent_1px)] [background-size:16px_16px]"
+      className="flex h-64 w-full items-center gap-3 overflow-hidden bg-[#f4f5f7] px-5 sm:h-72 sm:gap-5 sm:px-8 [background-image:radial-gradient(circle,rgba(28,29,38,0.16)_1px,transparent_1px)] [background-size:16px_16px]"
     >
       {children}
     </div>
@@ -31,35 +31,18 @@ function LogoTile() {
   );
 }
 
-function Curve() {
-  return (
-    <svg viewBox="0 0 96 48" className="h-12 w-12 shrink-0 sm:w-20">
-      <path
-        d="M2 16C34 16 48 30 94 30"
-        fill="none"
-        stroke="#4d8dff"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <circle cx="46" cy="23" r="2.6" fill="#4d8dff" />
-    </svg>
-  );
+function Link() {
+  return <div className="h-px w-8 shrink-0 bg-[#4d8dff] sm:w-14" />;
 }
 
-function Pill({ children }: { children: ReactNode }) {
+function Bar() {
+  return <div className="h-px w-full bg-[#1c1d26]/15" />;
+}
+
+function Frame({ children }: { children: ReactNode }) {
   return (
-    <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[#1c1d26]/10 bg-white px-2.5 py-1 text-[11px] font-medium text-[#1c1d26]/70">
+    <div className="min-w-0 flex-1 rounded-2xl border border-[#1c1d26]/10 bg-white p-3 sm:rounded-3xl sm:p-4">
       {children}
-    </div>
-  );
-}
-
-function Lines({ widths }: { widths: string[] }) {
-  return (
-    <div className="space-y-1.5">
-      {widths.map((width) => (
-        <div key={width} className={`h-1.5 rounded-full bg-[#1c1d26]/12 ${width}`} />
-      ))}
     </div>
   );
 }
@@ -69,40 +52,15 @@ export function FigmaImportArt() {
   return (
     <Canvas>
       <LogoTile />
-      <Curve />
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <Pill>
-          <span className="size-1.5 rounded-full bg-[#1abcfe]" />
-          Frame
-        </Pill>
-        <div className="rounded-2xl border border-[#1c1d26]/10 bg-white p-3 sm:rounded-3xl sm:p-4">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-14 rounded-full bg-[#1c1d26]/18" />
-            <div className="h-2 w-8 rounded-full bg-[#1c1d26]/10" />
-          </div>
-          <div className="mt-3 grid grid-cols-[1.15fr_0.85fr] gap-2">
-            <div className="rounded-xl bg-[#f3f5fb] p-2.5">
-              <div className="h-9 rounded-lg bg-[#dfe7ff] sm:h-12" />
-              <div className="mt-2">
-                <Lines widths={["w-4/5", "w-3/5"]} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className="rounded-xl bg-[#fff6d6] p-2">
-                <Lines widths={["w-8", "w-10"]} />
-              </div>
-              <div className="rounded-xl bg-[#e7f7ee] p-2">
-                <div className="flex gap-1">
-                  <span className="size-2 rounded-full bg-[#7dcea0]" />
-                  <span className="size-2 rounded-full bg-[#f6c945]" />
-                  <span className="size-2 rounded-full bg-[#f0a0b8]" />
-                </div>
-                <div className="mt-2 h-1.5 w-8 rounded-full bg-[#1c1d26]/15" />
-              </div>
-            </div>
-          </div>
+      <Link />
+      <Frame>
+        <div className="h-14 rounded-lg bg-[#e8eaef] sm:h-16" />
+        <div className="mt-3 space-y-2">
+          <Bar />
+          <Bar />
+          <Bar />
         </div>
-      </div>
+      </Frame>
     </Canvas>
   );
 }
@@ -111,32 +69,19 @@ export function FigmaImportArt() {
 export function FigmaExportArt() {
   return (
     <Canvas>
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <Pill>
-          <span className="size-1.5 rounded-full bg-[#0acf83]" />
-          Slides
-        </Pill>
-        <div className="rounded-2xl border border-[#1c1d26]/10 bg-white p-3 sm:rounded-3xl sm:p-4">
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              "bg-[#dfe7ff]",
-              "bg-[#ffe3ef]",
-              "bg-[#e7f7ee]",
-            ].map((tone) => (
-              <div key={tone} className="rounded-xl bg-[#f6f7fb] p-1.5">
-                <div className={`h-8 rounded-lg sm:h-11 ${tone}`} />
-                <div className="mt-1.5 h-1 w-4/5 rounded-full bg-[#1c1d26]/15" />
-                <div className="mt-1 h-1 w-3/5 rounded-full bg-[#1c1d26]/10" />
-              </div>
-            ))}
-          </div>
+      <Frame>
+        <div className="grid grid-cols-3 gap-2">
+          {["a", "b", "c"].map((id) => (
+            <div key={id} className="space-y-2">
+              <div className="h-10 rounded-lg bg-[#e8eaef] sm:h-14" />
+              <Bar />
+              <Bar />
+            </div>
+          ))}
         </div>
-      </div>
-      <Curve />
-      <div className="flex shrink-0 flex-col items-center gap-2">
-        <LogoTile />
-        <Pill>PNG · ZIP</Pill>
-      </div>
+      </Frame>
+      <Link />
+      <LogoTile />
     </Canvas>
   );
 }
