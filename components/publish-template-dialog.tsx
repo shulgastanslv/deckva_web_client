@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { publishTemplate } from "@/actions/templates";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { THUMB_TARGET_WIDTH } from "@/lib/canvas/thumbnail";
@@ -59,7 +61,7 @@ async function captureTemplateAssets(): Promise<{
     });
     previewUrl = preview?.dataUrl ?? previewUrl;
   } catch (err) {
-    console.error(err);
+    reportError(err, messages.errors.templatePreview);
   }
 
   return { previewUrl, thumbnails };
@@ -97,7 +99,7 @@ export function PublishTemplateDialog({
         if (!cancelled) setPreviewUrl(assets.previewUrl);
       })
       .catch((err) => {
-        console.error(err);
+        reportError(err, messages.errors.templatePreview);
         if (!cancelled) setPreviewUrl(null);
       })
       .finally(() => {
@@ -143,7 +145,7 @@ export function PublishTemplateDialog({
         if (slide && thumb) live.updateSlideThumbnail(slide.id, thumb);
       });
     } catch (err) {
-      console.error(err);
+      reportError(err, messages.errors.templatePreview);
     }
 
     const state = useCanvasStore.getState();

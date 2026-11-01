@@ -1,5 +1,6 @@
 "use server";
 
+import { messages } from "@/lib/messages";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
@@ -120,7 +121,7 @@ export async function getBilling(): Promise<
 > {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
     const billing = await buildSnapshot(userId);
     return {
       success: true,
@@ -129,7 +130,7 @@ export async function getBilling(): Promise<
     };
   } catch (err) {
     console.error("getBilling error:", err);
-    return { success: false, error: "Couldn't load billing" };
+    return { success: false, error: messages.errors.loadBilling };
   }
 }
 
@@ -138,7 +139,7 @@ export async function attachPaymentCard(
 ): Promise<ActionResult<{ billing: BillingSnapshot }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const tokenized = await tokenizeCard(input);
 
@@ -172,7 +173,7 @@ export async function attachPaymentCard(
   } catch (err) {
     console.error("attachPaymentCard error:", err);
     const message =
-      err instanceof Error ? err.message : "Couldn't save card";
+      err instanceof Error ? err.message : messages.errors.saveCard;
     return { success: false, error: message };
   }
 }
@@ -182,14 +183,14 @@ export async function detachPaymentCard(
 ): Promise<ActionResult<{ billing: BillingSnapshot }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const method = await prisma.paymentMethod.findFirst({
       where: paymentMethodId
         ? { id: paymentMethodId, userId }
         : { userId, isDefault: true },
     });
-    if (!method) return { success: false, error: "No card on file" };
+    if (!method) return { success: false, error: messages.errors.noCard };
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -209,7 +210,7 @@ export async function detachPaymentCard(
     ) {
       return {
         success: false,
-        error: "Cancel your subscription before removing the card",
+        error: messages.errors.cancelBeforeRemoveCard,
       };
     }
 
@@ -230,7 +231,7 @@ export async function detachPaymentCard(
     return { success: true, billing: await buildSnapshot(userId) };
   } catch (err) {
     console.error("detachPaymentCard error:", err);
-    return { success: false, error: "Couldn't remove card" };
+    return { success: false, error: messages.errors.removeCard };
   }
 }
 
@@ -239,7 +240,7 @@ export async function subscribePro(): Promise<
 > {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     if (await userHasPro(userId)) {
       return { success: true, billing: await buildSnapshot(userId) };
@@ -250,7 +251,7 @@ export async function subscribePro(): Promise<
       orderBy: { createdAt: "desc" },
     });
     if (!method) {
-      return { success: false, error: "Add a card before subscribing" };
+      return { success: false, error: messages.errors.addCardBeforeSubscribe };
     }
 
     const charge = await chargeCard({
@@ -309,7 +310,7 @@ export async function subscribePro(): Promise<
     return { success: true, billing: await buildSnapshot(userId) };
   } catch (err) {
     console.error("subscribePro error:", err);
-    return { success: false, error: "Couldn't start subscription" };
+    return { success: false, error: messages.errors.startSubscription };
   }
 }
 
@@ -318,7 +319,7 @@ export async function cancelSubscription(): Promise<
 > {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -328,7 +329,7 @@ export async function cancelSubscription(): Promise<
       },
     });
     if (!user || user.subscriptionStatus !== "ACTIVE") {
-      return { success: false, error: "No active subscription" };
+      return { success: false, error: messages.errors.noActiveSubscription };
     }
 
     await prisma.user.update({
@@ -340,7 +341,7 @@ export async function cancelSubscription(): Promise<
     return { success: true, billing: await buildSnapshot(userId) };
   } catch (err) {
     console.error("cancelSubscription error:", err);
-    return { success: false, error: "Couldn't cancel subscription" };
+    return { success: false, error: messages.errors.cancelSubscription };
   }
 }
 
@@ -349,7 +350,7 @@ export async function resumeSubscription(): Promise<
 > {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -364,7 +365,7 @@ export async function resumeSubscription(): Promise<
       user.subscriptionStatus !== "ACTIVE" ||
       !user.cancelAtPeriodEnd
     ) {
-      return { success: false, error: "Nothing to resume" };
+      return { success: false, error: messages.errors.nothingToResume };
     }
 
     await prisma.user.update({
@@ -376,6 +377,6 @@ export async function resumeSubscription(): Promise<
     return { success: true, billing: await buildSnapshot(userId) };
   } catch (err) {
     console.error("resumeSubscription error:", err);
-    return { success: false, error: "Couldn't resume subscription" };
+    return { success: false, error: messages.errors.resumeSubscription };
   }
 }

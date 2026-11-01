@@ -9,6 +9,8 @@ import { renderMissingThumbnails } from "@/lib/canvas/thumbnail";
 import { templateSlidesToItems } from "@/lib/templates/parse";
 import { withRemoteImageCors } from "@/lib/canvas/image-cors";
 import type { FabricCanvasJSON, RatioKey, SlideItem } from "@/lib/types";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 
 export function useApplyTemplate() {
   const slidesController = useSlidesController();
@@ -43,7 +45,7 @@ export function useApplyTemplate() {
           );
         }
       } catch (err) {
-        console.error(err);
+        reportError(err, messages.errors.thumbnails);
       }
 
       store.setSlides(items);

@@ -17,6 +17,8 @@ import { applyBrandKitToStore } from "@/lib/studio/brand-kit";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import type { RatioKey } from "@/lib/types";
 import type { DocumentMeta } from "@/lib/canvas/document";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 
 function currentDocument(): DocumentMeta {
   const state = useCanvasStore.getState();
@@ -61,7 +63,7 @@ function scheduleThumbnailHydration(projectId: string | null, persistToDb: boole
     try {
       rendered = await renderMissingThumbnails(snapshot, start.canvasDimensions);
     } catch (err) {
-      console.error(err);
+      reportError(err, messages.errors.thumbnails);
       return;
     }
     if (rendered.length === 0) return;
@@ -130,22 +132,22 @@ export function useProject() {
       try {
         const res = await getProjectById(projectId);
         if (seq !== loadSeq.current) {
-          return { success: false as const, error: "Cancelled" };
+          return { success: false as const, error: messages.errors.cancelled };
         }
 
         if (!res.success) {
-          return { success: false as const, error: "Couldn't load" };
+          return { success: false as const, error: messages.errors.loadProject };
         }
 
         slidesController?.saveCurrent();
         store.loadProjectState(res.project);
         if (seq !== loadSeq.current) {
-          return { success: false as const, error: "Cancelled" };
+          return { success: false as const, error: messages.errors.cancelled };
         }
 
         await slidesController?.loadCurrent();
         if (seq !== loadSeq.current) {
-          return { success: false as const, error: "Cancelled" };
+          return { success: false as const, error: messages.errors.cancelled };
         }
 
         useCanvasStore.getState().markSaved();
@@ -166,7 +168,7 @@ export function useProject() {
 
   const persist = useCallback(async (options?: { thumbnail?: boolean }): Promise<PersistResult> => {
     if (status !== "authenticated") {
-      return { success: false, error: "Sign in to save" };
+      return { success: false, error: messages.errors.signInToSave };
     }
 
     if (options?.thumbnail !== false) saveWithThumbnail.current = true;
@@ -179,7 +181,7 @@ export function useProject() {
     saveFlight.current = job;
 
     void (async () => {
-      let result: PersistResult = { success: false, error: "Couldn't save" };
+      let result: PersistResult = { success: false, error: messages.errors.saveFailed };
       useCanvasStore.getState().setSaving(true);
       try {
         for (let pass = 0; pass < 4; pass += 1) {

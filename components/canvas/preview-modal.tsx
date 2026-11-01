@@ -8,6 +8,8 @@ import { useSlidesController } from "@/context/canvas-manager";
 import { Canvas as FabricCanvas } from "fabric";
 import { IPhoneMockup } from "react-device-mockup";
 import { withRemoteImageCors } from "@/lib/canvas/image-cors";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 
 interface PreviewModalProps {
   open: boolean;
@@ -131,7 +133,7 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
             ),
           );
         } catch (error) {
-          console.error(`Failed to render slide ${slide.id}:`, error);
+          reportError(error, messages.errors.renderSlide);
           if (isMountedRef.current) {
             setSnapshots((prev) =>
               prev.map((s) => (s.id === slide.id ? { ...s, loading: false } : s)),

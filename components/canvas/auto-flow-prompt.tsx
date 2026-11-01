@@ -13,6 +13,8 @@ import {
   resolveAutoFlowTargets,
 } from "@/lib/canvas/auto-flow";
 import { continuationForText, writeTextPart } from "@/lib/canvas/text-continue";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 
 /**
  * When Auto Flow is on and an object leaves the slide, offer to create
@@ -134,7 +136,7 @@ export function AutoFlowPrompt() {
       manager.canvas.requestRenderAll();
       manager.commit();
     } catch (err) {
-      console.error("Auto Flow failed:", err);
+      reportError(err, messages.errors.autoFlow);
     } finally {
       busy.current = false;
     }

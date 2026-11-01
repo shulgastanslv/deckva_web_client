@@ -18,6 +18,8 @@ import { paintSlotOnCanvas } from "@/lib/canvas/paint-live";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -168,7 +170,7 @@ export function SidebarBackground() {
     if (!file.type.startsWith("image/")) return;
     void fileToDataUrl(file)
       .then((dataUrl) => manager?.setBackground({ type: "image", url: dataUrl }))
-      .catch(console.error);
+      .catch((err) => reportError(err, messages.errors.readImage));
   };
 
   const applyImageFromUrl = async () => {
@@ -179,11 +181,11 @@ export function SidebarBackground() {
     try {
       parsed = new URL(trimmed);
       if (!/^https?:$/i.test(parsed.protocol)) {
-        setUrlError("Need http(s) URL");
+        setUrlError(messages.errors.httpUrl);
         return;
       }
     } catch {
-      setUrlError("Invalid URL");
+      setUrlError(messages.errors.invalidUrl);
       return;
     }
 
@@ -192,8 +194,8 @@ export function SidebarBackground() {
     try {
       await manager?.setBackground({ type: "image", url: parsed.toString() });
     } catch (err) {
-      console.error(err);
-      setUrlError("Couldn't load image (CORS?)");
+      reportError(err, messages.errors.loadBackgroundCors);
+      setUrlError(messages.errors.loadBackgroundCors);
     } finally {
       setUrlLoading(false);
     }

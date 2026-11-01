@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChevronRight } from "lucide-react";
 
-import { readActiveOrganization } from "@/lib/studio/reads";
+import { useActiveOrganization } from "@/lib/studio/queries";
 import Logo from "@/components/logo";
 import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
@@ -16,26 +16,9 @@ export function StudioHeader({ onSignIn }: { onSignIn?: () => void }) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const signedIn = status === "authenticated";
-  const [isUpgrade, setIsUpgrade] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-
-  useEffect(() => {
-    if (!signedIn) {
-      setIsUpgrade(false);
-      return;
-    }
-    const load = async () => {
-      const res = await readActiveOrganization();
-      if (res.success && res.organization) {
-        setIsUpgrade(Boolean(res.organization?.isUpgrade));
-      }
-    };
-    void load();
-
-    const onOrg = () => void load();
-    window.addEventListener("studio:org-changed", onOrg);
-    return () => window.removeEventListener("studio:org-changed", onOrg);
-  }, [signedIn]);
+  const organization = useActiveOrganization(signedIn);
+  const isUpgrade = Boolean(organization.data?.organization?.isUpgrade);
 
   useEffect(() => {
     const onOpenUpgrade = () => setUpgradeOpen(true);

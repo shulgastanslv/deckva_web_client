@@ -18,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
@@ -98,7 +100,7 @@ export function StudioPrompt({
     const file = files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      setCoverError("Choose an image file");
+      setCoverError(messages.errors.chooseImage);
       return;
     }
     setReadingFile(true);
@@ -113,8 +115,8 @@ export function StudioPrompt({
       setLinkOpen(false);
       setLinkDraft("");
     } catch (err) {
-      console.error(err);
-      setCoverError("Couldn't read that image");
+      reportError(err, messages.errors.readImage);
+      setCoverError(messages.errors.readImage);
     } finally {
       setReadingFile(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

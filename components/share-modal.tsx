@@ -16,6 +16,8 @@ import { Check, Copy, Loader2, Link2 } from "lucide-react";
 import { FaFacebook, FaLinkedin, FaTelegram, FaWhatsapp, FaXTwitter } from "react-icons/fa6";
 import { SiThreads } from "react-icons/si";
 import { setProjectPublic } from "@/actions/projects";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import { useProject } from "@/hooks/use-project";
 import { useSession } from "next-auth/react";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -74,7 +76,7 @@ export function ShareModal({
     void setProjectPublic(currentProjectId, true)
       .then((res) => {
         if (res.success) setIsPublic(true);
-        else alert("Couldn't update public access");
+        else reportError(res, messages.errors.publicAccess);
       })
       .finally(() => setBusy(false));
   }, [open, currentProjectId, status]);
@@ -92,7 +94,7 @@ export function ShareModal({
       if (!id) {
         const res = await persist();
         if (!res.success || !("projectId" in res) || !res.projectId) {
-          setError("Save the project first");
+          setError(messages.errors.saveFirst);
           return null;
         }
         id = res.projectId;
@@ -101,7 +103,7 @@ export function ShareModal({
 
       const pub = await setProjectPublic(id, true);
       if (!pub.success) {
-        alert("Couldn't update public access");
+        reportError(pub, messages.errors.publicAccess);
         return null;
       }
       setIsPublic(true);
@@ -123,7 +125,7 @@ export function ShareModal({
     setBusy(false);
     if (!res.success) {
       setIsPublic(!next);
-      alert("Couldn't update public access");
+      reportError(res, messages.errors.publicAccess);
     }
   };
 
@@ -137,7 +139,7 @@ export function ShareModal({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      alert("Couldn't copy the link");
+      reportError(new Error(messages.errors.copyLink), messages.errors.copyLink);
     }
   };
 

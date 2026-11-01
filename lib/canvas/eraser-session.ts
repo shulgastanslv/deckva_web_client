@@ -1,3 +1,5 @@
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import {
   Image as FabricImage,
   Point,
@@ -173,7 +175,7 @@ export class ImageEraserSession {
       img.setCoords();
       this.canvas.requestRenderAll();
     } catch (err) {
-      console.error("eraser finalize:", err);
+      reportError(err, messages.errors.eraser);
       this.onStrokeEnd(false);
       return;
     }
@@ -243,7 +245,7 @@ function rasterizeImage(img: FabricImage): HTMLCanvasElement | null {
   try {
     ctx.drawImage(el, cropX, cropY, width, height, 0, 0, width, height);
   } catch (err) {
-    console.error("eraser rasterize:", err);
+    reportError(err, messages.errors.eraser);
     return null;
   }
   return canvas;

@@ -2,10 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { markNotificationsRead, type NotificationItem } from "@/actions/admin";
-import { forgetCachedRead } from "@/lib/studio/read-cache";
-import { readMyNotifications } from "@/lib/studio/reads";
+import { markNotificationsRead } from "@/actions/admin";
+import { messages } from "@/lib/messages";
+import {
+  fetchMyNotifications,
+  markNotificationCacheRead,
+  useMyNotifications,
+} from "@/lib/studio/queries";
 import { NotificationsArt } from "@/components/canvas/canvas_icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,38 +22,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function NotificationsMenu() {
-  const [items, setItems] = useState<NotificationItem[]>([]);
-  const [unread, setUnread] = useState(0);
-
-  const load = () => {
-    void readMyNotifications().then((res) => {
-      if (!res.success) return;
-      setItems(res.items);
-      setUnread(res.unread);
-    });
-  };
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const notifications = useMyNotifications(true);
+  const items = notifications.data?.items ?? [];
+  const unread = notifications.data?.unread ?? 0;
 
   useEffect(() => {
-    load();
-  }, []);
+    if (!open) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetchMyNotifications(queryClient);
+        if (cancelled || res.unread === 0) return;
+        const marked = await markNotificationsRead();
+        if (cancelled || !marked.success) return;
+        markNotificationCacheRead(queryClient);
+      } catch {
+        // Keep the last list. The server already logged the failure.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, queryClient]);
 
   return (
     <DropdownMenu
-      onOpenChange={(open) => {
-        if (!open) return;
-        void readMyNotifications().then((res) => {
-          if (!res.success) return;
-          setItems(res.items);
-          setUnread(res.unread);
-          if (res.unread === 0) return;
-          void markNotificationsRead().then((marked) => {
-            if (!marked.success) return;
-            forgetCachedRead("notifications");
-            setUnread(0);
-            setItems((prev) => prev.map((item) => ({ ...item, read: true })));
-          });
-        });
-      }}
+      open={open}
+      onOpenChange={setOpen}
     >
       <DropdownMenuTrigger asChild>
         <Button
@@ -64,12 +66,14 @@ export function NotificationsMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72 p-2 text-[13px]">
-        <DropdownMenuLabel className="text-[13px] font-semibold">Notifications</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-[13px] font-semibold">
+          {messages.notifications.title}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {items.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-2 py-5 text-center">
             <NotificationsArt className="h-auto w-full max-w-[120px]" />
-            <p className="text-[13px] text-muted-foreground">No new notifications</p>
+            <p className="text-[13px] text-muted-foreground">{messages.notifications.emptyMenu}</p>
           </div>
         ) : (
           <ul className="max-h-80 space-y-2 overflow-y-auto">

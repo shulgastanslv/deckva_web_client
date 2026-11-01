@@ -1,5 +1,6 @@
 "use server";
 
+import { messages } from "@/lib/messages";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/lib/generated/prisma/client";
@@ -139,7 +140,7 @@ export async function getTemplates(options?: {
     };
   } catch (err) {
     console.error("getTemplates error:", err);
-    return { success: false, error: "Couldn't load templates" };
+    return { success: false, error: messages.errors.loadTemplates };
   }
 }
 
@@ -147,13 +148,13 @@ export async function getTemplateById(
   templateId: string,
 ): Promise<ActionResult<{ template: TemplateDetail }>> {
   try {
-    if (!templateId) return { success: false, error: "templateId is required" };
+    if (!templateId) return { success: false, error: messages.errors.templateIdRequired };
 
     const row = await prisma.template.findUnique({
       where: { id: templateId },
     });
 
-    if (!row) return { success: false, error: "Template not found" };
+    if (!row) return { success: false, error: messages.errors.templateNotFound };
 
     const parsed = parseTemplateCanvasJSON(row.canvasJSON);
     const aspectRatio = isRatioKey(row.aspectRatio)
@@ -176,7 +177,7 @@ export async function getTemplateById(
     };
   } catch (err) {
     console.error("getTemplateById error:", err);
-    return { success: false, error: "Couldn't load the template" };
+    return { success: false, error: messages.errors.loadTemplate };
   }
 }
 
@@ -186,12 +187,12 @@ export async function publishTemplate(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return { success: false, error: "Sign in to publish" };
+      return { success: false, error: messages.errors.signInToPublish };
     }
 
     const title = input.title.trim();
     const category = input.category.trim() || "Other";
-    if (!title) return { success: false, error: "Enter a template name" };
+    if (!title) return { success: false, error: messages.errors.templateName };
 
     const slides = Array.isArray((input.canvasJSON as { slides?: unknown }).slides)
       ? (input.canvasJSON as { slides: FabricCanvasJSON[] }).slides
@@ -219,7 +220,7 @@ export async function publishTemplate(
     return { success: true, templateId: template.id };
   } catch (err) {
     console.error("publishTemplate error:", err);
-    return { success: false, error: "Couldn't publish the template" };
+    return { success: false, error: messages.errors.publishTemplate };
   }
 }
 
@@ -244,18 +245,18 @@ export async function renameTemplate(
 ): Promise<ActionResult<object>> {
   try {
     const user = await requireUser();
-    if (!user) return { success: false, error: "Sign in" };
+    if (!user) return { success: false, error: messages.errors.signIn };
     const next = title.trim();
-    if (!next) return { success: false, error: "Enter a name" };
+    if (!next) return { success: false, error: messages.errors.enterName };
 
     const row = await prisma.template.findUnique({
       where: { id: templateId },
       select: { authorId: true, category: true },
     });
-    if (!row) return { success: false, error: "Template not found" };
+    if (!row) return { success: false, error: messages.errors.templateNotFound };
     const owns = row.authorId === user.id;
     const admin = isAdminUser(user);
-    if (!owns && !admin) return { success: false, error: "You can't rename this template" };
+    if (!owns && !admin) return { success: false, error: messages.errors.renameTemplateForbidden };
 
     await prisma.template.update({ where: { id: templateId }, data: { title: next } });
     revalidatePath("/");
@@ -263,7 +264,7 @@ export async function renameTemplate(
     return { success: true };
   } catch (err) {
     console.error("renameTemplate error:", err);
-    return { success: false, error: "Couldn't rename the template" };
+    return { success: false, error: messages.errors.renameTemplate };
   }
 }
 
@@ -272,9 +273,9 @@ export async function duplicateTemplate(
 ): Promise<ActionResult<{ templateId: string }>> {
   try {
     const user = await requireUser();
-    if (!user) return { success: false, error: "Sign in" };
+    if (!user) return { success: false, error: messages.errors.signIn };
     const row = await prisma.template.findUnique({ where: { id: templateId } });
-    if (!row) return { success: false, error: "Template not found" };
+    if (!row) return { success: false, error: messages.errors.templateNotFound };
 
     const copy = await prisma.template.create({
       data: {
@@ -293,7 +294,7 @@ export async function duplicateTemplate(
     return { success: true, templateId: copy.id };
   } catch (err) {
     console.error("duplicateTemplate error:", err);
-    return { success: false, error: "Couldn't duplicate the template" };
+    return { success: false, error: messages.errors.duplicateTemplate };
   }
 }
 
@@ -303,35 +304,35 @@ export async function updateTemplateMeta(
 ): Promise<ActionResult<object>> {
   try {
     const user = await requireUser();
-    if (!user) return { success: false, error: "Sign in" };
+    if (!user) return { success: false, error: messages.errors.signIn };
 
     const row = await prisma.template.findUnique({
       where: { id: templateId },
       select: { authorId: true },
     });
-    if (!row) return { success: false, error: "Template not found" };
+    if (!row) return { success: false, error: messages.errors.templateNotFound };
 
     const owns = row.authorId === user.id;
     if (!owns && !isAdminUser(user)) {
-      return { success: false, error: "You can't edit this template" };
+      return { success: false, error: messages.errors.editTemplateForbidden };
     }
 
     const data: { title?: string; category?: string; badge?: string | null } = {};
     if (typeof input.title === "string") {
       const title = input.title.trim();
-      if (!title) return { success: false, error: "Enter a name" };
+      if (!title) return { success: false, error: messages.errors.enterName };
       data.title = title;
     }
     if (typeof input.category === "string") {
       const category = input.category.trim();
-      if (!category) return { success: false, error: "Enter a category" };
+      if (!category) return { success: false, error: messages.errors.enterCategory };
       data.category = category;
     }
     if (input.badge !== undefined) {
       data.badge = input.badge?.trim() || null;
     }
     if (Object.keys(data).length === 0) {
-      return { success: false, error: "Nothing to update" };
+      return { success: false, error: messages.errors.nothingToUpdate };
     }
 
     await prisma.template.update({ where: { id: templateId }, data });
@@ -340,7 +341,7 @@ export async function updateTemplateMeta(
     return { success: true };
   } catch (err) {
     console.error("updateTemplateMeta error:", err);
-    return { success: false, error: "Couldn't update the template" };
+    return { success: false, error: messages.errors.updateTemplate };
   }
 }
 
@@ -349,17 +350,17 @@ export async function deleteTemplate(
 ): Promise<ActionResult<object>> {
   try {
     const user = await requireUser();
-    if (!user) return { success: false, error: "Sign in" };
+    if (!user) return { success: false, error: messages.errors.signIn };
 
     const row = await prisma.template.findUnique({
       where: { id: templateId },
       select: { id: true, authorId: true },
     });
-    if (!row) return { success: false, error: "Template not found" };
+    if (!row) return { success: false, error: messages.errors.templateNotFound };
 
     const owns = row.authorId === user.id;
     if (!owns && !isAdminUser(user)) {
-      return { success: false, error: "You can't delete this template" };
+      return { success: false, error: messages.errors.deleteTemplateForbidden };
     }
 
     await prisma.template.delete({ where: { id: templateId } });
@@ -368,7 +369,7 @@ export async function deleteTemplate(
     return { success: true };
   } catch (err) {
     console.error("deleteTemplate error:", err);
-    return { success: false, error: "Couldn't delete the template" };
+    return { success: false, error: messages.errors.deleteTemplate };
   }
 }
 
@@ -381,11 +382,11 @@ export async function importTemplateJson(input: {
   try {
     const user = await requireUser();
     if (!user || !isAdminUser(user)) {
-      return { success: false, error: "Admin only" };
+      return { success: false, error: messages.errors.adminOnly };
     }
 
     const parsed = parseImportedTemplate(input.json);
-    if (!parsed.ok) return { success: false, error: "Invalid template" };
+    if (!parsed.ok) return { success: false, error: messages.errors.invalidTemplate };
 
     const record =
       input.json && typeof input.json === "object" && !Array.isArray(input.json)
@@ -394,7 +395,7 @@ export async function importTemplateJson(input: {
     const fromFile = typeof record.category === "string" ? record.category.trim() : "";
     const title = (input.title?.trim() || parsed.template.title || "Imported template").trim();
     const category = input.category?.trim() || fromFile;
-    if (!category) return { success: false, error: "Enter a category" };
+    if (!category) return { success: false, error: messages.errors.enterCategory };
 
     const aspectRatio = parsed.template.aspectRatio ?? "4:5";
     const created = await prisma.template.create({
@@ -420,6 +421,6 @@ export async function importTemplateJson(input: {
     return { success: true, templateId: created.id };
   } catch (err) {
     console.error("importTemplateJson error:", err);
-    return { success: false, error: "Couldn't import that template" };
+    return { success: false, error: messages.errors.importTemplate };
   }
 }

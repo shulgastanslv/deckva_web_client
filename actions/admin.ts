@@ -1,5 +1,6 @@
 "use server";
 
+import { messages } from "@/lib/messages";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
@@ -67,13 +68,13 @@ export async function listPublishedNews(): Promise<ActionResult<{ news: NewsItem
     };
   } catch (err) {
     console.error("listPublishedNews error:", err);
-    return { success: false, error: "Couldn't load news" };
+    return { success: false, error: messages.errors.loadNews };
   }
 }
 
 export async function listNews(): Promise<ActionResult<{ news: NewsItem[] }>> {
   try {
-    if (!(await requireAdminId())) return { success: false, error: "Admins only" };
+    if (!(await requireAdminId())) return { success: false, error: messages.errors.adminsOnly };
     const rows = await prisma.news.findMany({
       orderBy: { createdAt: "desc" },
       take: 30,
@@ -91,7 +92,7 @@ export async function listNews(): Promise<ActionResult<{ news: NewsItem[] }>> {
     };
   } catch (err) {
     console.error("listNews error:", err);
-    return { success: false, error: "Couldn't load news" };
+    return { success: false, error: messages.errors.loadNews };
   }
 }
 
@@ -114,10 +115,10 @@ export async function publishNews(input: {
 }): Promise<ActionResult<{ newsId: string }>> {
   try {
     const authorId = await requireAdminId();
-    if (!authorId) return { success: false, error: "Admins only" };
+    if (!authorId) return { success: false, error: messages.errors.adminsOnly };
     const title = input.title.trim();
     const body = input.body.trim();
-    if (!title || !body) return { success: false, error: "Title and text are required" };
+    if (!title || !body) return { success: false, error: messages.errors.titleAndTextRequired };
 
     const news = await prisma.news.create({
       data: { title, body, authorId },
@@ -127,7 +128,7 @@ export async function publishNews(input: {
     return { success: true, newsId: news.id };
   } catch (err) {
     console.error("publishNews error:", err);
-    return { success: false, error: "Couldn't publish the news" };
+    return { success: false, error: messages.errors.publishNews };
   }
 }
 
@@ -136,15 +137,15 @@ export async function sendNotification(input: {
   body: string;
 }): Promise<ActionResult<object>> {
   try {
-    if (!(await requireAdminId())) return { success: false, error: "Admins only" };
+    if (!(await requireAdminId())) return { success: false, error: messages.errors.adminsOnly };
     const title = input.title.trim();
     const body = input.body.trim();
-    if (!title || !body) return { success: false, error: "Title and text are required" };
+    if (!title || !body) return { success: false, error: messages.errors.titleAndTextRequired };
     await notifyEveryone(title, body);
     return { success: true };
   } catch (err) {
     console.error("sendNotification error:", err);
-    return { success: false, error: "Couldn't send the notification" };
+    return { success: false, error: messages.errors.sendNotification };
   }
 }
 
@@ -153,7 +154,7 @@ export async function listMyNotifications(): Promise<
 > {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
     const rows = await prisma.notification.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
@@ -169,14 +170,14 @@ export async function listMyNotifications(): Promise<
     return { success: true, items, unread: items.filter((item) => !item.read).length };
   } catch (err) {
     console.error("listMyNotifications error:", err);
-    return { success: false, error: "Couldn't load notifications" };
+    return { success: false, error: messages.errors.loadNotifications };
   }
 }
 
 export async function markNotificationsRead(): Promise<ActionResult<object>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
     await prisma.notification.updateMany({
       where: { userId, readAt: null },
       data: { readAt: new Date() },
@@ -184,6 +185,6 @@ export async function markNotificationsRead(): Promise<ActionResult<object>> {
     return { success: true };
   } catch (err) {
     console.error("markNotificationsRead error:", err);
-    return { success: false, error: "Couldn't update notifications" };
+    return { success: false, error: messages.errors.updateNotifications };
   }
 }

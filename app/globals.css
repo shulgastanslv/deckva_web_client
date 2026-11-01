@@ -185,6 +185,11 @@
     --sidebar-ring: #2f5bff;
 }
 
+[data-sonner-toast] {
+    box-shadow: none !important;
+    border-radius: 1rem !important;
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;

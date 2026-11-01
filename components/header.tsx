@@ -22,6 +22,8 @@ import {
   PlayIcon,
 } from "lucide-react";
 import { NotificationsMenu } from "@/components/notifications-menu";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import Link from "next/link";
 import Logo from "@/components/logo";
 import { useSession, signOut } from "next-auth/react";
@@ -113,7 +115,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
       return;
     }
     const res = await persist();
-    if (!res.success) alert("Couldn't save");
+    if (!res.success) reportError(res, messages.errors.saveFailed);
   };
 
   const handleUndo = () => {
@@ -131,7 +133,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
       slidesController?.saveCurrent();
       const state = useCanvasStore.getState();
       const current = state.slides.find((s) => s.id === state.currentSlideId);
-      if (!current) throw new Error("No active slide");
+      if (!current) throw new Error(messages.errors.noActiveSlide);
 
       const [rendered] = await renderSlidesToImages(
         [{ id: current.id, canvasJSON: current.canvasJSON }],
@@ -143,8 +145,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch (err) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : "Couldn't copy");
+      reportError(err, messages.errors.copy);
     } finally {
       setCopying(false);
     }

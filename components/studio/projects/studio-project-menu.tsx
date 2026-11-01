@@ -11,8 +11,8 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { moveProjectToFolder, type FolderListItem } from "@/actions/folders";
-import { readUserFolders } from "@/lib/studio/reads";
+import { moveProjectToFolder } from "@/actions/folders";
+import { useUserFolders } from "@/lib/studio/queries";
 import {
   deleteProject,
   duplicateProject,
@@ -40,15 +40,10 @@ export function StudioProjectMenu({
   project: ProjectListItem;
   onChanged: () => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState(project.title);
-  const [folders, setFolders] = useState<FolderListItem[]>([]);
-
-  const loadFolders = () => {
-    void readUserFolders().then((res) => {
-      if (res.success) setFolders(res.folders);
-    });
-  };
+  const folders = useUserFolders(open).data?.folders ?? [];
 
   const commitRename = async () => {
     const next = draft.trim();
@@ -66,12 +61,11 @@ export function StudioProjectMenu({
 
   return (
     <DropdownMenu
-      onOpenChange={(open) => {
-        if (!open) setRenaming(false);
-        if (open) {
-          setDraft(project.title);
-          loadFolders();
-        }
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setRenaming(false);
+        if (next) setDraft(project.title);
       }}
     >
       <DropdownMenuTrigger asChild>

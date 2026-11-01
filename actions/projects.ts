@@ -1,5 +1,6 @@
 "use server";
 
+import { messages } from "@/lib/messages";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/lib/generated/prisma/client";
@@ -125,7 +126,7 @@ export async function getUserProjects(options?: {
 }): Promise<ActionResult<{ projects: ProjectListItem[] }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const org = await ensureUserOrganization();
     const organizationId = org.success ? org.organization.id : null;
@@ -165,7 +166,7 @@ export async function getUserProjects(options?: {
     return { success: true, projects };
   } catch (err) {
     console.error("getUserProjects error:", err);
-    return { success: false, error: "Couldn't load projects" };
+    return { success: false, error: messages.errors.loadProjects };
   }
 }
 
@@ -175,11 +176,11 @@ export async function createProject(input?: {
 }): Promise<ActionResult<{ projectId: string; project: ProjectDetail }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const org = await ensureUserOrganization();
     if (!org.success) {
-      return { success: false, error: "Couldn't ensure organization" };
+      return { success: false, error: messages.errors.ensureOrganization };
     }
     const organizationId = org.organization.id;
 
@@ -239,7 +240,7 @@ export async function createProject(input?: {
     };
   } catch (err) {
     console.error("createProject error:", err);
-    return { success: false, error: "Couldn't create the project" };
+    return { success: false, error: messages.errors.createProject };
   }
 }
 
@@ -248,7 +249,7 @@ export async function getProjectById(
 ): Promise<ActionResult<{ project: ProjectDetail; isOwner: boolean }>> {
   try {
     const userId = await requireUserId();
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const project = await prisma.project.findFirst({
       where: {
@@ -263,7 +264,7 @@ export async function getProjectById(
       },
     });
 
-    if (!project) return { success: false, error: "Project not found" };
+    if (!project) return { success: false, error: messages.errors.projectNotFound };
 
     return {
       success: true,
@@ -287,7 +288,7 @@ export async function getProjectById(
     };
   } catch (err) {
     console.error("getProjectById error:", err);
-    return { success: false, error: "Couldn't load" };
+    return { success: false, error: messages.errors.loadProject };
   }
 }
 
@@ -298,15 +299,15 @@ export async function setProjectPublic(
 ): Promise<ActionResult<{ isPublic: boolean; sharePath: string }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const result = await prisma.project.updateMany({
       where: { id: projectId, userId },
       data: { isPublic },
     });
 
-    if (result.count === 0) return { success: false, error: "Project not found" };
+    if (result.count === 0) return { success: false, error: messages.errors.projectNotFound };
 
     return {
       success: true,
@@ -315,7 +316,7 @@ export async function setProjectPublic(
     };
   } catch (err) {
     console.error("setProjectPublic error:", err);
-    return { success: false, error: "Couldn't update access" };
+    return { success: false, error: messages.errors.updateAccess };
   }
 }
 
@@ -328,7 +329,7 @@ export async function getPublicCarousel(projectId: string): Promise<
   }>
 > {
   try {
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const project = await prisma.project.findFirst({
       where: { id: projectId, isPublic: true },
@@ -343,7 +344,7 @@ export async function getPublicCarousel(projectId: string): Promise<
       },
     });
 
-    if (!project) return { success: false, error: "This carousel is not public" };
+    if (!project) return { success: false, error: messages.errors.carouselNotPublic };
 
     const slides =
       project.slides.length > 0
@@ -358,7 +359,7 @@ export async function getPublicCarousel(projectId: string): Promise<
     };
   } catch (err) {
     console.error("getPublicCarousel error:", err);
-    return { success: false, error: "Couldn't load the carousel" };
+    return { success: false, error: messages.errors.loadCarousel };
   }
 }
 
@@ -369,17 +370,17 @@ export async function saveProject(
 ): Promise<ActionResult<{ updatedAt: string }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
     if (!input.slides?.length) {
-      return { success: false, error: "At least one slide is required" };
+      return { success: false, error: messages.errors.slideRequired };
     }
 
     const existing = await prisma.project.findFirst({
       where: { id: projectId, userId },
       select: { id: true },
     });
-    if (!existing) return { success: false, error: "Project not found" };
+    if (!existing) return { success: false, error: messages.errors.projectNotFound };
 
     const dims =
       CANVAS_RATIOS[input.aspectRatio] ??
@@ -414,7 +415,7 @@ export async function saveProject(
     return { success: true, updatedAt: updated.updatedAt.toISOString() };
   } catch (err) {
     console.error("saveProject error:", err);
-    return { success: false, error: "Couldn't save the project" };
+    return { success: false, error: messages.errors.saveProject };
   }
 }
 
@@ -424,9 +425,9 @@ export async function saveAsNewProject(
 ): Promise<ActionResult<{ projectId: string; updatedAt: string }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
     if (!input.slides?.length) {
-      return { success: false, error: "At least one slide is required" };
+      return { success: false, error: messages.errors.slideRequired };
     }
 
     const dims =
@@ -460,7 +461,7 @@ export async function saveAsNewProject(
     };
   } catch (err) {
     console.error("saveAsNewProject error:", err);
-    return { success: false, error: "Couldn't save the project" };
+    return { success: false, error: messages.errors.saveProject };
   }
 }
 
@@ -471,10 +472,10 @@ export async function saveProjectThumbnails(
 ): Promise<ActionResult<{ updated: boolean }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
     if (!thumbnails.length) {
-      return { success: false, error: "At least one slide is required" };
+      return { success: false, error: messages.errors.slideRequired };
     }
 
     const project = await prisma.project.findFirst({
@@ -488,9 +489,9 @@ export async function saveProjectThumbnails(
         },
       },
     });
-    if (!project) return { success: false, error: "Project not found" };
+    if (!project) return { success: false, error: messages.errors.projectNotFound };
     if (project.slides.length !== thumbnails.length) {
-      return { success: false, error: "Slide count changed" };
+      return { success: false, error: messages.errors.slideCountChanged };
     }
 
     const first = thumbnails[0] || null;
@@ -521,7 +522,7 @@ export async function saveProjectThumbnails(
     return { success: true, updated: true };
   } catch (err) {
     console.error("saveProjectThumbnails error:", err);
-    return { success: false, error: "Couldn't save thumbnails" };
+    return { success: false, error: messages.errors.saveThumbnails };
   }
 }
 
@@ -531,18 +532,18 @@ export async function updateProjectTitle(
 ): Promise<ActionResult<object>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const result = await prisma.project.updateMany({
       where: { id: projectId, userId },
       data: { title: title.trim() || "Untitled Carousel" },
     });
 
-    if (result.count === 0) return { success: false, error: "Project not found" };
+    if (result.count === 0) return { success: false, error: messages.errors.projectNotFound };
     return { success: true };
   } catch {
-    return { success: false, error: "Couldn't rename the project" };
+    return { success: false, error: messages.errors.renameProject };
   }
 }
 
@@ -551,13 +552,13 @@ export async function duplicateProject(
 ): Promise<ActionResult<{ projectId: string }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const project = await prisma.project.findFirst({
       where: { id: projectId, userId },
       include: { slides: { orderBy: { order: "asc" } } },
     });
-    if (!project) return { success: false, error: "Project not found" };
+    if (!project) return { success: false, error: messages.errors.projectNotFound };
 
     const copy = await prisma.project.create({
       data: {
@@ -584,7 +585,7 @@ export async function duplicateProject(
     return { success: true, projectId: copy.id };
   } catch (err) {
     console.error("duplicateProject error:", err);
-    return { success: false, error: "Couldn't duplicate the project" };
+    return { success: false, error: messages.errors.duplicateProject };
   }
 }
 
@@ -593,8 +594,8 @@ export async function toggleSaveProject(
 ): Promise<ActionResult<{ saved: boolean }>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const existing = await prisma.savedProject.findUnique({
       where: { userId_projectId: { userId, projectId } },
@@ -609,24 +610,24 @@ export async function toggleSaveProject(
     return { success: true, saved: true };
   } catch (err) {
     console.error("toggleSaveProject error:", err);
-    return { success: false, error: "Couldn't save" };
+    return { success: false, error: messages.errors.saveFailed };
   }
 }
 
 export async function deleteProject(projectId: string): Promise<ActionResult<object>> {
   try {
     const userId = await requireUserId();
-    if (!userId) return { success: false, error: "Sign in" };
-    if (!projectId) return { success: false, error: "projectId is required" };
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const result = await prisma.project.deleteMany({
       where: { id: projectId, userId },
     });
 
-    if (result.count === 0) return { success: false, error: "Project not found" };
+    if (result.count === 0) return { success: false, error: messages.errors.projectNotFound };
     revalidatePath("/");
     return { success: true };
   } catch {
-    return { success: false, error: "Couldn't delete the project" };
+    return { success: false, error: messages.errors.deleteProject };
   }
 }

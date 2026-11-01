@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { useCanvasManager } from "@/context/canvas-manager";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import type { FrameKind } from "@/lib/canvas/frames";
 
 export interface ElementItem {
@@ -62,7 +64,7 @@ export function useElementLibrary() {
     void fileToDataUrl(file)
       .then((dataUrl) => manager.objects.addImage(dataUrl))
       .catch((err) => {
-        console.error(err);
+        reportError(err, messages.errors.addImage);
       });
   };
 
@@ -71,7 +73,7 @@ export function useElementLibrary() {
     void fileToDataUrl(file)
       .then((dataUrl) => manager.objects.fillActiveFrame(dataUrl))
       .catch((err) => {
-        console.error(err);
+        reportError(err, messages.errors.addImage);
       });
   };
 
@@ -95,11 +97,11 @@ export function useElementLibrary() {
     try {
       parsed = new URL(trimmed);
       if (!/^https?:$/i.test(parsed.protocol)) {
-        setUrlError("Use an http(s) link");
+        setUrlError(messages.errors.httpLink);
         return;
       }
     } catch {
-      setUrlError("Invalid link");
+      setUrlError(messages.errors.invalidLink);
       return;
     }
 
@@ -109,8 +111,8 @@ export function useElementLibrary() {
       await manager.objects.addImage(parsed.toString());
       setImageUrl("");
     } catch (err) {
-      console.error(err);
-      setUrlError("Couldn't load the image (CORS?)");
+      reportError(err, messages.errors.loadImageCors);
+      setUrlError(messages.errors.loadImageCors);
     } finally {
       setUrlLoading(false);
     }

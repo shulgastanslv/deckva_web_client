@@ -17,6 +17,8 @@ import { carouselTextHits, replaceTextInJSON, replaceTextOnNodes } from "@/lib/c
 import { loadGoogleFont, normalizeFontFamily, SUGGESTED_FONTS } from "@/lib/fonts/google-fonts";
 import { FontSelect } from "@/components/canvas/font-select";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import {
   Select,
   SelectContent,
@@ -194,7 +196,9 @@ export function SidebarTools() {
 
   const onAvatarFile = (file: File | undefined) => {
     if (!file || !file.type.startsWith("image/")) return;
-    void fileToDataUrl(file, { maxEdge: 512, quality: 0.86 }).then(setAvatarUrl).catch(console.error);
+    void fileToDataUrl(file, { maxEdge: 512, quality: 0.86 })
+      .then(setAvatarUrl)
+      .catch((err) => reportError(err, messages.errors.readAvatar));
   };
 
   const lineCount = splitSlideLines(prompt).length;

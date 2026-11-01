@@ -26,6 +26,8 @@ import {
   Workflow,
 } from "lucide-react";
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import { CANVAS_RATIOS, type FabricCanvasJSON, type RatioKey } from "@/lib/types";
 import { fitCanvasJSON } from "@/lib/canvas/fit-frame";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
@@ -106,7 +108,7 @@ export function CanvasToolbar({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to export JSON:", err);
+      reportError(err, messages.errors.exportJson);
     }
   };
 
@@ -123,7 +125,7 @@ export function CanvasToolbar({
       const text = await file.text();
       const parsed = parseImportedTemplate(JSON.parse(text) as unknown);
       if (!parsed.ok || parsed.template.slides.length === 0) {
-        throw new Error(parsed.ok === false ? parsed.error : "Not a canvas JSON file");
+        throw new Error(parsed.ok === false ? parsed.error : messages.errors.notCanvasJson);
       }
 
       if (parsed.template.slides.length === 1) {
@@ -133,7 +135,7 @@ export function CanvasToolbar({
 
       setPendingImport(parsed.template);
     } catch (err) {
-      console.error("Failed to import JSON:", err);
+      reportError(err, messages.errors.importJson);
     }
   };
 
@@ -150,7 +152,7 @@ export function CanvasToolbar({
       await loadFirstIntoCurrent(first);
       setPendingImport(null);
     } catch (err) {
-      console.error("Failed to import first slide:", err);
+      reportError(err, messages.errors.importFirstSlide);
     } finally {
       setImporting(false);
     }
@@ -168,7 +170,7 @@ export function CanvasToolbar({
       });
       setPendingImport(null);
     } catch (err) {
-      console.error("Failed to import all slides:", err);
+      reportError(err, messages.errors.importAllSlides);
     } finally {
       setImporting(false);
     }

@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
 import { createProject } from "@/actions/projects";
-import { readActiveOrganization, readUserProjects } from "@/lib/studio/reads";
+import { fetchActiveOrganization, fetchUserProjects } from "@/lib/studio/queries";
+import { messages } from "@/lib/messages";
+import { reportError } from "@/lib/report-error";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
 import { stashPendingCover } from "@/lib/studio/pending-cover";
 import { stashStudioIntent } from "@/lib/studio/pending-intent";
@@ -13,13 +16,19 @@ import { FREE_CAROUSEL_LIMIT } from "@/lib/studio/plans";
 import type { RatioKey } from "@/lib/types";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
-async function requireCarouselSlot(): Promise<boolean> {
-  const [orgRes, projectsRes] = await Promise.all([
-    readActiveOrganization(),
-    readUserProjects(),
+async function requireCarouselSlot(client: QueryClient): Promise<boolean> {
+  const [orgResult, projectsResult] = await Promise.allSettled([
+    fetchActiveOrganization(client),
+    fetchUserProjects(client),
   ]);
-  if (orgRes.success && orgRes.organization?.isUpgrade) return true;
-  const count = projectsRes.success ? projectsRes.projects.length : 0;
+  if (
+    orgResult.status === "fulfilled" &&
+    orgResult.value.organization?.isUpgrade
+  ) {
+    return true;
+  }
+  const count =
+    projectsResult.status === "fulfilled" ? projectsResult.value.projects.length : 0;
   if (count >= FREE_CAROUSEL_LIMIT) {
     window.dispatchEvent(new CustomEvent("studio:open-upgrade"));
     return false;
@@ -39,6 +48,7 @@ function draftTitle(topic: string): string {
 
 export function useStudioCreate() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: session, status } = useSession();
   const [authNeeded, setAuthNeeded] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -52,7 +62,7 @@ export function useStudioCreate() {
 
   const openBlank = async () => {
     if (!requireAuth()) return;
-    if (!(await requireCarouselSlot())) return;
+    if (!(await requireCarouselSlot(queryClient))) return;
     stashStudioIntent({ type: "new" });
     router.push("/studio/editor");
   };
@@ -67,7 +77,7 @@ export function useStudioCreate() {
     const cover = input.cover?.trim() ?? "";
     setGenerateError(null);
     if (!requireAuth()) return;
-    if (!(await requireCarouselSlot())) return;
+    if (!(await requireCarouselSlot(queryClient))) return;
 
     setGenerating(true);
     try {
@@ -77,7 +87,7 @@ export function useStudioCreate() {
         aspectRatio,
       });
       if (!created.success) {
-        setGenerateError("Couldn't create the carousel");
+        setGenerateError(messages.errors.createCarousel);
         return;
       }
 
@@ -108,10 +118,8 @@ export function useStudioCreate() {
       notifyProjectsChanged();
       router.push(`/studio/editor?project=${created.projectId}`);
     } catch (err) {
-      console.error(err);
-      setGenerateError(
-        err instanceof Error ? err.message : "Couldn't start generation",
-      );
+      reportError(err, messages.errors.startGeneration);
+      setGenerateError(messages.errors.startGeneration);
     } finally {
       setGenerating(false);
     }

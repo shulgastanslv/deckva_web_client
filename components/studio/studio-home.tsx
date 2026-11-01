@@ -1,12 +1,11 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-import { type ProjectListItem } from "@/actions/projects";
-import { readUserProjects } from "@/lib/studio/reads";
+import { useInvalidateStudioProjects, useUserProjects } from "@/lib/studio/queries";
 import { AuthModal } from "@/components/auth";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
@@ -30,41 +29,15 @@ export function StudioHome() {
   const signedIn = status === "authenticated" && Boolean(userId);
   const create = useStudioCreate();
 
-  const [projects, setProjects] = useState<ProjectListItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const projectsQuery = useUserProjects("", signedIn);
+  const projects = useMemo(
+    () => projectsQuery.data?.projects ?? [],
+    [projectsQuery.data],
+  );
+  const loading = signedIn && !projectsQuery.data && !projectsQuery.isError;
+  const refreshProjects = useInvalidateStudioProjects();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<ViewMode>("list");
-
-  const fetchProjects = useCallback(async () => {
-    if (!userId) return;
-    setLoading(true);
-    try {
-      const res = await readUserProjects();
-      if (res.success) setProjects(res.projects);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (userId) void fetchProjects();
-    else {
-      setProjects([]);
-      setLoading(false);
-    }
-  }, [userId, fetchProjects]);
-
-  useEffect(() => {
-    const onChanged = () => {
-      if (userId) void fetchProjects();
-    };
-    window.addEventListener("core:projects-changed", onChanged);
-    window.addEventListener("studio:org-changed", onChanged);
-    return () => {
-      window.removeEventListener("core:projects-changed", onChanged);
-      window.removeEventListener("studio:org-changed", onChanged);
-    };
-  }, [userId, fetchProjects]);
 
   useEffect(() => {
     const onSidebarSearch = (event: Event) => {
@@ -145,7 +118,7 @@ export function StudioHome() {
                 onOpen={(id) =>
                   router.push(`/studio/editor?project=${id}`)
                 }
-                onChanged={fetchProjects}
+                onChanged={refreshProjects}
               />
             </div>
           ) : (
@@ -157,7 +130,7 @@ export function StudioHome() {
                   onOpen={() =>
                     router.push(`/studio/editor?project=${project.id}`)
                   }
-                  onChanged={fetchProjects}
+                  onChanged={refreshProjects}
                 />
               ))}
             </StudioBoardGrid>

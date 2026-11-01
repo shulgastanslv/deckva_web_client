@@ -1,5 +1,6 @@
 "use server";
 
+import { messages } from "@/lib/messages";
 import bcrypt from "bcryptjs";
 
 import { consumeAuthToken, issueAuthToken } from "@/lib/auth-tokens";
@@ -8,8 +9,8 @@ import { prisma } from "@/lib/prisma";
 
 function mailFailure(reason: "unconfigured" | "failed"): string | null {
   if (reason === "unconfigured" && process.env.NODE_ENV !== "production") return null;
-  if (reason === "unconfigured") return "Email delivery is not configured";
-  return "Couldn't send the email. Try again.";
+  if (reason === "unconfigured") return messages.errors.emailNotConfigured;
+  return messages.errors.sendEmail;
 }
 
 async function sendLinkEmail(input: {
@@ -29,7 +30,7 @@ async function sendLinkEmail(input: {
 
 export async function sendVerificationEmail(email: string) {
   const normalized = normalizeEmail(email);
-  if (!isValidEmail(normalized)) return { error: "Enter a valid email" };
+  if (!isValidEmail(normalized)) return { error: messages.errors.validEmail };
 
   const user = await prisma.user.findUnique({ where: { email: normalized } });
   if (!user || !user.password || user.emailVerified) {
@@ -57,7 +58,7 @@ export async function sendVerificationEmail(email: string) {
 
 export async function verifyEmail(token: string) {
   const consumed = await consumeAuthToken(token, "verify");
-  if (!consumed) return { error: "This link is invalid or has expired" };
+  if (!consumed) return { error: messages.errors.linkExpired };
 
   await prisma.user.update({
     where: { email: consumed.email },
@@ -69,7 +70,7 @@ export async function verifyEmail(token: string) {
 
 export async function requestPasswordReset(email: string) {
   const normalized = normalizeEmail(email);
-  if (!isValidEmail(normalized)) return { error: "Enter a valid email" };
+  if (!isValidEmail(normalized)) return { error: messages.errors.validEmail };
 
   const user = await prisma.user.findUnique({ where: { email: normalized } });
   if (user) {
@@ -95,11 +96,11 @@ export async function requestPasswordReset(email: string) {
 
 export async function resetPassword(token: string, password: string) {
   if (!password || password.length < 6) {
-    return { error: "Password must be at least 6 characters" };
+    return { error: messages.errors.passwordTooShort };
   }
 
   const consumed = await consumeAuthToken(token, "reset");
-  if (!consumed) return { error: "This link is invalid or has expired" };
+  if (!consumed) return { error: messages.errors.linkExpired };
 
   const hashedPassword = await bcrypt.hash(password, 10);
   await prisma.user.update({
@@ -113,16 +114,16 @@ export async function resetPassword(token: string, password: string) {
 export async function checkCredentials(email: string, password: string) {
   const normalized = normalizeEmail(email);
   if (!isValidEmail(normalized) || !password) {
-    return { error: "Incorrect email or password" };
+    return { error: messages.errors.incorrectCredentials };
   }
 
   const user = await prisma.user.findUnique({ where: { email: normalized } });
-  if (!user?.password) return { error: "Incorrect email or password" };
+  if (!user?.password) return { error: messages.errors.incorrectCredentials };
 
   const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return { error: "Incorrect email or password" };
+  if (!valid) return { error: messages.errors.incorrectCredentials };
   if (!user.emailVerified) {
-    return { error: "Confirm your email before signing in", code: "unverified" as const };
+    return { error: messages.errors.confirmEmail, code: "unverified" as const };
   }
 
   return { ok: true as const };
