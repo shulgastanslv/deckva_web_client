@@ -52,7 +52,7 @@ export function StudioMobileNav({
     <nav
       aria-label="Studio"
       className={cn(
-        "flex shrink-0 items-stretch justify-around bg-white pb-[env(safe-area-inset-bottom)] md:hidden dark:bg-[#14151c]",
+        "flex shrink-0 items-stretch justify-around rounded-full bg-white pb-[env(safe-area-inset-bottom)] md:hidden dark:bg-[#14151c]",
         moreOpen && "invisible",
       )}
     >
