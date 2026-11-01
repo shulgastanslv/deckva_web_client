@@ -914,10 +914,10 @@ export function RightSidebar({
   if (!selectedObject) return null;
 
   return (
-    <div className="relative flex h-full overflow-hidden bg-background">
+    <div className="relative flex h-full w-full overflow-hidden bg-background md:w-auto">
       <div
-        className={`flex flex-col overflow-y-auto transition-all duration-200 ease-in-out ${
-          isRightCollapsed ? "w-0 opacity-0" : "w-72 opacity-100"
+        className={`flex min-w-0 flex-col overflow-y-auto transition-all duration-200 ease-in-out max-md:w-full max-md:flex-1 max-md:opacity-100 ${
+          isRightCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-72 md:flex-none md:opacity-100"
         }`}
       >
         <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
@@ -1863,7 +1863,7 @@ export function RightSidebar({
         </ScrollArea>
       </div>
 
-      <aside className="flex w-10 shrink-0 flex-col items-center justify-start bg-muted/20 py-3">
+      <aside className="hidden w-10 shrink-0 flex-col items-center justify-start bg-muted/20 py-3 md:flex">
         <Button
           variant="ghost"
           size="icon"

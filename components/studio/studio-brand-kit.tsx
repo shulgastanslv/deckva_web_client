@@ -227,7 +227,7 @@ export function StudioBrandKit() {
                       type="button"
                       title="Remove logo"
                       onClick={() => removeLogo(logo.id)}
-                      className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                      className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-100 transition-opacity hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
                     >
                       <Trash2 className="size-3.5" />
                     </button>

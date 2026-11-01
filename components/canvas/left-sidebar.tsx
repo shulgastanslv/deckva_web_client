@@ -103,7 +103,7 @@ export function LeftSidebar({
   ];
 
   return (
-    <div className="flex h-full min-h-0 overflow-hidden border-r border-border bg-background">
+    <div className="flex h-full min-h-0 w-full overflow-hidden border-border bg-background max-md:border-0 md:w-auto md:border-r">
       <aside className="flex w-12 shrink-0 flex-col items-center justify-between border-r border-border/50 bg-muted/20 py-3">
         <TooltipProvider delayDuration={300}>
           <div className="flex flex-col gap-1.5">
@@ -161,8 +161,8 @@ export function LeftSidebar({
       </aside>
 
       <div
-        className={`flex min-h-0 min-w-0 flex-col overflow-hidden transition-all duration-200 ease-in-out ${
-          isLeftCollapsed ? "w-0 opacity-0" : "w-72 opacity-100"
+        className={`flex min-h-0 min-w-0 flex-col overflow-hidden transition-all duration-200 ease-in-out max-md:w-auto max-md:flex-1 max-md:opacity-100 ${
+          isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-72 md:flex-none md:opacity-100"
         }`}
       >
         <div className="flex h-8 shrink-0 items-center border-b border-border/40 px-4 text-[13px] font-semibold tracking-tight text-foreground">

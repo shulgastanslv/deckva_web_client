@@ -8,7 +8,7 @@ import { StudioBadge } from "@/components/studio/ui/studio-badge";
 import { cn } from "@/lib/utils";
 
 export const recentCols =
-  "grid-cols-[minmax(0,2fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_40px]";
+  "grid-cols-[minmax(0,1fr)_auto_36px] md:grid-cols-[minmax(0,2fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_40px]";
 
 export function StudioProjectRow({
   project,
@@ -44,20 +44,20 @@ export function StudioProjectRow({
           </span>
         </span>
       </button>
-      <p className="truncate text-[13px] text-neutral-500 dark:text-muted-foreground">
+      <p className="hidden truncate text-[13px] text-neutral-500 md:block dark:text-muted-foreground">
         {project.slideCount} slides
       </p>
-      <p className="truncate text-[13px] text-neutral-500 dark:text-muted-foreground">
+      <p className="hidden truncate text-[13px] text-neutral-500 md:block dark:text-muted-foreground">
         {project.aspectRatio}
       </p>
       <p className="truncate text-[13px] text-neutral-500 dark:text-muted-foreground">
         {formatBoardDate(project.updatedAt)}
       </p>
-      <p className="truncate text-[13px] text-neutral-500 dark:text-muted-foreground">
+      <p className="hidden truncate text-[13px] text-neutral-500 md:block dark:text-muted-foreground">
         {project.authorName || "You"}
       </p>
       <div
-        className="opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+        className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
         onClick={(e) => e.stopPropagation()}
       >
         <StudioProjectMenu project={project} onChanged={onChanged} />
