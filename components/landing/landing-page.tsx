@@ -15,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { FigmaExportArt, FigmaImportArt } from "@/components/landing/figma-miro-art";
 import { HeroStage } from "@/components/landing/hero-stage";
 import { LeaveReviewBlock } from "@/components/landing/leave-review-block";
 import { StudioVideo } from "@/components/landing/studio-video";
@@ -34,7 +35,6 @@ import {
 const LEGAL = {
   status: "Professional income tax payer",
   fullName: "Шульга Станислав",
-  unp: "XXXXXXXXX",
   email: "hello@deckva.by",
   country: "Republic of Belarus",
 } as const;
@@ -60,8 +60,12 @@ const MENU_GROUPS = [
     title: "Make",
     links: [
       { name: "Starting lines", href: "#start" },
-      { name: "AI generation", href: "#generate" },
+      { name: "The example", href: "#post" },
       { name: "Shapes", href: "#make" },
+      { name: "Ratios", href: "#ratios" },
+      { name: "Figma", href: "#figma" },
+      { name: "The picture", href: "#picture" },
+      { name: "AI generation", href: "#generate" },
     ],
   },
 ] as const;
@@ -91,6 +95,27 @@ const PROMPTS = [
     label: "Story",
     line: "A short story with a beginning, a turn, and an end.",
   },
+  {
+    label: "Offer",
+    line: "An offer in five slides: the problem, the thing, the proof, the price, and the next step.",
+  },
+  {
+    label: "Review",
+    line: "A review of one product: what it is, who it fits, and whether to buy it.",
+  },
+  {
+    label: "Announcement",
+    line: "An announcement: what changed, who it is for, and when it starts.",
+  },
+] as const;
+
+const JOBS = [
+  ["Launch", "The offer, the proof, then the next step."],
+  ["How-to", "One step on each slide, and the result at the end."],
+  ["Checklist", "Short lines people can save and come back to."],
+  ["Offer", "The problem, the thing, the price, and where to go."],
+  ["Review", "What it is, who it fits, and a clear yes or no."],
+  ["Announcement", "What changed, who it reaches, and when it starts."],
 ] as const;
 
 const SHAPES = [
@@ -114,15 +139,33 @@ const SHAPES = [
     title: "A series",
     text: "The same shape next time, with a new topic in it.",
   },
+  {
+    value: "offer",
+    title: "Offer",
+    text: "A problem, a thing, a proof, and a place to go next.",
+  },
+  {
+    value: "quote",
+    title: "A quote",
+    text: "One line large, then who said it, then why it matters.",
+  },
+  {
+    value: "list",
+    title: "A list",
+    text: "Numbered points. Each slide is one item, nothing else.",
+  },
+  {
+    value: "faq",
+    title: "Questions",
+    text: "A question on one slide, the answer on the next.",
+  },
 ] as const;
 
-const POSTS = [
-  "/reviews/1.jpg",
-  "/reviews/2.jpg",
-  "/reviews/3.jpg",
-  "/reviews/4.jpg",
-  "/reviews/5.jpg",
-  "/reviews/6.jpg",
+const RATIOS = [
+  { label: "4:5", frame: "aspect-[4/5] w-full" },
+  { label: "1:1", frame: "aspect-square w-full" },
+  { label: "9:16", frame: "aspect-[9/16] w-full" },
+  { label: "16:9", frame: "aspect-video w-full" },
 ] as const;
 
 function Place({ className }: { className?: string }) {
@@ -133,6 +176,18 @@ function Place({ className }: { className?: string }) {
     />
   );
 }
+
+const POSTS = [
+  "/reviews/1.jpg",
+  "/reviews/2.jpg",
+  "/reviews/3.jpg",
+  "/reviews/4.jpg",
+  "/reviews/5.jpg",
+  "/reviews/6.jpg",
+] as const;
+
+const EXAMPLE_LINE =
+  "A launch in six slides: the offer, who it is for, the proof, and what to do next.";
 
 const FAQ = [
   {
@@ -153,12 +208,72 @@ const FAQ = [
   {
     value: "price",
     q: "What does it cost?",
-    a: "15 Br a month. Cancel any time. Access stays until the end of the paid period.",
+    a: `The first ${FREE_CAROUSEL_LIMIT} carousels are free. After that, Pro is ${STUDIO_PRO_PRICE} Br a month. Cancel any time. Access stays until the end of the paid period.`,
   },
   {
     value: "where",
     q: "Where do I use it?",
-    a: "In the browser on a computer. Laying out slides needs a wide screen.",
+    a: "In the browser, on a computer or a phone.",
+  },
+  {
+    value: "figma-in",
+    q: "Can I import from Figma?",
+    a: "Yes. Bring a frame onto the slide. The picture, the type, and the order stay editable in the same project.",
+  },
+  {
+    value: "figma-out",
+    q: "Can I export back to Figma?",
+    a: "Yes. Send the carousel back, or download a PNG of one slide and a ZIP of the set. The file has no watermark.",
+  },
+  {
+    value: "background",
+    q: "What does Remove background do?",
+    a: "Select a picture. The subject stays, and the backdrop goes. The slide itself does not change.",
+  },
+  {
+    value: "magic",
+    q: "What is Magic layer?",
+    a: "It splits one picture into layers you can move, like separate pieces on the same slide.",
+  },
+  {
+    value: "upscale",
+    q: "How far can I upscale?",
+    a: "2×, 3×, or 4×. The sharper image stays on the slide.",
+  },
+  {
+    value: "ratios",
+    q: "Which frame sizes are there?",
+    a: "4:5 for a feed, 1:1 for a square, 9:16 for a story, and 16:9 for a wide frame. The sequence stays one project.",
+  },
+  {
+    value: "count",
+    q: "How many slides does a topic make?",
+    a: "From four to ten, in order. You can add, delete, and move slides after that.",
+  },
+  {
+    value: "language",
+    q: "What language are the slides?",
+    a: "The language follows the words you type. A Russian sentence comes back in Russian. An English sentence comes back in English.",
+  },
+  {
+    value: "template",
+    q: "Can I start from a template?",
+    a: "Yes. A template, a topic, or an empty project. A topic already lays the slides out. A template gives you a shape to fill.",
+  },
+  {
+    value: "pro",
+    q: "What is on Pro that is not free?",
+    a: `Unlimited private carousels, high-resolution exports, folders and brand kits, and priority support. The first ${FREE_CAROUSEL_LIMIT} carousels stay free.`,
+  },
+  {
+    value: "cancel",
+    q: "What happens if I cancel?",
+    a: "Pro stops renewing. Access stays until the end of the paid period. The projects stay in your account.",
+  },
+  {
+    value: "edit",
+    q: "Can I change a generated carousel?",
+    a: "Yes. Rewrite a line, swap the cover, move a slide, or run Remove background, Magic layer, and Upscale on a picture.",
   },
 ];
 
@@ -177,8 +292,12 @@ const FOOTER_COLUMNS = [
     title: "Make",
     links: [
       { name: "Starting lines", href: "#start" },
-      { name: "AI generation", href: "#generate" },
+      { name: "The example", href: "#post" },
       { name: "Shapes", href: "#make" },
+      { name: "Ratios", href: "#ratios" },
+      { name: "Figma", href: "#figma" },
+      { name: "The picture", href: "#picture" },
+      { name: "AI generation", href: "#generate" },
       { name: "Price", href: "#pricing" },
     ],
   },
@@ -493,7 +612,7 @@ export function LandingPage() {
               This is the topic the slides start from.
             </p>
             <a
-              href="/studio"
+              href={`/studio?topic=${encodeURIComponent(activePrompt.line)}`}
               className="inline-flex h-11 items-center justify-center rounded-full bg-land-ink px-5 text-sm font-semibold text-land-mist"
             >
               Open studio
@@ -513,18 +632,48 @@ export function LandingPage() {
       </LandingSection>
 
       <LandingSection id="post">
+        <p className="text-sm font-medium text-land-ink/50">
+          For a coach, a small brand, or anyone posting from one sentence.
+        </p>
+        <h2 className={`${sectionTitle} mt-3`}>From this line</h2>
+        <p className="mt-6 max-w-3xl text-2xl font-medium tracking-tight text-land-ink sm:text-3xl">
+          {EXAMPLE_LINE}
+        </p>
+        <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {POSTS.slice(0, 4).map((src, index) => (
+            <li
+              key={src}
+              className="overflow-hidden rounded-[1.75rem] bg-land-card"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt={`Slide ${index + 1} from the example carousel`}
+                className="aspect-[4/5] w-full object-cover object-top"
+              />
+            </li>
+          ))}
+        </ul>
+        <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className={`max-w-xl ${landSub}`}>
+            The file is a PNG of one slide, or a ZIP of the carousel. No watermark.
+          </p>
+          <a
+            href={`/studio?topic=${encodeURIComponent(EXAMPLE_LINE)}`}
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-land-ink px-5 text-sm font-semibold text-land-mist"
+          >
+            Open studio with this line
+          </a>
+        </div>
+      </LandingSection>
+
+      <LandingSection>
         <h2 className={sectionTitle}>Sequence is the first draft</h2>
         <p className={`mt-4 max-w-2xl ${landSub}`}>
           You name the subject. The studio returns a carousel in the ratio of
           a feed. Then you change the words, the cover, and the sequence until
           the post is yours.
         </p>
-        <a
-          href="/studio"
-          className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-land-ink px-5 text-sm font-semibold text-land-mist"
-        >
-          Open studio
-        </a>
         <Place className="mt-8 h-64 w-full rounded-[1.75rem] sm:h-80" />
         <ul className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-6">
           <li>
@@ -560,19 +709,11 @@ export function LandingPage() {
       <LandingSection>
         <div className="grid items-center gap-8 rounded-[1.75rem] bg-land-card p-6 sm:p-10 lg:grid-cols-2 lg:gap-12 lg:p-12">
           <div>
-            <h2 className={sectionTitle}>
-              One project holds the carousel
-            </h2>
+            <h2 className={sectionTitle}>One project holds the carousel</h2>
             <p className={`mt-4 ${landSub}`}>
               The topic, the slides, the edits, and the download live together.
               You take the file when the carousel is finished.
             </p>
-            <a
-              href="/studio"
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-land-mist px-5 text-sm font-semibold text-land-ink"
-            >
-              Open studio
-            </a>
           </div>
           <Place className="min-h-64 rounded-2xl" />
         </div>
@@ -620,17 +761,13 @@ export function LandingPage() {
 
       <LandingSection id="make">
         <h2 className={sectionTitle}>Posts with a job to do</h2>
-        <ul className="mt-8 grid gap-4 lg:grid-cols-3">
-          {[
-            ["Launch", "The offer, the proof, then the next step."],
-            ["How-to", "One step on each slide, and the result at the end."],
-            ["Checklist", "Short lines people can save and come back to."],
-          ].map(([title, text]) => (
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {JOBS.map(([title, text]) => (
             <li
               key={title}
               className="overflow-hidden rounded-[1.75rem] bg-land-card"
             >
-              <Place className="h-52 w-full" />
+              <Place className="h-40 w-full sm:h-52" />
               <div className="p-6">
                 <h3 className="text-2xl font-medium tracking-tight text-land-ink">
                   {title}
@@ -638,13 +775,22 @@ export function LandingPage() {
                 <p className="mt-3 text-base leading-relaxed text-land-ink/60">
                   {text}
                 </p>
-                <a
-                  href="/studio"
-                  className="mt-6 inline-flex h-10 items-center rounded-full bg-land-mist px-4 text-sm font-semibold text-land-ink"
-                >
-                  Open studio
-                </a>
               </div>
+            </li>
+          ))}
+        </ul>
+      </LandingSection>
+
+      <LandingSection id="ratios">
+        <h2 className={sectionTitle}>The same post, four frames</h2>
+        <p className={`mt-4 max-w-xl ${landSub}`}>
+          A feed, a square, a story, and a wide frame. The sequence stays one project.
+        </p>
+        <ul className="mt-8 grid grid-cols-2 items-end gap-4 sm:grid-cols-4">
+          {RATIOS.map((item) => (
+            <li key={item.label}>
+              <Place className={`${item.frame} rounded-[1.75rem]`} />
+              <p className="mt-3 text-sm font-medium text-land-ink/60">{item.label}</p>
             </li>
           ))}
         </ul>
@@ -654,12 +800,9 @@ export function LandingPage() {
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-16">
           <div>
             <h2 className={sectionTitle}>Same structure, next subject</h2>
-            <a
-              href="/studio"
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-land-ink px-5 text-sm font-semibold text-land-mist"
-            >
-              Open studio
-            </a>
+            <p className={`mt-4 ${landSub}`}>
+              Eight ways to shape the same carousel. Pick one, then change the subject.
+            </p>
           </div>
           <Accordion type="single" collapsible defaultValue="story">
             {SHAPES.map((item) => (
@@ -683,6 +826,66 @@ export function LandingPage() {
             ))}
           </Accordion>
         </div>
+      </LandingSection>
+
+      <LandingSection id="figma">
+        <h2 className={sectionTitle}>From Figma, and back</h2>
+        <p className={`mt-4 max-w-xl ${landSub}`}>
+          A frame comes into the slide. The finished carousel can leave again.
+        </p>
+        <ul className="mt-8 grid gap-4 lg:grid-cols-2">
+          <li className="overflow-hidden rounded-[1.75rem] bg-land-card">
+            <FigmaImportArt />
+            <div className="p-6">
+              <h3 className="text-2xl font-medium tracking-tight text-land-ink">
+                Import
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                Bring a frame from Figma onto the slide. The picture, the type, and the order stay editable.
+              </p>
+            </div>
+          </li>
+          <li className="overflow-hidden rounded-[1.75rem] bg-land-card">
+            <FigmaExportArt />
+            <div className="p-6">
+              <h3 className="text-2xl font-medium tracking-tight text-land-ink">
+                Export
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                Send the carousel back to Figma, or take a PNG of one slide and a ZIP of the set.
+              </p>
+            </div>
+          </li>
+        </ul>
+      </LandingSection>
+
+      <LandingSection id="picture">
+        <h2 className={sectionTitle}>On the picture</h2>
+        <p className={`mt-4 max-w-xl ${landSub}`}>
+          Three tools on a selected image. The slide stays the same project.
+        </p>
+        <ul className="mt-8 grid gap-4 lg:grid-cols-3">
+          {[
+            ["Remove background", "The subject stays. The backdrop goes."],
+            ["Magic layer", "One picture splits into layers you can move."],
+            ["Upscale", "2×, 3×, or 4×. The sharper image stays on the slide."],
+          ].map(([title, text]) => (
+            <li
+              key={title}
+              className="overflow-hidden rounded-[1.75rem] bg-land-card"
+            >
+              <Place className="h-40 w-full sm:h-52" />
+              <div className="p-6">
+                <h3 className="text-2xl font-medium tracking-tight text-land-ink">
+                  {title}
+                </h3>
+                <p className="mt-3 text-base leading-relaxed text-land-ink/60">
+                  {text}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </LandingSection>
 
       <LandingSection id="reviews">
@@ -731,7 +934,7 @@ export function LandingPage() {
               href="/studio"
               className="mt-8 inline-flex h-11 items-center justify-center self-stretch rounded-full bg-[#14151c] px-5 text-sm font-semibold text-white dark:bg-white dark:text-[#14151c]"
             >
-              Open studio
+              Start free
             </a>
           </li>
           <li className="flex flex-col rounded-[1.75rem] bg-land-ink p-6 text-land-mist sm:p-8">
@@ -762,6 +965,9 @@ export function LandingPage() {
             </a>
           </li>
         </ul>
+        <p className={`mt-6 max-w-xl ${landSub}`}>
+          The first {FREE_CAROUSEL_LIMIT} carousels are free. The next one is Pro, {STUDIO_PRO_PRICE} Br a month.
+        </p>
 
         <h2 id="generate" className={`${sectionTitle} mt-16 scroll-mt-28 sm:mt-20`}>
           AI generation
@@ -871,7 +1077,6 @@ export function LandingPage() {
                 <li>{LEGAL.status}</li>
                 <li>{LEGAL.country}</li>
                 <li className="text-white/90">{LEGAL.fullName}</li>
-                <li className="tabular-nums">Tax ID {LEGAL.unp}</li>
                 <li>
                   <a
                     href={`mailto:${LEGAL.email}`}

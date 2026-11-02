@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -24,6 +24,8 @@ type ViewMode = "list" | "grid";
 
 export function StudioHome() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const topic = searchParams.get("topic")?.trim() ?? "";
   const { data: session, status } = useSession();
   const userId = session?.user?.id ?? undefined;
   const signedIn = status === "authenticated" && Boolean(userId);
@@ -42,6 +44,13 @@ export function StudioHome() {
   const refreshProjects = useInvalidateStudioProjects();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<ViewMode>("list");
+
+  useEffect(() => {
+    if (!topic) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("topic");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [topic]);
 
   useEffect(() => {
     const onSidebarSearch = (event: Event) => {
@@ -73,6 +82,7 @@ export function StudioHome() {
       <StudioContentBody className="pt-6 sm:pt-10">
         <StudioStartSection
           name={signedIn ? helloName : null}
+          topic={topic}
           onBlank={create.openBlank}
           onTemplates={create.openTemplates}
           onGenerate={create.generateFromPrompt}
@@ -80,7 +90,7 @@ export function StudioHome() {
           generateError={create.generateError}
         />
 
-        <div className="h-14 sm:h-10" aria-hidden />
+        <div className="h-8 sm:h-10" aria-hidden />
 
         <section>
           <StudioSectionHeader

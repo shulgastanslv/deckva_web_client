@@ -8,6 +8,7 @@ import {
 
 export function StudioStartSection({
   name,
+  topic,
   onBlank,
   onTemplates,
   onGenerate,
@@ -15,6 +16,7 @@ export function StudioStartSection({
   generateError,
 }: {
   name: string | null;
+  topic?: string;
   onBlank: () => void;
   onTemplates: () => void;
   onGenerate: (input: StudioPromptSubmit) => void | Promise<void>;
@@ -41,6 +43,7 @@ export function StudioStartSection({
       </div>
 
       <StudioPrompt
+        initialTopic={topic}
         onSubmit={onGenerate}
         busy={generating}
         error={generateError}
