@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const itemClass =
-  "cursor-pointer gap-2.5 rounded-xl px-3.5 py-2.5 text-[14px] text-neutral-900 focus:bg-neutral-100 dark:text-foreground dark:focus:bg-muted";
+  "cursor-pointer gap-2.5 rounded-none px-3.5 py-2.5 text-[14px] text-neutral-900 focus:bg-neutral-100 dark:text-foreground dark:focus:bg-muted";
 
 export function StudioUserNav() {
   const { data: session, status } = useSession();
@@ -67,7 +67,7 @@ export function StudioUserNav() {
           side="bottom"
           align="end"
           sideOffset={10}
-          className="w-[220px] overflow-hidden rounded-3xl border-0 bg-white p-1.5 dark:bg-background dark:ring-1 dark:ring-border"
+          className="w-[220px] overflow-hidden rounded-2xl border-0 bg-white p-0 dark:bg-background dark:ring-1 dark:ring-border"
         >
           <div className="flex items-center gap-2.5 px-3.5 py-3">
             <StudioAvatar letter={userLetter} className="size-8 text-[12px]" />

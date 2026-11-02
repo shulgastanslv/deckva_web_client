@@ -21,6 +21,9 @@ const EXTRA = [
   "swibpCodeChrome",
   "swibpCodeLineNumbers",
   "swibpCodeFilename",
+  "swibpCodeDarkMode",
+  "swibpCodeBackground",
+  "swibpCodeTransparent",
 ];
 
 for (const key of EXTRA) {

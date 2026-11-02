@@ -539,20 +539,17 @@ export function LandingPage() {
             }}
           >
             <motion.h1
-              variants={rise}
               className="max-w-[14ch] text-5xl font-semibold tracking-tight leading-[0.96] sm:text-6xl lg:text-7xl"
             >
               Your post, from one line
             </motion.h1>
             <motion.p
-              variants={rise}
               className="mt-6 max-w-md text-xl leading-snug text-white/80"
             >
               Name what it is about. The slides arrive in order, ready to edit and download.
             </motion.p>
             <motion.div
-              variants={rise}
-              className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3"
+              className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3"  
             >
               <Button
                 asChild

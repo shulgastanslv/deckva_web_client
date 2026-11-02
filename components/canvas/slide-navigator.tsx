@@ -88,7 +88,7 @@ export function SlideNavigator() {
   }, [manager, canvasDimensions.width, updateSlideThumbnail, currentIndex, slides.length]);
 
   return (
-    <footer className="z-10 flex h-[68px] shrink-0 items-center gap-2 border-t border-border bg-background px-2 select-none sm:h-[76px] sm:gap-3 sm:px-4">
+    <footer className="z-10 flex h-[72px] shrink-0 items-center gap-2 border-t border-border bg-background px-3 select-none sm:gap-3 sm:px-3.5">
       <div className="w-12 shrink-0 leading-tight sm:w-[72px]">
         <div className="text-[13px] uppercase tracking-wide text-muted-foreground">
           Slide

@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useAttachCanvas, useCanvasManager } from "@/context/canvas-manager";
+import { CodeBlockEditDialog } from "@/components/canvas/code-block-edit-dialog";
 import { clampZoom } from "@/components/canvas/zoom-controls";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -431,6 +432,7 @@ export function CanvasView() {
           </div>
         </div>
       )}
+      <CodeBlockEditDialog />
     </div>
   );
 }

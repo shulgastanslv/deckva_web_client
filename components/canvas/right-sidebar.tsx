@@ -367,9 +367,6 @@ export function RightSidebar({
     null,
   );
 
-  useEffect(() => {
-    if (selectedObject) setIsRightCollapsed(false);
-  }, [selectedObject, setIsRightCollapsed]);
   const [imageUrlInput, setImageUrlInput] = useState("");
   const {
     canRun: canEnhance,
@@ -911,15 +908,29 @@ export function RightSidebar({
     ]
   );
 
-  if (!selectedObject) return null;
-
   return (
-    <div className="relative flex h-full w-full overflow-hidden bg-transparent md:w-auto md:rounded-3xl md:bg-white dark:md:bg-[#14151c]">
+    <div className="relative flex h-full w-full overflow-hidden bg-background md:w-auto">
       <div
-        className={`flex min-w-0 flex-col overflow-y-auto transition-all duration-200 ease-in-out max-md:w-full max-md:flex-1 max-md:opacity-100 ${
-          isRightCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-72 md:flex-none md:opacity-100"
-        }`}
+        className={cn(
+          "flex min-w-0 flex-col overflow-hidden transition-[width,opacity] duration-300 ease-out max-md:w-full max-md:flex-1",
+          isRightCollapsed
+            ? "pointer-events-none md:w-0 md:flex-none md:opacity-0"
+            : "md:w-72 md:flex-none md:opacity-100",
+        )}
       >
+        {!selectedObject ? (
+          <>
+            <div className="flex h-11 shrink-0 items-center px-3.5">
+              <span className="text-[13px] font-semibold tracking-tight text-foreground">
+                Properties
+              </span>
+            </div>
+            <div className="flex flex-1 items-center justify-center px-6 pb-10 text-center text-[13px] leading-relaxed text-muted-foreground">
+              Select an object on the canvas to edit its style.
+            </div>
+          </>
+        ) : (
+          <>
         <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
           <div className="min-w-0">
             <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
@@ -949,7 +960,7 @@ export function RightSidebar({
           ) : null}
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="min-h-0 flex-1">
           {isMulti ? (
             <div className="flex flex-col gap-1 pb-4 pt-1">
               <div className="space-y-3 px-3 pb-2">
@@ -1251,9 +1262,7 @@ export function RightSidebar({
               </div>
 
               {codeGroup ? (
-                <div className="px-3 pb-1">
                   <CodeBlockInspector group={codeGroup} />
-                </div>
               ) : null}
 
               {isImage && (
@@ -1861,9 +1870,11 @@ export function RightSidebar({
             </div>
           )}
         </ScrollArea>
+          </>
+        )}
       </div>
 
-      <aside className="hidden w-10 shrink-0 flex-col items-center justify-start bg-transparent py-3 md:flex">
+      <aside className="hidden w-12 shrink-0 flex-col items-center justify-start bg-muted/20 py-3 md:flex">
         <Button
           variant="ghost"
           size="icon"

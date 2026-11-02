@@ -55,10 +55,10 @@ export function NotificationsMenu() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-8 w-8 rounded-full text-muted-foreground hover:bg-background/50 hover:text-foreground"
+          className="relative size-9 rounded-full text-muted-foreground hover:bg-background/50 hover:text-foreground"
           title="Notifications"
         >
-          <Bell className="h-3.5 w-3.5" />
+          <Bell className="size-4" />
           {unread > 0 ? (
             <span className="absolute top-1 right-1 size-1.5 rounded-full bg-foreground" />
           ) : null}

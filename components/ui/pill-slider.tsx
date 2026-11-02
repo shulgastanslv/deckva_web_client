@@ -41,7 +41,7 @@ function PillSlider({
   return (
     <div
       className={cn(
-        "relative flex h-10 w-full items-center overflow-hidden rounded-full bg-muted/70 dark:bg-muted/50",
+        "relative flex h-10 w-full items-center overflow-hidden rounded-full bg-muted/20",
         disabled && "opacity-50",
         className,
       )}
@@ -74,8 +74,7 @@ function PillSlider({
           data-slot="pill-slider-track"
           className="relative h-full w-full grow overflow-hidden rounded-full bg-transparent"
         >
-          {/* No filled range — matches the reference pill look */}
-          <SliderPrimitive.Range className="absolute h-full bg-transparent" />
+          <SliderPrimitive.Range className="absolute h-full bg-muted" />
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
           data-slot="pill-slider-thumb"

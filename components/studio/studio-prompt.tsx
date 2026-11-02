@@ -141,8 +141,8 @@ export function StudioPrompt({
     <div>
       <div
         className={cn(
-          "rounded-3xl bg-muted/40 p-2 transition-colors",
-          "focus-within:bg-muted/55",
+          "rounded-[1.75rem] bg-muted/20 p-2 transition-colors",
+          "focus-within:bg-muted/30",
         )}
       >
         <textarea
@@ -158,8 +158,8 @@ export function StudioPrompt({
           disabled={disabled || busy}
           placeholder="Describe a carousel — topic, tone, audience…"
           className={cn(
-            "field-sizing-content min-h-[72px] w-full resize-none bg-transparent px-4 pt-3 pb-2 text-[15px] leading-relaxed text-foreground outline-none",
-            "placeholder:text-muted-foreground/80",
+            "field-sizing-content min-h-[88px] w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-[15px] leading-relaxed text-foreground outline-none",
+            "placeholder:text-muted-foreground/70",
             "disabled:cursor-not-allowed disabled:opacity-60",
           )}
         />

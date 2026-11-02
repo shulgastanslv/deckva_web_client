@@ -28,6 +28,8 @@ export interface CanvasManagerEvents {
   /** The whole document was replaced via `loadState` (e.g. slide switch). */
   load: CanvasState;
   selection: FabricObject | null;
+  /** Double-click asked to edit a code block (existing or just created). */
+  editCode: FabricObject;
 }
 
 /**
@@ -518,9 +520,19 @@ export class CanvasManager {
     this.canvas.on("mouse:dblclick", (e) => {
       if (this.crop.active) return;
       const target = e.target as FabricObject & { swibpRole?: string } | undefined;
-      if (target?.swibpRole === "split") this.objects.pickSplitImage();
-      else if (target?.swibpRole === "frame") this.objects.pickFrameImage(target);
-      else if (target) this.objects.pickShapeImage(target);
+      if (target?.swibpRole === "code") {
+        this.events.emit("editCode", target);
+        return;
+      }
+      if (!target) {
+        const group = this.objects.addCodeBlock();
+        this.commit();
+        this.events.emit("editCode", group);
+        return;
+      }
+      if (target.swibpRole === "split") this.objects.pickSplitImage();
+      else if (target.swibpRole === "frame") this.objects.pickFrameImage(target);
+      else this.objects.pickShapeImage(target);
     });
 
     this.canvas.on("object:added", (e) => {

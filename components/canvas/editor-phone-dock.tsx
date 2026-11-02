@@ -18,7 +18,7 @@ export function EditorPhoneDock({
   return (
     <nav
       aria-label="Editor"
-      className="flex shrink-0 items-stretch justify-around rounded-full bg-white pb-[env(safe-area-inset-bottom)] md:hidden dark:bg-[#14151c]"
+      className="flex shrink-0 items-stretch justify-around bg-muted/20 pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <button
         type="button"

@@ -179,7 +179,7 @@ export function CanvasToolbar({
   const slideCount = pendingImport?.slides.length ?? 0;
 
   return (
-    <div className="flex h-11 w-full min-w-0 shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border/40 bg-background/60 px-3 backdrop-blur-md select-none">
+    <div className="flex h-11 w-full min-w-0 shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border/40 bg-background/60 px-3.5 backdrop-blur-md select-none">
       <div className="flex shrink-0 items-center gap-2">
         <span className="hidden pl-1 text-[13px] font-medium tracking-wide text-muted-foreground uppercase sm:inline">
           Ratio

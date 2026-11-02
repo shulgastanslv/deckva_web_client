@@ -103,8 +103,8 @@ export function LeftSidebar({
   ];
 
   return (
-    <div className="flex h-full min-h-0 w-full overflow-hidden bg-transparent md:w-auto">
-      <aside className="flex w-12 shrink-0 flex-col items-center justify-between bg-transparent py-3">
+    <div className="flex h-full min-h-0 w-full overflow-hidden border-border bg-background max-md:border-0 md:w-auto md:border-r">
+      <aside className="flex w-12 shrink-0 flex-col items-center justify-between bg-muted/20 py-3">
         <TooltipProvider delayDuration={300}>
           <div className="flex flex-col gap-1.5">
             {navItems.map(({ id, icon: Icon, label }, index) => (
@@ -165,11 +165,11 @@ export function LeftSidebar({
           isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-72 md:flex-none md:opacity-100"
         }`}
       >
-        <div className="flex h-8 shrink-0 items-center border-b border-border/40 px-4 text-[13px] font-semibold tracking-tight text-foreground">
+        <div className="flex h-11 shrink-0 items-center border-b border-border/40 px-3.5 text-[13px] font-semibold tracking-tight text-foreground">
           {PANEL_TITLES[activeNav] ?? activeNav}
         </div>
 
-        <ScrollArea className="h-full min-h-0 w-full flex-1 p-2 [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden">
+        <ScrollArea className="h-full min-h-0 w-full flex-1 p-3 [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden">
           {activeNav === "elements" && <SidebarElements />}
           {activeNav === "layers" && <SidebarLayers />}
           {activeNav === "filters" && <SidebarFilters />}
@@ -183,7 +183,7 @@ export function LeftSidebar({
           {activeNav === "background" && <SidebarBackground />}
           {activeNav === "tools" && <SidebarTools />}
         </ScrollArea>
-        <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 border-t border-border/40 px-4 py-2 text-[13px] text-muted-foreground">
+        <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 border-t border-border/40 px-3.5 py-2.5 text-[13px] text-muted-foreground">
           <button
             type="button"
             onClick={() => setLegal("terms")}

@@ -87,9 +87,9 @@ export function CommandsKbd() {
           variant="ghost"
           size="icon"
           title="Commands"
-          className="h-7 w-7 rounded-full text-muted-foreground hover:bg-background/50 hover:text-foreground"
+          className="size-9 rounded-full text-muted-foreground hover:bg-background/50 hover:text-foreground"
         >
-          <Command className="h-3.5 w-3.5" />
+          <Command className="size-4" />
         </Button>
       </DropdownMenuTrigger>
 

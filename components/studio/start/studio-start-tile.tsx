@@ -29,10 +29,10 @@ export function StudioStartTile({
     >
       <div
         className={cn(
-          "relative aspect-[5/4] w-full overflow-hidden rounded-xl transition-colors",
+          "relative aspect-[5/4] w-full overflow-hidden rounded-2xl transition-colors",
           blank
-            ? "bg-muted/50"
-            : "bg-muted/50 group-hover:bg-muted/70",
+            ? "bg-background ring-1 ring-border/70"
+            : "bg-muted/20 group-hover:bg-muted/35",
         )}
       >
         {previewUrl ? (
