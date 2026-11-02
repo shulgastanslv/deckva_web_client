@@ -21,37 +21,24 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Студия",
-  description:
-    "Студия Deckva: правка слоёв на холсте, шаблоны, папки и экспорт слайдов в PNG или ZIP.",
-  keywords: [
-    "Deckva",
-    "студия",
-    "редактор каруселей",
-    "холст",
-    "шаблоны",
-    "экспорт PNG",
-    "carousel editor",
-  ],
+  title: "Studio",
+  description: "Canvas editing, templates, folders, and PNG/ZIP slide export.",
+  keywords: ["Deckva", "studio", "carousel editor", "canvas", "templates", "export PNG"],
   authors: [{ name: "Deckva", url: "https://deckva.by" }],
   creator: "Deckva",
   publisher: "Deckva",
-  icons: {
-    icon: "/browser.svg",
-  },
+  icons: { icon: "/browser.svg" },
   openGraph: {
-    title: "Deckva · Студия",
-    description:
-      "Рабочее пространство Deckva: проекты, холст и экспорт каруселей.",
+    title: "Deckva · Studio",
+    description: "Projects, canvas, and carousel export.",
     siteName: "Deckva",
-    locale: "ru_BY",
+    locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Deckva · Студия",
-    description:
-      "Рабочее пространство Deckva: проекты, холст и экспорт каруселей.",
+    title: "Deckva · Studio",
+    description: "Projects, canvas, and carousel export.",
   },
 };
 

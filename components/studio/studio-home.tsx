@@ -79,7 +79,7 @@ export function StudioHome() {
 
   return (
     <StudioContent>
-      <StudioContentBody className="pt-6 sm:pt-10">
+      <StudioContentBody className="pt-8">
         <StudioStartSection
           name={signedIn ? helloName : null}
           topic={topic}
@@ -90,7 +90,7 @@ export function StudioHome() {
           generateError={create.generateError}
         />
 
-        <div className="h-8 sm:h-10" aria-hidden />
+        <div className="h-8" aria-hidden />
 
         <section>
           <StudioSectionHeader

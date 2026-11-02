@@ -73,8 +73,8 @@ export function StudioHeader({
         <div className="flex items-center gap-1.5 sm:gap-2">
 
           {session?.user?.role === "ADMIN" ? (
-            <Button variant="secondary" className="hidden h-8 rounded-full sm:inline-flex">
-              Admin panel <ChevronRight className="size-4" />
+            <Button variant="secondary" className="hidden h-8 rounded-full sm:inline-flex" onClick={() => router.push("/admin")}>
+              Admin panel <ChevronRight className="size-4"  />
             </Button>
           ) : null}
 

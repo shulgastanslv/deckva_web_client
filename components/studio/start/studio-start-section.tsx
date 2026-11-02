@@ -128,6 +128,11 @@ export function StudioStartSection({
             iconName="carousel"
             onClick={onBlank}
           />
+          <StudioStartTile
+            title="Images"
+            iconName="image"
+            onClick={onBlank}
+          />
         </StudioStartRow>
       </div>
     </section>

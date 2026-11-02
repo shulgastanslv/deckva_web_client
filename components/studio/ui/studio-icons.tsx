@@ -321,24 +321,24 @@ export function StudioIconRocket(props: IconProps) {
 export function StudioIconImage(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="22" y="18" width="52" height="40" rx="10" fill={WHITE} />
+      <rect x="22" y="18" width="52" height="40" fill={WHITE} />
       <circle cx="36" cy="32" r="5" fill={AMBER_SOFT} />
       <path
         d="M28 50L38 38L46 46L56 34L70 48V50C70 52.2 68.2 54 66 54H32C29.8 54 28 52.2 28 50Z"
         fill={BLUE}
       />
 
-      <rect x="86" y="18" width="52" height="40" rx="10" fill={TEAL_SOFT} />
-      <rect x="96" y="30" width="30" height="5" rx="2.5" fill={TEAL} />
-      <rect x="96" y="40" width="20" height="4" rx="2" fill={WHITE} opacity="0.7" />
+      <rect x="86" y="18" width="52" height="40"  fill={TEAL_SOFT} />
+      <rect x="96" y="30" width="30" height="5"  fill={TEAL} />
+      <rect x="96" y="40" width="20" height="4" fill={WHITE} opacity="0.7" />
 
-      <rect x="22" y="70" width="52" height="40" rx="10" fill={VIOLET} />
-      <rect x="32" y="84" width="30" height="5" rx="2.5" fill={WHITE} opacity="0.95" />
-      <rect x="32" y="94" width="18" height="3" rx="1.5" fill={WHITE} opacity="0.5" />
+      <rect x="22" y="70" width="52" height="40" fill={VIOLET} />
+      <rect x="32" y="84" width="30" height="5"  fill={WHITE} opacity="0.95" />
+      <rect x="32" y="94" width="18" height="3"  fill={WHITE} opacity="0.5" />
 
-      <rect x="86" y="70" width="52" height="40" rx="10" fill={WHITE} />
-      <rect x="96" y="82" width="30" height="4" rx="2" fill={INK} opacity="0.75" />
-      <rect x="96" y="90" width="18" height="3" rx="1.5" fill={LINE} />
+      <rect x="86" y="70" width="52" height="40"  fill={WHITE} />
+      <rect x="96" y="82" width="30" height="4"  fill={INK} opacity="0.75" />
+      <rect x="96" y="90" width="18" height="3" fill={LINE} />
     </Scene>
   );
 }
@@ -465,8 +465,8 @@ export function StudioIconCarousel(props: IconProps) {
       <svg width="100" height="100" viewBox="0 0 171 185" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="46" width="125" height="175" fill={BLUE_SOFT} />
         <rect y="10" width="125" height="175" fill={WHITE} />
-        <rect x="13" y="22" width="100" height="20" fill={LINE} />
-        <rect x="13" y="47" width="100" height="20" fill={LINE} />
+        <rect x="13" y="22" width="100" height="20" fill={BLUE_SOFT} />
+        <rect x="13" y="47" width="100" height="20" fill={BLUE_SOFT} />
         <rect x="13" y="72" width="100" height="50" fill={LINE} />
         <rect x="13" y="151" width="100" height="20" fill={LINE} />
       </svg>

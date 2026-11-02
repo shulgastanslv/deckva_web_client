@@ -22,11 +22,6 @@ import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 
-const SUGGESTIONS = [
-  "How a fitness coach should post on Instagram",
-  "5 Next.js features every founder should know",
-  "Как заработать первые $1000 на фрилансе",
-] as const;
 
 export type StudioPromptSubmit = {
   topic: string;
@@ -341,24 +336,6 @@ export function StudioPrompt({
         <p className="mt-3 text-[13px] text-destructive">{error}</p>
       ) : null}
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {SUGGESTIONS.map((suggestion) => (
-          <PromptSuggestion
-            key={suggestion}
-            type="button"
-            variant="secondary"
-            size="sm"
-            disabled={disabled || busy || readingFile}
-            className="h-8 rounded-full px-3 text-[12px] font-medium"
-            onClick={() => {
-              setValue(suggestion);
-              submit(suggestion);
-            }}
-          >
-            {suggestion}
-          </PromptSuggestion>
-        ))}
-      </div>
     </div>
   );
 }
