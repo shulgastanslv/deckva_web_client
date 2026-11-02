@@ -141,7 +141,7 @@ function RailTool({
   children: ReactNode;
 }) {
   return (
-    <div className="relative size-8 shrink-0">
+    <div className="relative size-9 shrink-0">
       <Tooltip>
         <TooltipTrigger asChild>
           <button
@@ -154,7 +154,7 @@ function RailTool({
             onDragLeave={onDragLeave}
             onDrop={onDrop}
             className={cn(
-              "flex size-8 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
+              "flex size-9 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
               active || dragging
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -247,7 +247,7 @@ function ToolFlyout({
 }
 
 function BarDivider() {
-  return <div className="mx-0.5 h-4 w-px shrink-0 bg-border" />;
+  return <div className="mx-0.5 h-5 w-px shrink-0 bg-border/70" />;
 }
 
 export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
@@ -357,7 +357,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-3">
-        <div className="pointer-events-auto flex w-fit max-w-[calc(100vw-24px)] items-center gap-1 overflow-x-auto rounded-full border border-border/50 bg-background/90 p-1.5 shadow-lg backdrop-blur-md">
+        <div className="pointer-events-auto flex h-11 w-fit max-w-[calc(100vw-24px)] items-center gap-0.5 overflow-x-auto rounded-full border border-border/50 bg-background/95 p-1 backdrop-blur-md">
           <input
             type="file"
             ref={fileInputRef}
@@ -453,7 +453,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                           void addImageFromUrl();
                         }
                       }}
-                      className="h-8 rounded-full border-border/50 bg-muted/30 pl-7 text-[13px] shadow-none"
+                      className="h-9 rounded-full border-border/50 bg-muted/30 pl-7 text-[13px] shadow-none"
                     />
                   </div>
                   <Button
@@ -462,7 +462,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                     size="sm"
                     disabled={!manager || urlLoading || !imageUrl.trim()}
                     onClick={() => void addImageFromUrl()}
-                    className="h-8 shrink-0 rounded-full px-2.5 text-[13px]"
+                    className="h-9 shrink-0 rounded-full px-2.5 text-[13px]"
                   >
                     {urlLoading ? <Loader2 className="size-3 animate-spin" /> : "Add"}
                   </Button>
@@ -544,7 +544,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             type="button"
             onClick={() => setZoom(100)}
             title="Reset zoom"
-            className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg font-mono text-[10px] leading-none text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
+            className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full font-mono text-[11px] leading-none text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
           >
             {Math.round(zoom)}%
           </button>

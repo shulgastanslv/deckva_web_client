@@ -37,7 +37,7 @@ export function FilterMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="inline-flex h-8 min-w-0 items-center gap-1.5 rounded-full px-2.5 text-[13px] text-foreground transition-colors hover:bg-muted/40"
+          className="inline-flex h-10 min-w-0 items-center gap-1.5 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
         >
           {Icon ? <Icon className="size-3.5 shrink-0 text-muted-foreground" /> : null}
         </button>
@@ -57,7 +57,7 @@ export function FilterMenu({
                   key={option.id}
                   onSelect={() => onChange(option.id)}
                   className={cn(
-                    "cursor-pointer gap-2 rounded-md px-2 py-1.5 text-[13px] text-foreground focus:bg-muted/20 focus:text-foreground",
+                    "cursor-pointer gap-2 rounded-md px-2 py-1.5 text-[13px] text-foreground focus:bg-muted/60 dark:bg-muted/25 focus:text-foreground",
                   )}
                 >
                   <Check className={cn("size-3.5 shrink-0", active ? "opacity-100" : "opacity-0")} />

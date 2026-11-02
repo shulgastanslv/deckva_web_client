@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -15,6 +15,11 @@ import {
   brandKitFonts,
   loadBrandKit,
 } from "@/lib/studio/brand-kit";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface FontSelectProps {
   value: string;
@@ -34,7 +39,6 @@ export function FontSelect({
   compact = false,
   className,
 }: FontSelectProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [families, setFamilies] = useState<string[]>([]);
@@ -53,16 +57,11 @@ export function FontSelect({
   }, []);
 
   useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open || families.length > 0 || loadingList) return;
+    if (!open) {
+      setQuery("");
+      return;
+    }
+    if (families.length > 0 || loadingList) return;
     setLoadingList(true);
     setError(null);
     void fetchGoogleFontFamilies()
@@ -118,48 +117,45 @@ export function FontSelect({
   };
 
   return (
-    <div
-      ref={rootRef}
-      className={cn(
-        "relative flex flex-col",
-        compact ? "gap-0" : "gap-1.5",
-        className,
-      )}
-    >
-      {!compact && (
-        <span className="text-[13px] text-muted-foreground">Font</span>
-      )}
-      <button
-        type="button"
-        disabled={disabled || loadingFont}
-        onClick={() => setOpen((v) => !v)}
-        title={compact ? current : undefined}
-        className={cn(
-          "flex items-center gap-2 rounded-full bg-muted/40 text-left text-[13px] transition-colors",
-          "hover:bg-muted/60 disabled:opacity-60",
-          compact ? "h-8 w-[7.5rem] px-2.5" : "h-9 w-full px-3",
-        )}
-      >
-        <span
-          className="min-w-0 flex-1 truncate"
-          style={{ fontFamily: `"${current}", sans-serif` }}
-        >
-          {current}
-        </span>
-        {loadingFont ? (
-          <Loader2 className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
-        ) : (
-          <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
-        )}
-      </button>
+    <div className={cn("relative flex flex-col", compact ? "gap-0" : "gap-1.5", className)}>
+      {!compact && <span className="text-[13px] text-muted-foreground">Font</span>}
 
-      {open && (
-        <div
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            disabled={disabled || loadingFont}
+            title={compact ? current : undefined}
+            className={cn(
+              "flex items-center gap-2 rounded-full bg-muted/40 text-left text-[13px] transition-colors",
+              "hover:bg-muted/60 disabled:opacity-60",
+              compact ? "h-9 w-[7.5rem] px-2.5" : "h-9 w-full px-3",
+            )}
+          >
+            <span
+              className="min-w-0 flex-1 truncate"
+              style={{ fontFamily: `"${current}", sans-serif` }}
+            >
+              {current}
+            </span>
+            {loadingFont ? (
+              <Loader2 className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
+            ) : (
+              <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
+            )}
+          </button>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="start"
+          side="bottom"
+          sideOffset={8}
+          collisionPadding={12}
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          onCloseAutoFocus={(event) => event.preventDefault()}
           className={cn(
-            "absolute z-50 overflow-hidden rounded-2xl border border-border/60 bg-popover text-popover-foreground",
-            compact
-              ? "left-0 top-[calc(100%+6px)] w-64"
-              : "left-0 right-0 top-[calc(100%+4px)]",
+            "flex w-64 flex-col gap-0 overflow-hidden rounded-2xl border border-border/60 p-0 shadow-none",
+            !compact && "w-[var(--radix-popover-trigger-width)] min-w-64",
           )}
         >
           <div className="relative border-b border-border/40 p-2">
@@ -173,16 +169,14 @@ export function FontSelect({
             />
           </div>
 
-          <div className="max-h-56 overflow-y-auto p-1">
+          <div className="max-h-56 overflow-y-auto overscroll-contain p-1">
             {loadingList && families.length === 0 ? (
               <div className="flex items-center justify-center gap-2 py-6 text-[13px] text-muted-foreground">
                 <Loader2 className="size-3.5 animate-spin" />
                 Loading fonts…
               </div>
             ) : error ? (
-              <p className="px-3 py-4 text-center text-[13px] text-destructive">
-                {error}
-              </p>
+              <p className="px-3 py-4 text-center text-[13px] text-destructive">{error}</p>
             ) : (
               options.groups.map((group) =>
                 group.items.length === 0 ? null : (
@@ -201,7 +195,7 @@ export function FontSelect({
                             "flex w-full items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-[13px] transition-colors",
                             selected
                               ? "bg-muted text-foreground"
-                              : "hover:bg-muted/50 text-foreground",
+                              : "text-foreground hover:bg-muted/50",
                           )}
                         >
                           <span
@@ -210,9 +204,9 @@ export function FontSelect({
                           >
                             {family}
                           </span>
-                          {selected && (
+                          {selected ? (
                             <Check className="size-3.5 shrink-0 text-foreground" />
-                          )}
+                          ) : null}
                         </button>
                       );
                     })}
@@ -221,8 +215,8 @@ export function FontSelect({
               )
             )}
           </div>
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

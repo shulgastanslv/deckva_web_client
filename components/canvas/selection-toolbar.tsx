@@ -168,7 +168,7 @@ function ToolBtn({
           disabled={disabled}
           onClick={onClick}
           className={cn(
-            "inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors",
+            "inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors",
             "hover:bg-muted/70 hover:text-foreground disabled:pointer-events-none disabled:opacity-40",
             active && "bg-muted text-foreground",
             className,
@@ -185,7 +185,7 @@ function ToolBtn({
 }
 
 function BarDivider() {
-  return <div className="mx-0.5 h-4 w-px shrink-0 bg-border/70" />;
+  return <div className="mx-0.5 h-5 w-px shrink-0 bg-border/70" />;
 }
 
 function TextColorButton({
@@ -218,7 +218,7 @@ function TextColorButton({
             <button
               type="button"
               aria-label="Text color"
-              className="inline-flex size-8 shrink-0 flex-col items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted/70"
+              className="inline-flex size-9 shrink-0 flex-col items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted/70"
             >
               <span className="text-[13px] font-semibold leading-none">A</span>
               <span
@@ -268,7 +268,7 @@ function TextColorButton({
               }
             }}
             spellCheck={false}
-            className="h-8 flex-1 border-0 bg-transparent px-1 font-mono text-[13px] uppercase shadow-none focus-visible:ring-0 dark:bg-transparent"
+            className="h-9 flex-1 border-0 bg-transparent px-1 font-mono text-[13px] uppercase shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
         </div>
       </PopoverContent>
@@ -498,7 +498,7 @@ export function SelectionToolbar() {
         }}
       >
         <div
-          className="pointer-events-auto flex max-w-[min(920px,calc(100vw-24px))] items-center gap-0.5 overflow-x-auto rounded-full border border-border/50 bg-background/95 p-1 backdrop-blur-md"
+          className="pointer-events-auto flex h-11 max-w-[min(920px,calc(100vw-24px))] items-center gap-0.5 overflow-x-auto rounded-full border border-border/50 bg-background/95 p-1 backdrop-blur-md"
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
         >
@@ -513,9 +513,9 @@ export function SelectionToolbar() {
                 }}
               />
 
-              <div className="flex h-8 items-center rounded-full bg-muted/40 px-0.5">
+              <div className="flex h-9 items-center rounded-full bg-muted/40 px-0.5">
                 <ToolBtn label="Smaller" onClick={() => bumpFontSize(-1)}>
-                  <Minus className="size-3.5" />
+                  <Minus className="size-4" />
                 </ToolBtn>
                 <input
                   type="text"
@@ -531,7 +531,7 @@ export function SelectionToolbar() {
                   className="h-7 w-8 border-0 bg-transparent text-center text-[13px] tabular-nums text-foreground outline-none"
                 />
                 <ToolBtn label="Larger" onClick={() => bumpFontSize(1)}>
-                  <Plus className="size-3.5" />
+                  <Plus className="size-4" />
                 </ToolBtn>
               </div>
 
@@ -552,31 +552,31 @@ export function SelectionToolbar() {
                 active={textState.isBold}
                 onClick={() => toggleStyle("bold")}
               >
-                <Bold className="size-3.5" />
+                <Bold className="size-4" />
               </ToolBtn>
               <ToolBtn
                 label="Italic"
                 active={textState.isItalic}
                 onClick={() => toggleStyle("italic")}
               >
-                <Italic className="size-3.5" />
+                <Italic className="size-4" />
               </ToolBtn>
               <ToolBtn
                 label="Underline"
                 active={textState.isUnderline}
                 onClick={() => toggleStyle("underline")}
               >
-                <Underline className="size-3.5" />
+                <Underline className="size-4" />
               </ToolBtn>
               <ToolBtn
                 label="Strikethrough"
                 active={textState.isStrike}
                 onClick={() => toggleStyle("strike")}
               >
-                <Strikethrough className="size-3.5" />
+                <Strikethrough className="size-4" />
               </ToolBtn>
               <ToolBtn label="Change case" onClick={applyCase}>
-                <CaseSensitive className="size-3.5" />
+                <CaseSensitive className="size-4" />
               </ToolBtn>
 
               <BarDivider />
@@ -588,9 +588,9 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="Alignment"
-                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
-                        <AlignIcon className="size-3.5" />
+                        <AlignIcon className="size-4" />
                         <ChevronDown className="ml-0.5 size-2.5 opacity-60" />
                       </button>
                     </PopoverTrigger>
@@ -618,13 +618,13 @@ export function SelectionToolbar() {
                         } as unknown as Partial<FabricObject>)
                       }
                       className={cn(
-                        "inline-flex size-8 items-center justify-center rounded-full transition-colors",
+                        "inline-flex size-9 items-center justify-center rounded-full transition-colors",
                         textState.textAlign === align
                           ? "bg-muted text-foreground"
                           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                       )}
                     >
-                      <Icon className="size-3.5" />
+                      <Icon className="size-4" />
                     </button>
                   ))}
                 </PopoverContent>
@@ -637,9 +637,9 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="List"
-                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
-                        <List className="size-3.5" />
+                        <List className="size-4" />
                       </button>
                     </PopoverTrigger>
                   </TooltipTrigger>
@@ -652,20 +652,20 @@ export function SelectionToolbar() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-8 rounded-full gap-1.5 px-2.5 text-[13px]"
+                    className="h-9 rounded-full gap-1.5 px-2.5 text-[13px]"
                     onClick={() => applyTextList("bullet")}
                   >
-                    <List className="size-3.5" />
+                    <List className="size-4" />
                     Bullets
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-8 rounded-full gap-1.5 px-2.5 text-[13px]"
+                    className="h-9 rounded-full gap-1.5 px-2.5 text-[13px]"
                     onClick={() => applyTextList("number")}
                   >
-                    <ListOrdered className="size-3.5" />
+                    <ListOrdered className="size-4" />
                     Numbers
                   </Button>
                 </PopoverContent>
@@ -678,7 +678,7 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="Spacing"
-                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <span className="relative flex h-3.5 w-3.5 flex-col justify-between">
                           <span className="h-px w-full bg-current" />
@@ -729,10 +729,10 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="Transparency"
-                        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <span
-                          className="size-3.5 rounded-[3px] ring-1 ring-current/40"
+                          className="size-4 rounded-[3px] ring-1 ring-current/40"
                           style={{
                             backgroundImage:
                               "linear-gradient(45deg,#a3a3a3 25%,transparent 25%),linear-gradient(-45deg,#a3a3a3 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#a3a3a3 75%),linear-gradient(-45deg,transparent 75%,#a3a3a3 75%)",
@@ -777,7 +777,7 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="Transparency"
-                        className="inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         Opacity
                         <span className="tabular-nums text-foreground">
@@ -814,7 +814,7 @@ export function SelectionToolbar() {
             active={copiedStyle}
             onClick={copyOrPasteStyle}
           >
-            <Paintbrush className="size-3.5" />
+            <Paintbrush className="size-4" />
           </ToolBtn>
         </div>
       </div>

@@ -97,6 +97,7 @@ import type { TextStyles } from "@/lib/canvas/text-flow";
 import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { CodeBlockInspector } from "@/components/canvas/code-block-inspector";
+import { InspectorAssets } from "@/components/canvas/inspector-assets";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 
 type TextAlign = "left" | "center" | "right" | "justify";
@@ -925,7 +926,7 @@ export function RightSidebar({
                 Properties
               </span>
             </div>
-            <div className="flex flex-1 items-center justify-center px-6 pb-10 text-center text-[13px] leading-relaxed text-muted-foreground">
+            <div className="flex flex-1 items-center justify-center px-6 pb-10 text-center text-[15px] leading-relaxed text-muted-foreground">
               Select an object on the canvas to edit its style.
             </div>
           </>
@@ -964,64 +965,60 @@ export function RightSidebar({
           {isMulti ? (
             <div className="flex flex-col gap-1 pb-4 pt-1">
               <div className="space-y-3 px-3 pb-2">
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <FieldLabel>Align</FieldLabel>
-                  <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/40 p-1.5">
+                  <div className="grid grid-cols-4 gap-1 rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 p-1.5">
                     {(
                       [
-                        ["left", "Align left", AlignHorizontalJustifyStart],
-                        ["center", "Align center", AlignHorizontalJustifyCenter],
-                        ["right", "Align right", AlignHorizontalJustifyEnd],
-                        ["distribute-x", "Equal horizontal gaps", AlignHorizontalSpaceBetween],
-                        ["top", "Align top", AlignVerticalJustifyStart],
-                        ["middle", "Align middle", AlignVerticalJustifyCenter],
-                        ["bottom", "Align bottom", AlignVerticalJustifyEnd],
-                        ["distribute-y", "Equal vertical gaps", AlignVerticalSpaceBetween],
+                        ["left", "Left", AlignHorizontalJustifyStart],
+                        ["center", "Center", AlignHorizontalJustifyCenter],
+                        ["right", "Right", AlignHorizontalJustifyEnd],
+                        ["distribute-x", "Spread X", AlignHorizontalSpaceBetween],
+                        ["top", "Top", AlignVerticalJustifyStart],
+                        ["middle", "Middle", AlignVerticalJustifyCenter],
+                        ["bottom", "Bottom", AlignVerticalJustifyEnd],
+                        ["distribute-y", "Spread Y", AlignVerticalSpaceBetween],
                       ] as const
                     ).map(([mode, label, Icon]) => (
-                      <Button
+                      <button
                         key={mode}
                         type="button"
-                        variant="ghost"
-                        size="icon"
                         title={label}
-                        className={`size-8 ${btnRound}`}
                         onClick={() => alignSelection(mode)}
+                        className="flex h-9 flex-col items-center justify-center gap-0.5 rounded-xl text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
                       >
                         <Icon className="size-4" />
-                      </Button>
+                        <span className="text-[9px] font-medium leading-none">{label}</span>
+                      </button>
                     ))}
                   </div>
                 </div>
-                <div className="flex gap-1.5">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className={`h-8 flex-1 text-[13px] ${btnRound}`}
-                    onClick={groupSelected}
-                  >
-                    Group
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className={`h-8 flex-1 bg-muted/40 text-[13px] ${btnRound}`}
-                    onClick={copyStyle}
-                  >
-                    Copy style
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className={`h-8 flex-1 bg-muted/40 text-[13px] ${btnRound}`}
-                    disabled={!copiedStyle}
-                    onClick={pasteStyle}
-                  >
-                    Paste
-                  </Button>
+                <div className="space-y-1.5">
+                  <FieldLabel>Actions</FieldLabel>
+                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
+                    <button
+                      type="button"
+                      onClick={groupSelected}
+                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
+                    >
+                      Group
+                    </button>
+                    <button
+                      type="button"
+                      onClick={copyStyle}
+                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
+                    >
+                      Copy
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!copiedStyle}
+                      onClick={pasteStyle}
+                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80 disabled:pointer-events-none disabled:opacity-35"
+                    >
+                      Paste
+                    </button>
+                  </div>
                 </div>
               </div>
               {formValues && (
@@ -1162,83 +1159,82 @@ export function RightSidebar({
           ) : !formValues ? null : (
             <div className="flex flex-col gap-1 pb-4 pt-1">
               <div className="space-y-2 px-3 pb-2">
-                <div className="flex items-center gap-1.5">
-                  <ToolCluster className="flex-1 justify-center">
-                    <Button
+                <div className="space-y-1.5">
+                  <FieldLabel>Position</FieldLabel>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className={`size-8 ${btnRound}`}
                       onClick={handleCenterH}
-                      title="Center horizontally"
+                      className="flex h-10 items-center justify-center gap-2 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
                     >
-                      <AlignHorizontalDistributeCenter className="size-4" />
-                    </Button>
-                    <Button
+                      <AlignHorizontalDistributeCenter className="size-4 shrink-0" />
+                      Center X
+                    </button>
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className={`size-8 ${btnRound}`}
                       onClick={handleCenterV}
-                      title="Center vertically"
+                      className="flex h-10 items-center justify-center gap-2 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
                     >
-                      <AlignVerticalDistributeCenter className="size-4" />
-                    </Button>
-                    <Button
+                      <AlignVerticalDistributeCenter className="size-4 shrink-0" />
+                      Center Y
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <FieldLabel>Layer</FieldLabel>
+                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className={`size-8 ${btnRound}`}
                       onClick={handleBringForward}
-                      title="Bring forward"
+                      className="flex h-full flex-1 items-center justify-center gap-1.5 rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
                     >
-                      <BringToFront className="size-4" />
-                    </Button>
-                    <Button
+                      <BringToFront className="size-3.5" />
+                      Forward
+                    </button>
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className={`size-8 ${btnRound}`}
                       onClick={handleSendBackwards}
-                      title="Send backwards"
+                      className="flex h-full flex-1 items-center justify-center gap-1.5 rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
                     >
-                      <SendToBack className="size-4" />
-                    </Button>
-                  </ToolCluster>
+                      <SendToBack className="size-3.5" />
+                      Back
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-1.5">
-                  {canUngroup(selectedObject) && (
-                    <Button
+
+                <div className="space-y-1.5">
+                  <FieldLabel>Style</FieldLabel>
+                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
+                    <button
                       type="button"
-                      variant="secondary"
-                      size="sm"
-                      className={`h-8 flex-1 text-[13px] ${btnRound}`}
-                      onClick={ungroupSelected}
+                      onClick={copyStyle}
+                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
                     >
-                      Ungroup
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className={`h-8 flex-1 bg-muted/40 text-[13px] ${btnRound}`}
-                    onClick={copyStyle}
-                  >
-                    Copy style
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className={`h-8 flex-1 bg-muted/40 text-[13px] ${btnRound}`}
-                    disabled={!copiedStyle}
-                    onClick={pasteStyle}
-                  >
-                    Paste
-                  </Button>
+                      Copy
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!copiedStyle}
+                      onClick={pasteStyle}
+                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80 disabled:pointer-events-none disabled:opacity-35"
+                    >
+                      Paste
+                    </button>
+                  </div>
                 </div>
-                {canImportImage && (
+
+                {canUngroup(selectedObject) ? (
+                  <button
+                    type="button"
+                    onClick={ungroupSelected}
+                    className="flex h-10 w-full items-center justify-center rounded-full bg-muted/60 dark:bg-muted/25 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
+                  >
+                    {isCode ? "Break code block" : "Break group"}
+                  </button>
+                ) : null}
+
+                {canImportImage && !isImage ? (
                   <>
                     <input
                       type="file"
@@ -1251,18 +1247,24 @@ export function RightSidebar({
                       type="button"
                       variant="secondary"
                       size="sm"
-                      className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
+                      className={`h-10 w-full justify-center gap-2 text-[13px] ${btnRound}`}
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <Upload className="size-4" />
-                      Import image
+                      Fill with image
                     </Button>
                   </>
-                )}
+                ) : null}
               </div>
 
-              {codeGroup ? (
-                  <CodeBlockInspector group={codeGroup} />
+              {codeGroup ? <CodeBlockInspector group={codeGroup} /> : null}
+
+              {(isImage || canImportImage) && selectedObject ? (
+                <InspectorAssets
+                  target={selectedObject}
+                  isImage={isImage}
+                  canFill={canImportImage}
+                />
               ) : null}
 
               {isImage && (

@@ -199,16 +199,16 @@ export function SidebarFilters() {
       className="gap-3 overflow-hidden p-1.5 text-[13px]"
     >
       <div className="flex items-center gap-1">
-        <TabsList className="grid h-8 min-w-0 flex-1 grid-cols-2 rounded-full">
+        <TabsList className="grid h-11 min-w-0 flex-1 grid-cols-2 rounded-full bg-muted/60 p-1 group-data-horizontal/tabs:h-11 dark:bg-muted/25">
           <TabsTrigger
             value="slide"
-            className="rounded-full text-[13px] shadow-none data-active:border-transparent dark:data-active:border-transparent"
+            className="rounded-full text-[13px] font-medium shadow-none data-active:border-transparent data-active:bg-background data-active:text-foreground dark:data-active:border-transparent dark:data-active:bg-background"
           >
             Slide
           </TabsTrigger>
           <TabsTrigger
             value="image"
-            className="rounded-full text-[13px] shadow-none data-active:border-transparent dark:data-active:border-transparent"
+            className="rounded-full text-[13px] font-medium shadow-none data-active:border-transparent data-active:bg-background data-active:text-foreground dark:data-active:border-transparent dark:data-active:bg-background"
           >
             Image
           </TabsTrigger>

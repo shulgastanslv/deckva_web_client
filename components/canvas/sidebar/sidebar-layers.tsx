@@ -255,8 +255,10 @@ export function SidebarLayers() {
               onDragEnd={endDrag}
               onClick={(event) => select(obj, event.shiftKey)}
               className={cn(
-                "group/row flex h-7 cursor-pointer items-center gap-1 rounded-lg pr-1 transition-colors",
-                active ? "bg-muted text-foreground" : "hover:bg-muted/60",
+                "group/row flex h-9 cursor-pointer items-center gap-1.5 rounded-xl px-1 pr-1.5 transition-colors",
+                active
+                  ? "bg-muted/80 text-foreground dark:bg-muted/50"
+                  : "hover:bg-muted/60 dark:hover:bg-muted/30",
                 hidden && "opacity-50",
                 mark === "inside" && "ring-1 ring-foreground",
               )}
@@ -277,12 +279,12 @@ export function SidebarLayers() {
                   });
                 }}
                 className={cn(
-                  "flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground",
+                  "flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground",
                   children && "hover:bg-background/80 hover:text-foreground",
                   !children && "invisible",
                 )}
               >
-                <ChevronRight className={cn("size-3 transition-transform", open && "rotate-90")} />
+                <ChevronRight className={cn("size-3.5 transition-transform", open && "rotate-90")} />
               </button>
 
               <div
@@ -293,9 +295,9 @@ export function SidebarLayers() {
                   event.stopPropagation();
                   startRename(obj);
                 }}
-                className="flex min-w-0 flex-1 items-center gap-1"
+                className="flex min-w-0 flex-1 items-center gap-1.5"
               >
-              <Icon className="size-3.5 shrink-0 text-muted-foreground" />
+              <Icon className="size-4 shrink-0 text-muted-foreground" />
 
               {renaming ? (
                 <input
@@ -316,14 +318,16 @@ export function SidebarLayers() {
                     }
                   }}
                   placeholder={layerLabel(obj)}
-                  className="h-5 min-w-0 flex-1 rounded-md bg-background px-1 text-[13px] text-foreground outline-none ring-1 ring-border"
+                  className="h-7 min-w-0 flex-1 rounded-lg bg-background px-1.5 text-[13px] text-foreground outline-none ring-1 ring-border"
                 />
               ) : (
-                <span className="min-w-0 flex-1 truncate max-w-40">{layerLabel(obj)}</span>
+                <span className="min-w-0 max-w-40 flex-1 truncate text-[13px] font-medium">
+                  {layerLabel(obj)}
+                </span>
               )}
               </div>
 
-              <div className={cn("flex shrink-0 items-center", !hidden && !locked && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100")}>
+              <div className={cn("flex shrink-0 items-center gap-0.5", !hidden && !locked && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100")}>
                 <button
                   type="button"
                   aria-label={hidden ? "Show" : "Hide"}
@@ -333,11 +337,11 @@ export function SidebarLayers() {
                     run(() => setLayerVisible(obj, hidden));
                   }}
                   className={cn(
-                    "flex size-5 items-center justify-center rounded-md text-muted-foreground hover:text-foreground",
+                    "flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-background/70 hover:text-foreground",
                     !hidden && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100",
                   )}
                 >
-                  {hidden ? <EyeOff className="size-3" /> : <Eye className="size-3" />}
+                  {hidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                 </button>
                 <button
                   type="button"
@@ -348,11 +352,11 @@ export function SidebarLayers() {
                     run(() => setLayerLocked(obj, !locked));
                   }}
                   className={cn(
-                    "flex size-5 items-center justify-center rounded-md text-muted-foreground hover:text-foreground",
+                    "flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-background/70 hover:text-foreground",
                     !locked && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100",
                   )}
                 >
-                  {locked ? <Lock className="size-3" /> : <Unlock className="size-3" />}
+                  {locked ? <Lock className="size-3.5" /> : <Unlock className="size-3.5" />}
                 </button>
 
                 <DropdownMenu>
@@ -362,7 +366,7 @@ export function SidebarLayers() {
                       aria-label="Layer actions"
                       onClick={(event) => event.stopPropagation()}
                       onPointerDown={(event) => event.stopPropagation()}
-                      className="flex size-5 items-center justify-center rounded-md text-muted-foreground opacity-0 hover:text-foreground group-hover/row:opacity-100 data-[state=open]:opacity-100"
+                      className="flex size-7 items-center justify-center rounded-lg text-muted-foreground opacity-0 hover:bg-background/70 hover:text-foreground group-hover/row:opacity-100 data-[state=open]:opacity-100"
                     >
                       <MoreHorizontal className="size-3.5" />
                     </button>

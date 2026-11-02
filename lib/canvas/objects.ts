@@ -588,6 +588,108 @@ export class ObjectFactory {
     return frame;
   }
 
+  /** Device frames on this slide, left → right. */
+  listFrames(): Image[] {
+    return this.canvas
+      .getObjects()
+      .filter((obj): obj is Image => this.isFrame(obj))
+      .sort((a, b) => (a.left ?? 0) - (b.left ?? 0) || (a.top ?? 0) - (b.top ?? 0));
+  }
+
+  /** Drops screenshots into frames in left-to-right order. */
+  async fillFramesInOrder(sources: string[]) {
+    const frames = this.listFrames();
+    const n = Math.min(frames.length, sources.length);
+    for (let i = 0; i < n; i++) {
+      const frame = frames[i];
+      const source = sources[i];
+      if (!frame || !source) continue;
+      await this.fillDeviceFrame(frame, source);
+    }
+  }
+
+  /**
+   * Places `count` devices in a fitted row (or wrap) on the slide.
+   * Clears previous frames first when `replace` is true.
+   */
+  async placeDeviceRow(
+    kind: FrameKind,
+    count: number,
+    options?: { replace?: boolean; topRatio?: number },
+  ): Promise<Image[]> {
+    const n = Math.min(8, Math.max(1, Math.round(count)));
+    if (options?.replace !== false) {
+      for (const frame of this.listFrames()) this.canvas.remove(frame);
+    }
+
+    const { width, height } = this.getLogicalSize();
+    const frames: Image[] = [];
+    for (let i = 0; i < n; i++) {
+      frames.push(await this.addFrame(kind, width / 2, height / 2));
+    }
+
+    const gap = Math.max(10, width * 0.012);
+    const marginX = width * 0.05;
+    const marginTop = height * (options?.topRatio ?? 0.14);
+    const marginBottom = height * 0.08;
+    const fw = Math.max(1, frames[0]!.getScaledWidth());
+    const fh = Math.max(1, frames[0]!.getScaledHeight());
+    const fitW = (width - marginX * 2 - gap * (n - 1)) / n;
+    const fitH = height - marginTop - marginBottom;
+    const s = Math.min(fitW / fw, fitH / fh, 1);
+    const cellW = fw * s;
+    const cellH = fh * s;
+    const totalW = cellW * n + gap * (n - 1);
+    const startX = (width - totalW) / 2 + cellW / 2;
+    const cy = marginTop + cellH / 2;
+
+    frames.forEach((frame, i) => {
+      frame.set({
+        left: startX + i * (cellW + gap),
+        top: cy,
+        scaleX: (frame.scaleX || 1) * s,
+        scaleY: (frame.scaleY || 1) * s,
+        originX: "center",
+        originY: "center",
+      });
+      frame.setCoords();
+    });
+    this.canvas.discardActiveObject();
+    this.canvas.requestRenderAll();
+    return frames;
+  }
+
+  /** Phone + title for a ranked list slide (title above the device). */
+  async placeTitledDevice(
+    kind: FrameKind,
+    title: string,
+    screen?: string,
+  ): Promise<{ frame: Image; label: Textbox }> {
+    const { width, height } = this.getLogicalSize();
+    const label = this.addHeading(title || "Title", width / 2, height * 0.16);
+    label.set({
+      originX: "center",
+      originY: "center",
+      textAlign: "center",
+      width: Math.round(width * 0.82),
+    });
+    const frame = await this.addFrame(kind, width / 2, height * 0.58, screen);
+    const maxH = height * 0.62;
+    const maxW = width * 0.55;
+    const fw = Math.max(1, frame.getScaledWidth());
+    const fh = Math.max(1, frame.getScaledHeight());
+    const s = Math.min(maxW / fw, maxH / fh, 1);
+    if (s < 1) {
+      frame.set({
+        scaleX: (frame.scaleX || 1) * s,
+        scaleY: (frame.scaleY || 1) * s,
+      });
+      frame.setCoords();
+    }
+    this.canvas.requestRenderAll();
+    return { frame, label };
+  }
+
   /** Opens a file picker and fills the selected shape with that picture. */
   pickShapeImage(target?: FabricObject | null) {
     const shape = target ?? this.canvas.getActiveObject();

@@ -51,7 +51,7 @@ export function SidebarEnhance() {
           type="button"
           variant="secondary"
           size="sm"
-          className="h-9 w-full justify-start gap-2 rounded-full text-[13px]"
+          className="h-10 w-full justify-start gap-2 rounded-full bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
           disabled={!canRun}
           onClick={() => void removeBackground()}
         >
@@ -72,10 +72,10 @@ export function SidebarEnhance() {
                 disabled={Boolean(busy)}
                 onClick={() => setScale(value)}
                 className={cn(
-                  "h-8 flex-1 rounded-full text-[13px] tabular-nums transition-colors disabled:opacity-40",
+                  "h-10 flex-1 rounded-full text-[13px] font-medium tabular-nums transition-colors disabled:opacity-40",
                   scale === value
-                    ? "bg-foreground text-background"
-                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-background text-foreground"
+                    : "bg-muted/60 dark:bg-muted/25 text-muted-foreground hover:bg-muted/80 dark:hover:bg-muted/40 hover:text-foreground",
                 )}
               >
                 {value}×
@@ -86,7 +86,7 @@ export function SidebarEnhance() {
             type="button"
             variant="secondary"
             size="sm"
-            className="h-9 w-full justify-start gap-2 rounded-full text-[13px]"
+            className="h-10 w-full justify-start gap-2 rounded-full bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
             disabled={!canRun}
             onClick={() => void upscale()}
           >
@@ -103,7 +103,7 @@ export function SidebarEnhance() {
           type="button"
           variant="secondary"
           size="sm"
-          className="h-9 w-full justify-start gap-2 rounded-full text-[13px]"
+          className="h-10 w-full justify-start gap-2 rounded-full bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
           disabled={!canRun}
           onClick={() => void magicLayer()}
         >

@@ -41,7 +41,7 @@ function PillSlider({
   return (
     <div
       className={cn(
-        "relative flex h-10 w-full items-center overflow-hidden rounded-full bg-muted/20",
+        "relative flex h-10 w-full items-center overflow-hidden rounded-full bg-muted/60 dark:bg-muted/25",
         disabled && "opacity-50",
         className,
       )}

@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SidebarMockups } from "@/components/canvas/sidebar/sidebar-mockups";
 
 const NUMBER_STYLES: readonly SlideNumberStyle[] = ["1", "01", "1 / 8"];
 
@@ -113,7 +114,7 @@ function CornerSelect({
         if (isCorner(next)) onChange(next);
       }}
     >
-      <SelectTrigger className="h-8 w-[7.25rem] shrink-0 rounded-full px-2.5 text-[13px]" aria-label="Position">
+      <SelectTrigger className="h-10 w-[7.25rem] shrink-0 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Position">
         <SelectValue />
       </SelectTrigger>
       <SelectContent position="popper" align="end">
@@ -128,9 +129,9 @@ function CornerSelect({
 }
 
 const actionButton =
-  "h-8 rounded-full bg-muted px-2.5 text-[13px] text-foreground/80 transition-colors hover:bg-muted/60 disabled:pointer-events-none disabled:opacity-40 flex items-center justify-center gap-1";
+  "h-10 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40 disabled:pointer-events-none disabled:opacity-40 flex items-center justify-center gap-1.5";
 const fieldInput =
-  "h-8 w-full rounded-full bg-muted/40 px-3 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/60";
+  "h-10 w-full rounded-full bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/80 dark:focus:bg-muted/40";
 
 export function SidebarTools() {
   const manager = useCanvasManager();
@@ -268,6 +269,7 @@ export function SidebarTools() {
 
   return (
     <div className="flex flex-col text-[13px] text-foreground">
+      <SidebarMockups />
 
       <CollapsibleGroup id="tools-find" title="Find">
         <div className="space-y-1.5">
@@ -319,7 +321,7 @@ export function SidebarTools() {
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="One line, one slide"
           rows={3}
-          className="w-full resize-none rounded-xl bg-muted/30 px-3 py-2 text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground focus:bg-muted/40"
+          className="w-full resize-none rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 px-3.5 py-3 text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground focus:bg-muted/80 dark:focus:bg-muted/40"
         />
         <div className="grid grid-cols-3 gap-1">
           {TEXT_STYLES.map((style) => (
@@ -328,10 +330,10 @@ export function SidebarTools() {
               type="button"
               onClick={() => setSlideStyle(style.id)}
               className={cn(
-                "h-7 rounded-full px-1 text-[13px] transition-colors",
+                "h-10 rounded-full px-1 text-[13px] font-medium transition-colors",
                 slideStyle === style.id
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                  ? "bg-background text-foreground"
+                  : "bg-muted/60 dark:bg-muted/25 text-muted-foreground hover:bg-muted/80 dark:hover:bg-muted/40 hover:text-foreground",
               )}
             >
               {style.label}
@@ -358,7 +360,7 @@ export function SidebarTools() {
                 if (next === "1" || next === "01" || next === "1 / 8") setNumberStyle(next);
               }}
             >
-              <SelectTrigger className="h-8 min-w-0 flex-1 rounded-full px-2.5 text-[13px]" aria-label="Slide number">
+              <SelectTrigger className="h-10 min-w-0 flex-1 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Slide number">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -461,7 +463,7 @@ export function SidebarTools() {
         <div className="space-y-2">
           <div className="flex gap-1">
             <Select value={swipeVariant} onValueChange={setSwipeVariant}>
-              <SelectTrigger className="h-8 min-w-0 flex-1 rounded-full px-2.5 text-[13px]" aria-label="Swipe">
+              <SelectTrigger className="h-10 min-w-0 flex-1 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Swipe">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" className="max-h-72">
@@ -489,7 +491,7 @@ export function SidebarTools() {
         <div className="space-y-1.5">
           <div className="flex gap-1">
             <Select value={socialNetwork} onValueChange={setSocialNetwork}>
-              <SelectTrigger className="h-8 min-w-0 flex-1 rounded-full px-2.5 text-[13px]" aria-label="Network">
+              <SelectTrigger className="h-10 min-w-0 flex-1 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Network">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" className="max-h-72">

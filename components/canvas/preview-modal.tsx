@@ -6,10 +6,15 @@ import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useSlidesController } from "@/context/canvas-manager";
 import { Canvas as FabricCanvas } from "fabric";
-import { IPhoneMockup } from "react-device-mockup";
 import { withRemoteImageCors } from "@/lib/canvas/image-cors";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
+import { cn } from "@/lib/utils";
+import {
+  SOCIAL_PREVIEW_NETWORKS,
+  SocialPhonePreview,
+  type SocialPreviewNetwork,
+} from "@/components/canvas/social-phone-preview";
 
 interface PreviewModalProps {
   open: boolean;
@@ -33,6 +38,7 @@ const THUMB_LONG_EDGE = 280;
 export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProps) {
   const slides = useCanvasStore((s) => s.slides);
   const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
+  const projectTitle = useCanvasStore((s) => s.projectTitle);
   const updateSlideThumbnail = useCanvasStore((s) => s.updateSlideThumbnail);
 
   const slidesController = useSlidesController();
@@ -41,7 +47,7 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
   const [snapshots, setSnapshots] = useState<SlideSnapshot[]>([]);
   const [rendering, setRendering] = useState(false);
   const [view, setView] = useState<"slides" | "phone">("slides");
-  const swipeStart = useRef<number | null>(null);
+  const [network, setNetwork] = useState<SocialPreviewNetwork>("instagram");
 
   const isMountedRef = useRef(true);
   const offscreenRef = useRef<FabricCanvas | null>(null);
@@ -49,6 +55,12 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
   const slideIds = slides.map((s) => s.id);
   const activeIdx = Math.max(0, slideIds.indexOf(activeId));
   const aspectRatio = canvasDimensions.width / canvasDimensions.height;
+  const author =
+    projectTitle
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_]+/g, "")
+      .slice(0, 18) || "deckva";
 
   useEffect(() => {
     if (!open) return;
@@ -60,7 +72,6 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
     const { width, height } = canvasDimensions;
     const longEdge = Math.max(width, height);
 
-    // Always re-render sharp previews for the modal — store thumbs are too small.
     setActiveId(initialSlideId);
     setSnapshots(
       freshSlides.map((s) => ({
@@ -198,8 +209,8 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
   const thumbH = Math.round(thumbW / aspectRatio);
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col select-none animate-in fade-in-0 duration-200">
-      <div className="grid grid-cols-3 items-center px-6 py-4 shrink-0">
+    <div className="fixed inset-0 z-50 flex animate-in fade-in-0 flex-col bg-background/95 backdrop-blur-md duration-200 select-none">
+      <div className="grid shrink-0 grid-cols-3 items-center px-6 py-4">
         <div className="flex items-center gap-3">
           {rendering && (
             <span className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
@@ -212,24 +223,26 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
           <button
             type="button"
             onClick={() => setView("slides")}
-            className={`h-7 rounded-full px-3 transition-colors ${
-              view === "slides" ? "bg-background text-foreground shadow-2xs" : "text-muted-foreground"
-            }`}
+            className={cn(
+              "h-7 rounded-full px-3 transition-colors",
+              view === "slides" ? "bg-background text-foreground" : "text-muted-foreground",
+            )}
           >
             Slides
           </button>
           <button
             type="button"
             onClick={() => setView("phone")}
-            className={`h-7 rounded-full px-3 transition-colors ${
-              view === "phone" ? "bg-background text-foreground shadow-2xs" : "text-muted-foreground"
-            }`}
+            className={cn(
+              "h-7 rounded-full px-3 transition-colors",
+              view === "phone" ? "bg-background text-foreground" : "text-muted-foreground",
+            )}
           >
             Phone
           </button>
         </div>
         <div className="flex items-center justify-self-end gap-3">
-          <span className="text-[13px] font-mono text-muted-foreground">
+          <span className="font-mono text-[13px] text-muted-foreground">
             {activeIdx + 1} / {slides.length}
           </span>
           <Button
@@ -238,90 +251,59 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
             onClick={onClose}
             className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
           >
-            <X className="w-4 h-4" />
+            <X className="size-4" />
           </Button>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center gap-4 px-8 min-h-0">
+      {view === "phone" ? (
+        <div className="flex shrink-0 justify-center px-4 pb-3">
+          <div className="flex max-w-[min(100%,42rem)] gap-0.5 overflow-x-auto rounded-full bg-muted/50 p-1">
+            {SOCIAL_PREVIEW_NETWORKS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setNetwork(item.id)}
+                className={cn(
+                  "h-8 shrink-0 rounded-full px-3 text-[12px] font-medium tracking-tight transition-colors",
+                  network === item.id
+                    ? "bg-background text-foreground"
+                    : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex min-h-0 flex-1 items-center justify-center gap-4 px-8">
         <Button
           variant="ghost"
           size="icon"
           onClick={goPrev}
           disabled={activeIdx === 0}
-          className="h-10 w-10 rounded-full shrink-0 disabled:opacity-20"
+          className="h-10 w-10 shrink-0 rounded-full disabled:opacity-20"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="size-5" />
         </Button>
 
         {view === "phone" ? (
-          <IPhoneMockup
-            screenWidth={300}
-            screenType="island"
-            frameColor="#18181b"
-            frameOnly
-            hideStatusBar
-            hideNavBar
-            className="shrink-0"
-          >
-            <div
-              className="flex h-full w-full flex-col bg-background"
-              onPointerDown={(e) => {
-                swipeStart.current = e.clientX;
-              }}
-              onPointerUp={(e) => {
-                if (swipeStart.current == null) return;
-                const dx = e.clientX - swipeStart.current;
-                swipeStart.current = null;
-                if (dx <= -36) goNext();
-                else if (dx >= 36) goPrev();
-              }}
-              onPointerCancel={() => {
-                swipeStart.current = null;
-              }}
-            >
-              <div className="flex min-h-0 flex-1 items-start justify-center px-3 pt-8">
-                <div
-                  className="relative w-full overflow-hidden bg-muted/30"
-                  style={{ aspectRatio }}
-                >
-                  {activeSnap?.loading && !activeImage ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : activeImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={activeImage}
-                      alt={`Slide ${activeIdx + 1} on phone`}
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[13px] text-muted-foreground">Empty slide</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center justify-center gap-1 px-3 pb-5 pt-2.5">
-                {snapshots.map((snap, i) => (
-                  <button
-                    key={snap.id}
-                    type="button"
-                    aria-label={`Slide ${i + 1}`}
-                    onClick={() => setActiveId(snap.id)}
-                    className={`h-1.5 rounded-full transition-all ${
-                      snap.id === activeId ? "w-4 bg-foreground" : "w-1.5 bg-foreground/25"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </IPhoneMockup>
+          <SocialPhonePreview
+            network={network}
+            image={activeImage}
+            loading={activeSnap?.loading}
+            aspectRatio={aspectRatio}
+            slideIndex={activeIdx}
+            slideTotal={Math.max(slides.length, 1)}
+            author={author}
+            onPrev={goPrev}
+            onNext={goNext}
+          />
         ) : (
           <div
-            className="relative rounded-xl overflow-hidden shadow-2xl ring-1 ring-border/50 bg-muted/20 transition-all duration-200"
+            className="relative overflow-hidden rounded-xl bg-muted/20 ring-1 ring-border/50 transition-all duration-200"
             style={{
               aspectRatio,
               height: aspectRatio < 1 ? "min(72vh, 680px)" : undefined,
@@ -331,19 +313,19 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
             }}
           >
             {activeSnap?.loading && !activeImage ? (
-              <div className="absolute inset-0 bg-muted/40 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/40">
+                <Loader2 className="size-8 animate-spin text-muted-foreground" />
               </div>
             ) : activeImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={activeImage}
                 alt={`Slide ${activeIdx + 1}`}
-                className="w-full h-full object-contain"
+                className="h-full w-full object-contain"
                 draggable={false}
               />
             ) : (
-              <div className="absolute inset-0 bg-background flex items-center justify-center border border-dashed border-border/60">
+              <div className="absolute inset-0 flex items-center justify-center border border-dashed border-border/60 bg-background">
                 <span className="text-[13px] text-muted-foreground">Empty slide</span>
               </div>
             )}
@@ -355,13 +337,13 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
           size="icon"
           onClick={goNext}
           disabled={activeIdx === slides.length - 1}
-          className="h-10 w-10 rounded-full shrink-0 disabled:opacity-20"
+          className="h-10 w-10 shrink-0 rounded-full disabled:opacity-20"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="size-5" />
         </Button>
       </div>
 
-      <div className="shrink-0 py-4 px-6 flex items-center justify-center gap-2 overflow-x-auto border-t border-border/40">
+      <div className="flex shrink-0 items-center justify-center gap-2 overflow-x-auto border-t border-border/40 px-6 py-4">
         {snapshots.map((snap, i) => {
           const isActive = snap.id === activeId;
           const stripSrc = snap.thumbnail ?? snap.preview;
@@ -370,27 +352,28 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
               key={snap.id}
               type="button"
               onClick={() => setActiveId(snap.id)}
-              className={`relative shrink-0 rounded-md overflow-hidden transition-all duration-150 ring-2 ${
+              className={cn(
+                "relative shrink-0 overflow-hidden rounded-md ring-2 transition-all duration-150",
                 isActive
-                  ? "ring-primary shadow-sm scale-105"
-                  : "ring-transparent opacity-50 hover:opacity-100 hover:ring-border"
-              }`}
+                  ? "scale-105 ring-foreground"
+                  : "ring-transparent opacity-50 hover:opacity-100 hover:ring-border",
+              )}
               style={{ width: thumbW, height: thumbH }}
             >
               {snap.loading && !stripSrc ? (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                <div className="flex h-full w-full items-center justify-center bg-muted">
+                  <Loader2 className="size-3 animate-spin text-muted-foreground" />
                 </div>
               ) : stripSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={stripSrc}
                   alt={`Preview ${i + 1}`}
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                   draggable={false}
                 />
               ) : (
-                <div className="w-full h-full bg-muted" />
+                <div className="h-full w-full bg-muted" />
               )}
             </button>
           );

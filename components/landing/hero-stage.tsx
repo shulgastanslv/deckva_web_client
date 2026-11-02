@@ -1,17 +1,10 @@
 "use client";
 
-import type { ReactNode } from "react";
-
 import { ThreadsUI, type ThreadsPostData } from "@/components/landing/threads-ui";
+import { PhoneFrame } from "@/components/canvas/phone-frame";
 import { cn } from "@/lib/utils";
 
-/** Front-facing iPhone 17 Pro, silver. Screen hole from the frame's template. */
-const IPHONE_17_PRO = {
-  src: "/mockups/iphone-17-pro-silver.png",
-  width: 1406,
-  height: 2822,
-  screen: { x: 100, y: 100, width: 1206, height: 2622 },
-} as const;
+export { PhoneFrame };
 
 /** @deprecated Prefer inserting frames via ThreadsUI `media` */
 export const THREAD_SHOTS = [
@@ -51,46 +44,6 @@ const HERO_POST_A: ThreadsPostData[] = [
   },
 ];
 
-export function PhoneFrame({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-  size?: "default" | "hero";
-}) {
-  const { width, height, screen } = IPHONE_17_PRO;
-  // Glass corner is a circle (~230px on the source frame). A single % radius
-  // uses the tall side for the vertical curve and pulls the UI off the bezel.
-  const bleed = 12;
-  return (
-    <div
-      className={cn("relative mx-auto w-[270px]", className)}
-      style={{ aspectRatio: `${width} / ${height}` }}
-    >
-      <div
-        className="absolute overflow-hidden bg-white"
-        style={{
-          left: `${((screen.x - bleed) / width) * 100}%`,
-          top: `${((screen.y - bleed) / height) * 100}%`,
-          width: `${((screen.width + bleed * 2) / width) * 100}%`,
-          height: `${((screen.height + bleed * 2) / height) * 100}%`,
-          borderRadius: "17.5% / 8.1%",
-        }}
-      >
-        <div className="h-full w-full">{children}</div>
-      </div>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={IPHONE_17_PRO.src}
-        alt=""
-        className="pointer-events-none absolute inset-0 z-10 h-full w-full select-none"
-        draggable={false}
-      />
-    </div>
-  );
-}
-
 /** Threads phone with editable posts — pass your own `posts` to swap content. */
 export function ThreadsPhone({
   posts = HERO_POST_A,
@@ -104,7 +57,7 @@ export function ThreadsPhone({
   compact?: boolean;
 }) {
   return (
-    <PhoneFrame className={className} size={size}>
+    <PhoneFrame className={cn("w-[270px]", className)}>
       <ThreadsUI
         posts={posts}
         compact={compact ?? false}

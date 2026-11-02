@@ -74,9 +74,30 @@ model User {
   feedbacks       Feedback[]
   paymentMethods  PaymentMethod[]
   billingPayments BillingPayment[]
+  mediaAssets     MediaAsset[]
 
   @@index([activeOrganizationId])
   @@index([subscriptionStatus])
+}
+
+/// User image library for the editor Assets panel (logos, screenshots, fills).
+model MediaAsset {
+  id        String   @id @default(cuid())
+  name      String
+  dataUrl   String   @db.Text
+  mimeType  String   @default("image/png")
+  tags      String[] @default([])
+  width     Int?
+  height    Int?
+  bytes     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, updatedAt])
 }
 
 model Organization {

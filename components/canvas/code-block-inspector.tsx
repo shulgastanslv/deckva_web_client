@@ -5,14 +5,8 @@ import type { Group } from "fabric";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { PillSlider } from "@/components/ui/pill-slider";
+import { PillSelect } from "@/components/ui/pill-select";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   CODE_LANGS,
   CODE_PADDINGS,
@@ -70,96 +64,78 @@ export function CodeBlockInspector({ group }: { group: Group }) {
     });
   };
 
-  const activeTheme = CODE_THEMES.find((theme) => theme.id === draft.theme);
+  const themeOptions = CODE_THEMES.map((theme) => ({
+    value: theme.id,
+    label: theme.label,
+    leading: (
+      <span
+        className="size-3.5 shrink-0 rounded-full"
+        style={{
+          background: `linear-gradient(140deg, ${theme.background.from}, ${theme.background.to})`,
+        }}
+      />
+    ),
+  }));
+
+  const langOptions = CODE_LANGS.map((lang) => ({
+    value: lang.id,
+    label: lang.label,
+  }));
 
   return (
     <CollapsibleGroup id="rs-code" title="Code" defaultOpen>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         <textarea
           value={draft.code}
           onChange={(e) => patch({ code: e.target.value })}
           rows={8}
           spellCheck={false}
-          className="w-full resize-y rounded-2xl bg-muted/40 px-3 py-2.5 font-mono text-[12px] leading-relaxed outline-none placeholder:text-muted-foreground focus:bg-muted/60"
+          className="w-full resize-y rounded-[1.25rem] bg-muted/20 px-3.5 py-3 font-mono text-[12px] leading-relaxed outline-none placeholder:text-muted-foreground focus:bg-muted/30"
           placeholder="Paste your code…"
           aria-label="Code"
         />
         <p className="px-1 text-[12px] text-muted-foreground">
-          Tip: double-click the block (or empty canvas) to edit in a larger editor.
+          Double-click the block for a larger editor.
         </p>
 
-        <Select
+        <PillSelect
+          label="Theme"
           value={draft.theme}
           onValueChange={(next) => patch({ theme: next as CodeThemeId }, true)}
-        >
-          <SelectTrigger className="h-10 rounded-full  w-full px-3 text-[13px]" aria-label="Theme">
-            <SelectValue placeholder="Theme"> 
-              {activeTheme ? (
-                <span className="flex items-center gap-2">
-                  <span
-                    className="size-3.5 shrink-0 rounded-full"
-                    style={{
-                      background: `linear-gradient(140deg, ${activeTheme.background.from}, ${activeTheme.background.to})`,
-                    }}
-                  />
-                  {activeTheme.label}
-                </span>
-              ) : null}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent position="popper" className="max-h-80">
-            {CODE_THEMES.map((theme) => (
-              <SelectItem key={theme.id} value={theme.id} className="text-[13px]">
-                <span className="flex items-center gap-2">
-                  <span
-                    className="size-3.5 shrink-0 rounded-full"
-                    style={{
-                      background: `linear-gradient(140deg, ${theme.background.from}, ${theme.background.to})`,
-                    }}
-                  />
-                  {theme.label}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          options={themeOptions}
+          contentClassName="max-h-80"
+        />
 
-        <div className="grid grid-cols-2 gap-1.5">
-          <Select
-            value={draft.lang}
-            onValueChange={(next) => patch({ lang: next as CodeLang }, true)}
-          >
-            <SelectTrigger className="h-9 rounded-full px-3 text-[13px]" aria-label="Language">
-              <SelectValue placeholder="Language" />
-            </SelectTrigger>
-            <SelectContent position="popper" className="max-h-72">
-              {CODE_LANGS.map((lang) => (
-                <SelectItem key={lang.id} value={lang.id} className="text-[13px]">
-                  {lang.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <PillSelect
+          label="Language"
+          value={draft.lang}
+          onValueChange={(next) => patch({ lang: next as CodeLang }, true)}
+          options={langOptions}
+        />
 
+        <label className="relative flex h-10 w-full items-center overflow-hidden rounded-full bg-muted/20">
+          <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3.5 text-[13px] font-medium text-foreground/85">
+            Filename
+          </span>
           <input
             value={draft.filename}
             onChange={(e) => patch({ filename: e.target.value })}
             placeholder="Untitled"
-            aria-label="Title"
-            className="h-9 w-full rounded-full bg-muted/40 px-3 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/60"
+            aria-label="Filename"
+            className="h-full w-full bg-transparent pr-3.5 pl-[5.75rem] text-right text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
           />
-        </div>
+        </label>
 
         <div className="space-y-1.5">
           <p className="px-1 text-[12px] font-medium text-muted-foreground">Padding</p>
-          <div className="flex rounded-full bg-muted/40 p-0.5">
+          <div className="flex h-10 rounded-full bg-muted/20 p-1">
             {CODE_PADDINGS.map((pad) => (
               <button
                 key={pad}
                 type="button"
                 onClick={() => patch({ padding: pad as CodePadding }, true)}
                 className={cn(
-                  "h-8 flex-1 rounded-full text-[13px] font-medium transition-colors",
+                  "h-full flex-1 rounded-full text-[13px] font-medium transition-colors",
                   draft.padding === pad
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -190,41 +166,26 @@ export function CodeBlockInspector({ group }: { group: Group }) {
           onValueChange={(radius) => patch({ radius })}
         />
 
-        <label className="flex items-center justify-between gap-2 rounded-full bg-muted/40 px-3 py-2">
-          <span className="text-[13px] text-foreground/85">Dark mode</span>
-          <Switch
-            checked={draft.darkMode}
-            onCheckedChange={(darkMode) => patch({ darkMode }, true)}
-          />
-        </label>
-        <label className="flex items-center justify-between gap-2 rounded-full bg-muted/40 px-3 py-2">
-          <span className="text-[13px] text-foreground/85">Background</span>
-          <Switch
-            checked={draft.showBackground}
-            onCheckedChange={(showBackground) => patch({ showBackground }, true)}
-          />
-        </label>
-        <label className="flex items-center justify-between gap-2 rounded-full bg-muted/40 px-3 py-2">
-          <span className="text-[13px] text-foreground/85">Transparent</span>
-          <Switch
-            checked={draft.transparent}
-            onCheckedChange={(transparent) => patch({ transparent }, true)}
-          />
-        </label>
-        <label className="flex items-center justify-between gap-2 rounded-full bg-muted/40 px-3 py-2">
-          <span className="text-[13px] text-foreground/85">Window controls</span>
-          <Switch
-            checked={draft.showChrome}
-            onCheckedChange={(showChrome) => patch({ showChrome }, true)}
-          />
-        </label>
-        <label className="flex items-center justify-between gap-2 rounded-full bg-muted/40 px-3 py-2">
-          <span className="text-[13px] text-foreground/85">Line numbers</span>
-          <Switch
-            checked={draft.showLineNumbers}
-            onCheckedChange={(showLineNumbers) => patch({ showLineNumbers }, true)}
-          />
-        </label>
+        {(
+          [
+            ["Dark mode", "darkMode"],
+            ["Background", "showBackground"],
+            ["Transparent", "transparent"],
+            ["Window controls", "showChrome"],
+            ["Line numbers", "showLineNumbers"],
+          ] as const
+        ).map(([label, key]) => (
+          <label
+            key={key}
+            className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted/20 px-3.5"
+          >
+            <span className="text-[13px] font-medium text-foreground/85">{label}</span>
+            <Switch
+              checked={draft[key]}
+              onCheckedChange={(value) => patch({ [key]: value }, true)}
+            />
+          </label>
+        ))}
       </div>
     </CollapsibleGroup>
   );

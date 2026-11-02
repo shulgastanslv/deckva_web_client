@@ -12,20 +12,37 @@ import {
   type BackgroundPatternId,
 } from "@/lib/canvas/background-patterns";
 
-function PatternSwatch({ id }: { id: BackgroundPatternId }) {
+function PatternSwatch({
+  id,
+  ink = "#52525b",
+  paper = "#f4f4f5",
+}: {
+  id: BackgroundPatternId;
+  ink?: string;
+  paper?: string;
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = ref.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-    const pattern = ctx.createPattern(drawPatternTile(id, "#f4f4f4"), "repeat");
+    const pattern = ctx.createPattern(drawPatternTile(id, ink), "repeat");
     if (!pattern) return;
+    ctx.fillStyle = paper;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = pattern;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }, [id]);
+  }, [id, ink, paper]);
 
-  return <canvas ref={ref} width={96} height={64} className="h-full w-full" />;
+  return (
+    <canvas
+      ref={ref}
+      width={96}
+      height={96}
+      className="pointer-events-none size-full scale-110"
+    />
+  );
 }
 
 export function BackgroundPattern() {
@@ -37,6 +54,8 @@ export function BackgroundPattern() {
   const [patternOpacity, setPatternOpacity] = useState(0.28);
   const [patternColor, setPatternColor] = useState("#1a1a1a");
   const colorDirty = useRef(false);
+
+  const active = BACKGROUND_PATTERNS.find((pattern) => pattern.id === patternId) ?? null;
 
   const paintPattern = (
     id: BackgroundPatternId,
@@ -54,33 +73,39 @@ export function BackgroundPattern() {
   };
 
   return (
-    <div className="space-y-1.5">
-      <div className="grid grid-cols-4 gap-1.5">
-        {BACKGROUND_PATTERNS.map((pattern) => (
-          <button
-            key={pattern.id}
-            type="button"
-            disabled={!manager}
-            title={pattern.label}
-            onClick={() => paintPattern(pattern.id, patternScale, patternOpacity, patternColor, true)}
-            className={cn(
-              "overflow-hidden rounded-lg border bg-background transition-colors hover:border-foreground/30 disabled:pointer-events-none disabled:opacity-40",
-              patternId === pattern.id ? "border-foreground/50" : "border-border/60",
-            )}
-          >
-            <span className="block aspect-[3/2] w-full">
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-4 gap-2">
+        {BACKGROUND_PATTERNS.map((pattern) => {
+          const selected = patternId === pattern.id;
+          return (
+            <button
+              key={pattern.id}
+              type="button"
+              disabled={!manager}
+              title={pattern.label}
+              aria-label={pattern.label}
+              aria-pressed={selected}
+              onClick={() =>
+                paintPattern(pattern.id, patternScale, patternOpacity, patternColor, true)
+              }
+              className={cn(
+                "relative aspect-square overflow-hidden rounded-full bg-muted/40 transition-transform disabled:pointer-events-none disabled:opacity-40",
+                "hover:scale-105 active:scale-95",
+                selected && "outline outline-2 outline-offset-2 outline-foreground",
+              )}
+            >
               <PatternSwatch id={pattern.id} />
-            </span>
-            <span className="block truncate px-1 py-1 text-center text-[10px] leading-none text-muted-foreground">
-              {pattern.label}
-            </span>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
-      {patternId ? (
-        <div className="flex flex-col gap-1.5 px-0.5 pt-1">
+
+      {active ? (
+        <div className="flex flex-col gap-2.5">
           <div className="flex items-center gap-2">
-            <span className="w-9 shrink-0 text-[10px] text-muted-foreground">Color</span>
+            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground/85">
+              {active.label}
+            </span>
             <ColorPicker
               compact
               value={patternColor}
@@ -88,7 +113,7 @@ export function BackgroundPattern() {
               onChange={(color) => {
                 colorDirty.current = true;
                 setPatternColor(color);
-                paintPattern(patternId, patternScale, patternOpacity, color, false);
+                paintPattern(active.id, patternScale, patternOpacity, color, false);
               }}
               onCommit={() => {
                 if (!colorDirty.current) return;
@@ -111,10 +136,10 @@ export function BackgroundPattern() {
             formatValue={(n) => n.toFixed(2)}
             onValueChange={(scale) => {
               setPatternScale(scale);
-              paintPattern(patternId, scale, patternOpacity, patternColor, false);
+              paintPattern(active.id, scale, patternOpacity, patternColor, false);
             }}
             onValueCommit={(scale) =>
-              paintPattern(patternId, scale, patternOpacity, patternColor, true)
+              paintPattern(active.id, scale, patternOpacity, patternColor, true)
             }
           />
           <PillSlider
@@ -126,14 +151,18 @@ export function BackgroundPattern() {
             formatValue={(n) => n.toFixed(2)}
             onValueChange={(opacity) => {
               setPatternOpacity(opacity);
-              paintPattern(patternId, patternScale, opacity, patternColor, false);
+              paintPattern(active.id, patternScale, opacity, patternColor, false);
             }}
             onValueCommit={(opacity) =>
-              paintPattern(patternId, patternScale, opacity, patternColor, true)
+              paintPattern(active.id, patternScale, opacity, patternColor, true)
             }
           />
         </div>
-      ) : null}
+      ) : (
+        <p className="px-0.5 text-[12px] leading-snug text-muted-foreground">
+          Pick a texture to overlay on the current fill.
+        </p>
+      )}
     </div>
   );
 }

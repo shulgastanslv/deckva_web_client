@@ -59,10 +59,8 @@ export function SidebarElements() {
             if (file) addImageFromFile(file);
           }}
           className={cn(
-            "flex min-h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-6 text-center transition-colors disabled:opacity-40",
-            isDragging
-              ? "border-foreground/30 bg-muted"
-              : "border-border/70 hover:border-foreground/20 hover:bg-muted/60",
+            "flex min-h-28 w-full flex-col items-center justify-center gap-2 rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 px-4 py-6 text-center transition-colors disabled:opacity-40",
+            isDragging ? "bg-muted/40" : "hover:bg-muted/80 dark:hover:bg-muted/40",
           )}
         >
           <ImagePlus className="size-5 shrink-0 text-muted-foreground" />
@@ -88,7 +86,7 @@ export function SidebarElements() {
                   void addImageFromUrl();
                 }
               }}
-              className="h-8 rounded-full border-border/50 bg-muted/30 pl-8 text-[13px] shadow-none"
+              className="h-10 rounded-full border-0 bg-muted/60 dark:bg-muted/25 pl-9 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring/40"
             />
           </div>
           <Button
@@ -97,7 +95,7 @@ export function SidebarElements() {
             size="sm"
             disabled={!manager || urlLoading || !imageUrl.trim()}
             onClick={() => void addImageFromUrl()}
-            className="h-8 shrink-0 rounded-full px-3 text-[13px]"
+            className="h-10 shrink-0 rounded-full px-3.5 text-[13px]"
           >
             {urlLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Add"}
           </Button>

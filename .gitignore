@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# fffuel dddepth full pack (~240MB) — run: npm run download:dddepth
+/public/dddepth/3dshapes/*.jpg

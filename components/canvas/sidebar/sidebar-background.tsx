@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { UploadCloud, Loader2, Plus, ImageIcon, Palette } from "lucide-react";
+import { UploadCloud, Loader2, Plus, ImageIcon, Palette, Check } from "lucide-react";
 import {
   SOLID_PRESETS,
   GRADIENT_PRESETS,
@@ -24,6 +24,12 @@ import { useCanvasManager } from "@/context/canvas-manager";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ScreenSplit } from "@/components/canvas/sidebar/screen-split";
 import { BackgroundPattern } from "@/components/canvas/sidebar/background-pattern";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
@@ -35,8 +41,11 @@ import {
   loadBrandKit,
   type BrandKit,
 } from "@/lib/studio/brand-kit";
+import { DDDEPTH_BACKGROUNDS, DDDEPTH_COUNT } from "@/lib/presets/dddepth";
 
-type Tab = "color" | "gradient" | "image";
+type Tab = "color" | "gradient" | "image" | "shapes";
+
+const DDDEPTH_QUICK = 9;
 
 const SET_SWATCHES: { key: keyof Pick<SuggestedSet, "background" | "text" | "accent" | "card">; label: string }[] = [
   { key: "background", label: "Background" },
@@ -84,17 +93,20 @@ function SuggestedSetRow({
 const FILL_TABS: { id: Tab; label: string }[] = [
   { id: "color", label: "Color" },
   { id: "gradient", label: "Gradient" },
+  { id: "shapes", label: "3D" },
   { id: "image", label: "Image" },
 ];
 
 export function SidebarBackground() {
   const manager = useCanvasManager();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<Tab>("color");
+  const [tab, setTab] = useState<Tab>("shapes");
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [urlLoading, setUrlLoading] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
+  const [activeBg, setActiveBg] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const projectPalette = useCanvasStore((s) => s.palette);
   const markedSlideIds = useCanvasStore((s) => s.markedSlideIds);
@@ -159,15 +171,18 @@ export function SidebarBackground() {
   };
 
   const applySolid = (color: string) => {
+    setActiveBg(null);
     void manager?.setBackground({ type: "solid", color });
   };
 
   const applyGradient = (colors: [string, string]) => {
+    setActiveBg(null);
     void manager?.setBackground({ type: "gradient", colors });
   };
 
   const applyImageFile = (file: File) => {
     if (!file.type.startsWith("image/")) return;
+    setActiveBg(null);
     void fileToDataUrl(file)
       .then((dataUrl) => manager?.setBackground({ type: "image", url: dataUrl }))
       .catch((err) => reportError(err, messages.errors.readImage));
@@ -192,6 +207,7 @@ export function SidebarBackground() {
     setUrlError(null);
     setUrlLoading(true);
     try {
+      setActiveBg(null);
       await manager?.setBackground({ type: "image", url: parsed.toString() });
     } catch (err) {
       reportError(err, messages.errors.loadBackgroundCors);
@@ -201,25 +217,79 @@ export function SidebarBackground() {
     }
   };
 
-  return (
-    <div className="flex min-w-0 flex-col overflow-hidden text-[13px] text-foreground">
-      <CollapsibleGroup id="background-split" title="Screen split">
-        <ScreenSplit />
-      </CollapsibleGroup>
+  const applyDddepth = (src: string, closePicker = false) => {
+    setActiveBg(src);
+    void manager?.setBackground({ type: "image", url: src });
+    if (closePicker) setPickerOpen(false);
+  };
 
-      <CollapsibleGroup id="background-fill" title="Fill">
+  return (
+    <div className="flex min-w-0 flex-col text-[13px] text-foreground">
+      <CollapsibleGroup id="background-fill" title="Fill" defaultOpen>
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="gap-2">
-        <TabsList className="grid h-8 w-full grid-cols-3 rounded-full">
+        <TabsList className="grid h-11 w-full grid-cols-4 rounded-full bg-muted/60 p-1 group-data-horizontal/tabs:h-11 dark:bg-muted/25">
           {FILL_TABS.map((item) => (
             <TabsTrigger
               key={item.id}
               value={item.id}
-              className="rounded-full text-[13px] shadow-none data-active:border-transparent dark:data-active:border-transparent"
+              className="rounded-full px-1 text-[12px] font-medium shadow-none data-active:border-transparent data-active:bg-background data-active:text-foreground dark:data-active:border-transparent dark:data-active:bg-background"
             >
               {item.label}
             </TabsTrigger>
           ))}
         </TabsList>
+
+        <TabsContent value="shapes" className="mt-0">
+          <div className="flex flex-col gap-2">
+            {activeBg ? (
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className="relative h-28 w-full overflow-hidden rounded-2xl bg-muted/30"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={activeBg} alt="" className="size-full object-cover" />
+                <span className="absolute inset-x-0 bottom-0 bg-background/70 px-2.5 py-1.5 text-left text-[12px] font-medium backdrop-blur-sm">
+                  Change background
+                </span>
+              </button>
+            ) : null}
+            <div className="grid grid-cols-3 gap-1.5">
+              {DDDEPTH_BACKGROUNDS.slice(0, DDDEPTH_QUICK).map((src) => {
+                const selected = activeBg === src;
+                return (
+                  <button
+                    key={src}
+                    type="button"
+                    title="Set as background"
+                    onClick={() => applyDddepth(src)}
+                    className={cn(
+                      "relative aspect-square overflow-hidden rounded-xl bg-muted/40",
+                      selected && "outline outline-2 outline-offset-1 outline-foreground",
+                    )}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" loading="lazy" className="size-full object-cover" />
+                    {selected ? (
+                      <span className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-foreground text-background">
+                        <Check className="size-3" strokeWidth={3} />
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="w-full rounded-full"
+              onClick={() => setPickerOpen(true)}
+            >
+              Browse all · {DDDEPTH_COUNT}
+            </Button>
+          </div>
+        </TabsContent>
 
         <TabsContent value="color">
           <div className="grid grid-cols-6 gap-1.5">
@@ -305,7 +375,7 @@ export function SidebarBackground() {
                 "flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-6 text-center transition-colors",
                 isDragging
                   ? "border-foreground/40 bg-muted/40"
-                  : "border-border/80 bg-muted/20 hover:bg-muted/35",
+                  : "border-border/80 bg-muted/60 dark:bg-muted/25 hover:bg-muted/80 dark:hover:bg-muted/40",
               )}
             >
               <UploadCloud className="h-5 w-5 text-muted-foreground" />
@@ -333,14 +403,14 @@ export function SidebarBackground() {
                       void applyImageFromUrl();
                     }
                   }}
-                  className="h-8 text-[13px]"
+                  className="h-10 rounded-full border-0 bg-muted/60 dark:bg-muted/25 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40"
                 />
                 <Button
                   type="button"
                   size="sm"
                   disabled={urlLoading || !imageUrl.trim()}
                   onClick={() => void applyImageFromUrl()}
-                  className="rounded-full"
+                  className="h-10 rounded-full px-3.5"
                 >
                   {urlLoading ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -356,7 +426,11 @@ export function SidebarBackground() {
         </Tabs>
       </CollapsibleGroup>
 
-      <CollapsibleGroup id="background-pattern" title="Pattern">
+      <CollapsibleGroup id="background-split" title="Screen split" defaultOpen={false}>
+        <ScreenSplit />
+      </CollapsibleGroup>
+
+      <CollapsibleGroup id="background-pattern" title="Pattern" defaultOpen={false}>
         <BackgroundPattern />
       </CollapsibleGroup>
 
@@ -408,8 +482,8 @@ export function SidebarBackground() {
         </CollapsibleGroup>
       ) : null}
 
-      <CollapsibleGroup id="background-palette" title="Palette">
-        <div className="flex rounded-full bg-muted/50 p-0.5">
+      <CollapsibleGroup id="background-palette" title="Palette" defaultOpen={false}>
+        <div className="flex h-10 rounded-full bg-muted/60 dark:bg-muted/25 p-1">
           {(
             [
               ["all", "All"],
@@ -425,8 +499,10 @@ export function SidebarBackground() {
                 setSlidePalette(id === "slide" ? useCanvasStore.getState().palette : null);
               }}
               className={cn(
-                "h-7 flex-1 rounded-full text-[13px] transition-colors",
-                paletteScope === id ? "bg-background text-foreground shadow-xs" : "text-muted-foreground",
+                "h-full flex-1 rounded-full text-[13px] font-medium transition-colors",
+                paletteScope === id
+                  ? "bg-background text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {label}
@@ -444,7 +520,7 @@ export function SidebarBackground() {
           {PALETTE_SLOTS.map((slot) => (
             <div
               key={slot.id}
-              className="rounded-full px-2 py-1.5 hover:bg-muted/30"
+              className="rounded-full px-2 py-1.5 hover:bg-muted/80 dark:hover:bg-muted/40"
             >
               <ColorPicker
                 compact
@@ -469,7 +545,7 @@ export function SidebarBackground() {
 
       <BackgroundSlideSets />
 
-      <CollapsibleGroup id="background-sets" title="Suggest a set">
+      <CollapsibleGroup id="background-sets" title="Suggest a set" defaultOpen={false}>
         <div className="flex flex-col gap-1">
           {SUGGESTED_SETS.map((set) => (
             <SuggestedSetRow
@@ -484,6 +560,43 @@ export function SidebarBackground() {
           The large swatch fills this slide. Apply follows All, Marked, or This slide.
         </p>
       </CollapsibleGroup>
+
+      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <DialogContent className="grid max-h-[min(40rem,85dvh)] w-[min(36rem,calc(100vw-2rem))] grid-rows-[auto_minmax(0,1fr)] gap-3 overflow-hidden rounded-3xl border-0 bg-background p-4 sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] font-semibold">
+              3D backgrounds
+            </DialogTitle>
+          </DialogHeader>
+          <div className="min-h-0 overflow-y-auto overscroll-contain pr-1">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {DDDEPTH_BACKGROUNDS.map((src) => {
+                const selected = activeBg === src;
+                return (
+                  <button
+                    key={src}
+                    type="button"
+                    title="Set as background"
+                    onClick={() => applyDddepth(src, true)}
+                    className={cn(
+                      "relative aspect-square overflow-hidden rounded-2xl bg-muted/40",
+                      selected && "outline outline-2 outline-offset-1 outline-foreground",
+                    )}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" loading="lazy" className="size-full object-cover" />
+                    {selected ? (
+                      <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-foreground text-background">
+                        <Check className="size-3" strokeWidth={3} />
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
