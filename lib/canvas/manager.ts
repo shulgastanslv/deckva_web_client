@@ -19,6 +19,7 @@ import { fitCanvasJSON, fitGeometry, type FrameSize } from "./fit-frame";
 import { isAutoFlowSkippable } from "./auto-flow";
 import { stabilizeGroups } from "./group";
 import { refreshCanvasFonts } from "./paint-live";
+import { HoverManager } from "./hover";
 
 const DEFAULT_BACKGROUND = "#ffffff";
 
@@ -51,7 +52,7 @@ export class CanvasManager {
   readonly layouts: LayoutManager;
   readonly crop: ImageCropSession;
   readonly eraser: ImageEraserSession;
-
+  readonly hover: HoverManager;
   private readonly history = new HistoryStack<CanvasState>();
   private readonly events = new Emitter<CanvasManagerEvents>();
   private silentDepth = 0;
@@ -67,6 +68,7 @@ export class CanvasManager {
   constructor(canvasElement: HTMLCanvasElement) {
     this.core = new CanvasCore(canvasElement);
     this.canvas = this.core.canvas;
+    
     this.grid = new GridManager(this.canvas);
     this.objects = new ObjectFactory(this.canvas);
     this.io = new ImportExportManager(this.canvas);
@@ -83,7 +85,7 @@ export class CanvasManager {
       this.events.emit("selection", this.getActiveObject());
     });
     this.grid.setLayoutManager(this.layouts);
-
+    this.hover = new HoverManager(this.canvas);
     this.history.reset(this.getState());
     this.bindCanvasEvents();
     if (typeof document !== "undefined") {
@@ -457,6 +459,7 @@ export class CanvasManager {
     this.events.clear();
     this.grid.dispose();
     this.core.dispose();
+    this.hover.dispose();
   }
 
   private async restoreFromHistory(state: CanvasState): Promise<void> {
