@@ -1,4 +1,5 @@
 import type { RatioKey } from "@/lib/types";
+import { skipsInsightText } from "./roles";
 
 /** Platforms the editor already designs for. Patterns are general, not an account's own audience. */
 export const INSIGHT_PLATFORMS = ["Telegram", "Threads", "Instagram", "X"] as const;
@@ -41,7 +42,6 @@ interface ReadableObject {
 }
 
 const TEXT_TYPES = new Set(["text", "i-text", "itext", "textbox"]);
-const CHROME_ROLES = new Set(["number", "handle", "swipe", "cue", "social", "cta"]);
 
 const ZONES: Record<InsightPlatform, AttentionZone[]> = {
   Instagram: [
@@ -291,8 +291,7 @@ function childObjects(obj: ReadableObject): ReadableObject[] {
 function collectText(objects: ReadableObject[], texts: string[], colors: string[]) {
   for (const obj of objects) {
     const type = String(obj.type ?? "").toLowerCase();
-    const role = typeof obj.swibpRole === "string" ? obj.swibpRole : "";
-    if (TEXT_TYPES.has(type) && typeof obj.text === "string" && !CHROME_ROLES.has(role)) {
+    if (TEXT_TYPES.has(type) && typeof obj.text === "string" && !skipsInsightText(obj.swibpRole)) {
       const text = obj.text.trim();
       if (text) texts.push(text);
       pushColors(obj.fill, colors);
@@ -376,8 +375,7 @@ export function longTextBlocks(objects: unknown[], platform: InsightPlatform): L
       const obj = asReadable(value);
       if (!obj) continue;
       const type = String(obj.type ?? "").toLowerCase();
-      const role = typeof obj.swibpRole === "string" ? obj.swibpRole : "";
-      if (TEXT_TYPES.has(type) && typeof obj.text === "string" && !CHROME_ROLES.has(role)) {
+      if (TEXT_TYPES.has(type) && typeof obj.text === "string" && !skipsInsightText(obj.swibpRole)) {
         const characters = obj.text.trim().length;
         if (characters > limit) {
           blocks.push({ preview: previewText(obj.text), characters, limit });

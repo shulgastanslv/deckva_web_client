@@ -55,7 +55,11 @@ export function AutoFlowPrompt() {
     };
 
     manager.canvas.on("object:modified", onModified);
+    const unsubscribeEdit = manager.on("edit", (target) => {
+      onModified(target ? { target } : undefined);
+    });
     return () => {
+      unsubscribeEdit();
       manager.canvas.off("object:modified", onModified);
     };
   }, [manager, autoFlowEnabled, autoFlowEdgeTolerance, canvasDimensions]);

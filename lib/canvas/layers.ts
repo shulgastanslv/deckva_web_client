@@ -1,4 +1,5 @@
 import { type Canvas, type FabricObject, type Group } from "fabric";
+import { isPinnedRole } from "./roles";
 import { stabilizeGroup } from "./group";
 
 export type LayerObject = FabricObject & {
@@ -156,7 +157,7 @@ export function isLayerLocked(obj: FabricObject) {
 
 export function setLayerLocked(obj: FabricObject, locked: boolean) {
   const layer = obj as LayerObject;
-  const pin = layer.swibpRole === "split";
+  const pin = isPinnedRole(layer);
   obj.set({
     swibpLocked: locked,
     lockMovementX: locked || pin,

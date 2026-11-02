@@ -55,6 +55,14 @@ import { useCanvasManager } from "@/context/canvas-manager";
 import { useImageTools } from "@/components/canvas/use-image-tools";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { canFillShape } from "@/lib/canvas/objects";
+import {
+  paintShadow,
+  scaleToMeasuredHeight,
+  scaleToMeasuredWidth,
+  setCornerRadius,
+  setMovementLock,
+} from "@/lib/canvas/edits";
+import { replaceImageSource } from "@/lib/image/apply-deckva-tools";
 import { iconFill } from "@/lib/canvas/recolor-icon";
 import { FontSelect } from "@/components/canvas/font-select";
 import type { UpscaleScale } from "@/lib/image/deckva-tools";
@@ -601,7 +609,7 @@ export function RightSidebar({
   };
 
   const updateCornerRadius = (radius: number) => {
-    if (!selectedObject || !canvas) return;
+    if (!selectedObject || !manager) return;
 
     setFormValues((prev) => (prev ? { ...prev, rx: radius } : null));
 
@@ -610,88 +618,61 @@ export function RightSidebar({
         rx: radius,
         ry: radius,
       } as unknown as Partial<FabricObject>);
-    } else if (selectedObject.type === "image") {
-      const img = selectedObject as FabricImage;
-
-      img.set("rx" as keyof FabricImage, radius);
-
-      if (radius > 0) {
-        const clipRect = new Rect({
-          width: img.width,
-          height: img.height,
-          rx: radius,
-          ry: radius,
-          originX: "center",
-          originY: "center",
-        });
-        img.set({ clipPath: clipRect });
-      } else {
-        img.set({ clipPath: undefined });
-      }
-      canvas.requestRenderAll();
-      canvas.fire("object:modified");
+      return;
     }
+    if (selectedObject.type !== "image") return;
+    manager.edit(() => setCornerRadius(selectedObject, radius));
   };
 
   const toggleShadow = (enable: boolean) => {
-    if (!canvas || !formValues) return;
-    const objects = canvas.getActiveObjects();
+    if (!manager || !formValues) return;
+    const objects = manager.canvas.getActiveObjects();
     if (objects.length === 0) return;
 
-    for (const obj of objects) {
-      obj.set({
-        shadow: enable
-          ? new FabricShadow({
+    setFormValues((prev) => (prev ? { ...prev, hasShadow: enable } : null));
+    manager.edit(() =>
+      paintShadow(
+        objects,
+        enable
+          ? {
               color: formValues.shadowColor,
               blur: formValues.shadowBlur,
               offsetX: formValues.shadowOffsetX,
               offsetY: formValues.shadowOffsetY,
-            })
+            }
           : null,
-      });
-    }
-
-    setFormValues((prev) => (prev ? { ...prev, hasShadow: enable } : null));
-    canvas.requestRenderAll();
-    manager?.commit();
+      ),
+    );
   };
 
   const updateShadowProp = (
     key: "shadowColor" | "shadowBlur" | "shadowOffsetX" | "shadowOffsetY",
     val: unknown,
   ) => {
-    if (!canvas || !formValues) return;
+    if (!manager || !formValues) return;
 
     const nextValues = { ...formValues, [key]: val };
     setFormValues(nextValues);
     if (!nextValues.hasShadow) return;
 
-    for (const obj of canvas.getActiveObjects()) {
-      obj.set({
-        shadow: new FabricShadow({
-          color: nextValues.shadowColor,
-          blur: nextValues.shadowBlur,
-          offsetX: nextValues.shadowOffsetX,
-          offsetY: nextValues.shadowOffsetY,
-        }),
-      });
-    }
-    canvas.requestRenderAll();
-    manager?.commit();
+    manager.edit(() =>
+      paintShadow(manager.canvas.getActiveObjects(), {
+        color: nextValues.shadowColor,
+        blur: nextValues.shadowBlur,
+        offsetX: nextValues.shadowOffsetX,
+        offsetY: nextValues.shadowOffsetY,
+      }),
+    );
   };
 
   const changeImageSource = (newSrc: string) => {
-    if (!selectedObject || selectedObject.type !== "image" || !canvas) return;
+    if (!selectedObject || selectedObject.type !== "image" || !manager) return;
 
-    const imgObj = selectedObject as unknown as FabricImage;
-    if (typeof imgObj.setSrc === "function") {
-      imgObj.setSrc(newSrc, { crossOrigin: "anonymous" }).then(() => {
-        imgObj.setCoords();
-        canvas.requestRenderAll();
-        canvas.fire("object:modified");
-        setFormValues((prev) => (prev ? { ...prev, src: newSrc } : null));
-      });
-    }
+    const imgObj = selectedObject as FabricImage;
+    if (typeof imgObj.setSrc !== "function") return;
+    void replaceImageSource(manager, imgObj, newSrc).then(() => {
+      setFormValues((prev) => (prev ? { ...prev, src: newSrc } : null));
+    });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -749,42 +730,25 @@ export function RightSidebar({
   };
 
   const handleToggleLock = () => {
-    if (!canvas || !formValues) return;
-    const objects = canvas.getActiveObjects();
+    if (!manager || !formValues) return;
+    const objects = manager.canvas.getActiveObjects();
     if (objects.length === 0) return;
     const next = !formValues.isLocked;
     setFormValues((prev) => (prev ? { ...prev, isLocked: next } : null));
-    for (const obj of objects) {
-      obj.set({
-        lockMovementX: next,
-        lockMovementY: next,
-        lockRotation: next,
-        lockScalingX: next,
-        lockScalingY: next,
-        lockSkewingX: next,
-        lockSkewingY: next,
-        hasControls: !next,
-      });
-    }
-    canvas.requestRenderAll();
-    manager?.commit();
+    manager.edit(() => setMovementLock(objects, next));
   };
 
   const setWidth = (val: number) => {
     setFormValues((p) => (p ? { ...p, width: val } : null));
-    if (selectedObject && val > 0) {
-      selectedObject.scaleToWidth(val);
-      canvas?.requestRenderAll();
-      canvas?.fire("object:modified");
+    if (selectedObject && val > 0 && manager) {
+      manager.edit(() => scaleToMeasuredWidth(selectedObject, val));
     }
   };
 
   const setHeight = (val: number) => {
     setFormValues((p) => (p ? { ...p, height: val } : null));
-    if (selectedObject && val > 0) {
-      selectedObject.scaleToHeight(val);
-      canvas?.requestRenderAll();
-      canvas?.fire("object:modified");
+    if (selectedObject && val > 0 && manager) {
+      manager.edit(() => scaleToMeasuredHeight(selectedObject, val));
     }
   };
 

@@ -1,6 +1,8 @@
 import type { FabricCanvasJSON } from "@/lib/types";
+import { chromeRole, type ChromeRole } from "./roles";
 
-export type ChromeRole = "number" | "handle" | "swipe";
+export type { ChromeRole };
+export { chromeRole };
 export type SlideNumberStyle = "1" | "01" | "1 / 8";
 
 export interface ChromeTemplate {
@@ -8,8 +10,6 @@ export interface ChromeTemplate {
   numberStyle?: SlideNumberStyle;
   object: Record<string, unknown>;
 }
-
-const ROLES = new Set<string>(["number", "handle", "swipe"]);
 
 export function formatSlideNumber(
   style: SlideNumberStyle,
@@ -25,10 +25,6 @@ export function formatSlideNumber(
     default:
       return String(n);
   }
-}
-
-export function chromeRole(value: unknown): ChromeRole | null {
-  return typeof value === "string" && ROLES.has(value) ? (value as ChromeRole) : null;
 }
 
 export function numberStyleOf(value: unknown): SlideNumberStyle {

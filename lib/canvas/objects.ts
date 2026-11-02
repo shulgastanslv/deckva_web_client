@@ -16,7 +16,8 @@ import {
   util,
 } from "fabric";
 import { useCanvasStore } from "@/store/useCanvasStore";
-import { formatSlideNumber, type ChromeRole, type SlideNumberStyle } from "@/lib/canvas/chrome";
+import { formatSlideNumber, type SlideNumberStyle } from "@/lib/canvas/chrome";
+import { hasRole, type ObjectRole } from "@/lib/canvas/roles";
 import type { PaletteSlot, TextStyleDef, TextStyleId } from "@/lib/canvas/document";
 import "./fabric-props";
 import { isFrameKind, type FrameKind } from "@/lib/canvas/frames";
@@ -62,10 +63,15 @@ const CORNER_MUTED = "#64748b";
 const CORNER_INK = "#0f172a";
 
 export class ObjectFactory {
-  private canvas: Canvas;
+  constructor(
+    private readonly canvas: Canvas,
+    private readonly onEdited: (target?: FabricObject | null) => void = () => {},
+  ) {}
 
-  constructor(canvas: Canvas) {
-    this.canvas = canvas;
+  /** In-place update that does not add or remove an object, so Fabric stays quiet. */
+  private edited(target?: FabricObject | null) {
+    this.canvas.requestRenderAll();
+    this.onEdited(target);
   }
 
   private getCenter() {
@@ -103,15 +109,13 @@ export class ObjectFactory {
     return obj;
   }
 
-  private removeRole(role: ChromeRole) {
-    this.removeTagged(role);
+  private tagRole(obj: FabricObject, role: ObjectRole, extra?: Record<string, string>) {
+    return this.mark(obj, { swibpRole: role, ...extra });
   }
 
-  private removeTagged(role: string) {
+  private removeRole(role: ObjectRole) {
     for (const obj of [...this.canvas.getObjects()]) {
-      if ((obj as FabricObject & { swibpRole?: string }).swibpRole === role) {
-        this.canvas.remove(obj);
-      }
+      if (hasRole(obj, role)) this.canvas.remove(obj);
     }
   }
 
@@ -154,9 +158,7 @@ export class ObjectFactory {
     corner: Corner = "top-left",
   ): IText {
     const textValue = formatSlideNumber(style, index, total);
-    const existing = this.canvas
-      .getObjects()
-      .find((obj) => (obj as FabricObject & { swibpRole?: string }).swibpRole === "number");
+    const existing = this.canvas.getObjects().find((obj) => hasRole(obj, "number"));
     if (existing) {
       existing.set({
         text: textValue,
@@ -164,8 +166,7 @@ export class ObjectFactory {
         ...this.getCornerPosition(corner),
       });
       existing.setCoords();
-      this.canvas.requestRenderAll();
-      this.canvas.fire("object:modified", { target: existing });
+      this.edited(existing);
       return existing as IText;
     }
 
@@ -176,7 +177,7 @@ export class ObjectFactory {
       fontWeight: "400",
       fill: this.slotColor("text", CORNER_MUTED),
     });
-    this.mark(text, { swibpRole: "number", swibpNumberStyle: style, swibpSlot: "text" });
+    this.tagRole(text, "number", { swibpNumberStyle: style, swibpSlot: "text" });
     this.addToCanvas(text);
     return text;
   }
@@ -260,7 +261,7 @@ export class ObjectFactory {
       subTargetCheck: true,
       interactive: true,
     });
-    this.mark(group, { swibpRole: "handle" });
+    this.tagRole(group, "handle");
     this.addToCanvas(group);
     return group;
   }
@@ -294,8 +295,8 @@ export class ObjectFactory {
 
   /** Text swipe cue (e.g. "->") pinned bottom-right. */
   addSwipeArrow(text = "→", corner: Corner = "bottom-right"): IText {
-    this.removeTagged("swipe");
-    this.removeTagged("cue");
+    this.removeRole("swipe");
+    this.removeRole("cue");
     const arrow = new IText(text, {
       ...this.getCornerPosition(corner),
       fontSize: 56,
@@ -303,15 +304,15 @@ export class ObjectFactory {
       fontWeight: "700",
       fill: this.slotColor("accent", CORNER_INK),
     });
-    this.mark(arrow, { swibpRole: "swipe", swibpSlot: "accent" });
+    this.tagRole(arrow, "swipe", { swibpSlot: "accent" });
     this.addToCanvas(arrow);
     return arrow;
   }
 
   /** Swipe caption in a corner. Replaces the previous swipe. */
   addSwipeCue(text: string, corner: Corner = "bottom-right"): IText {
-    this.removeTagged("swipe");
-    this.removeTagged("cue");
+    this.removeRole("swipe");
+    this.removeRole("cue");
     const label = new IText(text, {
       ...this.getCornerPosition(corner),
       fontSize: 28,
@@ -320,7 +321,7 @@ export class ObjectFactory {
       fill: this.slotColor("accent", CORNER_INK),
       textAlign: corner.endsWith("right") ? "right" : "left",
     });
-    this.mark(label, { swibpRole: "swipe", swibpSlot: "accent" });
+    this.tagRole(label, "swipe", { swibpSlot: "accent" });
     this.addToCanvas(label);
     return label;
   }
@@ -336,7 +337,7 @@ export class ObjectFactory {
       .map((entry) => `${entry.label}: ${entry.value}`);
     if (lines.length === 0) return null;
 
-    this.removeTagged("social");
+    this.removeRole("social");
     const label = new IText(lines.join("\n"), {
       ...this.getCornerPosition(corner),
       fontSize: 26,
@@ -346,7 +347,7 @@ export class ObjectFactory {
       lineHeight: 1.28,
       textAlign: corner.endsWith("right") ? "right" : "left",
     });
-    this.mark(label, { swibpRole: "social", swibpSlot: "text" });
+    this.tagRole(label, "social", { swibpSlot: "text" });
     this.addToCanvas(label);
     return label;
   }
@@ -442,7 +443,7 @@ export class ObjectFactory {
   }
 
   private isSplit(obj: FabricObject) {
-    return (obj as FabricObject & { swibpRole?: string }).swibpRole === "split";
+    return hasRole(obj, "split");
   }
 
   private findSplit() {
@@ -478,7 +479,7 @@ export class ObjectFactory {
       rx: 0,
       ry: 0,
     });
-    this.mark(rect, { swibpRole: "split", swibpSlot: "card" });
+    this.tagRole(rect, "split", { swibpSlot: "card" });
     this.lockInPlace(rect);
     this.canvas.add(rect);
     this.canvas.setActiveObject(rect);
@@ -523,14 +524,14 @@ export class ObjectFactory {
       scaleX: 1 / MOCKUP_SCALE,
       scaleY: 1 / MOCKUP_SCALE,
     });
-    this.mark(img, { swibpRole: "frame", swibpFrameKind: kind });
+    this.tagRole(img, "frame", { swibpFrameKind: kind });
     this.addToCanvas(img);
     return img;
   }
 
   private isFrame(obj: FabricObject | null | undefined): obj is Image {
     if (!(obj instanceof Image)) return false;
-    return (obj as Image & { swibpRole?: string }).swibpRole === "frame";
+    return hasRole(obj, "frame");
   }
 
   private findFrame(prefer?: FabricObject | null) {
@@ -581,10 +582,10 @@ export class ObjectFactory {
       originY,
       angle,
     });
-    this.mark(frame, { swibpRole: "frame", swibpFrameKind: kind });
+    this.tagRole(frame, "frame", { swibpFrameKind: kind });
     frame.setCoords();
     this.canvas.setActiveObject(frame);
-    this.canvas.requestRenderAll();
+    this.edited(frame);
     return frame;
   }
 
@@ -794,7 +795,7 @@ export class ObjectFactory {
       { fill: "#000" },
     );
     const group = new Group([line, arrowHead], pos);
-    this.mark(group, { swibpRole: "arrow" });
+    this.tagRole(group, "arrow");
     this.addToCanvas(group);
     return group;
   }
@@ -825,7 +826,7 @@ export class ObjectFactory {
       originX: "center",
       originY: "center",
     });
-    this.mark(group, { swibpRole: "progress" });
+    this.tagRole(group, "progress");
     this.addToCanvas(group);
     return group;
   }
@@ -988,7 +989,7 @@ export class ObjectFactory {
     });
 
     const group = new Group([handle, channel], pos);
-    this.mark(group, { swibpRole: "caption" });
+    this.tagRole(group, "caption");
     this.addToCanvas(group);
     return group;
   }
