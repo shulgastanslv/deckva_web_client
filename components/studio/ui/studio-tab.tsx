@@ -16,7 +16,7 @@ export function StudioTab({
       type="button"
       onClick={onClick}
       className={cn(
-        "relative pb-2.5 text-[15px] transition-colors",
+        "relative shrink-0 pb-2.5 text-[15px] whitespace-nowrap transition-colors",
         active
           ? "font-semibold text-neutral-950 dark:text-foreground"
           : "font-medium text-neutral-400 hover:text-neutral-700 dark:text-muted-foreground dark:hover:text-foreground",

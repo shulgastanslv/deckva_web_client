@@ -51,7 +51,7 @@ function NotificationsPanel({
     filter === "unread" ? items.filter((item) => !item.read) : items;
 
   return (
-    <div className="flex h-[min(440px,calc(100dvh-32px))] w-[360px] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.14)] dark:border-border dark:bg-background">
+    <div className="flex h-[min(440px,calc(100dvh-32px))] w-[min(360px,calc(100vw-24px))] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.14)] dark:border-border dark:bg-background">
       <div className="flex items-center justify-between px-5 pt-4 pb-1">
         <h2 className="text-[16px] font-bold text-neutral-950 dark:text-foreground">
           {messages.notifications.title}

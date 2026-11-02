@@ -88,8 +88,8 @@ export function SlideNavigator() {
   }, [manager, canvasDimensions.width, updateSlideThumbnail, currentIndex, slides.length]);
 
   return (
-    <footer className="h-[76px] shrink-0 flex items-center gap-3 px-4 bg-background border-t border-border z-10 select-none">
-      <div className="w-[72px] shrink-0 leading-tight">
+    <footer className="z-10 flex h-[68px] shrink-0 items-center gap-2 border-t border-border bg-background px-2 select-none sm:h-[76px] sm:gap-3 sm:px-4">
+      <div className="w-12 shrink-0 leading-tight sm:w-[72px]">
         <div className="text-[13px] uppercase tracking-wide text-muted-foreground">
           Slide
         </div>
@@ -238,7 +238,7 @@ export function SlideNavigator() {
           title="Move left"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
-          Left
+          <span className="hidden sm:inline">Left</span>
         </Button>
         <Button
           variant="ghost"
@@ -248,7 +248,7 @@ export function SlideNavigator() {
           disabled={!canGoNext}
           title="Move right"
         >
-          Right
+          <span className="hidden sm:inline">Right</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </Button>
         <Button
@@ -259,7 +259,7 @@ export function SlideNavigator() {
           title="Duplicate slide"
         >
           <Copy className="h-3.5 w-3.5" />
-          Duplicate
+          <span className="hidden sm:inline">Duplicate</span>
         </Button>
         <Button
           variant="ghost"
@@ -270,7 +270,7 @@ export function SlideNavigator() {
           title="Delete slide"
         >
           <Trash2 className="h-3.5 w-3.5" />
-          Delete
+          <span className="hidden sm:inline">Delete</span>
         </Button>
       </div>
     </footer>

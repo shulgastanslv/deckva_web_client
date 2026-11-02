@@ -67,7 +67,7 @@ function AssetTile({
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+          className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-100 transition-opacity hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
         >
           <Trash2 className="size-3" />
         </button>

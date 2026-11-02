@@ -12,7 +12,7 @@ export function StudioContent({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 flex-col bg-background text-foreground dark:bg-muted/20",
+        "flex h-full min-h-0 flex-col bg-background text-foreground md:dark:bg-muted/20",
         className,
       )}
     >
@@ -35,7 +35,7 @@ export function StudioContentBody({
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div
         className={cn(
-          "min-h-full px-6 pt-6 pb-16 sm:px-10",
+          "min-h-full px-4 pt-5 pb-12 sm:px-6 sm:pt-6 md:px-10",
           centered && "mx-auto w-full max-w-[1080px]",
           className,
         )}

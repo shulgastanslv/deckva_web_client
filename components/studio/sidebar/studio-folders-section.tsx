@@ -217,7 +217,7 @@ export function StudioFoldersSection() {
                     <button
                       type="button"
                       aria-label="Folder actions"
-                      className="rounded-full p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted hover:text-foreground focus:opacity-100"
+                      className="rounded-full p-1 text-muted-foreground opacity-100 transition-opacity hover:bg-muted hover:text-foreground focus:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                     >
                       <MoreHorizontal className="size-3.5" />
                     </button>

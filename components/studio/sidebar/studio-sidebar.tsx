@@ -6,21 +6,29 @@ import { StudioOrgSwitcher } from "@/components/studio/org/studio-org-switcher";
 import { StudioFoldersSection } from "@/components/studio/sidebar/studio-folders-section";
 import { StudioSidebarNav } from "@/components/studio/sidebar/studio-sidebar-nav";
 import { StudioSidebarSearch } from "@/components/studio/sidebar/studio-sidebar-search";
+import { cn } from "@/lib/utils";
 
 export function StudioSidebar({
   search,
   onSearchChange,
   onBlank,
   onTemplates,
+  className,
 }: {
   search: string;
   onSearchChange: (value: string) => void;
   onBlank: () => void;
   onTemplates: () => void;
+  className?: string;
 }) {
   return (
-    <aside className="flex w-[252px] shrink-0 flex-col bg-muted/70 dark:bg-background">
-      <div className="flex min-h-0 flex-1 flex-col pt-3">
+    <aside
+      className={cn(
+        "flex h-full w-[252px] shrink-0 flex-col bg-transparent",
+        className,
+      )}
+    >
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-3">
         <StudioOrgSwitcher />
         <StudioSidebarSearch
           search={search}

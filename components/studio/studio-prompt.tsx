@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowUp,
   ImagePlus,
@@ -56,19 +56,28 @@ export function StudioPrompt({
   disabled,
   busy,
   error,
+  initialTopic = "",
 }: {
   onSubmit: (input: StudioPromptSubmit) => void | Promise<void>;
   disabled?: boolean;
   busy?: boolean;
   error?: string | null;
+  initialTopic?: string;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState("");
+  const appliedTopic = useRef(false);
+  const [value, setValue] = useState(initialTopic);
   const [cover, setCover] = useState<CoverAttachment | null>(null);
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkDraft, setLinkDraft] = useState("");
   const [coverError, setCoverError] = useState<string | null>(null);
   const [readingFile, setReadingFile] = useState(false);
+
+  useEffect(() => {
+    if (appliedTopic.current || !initialTopic) return;
+    appliedTopic.current = true;
+    setValue(initialTopic);
+  }, [initialTopic]);
 
   const trimmed = value.trim();
   const canSend = trimmed.length >= 2 && !disabled && !busy && !readingFile;
@@ -284,7 +293,7 @@ export function StudioPrompt({
                   }}
                 >
                   <Monitor className="size-3.5" />
-                  From computer
+                  From device
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer gap-2 rounded-xl px-2.5 py-2 text-[13px]"

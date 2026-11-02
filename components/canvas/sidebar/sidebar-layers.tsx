@@ -323,7 +323,7 @@ export function SidebarLayers() {
               )}
               </div>
 
-              <div className={cn("flex shrink-0 items-center", !hidden && !locked && "opacity-0 group-hover/row:opacity-100")}>
+              <div className={cn("flex shrink-0 items-center", !hidden && !locked && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100")}>
                 <button
                   type="button"
                   aria-label={hidden ? "Show" : "Hide"}
@@ -334,7 +334,7 @@ export function SidebarLayers() {
                   }}
                   className={cn(
                     "flex size-5 items-center justify-center rounded-md text-muted-foreground hover:text-foreground",
-                    !hidden && "opacity-0 group-hover/row:opacity-100",
+                    !hidden && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100",
                   )}
                 >
                   {hidden ? <EyeOff className="size-3" /> : <Eye className="size-3" />}
@@ -349,7 +349,7 @@ export function SidebarLayers() {
                   }}
                   className={cn(
                     "flex size-5 items-center justify-center rounded-md text-muted-foreground hover:text-foreground",
-                    !locked && "opacity-0 group-hover/row:opacity-100",
+                    !locked && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100",
                   )}
                 >
                   {locked ? <Lock className="size-3" /> : <Unlock className="size-3" />}

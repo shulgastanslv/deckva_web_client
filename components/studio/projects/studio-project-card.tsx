@@ -43,7 +43,7 @@ export function StudioProjectCard({
       </button>
 
       <div
-        className="absolute top-1.5 right-1.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+        className="absolute top-1.5 right-1.5 z-10 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
         onClick={(e) => e.stopPropagation()}
       >
         <StudioProjectMenu project={project} onChanged={onChanged} />

@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { StudioHome } from "@/components/studio/studio-home";
 import { StudioShell } from "@/components/studio/studio-shell";
-import { StudioPhoneGate } from "@/components/studio-phone-gate";
 
 function StudioHomeRedirects() {
   const router = useRouter();
@@ -38,13 +37,11 @@ function StudioHomeRedirects() {
 
 export default function StudioHomePage() {
   return (
-    <StudioPhoneGate>
-      <StudioShell>
-        <Suspense fallback={null}>
-          <StudioHomeRedirects />
-        </Suspense>
+    <StudioShell>
+      <Suspense fallback={null}>
+        <StudioHomeRedirects />
         <StudioHome />
-      </StudioShell>
-    </StudioPhoneGate>
+      </Suspense>
+    </StudioShell>
   );
 }

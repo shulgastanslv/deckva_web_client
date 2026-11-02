@@ -1,19 +1,24 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { X } from "lucide-react";
 
 import { AuthModal } from "@/components/auth";
 import { StudioHeader } from "@/components/studio/header/studio-header";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
+import { StudioMobileNav } from "@/components/studio/studio-mobile-nav";
 import { StudioSidebar } from "@/components/studio/sidebar/studio-sidebar";
 import { StudioUpgradeBanner } from "@/components/studio/ui/studio-upgrade-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function StudioShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [authOpen, setAuthOpen] = useState(false);
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
   const [sidebarSearch, setSidebarSearch] = useState("");
+  const [navOpen, setNavOpen] = useState(false);
   const create = useStudioCreate();
   const { authNeeded, setAuthNeeded } = create;
 
@@ -37,6 +42,19 @@ export function StudioShell({ children }: { children: ReactNode }) {
   }, [authNeeded, setAuthNeeded]);
 
   useEffect(() => {
+    setNavOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navOpen]);
+
+  useEffect(() => {
     const q = sidebarSearch.trim();
     const t = window.setTimeout(() => {
       window.dispatchEvent(
@@ -48,20 +66,63 @@ export function StudioShell({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={250}>
-      <div className="flex h-dvh w-full overflow-hidden bg-muted/70 text-foreground dark:bg-background">
-        <StudioSidebar
-          search={sidebarSearch}
-          onSearchChange={setSidebarSearch}
-          onBlank={create.openBlank}
-          onTemplates={create.openTemplates}
-        />
-
-        <StudioUpgradeBanner />
-        <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
-          <StudioHeader onSignIn={() => setAuthOpen(true)} />
-          <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-            {children}
+      <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground md:gap-3 md:bg-[#e6e8ef] md:p-3 md:dark:bg-[#0c0d12]">
+        <div className="hidden h-full md:flex">
+          <div className="flex h-full overflow-hidden rounded-3xl bg-white dark:bg-[#14151c]">
+            <StudioSidebar
+              search={sidebarSearch}
+              onSearchChange={setSidebarSearch}
+              onBlank={create.openBlank}
+              onTemplates={create.openTemplates}
+            />
           </div>
+        </div>
+
+        {navOpen ? (
+          <div className="fixed inset-0 z-[80] md:hidden">
+            <button
+              type="button"
+              aria-label="Close menu"
+              className="absolute inset-0 bg-black/55"
+              onClick={() => setNavOpen(false)}
+            />
+            <div className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col overflow-hidden rounded-r-3xl bg-white dark:bg-[#14151c]">
+              <div className="flex justify-end px-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => setNavOpen(false)}
+                  className="flex size-9 items-center justify-center rounded-full text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+              <StudioSidebar
+                className="min-h-0 w-full flex-1"
+                search={sidebarSearch}
+                onSearchChange={setSidebarSearch}
+                onBlank={create.openBlank}
+                onTemplates={create.openTemplates}
+              />
+            </div>
+          </div>
+        ) : null}
+
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:gap-3">
+          <StudioHeader
+            onSignIn={() => setAuthOpen(true)}
+            onMenu={() => setNavOpen(true)}
+          />
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:rounded-3xl md:bg-background">
+            <StudioUpgradeBanner />
+            <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
+              {children}
+            </div>
+          </div>
+          <StudioMobileNav
+            drawerOpen={navOpen}
+            onCreate={create.openBlank}
+          />
         </div>
 
         <AuthModal
