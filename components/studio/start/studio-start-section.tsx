@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import {
@@ -13,23 +13,30 @@ import {
   StudioPrompt,
   type StudioPromptSubmit,
 } from "@/components/studio/studio-prompt";
-import { StudioSectionHeader } from "@/components/studio/ui/studio-section-header";
-import type { StudioIconName } from "@/components/studio/ui/studio-icons";
-import { cn } from "@/lib/utils";
 
-const START_ICONS: { title: string; iconName: StudioIconName }[] = [
-  { title: "Fire", iconName: "fire" },
-  { title: "Layers", iconName: "layers" },
-  { title: "List", iconName: "list" },
-  { title: "Chart", iconName: "chart" },
-  { title: "Trophy", iconName: "trophy" },
-  { title: "Rocket", iconName: "rocket" },
-  { title: "Image", iconName: "image" },
-  { title: "Message", iconName: "message" },
-  { title: "Check", iconName: "check" },
-  { title: "Wand", iconName: "wand" },
-  { title: "Carousel", iconName: "carousel" },
-];
+// Импортируем компоненты дропдауна из shadcn/ui
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const ROLES = [
+  "All roles",
+  "Bloggers",
+  "Marketers",
+  "Designers",
+  "Developers",
+  "SEO specialists",
+  "Copywriters",
+  "Social media managers",
+  "Video creators",
+  "Podcasters",
+  "Content strategists",
+  "Freelancers",
+  "Other",
+] as const;
 
 export function StudioStartSection({
   name,
@@ -48,14 +55,56 @@ export function StudioStartSection({
   generating?: boolean;
   generateError?: string | null;
 }) {
-  const [showStarts, setShowStarts] = useState(true);
+  const [selectedRole, setSelectedRole] = useState<string>("All roles");
 
   return (
     <section>
-      <div className="mb-8 flex items-end justify-between gap-3">
-        <h1 className="min-w-0 text-xl font-bold tracking-tight text-foreground">
-          {name ? `Start something new, ${name}` : "Welcome"}
-        </h1>
+      <div className="mb-6 flex items-end justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground mb-2">
+            Start something new
+          </h2>
+
+          {/* Дропдаун на базе shadcn DropdownMenu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+              >
+                Templates for {selectedRole}
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent 
+              align="start" 
+              className="w-64 rounded-2xl p-2 shadow-lg"
+            >
+              {ROLES.map((role) => {
+                const isSelected = selectedRole === role;
+                return (
+                  <DropdownMenuItem
+                    key={role}
+                    onClick={() => {
+                      setSelectedRole(role);
+                      onTemplates(); // Вызываем пропс при смене категории, если нужно
+                    }}
+                    className={`flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl cursor-pointer ${
+                      isSelected
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground focus:text-foreground"
+                    }`}
+                  >
+                    <span>{role}</span>
+                    {isSelected && <Check className="h-4 w-4 text-foreground" />}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        
         <StudioCreateMenu
           onBlank={onBlank}
           onTemplates={onTemplates}
@@ -71,7 +120,16 @@ export function StudioStartSection({
         error={generateError}
       />
 
-    
+      <div className="flex flex-row gap-4 mt-4">
+        <StudioCreateTile onClick={onBlank} />
+        <StudioStartRow>
+          <StudioStartTile
+            title="Blank carousel"
+            iconName="carousel"
+            onClick={onBlank}
+          />
+        </StudioStartRow>
+      </div>
     </section>
   );
 }

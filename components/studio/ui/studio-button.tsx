@@ -28,7 +28,7 @@ export function StudioButton({
     <button
       type="button"
       className={cn(
-        "inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-[13px] font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-4 text-[13px] font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
         variants[variant],
         className,
       )}

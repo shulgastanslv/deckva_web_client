@@ -427,14 +427,11 @@ export function StudioIconCheck(props: IconProps) {
 export function StudioIconPlus(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="40" y="24" width="80" height="80" rx="16" fill={BLUE} />
-      <path
-        d="M80 44V84M60 64H100"
-        stroke={WHITE}
-        opacity="0.72"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
+      <svg width="50" height="50" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="70" y="25" width="10" height="100" fill={BLUE_SOFT} />
+        <rect x="25" y="80" width="10" height="100" transform="rotate(-90 25 80)" fill={BLUE_SOFT} />
+      </svg>
+
     </Scene>
   );
 }
@@ -465,17 +462,16 @@ export function StudioIconWand(props: IconProps) {
 export function StudioIconCarousel(props: IconProps) {
   return (
     <Scene {...props}>
-      {/* Side cards tucked behind — clipped visually by center */}
-      <rect x="16" y="36" width="28" height="56" rx="9" fill={CORAL_SOFT} />
-      <rect x="116" y="36" width="28" height="56" rx="9" fill={TEAL_SOFT} />
+      <svg width="100" height="100" viewBox="0 0 171 185" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="46" width="125" height="175" fill={BLUE_SOFT} />
+        <rect y="10" width="125" height="175" fill={WHITE} />
+        <rect x="13" y="22" width="100" height="20" fill={LINE} />
+        <rect x="13" y="47" width="100" height="20" fill={LINE} />
+        <rect x="13" y="72" width="100" height="50" fill={LINE} />
+        <rect x="13" y="151" width="100" height="20" fill={LINE} />
+      </svg>
 
-      {/* Center card on top */}
-      <rect x="48" y="20" width="64" height="88" rx="12" fill={WHITE} />
-      <rect x="58" y="36" width="36" height="5" rx="2.5" fill={INK} opacity="0.8" />
-      <rect x="58" y="46" width="24" height="3.5" rx="1.75" fill={LINE} />
-      <rect x="58" y="60" width="36" height="28" rx="8" fill={VIOLET} />
-      <rect x="66" y="70" width="20" height="4" rx="2" fill={WHITE} opacity="0.9" />
-      <rect x="66" y="78" width="14" height="3" rx="1.5" fill={WHITE} opacity="0.5" />
+
     </Scene>
   );
 }

@@ -25,11 +25,11 @@ export function StudioStartTile({
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-[156px] shrink-0 flex-col gap-2.5 text-left sm:w-[168px]"
+      className="group flex w-[200px] shrink-0 flex-col gap-2.5 text-left sm:w-[168px] h-[250px]"
     >
       <div
         className={cn(
-          "relative aspect-[5/4] w-full overflow-hidden rounded-2xl transition-colors",
+          "relative aspect-video w-full overflow-hidden rounded-xl transition-colors",
           blank
             ? "bg-background ring-1 ring-border/70"
             : "bg-muted/20 group-hover:bg-muted/35",
@@ -40,7 +40,7 @@ export function StudioStartTile({
           <img
             src={previewUrl}
             alt=""
-            className="size-full object-cover"
+            className="size-full object-cover object-center transition-transform duration-200 group-hover:scale-[1.02]"
             draggable={false}
           />
         ) : iconName ? (

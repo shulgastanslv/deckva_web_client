@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif } from "next/font/google";
+import { Inter, Instrument_Serif, Cormorant_Garamond } from "next/font/google";
 
 import { StudioSessionCache } from "@/components/studio/studio-session-cache";
 
@@ -9,6 +9,12 @@ const inter = Inter({
 });
 
 const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-studio-serif",
+});
+
+const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-studio-serif",
@@ -56,7 +62,7 @@ export default function StudioLayout({
 }) {
   return (
     <div
-      className={`${inter.variable} ${instrumentSerif.variable} ${inter.className} h-dvh antialiased`}
+      className={`${inter.variable} ${instrumentSerif.variable} ${cormorantGaramond.variable} ${inter.className} h-dvh antialiased`}
     >
       <StudioSessionCache />
       {children}

@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 
 import { StudioHome } from "@/components/studio/studio-home";
 import { StudioShell } from "@/components/studio/studio-shell";
+import { Suspense } from "react";
 
-/** Deep-link: open studio and fire the upgrade dialog. */
+
 export default function StudioUpgradeRoute() {
   const router = useRouter();
 
@@ -19,8 +20,10 @@ export default function StudioUpgradeRoute() {
   }, [router]);
 
   return (
-    <StudioShell>
-      <StudioHome />
-    </StudioShell>
+    <Suspense fallback={null}>
+      <StudioShell>
+        <StudioHome />
+      </StudioShell>
+    </Suspense>
   );
 }
