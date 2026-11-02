@@ -41,8 +41,8 @@ const LEGAL = {
 
 const NAV = [
   { name: "See it", link: "#studio" },
-  { name: "The post", link: "#post" },
-  { name: "Examples", link: "#reviews" },
+  { name: "The post", link: "#example" },
+  { name: "Examples", link: "#examples" },
   { name: "Price", link: "#pricing" },
   { name: "Questions", link: "#faq" },
 ];
@@ -52,15 +52,15 @@ const MENU_GROUPS = [
     title: "Product",
     links: [
       { name: "See it", href: "#studio" },
-      { name: "The post", href: "#post" },
-      { name: "Examples", href: "#reviews" },
+      { name: "The post", href: "#example" },
+      { name: "Examples", href: "#examples" },
     ],
   },
   {
     title: "Make",
     links: [
       { name: "Starting lines", href: "#start" },
-      { name: "The example", href: "#post" },
+      { name: "The example", href: "#example" },
       { name: "Shapes", href: "#make" },
       { name: "Ratios", href: "#ratios" },
       { name: "Figma", href: "#figma" },
@@ -283,7 +283,7 @@ const FOOTER_COLUMNS = [
     links: [
       { name: "Open studio", href: "/studio" },
       { name: "See it", href: "#studio" },
-      { name: "The post", href: "#post" },
+      { name: "The post", href: "#example" },
       { name: "Examples", href: "#reviews" },
       { name: "Questions", href: "#faq" },
     ],
@@ -581,10 +581,10 @@ export function LandingPage() {
       </section>
 
       <LandingSection id="start">
-        <h2 className={`${sectionTitle} mx-auto text-center`}>
+        <h2 className={`${sectionTitle}`}>
           Four starting lines
         </h2>
-        <div className="mx-auto mt-8 max-w-2xl rounded-[1.75rem] bg-land-card p-5 sm:p-7">
+        <div className="mt-8 rounded-[1.75rem] bg-land-card p-5 sm:p-7 w[">
           <div className="flex flex-wrap gap-2">
             {PROMPTS.map((item, index) => (
               <button
@@ -628,7 +628,7 @@ export function LandingPage() {
         </div>
       </LandingSection>
 
-      <LandingSection id="post">
+      <LandingSection id="examples">
         <p className="text-sm font-medium text-land-ink/50">
           For a coach, a small brand, or anyone posting from one sentence.
         </p>
@@ -825,37 +825,6 @@ export function LandingPage() {
         </div>
       </LandingSection>
 
-      <LandingSection id="figma">
-        <h2 className={sectionTitle}>From Figma, and back</h2>
-        <p className={`mt-4 max-w-xl ${landSub}`}>
-          A frame comes into the slide. The finished carousel can leave again.
-        </p>
-        <ul className="mt-8 grid gap-4 lg:grid-cols-2">
-          <li className="overflow-hidden rounded-[1.75rem] bg-land-card">
-            <FigmaImportArt />
-            <div className="p-6">
-              <h3 className="text-2xl font-medium tracking-tight text-land-ink">
-                Import
-              </h3>
-              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
-                Bring a frame from Figma onto the slide. The picture, the type, and the order stay editable.
-              </p>
-            </div>
-          </li>
-          <li className="overflow-hidden rounded-[1.75rem] bg-land-card">
-            <FigmaExportArt />
-            <div className="p-6">
-              <h3 className="text-2xl font-medium tracking-tight text-land-ink">
-                Export
-              </h3>
-              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
-                Send the carousel back to Figma, or take a PNG of one slide and a ZIP of the set.
-              </p>
-            </div>
-          </li>
-        </ul>
-      </LandingSection>
-
       <LandingSection id="picture">
         <h2 className={sectionTitle}>On the picture</h2>
         <p className={`mt-4 max-w-xl ${landSub}`}>
@@ -880,25 +849,6 @@ export function LandingPage() {
                   {text}
                 </p>
               </div>
-            </li>
-          ))}
-        </ul>
-      </LandingSection>
-
-      <LandingSection id="reviews">
-        <h2 className={sectionTitle}>Carousels from the studio</h2>
-        <ul className="mt-8 flex gap-4 overflow-x-auto pb-2">
-          {POSTS.map((src) => (
-            <li
-              key={src}
-              className="w-56 shrink-0 overflow-hidden rounded-[1.75rem] bg-land-card sm:w-64"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt=""
-                className="aspect-[4/5] w-full object-cover object-top"
-              />
             </li>
           ))}
         </ul>

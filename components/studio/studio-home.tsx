@@ -89,12 +89,11 @@ export function StudioHome() {
           generating={create.generating}
           generateError={create.generateError}
         />
-
-        <div className="h-8" aria-hidden />
-
-        <section>
+      
+        
+        <section className="mt-4">
           <StudioSectionHeader
-            title="Jump back to recents"
+            title="Recent Projects"
             trailing={
               signedIn ? (
                 <StudioViewToggle view={view} onChange={setView} />

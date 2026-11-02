@@ -29,7 +29,7 @@ const SAGE_SOFT = "#d8ebd9";
 const VIEW = "0 0 160 128";
 
 export type StudioIconName =
-  | "fire"
+  | "codeblock"
   | "layers"
   | "list"
   | "chart"
@@ -71,45 +71,19 @@ function Scene({
 }
 
 /** Bad → good slide pair */
-export function StudioIconFire(props: IconProps) {
+export function StudioIconCodeblock(props: IconProps) {
   return (
     <Scene {...props}>
-      <rect x="22" y="28" width="44" height="72" rx="10" fill={WHITE} />
-      <rect x="30" y="40" width="28" height="5" rx="2.5" fill={CORAL_SOFT} />
-      <rect x="30" y="50" width="20" height="3.5" rx="1.75" fill={LINE} />
-      <rect x="30" y="58" width="24" height="3.5" rx="1.75" fill={LINE} />
-      <path
-        d="M34 78L50 94M50 78L34 94"
-        stroke={CORAL}
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+      <svg width="150" height="150" viewBox="0 0 225 125" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="225" height="125" fill={WHITE} />
+        <path d="M140.083 63.1473L103.484 65.5469L125.722 95.6129" stroke-width="10" stroke={VIOLET_SOFT} />
+        <path d="M170.141 65L197.168 89.7954L161 99.3029" stroke-width="10" stroke={VIOLET_SOFT} />
+        <path d="M135 110L164 49" stroke-width="10" stroke={VIOLET_SOFT} />
+        <rect width="225" height="30" fill={LINE} />
+        <rect x="4" y="35" width="74" height="16" fill={LINE} />
+      </svg>
 
-      <path
-        d="M74 64H86"
-        stroke={LINE}
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M82 58L90 64L82 70"
-        stroke={LINE}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
 
-      <rect x="94" y="28" width="44" height="72" rx="10" fill={WHITE} />
-      <rect x="102" y="40" width="28" height="5" rx="2.5" fill={TEAL} />
-      <rect x="102" y="50" width="20" height="3.5" rx="1.75" fill={LINE} />
-      <rect x="102" y="58" width="24" height="3.5" rx="1.75" fill={LINE} />
-      <path
-        d="M106 84L114 92L130 72"
-        stroke={TEAL}
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
     </Scene>
   );
 }
@@ -328,16 +302,16 @@ export function StudioIconImage(props: IconProps) {
         fill={BLUE}
       />
 
-      <rect x="86" y="18" width="52" height="40"  fill={TEAL_SOFT} />
-      <rect x="96" y="30" width="30" height="5"  fill={TEAL} />
+      <rect x="86" y="18" width="52" height="40" fill={TEAL_SOFT} />
+      <rect x="96" y="30" width="30" height="5" fill={TEAL} />
       <rect x="96" y="40" width="20" height="4" fill={WHITE} opacity="0.7" />
 
       <rect x="22" y="70" width="52" height="40" fill={VIOLET} />
-      <rect x="32" y="84" width="30" height="5"  fill={WHITE} opacity="0.95" />
-      <rect x="32" y="94" width="18" height="3"  fill={WHITE} opacity="0.5" />
+      <rect x="32" y="84" width="30" height="5" fill={WHITE} opacity="0.95" />
+      <rect x="32" y="94" width="18" height="3" fill={WHITE} opacity="0.5" />
 
-      <rect x="86" y="70" width="52" height="40"  fill={WHITE} />
-      <rect x="96" y="82" width="30" height="4"  fill={INK} opacity="0.75" />
+      <rect x="86" y="70" width="52" height="40" fill={WHITE} />
+      <rect x="96" y="82" width="30" height="4" fill={INK} opacity="0.75" />
       <rect x="96" y="90" width="18" height="3" fill={LINE} />
     </Scene>
   );
@@ -477,7 +451,7 @@ export function StudioIconCarousel(props: IconProps) {
 }
 
 const ICONS: Record<StudioIconName, (props: IconProps) => ReactElement> = {
-  fire: StudioIconFire,
+  codeblock: StudioIconCodeblock,
   layers: StudioIconLayers,
   list: StudioIconList,
   chart: StudioIconChart,

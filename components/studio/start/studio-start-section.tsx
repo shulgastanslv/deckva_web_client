@@ -61,48 +61,10 @@ export function StudioStartSection({
     <section>
       <div className="mb-6 flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight text-foreground mb-2">
-            Start something new
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            Create a new project
           </h2>
-
-          {/* Дропдаун на базе shadcn DropdownMenu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-              >
-                Templates for {selectedRole}
-                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
-              </button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent 
-              align="start" 
-              className="w-64 rounded-2xl p-2 shadow-lg"
-            >
-              {ROLES.map((role) => {
-                const isSelected = selectedRole === role;
-                return (
-                  <DropdownMenuItem
-                    key={role}
-                    onClick={() => {
-                      setSelectedRole(role);
-                      onTemplates(); // Вызываем пропс при смене категории, если нужно
-                    }}
-                    className={`flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl cursor-pointer ${
-                      isSelected
-                        ? "bg-accent text-accent-foreground"
-                        : "text-muted-foreground focus:text-foreground"
-                    }`}
-                  >
-                    <span>{role}</span>
-                    {isSelected && <Check className="h-4 w-4 text-foreground" />}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <p className="text-sm text-muted-foreground"> Create a new project or choose from a template</p>
         </div>
         
         <StudioCreateMenu
@@ -120,6 +82,7 @@ export function StudioStartSection({
         error={generateError}
       />
 
+
       <div className="flex flex-row gap-4 mt-4">
         <StudioCreateTile onClick={onBlank} />
         <StudioStartRow>
@@ -131,6 +94,11 @@ export function StudioStartSection({
           <StudioStartTile
             title="Images"
             iconName="image"
+            onClick={onBlank}
+          />
+          <StudioStartTile
+            title="Code"
+            iconName="codeblock"
             onClick={onBlank}
           />
         </StudioStartRow>

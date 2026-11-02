@@ -92,7 +92,7 @@
     --land-mist: #e8ecf7;
     --land-card: #ffffff;
 
-    --background: oklch(1 0 0);
+    --background: #fff;
     --foreground: oklch(0.145 0.005 270); /* Легкий синий подтон в черном */
 
     --card: oklch(0.995 0.002 270);
@@ -142,7 +142,7 @@
     --land-mist: #12131a;
     --land-card: #1c1d26;
 
-    --background: #101010;
+    --background: #111111;
     --foreground: #ffffff;
 
     --card: #2c2c2c;
