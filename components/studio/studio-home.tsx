@@ -90,7 +90,7 @@ export function StudioHome() {
           generateError={create.generateError}
         />
 
-        <div className="h-14 sm:h-10" aria-hidden />
+        <div className="h-8 sm:h-10" aria-hidden />
 
         <section>
           <StudioSectionHeader

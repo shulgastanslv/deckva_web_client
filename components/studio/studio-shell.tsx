@@ -66,7 +66,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={250}>
-      <div className="flex h-dvh w-full gap-2 overflow-hidden bg-[#e6e8ef] p-2 text-foreground sm:gap-3 sm:p-3 dark:bg-[#0c0d12]">
+      <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground md:gap-3 md:bg-[#e6e8ef] md:p-3 md:dark:bg-[#0c0d12]">
         <div className="hidden h-full md:flex">
           <div className="flex h-full overflow-hidden rounded-3xl bg-white dark:bg-[#14151c]">
             <StudioSidebar
@@ -86,8 +86,8 @@ export function StudioShell({ children }: { children: ReactNode }) {
               className="absolute inset-0 bg-black/55"
               onClick={() => setNavOpen(false)}
             />
-            <div className="absolute inset-y-2 left-2 flex w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-3xl bg-white dark:bg-[#14151c]">
-              <div className="flex justify-end px-2 pt-2">
+            <div className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col overflow-hidden rounded-r-3xl bg-white dark:bg-[#14151c]">
+              <div className="flex justify-end px-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
                 <button
                   type="button"
                   aria-label="Close"
@@ -108,12 +108,12 @@ export function StudioShell({ children }: { children: ReactNode }) {
           </div>
         ) : null}
 
-        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-2 sm:gap-3">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:gap-3">
           <StudioHeader
             onSignIn={() => setAuthOpen(true)}
             onMenu={() => setNavOpen(true)}
           />
-          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-3xl bg-background">
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:rounded-3xl md:bg-background">
             <StudioUpgradeBanner />
             <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
               {children}

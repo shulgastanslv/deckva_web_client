@@ -12,7 +12,7 @@ export function StudioContent({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 flex-col bg-background text-foreground dark:bg-muted/20",
+        "flex h-full min-h-0 flex-col bg-background text-foreground md:dark:bg-muted/20",
         className,
       )}
     >
