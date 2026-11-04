@@ -201,7 +201,7 @@ export function SidebarFilters() {
     <Tabs
       value={tab}
       onValueChange={(value) => setTab(value as Tab)}
-      className="gap-3 overflow-hidden p-1.5 text-[13px]"
+      className="gap-3 overflow-hidden p-1.5 text-[13px] p-3"
     >
       <div className="flex items-center gap-1">
         <TabsList className="grid h-11 min-w-0 flex-1 grid-cols-2 rounded-full bg-muted/60 p-1 group-data-horizontal/tabs:h-11 dark:bg-muted/25">

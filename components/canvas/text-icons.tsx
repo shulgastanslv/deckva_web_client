@@ -10,7 +10,7 @@ export interface IconProps extends React.SVGProps<SVGSVGElement> {
 export const MIRO_THEME = {
   plate: {
     back: 'fill-[#E8E6F3] dark:fill-white/10',
-    front: 'fill-white dark:fill-[#1C1C21]',
+    front: 'fill-white/80 backdrop-blur-sm dark:fill-[#1C1C21]/80',
   },
   glyph: {
     fill: 'fill-[#232135] dark:fill-white',
@@ -39,7 +39,7 @@ const LayeredPlate: React.FC = () => (
     {/* Задняя смещенная карточка */}
     <rect
       x="8"
-      y="4"
+      y="2"
       width="30"
       height="30"
       rx="8"

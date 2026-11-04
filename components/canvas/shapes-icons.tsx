@@ -11,7 +11,7 @@ export const MIRO_THEME = {
   // Двухслойные плашки: белая карточка с нежно-лавандовой подложкой сзади
   plate: {
     back: 'fill-[#E8E6F3] dark:fill-white/10',
-    front: 'fill-white dark:fill-[#1C1C21]',
+    front: 'fill-white/80 backdrop-blur-sm dark:fill-[#1C1C21]/80',
   },
   // Строгий темно-графитовый тон линий и фигур (под темную тему — чистый белый)
   glyph: {
@@ -41,7 +41,7 @@ const LayeredPlate: React.FC = () => (
     {/* Задняя смещенная карточка (создает глубину бесконечной доски) */}
     <rect
       x="8"
-      y="4"
+      y="2"
       width="30"
       height="30"
       rx="8"

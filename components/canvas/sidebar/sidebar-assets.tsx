@@ -252,7 +252,7 @@ export function SidebarAssets() {
   };
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 overflow-hidden p-0.5">
+    <div className="flex min-w-0 flex-col gap-3 overflow-hidden p-3">
       <input
         ref={fileInputRef}
         type="file"

@@ -640,11 +640,11 @@ export function RightSidebar({
       obj.set({
         shadow: enable
           ? new FabricShadow({
-              color: formValues.shadowColor,
-              blur: formValues.shadowBlur,
-              offsetX: formValues.shadowOffsetX,
-              offsetY: formValues.shadowOffsetY,
-            })
+            color: formValues.shadowColor,
+            blur: formValues.shadowBlur,
+            offsetX: formValues.shadowOffsetX,
+            offsetY: formValues.shadowOffsetY,
+          })
           : null,
       });
     }
@@ -799,1097 +799,1191 @@ export function RightSidebar({
     (canvas?.getActiveObjects() ?? []).every(
       (obj) => obj.type === "text" || obj.type === "i-text" || obj.type === "textbox",
     );
+      const noteStyleEdit = () => {
+        if (boundStyle) setStyleOffer(boundStyle);
+      };
 
-  const noteStyleEdit = () => {
-    if (boundStyle) setStyleOffer(boundStyle);
-  };
+      const applyStyleToSlides = (ids: number[] | null) => {
+        if (!manager || !boundStyle) return;
+        const active = manager.getActiveObject() as FabricObject & {
+          fontFamily?: string;
+          fontSize?: number;
+          fontWeight?: string | number;
+          lineHeight?: number;
+        };
+        if (!active) return;
+        if (ids && ids.length === 0) return;
+        const next: TextStyleDef = {
+          fontFamily: typeof active.fontFamily === "string" ? active.fontFamily : "Inter",
+          fontSize: typeof active.fontSize === "number" ? active.fontSize : 32,
+          fontWeight: String(active.fontWeight ?? "400"),
+          lineHeight: typeof active.lineHeight === "number" ? active.lineHeight : 1.16,
+        };
+        const store = useCanvasStore.getState();
+        if (!ids) store.setTextStyle(boundStyle, next);
+        const chosen = ids ? new Set(ids) : null;
+        store.setSlides(
+          store.slides.map((slide) =>
+            !chosen || chosen.has(slide.id)
+              ? { ...slide, canvasJSON: applyTextStyleToSlide(slide.canvasJSON, boundStyle, next) }
+              : slide,
+          ),
+        );
+        if (!chosen || chosen.has(store.currentSlideId)) {
+          applyStyleOnCanvas(manager.canvas, boundStyle, next);
+          manager.commit();
+        }
+        store.setDirty(true);
+        setStyleOffer(null);
+      };
 
-  const applyStyleToSlides = (ids: number[] | null) => {
-    if (!manager || !boundStyle) return;
-    const active = manager.getActiveObject() as FabricObject & {
-      fontFamily?: string;
-      fontSize?: number;
-      fontWeight?: string | number;
-      lineHeight?: number;
-    };
-    if (!active) return;
-    if (ids && ids.length === 0) return;
-    const next: TextStyleDef = {
-      fontFamily: typeof active.fontFamily === "string" ? active.fontFamily : "Inter",
-      fontSize: typeof active.fontSize === "number" ? active.fontSize : 32,
-      fontWeight: String(active.fontWeight ?? "400"),
-      lineHeight: typeof active.lineHeight === "number" ? active.lineHeight : 1.16,
-    };
-    const store = useCanvasStore.getState();
-    if (!ids) store.setTextStyle(boundStyle, next);
-    const chosen = ids ? new Set(ids) : null;
-    store.setSlides(
-      store.slides.map((slide) =>
-        !chosen || chosen.has(slide.id)
-          ? { ...slide, canvasJSON: applyTextStyleToSlide(slide.canvasJSON, boundStyle, next) }
-          : slide,
-      ),
-    );
-    if (!chosen || chosen.has(store.currentSlideId)) {
-      applyStyleOnCanvas(manager.canvas, boundStyle, next);
-      manager.commit();
-    }
-    store.setDirty(true);
-    setStyleOffer(null);
-  };
+      const applyStyleToCarousel = () => applyStyleToSlides(null);
 
-  const applyStyleToCarousel = () => applyStyleToSlides(null);
+      const assignFillSlot = (slot: (typeof PALETTE_SLOTS)[number]["id"]) => {
+        const color = palette[slot];
+        setFormValues((prev) =>
+          prev ? { ...prev, fill: color, gradientFrom: null, gradientTo: null } : null,
+        );
+        updateSelected({ fill: color, swibpSlot: slot } as unknown as Partial<FabricObject>);
+      };
 
-  const assignFillSlot = (slot: (typeof PALETTE_SLOTS)[number]["id"]) => {
-    const color = palette[slot];
-    setFormValues((prev) =>
-      prev ? { ...prev, fill: color, gradientFrom: null, gradientTo: null } : null,
-    );
-    updateSelected({ fill: color, swibpSlot: slot } as unknown as Partial<FabricObject>);
-  };
+      const alignSelection = (mode: ObjectAlign) => {
+        if (!manager) return;
+        alignSelected(manager.canvas, mode);
+        manager.commit();
+      };
 
-  const alignSelection = (mode: ObjectAlign) => {
-    if (!manager) return;
-    alignSelected(manager.canvas, mode);
-    manager.commit();
-  };
+      const isText =
+        formValues?.type === "text" ||
+        formValues?.type === "i-text" ||
+        formValues?.type === "textbox";
 
-  const isText =
-    formValues?.type === "text" ||
-    formValues?.type === "i-text" ||
-    formValues?.type === "textbox";
+      const [cropping, setCropping] = useState(false);
+      const [cropZoom, setCropZoom] = useState(1);
+      const [cropMax, setCropMax] = useState(4);
 
-  const [cropping, setCropping] = useState(false);
-  const [cropZoom, setCropZoom] = useState(1);
-  const [cropMax, setCropMax] = useState(4);
+      useEffect(() => {
+        if (!manager) return;
+        manager.crop.subscribe(() => {
+          setCropping(manager.crop.active);
+          setCropZoom(manager.crop.zoom);
+          setCropMax(manager.crop.maxZoom);
+        });
+      }, [manager]);
 
-  useEffect(() => {
-    if (!manager) return;
-    manager.crop.subscribe(() => {
-      setCropping(manager.crop.active);
-      setCropZoom(manager.crop.zoom);
-      setCropMax(manager.crop.maxZoom);
-    });
-  }, [manager]);
+      const isRect = formValues?.type === "rect";
+      const isImage = formValues?.type === "image";
+      const codeGroup =
+        selectedObject && isCodeBlock(selectedObject)
+          ? (selectedObject as Group)
+          : null;
+      const isCode = Boolean(codeGroup);
+      const canHaveRadius = isRect || isImage;
+      const canImportImage = canFillShape(formValues?.type);
 
-  const isRect = formValues?.type === "rect";
-  const isImage = formValues?.type === "image";
-  const codeGroup =
-    selectedObject && isCodeBlock(selectedObject)
-      ? (selectedObject as Group)
-      : null;
-  const isCode = Boolean(codeGroup);
-  const canHaveRadius = isRect || isImage;
-  const canImportImage = canFillShape(formValues?.type);
+      const typeLabel: Record<string, string> = {
+        rect: "Rectangle",
+        circle: "Circle",
+        triangle: "Triangle",
+        image: "Image",
+        text: "Text",
+        "i-text": "Text",
+        textbox: "Text",
+        path: "Shape",
+        group: isCode ? "Code" : "Group",
+      };
 
-  const typeLabel: Record<string, string> = {
-    rect: "Rectangle",
-    circle: "Circle",
-    triangle: "Triangle",
-    image: "Image",
-    text: "Text",
-    "i-text": "Text",
-    textbox: "Text",
-    path: "Shape",
-    group: isCode ? "Code" : "Group",
-  };
+      const panelTitle = isMulti
+        ? "Selection"
+        : formValues
+          ? (typeLabel[formValues.type] ?? formValues.type)
+          : "Properties";
 
-  const panelTitle = isMulti
-    ? "Selection"
-    : formValues
-      ? (typeLabel[formValues.type] ?? formValues.type)
-      : "Properties";
+      const textAlignOptions = (
+        [
+          { id: "left" as const, icon: AlignLeft, title: "Align left" },
+          { id: "center" as const, icon: AlignCenter, title: "Align center" },
+          { id: "right" as const, icon: AlignRight, title: "Align right" },
+          { id: "justify" as const, icon: AlignJustify, title: "Justify" },
+        ]
+      );
 
-  const textAlignOptions = (
-    [
-      { id: "left" as const, icon: AlignLeft, title: "Align left" },
-      { id: "center" as const, icon: AlignCenter, title: "Align center" },
-      { id: "right" as const, icon: AlignRight, title: "Align right" },
-      { id: "justify" as const, icon: AlignJustify, title: "Justify" },
-    ]
-  );
-
-  return (
-    <div className="relative flex h-full w-full overflow-hidden bg-background md:w-auto">
-      <div
-        className={cn(
-          "flex min-w-0 flex-col overflow-hidden transition-[width,opacity] duration-300 ease-out max-md:w-full max-md:flex-1",
-          isRightCollapsed
-            ? "pointer-events-none md:w-0 md:flex-none md:opacity-0"
-            : "md:w-72 md:flex-none md:opacity-100",
-        )}
-      >
-        {!selectedObject ? (
-          <>
-            <div className="flex h-11 shrink-0 items-center px-3.5">
-              <span className="text-[13px] font-semibold tracking-tight text-foreground">
-                Properties
-              </span>
-            </div>
-            <div className="flex flex-1 items-center justify-center px-6 pb-10 text-center text-[15px] leading-relaxed text-muted-foreground">
-              Select an object on the canvas to edit its style.
-            </div>
-          </>
-        ) : (
-          <>
-        <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
-          <div className="min-w-0">
-            <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
-              {panelTitle}
-            </span>
-            {isMulti ? (
-              <span className="block truncate text-[11px] text-muted-foreground">
-                {selectedCount} objects
-              </span>
-            ) : null}
-          </div>
-          {formValues ? (
-            <Button
-              type="button"
-              variant={formValues.isLocked ? "secondary" : "ghost"}
-              size="icon"
-              className={`size-8 shrink-0 ${btnRound}`}
-              onClick={handleToggleLock}
-              title={formValues.isLocked ? "Unlock" : "Lock"}
-            >
-              {formValues.isLocked ? (
-                <Lock className="size-3.5" />
-              ) : (
-                <Unlock className="size-3.5" />
-              )}
-            </Button>
-          ) : null}
-        </div>
-
-        <ScrollArea className="min-h-0 flex-1">
-          {isMulti ? (
-            <div className="flex flex-col gap-1 pb-6 pt-2">
-              <div className="space-y-3 px-3 pb-2">
-                <div className="space-y-2">
-                  <FieldLabel>Align</FieldLabel>
-                  <div className="grid grid-cols-4 gap-1 rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 p-1.5">
-                    {(
-                      [
-                        ["left", "Left", AlignHorizontalJustifyStart],
-                        ["center", "Center", AlignHorizontalJustifyCenter],
-                        ["right", "Right", AlignHorizontalJustifyEnd],
-                        ["distribute-x", "Spread X", AlignHorizontalSpaceBetween],
-                        ["top", "Top", AlignVerticalJustifyStart],
-                        ["middle", "Middle", AlignVerticalJustifyCenter],
-                        ["bottom", "Bottom", AlignVerticalJustifyEnd],
-                        ["distribute-y", "Spread Y", AlignVerticalSpaceBetween],
-                      ] as const
-                    ).map(([mode, label, Icon]) => (
-                      <button
-                        key={mode}
-                        type="button"
-                        title={label}
-                        onClick={() => alignSelection(mode)}
-                        className="flex h-9 flex-col items-center justify-center gap-0.5 rounded-xl text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
-                      >
-                        <Icon className="size-4" />
-                      </button>
-                    ))}
-                  </div>
+      return (
+        <div className="relative flex h-full w-full overflow-hidden bg-background md:w-auto">
+          <div
+            className={cn(
+              "flex min-w-0 flex-col overflow-hidden transition-[width,opacity] duration-300 ease-out max-md:w-full max-md:flex-1",
+              isRightCollapsed
+                ? "pointer-events-none md:w-0 md:flex-none md:opacity-0"
+                : "md:w-72 md:flex-none md:opacity-100",
+            )}
+          >
+            {!selectedObject ? (
+              <>
+                <div className="flex h-11 shrink-0 items-center px-3.5">
+                  <span className="text-[13px] font-semibold tracking-tight text-foreground">
+                    Properties
+                  </span>
                 </div>
-                <div className="space-y-1.5">
-                  <FieldLabel>Actions</FieldLabel>
-                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
-                    <button
-                      type="button"
-                      onClick={groupSelected}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      Group
-                    </button>
-                    <button
-                      type="button"
-                      onClick={copyStyle}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!copiedStyle}
-                      onClick={pasteStyle}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80 disabled:pointer-events-none disabled:opacity-35"
-                    >
-                      Paste
-                    </button>
-                  </div>
+                <div className="flex flex-1 items-center justify-center px-6 pb-10 text-center text-[15px] leading-relaxed text-muted-foreground">
+                  Select an object on the canvas to edit its style.
                 </div>
-              </div>
-              {formValues && (
-                <>
-                  {sharedText && (
-                    <CollapsibleGroup id="rs-multi-text" title="Typography" defaultOpen>
-                      <ToolCluster>
-                        <Button
-                          type="button"
-                          variant={formValues.isBold ? "secondary" : "ghost"}
-                          size="icon"
-                          className={`size-8 ${btnRound}`}
-                          onClick={() => toggleTextStyle("bold")}
-                        >
-                          <Bold className="size-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={formValues.isItalic ? "secondary" : "ghost"}
-                          size="icon"
-                          className={`size-8 ${btnRound}`}
-                          onClick={() => toggleTextStyle("italic")}
-                        >
-                          <Italic className="size-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={formValues.isUnderline ? "secondary" : "ghost"}
-                          size="icon"
-                          className={`size-8 ${btnRound}`}
-                          onClick={() => toggleTextStyle("underline")}
-                        >
-                          <Underline className="size-4" />
-                        </Button>
-                      </ToolCluster>
-                      <FontSelect
-                        value={formValues.fontFamily ?? "Inter"}
-                        onChange={(family) => {
-                          setFormValues((prev) => (prev ? { ...prev, fontFamily: family } : null));
-                          updateSelected({ fontFamily: family } as unknown as Partial<FabricObject>);
-                          if (manager) refreshCanvasFonts(manager.canvas);
-                        }}
-                      />
-                      <NumberField
-                        label="Size"
-                        value={formValues.fontSize ?? 32}
-                        onChange={(v) => updateProp("fontSize", v)}
-                        min={8}
-                        max={240}
-                        unit="px"
-                      />
-                      <NumberField
-                        label="Line height"
-                        value={formValues.lineHeight ?? 1.16}
-                        onChange={(v) => updateProp("lineHeight", v)}
-                        min={0.8}
-                        max={2.5}
-                        step={0.05}
-                        decimals={2}
-                      />
-                      <Segmented
-                        value={formValues.textAlign ?? "left"}
-                        options={textAlignOptions}
-                        onChange={(align) => updateProp("textAlign", align)}
-                      />
-                    </CollapsibleGroup>
-                  )}
-                  <CollapsibleGroup id="rs-multi-color" title="Color" defaultOpen>
-                    <ColorPicker
-                      label="Fill"
-                      value={formValues.fill}
-                      onChange={(hex) => {
-                        setFormValues((prev) =>
-                          prev ? { ...prev, fill: hex, gradientFrom: null, gradientTo: null } : null,
-                        );
-                        updateSelected({
-                          fill: hex,
-                          swibpSlot: "",
-                        } as unknown as Partial<FabricObject>);
-                      }}
-                    />
-                    <ColorPicker
-                      label="Stroke"
-                      value={formValues.stroke}
-                      onChange={(hex) => updateProp("stroke", hex)}
-                    />
-                    <NumberField
-                      label="Stroke width"
-                      value={formValues.strokeWidth}
-                      onChange={(v) => updateProp("strokeWidth", v)}
-                      min={0}
-                      max={40}
-                      unit="px"
-                    />
-                  </CollapsibleGroup>
-                  <CollapsibleGroup id="rs-multi-look" title="Appearance" defaultOpen={false}>
-                    <NumberField
-                      label="Opacity"
-                      value={Math.round(formValues.opacity * 100)}
-                      onChange={(v) => updateProp("opacity", v / 100)}
-                      min={0}
-                      max={100}
-                      unit="%"
-                    />
-                    <div className="flex flex-col gap-1.5">
-                      <FieldLabel>Blend</FieldLabel>
-                      <select
-                        value={
-                          BLEND_MODES.some((mode) => mode.id === formValues.blendMode)
-                            ? formValues.blendMode
-                            : "source-over"
-                        }
-                        onChange={(e) =>
-                          updateProp("blendMode", e.target.value, "globalCompositeOperation")
-                        }
-                        className="h-9 w-full rounded-full bg-muted/40 px-3 text-[13px] text-foreground outline-none"
-                      >
-                        {BLEND_MODES.map((mode) => (
-                          <option key={mode.id} value={mode.id}>
-                            {mode.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex items-center justify-between gap-2 rounded-full bg-muted/40 px-3 py-1.5">
-                      <FieldLabel>Shadow</FieldLabel>
-                      <Switch
-                        size="sm"
-                        checked={formValues.hasShadow}
-                        onCheckedChange={toggleShadow}
-                        aria-label="Enable shadow"
-                      />
-                    </div>
-                  </CollapsibleGroup>
-                </>
-              )}
-            </div>
-          ) : !formValues ? null : (
-            <div className="flex flex-col gap-1 pb-4 pt-1">
-              <div className="space-y-2 px-3 pb-2">
-                <div className="space-y-1.5">
-                  <FieldLabel>Position</FieldLabel>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={handleCenterH}
-                      className="flex h-10 items-center justify-center gap-2 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
-                    >
-                      <AlignHorizontalDistributeCenter className="size-4 shrink-0" />
-                      Center X
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCenterV}
-                      className="flex h-10 items-center justify-center gap-2 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
-                    >
-                      <AlignVerticalDistributeCenter className="size-4 shrink-0" />
-                      Center Y
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <FieldLabel>Layer</FieldLabel>
-                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
-                    <button
-                      type="button"
-                      onClick={handleBringForward}
-                      className="flex h-full flex-1 items-center justify-center gap-1.5 rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      <BringToFront className="size-3.5" />
-                      Forward
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSendBackwards}
-                      className="flex h-full flex-1 items-center justify-center gap-1.5 rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      <SendToBack className="size-3.5" />
-                      Back
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <FieldLabel>Style</FieldLabel>
-                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
-                    <button
-                      type="button"
-                      onClick={copyStyle}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!copiedStyle}
-                      onClick={pasteStyle}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80 disabled:pointer-events-none disabled:opacity-35"
-                    >
-                      Paste
-                    </button>
-                  </div>
-                </div>
-
-                {canUngroup(selectedObject) ? (
-                  <button
-                    type="button"
-                    onClick={ungroupSelected}
-                    className="flex h-10 w-full items-center justify-center rounded-full bg-muted/60 dark:bg-muted/25 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
-                  >
-                    {isCode ? "Break code block" : "Break group"}
-                  </button>
-                ) : null}
-
-                {canImportImage && !isImage ? (
-                  <>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      className={`h-10 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="size-4" />
-                      Fill with image
-                    </Button>
-                  </>
-                ) : null}
-              </div>
-
-              {codeGroup ? <CodeBlockInspector group={codeGroup} /> : null}
-
-              {(isImage || canImportImage) && selectedObject ? (
-                <InspectorAssets
-                  target={selectedObject}
-                  isImage={isImage}
-                  canFill={canImportImage}
-                />
-              ) : null}
-
-              {isImage && (
-                <CollapsibleGroup id="rs-image" title="Image" defaultOpen>
-                  {cropping ? (
-                    <div className="space-y-3 rounded-2xl bg-muted/40 p-3">
-                      <p className="text-[13px] leading-snug text-muted-foreground">
-                        Drag the picture to move it inside the frame.
-                      </p>
-                      <NumberField
-                        label="Zoom"
-                        value={cropZoom}
-                        min={1}
-                        max={cropMax}
-                        step={0.01}
-                        decimals={2}
-                        unit="×"
-                        onChange={(value) => manager?.crop.setZoom(value)}
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className={`h-9 flex-1 bg-background/70 ${btnRound}`}
-                          onClick={() => manager?.crop.cancel()}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          className={`h-9 flex-1 ${btnRound}`}
-                          onClick={() => manager?.crop.apply()}
-                        >
-                          Done
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex gap-1.5">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        className={`h-9 flex-1 justify-center gap-2 text-[13px] ${btnRound}`}
-                        onClick={() => selectedObject && manager?.crop.start(selectedObject)}
-                        disabled={imageToolBusy}
-                      >
-                        <Crop className="size-4" />
-                        Crop
-                      </Button>
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileUpload}
-                        accept="image/*"
-                        className="hidden"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className={`h-9 flex-1 justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={imageToolBusy}
-                      >
-                        <Upload className="size-4" />
-                        Replace
-                      </Button>
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <FieldLabel>Enhance</FieldLabel>
-                    <Button
-                      type="button"
-                      variant="default"
-                      size="sm"
-                      className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                      onClick={() => void removeBackground()}
-                      disabled={!canEnhance}
-                    >
-                      {enhanceBusy === "remove-bg" ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <WandSparkles className="size-4" />
-                      )}
-                      {enhanceBusy === "remove-bg" ? "Removing background…" : "Remove background"}
-                    </Button>
-                    <div className="flex gap-1.5">
-                      <Segmented
-                        value={String(enhanceScale)}
-                        options={([2, 3, 4] as UpscaleScale[]).map((value) => ({
-                          id: String(value),
-                          label: `${value}×`,
-                        }))}
-                        onChange={(id) => setEnhanceScale(Number(id) as UpscaleScale)}
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className={`h-9 shrink-0 gap-1.5 bg-muted/40 px-3 text-[13px] ${btnRound}`}
-                        onClick={() => void upscale()}
-                        disabled={!canEnhance}
-                        title={`Upscale ${enhanceScale}×`}
-                      >
-                        {enhanceBusy === "upscale" ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          <ScanSearch className="size-4" />
-                        )}
-                        Upscale
-                      </Button>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className={`h-9 w-full justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
-                      onClick={() => void magicLayer()}
-                      disabled={!canEnhance}
-                    >
-                      {enhanceBusy === "magic-layer" ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Layers2 className="size-4" />
-                      )}
-                      {enhanceBusy === "magic-layer" ? "Splitting layers…" : "Magic layer"}
-                    </Button>
-                    {enhanceError ? (
-                      <p className="text-[13px] leading-snug text-destructive">
-                        {enhanceError}
-                      </p>
+              </>
+            ) : (
+              <>
+                <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
+                  <div className="min-w-0">
+                    <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
+                      {panelTitle}
+                    </span>
+                    {isMulti ? (
+                      <span className="block truncate text-[11px] text-muted-foreground">
+                        {selectedCount} objects
+                      </span>
                     ) : null}
                   </div>
-                </CollapsibleGroup>
-              )}
-
-              {isText && (
-                <CollapsibleGroup id="rs-text" title="Typography" defaultOpen>
-                  <textarea
-                    rows={3}
-                    value={formValues.text ?? ""}
-                    onChange={(e) => updateProp("text", e.target.value)}
-                    placeholder="Text content"
-                    className="resize-none rounded-2xl bg-muted/40 p-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
-                  />
-                  <p
-                    className={cn(
-                      "text-[12px] leading-snug",
-                      textLengthStatus("Instagram", (formValues.text ?? "").trim().length).tooLong
-                        ? "text-destructive"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {textLengthNote("Instagram", (formValues.text ?? "").trim().length)}
-                  </p>
-
-                  <div className="flex items-center gap-1.5">
-                    <ToolCluster className="shrink-0">
-                      <Button
-                        type="button"
-                        variant={formValues.isBold ? "secondary" : "ghost"}
-                        size="icon"
-                        className={`size-8 ${btnRound}`}
-                        onClick={() => toggleTextStyle("bold")}
-                        title="Bold"
-                      >
-                        <Bold className="size-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={formValues.isItalic ? "secondary" : "ghost"}
-                        size="icon"
-                        className={`size-8 ${btnRound}`}
-                        onClick={() => toggleTextStyle("italic")}
-                        title="Italic"
-                      >
-                        <Italic className="size-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={formValues.isUnderline ? "secondary" : "ghost"}
-                        size="icon"
-                        className={`size-8 ${btnRound}`}
-                        onClick={() => toggleTextStyle("underline")}
-                        title="Underline"
-                      >
-                        <Underline className="size-4" />
-                      </Button>
-                    </ToolCluster>
-                    <Segmented
-                      value={formValues.textAlign ?? "left"}
-                      options={textAlignOptions}
-                      onChange={(align) => updateProp("textAlign", align)}
-                      className="flex-1"
-                    />
-                  </div>
-
-                  <div className="flex gap-1.5">
+                  {formValues ? (
                     <Button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      className={`h-8 flex-1 gap-1.5 bg-muted/40 text-[13px] ${btnRound}`}
-                      onClick={() => applyTextList("bullet")}
+                      variant={formValues.isLocked ? "secondary" : "ghost"}
+                      size="icon"
+                      className={`size-8 shrink-0 ${btnRound}`}
+                      onClick={handleToggleLock}
+                      title={formValues.isLocked ? "Unlock" : "Lock"}
                     >
-                      <List className="size-3.5" />
-                      Bullets
+                      {formValues.isLocked ? (
+                        <Lock className="size-3.5" />
+                      ) : (
+                        <Unlock className="size-3.5" />
+                      )}
                     </Button>
-                    <Button
+                  ) : null}
+                </div>
+
+                <ScrollArea className="min-h-0 flex-1">
+                {isMulti ? (
+                <div className="flex flex-col gap-3.5 pb-6 pt-1.5">
+                  {/* --- 1. FIGMA ALIGN & DISTRIBUTE TOOLBAR --- */}
+                  <div className="mx-3 flex items-center justify-between bg-muted/40 p-2 rounded-2xl">
+                    {/* Выравнивание по горизонтали */}
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      className={`h-8 flex-1 gap-1.5 bg-muted/40 text-[13px] ${btnRound}`}
-                      onClick={() => applyTextList("number")}
+                      title="Align left"
+                      onClick={() => alignSelection("left")}
+                      className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
                     >
-                      <ListOrdered className="size-3.5" />
-                      Numbers
-                    </Button>
+                      <AlignHorizontalJustifyStart className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Align horizontal center"
+                      onClick={() => alignSelection("center")}
+                      className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                    >
+                      <AlignHorizontalJustifyCenter className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Align right"
+                      onClick={() => alignSelection("right")}
+                      className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                    >
+                      <AlignHorizontalJustifyEnd className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Distribute horizontal spacing"
+                      onClick={() => alignSelection("distribute-x")}
+                      className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                    >
+                      <AlignHorizontalSpaceBetween className="size-4" />
+                    </button>
+
+                    <div className="h-4 w-px bg-border/60" />
+
+                    {/* Выравнивание по вертикали */}
+                    <button
+                      type="button"
+                      title="Align top"
+                      onClick={() => alignSelection("top")}
+                      className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                    >
+                      <AlignVerticalJustifyStart className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Align vertical center"
+                      onClick={() => alignSelection("middle")}
+                      className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                    >
+                      <AlignVerticalJustifyCenter className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Align bottom"
+                      onClick={() => alignSelection("bottom")}
+                      className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                    >
+                      <AlignVerticalJustifyEnd className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Distribute vertical spacing"
+                      onClick={() => alignSelection("distribute-y")}
+                      className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                    >
+                      <AlignVerticalSpaceBetween className="size-4" />
+                    </button>
                   </div>
 
-                  <FontSelect
-                    value={formValues.fontFamily ?? "Inter"}
-                    onChange={(family) => {
-                      setFormValues((prev) =>
-                        prev ? { ...prev, fontFamily: family } : null,
-                      );
-                      updateSelected({
-                        fontFamily: family,
-                      } as unknown as Partial<FabricObject>);
-                      setFontOffer(family);
-                      if (manager) refreshCanvasFonts(manager.canvas);
-                    }}
-                  />
-
-                  {fontOffer && (
-                    <div className="flex flex-col gap-2 rounded-2xl bg-muted/40 p-2.5">
-                      <p className="text-[13px] leading-snug text-foreground">
-                        Use {fontOffer} on which slides?
-                      </p>
-                      <div className="flex gap-1">
-                        <Button
-                          type="button"
-                          size="sm"
-                          className={`h-7 flex-1 text-[13px] ${btnRound}`}
-                          onClick={() => {
-                            applyCarouselFont(fontOffer, manager);
-                            setFontOffer(null);
-                          }}
-                        >
-                          All
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className={`h-7 flex-1 bg-background/60 text-[13px] ${btnRound}`}
-                          disabled={markedSlideIds.length === 0}
-                          title={
-                            markedSlideIds.length === 0
-                              ? "Mark slides with the corner check"
-                              : `Use ${fontOffer} on ${markedSlideIds.length} marked slides`
-                          }
-                          onClick={() => {
-                            applyCarouselFont(fontOffer, manager, markedSlideIds);
-                            setFontOffer(null);
-                          }}
-                        >
-                          Marked
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className={`h-7 flex-1 text-[13px] ${btnRound}`}
-                          onClick={() => setFontOffer(null)}
-                        >
-                          This
-                        </Button>
-                      </div>
+                  {/* --- 2. СЕКЦИЯ ДЕЙСТВИЙ (GROUP & STYLES) --- */}
+                  <div className="mx-3 flex items-center justify-between">
+                    <div className="flex items-center gap-1 rounded-full bg-muted/50 p-1">
+                      <button
+                        type="button"
+                        onClick={groupSelected}
+                        className="rounded-full px-3 py-1 text-[12px] font-medium text-foreground transition-colors hover:bg-background"
+                      >
+                        Group
+                      </button>
+                      <div className="mx-0.5 h-3.5 w-px bg-border/60" />
+                      <button
+                        type="button"
+                        onClick={copyStyle}
+                        className="rounded-full px-2.5 py-1 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                      >
+                        Copy
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!copiedStyle}
+                        onClick={pasteStyle}
+                        className="rounded-full px-2.5 py-1 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-35"
+                      >
+                        Paste
+                      </button>
                     </div>
-                  )}
+                  </div>
 
-                  <NumberField
-                    label="Size"
-                    value={formValues.fontSize ?? 32}
-                    onChange={(v) => {
-                      updateProp("fontSize", v);
-                      noteStyleEdit();
-                    }}
-                    min={10}
-                    max={140}
-                    unit="px"
-                  />
-                  <NumberField
-                    label="Line height"
-                    value={formValues.lineHeight ?? 1.16}
-                    onChange={(v) => updateProp("lineHeight", v)}
-                    min={0.8}
-                    max={2.5}
-                    step={0.05}
-                    decimals={2}
-                  />
-                  <NumberField
-                    label="Letter spacing"
-                    value={formValues.charSpacing ?? 0}
-                    onChange={(v) => updateProp("charSpacing", v)}
-                    min={-200}
-                    max={800}
-                    step={10}
-                  />
-
-                  {styleOffer && (
-                    <div className="flex flex-col gap-2 rounded-2xl bg-muted/40 p-2.5">
-                      <p className="text-[13px] leading-snug text-foreground">
-                        Update every{" "}
-                        {TEXT_STYLES.find((style) => style.id === styleOffer)?.label.toLowerCase()}{" "}
-                        on which slides?
-                      </p>
-                      <div className="flex gap-1">
-                        <Button
-                          type="button"
-                          size="sm"
-                          className={`h-7 flex-1 text-[13px] ${btnRound}`}
-                          onClick={applyStyleToCarousel}
-                        >
-                          All
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className={`h-7 flex-1 bg-background/60 text-[13px] ${btnRound}`}
-                          disabled={markedSlideIds.length === 0}
-                          title={
-                            markedSlideIds.length === 0
-                              ? "Mark slides with the corner check"
-                              : "Update marked slides"
-                          }
-                          onClick={() => applyStyleToSlides(markedSlideIds)}
-                        >
-                          Marked
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className={`h-7 flex-1 text-[13px] ${btnRound}`}
-                          onClick={() => setStyleOffer(null)}
-                        >
-                          This
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CollapsibleGroup>
-              )}
-
-              <CollapsibleGroup
-                id="rs-fill"
-                title="Color"
-                defaultOpen={!isImage}
-              >
-                {!isImage ? (
-                  <>
-                    <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/30 p-1.5">
-                      {PALETTE_SLOTS.map((slot) => (
-                        <button
-                          key={slot.id}
-                          type="button"
-                          title={slot.label}
-                          onClick={() => assignFillSlot(slot.id)}
-                          className={cn(
-                            "flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] transition-colors",
-                            boundSlot === slot.id
-                              ? "bg-background text-foreground"
-                              : "text-muted-foreground hover:bg-muted/50",
-                          )}
-                        >
-                          <span
-                            className="size-4 rounded-full ring-1 ring-border/50"
-                            style={{ backgroundColor: palette[slot.id] }}
+                  {formValues && (
+                    <>
+                      {sharedText && (
+                        <CollapsibleGroup id="rs-multi-text" title="Typography" defaultOpen>
+                          <ToolCluster>
+                            <Button
+                              type="button"
+                              variant={formValues.isBold ? "secondary" : "ghost"}
+                              size="icon"
+                              className={`size-8 ${btnRound}`}
+                              onClick={() => toggleTextStyle("bold")}
+                            >
+                              <Bold className="size-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant={formValues.isItalic ? "secondary" : "ghost"}
+                              size="icon"
+                              className={`size-8 ${btnRound}`}
+                              onClick={() => toggleTextStyle("italic")}
+                            >
+                              <Italic className="size-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant={formValues.isUnderline ? "secondary" : "ghost"}
+                              size="icon"
+                              className={`size-8 ${btnRound}`}
+                              onClick={() => toggleTextStyle("underline")}
+                            >
+                              <Underline className="size-4" />
+                            </Button>
+                          </ToolCluster>
+                          <FontSelect
+                            value={formValues.fontFamily ?? "Inter"}
+                            onChange={(family) => {
+                              setFormValues((prev) => (prev ? { ...prev, fontFamily: family } : null));
+                              updateSelected({ fontFamily: family } as unknown as Partial<FabricObject>);
+                              if (manager) refreshCanvasFonts(manager.canvas);
+                            }}
                           />
-                          {slot.label}
+                          <NumberField
+                            label="Size"
+                            value={formValues.fontSize ?? 32}
+                            onChange={(v) => updateProp("fontSize", v)}
+                            min={8}
+                            max={240}
+                            unit="px"
+                          />
+                          <NumberField
+                            label="Line height"
+                            value={formValues.lineHeight ?? 1.16}
+                            onChange={(v) => updateProp("lineHeight", v)}
+                            min={0.8}
+                            max={2.5}
+                            step={0.05}
+                            decimals={2}
+                          />
+                          <Segmented
+                            value={formValues.textAlign ?? "left"}
+                            options={textAlignOptions}
+                            onChange={(align) => updateProp("textAlign", align)}
+                          />
+                        </CollapsibleGroup>
+                      )}
+
+                      <CollapsibleGroup id="rs-multi-color" title="Color" defaultOpen>
+                        <ColorPicker
+                          label="Fill"
+                          value={formValues.fill}
+                          onChange={(hex) => {
+                            setFormValues((prev) =>
+                              prev ? { ...prev, fill: hex, gradientFrom: null, gradientTo: null } : null,
+                            );
+                            updateSelected({
+                              fill: hex,
+                              swibpSlot: "",
+                            } as unknown as Partial<FabricObject>);
+                          }}
+                        />
+                        <ColorPicker
+                          label="Stroke"
+                          value={formValues.stroke}
+                          onChange={(hex) => updateProp("stroke", hex)}
+                        />
+                        <NumberField
+                          label="Stroke width"
+                          value={formValues.strokeWidth}
+                          onChange={(v) => updateProp("strokeWidth", v)}
+                          min={0}
+                          max={40}
+                          unit="px"
+                        />
+                      </CollapsibleGroup>
+
+                      <CollapsibleGroup id="rs-multi-look" title="Appearance" defaultOpen={false}>
+                        <NumberField
+                          label="Opacity"
+                          value={Math.round(formValues.opacity * 100)}
+                          onChange={(v) => updateProp("opacity", v / 100)}
+                          min={0}
+                          max={100}
+                          unit="%"
+                        />
+                        <div className="flex flex-col gap-1.5">
+                          <FieldLabel>Blend</FieldLabel>
+                          <select
+                            value={
+                              BLEND_MODES.some((mode) => mode.id === formValues.blendMode)
+                                ? formValues.blendMode
+                                : "source-over"
+                            }
+                            onChange={(e) =>
+                              updateProp("blendMode", e.target.value, "globalCompositeOperation")
+                            }
+                            className="h-9 w-full rounded-xl bg-muted/40 px-3 text-[13px] text-foreground outline-none transition-colors hover:bg-muted/60"
+                          >
+                            {BLEND_MODES.map((mode) => (
+                              <option key={mode.id} value={mode.id}>
+                                {mode.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 rounded-xl bg-muted/40 px-3.5 py-2">
+                          <FieldLabel>Shadow</FieldLabel>
+                          <Switch
+                            size="sm"
+                            checked={formValues.hasShadow}
+                            onCheckedChange={toggleShadow}
+                            aria-label="Enable shadow"
+                          />
+                        </div>
+                      </CollapsibleGroup>
+                    </>
+                  )}
+                </div>
+              ) : !formValues ? null : (
+                    <div className="flex flex-col gap-3.5 pb-6 pt-1.5">
+                      {/* --- 1. ВЫРАВНИВАНИЕ (ALIGN TOOLBAR) --- */}
+                      <div className="mx-3 flex items-center justify-between rounded-2xl bg-muted/30 p-1.5">
+                        <button
+                          type="button"
+                          title="Align left"
+                          onClick={() => alignSelection("left")}
+                          className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                        >
+                          <AlignHorizontalJustifyStart className="size-4" />
                         </button>
-                      ))}
-                    </div>
-                    <Segmented
-                      value={formValues.gradientFrom ? "gradient" : "solid"}
-                      options={[
-                        { id: "solid", label: "Solid" },
-                        { id: "gradient", label: "Gradient" },
-                      ]}
-                      onChange={(mode) => {
-                        if (mode === "solid") {
-                          clearGradient();
-                          return;
-                        }
-                        setGradient(
-                          formValues.gradientFrom || formValues.fill || "#111111",
-                          formValues.gradientTo || "#ffffff",
-                        );
-                      }}
-                    />
-                    {formValues.gradientFrom && formValues.gradientTo ? (
-                      <>
-                        <ColorPicker
-                          label="Start"
-                          value={formValues.gradientFrom}
-                          onChange={(hex) => setGradient(hex, formValues.gradientTo || "#ffffff")}
+                        <button
+                          type="button"
+                          title="Center horizontally"
+                          onClick={handleCenterH}
+                          className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                        >
+                          <AlignHorizontalJustifyCenter className="size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          title="Align right"
+                          onClick={() => alignSelection("right")}
+                          className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                        >
+                          <AlignHorizontalJustifyEnd className="size-4" />
+                        </button>
+                        <div className="h-4 w-px bg-border/60" />
+                        <button
+                          type="button"
+                          title="Align top"
+                          onClick={() => alignSelection("top")}
+                          className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                        >
+                          <AlignVerticalJustifyStart className="size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          title="Center vertically"
+                          onClick={handleCenterV}
+                          className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                        >
+                          <AlignVerticalJustifyCenter className="size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          title="Align bottom"
+                          onClick={() => alignSelection("bottom")}
+                          className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                        >
+                          <AlignVerticalJustifyEnd className="size-4" />
+                        </button>
+                      </div>
+
+                      {/* --- 2. РАЗМЕРЫ И ТРАНСФОРМАЦИЯ (ПОЛЯ ВВОДА) --- */}
+                      <div className="grid grid-cols-2 gap-2.5 px-3">
+                        <div className="flex h-9 items-center gap-2 rounded-xl bg-muted/40 px-3 border border-transparent transition-all focus-within:border-border focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/20">
+                          <span className="text-[12px] font-semibold uppercase text-muted-foreground select-none">W</span>
+                          <input
+                            type="number"
+                            value={Math.round(formValues.width)}
+                            onChange={(e) => setWidth(Number(e.target.value))}
+                            className="w-full bg-transparent font-mono text-[13px] outline-none"
+                          />
+                        </div>
+                        <div className="flex h-9 items-center gap-2 rounded-xl bg-muted/40 px-3 border border-transparent transition-all focus-within:border-border focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/20">
+                          <span className="text-[12px] font-semibold uppercase text-muted-foreground select-none">H</span>
+                          <input
+                            type="number"
+                            value={Math.round(formValues.height)}
+                            onChange={(e) => setHeight(Number(e.target.value))}
+                            className="w-full bg-transparent font-mono text-[13px] outline-none"
+                          />
+                        </div>
+                        <div className="flex h-9 items-center gap-2 rounded-xl bg-muted/40 px-3 border border-transparent transition-all focus-within:border-border focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/20">
+                          <span className="text-[12px] font-semibold uppercase text-muted-foreground select-none">∠</span>
+                          <input
+                            type="number"
+                            value={Math.round(formValues.angle)}
+                            onChange={(e) => updateProp("angle", Number(e.target.value))}
+                            className="w-full bg-transparent font-mono text-[13px] outline-none"
+                          />
+                        </div>
+                        {canHaveRadius ? (
+                          <div className="flex h-9 items-center gap-2 rounded-xl bg-muted/40 px-3 border border-transparent transition-all focus-within:border-border focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/20">
+                            <span className="text-[12px] font-semibold uppercase text-muted-foreground select-none">R</span>
+                            <input
+                              type="number"
+                              value={Math.round(formValues.rx ?? 0)}
+                              onChange={(e) => updateCornerRadius(Number(e.target.value))}
+                              className="w-full bg-transparent font-mono text-[13px] outline-none"
+                            />
+                          </div>
+                        ) : (
+                          <div />
+                        )}
+                      </div>
+
+                      {/* --- 3. СЕКЦИЯ LAYER & ДЕЙСТВИЯ --- */}
+                      <div className="mx-3 space-y-2.5 rounded-2xl">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[13px] font-semibold text-foreground">Layer</span>
+                          <div className="flex items-center gap-1 rounded-full bg-muted/50 p-1">
+                            <button
+                              type="button"
+                              title="Bring forward"
+                              onClick={handleBringForward}
+                              className="flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                            >
+                              <BringToFront className="size-4" />
+                            </button>
+                            <button
+                              type="button"
+                              title="Send backward"
+                              onClick={handleSendBackwards}
+                              className="flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                            >
+                              <SendToBack className="size-4" />
+                            </button>
+                            <div className="mx-1 h-3.5 w-px bg-border/60" />
+                            <button
+                              type="button"
+                              title="Copy properties"
+                              onClick={copyStyle}
+                              className="rounded-full px-2.5 py-1 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                            >
+                              Copy
+                            </button>
+                            <button
+                              type="button"
+                              title="Paste properties"
+                              disabled={!copiedStyle}
+                              onClick={pasteStyle}
+                              className="rounded-full px-2.5 py-1 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground disabled:opacity-35"
+                            >
+                              Paste
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Режим наложения и прозрачность */}
+                        {/* Разгруппировка */}
+                        {canUngroup(selectedObject) && (
+                          <button
+                            type="button"
+                            onClick={ungroupSelected}
+                            className="flex h-9 w-full items-center justify-center rounded-xl bg-muted/40 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                          >
+                            {isCode ? "Ungroup code block" : "Ungroup"}
+                          </button>
+                        )}
+
+                        {/* Загрузка картинки в форму */}
+                        {canImportImage && !isImage && (
+                          <>
+                            <input
+                              type="file"
+                              ref={fileInputRef}
+                              onChange={handleFileUpload}
+                              accept="image/*"
+                              className="hidden"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-muted/40 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                            >
+                              <Upload className="size-4" />
+                              Fill with image
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      {codeGroup ? <CodeBlockInspector group={codeGroup} /> : null}
+
+                      {(isImage || canImportImage) && selectedObject ? (
+                        <InspectorAssets
+                          target={selectedObject}
+                          isImage={isImage}
+                          canFill={canImportImage}
                         />
-                        <ColorPicker
-                          label="End"
-                          value={formValues.gradientTo}
-                          onChange={(hex) => setGradient(formValues.gradientFrom || "#111111", hex)}
-                        />
-                      </>
-                    ) : (
-                      <ColorPicker
-                        label={isText ? "Text color" : "Fill"}
-                        value={formValues.fill}
-                        onChange={(hex) => {
-                          setFormValues((prev) => (prev ? { ...prev, fill: hex } : null));
-                          updateSelected({
-                            fill: hex,
-                            swibpSlot: "",
-                          } as unknown as Partial<FabricObject>);
-                        }}
-                      />
-                    )}
-                  </>
-                ) : null}
-                {isText && (
-                  <ColorPicker
-                    label="Background"
-                    value={
-                      formValues.backgroundColor === "transparent"
-                        ? ""
-                        : (formValues.backgroundColor ?? "")
-                    }
-                    onChange={(hex) => updateProp("backgroundColor", hex)}
-                    trailing={
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className={`h-7 px-2 text-[13px] ${btnRound}`}
-                        onClick={() => updateProp("backgroundColor", "transparent")}
+                      ) : null}
+                      {isImage && (
+                        <CollapsibleGroup id="rs-image" title="Image" defaultOpen>
+                          {cropping ? (
+                            <div className="space-y-3 rounded-2xl bg-muted/40 p-3">
+                              <p className="text-[13px] leading-snug text-muted-foreground">
+                                Drag the picture to move it inside the frame.
+                              </p>
+                              <NumberField
+                                label="Zoom"
+                                value={cropZoom}
+                                min={1}
+                                max={cropMax}
+                                step={0.01}
+                                decimals={2}
+                                unit="×"
+                                onChange={(value) => manager?.crop.setZoom(value)}
+                              />
+                              <div className="flex gap-2">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-9 flex-1 bg-background/70 ${btnRound}`}
+                                  onClick={() => manager?.crop.cancel()}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  className={`h-9 flex-1 ${btnRound}`}
+                                  onClick={() => manager?.crop.apply()}
+                                >
+                                  Done
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex gap-1.5">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                className={`h-9 flex-1 justify-center gap-2 text-[13px] ${btnRound}`}
+                                onClick={() => selectedObject && manager?.crop.start(selectedObject)}
+                                disabled={imageToolBusy}
+                              >
+                                <Crop className="size-4" />
+                                Crop
+                              </Button>
+                              <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                                accept="image/*"
+                                className="hidden"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className={`h-9 flex-1 justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={imageToolBusy}
+                              >
+                                <Upload className="size-4" />
+                                Replace
+                              </Button>
+                            </div>
+                          )}
+
+                          <div className="space-y-2">
+                            <FieldLabel>Enhance</FieldLabel>
+                            <Button
+                              type="button"
+                              variant="default"
+                              size="sm"
+                              className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
+                              onClick={() => void removeBackground()}
+                              disabled={!canEnhance}
+                            >
+                              {enhanceBusy === "remove-bg" ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                <WandSparkles className="size-4" />
+                              )}
+                              {enhanceBusy === "remove-bg" ? "Removing background…" : "Remove background"}
+                            </Button>
+                            <div className="flex gap-1.5">
+                              <Segmented
+                                value={String(enhanceScale)}
+                                options={([2, 3, 4] as UpscaleScale[]).map((value) => ({
+                                  id: String(value),
+                                  label: `${value}×`,
+                                }))}
+                                onChange={(id) => setEnhanceScale(Number(id) as UpscaleScale)}
+                                className="flex-1"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className={`h-9 shrink-0 gap-1.5 bg-muted/40 px-3 text-[13px] ${btnRound}`}
+                                onClick={() => void upscale()}
+                                disabled={!canEnhance}
+                                title={`Upscale ${enhanceScale}×`}
+                              >
+                                {enhanceBusy === "upscale" ? (
+                                  <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                  <ScanSearch className="size-4" />
+                                )}
+                                Upscale
+                              </Button>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className={`h-9 w-full justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
+                              onClick={() => void magicLayer()}
+                              disabled={!canEnhance}
+                            >
+                              {enhanceBusy === "magic-layer" ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                <Layers2 className="size-4" />
+                              )}
+                              {enhanceBusy === "magic-layer" ? "Splitting layers…" : "Magic layer"}
+                            </Button>
+                            {enhanceError ? (
+                              <p className="text-[13px] leading-snug text-destructive">
+                                {enhanceError}
+                              </p>
+                            ) : null}
+                          </div>
+                        </CollapsibleGroup>
+                      )}
+
+                      {isText && (
+                        <CollapsibleGroup id="rs-text" title="Typography" defaultOpen>
+                          <textarea
+                            rows={3}
+                            value={formValues.text ?? ""}
+                            onChange={(e) => updateProp("text", e.target.value)}
+                            placeholder="Text content"
+                            className="resize-none w-full rounded-2xl bg-muted/40 p-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+                          />
+                          <p
+                            className={cn(
+                              "text-[12px] leading-snug",
+                              textLengthStatus("Instagram", (formValues.text ?? "").trim().length).tooLong
+                                ? "text-destructive"
+                                : "text-muted-foreground",
+                            )}
+                          >
+                            {textLengthNote("Instagram", (formValues.text ?? "").trim().length)}
+                          </p>
+
+                          <div className="flex items-center gap-1.5">
+                            <ToolCluster className="shrink-0">
+                              <Button
+                                type="button"
+                                variant={formValues.isBold ? "secondary" : "ghost"}
+                                size="icon"
+                                className={`size-8 ${btnRound}`}
+                                onClick={() => toggleTextStyle("bold")}
+                                title="Bold"
+                              >
+                                <Bold className="size-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={formValues.isItalic ? "secondary" : "ghost"}
+                                size="icon"
+                                className={`size-8 ${btnRound}`}
+                                onClick={() => toggleTextStyle("italic")}
+                                title="Italic"
+                              >
+                                <Italic className="size-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={formValues.isUnderline ? "secondary" : "ghost"}
+                                size="icon"
+                                className={`size-8 ${btnRound}`}
+                                onClick={() => toggleTextStyle("underline")}
+                                title="Underline"
+                              >
+                                <Underline className="size-4" />
+                              </Button>
+                            </ToolCluster>
+                            <Segmented
+                              value={formValues.textAlign ?? "left"}
+                              options={textAlignOptions}
+                              onChange={(align) => updateProp("textAlign", align)}
+                              className="flex-1"
+                            />
+                          </div>
+
+                          <div className="flex gap-1.5">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className={`h-8 flex-1 gap-1.5 bg-muted/40 text-[13px] ${btnRound}`}
+                              onClick={() => applyTextList("bullet")}
+                            >
+                              <List className="size-3.5" />
+                              Bullets
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className={`h-8 flex-1 gap-1.5 bg-muted/40 text-[13px] ${btnRound}`}
+                              onClick={() => applyTextList("number")}
+                            >
+                              <ListOrdered className="size-3.5" />
+                              Numbers
+                            </Button>
+                          </div>
+
+                          <FontSelect
+                            value={formValues.fontFamily ?? "Inter"}
+                            onChange={(family) => {
+                              setFormValues((prev) =>
+                                prev ? { ...prev, fontFamily: family } : null,
+                              );
+                              updateSelected({
+                                fontFamily: family,
+                              } as unknown as Partial<FabricObject>);
+                              setFontOffer(family);
+                              if (manager) refreshCanvasFonts(manager.canvas);
+                            }}
+                          />
+
+                          {fontOffer && (
+                            <div className="flex flex-col gap-2 rounded-2xl bg-muted/40 p-2.5">
+                              <p className="text-[13px] leading-snug text-foreground">
+                                Use {fontOffer} on which slides?
+                              </p>
+                              <div className="flex gap-1">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  className={`h-7 flex-1 text-[13px] ${btnRound}`}
+                                  onClick={() => {
+                                    applyCarouselFont(fontOffer, manager);
+                                    setFontOffer(null);
+                                  }}
+                                >
+                                  All
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 flex-1 bg-background/60 text-[13px] ${btnRound}`}
+                                  disabled={markedSlideIds.length === 0}
+                                  title={
+                                    markedSlideIds.length === 0
+                                      ? "Mark slides with the corner check"
+                                      : `Use ${fontOffer} on ${markedSlideIds.length} marked slides`
+                                  }
+                                  onClick={() => {
+                                    applyCarouselFont(fontOffer, manager, markedSlideIds);
+                                    setFontOffer(null);
+                                  }}
+                                >
+                                  Marked
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 flex-1 text-[13px] ${btnRound}`}
+                                  onClick={() => setFontOffer(null)}
+                                >
+                                  This
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          <NumberField
+                            label="Size"
+                            value={formValues.fontSize ?? 32}
+                            onChange={(v) => {
+                              updateProp("fontSize", v);
+                              noteStyleEdit();
+                            }}
+                            min={10}
+                            max={140}
+                            unit="px"
+                          />
+                          <NumberField
+                            label="Line height"
+                            value={formValues.lineHeight ?? 1.16}
+                            onChange={(v) => updateProp("lineHeight", v)}
+                            min={0.8}
+                            max={2.5}
+                            step={0.05}
+                            decimals={2}
+                          />
+                          <NumberField
+                            label="Letter spacing"
+                            value={formValues.charSpacing ?? 0}
+                            onChange={(v) => updateProp("charSpacing", v)}
+                            min={-200}
+                            max={800}
+                            step={10}
+                          />
+
+                          {styleOffer && (
+                            <div className="flex flex-col gap-2 rounded-2xl bg-muted/40 p-2.5">
+                              <p className="text-[13px] leading-snug text-foreground">
+                                Update every{" "}
+                                {TEXT_STYLES.find((style) => style.id === styleOffer)?.label.toLowerCase()}{" "}
+                                on which slides?
+                              </p>
+                              <div className="flex gap-1">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  className={`h-7 flex-1 text-[13px] ${btnRound}`}
+                                  onClick={applyStyleToCarousel}
+                                >
+                                  All
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 flex-1 bg-background/60 text-[13px] ${btnRound}`}
+                                  disabled={markedSlideIds.length === 0}
+                                  title={
+                                    markedSlideIds.length === 0
+                                      ? "Mark slides with the corner check"
+                                      : "Update marked slides"
+                                  }
+                                  onClick={() => applyStyleToSlides(markedSlideIds)}
+                                >
+                                  Marked
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 flex-1 text-[13px] ${btnRound}`}
+                                  onClick={() => setStyleOffer(null)}
+                                >
+                                  This
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </CollapsibleGroup>
+                      )}
+
+                      <CollapsibleGroup
+                        id="rs-fill"
+                        title="Color"
+                        defaultOpen={!isImage}
                       >
-                        Clear
-                      </Button>
-                    }
-                  />
-                )}
-                <ColorPicker
-                  label="Stroke"
-                  value={formValues.stroke}
-                  onChange={(hex) => updateProp("stroke", hex)}
-                />
-                <NumberField
-                  label="Stroke width"
-                  value={formValues.strokeWidth}
-                  onChange={(v) => updateProp("strokeWidth", v)}
-                  min={0}
-                  max={20}
-                  unit="px"
-                />
-              </CollapsibleGroup>
+                        {!isImage ? (
+                          <>
+                            <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/30 p-1.5">
+                              {PALETTE_SLOTS.map((slot) => (
+                                <button
+                                  key={slot.id}
+                                  type="button"
+                                  title={slot.label}
+                                  onClick={() => assignFillSlot(slot.id)}
+                                  className={cn(
+                                    "flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] transition-colors",
+                                    boundSlot === slot.id
+                                      ? "bg-background text-foreground"
+                                      : "text-muted-foreground hover:bg-muted/50",
+                                  )}
+                                >
+                                  <span
+                                    className="size-4 rounded-full ring-1 ring-border/50"
+                                    style={{ backgroundColor: palette[slot.id] }}
+                                  />
+                                  {slot.label}
+                                </button>
+                              ))}
+                            </div>
+                            <Segmented
+                              value={formValues.gradientFrom ? "gradient" : "solid"}
+                              options={[
+                                { id: "solid", label: "Solid" },
+                                { id: "gradient", label: "Gradient" },
+                              ]}
+                              onChange={(mode) => {
+                                if (mode === "solid") {
+                                  clearGradient();
+                                  return;
+                                }
+                                setGradient(
+                                  formValues.gradientFrom || formValues.fill || "#111111",
+                                  formValues.gradientTo || "#ffffff",
+                                );
+                              }}
+                            />
+                            {formValues.gradientFrom && formValues.gradientTo ? (
+                              <>
+                                <ColorPicker
+                                  label="Start"
+                                  value={formValues.gradientFrom}
+                                  onChange={(hex) => setGradient(hex, formValues.gradientTo || "#ffffff")}
+                                />
+                                <ColorPicker
+                                  label="End"
+                                  value={formValues.gradientTo}
+                                  onChange={(hex) => setGradient(formValues.gradientFrom || "#111111", hex)}
+                                />
+                              </>
+                            ) : (
+                              <ColorPicker
+                                label={isText ? "Text color" : "Fill"}
+                                value={formValues.fill}
+                                onChange={(hex) => {
+                                  setFormValues((prev) => (prev ? { ...prev, fill: hex } : null));
+                                  updateSelected({
+                                    fill: hex,
+                                    swibpSlot: "",
+                                  } as unknown as Partial<FabricObject>);
+                                }}
+                              />
+                            )}
+                          </>
+                        ) : null}
+                        {isText && (
+                          <ColorPicker
+                            label="Background"
+                            value={
+                              formValues.backgroundColor === "transparent"
+                                ? ""
+                                : (formValues.backgroundColor ?? "")
+                            }
+                            onChange={(hex) => updateProp("backgroundColor", hex)}
+                            trailing={
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className={`h-7 px-2 text-[13px] ${btnRound}`}
+                                onClick={() => updateProp("backgroundColor", "transparent")}
+                              >
+                                Clear
+                              </Button>
+                            }
+                          />
+                        )}
+                        <ColorPicker
+                          label="Stroke"
+                          value={formValues.stroke}
+                          onChange={(hex) => updateProp("stroke", hex)}
+                        />
+                        <NumberField
+                          label="Stroke width"
+                          value={formValues.strokeWidth}
+                          onChange={(v) => updateProp("strokeWidth", v)}
+                          min={0}
+                          max={20}
+                          unit="px"
+                        />
+                      </CollapsibleGroup>
 
-              <CollapsibleGroup
-                id="rs-position"
-                title="Size & rotate"
-                defaultOpen={!isText && !isImage}
-              >
-                <div className="grid grid-cols-2 gap-2.5">
-                  <DimInput
-                    label="Width"
-                    value={formValues.width}
-                    onChange={setWidth}
-                  />
-                  <DimInput
-                    label="Height"
-                    value={formValues.height}
-                    onChange={setHeight}
-                  />
-                </div>
-                <NumberField
-                  label="Rotation"
-                  value={formValues.angle}
-                  onChange={(v) => updateProp("angle", v)}
-                  min={-180}
-                  max={360}
-                  unit="°"
-                />
-              </CollapsibleGroup>
 
-              <CollapsibleGroup id="rs-appearance" title="Appearance" defaultOpen={false}>
-                <NumberField
-                  label="Opacity"
-                  value={Math.round(formValues.opacity * 100)}
-                  onChange={(v) => updateProp("opacity", v / 100)}
-                  min={0}
-                  max={100}
-                  unit="%"
-                />
-                {canHaveRadius && (
-                  <NumberField
-                    label="Corner radius"
-                    value={formValues.rx ?? 0}
-                    onChange={updateCornerRadius}
-                    min={0}
-                    max={120}
-                    unit="px"
-                  />
-                )}
-                <NumberField
-                  label="Padding"
-                  value={formValues.padding}
-                  onChange={(v) => updateProp("padding", v)}
-                  min={0}
-                  max={60}
-                  unit="px"
-                />
-                <div className="flex flex-col gap-1.5">
-                  <FieldLabel>Mask</FieldLabel>
-                  <Segmented
-                    value={(formValues.mask ?? "none") as MaskKind}
-                    options={[
-                      { id: "none" as MaskKind, label: "None" },
-                      { id: "circle" as MaskKind, label: "Circle" },
-                      { id: "rounded" as MaskKind, label: "Round" },
-                    ]}
-                    onChange={setMask}
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <FieldLabel>Blend</FieldLabel>
-                  <select
-                    value={
-                      BLEND_MODES.some((mode) => mode.id === formValues.blendMode)
-                        ? formValues.blendMode
-                        : "source-over"
-                    }
-                    onChange={(e) =>
-                      updateProp("blendMode", e.target.value, "globalCompositeOperation")
-                    }
-                    className="h-9 w-full rounded-full bg-muted/40 px-3 text-[13px] text-foreground outline-none"
-                  >
-                    {BLEND_MODES.map((mode) => (
-                      <option key={mode.id} value={mode.id}>
-                        {mode.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </CollapsibleGroup>
+                      <CollapsibleGroup id="rs-appearance" title="Appearance" defaultOpen={false}>
+                        <NumberField
+                          label="Opacity"
+                          value={Math.round(formValues.opacity * 100)}
+                          onChange={(v) => updateProp("opacity", v / 100)}
+                          min={0}
+                          max={100}
+                          unit="%"
+                        />
+                        {canHaveRadius && (
+                          <NumberField
+                            label="Corner radius"
+                            value={formValues.rx ?? 0}
+                            onChange={updateCornerRadius}
+                            min={0}
+                            max={120}
+                            unit="px"
+                          />
+                        )}
+                        <NumberField
+                          label="Padding"
+                          value={formValues.padding}
+                          onChange={(v) => updateProp("padding", v)}
+                          min={0}
+                          max={60}
+                          unit="px"
+                        />
+                        <div className="flex flex-col gap-1.5">
+                          <FieldLabel>Mask</FieldLabel>
+                          <Segmented
+                            value={(formValues.mask ?? "none") as MaskKind}
+                            options={[
+                              { id: "none" as MaskKind, label: "None" },
+                              { id: "circle" as MaskKind, label: "Circle" },
+                              { id: "rounded" as MaskKind, label: "Round" },
+                            ]}
+                            onChange={setMask}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <FieldLabel>Blend</FieldLabel>
+                          <select
+                            value={
+                              BLEND_MODES.some((mode) => mode.id === formValues.blendMode)
+                                ? formValues.blendMode
+                                : "source-over"
+                            }
+                            onChange={(e) =>
+                              updateProp("blendMode", e.target.value, "globalCompositeOperation")
+                            }
+                            className="h-9 w-full rounded-full bg-muted/40 px-3 text-[13px] text-foreground outline-none"
+                          >
+                            {BLEND_MODES.map((mode) => (
+                              <option key={mode.id} value={mode.id}>
+                                {mode.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </CollapsibleGroup>
 
-              <CollapsibleGroup
-                id="rs-effects"
-                title="Shadow"
-                defaultOpen={false}
-                headerRight={
-                  <Switch
-                    size="sm"
-                    checked={formValues.hasShadow}
-                    onCheckedChange={toggleShadow}
-                    aria-label="Enable shadow"
-                  />
-                }
-              >
-                {formValues.hasShadow ? (
-                  <div className="flex flex-col gap-3">
-                    <ColorPicker
-                      label="Color"
-                      value={formValues.shadowColor.slice(0, 7)}
-                      onChange={(hex) => updateShadowProp("shadowColor", hex)}
-                    />
-                    <NumberField
-                      label="Blur"
-                      value={formValues.shadowBlur}
-                      onChange={(v) => updateShadowProp("shadowBlur", v)}
-                      min={0}
-                      max={50}
-                      unit="px"
-                    />
-                    <NumberField
-                      label="Offset"
-                      value={formValues.shadowOffsetY}
-                      onChange={(v) => updateShadowProp("shadowOffsetY", v)}
-                      min={-30}
-                      max={50}
-                      unit="px"
-                    />
-                  </div>
-                ) : (
-                  <p className="text-[13px] text-muted-foreground">
-                    Turn on the switch to add a drop shadow.
-                  </p>
-                )}
-              </CollapsibleGroup>
-            </div>
-          )}
-        </ScrollArea>
-          </>
-        )}
-      </div>
+                      <CollapsibleGroup
+                        id="rs-effects"
+                        title="Shadow"
+                        defaultOpen={false}
+                        headerRight={
+                          <Switch
+                            size="sm"
+                            checked={formValues.hasShadow}
+                            onCheckedChange={toggleShadow}
+                            aria-label="Enable shadow"
+                          />
+                        }
+                      >
+                        {formValues.hasShadow ? (
+                          <div className="flex flex-col gap-3">
+                            <ColorPicker
+                              label="Color"
+                              value={formValues.shadowColor.slice(0, 7)}
+                              onChange={(hex) => updateShadowProp("shadowColor", hex)}
+                            />
+                            <NumberField
+                              label="Blur"
+                              value={formValues.shadowBlur}
+                              onChange={(v) => updateShadowProp("shadowBlur", v)}
+                              min={0}
+                              max={50}
+                              unit="px"
+                            />
+                            <NumberField
+                              label="Offset"
+                              value={formValues.shadowOffsetY}
+                              onChange={(v) => updateShadowProp("shadowOffsetY", v)}
+                              min={-30}
+                              max={50}
+                              unit="px"
+                            />
+                          </div>
+                        ) : (
+                          <p className="text-[13px] text-muted-foreground">
+                            Turn on the switch to add a drop shadow.
+                          </p>
+                        )}
+                      </CollapsibleGroup>
+                    </div>
+                  )}
+                </ScrollArea>
+              </>
+            )}
+          </div>
 
-      <aside className="hidden w-12 shrink-0 flex-col items-center justify-start bg-muted/20 py-3 md:flex">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
-          onClick={() => setIsRightCollapsed(!isRightCollapsed)}
-          title={isRightCollapsed ? "Expand panel" : "Collapse panel"}
-        >
-          {isRightCollapsed ? (
-            <PanelRightOpen className="size-4" />
-          ) : (
-            <PanelRightClose className="size-4" />
-          )}
-        </Button>
-      </aside>
-    </div>
-  );
-}
+          <aside className="hidden w-12 shrink-0 flex-col items-center justify-start bg-muted/20 py-3 md:flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
+              onClick={() => setIsRightCollapsed(!isRightCollapsed)}
+              title={isRightCollapsed ? "Expand panel" : "Collapse panel"}
+            >
+              {isRightCollapsed ? (
+                <PanelRightOpen className="size-4" />
+              ) : (
+                <PanelRightClose className="size-4" />
+              )}
+            </Button>
+          </aside>
+        </div>
+      );
+    }

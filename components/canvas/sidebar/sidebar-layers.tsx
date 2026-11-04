@@ -226,7 +226,7 @@ export function SidebarLayers() {
   };
 
   return (
-    <div className="flex flex-col gap-0.5 text-[13px]">
+    <div className="flex flex-col gap-0.5 text-[13px] p-3">
       {rows.length === 0 && (
         <p className="px-2 py-6 text-center text-[13px] text-muted-foreground">
           No objects yet. Add elements from the Elements tab.
