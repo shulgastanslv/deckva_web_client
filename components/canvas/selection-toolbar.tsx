@@ -498,7 +498,7 @@ export function SelectionToolbar() {
         }}
       >
         <div
-          className="pointer-events-auto flex h-11 max-w-[min(920px,calc(100vw-24px))] items-center gap-0.5 overflow-x-auto rounded-full border border-border/50 bg-background/95 p-1 backdrop-blur-md"
+          className="pointer-events-auto flex h-12 max-w-[min(920px,calc(100vw-24px))] items-center gap-1 rounded-full border border-border/50 bg-background p-1 backdrop-blur-md"
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
         >

@@ -53,7 +53,7 @@ export function PillSelect({
           className,
         )}
       >
-        <span className="shrink-0 font-medium text-foreground/85">{label}</span>
+        <span className="shrink-0 font-medium text-foreground/85 text-[13px]">{label}</span>
         <SelectValue placeholder={placeholder}>
           {selected ? (
             <span className="flex min-w-0 items-center justify-end gap-2 text-muted-foreground">

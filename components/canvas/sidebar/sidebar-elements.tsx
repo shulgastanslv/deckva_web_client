@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { cn } from "@/lib/utils";
 import { useElementLibrary } from "@/components/canvas/use-element-library";
+import type { FrameKind } from "@/lib/canvas/frames";
+import { ImageUploadIcon } from "@/components/canvas/shapes-icons";
 
 export function SidebarElements() {
   const {
@@ -63,7 +65,7 @@ export function SidebarElements() {
             isDragging ? "bg-muted/40" : "hover:bg-muted/80 dark:hover:bg-muted/40",
           )}
         >
-          <ImagePlus className="size-5 shrink-0 text-muted-foreground" />
+        <ImageUploadIcon size={44} className="shrink-0 transition-transform group-hover:scale-105" /> 
           <span className="font-medium text-foreground/80">Upload or drop</span>
           <span className="text-[13px] text-muted-foreground">PNG, JPG</span>
         </button>
@@ -112,19 +114,26 @@ export function SidebarElements() {
           className="hidden"
           disabled={!manager}
         />
-        <div className="grid grid-cols-4 gap-1">
-          {frames.map(({ kind, label, icon: Icon }) => (
-            <button
-              key={kind}
-              type="button"
-              title={label}
-              disabled={!manager}
-              onClick={() => manager?.objects.addFrame(kind)}
-              className="flex flex-col items-center justify-center gap-1.5 rounded-full px-2.5 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
-            >
-              <Icon className="h-4 w-4" strokeWidth={1.5} />
-              <span className="max-w-full truncate text-[13px] leading-none">{label}</span>
-            </button>
+        <div className="grid grid-cols-2 gap-4">
+          {frames.map(({ kind, label, src }) => (
+            <div key={kind} className="flex flex-col items-center">
+              <button
+                type="button"
+                title={label}
+                disabled={!manager}
+                onClick={() => manager?.objects.addFrame(kind as FrameKind)}
+                className="flex flex-col items-center justify-center gap-1.5 rounded-md px-2.5 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+              >
+                <div className="w-full h-16 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={src}
+                    alt={label}
+                    className="max-w-full max-h-full object-contain pointer-events-none select-none"
+                  />
+                </div>
+                <span className="max-w-full truncate text-[13px] leading-none">{label}</span>
+              </button>
+            </div>
           ))}
         </div>
       </CollapsibleGroup>
@@ -139,9 +148,9 @@ export function SidebarElements() {
                 title={title ?? label}
                 onClick={action}
                 disabled={!manager}
-                className="flex flex-col items-center justify-center gap-1.5 rounded-full px-2.5 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+                className="flex flex-col items-center justify-center gap-2 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
               >
-                <Icon className="h-4 w-4" strokeWidth={1.5} />
+                <Icon size={52} />
                 <span className="max-w-full truncate text-[13px] leading-none">{label}</span>
               </button>
             ))}

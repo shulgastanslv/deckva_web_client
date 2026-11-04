@@ -963,9 +963,9 @@ export function RightSidebar({
 
         <ScrollArea className="min-h-0 flex-1">
           {isMulti ? (
-            <div className="flex flex-col gap-1 pb-4 pt-1">
+            <div className="flex flex-col gap-1 pb-6 pt-2">
               <div className="space-y-3 px-3 pb-2">
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <FieldLabel>Align</FieldLabel>
                   <div className="grid grid-cols-4 gap-1 rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 p-1.5">
                     {(
@@ -988,7 +988,6 @@ export function RightSidebar({
                         className="flex h-9 flex-col items-center justify-center gap-0.5 rounded-xl text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
                       >
                         <Icon className="size-4" />
-                        <span className="text-[9px] font-medium leading-none">{label}</span>
                       </button>
                     ))}
                   </div>

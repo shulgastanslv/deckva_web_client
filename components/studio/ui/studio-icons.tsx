@@ -28,6 +28,23 @@ const SAGE_SOFT = "#d8ebd9";
 /** Shared canvas — every icon uses the same viewBox and visual scale. */
 const VIEW = "0 0 160 128";
 
+const MIRO = {
+  canvas: '#F1F0F7',
+  frame: '#FFFFFF',
+  frameBorder: '#E5E3F0',
+  line: '#E2E0EC',
+  lineDark: '#CBD5E1',
+  yellow: '#FDE047',
+  yellowDark: '#EAB308',
+  purple: '#C4B5FD',
+  purpleDark: '#8B5CF6',
+  blue: '#93C5FD',
+  blueDark: '#3B82F6',
+  green: '#86EFAC',
+  greenDark: '#22C55E',
+  coral: '#FCA5A5',
+};
+
 export type StudioIconName =
   | "codeblock"
   | "layers"
@@ -71,23 +88,51 @@ function Scene({
 }
 
 /** Bad → good slide pair */
-export function StudioIconCodeblock(props: IconProps) {
+export function StudioIconCodeblock(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <Scene {...props}>
-      <svg width="150" height="150" viewBox="0 0 225 125" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="225" height="125" fill={WHITE} />
-        <path d="M140.083 63.1473L103.484 65.5469L125.722 95.6129" stroke-width="10" stroke={VIOLET_SOFT} />
-        <path d="M170.141 65L197.168 89.7954L161 99.3029" stroke-width="10" stroke={VIOLET_SOFT} />
-        <path d="M135 110L164 49" stroke-width="10" stroke={VIOLET_SOFT} />
-        <rect width="225" height="30" fill={LINE} />
-        <rect x="4" y="35" width="74" height="16" fill={LINE} />
-      </svg>
+    <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Фоновый холст Miro */}
 
+      {/* Главное окно сниппета */}
+      <g filter="drop-shadow(0 3px 6px rgba(0,0,0,0.05))">
+        <rect x="22" y="22" width="156" height="86" rx="7" fill={MIRO.frame} stroke={MIRO.frameBorder} strokeWidth="1" />
 
-    </Scene>
+        {/* Шапка окна редактора */}
+        <path d="M22 29C22 25.134 25.134 22 29 22H171C174.866 22 178 25.134 178 29V38H22V29Z" fill="#F8FAFC" />
+        <line x1="22" y1="38" x2="178" y2="38" stroke={MIRO.frameBorder} strokeWidth="1" />
+
+        {/* Точки окна (Mac-style кнопки) */}
+        <circle cx="34" cy="30" r="2.5" fill={MIRO.coral} />
+        <circle cx="42" cy="30" r="2.5" fill={MIRO.yellow} />
+        <circle cx="50" cy="30" r="2.5" fill={MIRO.green} />
+
+        {/* Название вкладки */}
+        <rect x="62" y="27" width="28" height="6" rx="2" fill={MIRO.line} />
+
+        {/* Код и синтаксическая подсветка */}
+        {/* Строка 1: тег и ключевое слово */}
+        <rect x="36" y="48" width="18" height="4" rx="2" fill={MIRO.purpleDark} />
+        <rect x="58" y="48" width="34" height="4" rx="2" fill={MIRO.blueDark} />
+
+        {/* Строка 2: отступ, свойства */}
+        <rect x="46" y="58" width="24" height="4" rx="2" fill={MIRO.greenDark} />
+        <rect x="74" y="58" width="40" height="4" rx="2" fill={MIRO.lineDark} />
+
+        {/* Строка 3: символы скобок и завершение */}
+        <rect x="46" y="68" width="32" height="4" rx="2" fill={MIRO.yellowDark} />
+        <rect x="82" y="68" width="22" height="4" rx="2" fill={MIRO.line} />
+
+        {/* Строка 4: закрывающий тег */}
+        <rect x="36" y="78" width="14" height="4" rx="2" fill={MIRO.purpleDark} />
+
+        {/* Акцентный бейдж языка справа внизу */}
+        <rect x="140" y="86" width="30" height="14" rx="3" fill="#EEF2FF" />
+        <path d="M148 91L145 93L148 95M162 91L165 93L162 95" stroke={MIRO.purpleDark} strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="156" y1="90" x2="154" y2="96" stroke={MIRO.purpleDark} strokeWidth="1" strokeLinecap="round" />
+      </g>
+    </svg>
   );
 }
-
 /** Connected step cards */
 export function StudioIconLayers(props: IconProps) {
   return (
@@ -292,31 +337,45 @@ export function StudioIconRocket(props: IconProps) {
 }
 
 /** Visual frame grid */
-export function StudioIconImage(props: IconProps) {
+export function StudioIconImage(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <Scene {...props}>
-      <rect x="22" y="18" width="52" height="40" fill={WHITE} />
-      <circle cx="36" cy="32" r="5" fill={AMBER_SOFT} />
-      <path
-        d="M28 50L38 38L46 46L56 34L70 48V50C70 52.2 68.2 54 66 54H32C29.8 54 28 52.2 28 50Z"
-        fill={BLUE}
-      />
+    <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Фоновый холст Miro */}
 
-      <rect x="86" y="18" width="52" height="40" fill={TEAL_SOFT} />
-      <rect x="96" y="30" width="30" height="5" fill={TEAL} />
-      <rect x="96" y="40" width="20" height="4" fill={WHITE} opacity="0.7" />
+      {/* Основная карточка изображения (слева) */}
+      <g filter="drop-shadow(0 2px 5px rgba(0,0,0,0.05))">
+        <rect x="24" y="24" width="82" height="82" rx="6" fill={MIRO.frame} stroke={MIRO.frameBorder} strokeWidth="1" />
+        {/* Иллюстрация пейзажа */}
+        <rect x="30" y="30" width="70" height="46" rx="4" fill="#E0F2FE" />
+        <circle cx="43" cy="42" r="4.5" fill={MIRO.yellow} />
+        <path d="M30 68L48 50L60 60L72 47L100 68V76H30V68Z" fill={MIRO.blue} />
+        {/* Подпись к изображению */}
+        <rect x="32" y="85" width="48" height="4" rx="2" fill={MIRO.lineDark} />
+        <rect x="32" y="93" width="28" height="3" rx="1.5" fill={MIRO.line} />
+      </g>
 
-      <rect x="22" y="70" width="52" height="40" fill={VIOLET} />
-      <rect x="32" y="84" width="30" height="5" fill={WHITE} opacity="0.95" />
-      <rect x="32" y="94" width="18" height="3" fill={WHITE} opacity="0.5" />
+      {/* Верхний правый мини-фрейм */}
+      <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.03))">
+        <rect x="114" y="24" width="62" height="38" rx="5" fill={MIRO.frame} stroke={MIRO.frameBorder} strokeWidth="1" />
+        <rect x="120" y="30" width="22" height="26" rx="3" fill={MIRO.purple} opacity="0.5" />
+        <rect x="148" y="34" width="22" height="3" rx="1.5" fill={MIRO.lineDark} />
+        <rect x="148" y="41" width="16" height="3" rx="1.5" fill={MIRO.line} />
+        <rect x="148" y="48" width="12" height="3" rx="1.5" fill={MIRO.line} />
+      </g>
 
-      <rect x="86" y="70" width="52" height="40" fill={WHITE} />
-      <rect x="96" y="82" width="30" height="4" fill={INK} opacity="0.75" />
-      <rect x="96" y="90" width="18" height="3" fill={LINE} />
-    </Scene>
+      {/* Желтый стикер обратной связи (справа внизу) */}
+      <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.06))">
+        <rect x="118" y="68" width="36" height="36" rx="3" fill={MIRO.yellow} />
+        <rect x="124" y="76" width="24" height="2.5" rx="1" fill={MIRO.yellowDark} opacity="0.75" />
+        <rect x="124" y="82" width="18" height="2.5" rx="1" fill={MIRO.yellowDark} opacity="0.75" />
+        <rect x="124" y="88" width="20" height="2.5" rx="1" fill={MIRO.yellowDark} opacity="0.75" />
+      </g>
+
+      {/* Зеленый мини-стикер */}
+      <rect x="160" y="76" width="16" height="16" rx="2" fill={MIRO.green} />
+    </svg>
   );
 }
-
 /** Thread → slide stack */
 export function StudioIconMessage(props: IconProps) {
   return (
@@ -432,21 +491,51 @@ export function StudioIconWand(props: IconProps) {
     </Scene>
   );
 }
-
-export function StudioIconCarousel(props: IconProps) {
+export function StudioIconCarousel(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <Scene {...props}>
-      <svg width="100" height="100" viewBox="0 0 171 185" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="46" width="125" height="175" fill={BLUE_SOFT} />
-        <rect y="10" width="125" height="175" fill={WHITE} />
-        <rect x="13" y="22" width="100" height="20" fill={BLUE_SOFT} />
-        <rect x="13" y="47" width="100" height="20" fill={BLUE_SOFT} />
-        <rect x="13" y="72" width="100" height="50" fill={LINE} />
-        <rect x="13" y="151" width="100" height="20" fill={LINE} />
-      </svg>
+    <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
 
+      {/* Левый слайд (активный) */}
+      <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.04))">
+        <rect x="22" y="24" width="70" height="82" rx="6" fill={MIRO.frame} stroke={MIRO.frameBorder} strokeWidth="1" />
+        {/* Заголовок слайда */}
+        <rect x="30" y="34" width="38" height="6" rx="2" fill={MIRO.purpleDark} />
+        {/* Строки текста */}
+        <rect x="30" y="46" width="54" height="3" rx="1.5" fill={MIRO.line} />
+        <rect x="30" y="53" width="46" height="3" rx="1.5" fill={MIRO.line} />
+        <rect x="30" y="60" width="34" height="3" rx="1.5" fill={MIRO.line} />
+        {/* Заметка-стикер на слайде */}
+        <rect x="52" y="72" width="28" height="24" rx="2" fill={MIRO.yellow} />
+        <rect x="56" y="78" width="18" height="2.5" rx="1" fill={MIRO.yellowDark} opacity="0.6" />
+        <rect x="56" y="84" width="12" height="2.5" rx="1" fill={MIRO.yellowDark} opacity="0.6" />
+      </g>
 
-    </Scene>
+      {/* Центральная соединительная стрелка Miro */}
+      <path
+        d="M96 65C101 65 103 65 107 65"
+        stroke={MIRO.purpleDark}
+        strokeWidth="1.8"
+        strokeDasharray="2.5 2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M105 62L108.5 65L105 68"
+        stroke={MIRO.purpleDark}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Правый слайд (следующий карточный фрейм) */}
+      <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.03))">
+        <rect x="112" y="28" width="66" height="74" rx="6" fill={MIRO.frame} stroke={MIRO.frameBorder} strokeWidth="1" />
+        {/* Медиа-плейсхолдер */}
+        <rect x="120" y="37" width="50" height="28" rx="3" fill={MIRO.blue} opacity="0.45" />
+        {/* Строки текста */}
+        <rect x="120" y="72" width="42" height="3" rx="1.5" fill={MIRO.line} />
+        <rect x="120" y="79" width="30" height="3" rx="1.5" fill={MIRO.line} />
+      </g>
+    </svg>
   );
 }
 

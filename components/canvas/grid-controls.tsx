@@ -85,7 +85,7 @@ export function GridControls({ menuSide = "bottom" }: { menuSide?: "bottom" | "r
   ]);
 
   return (
-    <div className="flex items-center bg-muted/50 p-0.5 rounded-full">
+    <div className="flex items-center bg-muted/50 p-0.5 rounded-full h-9">
       <Button
         variant="ghost"
         size="icon"

@@ -7,14 +7,30 @@ export interface BackgroundConfig {
   url?: string;
 }
 
-export type RatioKey = "4:5" | "1:1" | "9:16" | "16:9";
+export type RatioKey = 
+  | "1:1" 
+  | "4:3" 
+  | "3:2" 
+  | "4:5" 
+  | "5:4" 
+  | "1.618:1" 
+  | "9:16" 
+  | "16:9" 
+  | "1:2" 
+  | "3:1";
 
-export const CANVAS_RATIOS: Record<RatioKey, { width: number; height: number }> = {
-  "4:5": { width: 1080, height: 1350 },
-  "1:1": { width: 1080, height: 1080 },
-  "9:16": { width: 1080, height: 1920 },
-  "16:9": { width: 1920, height: 1080 },
-};
+  export const CANVAS_RATIOS: Record<RatioKey, { width: number; height: number }> = {
+    "1:1": { width: 1080, height: 1080 },
+    "4:3": { width: 1440, height: 1080 },
+    "3:2": { width: 1620, height: 1080 },
+    "4:5": { width: 1080, height: 1350 },
+    "5:4": { width: 1350, height: 1080 },
+    "1.618:1": { width: 1747, height: 1080 },
+    "9:16": { width: 1080, height: 1920 },
+    "16:9": { width: 1920, height: 1080 },
+    "1:2": { width: 1080, height: 2160 },
+    "3:1": { width: 1920, height: 640 },
+  };
 
 // Fabric types `Canvas.toJSON()` as `any`, so the shape is declared explicitly.
 export interface FabricCanvasJSON {

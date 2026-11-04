@@ -42,12 +42,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { RatioSelect } from "@/components/canvas/ratio-select";
 
 const QUICK_RATIOS: { ratio: RatioKey; iconClass: string }[] = [
   { ratio: "4:5", iconClass: "w-2.5 h-3" },
   { ratio: "1:1", iconClass: "w-2.5 h-2.5" },
   { ratio: "9:16", iconClass: "w-2 h-3.5" },
   { ratio: "16:9", iconClass: "w-3.5 h-2" },
+  { ratio: "1:2", iconClass: "w-2.5 h-4" },
 ];
 
 export function CanvasToolbar({
@@ -179,50 +181,20 @@ export function CanvasToolbar({
   const slideCount = pendingImport?.slides.length ?? 0;
 
   return (
-    <div className="flex h-11 w-full min-w-0 shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border/40 bg-background/60 px-3.5 backdrop-blur-md select-none">
+    <div className="flex h-14 w-full min-w-0 shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border/40 bg-background/60 px-3.5 backdrop-blur-md select-none">
       <div className="flex shrink-0 items-center gap-2">
-        <span className="hidden pl-1 text-[13px] font-medium tracking-wide text-muted-foreground uppercase sm:inline">
-          Ratio
-        </span>
-
-        <div className="flex shrink-0 items-center rounded-full bg-muted/60 p-0.5">
-          {QUICK_RATIOS.map(({ ratio, iconClass }) => {
-            const isActive = currentRatio === ratio;
-            return (
-              <button
-                key={ratio}
-                type="button"
-                onClick={() => handleRatioChange(ratio)}
-                className={`flex items-center gap-1.5 px-3 py-1 text-[13px] rounded-full transition-all duration-150 ${
-                  isActive
-                    ? "bg-background text-foreground font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/40 font-medium"
-                }`}
-              >
-                <span
-                  className={`rounded-[2px] border ${iconClass} transition-colors ${
-                    isActive
-                      ? "border-foreground bg-foreground/20"
-                      : "border-muted-foreground/60"
-                  }`}
-                />
-                {ratio}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="h-4 w-px bg-border/60 mx-1" />
+        
 
         <GridControls />
+        <div className="h-4 w-px bg-border/60 mx-1" />
 
-        <div className="flex items-center bg-muted/50 p-0.5 rounded-full">
+        <div className="flex items-center bg-muted/50 p-0.5 rounded-full h-9">
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleAutoFlow}
             className={cn(
-              "h-8 px-2 text-[13px] gap-1 rounded-full transition-colors",
+              "h-9 px-2 text-[13px] gap-1 rounded-full transition-colors",
               autoFlowEnabled
                 ? "bg-background text-foreground"
                 : "text-muted-foreground hover:text-foreground hover:bg-background/50",
@@ -321,6 +293,10 @@ export function CanvasToolbar({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <div className="flex shrink-0 items-center rounded-full bg-muted/60 h-9">
+         <RatioSelect currentRatio={currentRatio} onRatioChange={handleRatioChange} />
+        </div>
+
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
@@ -340,7 +316,7 @@ export function CanvasToolbar({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-2.5 text-[13px] font-medium gap-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all"
+              className="h-9 px-2.5 text-[13px] font-medium gap-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all"
               title="JSON"
             >
               {copied ? (
@@ -384,7 +360,7 @@ export function CanvasToolbar({
             variant="ghost"
             size="icon"
             onClick={onHideChrome}
-            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80"
+            className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80"
             title="Hide toolbar and slides for focus (\\)"
             aria-label="Hide canvas chrome"
           >
