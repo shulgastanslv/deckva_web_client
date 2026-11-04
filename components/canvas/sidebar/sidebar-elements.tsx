@@ -65,7 +65,7 @@ export function SidebarElements() {
             isDragging ? "bg-muted/40" : "hover:bg-muted/80 dark:hover:bg-muted/40",
           )}
         >
-        <ImageUploadIcon size={44} className="shrink-0 transition-transform group-hover:scale-105" /> 
+          <ImageUploadIcon size={44} className="shrink-0 transition-transform group-hover:scale-105" />
           <span className="font-medium text-foreground/80">Upload or drop</span>
           <span className="text-[13px] text-muted-foreground">PNG, JPG</span>
         </button>
@@ -105,6 +105,27 @@ export function SidebarElements() {
         {urlError && <p className="text-[13px] text-destructive">{urlError}</p>}
       </CollapsibleGroup>
 
+
+
+      {sections.map((section) => (
+        <CollapsibleGroup key={section.id} id={section.id} title={section.title}>
+          <div className="grid grid-cols-4 gap-1">
+            {section.items.map(({ label, icon: Icon, action, title }) => (
+              <button
+                key={label}
+                type="button"
+                title={title ?? label}
+                onClick={action}
+                disabled={!manager}
+                className="flex flex-col items-center justify-center gap-2 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+              >
+                <Icon size={52} />
+                <span className="max-w-full truncate text-[13px] leading-none">{label}</span>
+              </button>
+            ))}
+          </div>
+        </CollapsibleGroup>
+      ))}
       <CollapsibleGroup id="elements-frames" title="Frames">
         <input
           type="file"
@@ -137,26 +158,6 @@ export function SidebarElements() {
           ))}
         </div>
       </CollapsibleGroup>
-
-      {sections.map((section) => (
-        <CollapsibleGroup key={section.id} id={section.id} title={section.title}>
-          <div className="grid grid-cols-4 gap-1">
-            {section.items.map(({ label, icon: Icon, action, title }) => (
-              <button
-                key={label}
-                type="button"
-                title={title ?? label}
-                onClick={action}
-                disabled={!manager}
-                className="flex flex-col items-center justify-center gap-2 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
-              >
-                <Icon size={52} />
-                <span className="max-w-full truncate text-[13px] leading-none">{label}</span>
-              </button>
-            ))}
-          </div>
-        </CollapsibleGroup>
-      ))}
     </div>
   );
 }

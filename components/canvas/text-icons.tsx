@@ -10,7 +10,7 @@ export interface IconProps extends React.SVGProps<SVGSVGElement> {
 export const MIRO_THEME = {
   plate: {
     back: 'fill-[#E8E6F3] dark:fill-white/10',
-    front: 'fill-white dark:fill-[#1C1C21] stroke-[#E3E1EE] dark:stroke-white/15',
+    front: 'fill-white dark:fill-[#1C1C21]',
   },
   glyph: {
     fill: 'fill-[#232135] dark:fill-white',

@@ -54,10 +54,6 @@ import { useImageTools } from "@/components/canvas/use-image-tools";
 import { clampZoom } from "@/components/canvas/zoom-controls";
 import type { UpscaleScale } from "@/lib/image/deckva-tools";
 import { useCanvasStore } from "@/store/useCanvasStore";
-import { HeadingIcon } from "@/components/canvas/text-icons";
-import { SubtitleIcon } from "@/components/canvas/text-icons";
-import { ParagraphIcon } from "@/components/canvas/text-icons";
-import { QuoteIcon } from "@/components/canvas/text-icons";
 
 interface ElementsToolbarProps {
   onExit: () => void;
@@ -67,31 +63,29 @@ interface ToolDef {
   id: string;
   label: string;
   hint: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   shortcut?: string;
   key?: string;
 }
 
-
-
 const SHAPES: ToolDef[] = [
-  { id: "rectangle", label: "Rectangle", hint: "Rectangle", icon: <Square />, shortcut: "R", key: "r" },
-  { id: "ellipse", label: "Ellipse", hint: "Oval", icon: <Ellipse />, shortcut: "O", key: "o" },
-  { id: "circle", label: "Circle", hint: "Circle", icon: <Circle /> },
-  { id: "line", label: "Line", hint: "Straight line", icon: <Minus />, shortcut: "L", key: "l" },
-  { id: "triangle", label: "Triangle", hint: "Triangle", icon: <Triangle /> },
-  { id: "diamond", label: "Diamond", hint: "Diamond", icon: <Diamond /> },
-  { id: "star", label: "Star", hint: "Five-point star", icon: <Star /> },
-  { id: "hexagon", label: "Hexagon", hint: "Hexagon", icon: <Hexagon /> },
-  { id: "divider", label: "Divider", hint: "Thin horizontal rule", icon: <SeparatorHorizontal />   },
+  { id: "rectangle", label: "Rectangle", hint: "Rectangle", icon: Square, shortcut: "R", key: "r" },
+  { id: "ellipse", label: "Ellipse", hint: "Oval", icon: Ellipse, shortcut: "O", key: "o" },
+  { id: "circle", label: "Circle", hint: "Circle", icon: Circle },
+  { id: "line", label: "Line", hint: "Straight line", icon: Minus, shortcut: "L", key: "l" },
+  { id: "triangle", label: "Triangle", hint: "Triangle", icon: Triangle },
+  { id: "diamond", label: "Diamond", hint: "Diamond", icon: Diamond },
+  { id: "star", label: "Star", hint: "Five-point star", icon: Star },
+  { id: "hexagon", label: "Hexagon", hint: "Hexagon", icon: Hexagon },
+  { id: "divider", label: "Divider", hint: "Thin horizontal rule", icon: SeparatorHorizontal },
 ];
 
 const TEXTS: ToolDef[] = [
-  { id: "text", label: "Text", hint: "Single line of text", icon: <Type />, shortcut: "T", key: "t" },
-  { id: "heading", label: "Heading", hint: "Large title", icon: <HeadingIcon /> },
-  { id: "subtitle", label: "Subtitle", hint: "Smaller title under the heading", icon: <SubtitleIcon /> },
-  { id: "paragraph", label: "Paragraph", hint: "Body text", icon: <ParagraphIcon /> },
-  { id: "quote", label: "Quote", hint: "Quoted line", icon: <QuoteIcon /> },
+  { id: "text", label: "Text", hint: "Single line of text", icon: Type, shortcut: "T", key: "t" },
+  { id: "heading", label: "Heading", hint: "Large title", icon: Heading1 },
+  { id: "subtitle", label: "Subtitle", hint: "Smaller title under the heading", icon: Heading2 },
+  { id: "paragraph", label: "Paragraph", hint: "Body text", icon: AlignLeft },
+  { id: "quote", label: "Quote", hint: "Quoted line", icon: Quote },
 ];
 
 function isTypingTarget() {
@@ -237,7 +231,7 @@ function ToolFlyout({
                   onSelect={() => onUse(tool)}
                   className={cn("gap-2", selected && "bg-accent")}
                 >
-                  {ItemIcon}
+                  <ItemIcon />
                   <span className="flex-1">{tool.label}</span>
                   {tool.shortcut && <DropdownMenuShortcut>{tool.shortcut}</DropdownMenuShortcut>}
                 </DropdownMenuItem>
@@ -247,7 +241,7 @@ function ToolFlyout({
         </CornerMenu>
       }
     >
-      {Icon}
+      <Icon className="size-4" />
     </RailTool>
   );
 }
@@ -363,7 +357,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-4">
-        <div className="pointer-events-auto flex h-12 w-fit max-w-[calc(100vw-24px)] items-center gap-1 rounded-full border border-border/50 bg-background/95 p-1 backdrop-blur-md">
+        <div className="pointer-events-auto flex h-12 w-fit max-w-[calc(100vw-24px)] items-center gap-1 overflow-x-auto rounded-full border border-border/50 bg-background p-1 backdrop-blur-md">
           <input
             type="file"
             ref={fileInputRef}
@@ -550,7 +544,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             type="button"
             onClick={() => setZoom(100)}
             title="Reset zoom"
-            className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full font-mono text-[13px] leading-none text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
+            className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full font-mono text-[11px] leading-none text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
           >
             {Math.round(zoom)}%
           </button>

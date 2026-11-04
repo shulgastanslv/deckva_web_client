@@ -11,12 +11,11 @@ export const MIRO_THEME = {
   // Двухслойные плашки: белая карточка с нежно-лавандовой подложкой сзади
   plate: {
     back: 'fill-[#E8E6F3] dark:fill-white/10',
-    front: 'fill-white dark:fill-[#1C1C21] stroke-[#E3E1EE] dark:stroke-white/15',
+    front: 'fill-white dark:fill-[#1C1C21]',
   },
   // Строгий темно-графитовый тон линий и фигур (под темную тему — чистый белый)
   glyph: {
     fill: 'fill-[#232135] dark:fill-white',
-    stroke: 'stroke-[#232135] dark:stroke-white',
   },
   // Акцентные стикеры Miro для живого вида
   accent: {
@@ -145,7 +144,6 @@ export const LineShapeIcon: React.FC<IconProps> = ({ size, className, ...props }
       d="M13 29L27 17"
       strokeWidth="2.4"
       strokeLinecap="round"
-      className={MIRO_THEME.glyph.stroke}
     />
     <circle cx="13" cy="29" r="2.2" className={MIRO_THEME.glyph.fill} />
     <circle cx="27" cy="17" r="2.2" className={MIRO_THEME.glyph.fill} />
@@ -160,7 +158,6 @@ export const DividerShapeIcon: React.FC<IconProps> = ({ size, className, ...prop
       d="M11 23H29"
       strokeWidth="2.2"
       strokeLinecap="round"
-      className={MIRO_THEME.glyph.stroke}
     />
     <circle cx="20" cy="18" r="1.5" className={MIRO_THEME.accent.purple} />
     <circle cx="20" cy="28" r="1.5" className={MIRO_THEME.accent.yellow} />
@@ -193,7 +190,6 @@ export const ImageUploadIcon: React.FC<IconProps> = ({ size, className, ...props
         d="M27.5 12.5V17.5M25 15H30"
         strokeWidth="1.4"
         strokeLinecap="round"
-        className="stroke-white dark:stroke-[#1C1C21]"
       />
     </g>
   </svg>
