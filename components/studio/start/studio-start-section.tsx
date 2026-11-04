@@ -62,15 +62,15 @@ export function StudioStartSection({
       <div className="mb-6 flex items-end justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-foreground">
-            Create a new project
+            Create a new content
           </h2>
-          <p className="text-sm text-muted-foreground"> Create a new project or choose from a template</p>
+          <p className="text-sm text-muted-foreground">Write your content idea and we will generate it for you</p>
         </div>
 
         <StudioCreateMenu
           onBlank={onBlank}
           onTemplates={onTemplates}
-          label="Create"
+          label="Create New"
           align="end"
         />
       </div>
@@ -82,17 +82,16 @@ export function StudioStartSection({
         error={generateError}
       />
 
-
       <div className="flex flex-row gap-4 mt-4">
         <StudioCreateTile onClick={onBlank} />
         <StudioStartRow>
           <StudioStartTile
-            title="Blank carousel"
-            iconName="carousel"
+            title="Generate Idea"
+            iconName="idea"
             onClick={onBlank}
           />
           <StudioStartTile
-            title="Images"
+            title="Image Upload"
             iconName="image"
             onClick={onBlank}
           />
@@ -102,12 +101,12 @@ export function StudioStartSection({
             onClick={onBlank}
           />
             <StudioStartTile
-              title="List"
+              title="List of Contents"
               iconName="list"
               onClick={onBlank}
             />
           <StudioStartTile
-            title="Code"
+            title="Code Block"
             iconName="codeblock"
             onClick={onBlank}
           />

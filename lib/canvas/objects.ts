@@ -558,7 +558,7 @@ export class ObjectFactory {
   /** Fills the selected device, or places a new iPhone when none is on the slide. */
   async fillActiveFrame(source: string) {
     const frame = this.findFrame();
-    if (!frame) return this.addFrame("iphone", undefined, undefined, source);
+    if (!frame) return this.addFrame("iphone13", undefined, undefined, source);
     return this.fillDeviceFrame(frame, source);
   }
 

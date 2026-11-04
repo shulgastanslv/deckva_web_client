@@ -10,7 +10,7 @@ export interface IconProps extends React.SVGProps<SVGSVGElement> {
 export const MIRO_THEME = {
   plate: {
     back: 'fill-[#E8E6F3] dark:fill-white/10',
-    front: 'fill-white/80 backdrop-blur-sm dark:fill-[#1C1C21]/80',
+    front: 'fill-muted/60 backdrop-blur-sm dark:fill-muted/60',
   },
   glyph: {
     fill: 'fill-[#232135] dark:fill-white',
@@ -36,23 +36,13 @@ const baseSvg = (size: number | string = 44, className = '') => ({
 // Базовая двухслойная подложка в стиле шаблонов Miro
 const LayeredPlate: React.FC = () => (
   <>
-    {/* Задняя смещенная карточка */}
-    <rect
-      x="8"
-      y="2"
-      width="30"
-      height="30"
-      rx="8"
-      className={MIRO_THEME.plate.back}
-    />
-    {/* Передняя карточка-фрейм */}
-    <rect
+     <rect
       x="5"
       y="8"
       width="30"
       height="30"
-      rx="8"
-      strokeWidth="1"
+      rx="25"
+      strokeWidth="1.2"
       className={MIRO_THEME.plate.front}
     />
   </>

@@ -126,7 +126,7 @@ export function SidebarElements() {
           </div>
         </CollapsibleGroup>
       ))}
-      {/* <CollapsibleGroup id="elements-frames" title="Frames">
+      <CollapsibleGroup id="elements-frames" title="Frames">
         <input
           type="file"
           ref={frameInputRef}
@@ -157,7 +157,7 @@ export function SidebarElements() {
             </div>
           ))}
         </div>
-      </CollapsibleGroup> */}
+      </CollapsibleGroup>
     </div>
   );
 }
