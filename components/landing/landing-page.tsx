@@ -277,6 +277,145 @@ const FAQ = [
   },
 ];
 
+export function SequenceIllustration({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`relative flex items-center justify-center overflow-hidden bg-[#F6F6F5] border border-black/[0.06] p-6 sm:p-10 select-none ${className}`}
+    >
+      <svg
+        viewBox="0 0 920 420"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full max-h-[380px]"
+      >
+        <defs>
+          {/* Мягкие нейтральные тени */}
+          <filter id="shadow-card" x="-10%" y="-10%" width="125%" height="130%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="10" stdDeviation="16" floodColor="#000000" flood-opacity="0.06" />
+            <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" flood-opacity="0.04" />
+          </filter>
+          
+          <filter id="shadow-float" x="-20%" y="-20%" width="140%" height="150%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="12" stdDeviation="18" floodColor="#000000" flood-opacity="0.09" />
+            <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#000000" flood-opacity="0.05" />
+          </filter>
+
+          {/* Минималистичные фоновые градиенты слайдов */}
+          <linearGradient id="art-gradient-1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#F9ECE2" />
+            <stop offset="50%" stopColor="#F4DCD0" />
+            <stop offset="100%" stopColor="#DF9475" />
+          </linearGradient>
+
+          <linearGradient id="art-gradient-2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#E9EDEC" />
+            <stop offset="100%" stopColor="#CCD6D3" />
+          </linearGradient>
+
+          <linearGradient id="art-gradient-3" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#EDEAE4" />
+            <stop offset="100%" stopColor="#D9D2C7" />
+          </linearGradient>
+        </defs>
+
+        {/* Фоновые маркеры шагов / соединяющая пунктирная линия */}
+        <path
+          d="M 120 70 L 800 70"
+          stroke="#E5E4E2"
+          strokeWidth="1.5"
+          strokeDasharray="4 6"
+        />
+
+        {/* Слайд 1 (Cover / Обложка) */}
+        <g filter="url(#shadow-card)">
+          <rect x="70" y="80" width="190" height="240" rx="18" fill="#FFFFFF" />
+          <rect x="70.5" y="80.5" width="189" height="239" rx="17.5" stroke="#EAEAE9" strokeWidth="1" />
+          
+          {/* Превью арт-блока обложки */}
+          <rect x="86" y="96" width="158" height="110" rx="10" fill="url(#art-gradient-1)" />
+          
+          {/* Абстрактная верстка текста на обложке */}
+          <rect x="86" y="222" width="70" height="10" rx="5" fill="#1C1A17" />
+          <rect x="86" y="240" width="120" height="6" rx="3" fill="#D3D1CD" />
+          <rect x="86" y="252" width="95" height="6" rx="3" fill="#E6E4DF" />
+          
+          {/* Индикатор номера слайда */}
+          <circle cx="94" cy="292" r="7" fill="#F4F3F1" />
+          <text x="94" y="295" fontSize="8" fontWeight="600" fill="#7A7874" textAnchor="middle" fontFamily="sans-serif">1</text>
+        </g>
+
+        {/* Слайд 2 (Центральный слайд — активный, слегка приподнят) */}
+        <g filter="url(#shadow-float)">
+          <rect x="290" y="65" width="200" height="255" rx="20" fill="#FFFFFF" />
+          <rect x="290.5" y="65.5" width="199" height="254" rx="19.5" stroke="#E5E4E1" strokeWidth="1" />
+          
+          {/* Превью контента */}
+          <rect x="306" y="81" width="168" height="118" rx="12" fill="url(#art-gradient-2)" />
+          <circle cx="390" cy="140" r="26" fill="#FFFFFF" fillOpacity="0.4" />
+          
+          {/* Строки текста */}
+          <rect x="306" y="215" width="110" height="10" rx="5" fill="#1C1A17" />
+          <rect x="306" y="233" width="148" height="6" rx="3" fill="#CBC8C2" />
+          <rect x="306" y="245" width="130" height="6" rx="3" fill="#E5E3DF" />
+
+          {/* Бейдж номера слайда */}
+          <rect x="306" y="280" width="46" height="18" rx="9" fill="#F4F3F1" />
+          <text x="329" y="292.5" fontSize="9" fontWeight="600" fill="#4B4843" textAnchor="middle" fontFamily="sans-serif">02 / 05</text>
+        </g>
+
+        {/* Слайд 3 */}
+        <g filter="url(#shadow-card)">
+          <rect x="520" y="80" width="190" height="240" rx="18" fill="#FFFFFF" />
+          <rect x="520.5" y="80.5" width="189" height="239" rx="17.5" stroke="#EAEAE9" strokeWidth="1" />
+          
+          <rect x="536" y="96" width="158" height="110" rx="10" fill="url(#art-gradient-3)" />
+          <rect x="536" y="222" width="90" height="10" rx="5" fill="#1C1A17" />
+          <rect x="536" y="240" width="130" height="6" rx="3" fill="#D3D1CD" />
+          <rect x="536" y="252" width="105" height="6" rx="3" fill="#E6E4DF" />
+          
+          <circle cx="544" cy="292" r="7" fill="#F4F3F1" />
+          <text x="544" y="295" fontSize="8" fontWeight="600" fill="#7A7874" textAnchor="middle" fontFamily="sans-serif">3</text>
+        </g>
+
+        {/* Слайд 4 (Уходящий в край) */}
+        <g filter="url(#shadow-card)" opacity="0.6">
+          <rect x="740" y="95" width="160" height="210" rx="16" fill="#FFFFFF" />
+          <rect x="740.5" y="95.5" width="159" height="209" rx="15.5" stroke="#ECEBE9" strokeWidth="1" />
+          <rect x="754" y="110" width="132" height="95" rx="8" fill="#EFEFEF" />
+          <rect x="754" y="220" width="80" height="8" rx="4" fill="#D2CFC9" />
+        </g>
+
+        {/* Плавающий UI-элемент слева сверху: генерация темы */}
+        <g filter="url(#shadow-float)">
+          <rect x="110" y="40" width="176" height="38" rx="19" fill="#FFFFFF" />
+          <rect x="110.5" y="40.5" width="175" height="37" rx="18.5" stroke="#ECEBEA" strokeWidth="1" />
+          <circle cx="129" cy="59" r="8" fill="#F4F3F0" />
+          <path d="M126.5 59h5M129 56.5v5" stroke="#5F5D58" strokeWidth="1.5" strokeLinecap="round" />
+          <text x="146" y="63" fontSize="12" fontWeight="500" fill="#1D1B18" fontFamily="sans-serif">Architecture 101</text>
+        </g>
+
+        {/* Плавающий UI-элемент справа: экспорт */}
+        <g filter="url(#shadow-float)">
+          <rect x="635" y="285" width="150" height="42" rx="21" fill="#FFFFFF" />
+          <rect x="635.5" y="285.5" width="149" height="41" rx="20.5" stroke="#ECEBEA" strokeWidth="1" />
+          
+          <rect x="643" y="293" width="26" height="26" rx="13" fill="#1C1A17" />
+          <path d="M656 300v9M652.5 305.5l3.5 3.5 3.5-3.5" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          
+          <text x="678" y="310" fontSize="11" fontWeight="600" fill="#1C1A17" fontFamily="sans-serif">Export</text>
+          <text x="718" y="310" fontSize="10.5" fontWeight="400" fill="#888580" fontFamily="sans-serif">.zip</text>
+        </g>
+
+        {/* Минималистичный курсор перетаскивания (Drag & Drop) */}
+        <g transform="translate(485, 175)" filter="url(#shadow-float)">
+          <circle cx="16" cy="16" r="16" fill="#1C1A17" />
+          <path d="M10 16h12M13 13l-3 3 3 3M19 13l3 3-3 3" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 const FOOTER_COLUMNS = [
   {
     title: "Product",
@@ -338,6 +477,137 @@ const SOCIAL = [
     Icon: FaTiktok,
   },
 ] as const;
+
+export function ProjectContainerIllustration({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`relative flex items-center justify-center overflow-hidden bg-[#F6F6F5] border border-black/[0.06] p-6 sm:p-8 select-none ${className}`}
+    >
+      <svg
+        viewBox="0 0 540 400"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full max-h-[340px]"
+      >
+        <defs>
+          {/* Мягкие нейтральные тени */}
+          <filter id="shadow-container" x="-10%" y="-10%" width="125%" height="125%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#000000" floodOpacity="0.05" />
+            <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" floodOpacity="0.03" />
+          </filter>
+
+          <filter id="shadow-elevated" x="-20%" y="-15%" width="140%" height="140%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="10" stdDeviation="14" floodColor="#000000" floodOpacity="0.08" />
+            <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" floodOpacity="0.04" />
+          </filter>
+
+          {/* Градиенты для обложек и слайдов */}
+          <linearGradient id="proj-gradient-card" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#FAF1E8" />
+            <stop offset="100%" stopColor="#E4BAA6" />
+          </linearGradient>
+
+          <linearGradient id="proj-gradient-thumb" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#ECEEEA" />
+            <stop offset="100%" stopColor="#D2D9D5" />
+          </linearGradient>
+        </defs>
+
+        {/* 1. Основное окно проекта (Container) */}
+        <g filter="url(#shadow-container)">
+          <rect x="40" y="35" width="460" height="330" rx="20" fill="#FFFFFF" />
+          <rect x="40.5" y="35.5" width="459" height="329" rx="19.5" stroke="#ECEAE7" strokeWidth="1" />
+
+          {/* Верхний бар проекта */}
+          <rect x="58" y="55" width="10" height="10" rx="5" fill="#E4E2DC" />
+          <rect x="74" y="55" width="10" height="10" rx="5" fill="#E4E2DC" />
+          <rect x="90" y="55" width="10" height="10" rx="5" fill="#E4E2DC" />
+
+          {/* Название и статус проекта */}
+          <rect x="120" y="56" width="90" height="8" rx="4" fill="#1C1A17" />
+          <rect x="424" y="52" width="60" height="16" rx="8" fill="#F4F3F1" />
+          <circle cx="433" cy="60" r="3" fill="#1C1A17" />
+          <rect x="442" y="57" width="32" height="6" rx="3" fill="#7A7874" />
+
+          <path d="M 40 80 L 500 80" stroke="#F1F0ED" strokeWidth="1" />
+        </g>
+
+        {/* 2. Левая панель: Свойства темы и история правок (The topic & edits) */}
+        <g>
+          {/* Блок темы */}
+          <rect x="62" y="98" width="128" height="64" rx="12" fill="#F8F8F7" />
+          <rect x="74" y="112" width="40" height="6" rx="3" fill="#999690" />
+          <rect x="74" y="126" width="85" height="8" rx="4" fill="#1C1A17" />
+          <rect x="74" y="140" width="65" height="6" rx="3" fill="#BFBCB6" />
+
+          {/* Блок версий/правок */}
+          <rect x="62" y="172" width="128" height="80" rx="12" fill="#F8F8F7" />
+          <rect x="74" y="186" width="55" height="6" rx="3" fill="#999690" />
+
+          <circle cx="78" cy="206" r="3.5" fill="#1C1A17" />
+          <rect x="88" y="203" width="70" height="6" rx="3" fill="#4B4843" />
+
+          <circle cx="78" cy="224" r="3.5" fill="#CBC8C2" />
+          <rect x="88" y="221" width="55" height="6" rx="3" fill="#999690" />
+
+          <circle cx="78" cy="242" r="3.5" fill="#CBC8C2" />
+          <rect x="88" y="239" width="62" height="6" rx="3" fill="#BFBCB6" />
+        </g>
+
+        {/* 3. Центр: Стопка слайдов карусели (The slides) */}
+        {/* Задний слайд (Slide 3) */}
+        <g opacity="0.5">
+          <rect x="290" y="110" width="145" height="195" rx="14" fill="#FFFFFF" stroke="#E2E0DC" strokeWidth="1" />
+          <rect x="302" y="122" width="121" height="85" rx="8" fill="#ECEAE5" />
+        </g>
+
+        {/* Промежуточный слайд (Slide 2) */}
+        <g opacity="0.8">
+          <rect x="255" y="118" width="145" height="195" rx="14" fill="#FFFFFF" stroke="#E2E0DC" strokeWidth="1" />
+          <rect x="267" y="130" width="121" height="85" rx="8" fill="url(#proj-gradient-thumb)" />
+        </g>
+
+        {/* Передний активный слайд (Slide 1 / Cover) */}
+        <g filter="url(#shadow-elevated)">
+          <rect x="215" y="128" width="155" height="205" rx="16" fill="#FFFFFF" />
+          <rect x="215.5" y="128.5" width="154" height="204" rx="15.5" stroke="#ECEAE7" strokeWidth="1" />
+
+          {/* Превью арт-обложки */}
+          <rect x="227" y="140" width="131" height="96" rx="10" fill="url(#proj-gradient-card)" />
+
+          {/* Строки контента */}
+          <rect x="227" y="250" width="80" height="8" rx="4" fill="#1C1A17" />
+          <rect x="227" y="266" width="105" height="5" rx="2.5" fill="#D3D1CD" />
+          <rect x="227" y="277" width="75" height="5" rx="2.5" fill="#E6E4DF" />
+
+          {/* Бейдж номера слайда */}
+          <rect x="227" y="302" width="38" height="15" rx="7.5" fill="#F4F3F1" />
+          <text x="246" y="312.5" fontSize="8" fontWeight="600" fill="#66645E" textAnchor="middle" fontFamily="sans-serif">01</text>
+        </g>
+
+        {/* 4. Плавающий элемент: Готовый файл (The download / ZIP) */}
+        <g filter="url(#shadow-elevated)">
+          <rect x="340" y="255" width="140" height="48" rx="24" fill="#1C1A17" />
+
+          {/* Иконка скачивания */}
+          <circle cx="364" cy="279" r="13" fill="#2E2C28" />
+          <path d="M 364 273 L 364 283 M 360.5 279.5 L 364 283 L 367.5 279.5" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+
+          {/* Лейбл файла */}
+          <text x="388" y="280" fontSize="11" fontWeight="600" fill="#FFFFFF" fontFamily="sans-serif">carousel.zip</text>
+          <text x="388" y="291" fontSize="9" fontWeight="400" fill="#999690" fontFamily="sans-serif">Ready to post</text>
+        </g>
+
+        {/* 5. Индикатор связки: аккуратный пинцет/бейджик состояния */}
+        <g filter="url(#shadow-container)">
+          <rect x="62" y="270" width="128" height="34" rx="17" fill="#FFFFFF" stroke="#EBEAE7" strokeWidth="1" />
+          <circle cx="78" cy="287" r="4.5" fill="#34C759" />
+          <text x="90" y="291" fontSize="10" fontWeight="500" fill="#3D3B37" fontFamily="sans-serif">Auto-saved</text>
+        </g>
+      </svg>
+    </div>
+  );
+}
 
 export function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
@@ -671,7 +941,6 @@ export function LandingPage() {
           a feed. Then you change the words, the cover, and the sequence until
           the post is yours.
         </p>
-        <Place className="mt-8 h-64 w-full rounded-[1.75rem] sm:h-80" />
         <ul className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-6">
           <li>
             <h3 className="text-xl font-medium tracking-tight text-land-ink">

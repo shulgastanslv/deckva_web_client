@@ -39,9 +39,9 @@ const LayeredPlate: React.FC = () => (
      <rect
       x="5"
       y="8"
-      width="30"
-      height="30"
-      rx="25"
+      width="32"
+      height="32"
+      rx="8"
       strokeWidth="1.2"
       className={MIRO_THEME.plate.front}
     />
