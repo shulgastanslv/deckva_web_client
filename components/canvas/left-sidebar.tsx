@@ -169,7 +169,7 @@ export function LeftSidebar({
           {PANEL_TITLES[activeNav] ?? activeNav}
         </div>
 
-        <ScrollArea className="h-full min-h-0 w-full flex-1 p-3 [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden">
+        <ScrollArea className="h-full min-h-0 w-full flex-1 [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden">
           {activeNav === "elements" && <SidebarElements />}
           {activeNav === "layers" && <SidebarLayers />}
           {activeNav === "filters" && <SidebarFilters />}
