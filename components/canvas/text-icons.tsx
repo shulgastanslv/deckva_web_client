@@ -52,7 +52,7 @@ const LayeredPlate: React.FC = () => (
       width="30"
       height="30"
       rx="8"
-      strokeWidth="1.2"
+      strokeWidth="1"
       className={MIRO_THEME.plate.front}
     />
   </>
@@ -64,7 +64,7 @@ export const MiroTextIcon: React.FC<IconProps> = ({ size, className, ...props })
     <LayeredPlate />
     <path 
       d="M12 16H28M20 16V28" 
-      strokeWidth="2.5" 
+      strokeWidth="1" 
       strokeLinecap="round" 
       className={MIRO_THEME.glyph.stroke}
     />
@@ -77,13 +77,13 @@ export const HeadingIcon: React.FC<IconProps> = ({ size, className, ...props }) 
     <LayeredPlate />
     <path 
       d="M12.5 16V28M19.5 16V28M12.5 22H19.5" 
-      strokeWidth="2.2" 
+      strokeWidth="1.5" 
       strokeLinecap="round" 
       className={MIRO_THEME.glyph.stroke}
     />
     <path 
       d="M24 18.5L26 17V28" 
-      strokeWidth="2" 
+      strokeWidth="1.5" 
       strokeLinecap="round" 
       strokeLinejoin="round" 
       className={MIRO_THEME.glyph.stroke}
@@ -97,13 +97,13 @@ export const SubtitleIcon: React.FC<IconProps> = ({ size, className, ...props })
     <LayeredPlate />
     <path 
       d="M11.5 16.5V27.5M17.5 16.5V27.5M11.5 22H17.5" 
-      strokeWidth="2" 
+      strokeWidth="1.5" 
       strokeLinecap="round" 
       className={MIRO_THEME.glyph.stroke}
     />
     <path 
       d="M22 19C22 17.5 23 16.5 24.8 16.5C26.5 16.5 27.5 17.5 27.5 19C27.5 21 24.5 22.5 22 25H27.5" 
-      strokeWidth="1.8" 
+      strokeWidth="1.5" 
       strokeLinecap="round" 
       strokeLinejoin="round" 
       className={MIRO_THEME.glyph.stroke}
@@ -117,7 +117,7 @@ export const ParagraphIcon: React.FC<IconProps> = ({ size, className, ...props }
     <LayeredPlate />
     <path 
       d="M14 16.5H28M14 21.5H28M14 26.5H21" 
-      strokeWidth="2.2" 
+      strokeWidth="1.5" 
       strokeLinecap="round" 
       className={MIRO_THEME.glyph.stroke}
     />
@@ -147,14 +147,14 @@ export const CodeIcon: React.FC<IconProps> = ({ size, className, ...props }) => 
     <LayeredPlate />
     <path 
       d="M14 19L11 22.5L14 26M26 19L29 22.5L26 26" 
-      strokeWidth="2" 
+      strokeWidth="1.5" 
       strokeLinecap="round" 
       strokeLinejoin="round" 
       className={MIRO_THEME.glyph.stroke}
     />
     <path 
       d="M21.5 16.5L18.5 28.5" 
-      strokeWidth="2" 
+      strokeWidth="1.5" 
       strokeLinecap="round" 
       className={MIRO_THEME.accent.purple}
     />

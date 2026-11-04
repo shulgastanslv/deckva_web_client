@@ -117,16 +117,16 @@ export function SidebarElements() {
                 title={title ?? label}
                 onClick={action}
                 disabled={!manager}
-                className="flex flex-col items-center justify-center gap-2 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+                className="flex flex-col items-center justify-center gap-2 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
               >
-                <Icon size={52} />
+                {Icon && <Icon size={52} />}
                 <span className="max-w-full truncate text-[13px] leading-none">{label}</span>
               </button>
             ))}
           </div>
         </CollapsibleGroup>
       ))}
-      <CollapsibleGroup id="elements-frames" title="Frames">
+      {/* <CollapsibleGroup id="elements-frames" title="Frames">
         <input
           type="file"
           ref={frameInputRef}
@@ -157,7 +157,7 @@ export function SidebarElements() {
             </div>
           ))}
         </div>
-      </CollapsibleGroup>
+      </CollapsibleGroup> */}
     </div>
   );
 }

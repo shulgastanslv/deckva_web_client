@@ -66,7 +66,7 @@ export function StudioStartSection({
           </h2>
           <p className="text-sm text-muted-foreground"> Create a new project or choose from a template</p>
         </div>
-        
+
         <StudioCreateMenu
           onBlank={onBlank}
           onTemplates={onTemplates}
@@ -96,6 +96,16 @@ export function StudioStartSection({
             iconName="image"
             onClick={onBlank}
           />
+          <StudioStartTile
+            title="Layers"
+            iconName="layers"
+            onClick={onBlank}
+          />
+            <StudioStartTile
+              title="List"
+              iconName="list"
+              onClick={onBlank}
+            />
           <StudioStartTile
             title="Code"
             iconName="codeblock"

@@ -38,7 +38,7 @@ export function RatioSelect({ currentRatio, onRatioChange, disabled }: RatioSele
     <PillSelect
       label="Ratio"
       value={currentRatio}
-      className="w-[150px] h-full"
+      className="w-[150px]"
       onValueChange={(val) => onRatioChange(val as RatioKey)}
       options={ratioOptions}
       disabled={disabled}

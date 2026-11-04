@@ -293,9 +293,7 @@ export function CanvasToolbar({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="flex shrink-0 items-center rounded-full bg-muted/60 h-9">
          <RatioSelect currentRatio={currentRatio} onRatioChange={handleRatioChange} />
-        </div>
 
       </div>
 

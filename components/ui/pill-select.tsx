@@ -46,7 +46,7 @@ export function PillSelect({
       <SelectTrigger
         aria-label={label}
         className={cn(
-          "h-10 w-full gap-2 rounded-full border-0 bg-muted/60 px-3.5 text-[13px] shadow-none",
+          "h-8 w-full gap-2 rounded-full border-0 bg-muted/60 px-3.5 text-[13px] shadow-none",
           "hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/40 dark:bg-muted/25 dark:hover:bg-muted/40",
           "data-[size=default]:h-10",
           "*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex-1",
