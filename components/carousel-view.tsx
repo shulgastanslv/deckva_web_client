@@ -8,17 +8,29 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import type { RatioKey } from "@/lib/types";
 
 const RATIO: Record<RatioKey, string> = {
+  "4:3": "4 / 3",
+  "3:2": "3 / 2",
+  "5:4": "5 / 4",
+  "1.618:1": "1.618 / 1",
   "4:5": "4 / 5",
   "1:1": "1 / 1",
   "9:16": "9 / 16",
   "16:9": "16 / 9",
+  "1:2": "1 / 2",
+  "3:1": "3 / 1",
 };
 
 const WIDTH: Record<RatioKey, string> = {
+  "4:3": "1.3333",
+  "3:2": "1.5",
+  "5:4": "1.25",
+  "1.618:1": "1.4662",
   "4:5": "0.8",
   "1:1": "1",
   "9:16": "0.5625",
   "16:9": "1.7778",
+  "1:2": "0.5",
+  "3:1": "0.3333",
 };
 
 export function ViewHeader() {

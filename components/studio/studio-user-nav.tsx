@@ -28,7 +28,7 @@ export function StudioUserNav() {
 
   const signedIn = status === "authenticated" && Boolean(session?.user);
   const userEmail = session?.user?.email ?? "";
-  const userName = session?.user?.name?.trim() || userEmail || "Account";
+  const userName = session?.user?.name?.trim() || userEmail || "Settings";
   const userLetter = (userName[0] || "U").toUpperCase();
 
   if (!signedIn) {
@@ -57,12 +57,11 @@ export function StudioUserNav() {
               "rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring",
               menuOpen && "ring-2 ring-[#4262ff]/35",
             )}
-            aria-label="Account"
+            aria-label="Settings"
           >
             <StudioAvatar letter={userLetter} className="size-8 text-[12px]" />
           </button>
         </DropdownMenuTrigger>
-
         <DropdownMenuContent
           side="bottom"
           align="end"
@@ -84,7 +83,7 @@ export function StudioUserNav() {
               onClick={() => setAccountOpen(true)}
             >
               <CircleUserRound className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-              Account
+              Settings
             </DropdownMenuItem>
            
             <DropdownMenuItem

@@ -250,7 +250,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                     variant="ghost"
                     size="icon"
                     className="size-9 rounded-full p-0 ring-1 ring-border/60 hover:bg-muted/40 hover:ring-border"
-                    title="Account"
+                    title="Settings"
                   >
                     <Avatar className="size-9">
                       <AvatarImage
@@ -297,7 +297,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
                       onClick={() => setIsProfileOpen(true)}
                     >
                       <User className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                      Account
+                      Settings
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className={accountItemClass}
