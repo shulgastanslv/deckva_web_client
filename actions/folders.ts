@@ -86,7 +86,7 @@ export async function createFolder(
     });
 
     revalidatePath("/studio");
-    revalidatePath("/studio/projects");
+    revalidatePath("/studio/browse");
 
     return {
       success: true,
@@ -128,7 +128,7 @@ export async function renameFolder(
     });
 
     revalidatePath("/studio");
-    revalidatePath("/studio/projects");
+    revalidatePath("/studio/browse");
 
     return {
       success: true,
@@ -161,7 +161,7 @@ export async function deleteFolder(
     await prisma.folder.delete({ where: { id: folderId } });
 
     revalidatePath("/studio");
-    revalidatePath("/studio/projects");
+    revalidatePath("/studio/browse");
 
     return { success: true };
   } catch (err) {
@@ -197,7 +197,7 @@ export async function moveProjectToFolder(
     });
 
     revalidatePath("/studio");
-    revalidatePath("/studio/projects");
+    revalidatePath("/studio/browse");
 
     return { success: true };
   } catch (err) {

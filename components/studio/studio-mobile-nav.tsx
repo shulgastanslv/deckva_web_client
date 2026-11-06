@@ -29,10 +29,10 @@ export function StudioMobileNav({
       active: pathname === "/studio",
     },
     {
-      href: "/studio/projects",
+      href: "/studio/browse",
       label: "Projects",
       icon: FolderIcon,
-      active: pathname.startsWith("/studio/projects"),
+      active: pathname.startsWith("/studio/browse"),
     },
     {
       href: "/studio/templates",

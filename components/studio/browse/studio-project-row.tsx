@@ -2,8 +2,8 @@
 
 import type { ProjectListItem } from "@/actions/projects";
 import { formatBoardDate } from "@/components/studio/lib/format";
-import { StudioProjectMenu } from "@/components/studio/projects/studio-project-menu";
-import { StudioProjectThumb } from "@/components/studio/projects/studio-project-thumb";
+import { StudioProjectMenu } from "@/components/studio/browse/studio-project-menu";
+import { StudioProjectThumb } from "@/components/studio/browse/studio-project-thumb";
 import { StudioBadge } from "@/components/studio/ui/studio-badge";
 import { cn } from "@/lib/utils";
 

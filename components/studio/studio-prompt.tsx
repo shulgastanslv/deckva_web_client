@@ -3,16 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowUp,
+  ChevronDown,
   Clock,
-  FileIcon,
-  FolderUp,
-  Globe,
-  ImageIcon,
-  Link2,
+  LayoutTemplate,
   Loader2,
-  Paperclip,
+  Palette,
+  Sparkles,
   Trash2,
-  X,
 } from "lucide-react";
 
 import {
@@ -23,38 +20,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { fileToDataUrl } from "@/lib/image/file-to-data-url";
-import { messages } from "@/lib/messages";
-import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 
-export type StudioAttachment = {
-  id: string;
-  value: string; // URL или DataURL
-  label: string;
-  kind: "file" | "link";
-  mimeType?: string;
-};
+export type GenerationType = "idea" | "palette" | "carousel";
 
 export type StudioPromptSubmit = {
   topic: string;
-  attachments: StudioAttachment[];
+  type: GenerationType;
 };
 
 const RECENT_KEY = "studio_recent_prompts";
 const MAX_RECENTS = 5;
 
-function normalizeUrl(raw: string): string | null {
-  const trimmed = raw.trim();
-  if (!trimmed) return "";
-  try {
-    const url = new URL(trimmed);
-    if (!/^https?:$/i.test(url.protocol)) return null;
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
+const GENERATION_TYPES = [
+  { value: "idea", label: "Идея", icon: Sparkles, placeholder: "Опишите тему для генерации идей..." },
+  { value: "palette", label: "Палитра", icon: Palette, placeholder: "Опишите настроение или бренд для генерации палитры..." },
+  { value: "carousel", label: "Дизайн каруселей", icon: LayoutTemplate, placeholder: "Опишите контент и стиль для дизайна карусели..." },
+] as const;
 
 export function StudioPrompt({
   onSubmit,
@@ -69,28 +51,18 @@ export function StudioPrompt({
   error?: string | null;
   initialTopic?: string;
 }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const appliedTopic = useRef(false);
 
   const [value, setValue] = useState(initialTopic);
-  const [attachments, setAttachments] = useState<StudioAttachment[]>([]);
   const [recentPrompts, setRecentPrompts] = useState<string[]>([]);
+  const [generationType, setGenerationType] = useState<GenerationType>("idea");
 
-  // Состояние диалога добавления ссылки
-  const [linkOpen, setLinkOpen] = useState(false);
-  const [linkDraft, setLinkDraft] = useState("");
-
-  const [promptError, setPromptError] = useState<string | null>(null);
-  const [readingFile, setReadingFile] = useState(false);
-
-  // Синхронизация initialTopic
   useEffect(() => {
     if (appliedTopic.current || !initialTopic) return;
     appliedTopic.current = true;
     setValue(initialTopic);
   }, [initialTopic]);
 
-  // Загрузка недавних запросов
   useEffect(() => {
     try {
       const stored = localStorage.getItem(RECENT_KEY);
@@ -123,82 +95,17 @@ export function StudioPrompt({
   };
 
   const trimmed = value.trim();
-  const canSend = trimmed.length >= 2 && !disabled && !busy && !readingFile;
-
-  const removeAttachment = (id: string) => {
-    setAttachments((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const applyLink = () => {
-    const next = normalizeUrl(linkDraft);
-    if (next === null) {
-      setPromptError("Укажите корректный URL (http:// или https://)");
-      return;
-    }
-    if (!next) {
-      setLinkOpen(false);
-      return;
-    }
-
-    setAttachments((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        value: next,
-        label: next,
-        kind: "link",
-      },
-    ]);
-
-    setLinkDraft("");
-    setLinkOpen(false);
-    setPromptError(null);
-  };
-
-  const pickFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    setReadingFile(true);
-    setPromptError(null);
-
-    try {
-      const newAttachments: StudioAttachment[] = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        let fileData = "";
-
-        if (file.type.startsWith("image/")) {
-          fileData = await fileToDataUrl(file, { maxEdge: 1080, quality: 0.82 });
-        } else {
-          fileData = URL.createObjectURL(file);
-        }
-
-        newAttachments.push({
-          id: crypto.randomUUID(),
-          value: fileData,
-          label: file.name,
-          kind: "file",
-          mimeType: file.type,
-        });
-      }
-
-      setAttachments((prev) => [...prev, ...newAttachments]);
-    } catch (err) {
-      reportError(err, messages.errors.readImage);
-      setPromptError("Ошибка при чтении файла");
-    } finally {
-      setReadingFile(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
+  const canSend = trimmed.length >= 2 && !disabled && !busy;
 
   const submit = (topic = trimmed) => {
     const finalTopic = topic.trim();
-    if (finalTopic.length < 2 || disabled || busy || readingFile) return;
+    if (finalTopic.length < 2 || disabled || busy) return;
 
     saveRecent(finalTopic);
-    void onSubmit({ topic: finalTopic, attachments });
+    void onSubmit({ topic: finalTopic, type: generationType });
   };
+
+  const currentTypeData = GENERATION_TYPES.find((t) => t.value === generationType) || GENERATION_TYPES[0];
 
   return (
     <div className="w-full">
@@ -219,7 +126,7 @@ export function StudioPrompt({
           }}
           rows={2}
           disabled={disabled || busy}
-          placeholder="Опишите задачу — тему, детали, аудиторию…"
+          placeholder={currentTypeData.placeholder}
           className={cn(
             "field-sizing-content min-h-[88px] w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-[15px] leading-relaxed text-foreground outline-none",
             "placeholder:text-muted-foreground/70",
@@ -227,148 +134,38 @@ export function StudioPrompt({
           )}
         />
 
-        {/* Форма ввода ссылки */}
-        {linkOpen && (
-          <div className="mx-2 mb-2 flex items-center gap-2 rounded-2xl bg-background/80 px-3 py-2">
-            <Globe className="size-4 shrink-0 text-muted-foreground" />
-            <input
-              value={linkDraft}
-              onChange={(e) => {
-                setLinkDraft(e.target.value);
-                setPromptError(null);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  applyLink();
-                }
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  setLinkOpen(false);
-                  setPromptError(null);
-                }
-              }}
-              disabled={disabled || busy}
-              placeholder="Вставьте ссылку (https://…)"
-              className="min-w-0 flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
-              autoFocus
-            />
-            <button
-              type="button"
-              onClick={applyLink}
-              disabled={disabled || busy}
-              className="rounded-full px-2.5 py-1 text-[12px] font-medium text-foreground hover:bg-muted"
-            >
-              Добавить
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setLinkOpen(false);
-                setPromptError(null);
-              }}
-              className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <X className="size-3.5" />
-            </button>
-          </div>
-        )}
-
-        {/* Список прикрепленных вложений */}
-        {attachments.length > 0 && (
-          <div className="mx-2 mb-2 flex flex-wrap gap-1.5">
-            {attachments.map((att) => (
-              <div
-                key={att.id}
-                className="flex items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-[12px] text-foreground shadow-sm"
-              >
-                {att.kind === "link" ? (
-                  <Link2 className="size-3 shrink-0 text-muted-foreground" />
-                ) : att.mimeType?.startsWith("image/") ? (
-                  <ImageIcon className="size-3 shrink-0 text-muted-foreground" />
-                ) : (
-                  <FileIcon className="size-3 shrink-0 text-muted-foreground" />
-                )}
-                <span className="max-w-[150px] truncate" title={att.label}>
-                  {att.label}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeAttachment(att.id)}
-                  disabled={disabled || busy}
-                  className="rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  <X className="size-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {promptError && (
-          <p className="mx-4 mb-2 text-[12px] text-destructive">{promptError}</p>
-        )}
-
-        {/* Панель действий */}
         <div className="flex items-center justify-between gap-3 px-2 pb-1">
-          <div className="flex min-w-0 items-center gap-1">
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                void pickFiles(e.target.files);
-              }}
-            />
-
-            {/* Меню прикрепления (Файлы / Ссылка) */}
+          <div className="flex min-w-0 items-center gap-2">
+            {/* Меню выбора типа генерации */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  disabled={disabled || busy || readingFile}
-                  title="Прикрепить"
-                  className={cn(
-                    "inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                    (attachments.length > 0 || linkOpen || readingFile) &&
-                      "bg-muted text-foreground",
-                  )}
+                  disabled={disabled || busy}
+                  className="inline-flex h-8 items-center gap-2 rounded-full bg-foreground px-3.5 text-[13px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
-                  {readingFile ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Paperclip className="size-4" />
-                  )}
+                  <span className="hidden sm:inline-block">{currentTypeData.label}</span>
+                  <ChevronDown className="size-3.5 opacity-70" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                sideOffset={8}
-                className="min-w-[170px] rounded-2xl border-0 bg-muted p-1.5 shadow-none"
-              >
-                <DropdownMenuItem
-                  className="cursor-pointer gap-2 rounded-xl px-2.5 py-2 text-[13px]"
-                  onSelect={() => {
-                    fileInputRef.current?.click();
-                  }}
+                sideOffset={10}
+                className="w-full rounded-2xl border-neutral-200/80 bg-white p-2 border-none dark:bg-neutral-900"
                 >
-                  <FolderUp className="size-3.5" />
-                  Загрузить файлы
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer gap-2 rounded-xl px-2.5 py-2 text-[13px]"
-                  onSelect={() => {
-                    setLinkOpen(true);
-                  }}
-                >
-                  <Link2 className="size-3.5" />
-                  Добавить ссылку
-                </DropdownMenuItem>
+                {GENERATION_TYPES.map((type) => (
+                  <DropdownMenuItem
+                    key={type.value}
+                    onSelect={() => setGenerationType(type.value)}
+                    className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-foreground transition-colors hover:bg-muted focus:bg-muted"
+                  >
+                    {type.label}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Меню Recent запросов */}
+            {/* Меню истории запросов */}
             {recentPrompts.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -383,27 +180,27 @@ export function StudioPrompt({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  sideOffset={8}
-                  className="w-[280px] rounded-2xl border-0 bg-muted p-1.5 shadow-none"
+                  sideOffset={10}
+                  className="w-[280px] rounded-2xl border border-border/50 bg-background p-2 shadow-lg"
                 >
-                  <div className="flex items-center justify-between px-2 py-1">
-                    <DropdownMenuLabel className="p-0 text-[11px] font-normal text-muted-foreground">
+                  <div className="flex items-center justify-between px-3 py-1.5">
+                    <DropdownMenuLabel className="p-0 text-[12px] font-medium text-muted-foreground">
                       Недавние запросы
                     </DropdownMenuLabel>
                     <button
                       type="button"
                       onClick={clearRecents}
-                      className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive"
+                      className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-destructive transition-colors"
                     >
-                      <Trash2 className="size-3" />
+                      <Trash2 className="size-3.5" />
                       Очистить
                     </button>
                   </div>
-                  <DropdownMenuSeparator className="my-1 bg-border/40" />
+                  <DropdownMenuSeparator className="my-1.5 bg-border/50" />
                   {recentPrompts.map((recentItem, idx) => (
                     <DropdownMenuItem
                       key={idx}
-                      className="cursor-pointer truncate rounded-xl px-2.5 py-1.5 text-[13px]"
+                      className="flex cursor-pointer items-center rounded-xl px-3 py-2.5 text-[14px] text-foreground transition-colors hover:bg-muted focus:bg-muted"
                       onSelect={() => setValue(recentItem)}
                     >
                       <span className="truncate">{recentItem}</span>
@@ -413,16 +210,11 @@ export function StudioPrompt({
               </DropdownMenu>
             )}
 
-            <p className="truncate pl-1 text-[12px] text-muted-foreground">
-              {busy
-                ? "Генерация…"
-                : readingFile
-                  ? "Чтение файлов…"
-                  : "Enter для отправки · Shift+Enter для новой строки"}
+            <p className="hidden md:block truncate pl-2 text-[12px] text-muted-foreground">
+              {busy ? "Генерация…" : "Enter для отправки · Shift+Enter для новой строки"}
             </p>
           </div>
 
-          {/* Кнопка отправки */}
           <button
             type="button"
             disabled={!canSend}
@@ -444,7 +236,7 @@ export function StudioPrompt({
         </div>
       </div>
 
-      {error && <p className="mt-3 text-[13px] text-destructive">{error}</p>}
+      {error && <p className="mt-3 px-2 text-[13px] text-destructive">{error}</p>}
     </div>
   );
 }

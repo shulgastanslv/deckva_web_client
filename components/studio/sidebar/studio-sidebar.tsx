@@ -28,7 +28,7 @@ export function StudioSidebar({
         className,
       )}
     >
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-3">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-3 z-50">
         <StudioOrgSwitcher />
         <StudioSidebarSearch
           search={search}

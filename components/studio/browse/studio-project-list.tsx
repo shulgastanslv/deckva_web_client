@@ -4,7 +4,7 @@ import type { ProjectListItem } from "@/actions/projects";
 import {
   recentCols,
   StudioProjectRow,
-} from "@/components/studio/projects/studio-project-row";
+} from "@/components/studio/browse/studio-project-row";
 import { cn } from "@/lib/utils";
 
 export function StudioProjectList({

@@ -77,7 +77,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
         </div>
 
         {navOpen ? (
-          <div className="fixed inset-0 z-[80] md:hidden">
+          <div className="fixed inset-0 z-50 md:hidden">
             <button
               type="button"
               aria-label="Close menu"

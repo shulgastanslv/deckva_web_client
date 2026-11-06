@@ -1,0 +1,449 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import ScrollContainer from "react-indiana-drag-scroll";
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  List,
+  Loader2,
+  Search,
+} from "lucide-react";
+
+import {
+  useInvalidateStudioProjects,
+  useUserFolders,
+  useUserProjects,
+} from "@/lib/studio/queries";
+import { StudioBoardGrid } from "@/components/studio/browse/studio-board-grid";
+import { StudioProjectCard } from "@/components/studio/browse/studio-project-card";
+import { StudioProjectList } from "@/components/studio/browse/studio-project-list";
+import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
+import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
+
+// --- Template Imports ---
+import { getTemplates, type TemplateListItem } from "@/actions/templates";
+import { TEMPLATE_CATEGORIES } from "@/lib/templates/categories";
+
+// --- Shared UI Imports ---
+import { AuthModal } from "@/components/auth";
+import {
+  StudioContent,
+  StudioContentBody,
+} from "@/components/studio/ui/studio-content";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+
+type MainTab = "all" | "starred" | "templates";
+
+export function StudioBrowse() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
+  const userId = session?.user?.id;
+  const signedIn = status === "authenticated" && Boolean(userId);
+  const create = useStudioCreate();
+
+  // --- Shared State ---
+  const [activeTab, setActiveTab] = useState<MainTab>(
+    (searchParams.get("tab") as MainTab) || "all"
+  );
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState<"list" | "grid">("list");
+  const [sort, setSort] = useState("last-opened");
+
+  // --- Project State & Data ---
+  const folderId = searchParams.get("folder");
+  const projectsQuery = useUserProjects(folderId ?? "", signedIn);
+  const foldersQuery = useUserFolders(signedIn);
+  const projects = useMemo(
+    () => projectsQuery.data?.projects ?? [],
+    [projectsQuery.data]
+  );
+  const folders = useMemo(
+    () => foldersQuery.data?.folders ?? [],
+    [foldersQuery.data]
+  );
+  const loadingProjects = signedIn && !projectsQuery.data && !projectsQuery.isError;
+  const refreshProjects = useInvalidateStudioProjects();
+
+  const activeFolder = useMemo(
+    () => folders.find((f) => f.id === folderId) ?? null,
+    [folders, folderId]
+  );
+
+  const visibleProjects = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return projects
+      .filter((p) => {
+        if (activeTab === "starred" && !p.isSaved) return false;
+        if (q && !(p.title || "Untitled").toLowerCase().includes(q)) return false;
+        return true;
+      })
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  }, [projects, activeTab, search]);
+
+  // --- Template State & Data ---
+  const [templateCategory, setTemplateCategory] = useState("all");
+  const [templates, setTemplates] = useState<TemplateListItem[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [openingId, setOpeningId] = useState<string | null>(null);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const allCategories = ["all", ...TEMPLATE_CATEGORIES];
+
+  const fetchTemplates = useCallback(async () => {
+    setLoadingTemplates(true);
+    try {
+      const listRes = await getTemplates({
+        category: templateCategory === "all" ? undefined : templateCategory,
+        search: search.trim() || undefined,
+      });
+      setTemplates(listRes.success ? listRes.templates : []);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  }, [templateCategory, search]);
+
+  useEffect(() => {
+    if (activeTab !== "templates") return;
+    const t = window.setTimeout(() => void fetchTemplates(), search ? 220 : 0);
+    return () => window.clearTimeout(t);
+  }, [fetchTemplates, search, activeTab]);
+
+  const openTemplate = (id: string) => {
+    if (!signedIn) {
+      create.setAuthNeeded(true);
+      return;
+    }
+    setOpeningId(id);
+    router.push(`/studio/editor?template=${id}`);
+  };
+
+  // --- Global Event Listeners & URL Sync ---
+  useEffect(() => {
+    const urlTab = searchParams.get("tab");
+    setActiveTab((urlTab as MainTab) || "all");
+  }, [searchParams]);
+
+  useEffect(() => {
+    const onSidebarSearch = (event: Event) => {
+      const query = (event as CustomEvent<{ query?: string }>).detail?.query;
+      if (typeof query === "string") setSearch(query);
+    };
+    window.addEventListener("studio:sidebar-search", onSidebarSearch);
+    return () => window.removeEventListener("studio:sidebar-search", onSidebarSearch);
+  }, []);
+
+  const setTabAndUrl = (next: MainTab) => {
+    setActiveTab(next);
+    const params = new URLSearchParams();
+    if (next !== "all") params.set("tab", next);
+    if (folderId) params.set("folder", folderId);
+
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
+
+  // --- Scroll Logic for Template Categories ---
+  const checkScroll = useCallback(() => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "templates") {
+      checkScroll();
+      window.addEventListener("resize", checkScroll);
+      return () => window.removeEventListener("resize", checkScroll);
+    }
+  }, [checkScroll, activeTab, templateCategory]);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === "left" ? -250 : 250;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  const pageTitle = activeFolder
+    ? activeFolder.name
+    : activeTab === "all"
+    ? "Projects"
+    : activeTab === "starred"
+    ? "Starred"
+    : "Templates";
+
+  const pageDescription = activeFolder
+    ? "Manage projects in this folder."
+    : activeTab === "all"
+    ? "Create, manage, and organize all your creative projects in one place."
+    : activeTab === "starred"
+    ? "Quick access to your most important and frequently used projects."
+    : "Start quickly with our beautifully designed, customizable templates.";
+
+  return (
+    <StudioContent>
+      <StudioContentBody className="pt-6 sm:pt-10">
+        <div className="flex flex-col-reverse md:flex-row items-start gap-8">
+          <div className="flex-1 min-w-0 w-full">
+            
+            {/* Header Title & Description */}
+            <div className="mb-6">
+              <h1 className="text-3xl sm:text-4xl font-medium tracking-tight text-neutral-900 dark:text-neutral-100">
+                {pageTitle}
+              </h1>
+              <p className="mt-2 text-[14px] text-muted-foreground">
+                {pageDescription}
+              </p>
+            </div>
+
+            {/* --- UNIFIED FILTER BAR --- */}
+            <div className="mb-6 flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
+              
+              {/* Поиск */}
+              <div className="relative w-full sm:w-64 sm:flex-none">
+                <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={`Search ${activeTab === "templates" ? "templates" : "projects"}`}
+                  className="h-9 w-full rounded-full border-none bg-muted/40 pl-9 pr-4 text-[13px] shadow-none placeholder:text-muted-foreground focus-visible:ring-1"
+                />
+              </div>
+
+              {/* Левые фильтры */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Select defaultValue="anyone">
+                  <SelectTrigger className="h-9 w-auto gap-2 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 focus:ring-0 [&>span]:line-clamp-1">
+                    <SelectValue placeholder="Owned by anyone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="anyone">Owned by anyone</SelectItem>
+                    <SelectItem value="me">Owned by me</SelectItem>
+                    <SelectItem value="not-me">Not owned by me</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select defaultValue="all">
+                  <SelectTrigger className="h-9 w-auto gap-2 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 focus:ring-0 [&>span]:line-clamp-1">
+                    <SelectValue placeholder="Space" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Space</SelectItem>
+                    <SelectItem value="personal">Personal</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Правая часть панели */}
+              <div className="ml-auto flex items-center gap-2 sm:gap-3">
+                
+                {/* Кнопка создания */}
+                {activeTab !== "templates" && (
+                  <StudioCreateMenu onBlank={create.openBlank} onTemplates={() => setTabAndUrl("templates")} />
+                )}
+
+                {/* Сортировка */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-9 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted">
+                      Sort <ChevronDown className="ml-1 size-3.5 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                    {[
+                      { id: "last-opened", label: "Last opened" },
+                      { id: "last-modified", label: "Last modified" },
+                      { id: "alphabetical", label: "Alphabetically" },
+                      { id: "last-created", label: "Last created" },
+                    ].map((option) => (
+                      <DropdownMenuItem key={option.id} onClick={() => setSort(option.id)} className="flex items-center gap-2 rounded-lg text-[13px]">
+                        <div className="flex w-4 items-center justify-center">
+                          {sort === option.id && <Check className="size-4" />}
+                        </div>
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Переключатель вида */}
+                <div className="flex h-9 items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shadow-none">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setView("grid")}
+                    className={cn("h-8 w-8 rounded-md shadow-none", view === "grid" ? "bg-background text-foreground" : "hover:bg-muted/60 text-muted-foreground hover:text-foreground")}
+                  >
+                    <LayoutGrid className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setView("list")}
+                    className={cn("h-8 w-8 rounded-md shadow-none", view === "list" ? "bg-background text-foreground" : "hover:bg-muted/60 text-muted-foreground hover:text-foreground")}
+                  >
+                    <List className="size-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* --- TEMPLATE CATEGORIES SCROLL --- */}
+            {activeTab === "templates" && (
+              <div className="relative mb-6">
+                {canScrollLeft && (
+                  <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 flex w-12 items-center justify-start bg-gradient-to-r from-background to-transparent">
+                    <button type="button" onClick={() => scroll("left")} className="pointer-events-auto flex size-7 items-center justify-center rounded-full border-none bg-muted/40 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground">
+                      <ChevronLeft className="size-4" />
+                    </button>
+                  </div>
+                )}
+                <ScrollContainer innerRef={scrollRef} onScroll={checkScroll} className="flex items-center gap-5 overflow-x-auto scroll-smooth select-none [scrollbar-width:none] active:cursor-grabbing sm:gap-6 [&::-webkit-scrollbar]:hidden">
+                  {allCategories.map((tab) => {
+                    const isAll = tab === "all";
+                    const isActive = templateCategory === tab;
+                    return (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setTemplateCategory(tab)}
+                        className={cn(
+                          "relative shrink-0 pb-2.5 whitespace-nowrap text-[15px] transition-colors border-none",
+                          isActive ? "font-semibold text-neutral-950 dark:text-foreground" : "font-medium text-neutral-400 hover:text-neutral-700 dark:text-muted-foreground dark:hover:text-foreground"
+                        )}
+                      >
+                        {isAll ? "All" : tab}
+                      </button>
+                    );
+                  })}
+                </ScrollContainer>
+                {canScrollRight && (
+                  <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 flex w-12 items-center justify-end bg-gradient-to-l from-background to-transparent">
+                    <button type="button" onClick={() => scroll("right")} className="pointer-events-auto flex size-7 items-center justify-center rounded-full border-none bg-muted/40 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground">
+                      <ChevronRight className="size-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* --- CONTENT RENDERER --- */}
+            {!signedIn && activeTab !== "templates" ? (
+              <div className="max-w-sm py-8">
+                <p className="text-[22px] text-neutral-950 dark:text-foreground" style={{ fontFamily: "var(--font-studio-serif), ui-serif, Georgia, serif" }}>
+                  Sign in to see projects
+                </p>
+                <p className="mt-2 text-[14px] text-neutral-500 dark:text-muted-foreground">
+                  Your carousels will show up here.
+                </p>
+                <button type="button" className="mt-4 text-[13px] font-medium text-neutral-950 underline-offset-4 hover:underline dark:text-foreground" onClick={() => create.setAuthNeeded(true)}>
+                  Sign in
+                </button>
+              </div>
+            ) : activeTab === "templates" ? (
+              loadingTemplates && templates.length === 0 ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : templates.length === 0 ? (
+                <div className="py-16 text-center">
+                  <p className="text-[22px] text-neutral-950 dark:text-foreground">No templates found</p>
+                  <p className="mt-2 text-[13px] text-neutral-500 dark:text-muted-foreground">Try another category or search query.</p>
+                </div>
+              ) : (
+                <StudioBoardGrid>
+                  {templates.map((tpl) => (
+                    <button key={tpl.id} type="button" disabled={openingId === tpl.id} onClick={() => openTemplate(tpl.id)} className="group flex flex-col gap-2.5 text-left disabled:opacity-50">
+                      <div className="relative aspect-4/5 overflow-hidden rounded-xl border-none bg-muted/40 shadow-none transition-colors group-hover:bg-muted/60">
+                        {tpl.previewUrl ? (
+                          <img src={tpl.previewUrl} alt="" className="size-full object-cover" draggable={false} />
+                        ) : (
+                          <span className="flex h-full items-center justify-center px-3 text-center text-[12px] text-muted-foreground/70">{tpl.title}</span>
+                        )}
+                        {openingId === tpl.id && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+                            <Loader2 className="size-3.5 animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="px-0.5">
+                        <p className="truncate text-[13px] font-medium text-foreground">{tpl.title}</p>
+                        <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                          {tpl.slideCount} slides{tpl.badge ? ` · ${tpl.badge}` : ""}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </StudioBoardGrid>
+              )
+            ) : (
+              loadingProjects && projects.length === 0 ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : view === "list" ? (
+                visibleProjects.length > 0 && (
+                  <div className="overflow-x-auto">
+                    <StudioProjectList projects={visibleProjects} onOpen={(id) => router.push(`/studio/editor?project=${id}`)} onChanged={refreshProjects} />
+                  </div>
+                )
+              ) : (
+                <StudioBoardGrid>
+                  {visibleProjects.map((project) => (
+                    <StudioProjectCard key={project.id} project={project} onOpen={() => router.push(`/studio/editor?project=${project.id}`)} onChanged={refreshProjects} />
+                  ))}
+                </StudioBoardGrid>
+              )
+            )}
+
+            {signedIn && !loadingProjects && activeTab !== "templates" && visibleProjects.length === 0 ? (
+              <div className="py-16 text-center">
+                <p className="text-[22px] text-neutral-950 dark:text-foreground">
+                  {search.trim() ? "Nothing found" : folderId ? "Folder is empty" : activeTab === "starred" ? "No starred carousels" : "No projects yet"}
+                </p>
+                <p className="mt-2 text-[13px] text-neutral-500 dark:text-muted-foreground">
+                  {search.trim() ? "Try another search." : "Create a blank carousel or start from a template."}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </StudioContentBody>
+
+      <AuthModal
+        isOpen={create.authNeeded}
+        onOpenChange={(open) => {
+          if (!open) create.setAuthNeeded(false);
+        }}
+      />
+    </StudioContent>
+  );
+}

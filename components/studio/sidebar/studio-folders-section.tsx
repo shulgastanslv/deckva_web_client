@@ -170,7 +170,7 @@ export function StudioFoldersSection() {
 
           {folders.map((folder) => {
             const active =
-              pathname.startsWith("/studio/projects") &&
+              pathname.startsWith("/studio/browse") &&
               activeFolderId === folder.id;
 
             if (renamingId === folder.id) {
@@ -205,7 +205,7 @@ export function StudioFoldersSection() {
                 )}
               >
                 <Link
-                  href={`/studio/projects?folder=${folder.id}`}
+                  href={`/studio/browse?folder=${folder.id}`}
                   className="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 text-[13px] font-medium"
                 >
                   <Folder className="size-4 shrink-0 stroke-[1.75]" />

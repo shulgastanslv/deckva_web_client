@@ -306,7 +306,7 @@ export async function subscribePro(): Promise<
     ]);
 
     revalidatePath("/studio");
-    revalidatePath("/studio/projects");
+    revalidatePath("/studio/browse");
     return { success: true, billing: await buildSnapshot(userId) };
   } catch (err) {
     console.error("subscribePro error:", err);

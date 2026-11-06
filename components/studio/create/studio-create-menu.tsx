@@ -56,8 +56,8 @@ export function StudioCreateMenu({
       <DropdownMenuContent
         align={align}
         sideOffset={8}
-        className="w-full rounded-2xl border border-neutral-200/80 bg-white p-2 shadow-xl dark:border-neutral-800 dark:bg-neutral-900"
-      >
+        className="w-full rounded-2xl border-neutral-200/80 bg-white p-2 border-none dark:bg-neutral-900"
+        >
         <DropdownMenuItem
           className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-800 focus:bg-neutral-100 dark:text-neutral-200 dark:focus:bg-neutral-800"
           onClick={onBlank}

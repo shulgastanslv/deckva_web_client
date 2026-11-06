@@ -8,9 +8,9 @@ import { useSession } from "next-auth/react";
 import { useInvalidateStudioProjects, useUserProjects } from "@/lib/studio/queries";
 import { AuthModal } from "@/components/auth";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
-import { StudioBoardGrid } from "@/components/studio/projects/studio-board-grid";
-import { StudioProjectCard } from "@/components/studio/projects/studio-project-card";
-import { StudioProjectList } from "@/components/studio/projects/studio-project-list";
+import { StudioBoardGrid } from "@/components/studio/browse/studio-board-grid";
+import { StudioProjectCard } from "@/components/studio/browse/studio-project-card";
+import { StudioProjectList } from "@/components/studio/browse/studio-project-list";
 import { StudioStartSection } from "@/components/studio/start/studio-start-section";
 import {
   StudioContent,

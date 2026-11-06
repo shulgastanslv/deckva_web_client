@@ -2,14 +2,14 @@
 
 import { Suspense } from "react";
 
-import { StudioProjects } from "@/components/studio/studio-projects";
+import { StudioBrowse } from "@/components/studio/studio-browse";
 import { StudioShell } from "@/components/studio/studio-shell";
 
-export default function StudioProjectsPage() {
+export default function StudioBrowsePage() {
   return (
     <StudioShell>
       <Suspense fallback={null}>
-        <StudioProjects />
+        <StudioBrowse />
       </Suspense>
     </StudioShell>
   );

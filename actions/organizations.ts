@@ -236,7 +236,7 @@ export async function createOrganization(
     });
 
     revalidatePath("/studio");
-    revalidatePath("/studio/projects");
+    revalidatePath("/studio/browse");
 
     return { success: true, organization: await mapOrg(org, userId) };
   } catch (err) {
@@ -263,7 +263,7 @@ export async function setActiveOrganization(
     });
 
     revalidatePath("/studio");
-    revalidatePath("/studio/projects");
+    revalidatePath("/studio/browse");
 
     return { success: true, organizationId };
   } catch (err) {

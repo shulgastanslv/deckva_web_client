@@ -204,7 +204,7 @@ export default function CarouselEditor() {
         )}
 
         <main
-          className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/50"
+          className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/20"
           style={
             showDotGrid
               ? {
