@@ -14,7 +14,6 @@ import {
   type StudioPromptSubmit,
 } from "@/components/studio/studio-prompt";
 
-// Импортируем компоненты дропдауна из shadcn/ui
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,21 +21,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const ROLES = [
-  "All roles",
-  "Bloggers",
-  "Marketers",
-  "Designers",
-  "Developers",
-  "SEO specialists",
-  "Copywriters",
-  "Social media managers",
-  "Video creators",
-  "Podcasters",
-  "Content strategists",
-  "Freelancers",
-  "Other",
-] as const;
 
 export function StudioStartSection({
   name,
@@ -55,63 +39,63 @@ export function StudioStartSection({
   generating?: boolean;
   generateError?: string | null;
 }) {
-  const [selectedRole, setSelectedRole] = useState<string>("All roles");
 
   return (
-    <section>
-      <div className="mb-6 flex items-end justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">
-            Create a new content
-          </h2>
-          <p className="text-sm text-muted-foreground">Write your content idea and we will generate it for you</p>
+    <div className="flex flex-col">
+      <section>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-xl sm:text-[22px] font-semibold tracking-tight text-foreground">
+              Let's create something new
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Choose a template or start from scratch.
+            </p>
+          </div>
+          <StudioCreateMenu
+            onBlank={onBlank}
+            onTemplates={onTemplates}
+            label="Create"
+            align="end"
+          />
         </div>
-
-        <StudioCreateMenu
-          onBlank={onBlank}
-          onTemplates={onTemplates}
-          label="Create New"
-          align="end"
-        />
-      </div>
-
-      <StudioPrompt
-        initialTopic={topic}
-        onSubmit={onGenerate}
-        busy={generating}
-        error={generateError}
-      />
-
-      <div className="flex flex-row gap-4 mt-4">
-        <StudioCreateTile onClick={onBlank} />
-        <StudioStartRow>
-          <StudioStartTile
-            title="Generate Idea"
-            iconName="idea"
-            onClick={onBlank}
-          />
-          <StudioStartTile
-            title="Image Upload"
-            iconName="image"
-            onClick={onBlank}
-          />
-          <StudioStartTile
-            title="Layers"
-            iconName="layers"
-            onClick={onBlank}
-          />
+        <div className="flex flex-row gap-4 m-6">
+          <StudioCreateTile onClick={onBlank} />
+          <StudioStartRow>
+            <StudioStartTile
+              title="Generate Idea"
+              iconName="idea"
+              onClick={onBlank}
+            />
+            <StudioStartTile
+              title="Image Upload"
+              iconName="image"
+              onClick={onBlank}
+            />
+            <StudioStartTile
+              title="Layers"
+              iconName="layers"
+              onClick={onBlank}
+            />
             <StudioStartTile
               title="List of Contents"
               iconName="list"
               onClick={onBlank}
             />
-          <StudioStartTile
-            title="Code Block"
-            iconName="codeblock"
-            onClick={onBlank}
-          />
-        </StudioStartRow>
-      </div>
-    </section>
+            <StudioStartTile
+              title="Code Block"
+              iconName="codeblock"
+              onClick={onBlank}
+            />
+          </StudioStartRow>
+        </div>
+        <StudioPrompt
+          initialTopic={topic}
+          onSubmit={onGenerate}
+          busy={generating}
+          error={generateError}
+        />
+      </section>
+    </div>
   );
 }

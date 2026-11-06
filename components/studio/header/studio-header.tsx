@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ChevronRight, Menu } from "lucide-react";
+import { ChevronRight, Keyboard, Menu, Send, UserPlus } from "lucide-react";
 
 import { useActiveOrganization } from "@/lib/studio/queries";
 import Logo from "@/components/logo";
@@ -68,29 +68,50 @@ export function StudioHeader({
               className="shrink-0 hover:rotate-0"
             />
           </button>
-        </div>
-
-        <div className="flex items-center gap-1.5 sm:gap-2">
-
-          {session?.user?.role === "ADMIN" ? (
-            <Button variant="secondary" className="hidden h-8 rounded-full sm:inline-flex" onClick={() => router.push("/admin")}>
-              Admin panel <ChevronRight className="size-4"  />
-            </Button>
-          ) : null}
-
           {!isUpgrade ? (
             <Button
               type="button"
-              className="h-8 rounded-full bg-[#4262ff] px-3 text-[12px] font-semibold text-white hover:bg-[#3554e8] sm:px-3.5 sm:text-[13px]"
+              className="h-9 rounded-full bg-[#4262ff] px-3 text-[12px] font-semibold text-white hover:bg-[#3554e8] sm:px-3.5 sm:text-[13px]"
               onClick={openUpgrade}
             >
               Upgrade
             </Button>
           ) : (
-            <span className="inline-flex h-8 items-center rounded-full bg-[#4262ff]/12 px-3 text-[12px] font-semibold text-[#4262ff]">
+            <span className="inline-flex h-9 items-center rounded-full bg-[#4262ff]/12 px-3 text-[12px] font-semibold text-[#4262ff]">
               Pro
             </span>
           )}
+        </div>
+
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* --- НОВЫЕ ЭЛЕМЕНТЫ ДЛЯ ХЕДЕРА --- */}
+          <div className="flex items-center gap-3">
+
+            {/* Кнопка горячих клавиш */}
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground border-none shadow-none"
+              title="Keyboard shortcuts"
+            >
+              <Keyboard className="size-4" />
+            </button>
+
+            <Button
+              variant="secondary"
+              className="h-9 rounded-full px-3 font-medium shadow-none border-none transition-colors"
+            >
+              <UserPlus className="mr-2 size-3.5" />
+              Invite Members
+            </Button>
+
+          </div>
+          {/* {session?.user?.role === "ADMIN" ? (
+            <Button variant="secondary" className="hidden h-9 rounded-full sm:inline-flex" onClick={() => router.push("/admin")}>
+              Admin panel <ChevronRight className="size-4" />
+            </Button>
+          ) : null} */}
+
+         
 
           <StudioNotifications />
 

@@ -33,9 +33,9 @@ const RECENT_KEY = "studio_recent_prompts";
 const MAX_RECENTS = 5;
 
 const GENERATION_TYPES = [
-  { value: "idea", label: "Идея", icon: Sparkles, placeholder: "Опишите тему для генерации идей..." },
-  { value: "palette", label: "Палитра", icon: Palette, placeholder: "Опишите настроение или бренд для генерации палитры..." },
-  { value: "carousel", label: "Дизайн каруселей", icon: LayoutTemplate, placeholder: "Опишите контент и стиль для дизайна карусели..." },
+  { value: "idea", label: "Idea", icon: Sparkles, placeholder: "Describe the topic for idea generation..." },
+  { value: "palette", label: "Palette", icon: Palette, placeholder: "Describe the mood or brand for palette generation..." },
+  { value: "carousel", label: "Carousel Design", icon: LayoutTemplate, placeholder: "Describe the content and style for carousel design..." },
 ] as const;
 
 export function StudioPrompt({

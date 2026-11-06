@@ -133,38 +133,20 @@ export function StudioIconImage(props: React.SVGProps<SVGSVGElement>) {
 export function StudioIconPlus(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <rect
-        x="24"
-        y="22"
-        width="152"
-        height="86"
-        rx="8"
-        fill={MIRO.frame}
-        stroke={MIRO.blueDark}
-        strokeWidth="1.8"
-        strokeDasharray="4 3"
-      />
-
       <g filter="drop-shadow(0 3px 6px rgba(139,92,246,0.18))">
-        <circle cx="85" cy="65" r="18" fill={MIRO.blueDark} />
+        {/* Центрируем круг: x = 100 (половина от 200), y = 65 (половина от 130) */}
+        <circle cx="100" cy="65" r="18" fill={MIRO.blueDark} />
+        
+        {/* Центрируем крестик относительно точки (100, 65):
+            По горизонтали линии идут от 100-8 (92) до 100+8 (108)
+            По вертикали линии идут от 65-8 (57) до 65+8 (73) */}
         <path
-          d="M85 57V73M77 65H93"
+          d="M100 57V73M92 65H108"
           stroke="#FFFFFF"
           strokeWidth="2.4"
           strokeLinecap="round"
         />
       </g>
-
-      {/* Желтый акцентный стикер подсказки "New" */}
-      <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.06))">
-        <rect x="120" y="44" width="36" height="36" rx="3" fill={MIRO.yellow} />
-        <rect x="126" y="52" width="24" height="3" rx="1.5" fill={MIRO.yellowDark} opacity="0.8" />
-        <rect x="126" y="59" width="18" height="3" rx="1.5" fill={MIRO.yellowDark} opacity="0.8" />
-        <rect x="126" y="66" width="14" height="3" rx="1.5" fill={MIRO.yellowDark} opacity="0.8" />
-      </g>
-
-      {/* Мятная метка-бейдж */}
-      <rect x="36" y="34" width="22" height="7" rx="3.5" fill={MIRO.green} />
     </svg>
   );
 }
