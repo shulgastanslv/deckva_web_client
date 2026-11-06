@@ -124,7 +124,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
 
   return (
     <>
-      <header className="z-20 grid h-16 w-full shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 bg-background/95 px-4 text-sm select-none backdrop-blur">        {/* Project */}
+      <header className="z-20 grid h-16 w-full shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 bg-background/95 px-4 text-sm select-none backdrop-blur border-b border-border/50">        {/* Project */}
         <div className="flex min-w-0 items-center gap-2">
           <Logo width={32} height={32} href="/studio" />
           <ChevronRight className="hidden size-4 shrink-0 text-muted-foreground/40 sm:block" />

@@ -910,7 +910,7 @@ export function RightSidebar({
   );
 
   return (
-    <div className="relative flex h-full w-full overflow-hidden bg-background md:w-auto">
+    <div className="relative flex h-full w-full overflow-hidden bg-background md:w-auto border-l border-border/50">
       <div
         className={cn(
           "flex min-w-0 flex-col overflow-hidden transition-[width,opacity] duration-300 ease-out max-md:w-full max-md:flex-1",

@@ -181,7 +181,7 @@ export function CanvasToolbar({
   const slideCount = pendingImport?.slides.length ?? 0;
 
   return (
-    <div className="flex h-14 w-full min-w-0 shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border/40 bg-background/60 px-3.5 backdrop-blur-md select-none">
+    <div className="flex h-14 w-full min-w-0 shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border/50 bg-background/60 px-3.5 backdrop-blur-md select-none">
       <div className="flex shrink-0 items-center gap-2">
         
 
