@@ -107,11 +107,11 @@ export function StudioShell({ children }: { children: ReactNode }) {
         ) : null}
 
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background md:m-2 md:ml-0 md:rounded-2xl">
+          <StudioUpgradeBanner />
           <StudioHeader
             onSignIn={() => setAuthOpen(true)}
             onMenu={() => setNavOpen(true)}
           />
-          <StudioUpgradeBanner />
           <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
             {children}
           </div>

@@ -43,7 +43,7 @@ export function StudioHeader({
 
   return (
     <>
-      <header className="flex shrink-0 items-center justify-between gap-2 bg-muted/20 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 sm:gap-3 sm:px-6">
+      <header className="flex shrink-0 items-center justify-between gap-2 bg-muted/20 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 sm:gap-3 sm:px-6 rounded-t-2xl">
         <div className="flex min-w-0 items-center gap-1 sm:gap-2">
           {onMenu ? (
             <button

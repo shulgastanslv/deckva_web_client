@@ -43,7 +43,7 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
   };
 
   return (
-    <div className={cn("shrink-0 px-4 pt-2 sm:px-5", className)}>
+    <div className={cn("shrink-0 pt-2 mb-4 w-full", className)}>
       <div className="flex items-center gap-3 rounded-2xl bg-[#4262ff] px-4 py-2.5 text-white">
         <ArrowUpCircle
           className="size-5 shrink-0 stroke-[1.75] opacity-95"
