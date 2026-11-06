@@ -27,12 +27,13 @@ const actionButton =
   "h-10 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40 disabled:pointer-events-none disabled:opacity-40 flex items-center justify-center gap-1.5";
 
 const DEVICE_OPTIONS: { id: FrameKind; label: string }[] = [
-  { id: "iphone", label: "iPhone" },
-  { id: "android", label: "Android" },
-  { id: "laptop", label: "Laptop" },
-  { id: "monitor", label: "Monitor" },
-  { id: "ipad", label: "iPad" },
-  { id: "tablet", label: "Tablet" },
+  { id: "iphone18pro", label: "iPhone 18 Pro" },
+  { id: "iphone17pro", label: "iPhone 17 Pro" },
+  { id: "iphone17promax", label: "iPhone 17 Pro Max" },
+  { id: "iphone18promax", label: "iPhone 18 Pro Max" },
+  { id: "iphoneDuoClose", label: "iPhone Duo Close" },
+  { id: "iphoneDuoOpen", label: "iPhone Duo Open" },
+  { id: "iphoneAir", label: "iPhone Air" },
 ];
 
 const ROW_COUNTS = [3, 4, 5] as const;
@@ -51,7 +52,7 @@ export function SidebarMockups() {
   const slidesController = useSlidesController();
   const fillInputRef = useRef<HTMLInputElement>(null);
   const [titles, setTitles] = useState("Next.js\nRemix\nNuxt\nSvelteKit\nAstro");
-  const [device, setDevice] = useState<FrameKind>("iphone");
+  const [device, setDevice] = useState<FrameKind>("iphone18pro");
   const [rowCount, setRowCount] = useState<(typeof ROW_COUNTS)[number]>(5);
   const [fillMode, setFillMode] = useState<"this-slide" | "per-slide">("per-slide");
   const [busy, setBusy] = useState<string | null>(null);
@@ -140,8 +141,6 @@ export function SidebarMockups() {
         >
           {busy === "ranked" ? (
             <Loader2 className="size-3.5 animate-spin" />
-          ) : device === "laptop" || device === "monitor" ? (
-            <Laptop className="size-3.5" />
           ) : (
             <Smartphone className="size-3.5" />
           )}
