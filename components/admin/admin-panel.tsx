@@ -14,7 +14,7 @@ import {
   AdminShell,
   type AdminSection,
 } from "@/components/admin/admin-shell";
-import { AdminTemplates } from "@/components/admin-templates";
+import { AdminTemplates } from "@/components/admin/admin-templates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";

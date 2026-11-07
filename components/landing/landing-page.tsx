@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { Check, ChevronRight, Menu, X } from "lucide-react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
-import Logo from "@/components/logo";
+import Logo from "@/components/logo/logo";
 import { AuthModal } from "@/components/auth";
 import { Button } from "@/components/ui/button";
 import {

@@ -29,6 +29,7 @@ import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 // --- Template Imports ---
 import { getTemplates, type TemplateListItem } from "@/actions/templates";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates/categories";
+import { CategoryDropdown } from "./studio-category-dropdown";
 
 // --- Shared UI Imports ---
 import { AuthModal } from "@/components/auth";
@@ -194,26 +195,25 @@ export function StudioBrowse() {
   const pageTitle = activeFolder
     ? activeFolder.name
     : activeTab === "all"
-    ? "Projects"
-    : activeTab === "starred"
-    ? "Starred"
-    : "Templates";
+      ? "Projects"
+      : activeTab === "starred"
+        ? "Starred"
+        : "Templates";
 
   const pageDescription = activeFolder
     ? "Manage projects in this folder."
     : activeTab === "all"
-    ? "Create, manage, and organize all your creative projects in one place."
-    : activeTab === "starred"
-    ? "Quick access to your most important and frequently used projects."
-    : "Start quickly with our beautifully designed, customizable templates.";
+      ? "Create, manage, and organize all your creative projects in one place."
+      : activeTab === "starred"
+        ? "Quick access to your most important and frequently used projects."
+        : "Start quickly with our beautifully designed, customizable templates.";
 
   return (
     <StudioContent>
       <StudioContentBody className="pt-6 sm:pt-10">
         <div className="flex flex-col-reverse md:flex-row items-start gap-8">
           <div className="flex-1 min-w-0 w-full">
-            
-            {/* Header Title & Description */}
+
             <div className="mb-6">
               <h1 className="text-3xl sm:text-4xl font-medium tracking-tight text-neutral-900 dark:text-neutral-100">
                 {pageTitle}
@@ -223,10 +223,8 @@ export function StudioBrowse() {
               </p>
             </div>
 
-            {/* --- UNIFIED FILTER BAR --- */}
             <div className="mb-6 flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
-              
-              {/* Поиск */}
+
               <div className="relative w-full sm:w-64 sm:flex-none">
                 <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -237,40 +235,12 @@ export function StudioBrowse() {
                 />
               </div>
 
-              {/* Левые фильтры */}
-              <div className="flex items-center gap-1 sm:gap-2">
-                <Select defaultValue="anyone">
-                  <SelectTrigger className="h-9 w-auto gap-2 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 focus:ring-0 [&>span]:line-clamp-1">
-                    <SelectValue placeholder="Owned by anyone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="anyone">Owned by anyone</SelectItem>
-                    <SelectItem value="me">Owned by me</SelectItem>
-                    <SelectItem value="not-me">Not owned by me</SelectItem>
-                  </SelectContent>
-                </Select>
+              {activeTab === "templates" && (
+                <CategoryDropdown selectedCategory={templateCategory} onSelectCategory={setTemplateCategory} />
+              )}
 
-                <Select defaultValue="all">
-                  <SelectTrigger className="h-9 w-auto gap-2 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 focus:ring-0 [&>span]:line-clamp-1">
-                    <SelectValue placeholder="Space" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Space</SelectItem>
-                    <SelectItem value="personal">Personal</SelectItem>
-                    <SelectItem value="team">Team</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Правая часть панели */}
               <div className="ml-auto flex items-center gap-2 sm:gap-3">
-                
-                {/* Кнопка создания */}
-                {activeTab !== "templates" && (
-                  <StudioCreateMenu onBlank={create.openBlank} onTemplates={() => setTabAndUrl("templates")} />
-                )}
 
-                {/* Сортировка */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-9 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted">
@@ -294,7 +264,6 @@ export function StudioBrowse() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Переключатель вида */}
                 <div className="flex h-9 items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shadow-none">
                   <Button
                     variant="ghost"
@@ -316,46 +285,6 @@ export function StudioBrowse() {
               </div>
             </div>
 
-            {/* --- TEMPLATE CATEGORIES SCROLL --- */}
-            {activeTab === "templates" && (
-              <div className="relative mb-6">
-                {canScrollLeft && (
-                  <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 flex w-12 items-center justify-start bg-gradient-to-r from-background to-transparent">
-                    <button type="button" onClick={() => scroll("left")} className="pointer-events-auto flex size-7 items-center justify-center rounded-full border-none bg-muted/40 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground">
-                      <ChevronLeft className="size-4" />
-                    </button>
-                  </div>
-                )}
-                <ScrollContainer innerRef={scrollRef} onScroll={checkScroll} className="flex items-center gap-5 overflow-x-auto scroll-smooth select-none [scrollbar-width:none] active:cursor-grabbing sm:gap-6 [&::-webkit-scrollbar]:hidden">
-                  {allCategories.map((tab) => {
-                    const isAll = tab === "all";
-                    const isActive = templateCategory === tab;
-                    return (
-                      <button
-                        key={tab}
-                        type="button"
-                        onClick={() => setTemplateCategory(tab)}
-                        className={cn(
-                          "relative shrink-0 pb-2.5 whitespace-nowrap text-[15px] transition-colors border-none",
-                          isActive ? "font-semibold text-neutral-950 dark:text-foreground" : "font-medium text-neutral-400 hover:text-neutral-700 dark:text-muted-foreground dark:hover:text-foreground"
-                        )}
-                      >
-                        {isAll ? "All" : tab}
-                      </button>
-                    );
-                  })}
-                </ScrollContainer>
-                {canScrollRight && (
-                  <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 flex w-12 items-center justify-end bg-gradient-to-l from-background to-transparent">
-                    <button type="button" onClick={() => scroll("right")} className="pointer-events-auto flex size-7 items-center justify-center rounded-full border-none bg-muted/40 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground">
-                      <ChevronRight className="size-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* --- CONTENT RENDERER --- */}
             {!signedIn && activeTab !== "templates" ? (
               <div className="max-w-sm py-8">
                 <p className="text-[22px] text-neutral-950 dark:text-foreground" style={{ fontFamily: "var(--font-studio-serif), ui-serif, Georgia, serif" }}>
@@ -381,7 +310,7 @@ export function StudioBrowse() {
               ) : (
                 <StudioBoardGrid>
                   {templates.map((tpl) => (
-                    <button key={tpl.id} type="button" disabled={openingId === tpl.id} onClick={() => openTemplate(tpl.id)} className="group flex flex-col gap-2.5 text-left disabled:opacity-50">
+                    <button key={tpl.id} type="button" disabled={openingId === tpl.id} onClick={() => openTemplate(tpl.id)} className="group flex flex-col gap-2.5 text-left disabled:opacity-50 cursor-pointer">
                       <div className="relative aspect-4/5 overflow-hidden rounded-xl border-none bg-muted/40 shadow-none transition-colors group-hover:bg-muted/60">
                         {tpl.previewUrl ? (
                           <img src={tpl.previewUrl} alt="" className="size-full object-cover" draggable={false} />

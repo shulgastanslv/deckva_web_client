@@ -22,7 +22,7 @@ export function StudioProjectRow({
   return (
     <div
       className={cn(
-        "group grid items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-black/[0.03] dark:hover:bg-muted/40",
+        "group grid items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-black/[0.03] dark:hover:bg-muted/40 cursor-pointer select-none",
         recentCols,
       )}
     >

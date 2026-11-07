@@ -16,11 +16,11 @@ export function StudioProjectCard({
   onChanged: () => void;
 }) {
   return (
-    <article className="group relative flex flex-col gap-2.5">
+    <article className="group relative flex flex-col gap-2.5 cursor-pointer select-none hover:rotate-2 transition-transform duration-300">
       <button
         type="button"
         onClick={onOpen}
-        className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted text-left transition-colors group-hover:bg-muted/80"
+        className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted text-left transition-colors group-hover:bg-muted/80 cursor-pointer select-none"
       >
         {project.previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

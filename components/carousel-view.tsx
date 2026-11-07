@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import Logo from "@/components/logo";
+import Logo from "@/components/logo/logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import type { RatioKey } from "@/lib/types";
 

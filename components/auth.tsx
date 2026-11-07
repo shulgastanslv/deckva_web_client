@@ -21,7 +21,7 @@ import {
 } from "@/actions/auth-email";
 import { registerUser } from "@/actions/user";
 import { Loader2 } from "lucide-react";
-import Logo from "./logo";
+import Logo from "./logo/logo";
 
 type View = "login" | "register" | "forgot-password" | "reset-password" | "check-email";
 type CheckKind = "verify" | "reset";

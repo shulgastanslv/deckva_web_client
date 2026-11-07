@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 
-import { LOGO_PATH_BACK, LOGO_PATH_FRONT } from "@/components/logo-paths";
+import { LOGO_PATH_BACK, LOGO_PATH_FRONT } from "@/components/logo/logo-paths";
 import { cn } from "@/lib/utils";
 
 type LogoAnimatedLoadingProps = {

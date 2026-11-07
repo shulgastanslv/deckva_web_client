@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
-import { AdminPanel } from "@/components/admin-panel";
+import { AdminPanel } from "@/components/admin/admin-panel";
 import { emailIsAdmin } from "@/lib/auth-role";
 import { prisma } from "@/lib/prisma";
 

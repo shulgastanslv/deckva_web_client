@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import { LOGO_PATH_BACK, LOGO_PATH_FRONT } from "@/components/logo-paths";
+import { LOGO_PATH_BACK, LOGO_PATH_FRONT } from "@/components/logo/logo-paths";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {

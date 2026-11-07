@@ -10,7 +10,7 @@ import {
   Shield,
 } from "lucide-react";
 
-import Logo from "@/components/logo";
+import Logo from "@/components/logo/logo";
 import { cn } from "@/lib/utils";
 
 export type AdminSection =
