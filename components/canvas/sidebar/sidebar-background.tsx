@@ -280,10 +280,8 @@ export function SidebarBackground() {
               })}
             </div>
             <Button
-              type="button"
-              size="sm"
               variant="secondary"
-              className="w-full rounded-full"
+              className="w-full rounded-full h-10"
               onClick={() => setPickerOpen(true)}
             >
               Browse all · {DDDEPTH_COUNT}

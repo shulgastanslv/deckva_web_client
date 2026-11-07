@@ -641,7 +641,7 @@ export function LandingPage() {
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
       <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
-        <div className="mx-auto flex max-w-[1200px] items-center gap-2 rounded-full border border-white/50 bg-white/70 px-2 py-1.5 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:gap-3 sm:px-3">
+        <div className="mx-auto flex max-w-[1200px] items-center gap-2 rounded-full border-none bg-white/70 px-2 py-1.5 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:gap-3 sm:px-3">
           <div className="flex min-w-0 items-center gap-1">
             <Button
               type="button"

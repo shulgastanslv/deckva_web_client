@@ -1,6 +1,6 @@
 "use client";
 
-import { ImagePlus, Link2, Loader2 } from "lucide-react";
+import { ImagePlus, Link2, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
@@ -8,6 +8,10 @@ import { cn } from "@/lib/utils";
 import { useElementLibrary } from "@/components/canvas/use-element-library";
 import type { FrameKind } from "@/lib/canvas/frames";
 import { ImageUploadIcon } from "@/components/canvas/shapes-icons";
+import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DeviceDropdown } from "@/components/canvas/frames-dropdown";
+
 
 export function SidebarElements() {
   const {
@@ -31,6 +35,11 @@ export function SidebarElements() {
     handleFrameFileChange,
     addImageFromUrl,
   } = useElementLibrary();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredFrames = frames.filter((frame) =>
+    frame.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col text-[13px] text-foreground">
