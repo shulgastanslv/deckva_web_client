@@ -162,14 +162,14 @@ export function LeftSidebar({
 
       <div
         className={`flex min-h-0 min-w-0 flex-col overflow-hidden transition-all duration-200 ease-in-out max-md:w-auto max-md:flex-1 max-md:opacity-100 ${
-          isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-72 md:flex-none md:opacity-100"
+          isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-80 md:flex-none md:opacity-100"
         }`}
       >
         <div className="flex h-11 shrink-0 items-center border-b border-border/40 px-3.5 text-[13px] font-semibold tracking-tight text-foreground">
           {PANEL_TITLES[activeNav] ?? activeNav}
         </div>
 
-        <ScrollArea className="h-full min-h-0 w-full flex-1 [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden">
+        <ScrollArea className="h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:max-w-full [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-viewport]>div]:!max-w-full">
           {activeNav === "elements" && <SidebarElements />}
           {activeNav === "layers" && <SidebarLayers />}
           {activeNav === "filters" && <SidebarFilters />}
