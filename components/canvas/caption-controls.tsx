@@ -138,7 +138,7 @@ export function CaptionControls() {
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="default"
+          variant="ghost"
           size="sm"
           className="h-9 rounded-full px-3 text-[13px]"
         >

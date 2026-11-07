@@ -53,6 +53,30 @@ export type CodeLang =
 
 export type CodePadding = 16 | 32 | 64 | 128;
 
+export type CodeChromeStyle =
+  | "none"
+  | "macos"
+  | "safari"
+  | "card"
+  | "stack"
+  | "stack-2"
+  | "arc"
+  | "windows";
+
+export const CODE_CHROME_STYLES: {
+  id: CodeChromeStyle;
+  label: string;
+}[] = [
+  { id: "none", label: "None" },
+  { id: "macos", label: "MacOS" },
+  { id: "safari", label: "Safari" },
+  { id: "card", label: "Card" },
+  { id: "stack", label: "Stack" },
+  { id: "stack-2", label: "Stack 2" },
+  { id: "arc", label: "Arc" },
+  { id: "windows", label: "Windows" },
+];
+
 export type CodeTokenKind =
   | "plain"
   | "keyword"
@@ -75,9 +99,29 @@ export interface CodeBlockOptions {
   padding: CodePadding;
   radius: number;
   fontSize: number;
+  /** @deprecated Prefer `chromeStyle`. Kept for older callers. */
   showChrome: boolean;
+  chromeStyle: CodeChromeStyle;
   showLineNumbers: boolean;
   filename: string;
+}
+
+export function resolveChromeStyle(
+  style: CodeChromeStyle | undefined,
+  showChrome?: boolean,
+): CodeChromeStyle {
+  if (style && CODE_CHROME_STYLES.some((item) => item.id === style)) return style;
+  return showChrome === false ? "none" : "macos";
+}
+
+export function chromeHasBar(style: CodeChromeStyle) {
+  return style !== "none" && style !== "arc";
+}
+
+export function chromeStackLayers(style: CodeChromeStyle) {
+  if (style === "stack") return 1;
+  if (style === "stack-2") return 2;
+  return 0;
 }
 
 export const CODE_PADDINGS: CodePadding[] = [16, 32, 64, 128];
@@ -132,9 +176,22 @@ export const DEFAULT_CODE_OPTIONS: CodeBlockOptions = {
   radius: 16,
   fontSize: 28,
   showChrome: true,
+  chromeStyle: "macos",
   showLineNumbers: false,
   filename: "Untitled",
 };
+
+export const CODE_UI_SCALE_BASE = DEFAULT_CODE_OPTIONS.fontSize;
+
+export function fontSizeFromUiScale(scalePercent: number) {
+  return Math.round(
+    Math.min(48, Math.max(16, (CODE_UI_SCALE_BASE * scalePercent) / 100)),
+  );
+}
+
+export function uiScaleFromFontSize(fontSize: number) {
+  return Math.round((fontSize / CODE_UI_SCALE_BASE) * 100);
+}
 
 const C_LIKE = [
   "const", "let", "var", "function", "return", "if", "else", "for", "while",
@@ -516,6 +573,15 @@ export function isCodeBlock(obj: FabricObject | null | undefined): obj is Group 
   return (obj as CodeMeta).swibpRole === "code";
 }
 
+function parseChromeStyle(raw: unknown, showChromeFallback?: boolean): CodeChromeStyle {
+  if (typeof raw === "string") {
+    if (raw === "0") return "none";
+    if (raw === "1") return "macos";
+    return resolveChromeStyle(raw as CodeChromeStyle, showChromeFallback);
+  }
+  return resolveChromeStyle(undefined, showChromeFallback);
+}
+
 export function readCodeOptions(obj: FabricObject): CodeBlockOptions {
   const meta = obj as CodeMeta;
   const lang = migrateLang(meta.swibpCodeLang ?? "");
@@ -529,6 +595,7 @@ export function readCodeOptions(obj: FabricObject): CodeBlockOptions {
     : ([16, 32, 64, 128] as const).reduce((best, n) =>
         Math.abs(n - paddingRaw) < Math.abs(best - paddingRaw) ? n : best,
       );
+  const chromeStyle = parseChromeStyle(meta.swibpCodeChrome);
   return {
     code: typeof meta.swibpCode === "string" ? meta.swibpCode : DEFAULT_CODE,
     lang,
@@ -545,7 +612,8 @@ export function readCodeOptions(obj: FabricObject): CodeBlockOptions {
       typeof meta.swibpCodeFontSize === "number"
         ? meta.swibpCodeFontSize
         : DEFAULT_CODE_OPTIONS.fontSize,
-    showChrome: meta.swibpCodeChrome !== "0",
+    showChrome: chromeStyle !== "none",
+    chromeStyle,
     showLineNumbers: meta.swibpCodeLineNumbers === "1",
     filename:
       typeof meta.swibpCodeFilename === "string"
@@ -555,6 +623,7 @@ export function readCodeOptions(obj: FabricObject): CodeBlockOptions {
 }
 
 function writeCodeMeta(group: Group, options: CodeBlockOptions) {
+  const chromeStyle = resolveChromeStyle(options.chromeStyle, options.showChrome);
   group.set({
     swibpRole: "code",
     swibpCode: options.code,
@@ -563,7 +632,7 @@ function writeCodeMeta(group: Group, options: CodeBlockOptions) {
     swibpCodePadding: options.padding,
     swibpCodeRadius: options.radius,
     swibpCodeFontSize: options.fontSize,
-    swibpCodeChrome: options.showChrome ? "1" : "0",
+    swibpCodeChrome: chromeStyle,
     swibpCodeLineNumbers: options.showLineNumbers ? "1" : "0",
     swibpCodeFilename: options.filename,
     swibpCodeDarkMode: options.darkMode ? "1" : "0",
@@ -584,6 +653,177 @@ function rayGradient(from: string, to: string) {
   });
 }
 
+function inertRect(props: ConstructorParameters<typeof Rect>[0]) {
+  return new Rect({
+    selectable: false,
+    evented: false,
+    originX: "left",
+    originY: "top",
+    ...props,
+  });
+}
+
+function paintChrome(
+  parts: FabricObject[],
+  opts: {
+    style: CodeChromeStyle;
+    winLeft: number;
+    winTop: number;
+    windowW: number;
+    windowH: number;
+    chromeH: number;
+    radius: number;
+    transparent: boolean;
+    chromeBg: string;
+    titleColor: string;
+    filename: string;
+    fontFamily: string;
+    fontSize: number;
+    darkMode: boolean;
+  },
+) {
+  const {
+    style,
+    winLeft,
+    winTop,
+    windowW,
+    chromeH,
+    transparent,
+    chromeBg,
+    titleColor,
+    filename,
+    fontFamily,
+    fontSize,
+  } = opts;
+  if (style === "none" || style === "arc") return;
+
+  if (!transparent) {
+    parts.push(
+      inertRect({
+        left: winLeft,
+        top: winTop,
+        width: windowW,
+        height: chromeH,
+        fill: chromeBg,
+      }),
+    );
+    parts.push(
+      inertRect({
+        left: winLeft,
+        top: winTop + chromeH - 10,
+        width: windowW,
+        height: 10,
+        fill: chromeBg,
+      }),
+    );
+  }
+
+  const midY = winTop + chromeH / 2;
+  const dots: [string, string, string] = ["#ff5f56", "#ffbd2e", "#27c93f"];
+
+  if (style === "macos" || style === "safari" || style === "card" || style === "stack" || style === "stack-2") {
+    dots.forEach((color, index) => {
+      parts.push(
+        new Circle({
+          left: winLeft + 22 + index * 18,
+          top: midY,
+          radius: 5.5,
+          fill: color,
+          originX: "center",
+          originY: "center",
+          selectable: false,
+          evented: false,
+        }),
+      );
+    });
+  }
+
+  if (style === "windows") {
+    const btnY = midY;
+    const btnRight = winLeft + windowW - 18;
+    const stroke = titleColor;
+    // Close / maximize / minimize (right → left)
+    parts.push(
+      new Text("×", {
+        left: btnRight,
+        top: btnY,
+        fontSize: Math.max(14, Math.round(fontSize * 0.55)),
+        fontFamily,
+        fill: stroke,
+        originX: "center",
+        originY: "center",
+        selectable: false,
+        evented: false,
+        editable: false,
+      }),
+    );
+    parts.push(
+      inertRect({
+        left: btnRight - 28,
+        top: btnY - 5,
+        width: 10,
+        height: 10,
+        fill: "transparent",
+        stroke,
+        strokeWidth: 1.5,
+      }),
+    );
+    parts.push(
+      inertRect({
+        left: btnRight - 52,
+        top: btnY - 1,
+        width: 12,
+        height: 2,
+        fill: stroke,
+      }),
+    );
+  }
+
+  if (style === "safari") {
+    const barW = Math.min(windowW * 0.55, 280);
+    parts.push(
+      inertRect({
+        left: winLeft + (windowW - barW) / 2,
+        top: midY - 11,
+        width: barW,
+        height: 22,
+        rx: 11,
+        ry: 11,
+        fill: opts.darkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+      }),
+    );
+  }
+
+  if (style === "card") {
+    parts.push(
+      inertRect({
+        left: winLeft,
+        top: winTop + chromeH - 3,
+        width: windowW,
+        height: 3,
+        fill: opts.darkMode ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
+      }),
+    );
+  }
+
+  if (filename.trim() && style !== "safari") {
+    parts.push(
+      new Text(filename.trim(), {
+        left: winLeft + windowW / 2,
+        top: midY,
+        fontSize: Math.max(13, Math.round(fontSize * 0.48)),
+        fontFamily,
+        fill: titleColor,
+        originX: "center",
+        originY: "center",
+        selectable: false,
+        evented: false,
+        editable: false,
+      }),
+    );
+  }
+}
+
 export function buildCodeBlockGroup(
   options: CodeBlockOptions = DEFAULT_CODE_OPTIONS,
 ): Group {
@@ -595,7 +835,15 @@ export function buildCodeBlockGroup(
   const lineHeight = fontSize * 1.55;
   const outerPad = options.showBackground ? options.padding : 0;
   const innerPad = Math.round(Math.max(28, fontSize * 1.05));
-  const chromeH = options.showChrome ? 52 : 0;
+  const chromeStyle = resolveChromeStyle(options.chromeStyle, options.showChrome);
+  const chromeH = chromeHasBar(chromeStyle)
+    ? chromeStyle === "safari"
+      ? 58
+      : 52
+    : 0;
+  const stackLayers = chromeStackLayers(chromeStyle);
+  const stackGap = 10;
+  const stackPad = stackLayers * stackGap;
   const lang = resolveLang(options.lang, options.code);
   const lines = (options.code.replace(/\r\n/g, "\n") || " ").split("\n");
   const lineNoWidth = options.showLineNumbers
@@ -612,11 +860,12 @@ export function buildCodeBlockGroup(
   const contentW = Math.max(maxTextW, 320);
   const windowW = innerPad * 2 + lineNoWidth + contentW;
   const windowH = chromeH + innerPad * 2 + lines.length * lineHeight;
-  const width = windowW + outerPad * 2;
-  const height = windowH + outerPad * 2;
+  const width = windowW + outerPad * 2 + stackPad;
+  const height = windowH + outerPad * 2 + stackPad;
   const winLeft = outerPad;
   const winTop = outerPad;
-  const radius = options.radius;
+  const radius =
+    chromeStyle === "arc" ? Math.max(options.radius, 22) : options.radius;
 
   const windowBg = options.transparent
     ? "rgba(0,0,0,0)"
@@ -630,13 +879,13 @@ export function buildCodeBlockGroup(
       : "#f4f4f5";
   const lineNoColor = options.darkMode ? "#5c5c66" : "#a1a1aa";
   const titleColor = options.darkMode ? "#8b8b96" : "#71717a";
-  const dots: [string, string, string] = ["#ff5f56", "#ffbd2e", "#27c93f"];
+  const stackFill = options.darkMode ? "#1c1c24" : "#e4e4e7";
 
   const parts: FabricObject[] = [];
 
   if (options.showBackground) {
     parts.push(
-      new Rect({
+      inertRect({
         left: 0,
         top: 0,
         width,
@@ -644,17 +893,29 @@ export function buildCodeBlockGroup(
         rx: Math.max(radius + 8, 24),
         ry: Math.max(radius + 8, 24),
         fill: rayGradient(theme.background.from, theme.background.to),
-        selectable: false,
-        evented: false,
-        originX: "left",
-        originY: "top",
       }),
     );
   }
 
+  if (!options.transparent && stackLayers > 0) {
+    for (let i = stackLayers; i >= 1; i -= 1) {
+      parts.push(
+        inertRect({
+          left: winLeft + i * stackGap,
+          top: winTop + i * stackGap,
+          width: windowW,
+          height: windowH,
+          rx: radius,
+          ry: radius,
+          fill: stackFill,
+        }),
+      );
+    }
+  }
+
   if (!options.transparent) {
     parts.push(
-      new Rect({
+      inertRect({
         left: winLeft,
         top: winTop,
         width: windowW,
@@ -662,79 +923,33 @@ export function buildCodeBlockGroup(
         rx: radius,
         ry: radius,
         fill: windowBg,
-        selectable: false,
-        evented: false,
-        originX: "left",
-        originY: "top",
+        stroke:
+          chromeStyle === "card" || chromeStyle === "arc"
+            ? options.darkMode
+              ? "rgba(255,255,255,0.12)"
+              : "rgba(0,0,0,0.1)"
+            : undefined,
+        strokeWidth: chromeStyle === "card" || chromeStyle === "arc" ? 1.5 : 0,
       }),
     );
   }
 
-  if (options.showChrome) {
-    if (!options.transparent) {
-      parts.push(
-        new Rect({
-          left: winLeft,
-          top: winTop,
-          width: windowW,
-          height: chromeH,
-          fill: chromeBg,
-          selectable: false,
-          evented: false,
-          originX: "left",
-          originY: "top",
-        }),
-      );
-
-      // Cover bottom of chrome so only top corners feel rounded with the window.
-      parts.push(
-        new Rect({
-          left: winLeft,
-          top: winTop + chromeH - 10,
-          width: windowW,
-          height: 10,
-          fill: chromeBg,
-          selectable: false,
-          evented: false,
-          originX: "left",
-          originY: "top",
-        }),
-      );
-    }
-
-    const dotsY = winTop + chromeH / 2;
-    dots.forEach((color, index) => {
-      parts.push(
-        new Circle({
-          left: winLeft + 22 + index * 18,
-          top: dotsY,
-          radius: 5.5,
-          fill: color,
-          originX: "center",
-          originY: "center",
-          selectable: false,
-          evented: false,
-        }),
-      );
-    });
-
-    if (options.filename.trim()) {
-      parts.push(
-        new Text(options.filename.trim(), {
-          left: winLeft + windowW / 2,
-          top: dotsY,
-          fontSize: Math.max(13, Math.round(fontSize * 0.48)),
-          fontFamily,
-          fill: titleColor,
-          originX: "center",
-          originY: "center",
-          selectable: false,
-          evented: false,
-          editable: false,
-        }),
-      );
-    }
-  }
+  paintChrome(parts, {
+    style: chromeStyle,
+    winLeft,
+    winTop,
+    windowW,
+    windowH,
+    chromeH,
+    radius,
+    transparent: options.transparent,
+    chromeBg,
+    titleColor,
+    filename: options.filename,
+    fontFamily,
+    fontSize,
+    darkMode: options.darkMode,
+  });
 
   tokenized.forEach((tokens, lineIndex) => {
     const top = winTop + chromeH + innerPad + lineIndex * lineHeight;
@@ -782,7 +997,7 @@ export function buildCodeBlockGroup(
     subTargetCheck: false,
     interactive: false,
   });
-  writeCodeMeta(group, options);
+  writeCodeMeta(group, { ...options, chromeStyle, showChrome: chromeStyle !== "none" });
   return group;
 }
 

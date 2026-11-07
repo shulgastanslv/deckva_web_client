@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type ComponentType } from "react";
 import {
+  Code2,
   ImageIcon,
   Link2,
   Loader2,
@@ -10,6 +11,7 @@ import {
   Smartphone,
   Type,
 } from "lucide-react";
+import type { Group } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -20,8 +22,12 @@ import {
 import type { FrameKind } from "@/lib/canvas/frames";
 import { ImageUploadIcon } from "@/components/canvas/shapes-icons";
 import { FramesPicker } from "@/components/canvas/sidebar/frames-picker";
+import { CodeBlockSettings } from "@/components/canvas/code-block-inspector";
+import { ChipScroll } from "@/components/canvas/sidebar/chip-scroll";
+import { isCodeBlock } from "@/lib/canvas/code-block";
+import { useSelectedObject } from "@/hooks/use-selected-object";
 
-type Category = "photos" | "text" | "shapes" | "frames";
+type Category = "photos" | "text" | "shapes" | "frames" | "code";
 
 const CATEGORIES: {
   id: Category;
@@ -32,6 +38,7 @@ const CATEGORIES: {
   { id: "text", label: "Text", icon: Type },
   { id: "shapes", label: "Shapes", icon: Shapes },
   { id: "frames", label: "Frames", icon: Smartphone },
+  { id: "code", label: "Code", icon: Code2 },
 ];
 
 const TEXT_PREVIEW: Record<
@@ -40,24 +47,19 @@ const TEXT_PREVIEW: Record<
 > = {
   heading: {
     sample: "Add a heading",
-    className: "text-[22px] font-bold leading-tight tracking-tight",
+    className: "text-[26px] font-bold leading-tight tracking-tight",
   },
   subtitle: {
     sample: "Add a subheading",
-    className: "text-[16px] font-semibold leading-snug",
+    className: "text-[18px] font-semibold leading-snug",
   },
   paragraph: {
     sample: "Add a little bit of body text",
-    className: "text-[13px] font-normal leading-relaxed text-muted-foreground",
+    className: "text-[15px] font-normal leading-relaxed text-muted-foreground",
   },
   quote: {
     sample: "“Add a quote”",
-    className: "text-[15px] font-medium italic leading-snug",
-  },
-  code: {
-    sample: "const hello = true",
-    className:
-      "font-mono text-[12px] leading-relaxed text-muted-foreground",
+    className: "text-[17px] font-medium italic leading-snug",
   },
 };
 
@@ -90,8 +92,14 @@ export function SidebarElements() {
     addImageFromUrl,
   } = useElementLibrary();
 
+  const { selectedObject } = useSelectedObject();
   const [category, setCategory] = useState<Category>("frames");
   const [search, setSearch] = useState("");
+
+  const codeGroup =
+    selectedObject && isCodeBlock(selectedObject)
+      ? (selectedObject as Group)
+      : null;
 
   const textItems = useMemo(() => {
     const section = sections.find((s) => s.id === "elements-text");
@@ -103,8 +111,18 @@ export function SidebarElements() {
     return filterItems(section?.items ?? [], search);
   }, [sections, search]);
 
+  const tabItems = useMemo(
+    () =>
+      CATEGORIES.map(({ id, label, icon: Icon }) => ({
+        id,
+        label,
+        icon: <Icon />,
+      })),
+    [],
+  );
+
   return (
-    <div className="flex w-full min-w-0 max-w-full flex-col overflow-x-hidden text-[13px] text-foreground">
+    <div className="flex w-full min-w-0 max-w-full p-2 flex-col overflow-x-hidden text-[14px] text-foreground">
       <input
         type="file"
         ref={fileInputRef}
@@ -122,10 +140,9 @@ export function SidebarElements() {
         disabled={!manager}
       />
 
-      {/* Canva-style header: search + chips (sticky in parent ScrollArea) */}
-      <div className="sticky top-0 z-10 w-full min-w-0 space-y-2.5 bg-background/95 px-3 pt-3 pb-2 backdrop-blur-sm">
-        <label className="flex h-10 min-w-0 items-center gap-2 rounded-full bg-muted/70 px-3 dark:bg-muted/35">
-          <Search className="size-3.5 shrink-0 text-muted-foreground" />
+      <div className="sticky top-0 z-10 w-full min-w-0 space-y-3 bg-background/95 px-3 pt-3 pb-2 backdrop-blur-sm">
+        <label className="flex h-11 min-w-0 items-center gap-2 rounded-full bg-muted/70 px-3.5 dark:bg-muted/35">
+          <Search className="size-4 shrink-0 text-muted-foreground" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -136,36 +153,27 @@ export function SidebarElements() {
                   ? "Search text..."
                   : category === "shapes"
                     ? "Search shapes..."
-                    : "Search devices..."
+                    : category === "code"
+                      ? "Search code..."
+                      : "Search devices..."
             }
-            className="h-full min-w-0 w-full bg-transparent text-[13px] outline-none placeholder:text-muted-foreground"
+            className="h-full min-w-0 w-full bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
           />
         </label>
 
-        <div className="grid w-full grid-cols-4 gap-1">
-          {CATEGORIES.map(({ id, label, icon: Icon }) => {
-            const active = category === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setCategory(id)}
-                className={cn(
-                  "flex h-8 min-w-0 items-center justify-center gap-1 rounded-full px-1.5 text-[11px] font-medium transition-colors",
-                  active
-                    ? "bg-foreground text-background"
-                    : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground dark:bg-muted/35",
-                )}
-              >
-                <Icon className="size-3.5 shrink-0" />
-                <span className="truncate">{label}</span>
-              </button>
-            );
-          })}
-        </div>
+        <ChipScroll
+          items={tabItems}
+          value={category}
+          onChange={(id) => setCategory(id as Category)}
+          ariaLabel="Element categories"
+        />
       </div>
 
-      <div className="w-full min-w-0 space-y-3 px-3 pt-1 pb-4">
+      <div
+        role="tabpanel"
+        aria-label={CATEGORIES.find((item) => item.id === category)?.label}
+        className="w-full min-w-0 space-y-3 px-3 pt-1 pb-4"
+      >
         {category === "photos" ? (
           <div className="space-y-2.5">
             <button
@@ -192,17 +200,17 @@ export function SidebarElements() {
               )}
             >
               <ImageUploadIcon size={44} className="shrink-0" />
-              <span className="font-medium text-foreground/80">
+              <span className="text-[15px] font-medium text-foreground/80">
                 Upload or drop
               </span>
-              <span className="text-[12px] text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground">
                 PNG, JPG — or paste with Ctrl+V
               </span>
             </button>
 
             <div className="flex items-center gap-1.5">
               <div className="relative min-w-0 flex-1">
-                <Link2 className="pointer-events-none absolute top-1/2 left-3 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                <Link2 className="pointer-events-none absolute top-1/2 left-3.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="url"
                   placeholder="Paste image URL"
@@ -218,7 +226,7 @@ export function SidebarElements() {
                       void addImageFromUrl();
                     }
                   }}
-                  className="h-10 rounded-full border-0 bg-muted/60 pl-9 text-[13px] shadow-none hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/40 dark:bg-muted/25 dark:hover:bg-muted/40"
+                  className="h-11 rounded-full border-0 bg-muted/60 pl-10 text-[14px] shadow-none hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/40 dark:bg-muted/25 dark:hover:bg-muted/40"
                 />
               </div>
               <Button
@@ -227,28 +235,28 @@ export function SidebarElements() {
                 size="sm"
                 disabled={!manager || urlLoading || !imageUrl.trim()}
                 onClick={() => void addImageFromUrl()}
-                className="h-10 shrink-0 rounded-full px-3.5 text-[13px]"
+                className="h-11 shrink-0 rounded-full px-4 text-[14px]"
               >
                 {urlLoading ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <Loader2 className="size-3.5 animate-spin" />
                 ) : (
                   "Add"
                 )}
               </Button>
             </div>
             {urlError ? (
-              <p className="text-[13px] text-destructive">{urlError}</p>
+              <p className="text-[14px] text-destructive">{urlError}</p>
             ) : null}
           </div>
         ) : null}
 
         {category === "text" ? (
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {textItems.map((item) => {
               const key = item.label.toLowerCase();
               const preview = TEXT_PREVIEW[key] ?? {
                 sample: item.label,
-                className: "text-[14px] font-medium",
+                className: "text-[16px] font-medium",
               };
               return (
                 <button
@@ -257,7 +265,7 @@ export function SidebarElements() {
                   title={item.title ?? item.label}
                   disabled={!manager}
                   onClick={item.action}
-                  className="flex w-full min-w-0 items-center overflow-hidden rounded-2xl bg-muted/50 px-3.5 py-3.5 text-left transition-colors hover:bg-muted disabled:opacity-40 dark:bg-muted/25 dark:hover:bg-muted/40"
+                  className="flex w-full min-w-0 items-center overflow-hidden rounded-2xl bg-muted/50 px-4 py-4 text-left transition-colors hover:bg-muted disabled:opacity-40 dark:bg-muted/25 dark:hover:bg-muted/40"
                 >
                   <span className={cn("w-full truncate", preview.className)}>
                     {preview.sample}
@@ -266,7 +274,7 @@ export function SidebarElements() {
               );
             })}
             {textItems.length === 0 ? (
-              <p className="py-10 text-center text-muted-foreground">
+              <p className="py-10 text-center text-[14px] text-muted-foreground">
                 No text styles found
               </p>
             ) : null}
@@ -274,7 +282,7 @@ export function SidebarElements() {
         ) : null}
 
         {category === "shapes" ? (
-          <div className="grid w-full grid-cols-3 gap-1.5">
+          <div className="grid w-full grid-cols-3 gap-2">
             {shapeItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -289,14 +297,14 @@ export function SidebarElements() {
                   <span className="flex h-14 w-full items-center justify-center text-foreground">
                     <Icon size={44} />
                   </span>
-                  <span className="w-full truncate text-[11px] font-medium text-foreground">
+                  <span className="w-full truncate text-[12px] font-medium text-foreground">
                     {item.label}
                   </span>
                 </button>
               );
             })}
             {shapeItems.length === 0 ? (
-              <p className="col-span-3 py-10 text-center text-muted-foreground">
+              <p className="col-span-3 py-10 text-center text-[14px] text-muted-foreground">
                 No shapes found
               </p>
             ) : null}
@@ -322,6 +330,15 @@ export function SidebarElements() {
                 manager.commit();
               })();
             }}
+          />
+        ) : null}
+
+        {category === "code" ? (
+          <CodeBlockSettings
+            group={codeGroup}
+            showAddButton
+            onAdd={(options) => manager?.objects.addCodeBlock(options)}
+            onOpenFrames={() => setCategory("frames")}
           />
         ) : null}
       </div>

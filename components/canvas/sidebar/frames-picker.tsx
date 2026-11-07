@@ -13,11 +13,13 @@ import {
 import { getDeviceScreenSize } from "@/lib/canvas/device-mockup";
 import {
   BRAND_KIT_CHANGED,
+  defaultBrandKit,
   loadBrandKit,
 } from "@/lib/studio/brand-kit";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
 import { FRAME_ITEMS } from "@/components/canvas/use-element-library";
+import { SidebarSearchSelect } from "@/components/canvas/sidebar/sidebar-search-select";
 
 type FrameItem = (typeof FRAME_ITEMS)[number];
 type FrameFamily = FrameLayoutPreset["family"];
@@ -30,6 +32,14 @@ export type FramePlaceOptions = {
   color: string;
   fit: FrameFitMode;
 };
+
+const FAMILIES: { id: FrameFamily | "all"; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "phone", label: "Phone" },
+  { id: "tablet", label: "Tablet" },
+  { id: "desktop", label: "Desktop" },
+  { id: "watch", label: "Watch" },
+];
 
 const CHECKER_STYLE = {
   backgroundColor: "#ffffff",
@@ -46,13 +56,13 @@ const CHECKER_STYLE = {
 function previewSize(family: FrameFamily) {
   switch (family) {
     case "desktop":
-      return { maxWidth: "82%", maxHeight: "62%" };
+      return { maxWidth: "88%", maxHeight: "58%" };
     case "tablet":
-      return { maxWidth: "72%", maxHeight: "72%" };
+      return { maxWidth: "70%", maxHeight: "70%" };
     case "watch":
-      return { maxWidth: "40%", maxHeight: "58%" };
+      return { maxWidth: "42%", maxHeight: "56%" };
     default:
-      return { maxWidth: "40%", maxHeight: "86%" };
+      return { maxWidth: "38%", maxHeight: "84%" };
   }
 }
 
@@ -90,22 +100,18 @@ function LayoutCard({
       onClick={onSelect}
       title={layout.label}
       className={cn(
-        "relative block aspect-[4/3] w-full min-w-0 overflow-hidden rounded-[1.25rem] text-left transition-[box-shadow,ring]",
+        "group relative block aspect-[4/3] w-full min-w-0 overflow-hidden rounded-2xl text-left transition-colors",
         active
-          ? "ring-2 ring-ring"
-          : "ring-1 ring-transparent hover:ring-muted-foreground/25",
+          ? "bg-muted ring-2 ring-ring"
+          : "bg-muted/45 hover:bg-muted dark:bg-muted/20 dark:hover:bg-muted/35",
       )}
-      style={
-        clear
-          ? CHECKER_STYLE
-          : { backgroundColor: background }
-      }
+      style={clear ? CHECKER_STYLE : { backgroundColor: background }}
     >
       {!clear && light ? (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(0,0,0,0.06)_0%,transparent_42%),radial-gradient(circle_at_88%_78%,rgba(0,0,0,0.05)_0%,transparent_40%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(0,0,0,0.05)_0%,transparent_42%)]" />
       ) : null}
       {!clear && !light ? (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.08)_0%,transparent_42%),radial-gradient(circle_at_88%_78%,rgba(255,255,255,0.05)_0%,transparent_40%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.07)_0%,transparent_42%)]" />
       ) : null}
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -125,6 +131,9 @@ function LayoutCard({
           transformOrigin: "center center",
         }}
       />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-2 pb-1.5 pt-5 text-[11px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+        {layout.label}
+      </span>
       <span className="sr-only">{layout.label}</span>
     </button>
   );
@@ -146,7 +155,9 @@ export function FramesPicker({
   onBackground?: (color: string) => void;
 }) {
   const projectPalette = useCanvasStore((s) => s.palette);
-  const [brandKit, setBrandKit] = useState(() => loadBrandKit());
+  // Default kit on first paint so SSR/client match; hydrate from localStorage after mount.
+  const [brandKit, setBrandKit] = useState(defaultBrandKit);
+  const [familyFilter, setFamilyFilter] = useState<FrameFamily | "all">("phone");
   const [selectedKind, setSelectedKind] = useState<FrameKind>("iphone18pro");
   const [layoutId, setLayoutId] = useState(FRAME_LAYOUT_PRESETS[0]!.id);
   const [bgColor, setBgColor] = useState("#ffffff");
@@ -154,6 +165,7 @@ export function FramesPicker({
   const fit: FrameFitMode = "max";
 
   useEffect(() => {
+    setBrandKit(loadBrandKit());
     const refresh = () => setBrandKit(loadBrandKit());
     window.addEventListener(BRAND_KIT_CHANGED, refresh);
     window.addEventListener("storage", refresh);
@@ -170,7 +182,6 @@ export function FramesPicker({
       { id: "kit-bg", color: kit.background, label: "Brand background" },
       { id: "kit-accent", color: kit.accent, label: "Brand accent" },
       { id: "kit-card", color: kit.card, label: "Brand card" },
-      { id: "kit-text", color: kit.text, label: "Brand text" },
       { id: "project-bg", color: project.background, label: "Project background" },
       { id: "project-accent", color: project.accent, label: "Project accent" },
     ];
@@ -183,21 +194,61 @@ export function FramesPicker({
     });
   }, [brandKit, projectPalette]);
 
+  const searchableItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return FRAME_ITEMS;
+    return FRAME_ITEMS.filter((item) => {
+      const family = frameFamilyForKind(item.kind);
+      return (
+        item.label.toLowerCase().includes(q) ||
+        item.kind.toLowerCase().includes(q) ||
+        family.includes(q)
+      );
+    });
+  }, [search]);
+
+  const visibleItems = useMemo(() => {
+    if (familyFilter === "all") return searchableItems;
+    return searchableItems.filter(
+      (item) => frameFamilyForKind(item.kind) === familyFilter,
+    );
+  }, [searchableItems, familyFilter]);
+
+  useEffect(() => {
+    if (visibleItems.some((item) => item.kind === selectedKind)) return;
+    const next = visibleItems[0];
+    if (next) setSelectedKind(next.kind as FrameKind);
+  }, [visibleItems, selectedKind]);
+
   const selectedFrame =
     FRAME_ITEMS.find((item) => item.kind === selectedKind) ?? FRAME_ITEMS[0]!;
   const family = frameFamilyForKind(selectedKind);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return FRAME_ITEMS.filter((item) => {
-      if (!q) return true;
-      return (
-        item.label.toLowerCase().includes(q) ||
-        item.kind.toLowerCase().includes(q) ||
-        frameFamilyForKind(item.kind).includes(q)
-      );
-    });
-  }, [search]);
+  const deviceOptions = useMemo(
+    () =>
+      searchableItems.map((item) => {
+        const itemFamily = frameFamilyForKind(item.kind);
+        const size = getDeviceScreenSize(item.kind as FrameKind);
+        return {
+          value: item.kind,
+          label: item.label,
+          description: `${size.width}×${size.height}`,
+          group: itemFamily,
+          keywords: `${item.kind} ${itemFamily}`,
+          leading: (
+            <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-background/70 dark:bg-background/25">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.src}
+                alt=""
+                className="max-h-7 max-w-7 object-contain"
+              />
+            </span>
+          ),
+        };
+      }),
+    [searchableItems],
+  );
 
   const layoutPresets = useMemo(() => {
     const matched = FRAME_LAYOUT_PRESETS.filter((p) => p.family === family);
@@ -225,58 +276,39 @@ export function FramesPicker({
   };
 
   return (
-    <div className="flex w-full min-w-0 max-w-full flex-col gap-3 overflow-x-hidden">
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-2xl bg-muted/50 px-2.5 py-2 dark:bg-muted/25">
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-          {brandSwatches.map((swatch) => {
-            const active = bgColor.toLowerCase() === swatch.color.toLowerCase();
-            return (
-              <button
-                key={swatch.id}
-                type="button"
-                title={swatch.label}
-                disabled={disabled}
-                onClick={() => applyColor(swatch.color)}
-                className={cn(
-                  "size-5 shrink-0 rounded-full ring-offset-1 ring-offset-background disabled:opacity-40",
-                  active && "ring-2 ring-primary",
-                )}
-                style={{ backgroundColor: swatch.color }}
-              />
-            );
-          })}
+    <div className="flex w-full min-w-0 max-w-full flex-col gap-3 overflow-x-hidden text-[14px]">
+      <div className="flex min-w-0 items-center gap-2">
+        <SidebarSearchSelect
+          label="Device"
+          value={selectedKind}
+          options={deviceOptions}
+          disabled={disabled || searchableItems.length === 0}
+          onValueChange={(next) => setSelectedKind(next as FrameKind)}
+          placeholder="Choose device"
+          searchPlaceholder="Search devices…"
+          emptyText="No devices found"
+          filters={FAMILIES}
+          filterValue={familyFilter}
+          onFilterChange={(id) => setFamilyFilter(id as FrameFamily | "all")}
+          filterAriaLabel="Device families"
+          className="min-w-0 flex-1"
+          triggerClassName="rounded-2xl px-2.5"
+        />
 
-          <button
-            type="button"
-            title="Transparent"
-            disabled={disabled}
-            onClick={() => applyColor("transparent")}
-            className={cn(
-              "size-5 shrink-0 rounded-full ring-offset-1 ring-offset-background disabled:opacity-40",
-              bgColor === "transparent" && "ring-2 ring-primary",
-            )}
-            style={CHECKER_STYLE}
-          />
-
-          <ColorPicker
-            compact
-            disabled={disabled}
-            value={bgColor === "transparent" ? "#ffffff" : bgColor}
-            onChange={applyColor}
-            title="Custom color"
-            className="[&_button]:size-5"
-          />
-        </div>
-
-        <div className="flex h-7 items-center rounded-full bg-background/80 p-0.5">
+        <div
+          role="group"
+          aria-label="Orientation"
+          className="flex h-11 shrink-0 items-center rounded-2xl bg-muted/55 p-1 dark:bg-muted/25"
+        >
           <button
             type="button"
             title="Portrait"
+            aria-pressed={orientation === "portrait"}
             onClick={() => setOrientation("portrait")}
             className={cn(
-              "flex size-6 items-center justify-center rounded-full transition-colors",
+              "flex size-9 items-center justify-center rounded-xl transition-colors",
               orientation === "portrait"
-                ? "bg-muted text-foreground"
+                ? "bg-background text-foreground"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -285,11 +317,12 @@ export function FramesPicker({
           <button
             type="button"
             title="Landscape"
+            aria-pressed={orientation === "landscape"}
             onClick={() => setOrientation("landscape")}
             className={cn(
-              "flex size-6 items-center justify-center rounded-full transition-colors",
+              "flex size-9 items-center justify-center rounded-xl transition-colors",
               orientation === "landscape"
-                ? "bg-muted text-foreground"
+                ? "bg-background text-foreground"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -298,71 +331,68 @@ export function FramesPicker({
         </div>
       </div>
 
-      <div className="min-w-0">
-        <p className="mb-2 px-0.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-          Devices
-        </p>
-        <div className="grid w-full grid-cols-2 gap-1.5">
-          {filtered.map((item) => {
-            const size = getDeviceScreenSize(item.kind as FrameKind);
-            const active = item.kind === selectedKind;
-            return (
-              <button
-                key={item.kind}
-                type="button"
-                onClick={() => setSelectedKind(item.kind as FrameKind)}
-                className={cn(
-                  "flex min-w-0 flex-col items-center gap-1 overflow-hidden rounded-2xl bg-muted/40 px-1 py-2 text-center transition-colors dark:bg-muted/20",
-                  active
-                    ? "bg-primary/10 ring-2 ring-inset ring-primary"
-                    : "hover:bg-muted/70",
-                )}
-              >
-                <div className="flex h-16 w-full items-center justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.src}
-                    alt=""
-                    className="max-h-full max-w-full object-contain"
-                  />
-                </div>
-                <span className="line-clamp-2 w-full px-0.5 text-[10px] font-medium leading-tight text-foreground">
-                  {item.label}
-                </span>
-                <span className="text-[9px] text-muted-foreground tabular-nums">
-                  {size.width}×{size.height}
-                </span>
-              </button>
-            );
-          })}
-          {filtered.length === 0 ? (
-            <p className="col-span-2 py-8 text-center text-[13px] text-muted-foreground">
-              No devices found
-            </p>
-          ) : null}
-        </div>
+      <div
+        role="group"
+        aria-label="Background color"
+        className="flex min-w-0 flex-wrap items-center gap-1.5"
+      >
+        {brandSwatches.map((swatch) => {
+          const active = bgColor.toLowerCase() === swatch.color.toLowerCase();
+          return (
+            <button
+              key={swatch.id}
+              type="button"
+              title={swatch.label}
+              aria-label={swatch.label}
+              aria-pressed={active}
+              disabled={disabled}
+              onClick={() => applyColor(swatch.color)}
+              className={cn(
+                "size-6 shrink-0 rounded-full ring-offset-1 ring-offset-background disabled:opacity-40",
+                active && "ring-2 ring-foreground/70",
+              )}
+              style={{ backgroundColor: swatch.color }}
+            />
+          );
+        })}
+        <button
+          type="button"
+          title="Transparent"
+          aria-label="Transparent background"
+          aria-pressed={bgColor === "transparent"}
+          disabled={disabled}
+          onClick={() => applyColor("transparent")}
+          className={cn(
+            "size-6 shrink-0 rounded-full ring-offset-1 ring-offset-background disabled:opacity-40",
+            bgColor === "transparent" && "ring-2 ring-foreground/70",
+          )}
+          style={CHECKER_STYLE}
+        />
+        <ColorPicker
+          compact
+          disabled={disabled}
+          value={bgColor === "transparent" ? "#ffffff" : bgColor}
+          onChange={applyColor}
+          title="Custom color"
+          className="[&_button]:size-6"
+        />
       </div>
 
-      <div className="min-w-0">
-        <p className="mb-2 px-0.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-          Layouts
-        </p>
-        <div className="space-y-2 overflow-hidden rounded-[1.35rem] bg-muted/30 p-2 dark:bg-muted/15">
-          {layoutPresets.map((layout) => (
-            <LayoutCard
-              key={layout.id}
-              layout={layout}
-              frame={selectedFrame}
-              family={family}
-              background={bgColor}
-              active={layout.id === layoutId}
-              onSelect={() => {
-                if (disabled) return;
-                place(layout);
-              }}
-            />
-          ))}
-        </div>
+      <div className="grid w-full gap-2">
+        {layoutPresets.map((layout) => (
+          <LayoutCard
+            key={layout.id}
+            layout={layout}
+            frame={selectedFrame}
+            family={family}
+            background={bgColor}
+            active={layout.id === layoutId}
+            onSelect={() => {
+              if (disabled) return;
+              place(layout);
+            }}
+          />
+        ))}
       </div>
     </div>
   );

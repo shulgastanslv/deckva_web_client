@@ -5,7 +5,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   AlignLeft,
   Circle,
-  Code2,
   Diamond,
   Ellipse,
   Hexagon,
@@ -29,7 +28,6 @@ import { HeadingIcon } from "@/components/canvas/text-icons";
 import { SubtitleIcon } from "@/components/canvas/text-icons";
 import { ParagraphIcon } from "@/components/canvas/text-icons";
 import { QuoteIcon } from "@/components/canvas/text-icons";
-import { CodeIcon } from "@/components/canvas/text-icons";
 import { IconProps } from "@/components/canvas/text-icons";
 import { RectangleShapeIcon } from "@/components/canvas/shapes-icons";
 import { CircleShapeIcon } from "@/components/canvas/shapes-icons";
@@ -169,12 +167,6 @@ export function useElementLibrary() {
           { label: "Subtitle", icon: SubtitleIcon , title: "Subtitle", action: () => manager?.objects.addSubtitle() },
           { label: "Paragraph", icon: ParagraphIcon , title: "Paragraph", action: () => manager?.objects.addParagraph() },
           { label: "Quote", icon: QuoteIcon , title: "Quote", action: () => manager?.objects.addQuote() },
-          {
-            label: "Code",
-            icon: CodeIcon ,
-            title: "Code block",
-            action: () => manager?.objects.addCodeBlock()
-          },
         ],
       },
       {

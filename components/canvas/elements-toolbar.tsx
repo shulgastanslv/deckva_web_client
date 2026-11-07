@@ -686,14 +686,6 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
           <BarDivider />
 
           <CaptionControls />
-          {postCaption.trim() ? (
-            <span
-              title={postCaption}
-              className="hidden max-w-[9rem] truncate px-1 text-[11px] text-muted-foreground sm:inline"
-            >
-              {postCaption.trim()}
-            </span>
-          ) : null}
 
           <div className="flex h-9 items-center rounded-full bg-muted/50 p-0.5">
             <RailTool

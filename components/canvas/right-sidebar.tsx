@@ -96,7 +96,6 @@ import { applyList, applySelectionStyle, writeFormattedText, type ListKind } fro
 import type { TextStyles } from "@/lib/canvas/text-flow";
 import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
 import { ColorPicker } from "@/components/ui/color-picker";
-import { CodeBlockInspector } from "@/components/canvas/code-block-inspector";
 import { InspectorAssets } from "@/components/canvas/inspector-assets";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 
@@ -1255,8 +1254,6 @@ export function RightSidebar({
                   </>
                 ) : null}
               </div>
-
-              {codeGroup ? <CodeBlockInspector group={codeGroup} /> : null}
 
               {(isImage || canImportImage) && selectedObject ? (
                 <InspectorAssets
