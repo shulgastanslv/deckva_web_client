@@ -9,6 +9,12 @@ export const studioKeys = {
   folders: ["studio", "folders"] as const,
   projectsRoot: ["studio", "projects"] as const,
   projects: (folderId = "") => ["studio", "projects", folderId] as const,
+  artifactsRoot: ["studio", "artifacts"] as const,
+  artifacts: (kind = "", folderId = "") =>
+    ["studio", "artifacts", kind, folderId] as const,
+  artifact: (id: string) => ["studio", "artifact", id] as const,
+  projectAnnotations: (projectId: string) =>
+    ["studio", "annotations", projectId] as const,
   notifications: ["studio", "notifications"] as const,
 };
 

@@ -3,6 +3,12 @@
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import { listMyNotifications, type NotificationItem } from "@/actions/admin";
+import {
+  getArtifactById,
+  getUserArtifacts,
+  listProjectAnnotations,
+  type ArtifactKindValue,
+} from "@/actions/artifacts";
 import { getUserFolders } from "@/actions/folders";
 import { getActiveOrganization, getUserOrganizations } from "@/actions/organizations";
 import { getUserProjects } from "@/actions/projects";
@@ -57,6 +63,46 @@ export function useUserProjects(folderId: string, enabled: boolean) {
   });
 }
 
+export function useUserArtifacts(
+  kind: ArtifactKindValue | "",
+  enabled: boolean,
+  folderId = "",
+) {
+  return useQuery({
+    queryKey: studioKeys.artifacts(kind, folderId),
+    queryFn: () =>
+      readStudioResult(() =>
+        getUserArtifacts({
+          ...(kind ? { kind } : {}),
+          ...(folderId ? { folderId } : {}),
+        }),
+      ),
+    staleTime: studioStaleTime.projects,
+    enabled,
+    ...quiet,
+  });
+}
+
+export function useArtifact(artifactId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: studioKeys.artifact(artifactId),
+    queryFn: () => readStudioResult(() => getArtifactById(artifactId)),
+    staleTime: studioStaleTime.projects,
+    enabled: enabled && Boolean(artifactId),
+    ...quiet,
+  });
+}
+
+export function useProjectAnnotations(projectId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: studioKeys.projectAnnotations(projectId),
+    queryFn: () => readStudioResult(() => listProjectAnnotations(projectId)),
+    staleTime: studioStaleTime.projects,
+    enabled: enabled && Boolean(projectId),
+    ...quiet,
+  });
+}
+
 export function useMyNotifications(enabled: boolean) {
   return useQuery({
     queryKey: studioKeys.notifications,
@@ -94,6 +140,15 @@ export function fetchMyNotifications(client: QueryClient) {
 
 export function invalidateStudioProjects(client: QueryClient) {
   return client.invalidateQueries({ queryKey: studioKeys.projectsRoot });
+}
+
+export function invalidateStudioArtifacts(client: QueryClient) {
+  return client.invalidateQueries({ queryKey: studioKeys.artifactsRoot });
+}
+
+export function useInvalidateStudioArtifacts() {
+  const client = useQueryClient();
+  return () => invalidateStudioArtifacts(client);
 }
 
 type NotificationCache = {

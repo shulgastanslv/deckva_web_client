@@ -1,86 +1,212 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, Link2, ArrowUpCircle, Mail } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { ArrowRight, Link2, Loader2, Mail, UserPlus } from "lucide-react";
+
+import {
+  getOrCreateInviteLink,
+  sendOrganizationInvites,
+} from "@/actions/invites";
+import { studioKeys, useActiveOrganization } from "@/lib/studio/queries";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 export function InviteMembersDialog() {
-  const [emails, setEmails] = useState("");
-  const [isCopied, setIsCopied] = useState(false);
+  const { status } = useSession();
+  const signedIn = status === "authenticated";
+  const queryClient = useQueryClient();
+  const organization = useActiveOrganization(signedIn);
+  const org = organization.data?.organization ?? null;
+  const canInvite = org?.role === "OWNER" || org?.role === "ADMIN";
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText("https://your-app.com/invite/team-link");
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+  const [open, setOpen] = useState(false);
+  const [emails, setEmails] = useState("");
+  const [role, setRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
+  const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
+
+  if (!signedIn || !org || !canInvite) return null;
+
+  const reset = () => {
+    setEmails("");
+    setRole("MEMBER");
+    setError(null);
+    setSummary(null);
+    setBusy(false);
+  };
+
+  const handleCopyLink = async () => {
+    setError(null);
+    setBusy(true);
+    try {
+      const res = await getOrCreateInviteLink(org.id);
+      if (!res.success || !("url" in res)) {
+        setError("error" in res ? res.error : "Couldn't create invite link");
+        return;
+      }
+      await navigator.clipboard.writeText(res.url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("Couldn't copy invite link");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!emails.trim() || busy) return;
+    setBusy(true);
+    setError(null);
+    setSummary(null);
+    try {
+      const res = await sendOrganizationInvites({
+        organizationId: org.id,
+        emails,
+        role,
+      });
+      if (!res.success || !("results" in res)) {
+        setError("error" in res ? res.error : "Couldn't send invites");
+        return;
+      }
+
+      const notified = res.results.filter((r) => r.status === "notified").length;
+      const invited = res.results.filter((r) => r.status === "invited").length;
+      const already = res.results.filter(
+        (r) => r.status === "already_member",
+      ).length;
+
+      const parts: string[] = [];
+      if (notified) parts.push(`${notified} notified in-app`);
+      if (invited) parts.push(`${invited} invite link ready`);
+      if (already) parts.push(`${already} already members`);
+      setSummary(parts.join(" · ") || "Done");
+      setEmails("");
+      void queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
+    } catch {
+      setError("Couldn't send invites");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) reset();
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           variant="secondary"
-          className="h-9 rounded-full bg-blue-500 px-3.5 text-[13px] font-semibold text-white hover:bg-blue-500/50"
-          >
+          className="h-9 rounded-full bg-[#4262ff] px-3.5 text-[13px] font-semibold text-white hover:bg-[#4262ff]/90"
+        >
           <UserPlus className="mr-2 size-3.5" />
           Invite Members
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[480px] rounded-[28px] p-0 border-none gap-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-4">
-          <DialogTitle className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
-            Invite to workspace
+      <DialogContent
+        className="w-[min(30rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-md"
+        showCloseButton
+      >
+        <DialogHeader className="gap-1 px-5 pt-5 pb-3">
+          <DialogTitle className="text-[17px] font-semibold tracking-tight">
+            Invite to {org.name}
           </DialogTitle>
+          <DialogDescription className="text-[13px] leading-relaxed">
+            Registered accounts get an in-app notification. Others can join
+            via the invite link.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="px-6 pb-6 flex flex-col gap-4">
-          {/* Текстовое поле для email */}
+        <div className="space-y-4 px-5 pb-5">
           <div className="relative">
-            <Mail className="absolute left-3.5 top-3.5 size-4 text-neutral-400" />
-            <Textarea
-              placeholder="Enter or paste email addresses..."
+            <Mail className="pointer-events-none absolute top-3.5 left-3.5 size-4 text-muted-foreground" />
+            <textarea
               value={emails}
               onChange={(e) => setEmails(e.target.value)}
-              className="min-h-[120px] resize-none rounded-2xl border-neutral-200 bg-neutral-50 pl-10 pt-3 text-[13px] focus-visible:ring-1 focus-visible:ring-neutral-300 dark:border-neutral-800 dark:bg-neutral-900/50 dark:focus-visible:ring-neutral-700"
+              disabled={busy}
+              rows={4}
+              placeholder="Enter emails, separated by commas…"
+              className={cn(
+                "min-h-[110px] w-full resize-none rounded-2xl bg-muted/30 py-3 pr-3.5 pl-10 text-[14px] leading-relaxed text-foreground outline-none",
+                "placeholder:text-muted-foreground/70 focus:bg-muted/40",
+                "disabled:cursor-not-allowed disabled:opacity-60",
+              )}
             />
           </div>
 
-          {/* Кнопки действий */}
-          <div className="flex items-center justify-between gap-2 mt-2">
-            <Button
-              variant="outline"
-              onClick={handleCopyLink}
-              className="h-10 rounded-full px-4 text-[13px] font-medium border-neutral-200 dark:border-neutral-800"
-            >
-              <Link2 className="mr-2 size-3.5" />
-              {isCopied ? "Copied!" : "Copy invite link"}
-            </Button>
-            <Button
-              disabled={!emails.trim()}
-              className="h-10 rounded-full px-6 text-[13px] font-medium transition-all"
-            >
-              Send invitations
-            </Button>
-            
+          <div className="grid grid-cols-2 gap-1.5 rounded-2xl bg-muted/35 p-1">
+            {(["MEMBER", "ADMIN"] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                disabled={busy}
+                onClick={() => setRole(value)}
+                className={cn(
+                  "inline-flex h-9 items-center justify-center rounded-xl text-[13px] font-medium transition-colors",
+                  role === value
+                    ? "bg-background text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {value === "MEMBER" ? "Member" : "Admin"}
+              </button>
+            ))}
           </div>
 
-          {/* Плашка Upgrade (в стиле вашего Pro бейджа) */}
-          <div className="mt-4 flex items-start gap-3 rounded-2xl bg-[#4262ff]/10 p-4 text-[13px] text-[#4262ff] dark:bg-[#4262ff]/15">
-            <ArrowUpCircle className="mt-0.5 size-4 shrink-0" />
-            <p className="leading-relaxed text-white">
-              <a href="#" className="font-semibold underline underline-offset-2 hover:text-[#4262ff]">
-                Upgrade
-              </a>{" "}
-              to invite Guests to shared boards and collaborate securely with clients and partners.
-            </p>
+          {error ? (
+            <p className="text-[13px] text-destructive">{error}</p>
+          ) : null}
+          {summary ? (
+            <p className="text-[13px] text-muted-foreground">{summary}</p>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => void handleCopyLink()}
+              className="h-10 rounded-full px-4 text-[13px]"
+            >
+              {busy ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Link2 className="size-3.5" />
+              )}
+              {copied ? "Copied" : "Copy invite link"}
+            </Button>
+            <Button
+              type="button"
+              disabled={busy || !emails.trim()}
+              onClick={() => void handleSend()}
+              className="ml-auto h-10 rounded-full px-5 text-[13px] font-medium"
+            >
+              {busy ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <>
+                  Send invites
+                  <ArrowRight className="size-3.5 opacity-70" />
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </DialogContent>

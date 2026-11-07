@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
+import { getServerSession } from "next-auth";
+
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -61,7 +64,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html
       lang="ru"
@@ -72,7 +77,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <span className={`${montserrat.className} sr-only`} aria-hidden>
           .
         </span>
-        <Providers>{children}</Providers>
+        <Providers session={session}>{children}</Providers>
       </body>
     </html>
   );

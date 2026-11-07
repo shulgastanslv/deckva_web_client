@@ -14,25 +14,65 @@ import {
 import type { FabricCanvasJSON } from "@/lib/types";
 import { useApplyTemplate } from "@/hooks/use-apply-template";
 import { useProject } from "@/hooks/use-project";
-import { useSlidesController } from "@/context/canvas-manager";
+import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
+import type { StudioInsertIntent } from "@/lib/studio/pending-intent";
 
 function notifyProjectsChanged() {
   window.dispatchEvent(new CustomEvent("core:projects-changed"));
 }
 
 /** Consumes home/projects/templates intents once the editor canvas is ready. */
+function applyInsertIntent(
+  manager: NonNullable<ReturnType<typeof useCanvasManager>>,
+  intent: StudioInsertIntent,
+) {
+  const content = intent.content?.trim() || "";
+  const title = intent.title?.trim() || "";
+
+  if (intent.insert === "codeblock") {
+    manager.objects.addCodeBlock({
+      code: content || "// Your code here",
+    });
+    if (title) {
+      useCanvasStore.getState().setProjectTitle(title.slice(0, 64));
+    }
+    useCanvasStore.getState().setDirty(true);
+    return;
+  }
+
+  // List of contents: heading + body lines as a checklist-style block.
+  const lines = content
+    ? content
+        .split(/\n+/)
+        .map((line) => line.replace(/^[-*•\d.)\s]+/, "").trim())
+        .filter(Boolean)
+        .slice(0, 8)
+    : ["First point", "Second point", "Third point"];
+
+  const heading = title || "Contents";
+  manager.objects.addHeading(heading);
+  manager.objects.addParagraph(
+    lines.map((line, i) => `${i + 1}. ${line}`).join("\n"),
+  );
+  if (heading) {
+    useCanvasStore.getState().setProjectTitle(heading.slice(0, 64));
+  }
+  useCanvasStore.getState().setDirty(true);
+}
+
 export function StudioIntentBootstrap() {
   const searchParams = useSearchParams();
   const slidesController = useSlidesController();
+  const manager = useCanvasManager();
   const { newProject, loadProject } = useProject();
   const { applyTemplateById, applyPayload } = useApplyTemplate();
   const ran = useRef(false);
 
   useEffect(() => {
-    if (!slidesController || ran.current) return;
+    if (!slidesController || !manager || ran.current) return;
 
     const projectId = searchParams.get("project");
     const pending = peekStudioIntent();
@@ -90,8 +130,16 @@ export function StudioIntentBootstrap() {
             slides: result.slides,
           });
 
-          useCanvasStore.getState().setProjectTitle(result.title);
+          const store = useCanvasStore.getState();
+          store.setProjectTitle(result.title);
+          if (result.palette) {
+            const { aiPaletteToProjectPalette } = await import(
+              "@/lib/ai/generate-palette"
+            );
+            store.setPalette(aiPaletteToProjectPalette(result.palette));
+          }
 
+          const snap = useCanvasStore.getState();
           const saved = await saveProject(intent.projectId, {
             title: result.title,
             aspectRatio: result.aspectRatio,
@@ -101,6 +149,11 @@ export function StudioIntentBootstrap() {
               canvasJSON,
               thumbnail: null,
             })),
+            document: {
+              palette: snap.palette,
+              textStyles: snap.textStyles,
+              chrome: snap.chrome,
+            },
           });
           if (!saved.success) {
             throw new Error(messages.errors.saveCarousel);
@@ -156,6 +209,13 @@ export function StudioIntentBootstrap() {
           return;
         }
 
+        if (intent?.type === "insert") {
+          await newProject();
+          applyInsertIntent(manager, intent);
+          stripQuery("new");
+          return;
+        }
+
         if (wantsNew || intent?.type === "new") {
           await newProject();
           stripQuery("new");
@@ -166,6 +226,7 @@ export function StudioIntentBootstrap() {
     })();
   }, [
     slidesController,
+    manager,
     newProject,
     loadProject,
     applyTemplateById,

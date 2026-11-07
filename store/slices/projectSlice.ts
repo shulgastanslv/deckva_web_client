@@ -4,6 +4,7 @@ import type { FabricCanvasJSON, RatioKey, SlideItem } from "@/lib/types";
 export interface ProjectSlice {
   currentProjectId: string | null;
   projectTitle: string;
+  postCaption: string;
   isDirty: boolean;
   isSaving: boolean;
   isLoadingProject: boolean;
@@ -15,6 +16,7 @@ export interface ProjectSlice {
 
   setCurrentProjectId: (id: string | null) => void;
   setProjectTitle: (title: string) => void;
+  setPostCaption: (caption: string) => void;
   setDirty: (dirty: boolean) => void;
   setSaving: (saving: boolean) => void;
   setLoadingProject: (loading: boolean) => void;
@@ -28,6 +30,7 @@ export interface ProjectSlice {
     height: number;
     slides: SlideItem[];
     document?: unknown;
+    postCaption?: string | null;
   }) => void;
   resetToBlankProject: () => void;
 }
@@ -51,6 +54,7 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
 ) => ({
   currentProjectId: null,
   projectTitle: "Untitled Carousel",
+  postCaption: "",
   isDirty: false,
   isSaving: false,
   isLoadingProject: false,
@@ -61,6 +65,8 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
   setCurrentProjectId: (currentProjectId) => set({ currentProjectId }),
   setProjectTitle: (projectTitle) =>
     set((state) => ({ projectTitle, isDirty: true, editRevision: state.editRevision + 1 })),
+  setPostCaption: (postCaption) =>
+    set((state) => ({ postCaption, isDirty: true, editRevision: state.editRevision + 1 })),
   setDirty: (isDirty) =>
     set((state) => ({
       isDirty,
@@ -76,7 +82,7 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
     ),
   markSaved: () => set({ isDirty: false, lastSavedAt: new Date().toISOString() }),
 
-  loadProjectState: ({ id, title, aspectRatio, slides, document }) => {
+  loadProjectState: ({ id, title, aspectRatio, slides, document, postCaption }) => {
     const hydrated =
       slides.length > 0
         ? slides
@@ -90,6 +96,7 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
     set({
       currentProjectId: id,
       projectTitle: title,
+      postCaption: postCaption?.trim() || "",
       isDirty: false,
       lastSavedAt: new Date().toISOString(),
     });
@@ -104,6 +111,7 @@ export const createProjectSlice: StateCreator<ProjectStore, [], [], ProjectSlice
     set({
       currentProjectId: null,
       projectTitle: "Untitled Carousel",
+      postCaption: "",
       isDirty: false,
       isSaving: false,
       isLoadingProject: false,

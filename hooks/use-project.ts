@@ -197,6 +197,7 @@ export function useProject() {
           const revision = snap.editRevision;
           const payload = {
             title: snap.projectTitle,
+            postCaption: snap.postCaption || null,
             aspectRatio: snap.currentRatio as RatioKey,
             width: snap.canvasDimensions.width,
             height: snap.canvasDimensions.height,

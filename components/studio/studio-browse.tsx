@@ -17,12 +17,15 @@ import {
 
 import {
   useInvalidateStudioProjects,
+  useUserArtifacts,
   useUserFolders,
   useUserProjects,
 } from "@/lib/studio/queries";
 import { StudioBoardGrid } from "@/components/studio/browse/studio-board-grid";
 import { StudioProjectCard } from "@/components/studio/browse/studio-project-card";
 import { StudioProjectList } from "@/components/studio/browse/studio-project-list";
+import { StudioPaletteCard } from "@/components/studio/browse/studio-palette-card";
+import { StudioTextList } from "@/components/studio/browse/studio-text-row";
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 
@@ -54,7 +57,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-type MainTab = "all" | "starred" | "templates";
+type MainTab = "all" | "texts" | "palettes" | "carousels" | "starred" | "templates";
 
 export function StudioBrowse() {
   const router = useRouter();
@@ -76,17 +79,36 @@ export function StudioBrowse() {
   // --- Project State & Data ---
   const folderId = searchParams.get("folder");
   const projectsQuery = useUserProjects(folderId ?? "", signedIn);
+  const textsQuery = useUserArtifacts("TEXT", signedIn && activeTab === "texts", folderId ?? "");
+  const palettesQuery = useUserArtifacts(
+    "PALETTE",
+    signedIn && activeTab === "palettes",
+    folderId ?? "",
+  );
   const foldersQuery = useUserFolders(signedIn);
   const projects = useMemo(
     () => projectsQuery.data?.projects ?? [],
     [projectsQuery.data]
+  );
+  const texts = useMemo(
+    () => textsQuery.data?.artifacts ?? [],
+    [textsQuery.data]
+  );
+  const palettes = useMemo(
+    () => palettesQuery.data?.artifacts ?? [],
+    [palettesQuery.data]
   );
   const folders = useMemo(
     () => foldersQuery.data?.folders ?? [],
     [foldersQuery.data]
   );
   const loadingProjects = signedIn && !projectsQuery.data && !projectsQuery.isError;
+  const loadingTexts = signedIn && activeTab === "texts" && !textsQuery.data && !textsQuery.isError;
+  const loadingPalettes =
+    signedIn && activeTab === "palettes" && !palettesQuery.data && !palettesQuery.isError;
   const refreshProjects = useInvalidateStudioProjects();
+  const showProjects =
+    activeTab === "all" || activeTab === "carousels" || activeTab === "starred";
 
   const activeFolder = useMemo(
     () => folders.find((f) => f.id === folderId) ?? null,
@@ -103,6 +125,28 @@ export function StudioBrowse() {
       })
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }, [projects, activeTab, search]);
+
+  const visibleTexts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return texts
+      .filter((a) => {
+        if (!q) return true;
+        const hay = `${a.title} ${a.previewText ?? ""} ${a.prompt ?? ""}`.toLowerCase();
+        return hay.includes(q);
+      })
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  }, [texts, search]);
+
+  const visiblePalettes = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return palettes
+      .filter((a) => {
+        if (!q) return true;
+        const hay = `${a.title} ${a.previewText ?? ""} ${a.prompt ?? ""}`.toLowerCase();
+        return hay.includes(q);
+      })
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  }, [palettes, search]);
 
   // --- Template State & Data ---
   const [templateCategory, setTemplateCategory] = useState("all");
@@ -194,19 +238,27 @@ export function StudioBrowse() {
 
   const pageTitle = activeFolder
     ? activeFolder.name
-    : activeTab === "all"
-      ? "Projects"
-      : activeTab === "starred"
-        ? "Starred"
-        : "Templates";
+    : activeTab === "texts"
+      ? "Texts"
+      : activeTab === "palettes"
+        ? "Palettes"
+        : activeTab === "starred"
+          ? "Starred"
+          : activeTab === "templates"
+            ? "Templates"
+            : "Carousels";
 
   const pageDescription = activeFolder
     ? "Manage projects in this folder."
-    : activeTab === "all"
-      ? "Create, manage, and organize all your creative projects in one place."
-      : activeTab === "starred"
-        ? "Quick access to your most important and frequently used projects."
-        : "Start quickly with our beautifully designed, customizable templates.";
+    : activeTab === "texts"
+      ? "Generated post captions and copy ready to turn into carousels."
+      : activeTab === "palettes"
+        ? "Color systems generated for carousels and your brand kit."
+        : activeTab === "starred"
+          ? "Quick access to your most important and frequently used projects."
+          : activeTab === "templates"
+            ? "Start quickly with our beautifully designed, customizable templates."
+            : "Create, manage, and organize all your carousels in one place.";
 
   return (
     <StudioContent>
@@ -230,7 +282,15 @@ export function StudioBrowse() {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={`Search ${activeTab === "templates" ? "templates" : "projects"}`}
+                  placeholder={`Search ${
+                    activeTab === "templates"
+                      ? "templates"
+                      : activeTab === "texts"
+                        ? "texts"
+                        : activeTab === "palettes"
+                          ? "palettes"
+                          : "carousels"
+                  }`}
                   className="h-9 w-full rounded-full border-none bg-muted/40 pl-9 pr-4 text-[13px] shadow-none placeholder:text-muted-foreground focus-visible:ring-1"
                 />
               </div>
@@ -288,15 +348,77 @@ export function StudioBrowse() {
             {!signedIn && activeTab !== "templates" ? (
               <div className="max-w-sm py-8">
                 <p className="text-[22px] text-neutral-950 dark:text-foreground" style={{ fontFamily: "var(--font-studio-serif), ui-serif, Georgia, serif" }}>
-                  Sign in to see projects
+                  Sign in to see{" "}
+                  {activeTab === "texts"
+                    ? "texts"
+                    : activeTab === "palettes"
+                      ? "palettes"
+                      : "projects"}
                 </p>
                 <p className="mt-2 text-[14px] text-neutral-500 dark:text-muted-foreground">
-                  Your carousels will show up here.
+                  Your{" "}
+                  {activeTab === "texts"
+                    ? "post texts"
+                    : activeTab === "palettes"
+                      ? "palettes"
+                      : "carousels"}{" "}
+                  will show up here.
                 </p>
                 <button type="button" className="mt-4 text-[13px] font-medium text-neutral-950 underline-offset-4 hover:underline dark:text-foreground" onClick={() => create.setAuthNeeded(true)}>
                   Sign in
                 </button>
               </div>
+            ) : activeTab === "texts" ? (
+              loadingTexts && texts.length === 0 ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : visibleTexts.length === 0 ? (
+                <div className="py-16 text-center">
+                  <p className="text-[22px] text-neutral-950 dark:text-foreground">
+                    {search.trim() ? "Nothing found" : "No texts yet"}
+                  </p>
+                  <p className="mt-2 text-[13px] text-neutral-500 dark:text-muted-foreground">
+                    {search.trim()
+                      ? "Try another search."
+                      : "Generate a post caption from the studio home prompt."}
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <StudioTextList
+                    artifacts={visibleTexts}
+                    onOpen={(id) => router.push(`/studio/artifacts/${id}`)}
+                  />
+                </div>
+              )
+            ) : activeTab === "palettes" ? (
+              loadingPalettes && palettes.length === 0 ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : visiblePalettes.length === 0 ? (
+                <div className="py-16 text-center">
+                  <p className="text-[22px] text-neutral-950 dark:text-foreground">
+                    {search.trim() ? "Nothing found" : "No palettes yet"}
+                  </p>
+                  <p className="mt-2 text-[13px] text-neutral-500 dark:text-muted-foreground">
+                    {search.trim()
+                      ? "Try another search."
+                      : "Generate a palette from the studio home prompt."}
+                  </p>
+                </div>
+              ) : (
+                <StudioBoardGrid>
+                  {visiblePalettes.map((artifact) => (
+                    <StudioPaletteCard
+                      key={artifact.id}
+                      artifact={artifact}
+                      onOpen={() => router.push(`/studio/artifacts/${artifact.id}`)}
+                    />
+                  ))}
+                </StudioBoardGrid>
+              )
             ) : activeTab === "templates" ? (
               loadingTemplates && templates.length === 0 ? (
                 <div className="flex justify-center py-20">
@@ -353,13 +475,24 @@ export function StudioBrowse() {
               )
             )}
 
-            {signedIn && !loadingProjects && activeTab !== "templates" && visibleProjects.length === 0 ? (
+            {signedIn &&
+            !loadingProjects &&
+            showProjects &&
+            visibleProjects.length === 0 ? (
               <div className="py-16 text-center">
                 <p className="text-[22px] text-neutral-950 dark:text-foreground">
-                  {search.trim() ? "Nothing found" : folderId ? "Folder is empty" : activeTab === "starred" ? "No starred carousels" : "No projects yet"}
+                  {search.trim()
+                    ? "Nothing found"
+                    : folderId
+                      ? "Folder is empty"
+                      : activeTab === "starred"
+                        ? "No starred carousels"
+                        : "No carousels yet"}
                 </p>
                 <p className="mt-2 text-[13px] text-neutral-500 dark:text-muted-foreground">
-                  {search.trim() ? "Try another search." : "Create a blank carousel or start from a template."}
+                  {search.trim()
+                    ? "Try another search."
+                    : "Create a blank carousel or start from a template."}
                 </p>
               </div>
             ) : null}

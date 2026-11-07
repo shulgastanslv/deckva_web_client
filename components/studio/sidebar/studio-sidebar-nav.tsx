@@ -49,7 +49,9 @@ export function StudioSidebarNav() {
       icon: FolderIcon,
       active: pathname.startsWith("/studio/browse"),
       subItems: [
-        { href: "/studio/browse?tab=all", label: "Projects", tabId: "all" },
+        { href: "/studio/browse?tab=all", label: "Carousels", tabId: "all" },
+        { href: "/studio/browse?tab=texts", label: "Texts", tabId: "texts" },
+        { href: "/studio/browse?tab=palettes", label: "Palettes", tabId: "palettes" },
         { href: "/studio/browse?tab=starred", label: "Starred", tabId: "starred" },
         { href: "/studio/browse?tab=templates", label: "Templates", tabId: "templates" },
       ],

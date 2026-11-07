@@ -8,6 +8,10 @@ import { ensureUserOrganization } from "@/actions/organizations";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
+import {
+  canAccessOrgResource,
+  canManageOrgResource,
+} from "@/lib/studio/org-access";
 
 export interface FolderListItem {
   id: string;
@@ -39,7 +43,7 @@ export async function getUserFolders(): Promise<
     const organizationId = ensured.organization.id;
 
     const folders = await prisma.folder.findMany({
-      where: { userId, organizationId },
+      where: { organizationId },
       orderBy: { updatedAt: "desc" },
       include: { _count: { select: { projects: true } } },
     });
@@ -117,9 +121,11 @@ export async function renameFolder(
     }
 
     const existing = await prisma.folder.findFirst({
-      where: { id: folderId, userId },
+      where: { id: folderId },
     });
-    if (!existing) return { success: false, error: messages.errors.folderNotFound };
+    if (!existing || !(await canAccessOrgResource(userId, existing))) {
+      return { success: false, error: messages.errors.folderNotFound };
+    }
 
     const folder = await prisma.folder.update({
       where: { id: folderId },
@@ -154,9 +160,11 @@ export async function deleteFolder(
     if (!folderId) return { success: false, error: messages.errors.folderIdRequired };
 
     const existing = await prisma.folder.findFirst({
-      where: { id: folderId, userId },
+      where: { id: folderId },
     });
-    if (!existing) return { success: false, error: messages.errors.folderNotFound };
+    if (!existing || !(await canManageOrgResource(userId, existing))) {
+      return { success: false, error: messages.errors.folderNotFound };
+    }
 
     await prisma.folder.delete({ where: { id: folderId } });
 
@@ -180,15 +188,26 @@ export async function moveProjectToFolder(
     if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const project = await prisma.project.findFirst({
-      where: { id: projectId, userId },
+      where: { id: projectId },
     });
-    if (!project) return { success: false, error: messages.errors.projectNotFound };
+    if (!project || !(await canAccessOrgResource(userId, project))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
 
     if (folderId) {
       const folder = await prisma.folder.findFirst({
-        where: { id: folderId, userId },
+        where: { id: folderId },
       });
-      if (!folder) return { success: false, error: messages.errors.folderNotFound };
+      if (!folder || !(await canAccessOrgResource(userId, folder))) {
+        return { success: false, error: messages.errors.folderNotFound };
+      }
+      if (
+        folder.organizationId &&
+        project.organizationId &&
+        folder.organizationId !== project.organizationId
+      ) {
+        return { success: false, error: messages.errors.moveProject };
+      }
     }
 
     await prisma.project.update({

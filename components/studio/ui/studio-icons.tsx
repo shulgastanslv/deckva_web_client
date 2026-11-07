@@ -26,7 +26,10 @@ export type StudioIconName =
   | "plus"
   | "idea"
   | "list"
-  | "layers";
+  | "layers"
+  | "palette"
+  | "carousel"
+  | "brand";
 
 type IconProps = SVGProps<SVGSVGElement> & {
   title?: string;
@@ -285,6 +288,80 @@ export function StudioIconLayers(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Color palette swatches on a board frame */
+export function StudioIconPalette(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <g filter="drop-shadow(0 3px 6px rgba(0,0,0,0.05))">
+        <rect x="28" y="24" width="108" height="82" rx="7" fill={MIRO.frame} stroke={MIRO.frameBorder} strokeWidth="1" />
+        <rect x="40" y="36" width="40" height="5" rx="2" fill={MIRO.blueDark} />
+        <rect x="40" y="46" width="56" height="3" rx="1.5" fill={MIRO.lineDark} />
+
+        <rect x="40" y="62" width="22" height="28" rx="4" fill={MIRO.coral} />
+        <rect x="68" y="62" width="22" height="28" rx="4" fill={MIRO.yellow} />
+        <rect x="96" y="62" width="22" height="28" rx="4" fill={MIRO.blueSoft} />
+      </g>
+
+      <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.06))">
+        <rect x="148" y="30" width="28" height="28" rx="6" fill={MIRO.green} />
+        <rect x="148" y="66" width="28" height="28" rx="6" fill={MIRO.blueDark} />
+      </g>
+    </svg>
+  );
+}
+
+/** Carousel / slide stack preview */
+export function StudioIconCarousel(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <g opacity="0.55">
+        <rect x="58" y="28" width="70" height="74" rx="8" fill={MIRO.line} stroke={MIRO.frameBorder} strokeWidth="1" />
+      </g>
+      <g opacity="0.8">
+        <rect x="48" y="24" width="74" height="82" rx="8" fill="#F8FAFC" stroke={MIRO.frameBorder} strokeWidth="1" />
+      </g>
+      <g filter="drop-shadow(0 4px 8px rgba(0,0,0,0.08))">
+        <rect x="36" y="20" width="78" height="90" rx="8" fill={MIRO.frame} stroke={MIRO.frameBorder} strokeWidth="1" />
+        <rect x="46" y="32" width="58" height="36" rx="4" fill={MIRO.blueSoft} opacity="0.55" />
+        <rect x="46" y="78" width="40" height="4" rx="2" fill={MIRO.blueDark} />
+        <rect x="46" y="86" width="52" height="3" rx="1.5" fill={MIRO.lineDark} />
+        <rect x="46" y="93" width="34" height="3" rx="1.5" fill={MIRO.line} />
+      </g>
+      <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.06))">
+        <rect x="132" y="36" width="40" height="40" rx="4" fill={MIRO.yellow} />
+        <rect x="138" y="46" width="28" height="3" rx="1.5" fill={MIRO.yellowDark} opacity="0.8" />
+        <rect x="138" y="54" width="18" height="3" rx="1.5" fill={MIRO.yellowDark} opacity="0.8" />
+      </g>
+    </svg>
+  );
+}
+
+/** Brand kit — type + color tokens */
+export function StudioIconBrand(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <g filter="drop-shadow(0 3px 6px rgba(0,0,0,0.05))">
+        <rect x="26" y="22" width="100" height="86" rx="7" fill={MIRO.frame} stroke={MIRO.frameBorder} strokeWidth="1" />
+        <rect x="38" y="34" width="28" height="28" rx="6" fill={MIRO.blueDark} />
+        <path d="M47 48H57M52 43V53" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+        <rect x="74" y="38" width="38" height="5" rx="2" fill={MIRO.blueDark} />
+        <rect x="74" y="48" width="28" height="3" rx="1.5" fill={MIRO.lineDark} />
+
+        <rect x="38" y="74" width="14" height="18" rx="3" fill={MIRO.coral} />
+        <rect x="56" y="74" width="14" height="18" rx="3" fill={MIRO.yellow} />
+        <rect x="74" y="74" width="14" height="18" rx="3" fill={MIRO.green} />
+        <rect x="92" y="74" width="14" height="18" rx="3" fill={MIRO.blueSoft} />
+      </g>
+      <g filter="drop-shadow(0 2px 4px rgba(0,0,0,0.06))">
+        <rect x="138" y="30" width="38" height="50" rx="4" fill={MIRO.yellow} />
+        <rect x="144" y="40" width="26" height="3" rx="1.5" fill={MIRO.yellowDark} opacity="0.8" />
+        <rect x="144" y="48" width="20" height="3" rx="1.5" fill={MIRO.yellowDark} opacity="0.8" />
+        <rect x="144" y="56" width="14" height="3" rx="1.5" fill={MIRO.yellowDark} opacity="0.8" />
+      </g>
+    </svg>
+  );
+}
+
 const ICONS: Record<StudioIconName, (props: IconProps) => ReactElement> = {
   codeblock: StudioIconCodeblock,
   image: StudioIconImage,
@@ -292,6 +369,9 @@ const ICONS: Record<StudioIconName, (props: IconProps) => ReactElement> = {
   idea: StudioIconIdea,
   list: StudioIconList,
   layers: StudioIconLayers,
+  palette: StudioIconPalette,
+  carousel: StudioIconCarousel,
+  brand: StudioIconBrand,
 };
 
 export function StudioIcon({

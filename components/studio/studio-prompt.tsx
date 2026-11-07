@@ -5,10 +5,7 @@ import {
   ArrowUp,
   ChevronDown,
   Clock,
-  LayoutTemplate,
   Loader2,
-  Palette,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 
@@ -20,23 +17,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  GENERATION_TYPES,
+  getGenerationType,
+} from "@/lib/studio/generation/registry";
+import type {
+  GenerationKind,
+  StudioPromptSubmit,
+} from "@/lib/studio/generation/types";
 import { cn } from "@/lib/utils";
 
-export type GenerationType = "idea" | "palette" | "carousel";
-
-export type StudioPromptSubmit = {
-  topic: string;
-  type: GenerationType;
-};
+export type { GenerationKind, StudioPromptSubmit };
+export type GenerationType = GenerationKind;
 
 const RECENT_KEY = "studio_recent_prompts";
 const MAX_RECENTS = 5;
-
-const GENERATION_TYPES = [
-  { value: "idea", label: "Idea", icon: Sparkles, placeholder: "Describe the topic for idea generation..." },
-  { value: "palette", label: "Palette", icon: Palette, placeholder: "Describe the mood or brand for palette generation..." },
-  { value: "carousel", label: "Carousel Design", icon: LayoutTemplate, placeholder: "Describe the content and style for carousel design..." },
-] as const;
 
 export function StudioPrompt({
   onSubmit,
@@ -44,18 +39,20 @@ export function StudioPrompt({
   busy,
   error,
   initialTopic = "",
+  initialType = "text",
 }: {
   onSubmit: (input: StudioPromptSubmit) => void | Promise<void>;
   disabled?: boolean;
   busy?: boolean;
   error?: string | null;
   initialTopic?: string;
+  initialType?: GenerationKind;
 }) {
   const appliedTopic = useRef(false);
 
   const [value, setValue] = useState(initialTopic);
   const [recentPrompts, setRecentPrompts] = useState<string[]>([]);
-  const [generationType, setGenerationType] = useState<GenerationType>("idea");
+  const [generationType, setGenerationType] = useState<GenerationKind>(initialType);
 
   useEffect(() => {
     if (appliedTopic.current || !initialTopic) return;
@@ -64,13 +61,17 @@ export function StudioPrompt({
   }, [initialTopic]);
 
   useEffect(() => {
+    setGenerationType(initialType);
+  }, [initialType]);
+
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(RECENT_KEY);
       if (stored) {
         setRecentPrompts(JSON.parse(stored));
       }
     } catch {
-      // Игнорируем ошибки парсинга
+      // ignore parse errors
     }
   }, []);
 
@@ -81,7 +82,7 @@ export function StudioPrompt({
       setRecentPrompts(updated);
       localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
     } catch {
-      // Игнорируем ошибки записи
+      // ignore write errors
     }
   };
 
@@ -90,7 +91,7 @@ export function StudioPrompt({
     try {
       localStorage.removeItem(RECENT_KEY);
     } catch {
-      // Игнорируем ошибки
+      // ignore
     }
   };
 
@@ -105,7 +106,7 @@ export function StudioPrompt({
     void onSubmit({ topic: finalTopic, type: generationType });
   };
 
-  const currentTypeData = GENERATION_TYPES.find((t) => t.value === generationType) || GENERATION_TYPES[0];
+  const currentTypeData = getGenerationType(generationType);
 
   return (
     <div className="w-full">
@@ -136,7 +137,6 @@ export function StudioPrompt({
 
         <div className="flex items-center justify-between gap-3 px-2 pb-1">
           <div className="flex min-w-0 items-center gap-2">
-            {/* Меню выбора типа генерации */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -151,12 +151,12 @@ export function StudioPrompt({
               <DropdownMenuContent
                 align="start"
                 sideOffset={10}
-                className="w-full rounded-2xl border-neutral-200/80 bg-white p-2 border-none dark:bg-neutral-900"
-                >
+                className="w-full rounded-2xl border-none border-neutral-200/80 bg-white p-2 dark:bg-neutral-900"
+              >
                 {GENERATION_TYPES.map((type) => (
                   <DropdownMenuItem
-                    key={type.value}
-                    onSelect={() => setGenerationType(type.value)}
+                    key={type.kind}
+                    onSelect={() => setGenerationType(type.kind)}
                     className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-foreground transition-colors hover:bg-muted focus:bg-muted"
                   >
                     {type.label}
@@ -165,14 +165,13 @@ export function StudioPrompt({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Меню истории запросов */}
             {recentPrompts.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
                     disabled={disabled || busy}
-                    title="История запросов"
+                    title="Recent prompts"
                     className="inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
                     <Clock className="size-4" />
@@ -181,19 +180,19 @@ export function StudioPrompt({
                 <DropdownMenuContent
                   align="start"
                   sideOffset={10}
-                  className="w-[280px] rounded-2xl border border-border/50 bg-background p-2 shadow-lg"
+                  className="w-[280px] rounded-2xl border border-border/50 bg-background p-2"
                 >
                   <div className="flex items-center justify-between px-3 py-1.5">
                     <DropdownMenuLabel className="p-0 text-[12px] font-medium text-muted-foreground">
-                      Недавние запросы
+                      Recent prompts
                     </DropdownMenuLabel>
                     <button
                       type="button"
                       onClick={clearRecents}
-                      className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-destructive transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground transition-colors hover:text-destructive"
                     >
                       <Trash2 className="size-3.5" />
-                      Очистить
+                      Clear
                     </button>
                   </div>
                   <DropdownMenuSeparator className="my-1.5 bg-border/50" />
@@ -210,8 +209,8 @@ export function StudioPrompt({
               </DropdownMenu>
             )}
 
-            <p className="hidden md:block truncate pl-2 text-[12px] text-muted-foreground">
-              {busy ? "Генерация…" : "Enter для отправки · Shift+Enter для новой строки"}
+            <p className="hidden truncate pl-2 text-[12px] text-muted-foreground md:block">
+              {busy ? "Generating…" : "Enter to send · Shift+Enter for a new line"}
             </p>
           </div>
 
@@ -219,7 +218,7 @@ export function StudioPrompt({
             type="button"
             disabled={!canSend}
             onClick={() => submit()}
-            title="Отправить"
+            title="Send"
             className={cn(
               "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
               canSend

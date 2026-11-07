@@ -39,6 +39,7 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
   const slides = useCanvasStore((s) => s.slides);
   const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
   const projectTitle = useCanvasStore((s) => s.projectTitle);
+  const postCaption = useCanvasStore((s) => s.postCaption);
   const updateSlideThumbnail = useCanvasStore((s) => s.updateSlideThumbnail);
 
   const slidesController = useSlidesController();
@@ -298,6 +299,7 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
             slideIndex={activeIdx}
             slideTotal={Math.max(slides.length, 1)}
             author={author}
+            caption={postCaption}
             onPrev={goPrev}
             onNext={goNext}
           />

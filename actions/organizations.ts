@@ -288,9 +288,21 @@ export async function getActiveOrganization(): Promise<
 
 // Добавьте это в конец файла @/actions/organizations.ts
 
+export type OrganizationMemberItem = {
+  id: string;
+  role: "OWNER" | "ADMIN" | "MEMBER";
+  createdAt: string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+  };
+};
+
 export async function updateOrganization(
   organizationId: string,
-  data: { name?: string; color?: string }
+  data: { name?: string; color?: string },
 ): Promise<ActionResult<{ organizationId: string }>> {
   try {
     const userId = await requireUserId();
@@ -299,16 +311,23 @@ export async function updateOrganization(
     const membership = await prisma.organizationMember.findFirst({
       where: { userId, organizationId },
     });
-    
-    // Только Владелец (OWNER) или Админ (ADMIN) могут менять профиль
-    if (!membership || (membership.role !== "OWNER" && membership.role !== "ADMIN")) {
-      return { success: false, error: "У вас нет прав для изменения этой организации." };
+
+    if (
+      !membership ||
+      (membership.role !== "OWNER" && membership.role !== "ADMIN")
+    ) {
+      return { success: false, error: messages.errors.orgEditForbidden };
+    }
+
+    const name = data.name?.trim();
+    if (data.name !== undefined && (!name || name.length < 2)) {
+      return { success: false, error: messages.errors.nameRequired };
     }
 
     await prisma.organization.update({
       where: { id: organizationId },
       data: {
-        ...(data.name ? { name: data.name } : {}),
+        ...(name ? { name } : {}),
         ...(data.color ? { color: data.color } : {}),
       },
     });
@@ -317,13 +336,13 @@ export async function updateOrganization(
     return { success: true, organizationId };
   } catch (err) {
     console.error("updateOrganization error:", err);
-    return { success: false, error: "Не удалось обновить организацию." };
+    return { success: false, error: messages.errors.updateOrganization };
   }
 }
 
 export async function deleteOrganization(
-  organizationId: string
-): Promise<ActionResult> {
+  organizationId: string,
+): Promise<ActionResult<object>> {
   try {
     const userId = await requireUserId();
     if (!userId) return { success: false, error: messages.errors.signIn };
@@ -331,41 +350,35 @@ export async function deleteOrganization(
     const membership = await prisma.organizationMember.findFirst({
       where: { userId, organizationId },
     });
-    
-    // ТОЛЬКО Владелец (OWNER) может удалить организацию
+
     if (!membership || membership.role !== "OWNER") {
-      return { success: false, error: "Только владелец может удалить организацию." };
+      return { success: false, error: messages.errors.orgDeleteForbidden };
     }
 
-    // Удаляем организацию
     await prisma.organization.delete({
       where: { id: organizationId },
     });
 
-    // Если удаленная организация была активной, сбрасываем activeOrganizationId
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user?.activeOrganizationId === organizationId) {
       await prisma.user.update({
         where: { id: userId },
         data: { activeOrganizationId: null },
       });
-      // Функция сама создаст дефолтную оргу или переключит на другую
-      await ensureUserOrganization(); 
+      await ensureUserOrganization();
     }
 
     revalidatePath("/studio");
     return { success: true };
   } catch (err) {
     console.error("deleteOrganization error:", err);
-    return { success: false, error: "Не удалось удалить организацию." };
+    return { success: false, error: messages.errors.deleteOrganization };
   }
 }
 
-
-
 export async function getOrganizationMembers(
-  organizationId: string
-): Promise<ActionResult<{ members: any[] }>> {
+  organizationId: string,
+): Promise<ActionResult<{ members: OrganizationMemberItem[] }>> {
   try {
     const userId = await requireUserId();
     if (!userId) return { success: false, error: messages.errors.signIn };
@@ -373,19 +386,198 @@ export async function getOrganizationMembers(
     const membership = await prisma.organizationMember.findFirst({
       where: { userId, organizationId },
     });
-    if (!membership) return { success: false, error: "Нет доступа." };
+    if (!membership) {
+      return { success: false, error: messages.errors.organizationNotFound };
+    }
 
     const members = await prisma.organizationMember.findMany({
       where: { organizationId },
       include: {
-        user: { select: { id: true, name: true, email: true, image: true } }
+        user: { select: { id: true, name: true, email: true, image: true } },
       },
-      orderBy: { role: 'asc' } // Первыми идут OWNER, затем ADMIN, затем MEMBER
+      orderBy: [{ role: "asc" }, { createdAt: "asc" }],
     });
 
-    return { success: true, members };
+    return {
+      success: true,
+      members: members.map((member) => ({
+        id: member.id,
+        role: member.role,
+        createdAt: member.createdAt.toISOString(),
+        user: {
+          id: member.user.id,
+          name: member.user.name,
+          email: member.user.email,
+          image: member.user.image,
+        },
+      })),
+    };
   } catch (err) {
     console.error("getOrganizationMembers error:", err);
-    return { success: false, error: "Не удалось загрузить участников." };
+    return { success: false, error: messages.errors.loadOrgMembers };
+  }
+}
+
+export async function updateOrganizationMemberRole(input: {
+  organizationId: string;
+  memberUserId: string;
+  role: "ADMIN" | "MEMBER";
+}): Promise<ActionResult<object>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    const actor = await prisma.organizationMember.findFirst({
+      where: { userId, organizationId: input.organizationId },
+    });
+    if (!actor || actor.role !== "OWNER") {
+      return { success: false, error: messages.errors.orgRoleForbidden };
+    }
+
+    if (input.memberUserId === userId) {
+      return { success: false, error: messages.errors.orgRoleSelf };
+    }
+
+    const target = await prisma.organizationMember.findFirst({
+      where: {
+        userId: input.memberUserId,
+        organizationId: input.organizationId,
+      },
+    });
+    if (!target) {
+      return { success: false, error: messages.errors.orgMemberNotFound };
+    }
+    if (target.role === "OWNER") {
+      return { success: false, error: messages.errors.orgRoleOwner };
+    }
+
+    await prisma.organizationMember.update({
+      where: { id: target.id },
+      data: { role: input.role },
+    });
+
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (err) {
+    console.error("updateOrganizationMemberRole error:", err);
+    return { success: false, error: messages.errors.updateOrgMember };
+  }
+}
+
+export async function removeOrganizationMember(input: {
+  organizationId: string;
+  memberUserId: string;
+}): Promise<ActionResult<object>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    const actor = await prisma.organizationMember.findFirst({
+      where: { userId, organizationId: input.organizationId },
+    });
+    if (!actor) {
+      return { success: false, error: messages.errors.organizationNotFound };
+    }
+
+    const target = await prisma.organizationMember.findFirst({
+      where: {
+        userId: input.memberUserId,
+        organizationId: input.organizationId,
+      },
+    });
+    if (!target) {
+      return { success: false, error: messages.errors.orgMemberNotFound };
+    }
+
+    const removingSelf = input.memberUserId === userId;
+    if (removingSelf) {
+      if (actor.role === "OWNER") {
+        return { success: false, error: messages.errors.orgOwnerLeave };
+      }
+    } else if (actor.role !== "OWNER" && actor.role !== "ADMIN") {
+      return { success: false, error: messages.errors.orgRemoveForbidden };
+    } else if (target.role === "OWNER") {
+      return { success: false, error: messages.errors.orgRemoveOwner };
+    } else if (actor.role === "ADMIN" && target.role === "ADMIN") {
+      return { success: false, error: messages.errors.orgRemoveForbidden };
+    }
+
+    await prisma.organizationMember.delete({ where: { id: target.id } });
+
+    if (removingSelf) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { activeOrganizationId: true },
+      });
+      if (user?.activeOrganizationId === input.organizationId) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { activeOrganizationId: null },
+        });
+        await ensureUserOrganization();
+      }
+    } else {
+      await prisma.user.updateMany({
+        where: {
+          id: input.memberUserId,
+          activeOrganizationId: input.organizationId,
+        },
+        data: { activeOrganizationId: null },
+      });
+    }
+
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (err) {
+    console.error("removeOrganizationMember error:", err);
+    return { success: false, error: messages.errors.removeOrgMember };
+  }
+}
+
+export async function transferOrganizationOwnership(input: {
+  organizationId: string;
+  memberUserId: string;
+}): Promise<ActionResult<object>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    if (input.memberUserId === userId) {
+      return { success: false, error: messages.errors.orgRoleSelf };
+    }
+
+    const actor = await prisma.organizationMember.findFirst({
+      where: { userId, organizationId: input.organizationId },
+    });
+    if (!actor || actor.role !== "OWNER") {
+      return { success: false, error: messages.errors.orgTransferForbidden };
+    }
+
+    const target = await prisma.organizationMember.findFirst({
+      where: {
+        userId: input.memberUserId,
+        organizationId: input.organizationId,
+      },
+    });
+    if (!target) {
+      return { success: false, error: messages.errors.orgMemberNotFound };
+    }
+
+    await prisma.$transaction([
+      prisma.organizationMember.update({
+        where: { id: actor.id },
+        data: { role: "ADMIN" },
+      }),
+      prisma.organizationMember.update({
+        where: { id: target.id },
+        data: { role: "OWNER" },
+      }),
+    ]);
+
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (err) {
+    console.error("transferOrganizationOwnership error:", err);
+    return { success: false, error: messages.errors.transferOrganization };
   }
 }

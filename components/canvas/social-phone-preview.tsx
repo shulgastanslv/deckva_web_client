@@ -50,11 +50,18 @@ type Props = {
   slideIndex: number;
   slideTotal: number;
   author?: string;
+  /** Post caption shown under the media in feed-style networks. */
+  caption?: string;
   onPrev?: () => void;
   onNext?: () => void;
   network: SocialPreviewNetwork;
   className?: string;
 };
+
+function captionOrFallback(caption: string | undefined, fallback: string) {
+  const trimmed = caption?.trim();
+  return trimmed || fallback;
+}
 
 /** Instagram feed posts sit between 4:5 and ~1.91:1. */
 function clampFeedAspect(ratio: number) {
@@ -267,8 +274,12 @@ function TabIcon({
 }
 
 function InstagramChrome(props: Props) {
-  const { author = "deckva", slideIndex, slideTotal, image, loading } = props;
+  const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
+  const body = captionOrFallback(
+    caption,
+    slideTotal > 1 ? `Slide ${slideIndex + 1} of ${slideTotal}` : "New post",
+  );
 
   return (
     <div className="flex h-full w-full flex-col bg-white text-neutral-950">
@@ -308,11 +319,9 @@ function InstagramChrome(props: Props) {
 
       <div className="min-h-0 flex-1 space-y-1 overflow-hidden px-3 pt-2">
         <p className="text-[13px] font-semibold leading-none">128 likes</p>
-        <p className="text-[13px] leading-snug">
+        <p className="line-clamp-4 text-[13px] leading-snug whitespace-pre-wrap">
           <span className="font-semibold">{author}</span>{" "}
-          <span className="text-neutral-800">
-            {slideTotal > 1 ? `Slide ${slideIndex + 1} of ${slideTotal}` : "New post"}
-          </span>
+          <span className="text-neutral-800">{body}</span>
         </p>
         <p className="text-[13px] text-neutral-500">View all comments</p>
       </div>
@@ -340,8 +349,14 @@ function InstagramChrome(props: Props) {
 }
 
 function ThreadsChrome(props: Props) {
-  const { author = "deckva", slideIndex, slideTotal, image, loading } = props;
+  const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
+  const body = captionOrFallback(
+    caption,
+    slideTotal > 1
+      ? `Carousel preview · ${slideIndex + 1}/${slideTotal}`
+      : "Previewing this slide in Threads",
+  );
 
   return (
     <div className="flex h-full w-full flex-col bg-white text-neutral-950">
@@ -365,10 +380,8 @@ function ThreadsChrome(props: Props) {
               <span className="truncate text-[14px] font-semibold tracking-tight">{author}</span>
               <span className="shrink-0 text-[13px] text-neutral-400">2h</span>
             </div>
-            <p className="mt-1 text-[14px] leading-[1.3] text-neutral-900">
-              {slideTotal > 1
-                ? `Carousel preview · ${slideIndex + 1}/${slideTotal}`
-                : "Previewing this slide in Threads"}
+            <p className="mt-1 line-clamp-5 text-[14px] leading-[1.3] text-neutral-900 whitespace-pre-wrap">
+              {body}
             </p>
             <div className="mt-2.5 overflow-hidden rounded-[16px] border border-black/[0.08]">
               <SlideImage
@@ -556,8 +569,14 @@ function StoriesChrome(props: Props) {
 }
 
 function XChrome(props: Props) {
-  const { author = "deckva", slideIndex, slideTotal, image, loading } = props;
+  const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
+  const body = captionOrFallback(
+    caption,
+    slideTotal > 1
+      ? `Previewing slide ${slideIndex + 1} of ${slideTotal}`
+      : "Previewing this slide on X",
+  );
 
   return (
     <div className="flex h-full w-full flex-col bg-black text-white">
@@ -576,10 +595,8 @@ function XChrome(props: Props) {
               <span className="text-[14px] text-white/45">@{author}</span>
               <span className="text-[14px] text-white/45">· 2h</span>
             </div>
-            <p className="mt-1 text-[15px] leading-snug text-white">
-              {slideTotal > 1
-                ? `Previewing slide ${slideIndex + 1} of ${slideTotal}`
-                : "Previewing this slide on X"}
+            <p className="mt-1 line-clamp-5 text-[15px] leading-snug whitespace-pre-wrap text-white">
+              {body}
             </p>
             <div className="mt-3 overflow-hidden rounded-2xl border border-white/15">
               <SlideImage image={image} loading={loading} aspectRatio={ar} />
@@ -636,8 +653,14 @@ function BellDot() {
 }
 
 function LinkedInChrome(props: Props) {
-  const { author = "deckva", slideIndex, slideTotal, image, loading } = props;
+  const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
+  const body = captionOrFallback(
+    caption,
+    slideTotal > 1
+      ? `Slide ${slideIndex + 1} of ${slideTotal} — carousel preview`
+      : "Previewing this slide on LinkedIn",
+  );
 
   return (
     <div className="flex h-full w-full flex-col bg-[#f4f2ee] text-neutral-900">
@@ -663,10 +686,8 @@ function LinkedInChrome(props: Props) {
             </div>
             <MoreHorizontal className="size-5 text-neutral-500" strokeWidth={1.75} />
           </div>
-          <p className="px-3 pb-2.5 pt-2 text-[13px] leading-snug text-neutral-900">
-            {slideTotal > 1
-              ? `Slide ${slideIndex + 1} of ${slideTotal} — carousel preview`
-              : "Previewing this slide on LinkedIn"}
+          <p className="line-clamp-4 px-3 pb-2.5 pt-2 text-[13px] leading-snug whitespace-pre-wrap text-neutral-900">
+            {body}
           </p>
           <SlideImage image={image} loading={loading} aspectRatio={ar} fit="contain" />
           <div className="flex items-center justify-between px-3 py-2 text-[11px] text-neutral-500">

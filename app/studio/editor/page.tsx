@@ -14,6 +14,7 @@ import { SelectionToolbar } from "@/components/canvas/selection-toolbar";
 import { AutoFlowPrompt } from "@/components/canvas/auto-flow-prompt";
 import { RightSidebar } from "@/components/canvas/right-sidebar";
 import { PreviewModal } from "@/components/canvas/preview-modal";
+import { EditorReviewPanel } from "@/components/canvas/editor-review-panel";
 import type { NavId } from "@/components/canvas/left-sidebar";
 import { EditorPhoneDock } from "@/components/canvas/editor-phone-dock";
 import { StudioIntentBootstrap } from "@/components/studio/studio-intent-bootstrap";
@@ -23,6 +24,7 @@ import { useProject } from "@/hooks/use-project";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { cn } from "@/lib/utils";
+import { MessageSquareText } from "lucide-react";
 
 const SlideNavigator = dynamic(
   () => import("@/components/canvas/slide-navigator").then((mod) => mod.SlideNavigator),
@@ -99,7 +101,10 @@ export default function CarouselEditor() {
   /** Hide only canvas toolbar + slide navigator (sidebars stay). */
   const [canvasChrome, setCanvasChrome] = useState(true);
   const [phoneSheet, setPhoneSheet] = useState<"library" | "style" | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const manager = useCanvasManager();
+  const postCaption = useCanvasStore((s) => s.postCaption);
+  const isGeneratingCarousel = useCanvasStore((s) => s.isGeneratingCarousel);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -171,6 +176,7 @@ export default function CarouselEditor() {
             setPreviewSlideId(storeCurrentId);
             setShowPreviewModal(true);
           }}
+          onReview={() => setReviewOpen((open) => !open)}
           onFocus={() => {
             setPhoneSheet(null);
             setFocusMode(true);
@@ -229,6 +235,18 @@ export default function CarouselEditor() {
               <CanvasChromeRestore onShow={() => setCanvasChrome(true)} />
             )}
             {!focusMode && <AutoFlowPrompt />}
+            {!focusMode && !isGeneratingCarousel && !postCaption.trim() ? (
+              <div className="pointer-events-none absolute inset-x-0 top-3 z-20 flex justify-center px-4">
+                <button
+                  type="button"
+                  onClick={() => setReviewOpen(true)}
+                  className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-background/95 px-3.5 py-1.5 text-[12px] font-medium text-foreground ring-1 ring-border/60 backdrop-blur"
+                >
+                  <MessageSquareText className="size-3.5 opacity-70" />
+                  Generate post caption
+                </button>
+              </div>
+            ) : null}
             {!focusMode && phoneSheet ? (
               <button
                 type="button"
@@ -240,6 +258,10 @@ export default function CarouselEditor() {
           </div>
           {!focusMode && canvasChrome && <SlideNavigator />}
         </main>
+
+        {!focusMode && reviewOpen ? (
+          <EditorReviewPanel open={reviewOpen} onClose={() => setReviewOpen(false)} />
+        ) : null}
 
         {!focusMode && (
           <div

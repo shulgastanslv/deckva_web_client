@@ -12,15 +12,38 @@ export type StudioGenerateIntent = {
   slidesCount: number;
   /** Cover image URL; empty string = gray placeholder on slide 1. */
   cover: string;
+  parentArtifactId?: string | null;
 };
 
-export type StudioIntent = { type: "new" } | StudioGenerateIntent;
+export type StudioInsertKind = "codeblock" | "list";
+
+export type StudioInsertIntent = {
+  type: "insert";
+  insert: StudioInsertKind;
+  /** Optional seed content for the inserted element. */
+  content?: string;
+  title?: string;
+};
+
+export type StudioIntent =
+  | { type: "new" }
+  | StudioGenerateIntent
+  | StudioInsertIntent;
 
 function parseIntent(raw: string): StudioIntent | null {
   try {
     const parsed = JSON.parse(raw) as StudioIntent;
     if (!parsed || typeof parsed !== "object") return null;
     if (parsed.type === "new") return { type: "new" };
+    if (parsed.type === "insert") {
+      if (parsed.insert !== "codeblock" && parsed.insert !== "list") return null;
+      return {
+        type: "insert",
+        insert: parsed.insert,
+        content: typeof parsed.content === "string" ? parsed.content : "",
+        title: typeof parsed.title === "string" ? parsed.title : "",
+      };
+    }
     if (parsed.type === "generate") {
       if (
         typeof parsed.projectId !== "string" ||

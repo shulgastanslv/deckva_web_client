@@ -1,259 +1,608 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Check, UserCircle2 } from "lucide-react";
+import {
+  Check,
+  Loader2,
+  MoreHorizontal,
+  UserCircle2,
+} from "lucide-react";
 
+import {
+  deleteOrganization,
+  getOrganizationMembers,
+  removeOrganizationMember,
+  transferOrganizationOwnership,
+  updateOrganization,
+  updateOrganizationMemberRole,
+  type OrganizationMemberItem,
+} from "@/actions/organizations";
+import {
+  listOrganizationInvites,
+  revokeOrganizationInvite,
+  sendOrganizationInvites,
+} from "@/actions/invites";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { studioKeys } from "@/lib/studio/queries";
+import { cn } from "@/lib/utils";
 
-import { 
-  updateOrganization, 
-  deleteOrganization, 
-  getOrganizationMembers 
-} from "@/actions/organizations";
-
-// Используем те же цвета, что и на бэкенде для палитры
-const ORG_COLORS = ["#7EB6FF", "#C4B5FD", "#86EFAC", "#FCD34D", "#FDA4AF", "#67E8F9"];
+const ORG_COLORS = [
+  "#7EB6FF",
+  "#C4B5FD",
+  "#86EFAC",
+  "#FCD34D",
+  "#FDA4AF",
+  "#67E8F9",
+];
 
 interface OrgDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  organization: { id: string; name: string; color: string; role: string } | null;
+  organization: {
+    id: string;
+    name: string;
+    color: string;
+    role: string;
+  } | null;
 }
 
-// --------------------------------------------------------
-// 1. Редактирование профиля (Имя и Цвет)
-// --------------------------------------------------------
-export function EditProfileDialog({ open, onOpenChange, organization }: OrgDialogProps) {
+function invalidateOrg(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
+  queryClient.invalidateQueries({ queryKey: studioKeys.activeOrganization });
+  window.dispatchEvent(new CustomEvent("studio:org-changed"));
+}
+
+export function EditProfileDialog({
+  open,
+  onOpenChange,
+  organization,
+}: OrgDialogProps) {
   const queryClient = useQueryClient();
   const [name, setName] = useState(organization?.name || "");
   const [color, setColor] = useState(organization?.color || "");
-  const [isLoading, setIsLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Синхронизация стейта при открытии/смене орги
   useEffect(() => {
-    if (organization) {
-      setName(organization.name);
-      setColor(organization.color);
-    }
+    if (!organization || !open) return;
+    setName(organization.name);
+    setColor(organization.color);
+    setError(null);
   }, [organization, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization || !name.trim()) return;
-
-    setIsLoading(true);
+    if (!organization || !name.trim() || busy) return;
+    setBusy(true);
+    setError(null);
     try {
-      const res = await updateOrganization(organization.id, { name: name.trim(), color });
-      if (res.success) {
-        queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
-        window.dispatchEvent(new CustomEvent("studio:org-changed"));
-        onOpenChange(false);
+      const res = await updateOrganization(organization.id, {
+        name: name.trim(),
+        color,
+      });
+      if (!res.success) {
+        setError("error" in res ? res.error : "Couldn't update organization");
+        return;
       }
+      invalidateOrg(queryClient);
+      onOpenChange(false);
     } finally {
-      setIsLoading(false);
+      setBusy(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-2xl sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+      <DialogContent
+        className="w-[min(28rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-md"
+        showCloseButton
+      >
+        <DialogHeader className="gap-1 px-5 pt-5 pb-3">
+          <DialogTitle className="text-[17px] font-semibold tracking-tight">
+            Edit organization
+          </DialogTitle>
+          <DialogDescription className="text-[13px] leading-relaxed">
+            Update the name and avatar color for this workspace.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 py-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Organization Name</label>
-            <Input 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-              placeholder="e.g. Acme Corp" 
-              className="rounded-xl"
-              disabled={isLoading}
+
+        <form onSubmit={handleSubmit} className="space-y-5 px-5 pb-5">
+          <label className="block space-y-1.5">
+            <span className="text-[12px] font-medium text-muted-foreground">
+              Name
+            </span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={busy}
+              placeholder="Organization name"
+              className="h-10 w-full rounded-2xl bg-muted/30 px-3.5 text-[14px] outline-none focus:bg-muted/40 disabled:opacity-60"
             />
-          </div>
-          
-          <div className="space-y-3">
-            <label className="text-sm font-medium">Avatar Color</label>
+          </label>
+
+          <div className="space-y-2">
+            <span className="text-[12px] font-medium text-muted-foreground">
+              Color
+            </span>
             <div className="flex flex-wrap gap-2">
               {ORG_COLORS.map((c) => (
                 <button
                   key={c}
                   type="button"
+                  disabled={busy}
                   onClick={() => setColor(c)}
                   className={cn(
-                    "flex size-8 items-center justify-center rounded-full transition-transform hover:scale-110",
-                    color === c ? "ring-2 ring-foreground ring-offset-2 ring-offset-background" : ""
+                    "flex size-8 items-center justify-center rounded-full transition-transform hover:scale-105",
+                    color === c && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
                   )}
                   style={{ backgroundColor: c }}
                 >
-                  {color === c && <Check className="size-4 text-black/60" />}
+                  {color === c ? (
+                    <Check className="size-3.5 text-black/55" />
+                  ) : null}
                 </button>
               ))}
             </div>
           </div>
 
-          <DialogFooter className="flex justify-end gap-2 bg-transparent">
-            <Button type="button" variant="outline" className="rounded-full" onClick={() => onOpenChange(false)} disabled={isLoading}>
+          {error ? (
+            <p className="text-[13px] text-destructive">{error}</p>
+          ) : null}
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-full"
+              disabled={busy}
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="rounded-full" disabled={isLoading || !name.trim()}>
-              {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Save Changes
+            <Button
+              type="submit"
+              className="rounded-full"
+              disabled={busy || name.trim().length < 2}
+            >
+              {busy ? <Loader2 className="size-4 animate-spin" /> : "Save"}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
 
-// --------------------------------------------------------
-// 2. Управление участниками
-// --------------------------------------------------------
-export function ManageMembersDialog({ open, onOpenChange, organization }: OrgDialogProps) {
-  const [members, setMembers] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function ManageMembersDialog({
+  open,
+  onOpenChange,
+  organization,
+}: OrgDialogProps) {
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const myId = session?.user?.id ?? null;
+  const isOwner = organization?.role === "OWNER";
+  const isAdmin =
+    organization?.role === "OWNER" || organization?.role === "ADMIN";
+
+  const [members, setMembers] = useState<OrganizationMemberItem[]>([]);
+  const [pending, setPending] = useState<
+    Array<{ id: string; email: string | null; role: string }>
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [inviteEmails, setInviteEmails] = useState("");
+  const [inviteRole, setInviteRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const reload = async () => {
+    if (!organization) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const [membersRes, invitesRes] = await Promise.all([
+        getOrganizationMembers(organization.id),
+        isAdmin
+          ? listOrganizationInvites(organization.id)
+          : Promise.resolve({ success: true as const, invites: [] }),
+      ]);
+      if (membersRes.success && "members" in membersRes) {
+        setMembers(membersRes.members);
+      }
+      if (invitesRes.success && "invites" in invitesRes) {
+        setPending(
+          invitesRes.invites.map((row) => ({
+            id: row.id,
+            email: row.email,
+            role: row.role,
+          })),
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (open && organization) {
-      setIsLoading(true);
-      getOrganizationMembers(organization.id).then((res) => {
-        if (res.success) setMembers(res.members);
-        setIsLoading(false);
-      });
+      void reload();
+      setInviteEmails("");
+      setInviteRole("MEMBER");
+      setError(null);
     } else {
       setMembers([]);
+      setPending([]);
     }
-  }, [open, organization]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, organization?.id]);
+
+  const runMemberAction = async (fn: () => Promise<{ success: boolean; error?: string }>) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fn();
+      if (!res.success) {
+        setError(res.error || "Something went wrong");
+        return;
+      }
+      invalidateOrg(queryClient);
+      await reload();
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-2xl sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Manage Members</DialogTitle>
+      <DialogContent
+        className="w-[min(32rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-lg"
+        showCloseButton
+      >
+        <DialogHeader className="gap-1 px-5 pt-5 pb-3">
+          <DialogTitle className="text-[17px] font-semibold tracking-tight">
+            Members
+          </DialogTitle>
+          <DialogDescription className="text-[13px] leading-relaxed">
+            Manage people in {organization?.name ?? "this organization"}.
+          </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          {isLoading ? (
-            <div className="flex justify-center py-6">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+
+        <div className="space-y-5 px-5 pb-5">
+          {isAdmin ? (
+            <div className="space-y-4">
+              <textarea
+                value={inviteEmails}
+                onChange={(e) => setInviteEmails(e.target.value)}
+                disabled={busy}
+                rows={2}
+                placeholder="Invite by email…"
+                className="min-h-[64px] w-full resize-none rounded-2xl bg-muted/30 px-3.5 py-2.5 text-[13px] outline-none placeholder:text-muted-foreground/70 disabled:opacity-60"
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="grid grid-cols-2 gap-1 rounded-full bg-muted/50 p-1">
+                  {(["MEMBER", "ADMIN"] as const).map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      disabled={busy || (!isOwner && value === "ADMIN")}
+                      onClick={() => setInviteRole(value)}
+                      className={cn(
+                        "h-8 rounded-full px-3 text-[12px] font-medium transition-colors",
+                        inviteRole === value
+                          ? "bg-background text-foreground"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {value === "MEMBER" ? "Member" : "Admin"}
+                    </button>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  disabled={busy || !inviteEmails.trim()}
+                  className="ml-auto h-9 rounded-full"
+                  onClick={() =>
+                    void runMemberAction(async () => {
+                      if (!organization) return { success: false, error: "Missing org" };
+                      const res = await sendOrganizationInvites({
+                        organizationId: organization.id,
+                        emails: inviteEmails,
+                        role: inviteRole,
+                      });
+                      if (res.success) setInviteEmails("");
+                      return res;
+                    })
+                  }
+                >
+                  Invite
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <div className="space-y-4 max-h-[300px] overflow-y-auto">
-              {members.map((member) => (
-                <div key={member.user.id} className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
+            <ul className="max-h-[280px] space-y-1 overflow-y-auto">
+              {members.map((member) => {
+                const isMe = member.user.id === myId;
+                return (
+                  <li
+                    key={member.id}
+                    className="flex items-center gap-3 rounded-2xl px-2 py-2"
+                  >
                     {member.user.image ? (
-                      <img src={member.user.image} alt="" className="size-8 rounded-full" />
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={member.user.image}
+                        alt=""
+                        className="size-9 rounded-full object-cover"
+                      />
                     ) : (
-                      <UserCircle2 className="size-8 text-muted-foreground" />
+                      <UserCircle2 className="size-9 text-muted-foreground" />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{member.user.name || "User"}</p>
-                      <p className="truncate text-xs text-muted-foreground">{member.user.email}</p>
+                      <p className="truncate text-[13px] font-medium">
+                        {member.user.name || "User"}
+                        {isMe ? " (you)" : ""}
+                      </p>
+                      <p className="truncate text-[12px] text-muted-foreground">
+                        {member.user.email}
+                      </p>
                     </div>
-                  </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase bg-muted px-2 py-1 rounded-full">
-                    {member.role}
-                  </span>
-                </div>
-              ))}
-            </div>
+                    <span className="rounded-full bg-muted/50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                      {member.role}
+                    </span>
+                    {(isOwner || isMe || (isAdmin && member.role === "MEMBER")) &&
+                    !(isMe && member.role === "OWNER") ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            className="flex size-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                            aria-label="Member actions"
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="w-44 rounded-2xl border-0 p-1"
+                        >
+                          {isOwner && member.role !== "OWNER" ? (
+                            <>
+                              <DropdownMenuItem
+                                className="rounded-xl text-[13px]"
+                                onClick={() =>
+                                  void runMemberAction(() =>
+                                    updateOrganizationMemberRole({
+                                      organizationId: organization!.id,
+                                      memberUserId: member.user.id,
+                                      role:
+                                        member.role === "ADMIN"
+                                          ? "MEMBER"
+                                          : "ADMIN",
+                                    }),
+                                  )
+                                }
+                              >
+                                Make {member.role === "ADMIN" ? "member" : "admin"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="rounded-xl text-[13px]"
+                                onClick={() =>
+                                  void runMemberAction(() =>
+                                    transferOrganizationOwnership({
+                                      organizationId: organization!.id,
+                                      memberUserId: member.user.id,
+                                    }),
+                                  )
+                                }
+                              >
+                                Transfer ownership
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                            </>
+                          ) : null}
+                          <DropdownMenuItem
+                            className="rounded-xl text-[13px] text-destructive focus:text-destructive"
+                            onClick={() =>
+                              void runMemberAction(async () => {
+                                const res = await removeOrganizationMember({
+                                  organizationId: organization!.id,
+                                  memberUserId: member.user.id,
+                                });
+                                if (res.success && isMe) onOpenChange(false);
+                                return res;
+                              })
+                            }
+                          >
+                            {isMe ? "Leave organization" : "Remove"}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <span className="size-8" />
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           )}
+
+          {pending.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">
+                Pending invites
+              </p>
+              <ul className="space-y-1">
+                {pending.map((invite) => (
+                  <li
+                    key={invite.id}
+                    className="flex items-center gap-3 rounded-2xl px-2 py-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-medium">
+                        {invite.email}
+                      </p>
+                      <p className="text-[12px] text-muted-foreground">
+                        {invite.role.toLowerCase()} · pending
+                      </p>
+                    </div>
+                    {isAdmin ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        disabled={busy}
+                        className="h-8 rounded-full text-[12px]"
+                        onClick={() =>
+                          void runMemberAction(() =>
+                            revokeOrganizationInvite(invite.id),
+                          )
+                        }
+                      >
+                        Revoke
+                      </Button>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {error ? (
+            <p className="text-[13px] text-destructive">{error}</p>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-// --------------------------------------------------------
-// 3. Удаление организации (с подтверждением названия)
-// --------------------------------------------------------
-export function DeleteOrganizationDialog({ open, onOpenChange, organization }: OrgDialogProps) {
+export function DeleteOrganizationDialog({
+  open,
+  onOpenChange,
+  organization,
+}: OrgDialogProps) {
   const queryClient = useQueryClient();
   const [confirmName, setConfirmName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Сброс поля при закрытии
   useEffect(() => {
-    if (!open) setConfirmName("");
+    if (!open) {
+      setConfirmName("");
+      setError(null);
+    }
   }, [open]);
 
   const isOwner = organization?.role === "OWNER";
   const canDelete = confirmName === organization?.name;
 
   const handleDelete = async () => {
-    if (!organization || !canDelete) return;
-    
-    setIsLoading(true);
+    if (!organization || !canDelete || busy) return;
+    setBusy(true);
+    setError(null);
     try {
       const res = await deleteOrganization(organization.id);
-      if (res.success) {
-        queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
-        window.dispatchEvent(new CustomEvent("studio:org-changed"));
-        window.dispatchEvent(new CustomEvent("studio:folders-changed"));
-        window.dispatchEvent(new CustomEvent("core:projects-changed"));
-        onOpenChange(false);
+      if (!res.success) {
+        setError("error" in res ? res.error : "Couldn't delete organization");
+        return;
       }
+      invalidateOrg(queryClient);
+      window.dispatchEvent(new CustomEvent("studio:folders-changed"));
+      window.dispatchEvent(new CustomEvent("core:projects-changed"));
+      onOpenChange(false);
     } finally {
-      setIsLoading(false);
+      setBusy(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-2xl sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="text-destructive">Delete Organization</DialogTitle>
+      <DialogContent
+        className="w-[min(28rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-md"
+        showCloseButton
+      >
+        <DialogHeader className="gap-1 px-5 pt-5 pb-3">
+          <DialogTitle className="text-[17px] font-semibold tracking-tight text-destructive">
+            Delete organization
+          </DialogTitle>
+          <DialogDescription className="text-[13px] leading-relaxed">
+            This permanently removes the organization workspace.
+          </DialogDescription>
         </DialogHeader>
-        <div className="py-4 space-y-4">
+
+        <div className="space-y-4 px-5 pb-5">
           {!isOwner ? (
-            <div className="p-3 bg-muted rounded-xl text-sm">
-              Only the <strong>OWNER</strong> can delete this organization.
-            </div>
+            <p className="rounded-2xl bg-muted/40 px-3.5 py-3 text-[13px] text-muted-foreground">
+              Only the owner can delete this organization.
+            </p>
           ) : (
             <>
-              <p className="text-sm text-muted-foreground">
-                This action cannot be undone. All projects and folders will be permanently deleted.
+              <p className="text-[13px] leading-relaxed text-muted-foreground">
+                Type <span className="font-semibold text-foreground">{organization?.name}</span>{" "}
+                to confirm. Projects stay with their owners, but org membership
+                is removed.
               </p>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Type <span className="font-bold select-all">{organization?.name}</span> to confirm
-                </label>
-                <Input 
-                  value={confirmName} 
-                  onChange={(e) => setConfirmName(e.target.value)} 
-                  className="rounded-full mt-4"
-                  disabled={isLoading}
-                />
-              </div>
+              <input
+                value={confirmName}
+                onChange={(e) => setConfirmName(e.target.value)}
+                disabled={busy}
+                className="h-10 w-full rounded-2xl bg-muted/30 px-3.5 text-[14px] outline-none focus:bg-muted/40 disabled:opacity-60"
+              />
             </>
           )}
+
+          {error ? (
+            <p className="text-[13px] text-destructive">{error}</p>
+          ) : null}
+
+          <DialogFooter className="flex justify-end gap-2 bg-transparent p-0">
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-full"
+              disabled={busy}
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="rounded-full"
+              disabled={!canDelete || !isOwner || busy}
+              onClick={() => void handleDelete()}
+            >
+              {busy ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                "Delete organization"
+              )}
+            </Button>
+          </DialogFooter>
         </div>
-        <DialogFooter className="flex justify-end gap-2 bg-transparent">
-          <Button variant="outline" className="rounded-full" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button 
-            variant="destructive" 
-            disabled={!canDelete || !isOwner || isLoading} 
-            onClick={handleDelete}
-            className="rounded-full"
-          >
-            {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-            Delete Organization
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -23,6 +23,7 @@ export interface NotificationItem {
   id: string;
   title: string;
   body: string;
+  href: string | null;
   createdAt: string;
   read: boolean;
 }
@@ -164,6 +165,7 @@ export async function listMyNotifications(): Promise<
       id: row.id,
       title: row.title,
       body: row.body,
+      href: row.href ?? null,
       createdAt: row.createdAt.toISOString(),
       read: row.readAt != null,
     }));

@@ -41,6 +41,25 @@ enum BillingPaymentKind {
   REFUND
 }
 
+enum ArtifactKind {
+  TEXT
+  PALETTE
+  CAROUSEL
+}
+
+enum ArtifactStatus {
+  DRAFT
+  READY
+  FAILED
+}
+
+enum OrganizationInviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -64,8 +83,10 @@ model User {
   activeOrganization   Organization? @relation("UserActiveOrganization", fields: [activeOrganizationId], references: [id], onDelete: SetNull)
 
   projects        Project[]
+  artifacts       Artifact[]
   folders         Folder[]
   memberships     OrganizationMember[]
+  sentInvites     OrganizationInvite[] @relation("OrganizationInviteSender")
   savedProjects   SavedProject[]
   authTokens      AuthToken[]
   templates       Template[]
@@ -108,9 +129,33 @@ model Organization {
   updatedAt DateTime @updatedAt
 
   members        OrganizationMember[]
+  invites        OrganizationInvite[]
   folders        Folder[]
   projects       Project[]
+  artifacts      Artifact[]
   activeForUsers User[]               @relation("UserActiveOrganization")
+}
+
+/// Email or open-link invite to join an organization.
+model OrganizationInvite {
+  id        String                   @id @default(cuid())
+  token     String                   @unique
+  /// Null = reusable open invite link for the organization.
+  email     String?
+  role      OrgMemberRole            @default(MEMBER)
+  status    OrganizationInviteStatus @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime                 @default(now())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  invitedById String
+  invitedBy   User   @relation("OrganizationInviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([email, status])
+  @@index([expiresAt])
 }
 
 /// Saved card for recurring Pro billing. PAN/CVV are never stored — only token + display fields.
@@ -186,7 +231,8 @@ model Folder {
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  projects Project[]
+  projects  Project[]
+  artifacts Artifact[]
 
   @@index([userId])
   @@index([userId, updatedAt])
@@ -217,6 +263,8 @@ model Project {
   canvasJSON  Json
   thumbnail  String? @db.Text
   isPublic    Boolean  @default(false)
+  /// Caption for social preview / posting.
+  postCaption String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -229,13 +277,68 @@ model Project {
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 
-  slides  Slide[]
-  savedBy SavedProject[]
+  slides       Slide[]
+  savedBy      SavedProject[]
+  artifact     Artifact?
+  annotations  ProjectAnnotation[]
 
   @@index([userId])
   @@index([userId, updatedAt])
   @@index([folderId])
   @@index([organizationId])
+}
+
+/// Studio generation artifact (text posts today; palette later). Carousels link to Project.
+model Artifact {
+  id        String         @id @default(cuid())
+  kind      ArtifactKind
+  title     String
+  prompt    String?        @db.Text
+  payload   Json
+  thumbnail String?        @db.Text
+  status    ArtifactStatus @default(READY)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  parentId String?
+  parent   Artifact?  @relation("ArtifactLineage", fields: [parentId], references: [id], onDelete: SetNull)
+  children Artifact[] @relation("ArtifactLineage")
+
+  projectId String?  @unique
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  folderId String?
+  folder   Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, kind, updatedAt])
+  @@index([userId, updatedAt])
+  @@index([organizationId])
+  @@index([parentId])
+  @@index([folderId])
+}
+
+/// Personal review notes pinned to a slide (not collaborative threads).
+model ProjectAnnotation {
+  id         String   @id @default(cuid())
+  slideIndex Int      @default(0)
+  x          Float?
+  y          Float?
+  body       String   @db.Text
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, slideIndex])
+  @@index([projectId, createdAt])
 }
 
 /// One Fabric canvas snapshot in a carousel project.
@@ -289,6 +392,8 @@ model Notification {
   id        String    @id @default(cuid())
   title     String
   body      String    @db.Text
+  /// Optional deep link (e.g. /invite/token) shown as a CTA in the inbox.
+  href      String?
   readAt    DateTime?
   createdAt DateTime  @default(now())
 

@@ -52,9 +52,10 @@ interface HeaderProps {
   onPreview?: () => void;
   onPhonePreview?: () => void;
   onFocus?: () => void;
+  onReview?: () => void;
 }
 
-export function Header({ onPreview, onFocus }: HeaderProps) {
+export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
@@ -188,6 +189,16 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             >
               <Play className="size-4" />
               <span className="hidden sm:inline">Preview</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onReview}
+              className={cn(labelBtn, "text-muted-foreground hover:bg-background hover:text-foreground")}
+              title="Review notes and caption"
+            >
+              <MessageSquareText className="size-4" />
+              <span className="hidden sm:inline">Review</span>
             </Button>
             <Button
               variant="ghost"

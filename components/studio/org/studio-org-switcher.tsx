@@ -184,7 +184,7 @@ export function StudioOrgSwitcher({
                   </p>
                 </div>
                 
-                {isAdmin && (
+                {active ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
@@ -195,35 +195,41 @@ export function StudioOrgSwitcher({
                         <MoreHorizontal className="size-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      align="end" 
-                      className="w-48 rounded-2xl p-1 shadow-md"
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-48 rounded-2xl border-0 p-1"
                     >
-                      <DropdownMenuItem 
-                        onClick={() => setIsEditAvatarOpen(true)}
-                        className="gap-2.5 rounded-xl cursor-pointer py-2 text-[13px]"
-                      >
-                        <Palette className="size-4 text-muted-foreground" />
-                        Edit Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      {isAdmin ? (
+                        <DropdownMenuItem
+                          onClick={() => setIsEditAvatarOpen(true)}
+                          className="cursor-pointer gap-2.5 rounded-xl py-2 text-[13px]"
+                        >
+                          <Palette className="size-4 text-muted-foreground" />
+                          Edit organization
+                        </DropdownMenuItem>
+                      ) : null}
+                      <DropdownMenuItem
                         onClick={() => setIsMembersOpen(true)}
-                        className="gap-2.5 rounded-xl cursor-pointer py-2 text-[13px]"
+                        className="cursor-pointer gap-2.5 rounded-xl py-2 text-[13px]"
                       >
                         <Users className="size-4 text-muted-foreground" />
-                        Manage Members
+                        Manage members
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => setIsDeleteOpen(true)}
-                        className="gap-2.5 rounded-xl cursor-pointer py-2 text-[13px] text-destructive focus:text-destructive focus:bg-destructive/10"
-                      >
-                        <Trash2 className="size-4" />
-                        Delete Organization
-                      </DropdownMenuItem>
+                      {active.role === "OWNER" ? (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => setIsDeleteOpen(true)}
+                            className="cursor-pointer gap-2.5 rounded-xl py-2 text-[13px] text-destructive focus:bg-destructive/10 focus:text-destructive"
+                          >
+                            <Trash2 className="size-4" />
+                            Delete organization
+                          </DropdownMenuItem>
+                        </>
+                      ) : null}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                )}
+                ) : null}
               </div>
             ) : null}
 

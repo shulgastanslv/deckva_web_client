@@ -10,6 +10,11 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 import {
+  canAccessOrgResource,
+  canManageOrgResource,
+  userOrganizationIds,
+} from "@/lib/studio/org-access";
+import {
   FREE_CAROUSEL_LIMIT,
   freeCarouselLimitMessage,
 } from "@/lib/studio/plans";
@@ -44,6 +49,7 @@ export interface ProjectDetail {
   updatedAt: string;
   slides: SlideItem[];
   document: DocumentMeta;
+  postCaption: string | null;
 }
 
 export interface SaveProjectInput {
@@ -56,6 +62,7 @@ export interface SaveProjectInput {
     thumbnail?: string | null;
   }>;
   document?: DocumentMeta;
+  postCaption?: string | null;
 }
 
 type ActionResult<T extends object = object> =
@@ -131,10 +138,12 @@ export async function getUserProjects(options?: {
     const org = await ensureUserOrganization();
     const organizationId = org.success ? org.organization.id : null;
 
+    // Shared workspace: every org member sees org projects, not only their own.
     const rawProjects = await prisma.project.findMany({
       where: {
-        userId,
-        ...(organizationId ? { organizationId } : {}),
+        ...(organizationId
+          ? { organizationId }
+          : { userId }),
         ...(options?.folderId ? { folderId: options.folderId } : {}),
       },
       orderBy: { updatedAt: "desc" },
@@ -236,6 +245,7 @@ export async function createProject(input?: {
         updatedAt: project.updatedAt.toISOString(),
         slides: mapSlidesForClient(project.slides),
         document: readStoredDocument(project.canvasJSON),
+        postCaption: project.postCaption ?? null,
       },
     };
   } catch (err) {
@@ -251,12 +261,14 @@ export async function getProjectById(
     const userId = await requireUserId();
     if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
+    const orgIds = userId ? await userOrganizationIds(userId) : [];
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
         OR: [
           ...(userId ? [{ userId }] : []),
           { isPublic: true },
+          ...(orgIds.length > 0 ? [{ organizationId: { in: orgIds } }] : []),
         ],
       },
       include: {
@@ -284,6 +296,7 @@ export async function getProjectById(
           project.thumbnail,
         ),
         document: readStoredDocument(project.canvasJSON),
+        postCaption: project.postCaption ?? null,
       },
     };
   } catch (err) {
@@ -377,10 +390,15 @@ export async function saveProject(
     }
 
     const existing = await prisma.project.findFirst({
-      where: { id: projectId, userId },
-      select: { id: true },
+      where: { id: projectId },
+      select: { id: true, userId: true, organizationId: true },
     });
-    if (!existing) return { success: false, error: messages.errors.projectNotFound };
+    if (
+      !existing ||
+      !(await canAccessOrgResource(userId, existing))
+    ) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
 
     const dims =
       CANVAS_RATIOS[input.aspectRatio] ??
@@ -405,6 +423,9 @@ export async function saveProject(
           aspectRatio: input.aspectRatio,
           width: dims.width,
           height: dims.height,
+          ...(input.postCaption !== undefined
+            ? { postCaption: input.postCaption?.trim() || null }
+            : {}),
           ...projectSnapshot(input.slides, input.document),
         },
         select: { updatedAt: true },
@@ -434,13 +455,18 @@ export async function saveAsNewProject(
       CANVAS_RATIOS[input.aspectRatio] ??
       ({ width: input.width, height: input.height } as const);
 
+    const org = await ensureUserOrganization();
+    const organizationId = org.success ? org.organization.id : null;
+
     const project = await prisma.project.create({
       data: {
         userId,
+        organizationId,
         title: input.title.trim() || "Untitled Carousel",
         aspectRatio: input.aspectRatio,
         width: dims.width,
         height: dims.height,
+        postCaption: input.postCaption?.trim() || null,
         ...projectSnapshot(input.slides, input.document),
         slides: {
           create: input.slides.map((slide, order) => ({
@@ -478,8 +504,16 @@ export async function saveProjectThumbnails(
       return { success: false, error: messages.errors.slideRequired };
     }
 
+    const access = await prisma.project.findFirst({
+      where: { id: projectId },
+      select: { userId: true, organizationId: true },
+    });
+    if (!access || !(await canAccessOrgResource(userId, access))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
     const project = await prisma.project.findFirst({
-      where: { id: projectId, userId },
+      where: { id: projectId },
       select: {
         thumbnail: true,
         updatedAt: true,
@@ -535,12 +569,18 @@ export async function updateProjectTitle(
     if (!userId) return { success: false, error: messages.errors.signIn };
     if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
-    const result = await prisma.project.updateMany({
-      where: { id: projectId, userId },
+    const existing = await prisma.project.findFirst({
+      where: { id: projectId },
+      select: { id: true, userId: true, organizationId: true },
+    });
+    if (!existing || !(await canAccessOrgResource(userId, existing))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    await prisma.project.update({
+      where: { id: projectId },
       data: { title: title.trim() || "Untitled Carousel" },
     });
-
-    if (result.count === 0) return { success: false, error: messages.errors.projectNotFound };
     return { success: true };
   } catch {
     return { success: false, error: messages.errors.renameProject };
@@ -555,10 +595,17 @@ export async function duplicateProject(
     if (!userId) return { success: false, error: messages.errors.signIn };
 
     const project = await prisma.project.findFirst({
-      where: { id: projectId, userId },
+      where: { id: projectId },
       include: { slides: { orderBy: { order: "asc" } } },
     });
-    if (!project) return { success: false, error: messages.errors.projectNotFound };
+    if (!project || !(await canAccessOrgResource(userId, project))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    const org = await ensureUserOrganization();
+    const organizationId = org.success
+      ? org.organization.id
+      : project.organizationId;
 
     const copy = await prisma.project.create({
       data: {
@@ -570,6 +617,7 @@ export async function duplicateProject(
         thumbnail: project.thumbnail,
         isPublic: false,
         userId,
+        organizationId,
         slides: {
           create: project.slides.map((slide) => ({
             order: slide.order,
@@ -620,11 +668,15 @@ export async function deleteProject(projectId: string): Promise<ActionResult<obj
     if (!userId) return { success: false, error: messages.errors.signIn };
     if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
-    const result = await prisma.project.deleteMany({
-      where: { id: projectId, userId },
+    const existing = await prisma.project.findFirst({
+      where: { id: projectId },
+      select: { id: true, userId: true, organizationId: true },
     });
+    if (!existing || !(await canManageOrgResource(userId, existing))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
 
-    if (result.count === 0) return { success: false, error: messages.errors.projectNotFound };
+    await prisma.project.delete({ where: { id: projectId } });
     revalidatePath("/");
     return { success: true };
   } catch {

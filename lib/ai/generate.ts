@@ -1,6 +1,10 @@
+import { fetchAiJson, aiBaseUrl } from "@/lib/ai/client";
+import { parseAiPalette, type AiPalette } from "@/lib/ai/generate-palette";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
 import { isRatioKey } from "@/lib/templates/parse";
+
+export { aiBaseUrl };
 
 export type GenerateCarouselInput = {
   topic: string;
@@ -17,14 +21,10 @@ export type GenerateCarouselResult = {
   width: number;
   height: number;
   slides: FabricCanvasJSON[];
+  palette?: AiPalette;
 };
 
-const DEFAULT_AI_URL = "http://127.0.0.1:9000";
 const TIMEOUT_MS = 180_000;
-
-export function aiBaseUrl() {
-  return (process.env.DECKVA_AI_URL?.trim() || DEFAULT_AI_URL).replace(/\/$/, "");
-}
 
 function isFabricSlide(value: unknown): value is FabricCanvasJSON {
   return (
@@ -49,67 +49,32 @@ export async function generateCarouselUpstream(
   const handle = normalizeHandle(input.handle);
   const cover = input.cover ?? "";
 
-  const url = `${aiBaseUrl()}/generate`;
-  let upstream: Response;
-  try {
-    upstream = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        topic,
-        aspect_ratio: aspectRatio,
-        slides_count: slidesCount,
-        language,
-        handle,
-        cover,
-        save: false,
-      }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-  } catch (err) {
-    const timedOut =
-      err instanceof Error &&
-      (err.name === "TimeoutError" || err.name === "AbortError");
-    throw new Error(
-      timedOut
-        ? "Carousel generation timed out"
-        : "Couldn't reach the Deckva AI server",
-    );
-  }
+  const payload = (await fetchAiJson(
+    "/generate",
+    {
+      topic,
+      aspect_ratio: aspectRatio,
+      slides_count: slidesCount,
+      language,
+      handle,
+      cover,
+      save: false,
+    },
+    { timeoutMs: TIMEOUT_MS, label: "Carousel generation" },
+  )) as Record<string, unknown>;
 
-  const payload: unknown = await upstream.json().catch(() => null);
-  if (!upstream.ok) {
-    const detail =
-      payload &&
-      typeof payload === "object" &&
-      typeof (payload as { detail?: unknown }).detail === "string"
-        ? (payload as { detail: string }).detail
-        : payload &&
-            typeof payload === "object" &&
-            typeof (payload as { error?: unknown }).error === "string"
-          ? (payload as { error: string }).error
-          : `Generation failed (${upstream.status})`;
-    throw new Error(detail);
-  }
-
-  if (!payload || typeof payload !== "object") {
-    throw new Error("AI returned an empty response");
-  }
-
-  const row = payload as Record<string, unknown>;
   const carousel =
-    row.carousel && typeof row.carousel === "object"
-      ? (row.carousel as Record<string, unknown>)
-      : row;
+    payload.carousel && typeof payload.carousel === "object"
+      ? (payload.carousel as Record<string, unknown>)
+      : payload;
 
   const title =
-    (typeof row.title === "string" && row.title.trim()) ||
+    (typeof payload.title === "string" && payload.title.trim()) ||
     (typeof carousel.title === "string" && carousel.title.trim()) ||
     topic.slice(0, 80);
 
   const ratioRaw =
-    (typeof row.aspectRatio === "string" && row.aspectRatio) ||
+    (typeof payload.aspectRatio === "string" && payload.aspectRatio) ||
     (typeof carousel.aspectRatio === "string" && carousel.aspectRatio) ||
     aspectRatio;
   const ratio: RatioKey = isRatioKey(ratioRaw) ? ratioRaw : aspectRatio;
@@ -121,17 +86,24 @@ export async function generateCarouselUpstream(
   }
 
   const width =
-    typeof row.width === "number"
-      ? row.width
+    typeof payload.width === "number"
+      ? payload.width
       : typeof carousel.width === "number"
         ? carousel.width
         : 1080;
   const height =
-    typeof row.height === "number"
-      ? row.height
+    typeof payload.height === "number"
+      ? payload.height
       : typeof carousel.height === "number"
         ? carousel.height
         : 1350;
 
-  return { title, aspectRatio: ratio, width, height, slides };
+  let palette: AiPalette | undefined;
+  try {
+    if (payload.palette) palette = parseAiPalette(payload.palette);
+  } catch {
+    palette = undefined;
+  }
+
+  return { title, aspectRatio: ratio, width, height, slides, palette };
 }

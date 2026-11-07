@@ -74,6 +74,19 @@ function ReadModal({
           <div className="prose prose-sm dark:prose-invert max-w-none text-neutral-700 dark:text-neutral-300">
             <ReactMarkdown>{item?.body || ""}</ReactMarkdown>
           </div>
+          {item?.href ? (
+            <div className="mt-6">
+              <Button
+                type="button"
+                className="h-10 rounded-full px-5 text-[13px] font-medium"
+                onClick={() => {
+                  window.location.href = item.href!;
+                }}
+              >
+                Open invite
+              </Button>
+            </div>
+          ) : null}
         </ScrollArea>
       </DialogContent>
     </Dialog>
@@ -215,8 +228,22 @@ function NotificationsPanel({
                   </div>
                   
                   <p className="mt-1 text-[12px] leading-relaxed text-neutral-500 line-clamp-2 dark:text-muted-foreground">
-                    {item.body}
+                    {item.body.replace(/\*\*/g, "")}
                   </p>
+
+                  {item.href ? (
+                    <div className="mt-3">
+                      <Button
+                        type="button"
+                        className="h-8 rounded-full px-3 text-[12px] font-medium"
+                        onClick={() => {
+                          window.location.href = item.href!;
+                        }}
+                      >
+                        Open invite
+                      </Button>
+                    </div>
+                  ) : null}
 
                   {/* Кнопки действий */}
                   <div className="mt-3 flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
