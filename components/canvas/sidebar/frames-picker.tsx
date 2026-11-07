@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { RectangleHorizontal, RectangleVertical } from "lucide-react";
+import {
+  ChevronsUpDown,
+  Ellipsis,
+  RectangleHorizontal,
+  RectangleVertical,
+} from "lucide-react";
 
 import { ColorPicker } from "@/components/ui/color-picker";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import type { FrameKind } from "@/lib/canvas/frames";
 import {
   FRAME_LAYOUT_PRESETS,
@@ -19,7 +29,6 @@ import {
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
 import { FRAME_ITEMS } from "@/components/canvas/use-element-library";
-import { SidebarSearchSelect } from "@/components/canvas/sidebar/sidebar-search-select";
 
 type FrameItem = (typeof FRAME_ITEMS)[number];
 type FrameFamily = FrameLayoutPreset["family"];
@@ -32,14 +41,6 @@ export type FramePlaceOptions = {
   color: string;
   fit: FrameFitMode;
 };
-
-const FAMILIES: { id: FrameFamily | "all"; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "phone", label: "Phone" },
-  { id: "tablet", label: "Tablet" },
-  { id: "desktop", label: "Desktop" },
-  { id: "watch", label: "Watch" },
-];
 
 const CHECKER_STYLE = {
   backgroundColor: "#ffffff",
@@ -56,13 +57,13 @@ const CHECKER_STYLE = {
 function previewSize(family: FrameFamily) {
   switch (family) {
     case "desktop":
-      return { maxWidth: "88%", maxHeight: "58%" };
+      return { maxWidth: "78%", maxHeight: "52%" };
     case "tablet":
-      return { maxWidth: "70%", maxHeight: "70%" };
+      return { maxWidth: "62%", maxHeight: "62%" };
     case "watch":
-      return { maxWidth: "42%", maxHeight: "56%" };
+      return { maxWidth: "36%", maxHeight: "48%" };
     default:
-      return { maxWidth: "38%", maxHeight: "84%" };
+      return { maxWidth: "34%", maxHeight: "72%" };
   }
 }
 
@@ -100,18 +101,18 @@ function LayoutCard({
       onClick={onSelect}
       title={layout.label}
       className={cn(
-        "group relative block aspect-[4/3] w-full min-w-0 overflow-hidden rounded-2xl text-left transition-colors",
+        "group relative mx-1 block aspect-[5/4] w-[calc(100%-0.5rem)] min-w-0 overflow-hidden rounded-[1.35rem] text-left transition-[box-shadow,background-color]",
         active
-          ? "bg-muted ring-2 ring-ring"
-          : "bg-muted/45 hover:bg-muted dark:bg-muted/20 dark:hover:bg-muted/35",
+          ? "ring-2 ring-ring ring-offset-2 ring-offset-background"
+          : "hover:brightness-[0.98] dark:hover:brightness-110",
       )}
       style={clear ? CHECKER_STYLE : { backgroundColor: background }}
     >
       {!clear && light ? (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(0,0,0,0.05)_0%,transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(0,0,0,0.04)_0%,transparent_45%),radial-gradient(circle_at_85%_80%,rgba(0,0,0,0.035)_0%,transparent_40%)]" />
       ) : null}
       {!clear && !light ? (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.07)_0%,transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.08)_0%,transparent_45%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.05)_0%,transparent_40%)]" />
       ) : null}
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -119,7 +120,7 @@ function LayoutCard({
         src={frame.src}
         alt=""
         draggable={false}
-        className="pointer-events-none absolute object-contain"
+        className="pointer-events-none absolute object-contain drop-shadow-sm"
         style={{
           left: `${layout.x * 100}%`,
           top: `${layout.y * 100}%`,
@@ -131,9 +132,6 @@ function LayoutCard({
           transformOrigin: "center center",
         }}
       />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-2 pb-1.5 pt-5 text-[11px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-        {layout.label}
-      </span>
       <span className="sr-only">{layout.label}</span>
     </button>
   );
@@ -141,7 +139,7 @@ function LayoutCard({
 
 export function FramesPicker({
   disabled,
-  search = "",
+  search: externalSearch = "",
   onPlace,
   onBackground,
 }: {
@@ -155,13 +153,12 @@ export function FramesPicker({
   onBackground?: (color: string) => void;
 }) {
   const projectPalette = useCanvasStore((s) => s.palette);
-  // Default kit on first paint so SSR/client match; hydrate from localStorage after mount.
   const [brandKit, setBrandKit] = useState(defaultBrandKit);
-  const [familyFilter, setFamilyFilter] = useState<FrameFamily | "all">("phone");
   const [selectedKind, setSelectedKind] = useState<FrameKind>("iphone18pro");
   const [layoutId, setLayoutId] = useState(FRAME_LAYOUT_PRESETS[0]!.id);
   const [bgColor, setBgColor] = useState("#ffffff");
   const [orientation, setOrientation] = useState<FrameOrientation>("portrait");
+  const [deviceOpen, setDeviceOpen] = useState(false);
   const fit: FrameFitMode = "max";
 
   useEffect(() => {
@@ -175,15 +172,14 @@ export function FramesPicker({
     };
   }, []);
 
-  const brandSwatches = useMemo(() => {
-    const kit = brandKit.palette;
-    const project = projectPalette;
+  const footerSwatches = useMemo(() => {
     const list = [
-      { id: "kit-bg", color: kit.background, label: "Brand background" },
-      { id: "kit-accent", color: kit.accent, label: "Brand accent" },
-      { id: "kit-card", color: kit.card, label: "Brand card" },
-      { id: "project-bg", color: project.background, label: "Project background" },
-      { id: "project-accent", color: project.accent, label: "Project accent" },
+      { id: "white", color: "#ffffff", label: "White" },
+      {
+        id: "accent",
+        color: brandKit.palette.accent || projectPalette.accent || "#1e3a5f",
+        label: "Accent",
+      },
     ];
     const seen = new Set<string>();
     return list.filter((item) => {
@@ -194,10 +190,10 @@ export function FramesPicker({
     });
   }, [brandKit, projectPalette]);
 
-  const searchableItems = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return FRAME_ITEMS;
+  const devices = useMemo(() => {
+    const q = externalSearch.trim().toLowerCase();
     return FRAME_ITEMS.filter((item) => {
+      if (!q) return true;
       const family = frameFamilyForKind(item.kind);
       return (
         item.label.toLowerCase().includes(q) ||
@@ -205,50 +201,18 @@ export function FramesPicker({
         family.includes(q)
       );
     });
-  }, [search]);
-
-  const visibleItems = useMemo(() => {
-    if (familyFilter === "all") return searchableItems;
-    return searchableItems.filter(
-      (item) => frameFamilyForKind(item.kind) === familyFilter,
-    );
-  }, [searchableItems, familyFilter]);
+  }, [externalSearch]);
 
   useEffect(() => {
-    if (visibleItems.some((item) => item.kind === selectedKind)) return;
-    const next = visibleItems[0];
+    if (devices.some((item) => item.kind === selectedKind)) return;
+    const next = devices[0];
     if (next) setSelectedKind(next.kind as FrameKind);
-  }, [visibleItems, selectedKind]);
+  }, [devices, selectedKind]);
 
   const selectedFrame =
     FRAME_ITEMS.find((item) => item.kind === selectedKind) ?? FRAME_ITEMS[0]!;
   const family = frameFamilyForKind(selectedKind);
-
-  const deviceOptions = useMemo(
-    () =>
-      searchableItems.map((item) => {
-        const itemFamily = frameFamilyForKind(item.kind);
-        const size = getDeviceScreenSize(item.kind as FrameKind);
-        return {
-          value: item.kind,
-          label: item.label,
-          description: `${size.width}×${size.height}`,
-          group: itemFamily,
-          keywords: `${item.kind} ${itemFamily}`,
-          leading: (
-            <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-background/70 dark:bg-background/25">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.src}
-                alt=""
-                className="max-h-7 max-w-7 object-contain"
-              />
-            </span>
-          ),
-        };
-      }),
-    [searchableItems],
-  );
+  const selectedSize = getDeviceScreenSize(selectedKind);
 
   const layoutPresets = useMemo(() => {
     const matched = FRAME_LAYOUT_PRESETS.filter((p) => p.family === family);
@@ -276,109 +240,184 @@ export function FramesPicker({
   };
 
   return (
-    <div className="flex w-full min-w-0 max-w-full flex-col gap-3 overflow-x-hidden text-[14px]">
-      <div className="flex min-w-0 items-center gap-2">
-        <SidebarSearchSelect
-          label="Device"
-          value={selectedKind}
-          options={deviceOptions}
-          disabled={disabled || searchableItems.length === 0}
-          onValueChange={(next) => setSelectedKind(next as FrameKind)}
-          placeholder="Choose device"
-          searchPlaceholder="Search devices…"
-          emptyText="No devices found"
-          filters={FAMILIES}
-          filterValue={familyFilter}
-          onFilterChange={(id) => setFamilyFilter(id as FrameFamily | "all")}
-          filterAriaLabel="Device families"
-          className="min-w-0 flex-1"
-          triggerClassName="rounded-2xl px-2.5"
-        />
+    <div className="flex w-full min-w-0 max-w-full flex-col gap-3 overflow-x-hidden">
+      <Popover open={deviceOpen} onOpenChange={setDeviceOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            disabled={disabled || devices.length === 0}
+            className="flex h-12 w-full min-w-0 items-center gap-2.5 rounded-2xl bg-muted/60 px-2.5 text-left transition-colors hover:bg-muted disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45"
+          >
+            <span className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-background/80 dark:bg-background/35">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={selectedFrame.src}
+                alt=""
+                className="max-h-6 max-w-6 object-contain"
+              />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[13px] font-medium text-foreground">
+                {selectedFrame.label}
+              </span>
+              <span className="block text-[11px] tabular-nums text-muted-foreground">
+                {selectedSize.width} × {selectedSize.height}
+              </span>
+            </span>
+            <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
+          </button>
+        </PopoverTrigger>
 
-        <div
-          role="group"
-          aria-label="Orientation"
-          className="flex h-11 shrink-0 items-center rounded-2xl bg-muted/55 p-1 dark:bg-muted/25"
+        <PopoverContent
+          align="start"
+          sideOffset={8}
+          collisionPadding={12}
+          className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] border-0 bg-popover p-0"
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <button
-            type="button"
-            title="Portrait"
-            aria-pressed={orientation === "portrait"}
-            onClick={() => setOrientation("portrait")}
-            className={cn(
-              "flex size-9 items-center justify-center rounded-xl transition-colors",
-              orientation === "portrait"
-                ? "bg-background text-foreground"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <RectangleVertical className="size-3.5" />
-          </button>
-          <button
-            type="button"
-            title="Landscape"
-            aria-pressed={orientation === "landscape"}
-            onClick={() => setOrientation("landscape")}
-            className={cn(
-              "flex size-9 items-center justify-center rounded-xl transition-colors",
-              orientation === "landscape"
-                ? "bg-background text-foreground"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <RectangleHorizontal className="size-3.5" />
-          </button>
-        </div>
-      </div>
+          <div className="max-h-[min(22rem,50vh)] overflow-y-auto overscroll-contain px-2.5 pt-2.5 pb-2 [scrollbar-width:thin]">
+            <div className="grid grid-cols-3 gap-1.5">
+              {devices.map((item) => {
+                const active = item.kind === selectedKind;
+                const size = getDeviceScreenSize(item.kind as FrameKind);
+                return (
+                  <button
+                    key={item.kind}
+                    type="button"
+                    title={item.label}
+                    onClick={() => {
+                      setSelectedKind(item.kind as FrameKind);
+                      setDeviceOpen(false);
+                    }}
+                    className={cn(
+                      "flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1.5 py-2.5 text-center transition-colors",
+                      active
+                        ? "bg-muted ring-2 ring-ring"
+                        : "hover:bg-muted/60 dark:hover:bg-muted/35",
+                    )}
+                  >
+                    <span className="flex h-16 w-full items-center justify-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.src}
+                        alt=""
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </span>
+                    <span className="w-full truncate text-[11px] font-medium leading-tight text-foreground">
+                      {item.label}
+                    </span>
+                    <span className="w-full truncate text-[10px] tabular-nums text-muted-foreground">
+                      {size.width} × {size.height}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {devices.length === 0 ? (
+              <p className="px-2 py-10 text-center text-[13px] text-muted-foreground">
+                No devices found
+              </p>
+            ) : null}
+          </div>
 
-      <div
-        role="group"
-        aria-label="Background color"
-        className="flex min-w-0 flex-wrap items-center gap-1.5"
-      >
-        {brandSwatches.map((swatch) => {
-          const active = bgColor.toLowerCase() === swatch.color.toLowerCase();
-          return (
+          <div className="flex items-center gap-2 border-t border-border/40 px-3 py-2.5">
+            <div
+              role="group"
+              aria-label="Background color"
+              className="flex min-w-0 flex-1 items-center gap-1.5"
+            >
+              {footerSwatches.map((swatch) => {
+                const active =
+                  bgColor.toLowerCase() === swatch.color.toLowerCase();
+                return (
+                  <button
+                    key={swatch.id}
+                    type="button"
+                    title={swatch.label}
+                    aria-label={swatch.label}
+                    aria-pressed={active}
+                    disabled={disabled}
+                    onClick={() => applyColor(swatch.color)}
+                    className={cn(
+                      "size-6 shrink-0 rounded-full ring-offset-1 ring-offset-popover disabled:opacity-40",
+                      active && "ring-2 ring-ring",
+                    )}
+                    style={{ backgroundColor: swatch.color }}
+                  />
+                );
+              })}
+              <button
+                type="button"
+                title="Transparent"
+                aria-label="Transparent background"
+                aria-pressed={bgColor === "transparent"}
+                disabled={disabled}
+                onClick={() => applyColor("transparent")}
+                className={cn(
+                  "size-6 shrink-0 rounded-full ring-offset-1 ring-offset-popover disabled:opacity-40",
+                  bgColor === "transparent" && "ring-2 ring-ring",
+                )}
+                style={CHECKER_STYLE}
+              />
+              <ColorPicker
+                compact
+                disabled={disabled}
+                value={bgColor === "transparent" ? "#ffffff" : bgColor}
+                onChange={applyColor}
+                title="Custom color"
+                className="[&_button]:size-6"
+              />
+            </div>
+
+            <div
+              role="group"
+              aria-label="Orientation"
+              className="flex h-8 shrink-0 items-center rounded-full bg-muted/50 p-0.5 dark:bg-muted/30"
+            >
+              <button
+                type="button"
+                title="Portrait"
+                aria-pressed={orientation === "portrait"}
+                onClick={() => setOrientation("portrait")}
+                className={cn(
+                  "flex size-7 items-center justify-center rounded-full transition-colors",
+                  orientation === "portrait"
+                    ? "bg-background text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <RectangleVertical className="size-3.5" />
+              </button>
+              <button
+                type="button"
+                title="Landscape"
+                aria-pressed={orientation === "landscape"}
+                onClick={() => setOrientation("landscape")}
+                className={cn(
+                  "flex size-7 items-center justify-center rounded-full transition-colors",
+                  orientation === "landscape"
+                    ? "bg-background text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <RectangleHorizontal className="size-3.5" />
+              </button>
+            </div>
+
             <button
-              key={swatch.id}
               type="button"
-              title={swatch.label}
-              aria-label={swatch.label}
-              aria-pressed={active}
-              disabled={disabled}
-              onClick={() => applyColor(swatch.color)}
-              className={cn(
-                "size-6 shrink-0 rounded-full ring-offset-1 ring-offset-background disabled:opacity-40",
-                active && "ring-2 ring-foreground/70",
-              )}
-              style={{ backgroundColor: swatch.color }}
-            />
-          );
-        })}
-        <button
-          type="button"
-          title="Transparent"
-          aria-label="Transparent background"
-          aria-pressed={bgColor === "transparent"}
-          disabled={disabled}
-          onClick={() => applyColor("transparent")}
-          className={cn(
-            "size-6 shrink-0 rounded-full ring-offset-1 ring-offset-background disabled:opacity-40",
-            bgColor === "transparent" && "ring-2 ring-foreground/70",
-          )}
-          style={CHECKER_STYLE}
-        />
-        <ColorPicker
-          compact
-          disabled={disabled}
-          value={bgColor === "transparent" ? "#ffffff" : bgColor}
-          onChange={applyColor}
-          title="Custom color"
-          className="[&_button]:size-6"
-        />
-      </div>
+              title="More"
+              aria-label="More options"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Ellipsis className="size-3.5" />
+            </button>
+          </div>
+        </PopoverContent>
+      </Popover>
 
-      <div className="grid w-full gap-2">
+      <div className="flex w-full flex-col gap-2.5">
         {layoutPresets.map((layout) => (
           <LayoutCard
             key={layout.id}

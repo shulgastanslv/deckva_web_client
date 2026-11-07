@@ -97,6 +97,7 @@ import type { TextStyles } from "@/lib/canvas/text-flow";
 import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { InspectorAssets } from "@/components/canvas/inspector-assets";
+import { ObjectTransformPanel } from "@/components/canvas/object-transform-panel";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 
 type TextAlign = "left" | "center" | "right" | "justify";
@@ -963,6 +964,18 @@ export function RightSidebar({
         <ScrollArea className="min-h-0 flex-1">
           {isMulti ? (
             <div className="flex flex-col gap-1 pb-6 pt-2">
+              {selectedObject && canvas && formValues ? (
+                <div className="px-3 pb-2 pt-1">
+                  <ObjectTransformPanel
+                    object={selectedObject}
+                    canvas={canvas}
+                    onCommit={() => manager?.commit()}
+                    onFormSync={(patch) =>
+                      setFormValues((prev) => (prev ? { ...prev, ...patch } : null))
+                    }
+                  />
+                </div>
+              ) : null}
               <div className="space-y-3 px-3 pb-2">
                 <div className="space-y-2">
                   <FieldLabel>Align</FieldLabel>
@@ -1156,9 +1169,30 @@ export function RightSidebar({
             </div>
           ) : !formValues ? null : (
             <div className="flex flex-col gap-1 pb-4 pt-1">
+              {selectedObject && canvas && formValues ? (
+                <div className="px-3 pb-2 pt-1">
+                  <ObjectTransformPanel
+                    object={
+                      selectedObject.type === "activeselection"
+                        ? ((
+                            selectedObject as FabricObject & {
+                              getObjects: () => FabricObject[];
+                            }
+                          ).getObjects()[0] ?? selectedObject)
+                        : selectedObject
+                    }
+                    canvas={canvas}
+                    onCommit={() => manager?.commit()}
+                    onFormSync={(patch) =>
+                      setFormValues((prev) => (prev ? { ...prev, ...patch } : null))
+                    }
+                  />
+                </div>
+              ) : null}
+
               <div className="space-y-2 px-3 pb-2">
                 <div className="space-y-1.5">
-                  <FieldLabel>Position</FieldLabel>
+                  <FieldLabel>Align</FieldLabel>
                   <div className="grid grid-cols-2 gap-1.5">
                     <button
                       type="button"
@@ -1736,7 +1770,7 @@ export function RightSidebar({
 
               <CollapsibleGroup
                 id="rs-position"
-                title="Size & rotate"
+                title="Size"
                 defaultOpen={!isText && !isImage}
               >
                 <div className="grid grid-cols-2 gap-2.5">
@@ -1751,14 +1785,6 @@ export function RightSidebar({
                     onChange={setHeight}
                   />
                 </div>
-                <NumberField
-                  label="Rotation"
-                  value={formValues.angle}
-                  onChange={(v) => updateProp("angle", v)}
-                  min={-180}
-                  max={360}
-                  unit="°"
-                />
               </CollapsibleGroup>
 
               <CollapsibleGroup id="rs-appearance" title="Appearance" defaultOpen={false}>

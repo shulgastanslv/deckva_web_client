@@ -99,7 +99,7 @@ export function SidebarSearchSelect<TFilter extends string = string>({
             aria-label={label}
             disabled={disabled}
             className={cn(
-              "flex h-11 w-full min-w-0 items-center gap-2 rounded-full px-3.5 text-left transition-colors disabled:pointer-events-none disabled:opacity-40",
+              "flex h-10 w-full min-w-0 items-center gap-2 rounded-full px-3.5 text-left transition-colors disabled:pointer-events-none disabled:opacity-40",
               sidebarSurface,
               triggerClassName,
             )}
@@ -109,7 +109,7 @@ export function SidebarSearchSelect<TFilter extends string = string>({
             </span>
             <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
               {selected?.leading}
-              <span className="truncate text-[14px] text-foreground">
+              <span className="truncate text-[13px] text-foreground">
                 {selected?.label ?? placeholder}
               </span>
             </span>

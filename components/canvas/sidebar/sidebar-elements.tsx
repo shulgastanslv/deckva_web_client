@@ -141,30 +141,35 @@ export function SidebarElements() {
       />
 
       <div className="sticky top-0 z-10 w-full min-w-0 space-y-3 bg-background/95 px-3 pt-3 pb-2 backdrop-blur-sm">
-        <label className="flex h-11 min-w-0 items-center gap-2 rounded-full bg-muted/70 px-3.5 dark:bg-muted/35">
-          <Search className="size-4 shrink-0 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={
-              category === "photos"
-                ? "Search photos..."
-                : category === "text"
-                  ? "Search text..."
-                  : category === "shapes"
-                    ? "Search shapes..."
-                    : category === "code"
-                      ? "Search code..."
-                      : "Search devices..."
-            }
-            className="h-full min-w-0 w-full bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
-          />
-        </label>
+        {category !== "code" ? (
+          <label className="flex h-10 min-w-0 items-center gap-2 rounded-full bg-muted/70 px-3.5 dark:bg-muted/35">
+            <Search className="size-4 shrink-0 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={
+                category === "photos"
+                  ? "Search photos..."
+                  : category === "text"
+                    ? "Search text..."
+                    : category === "shapes"
+                      ? "Search shapes..."
+                      : category === "frames"
+                        ? "Search devices..."
+                        : "Search..."
+              }
+              className="h-full min-w-0 w-full bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
+            />
+          </label>
+        ) : null}
 
         <ChipScroll
           items={tabItems}
           value={category}
-          onChange={(id) => setCategory(id as Category)}
+          onChange={(id) => {
+            setCategory(id as Category);
+            setSearch("");
+          }}
           ariaLabel="Element categories"
         />
       </div>

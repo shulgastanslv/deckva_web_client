@@ -63,6 +63,10 @@ export function StudioHome() {
   const authPending = status === "loading";
   const signedIn = status === "authenticated" && Boolean(userId);
   const create = useStudioCreate();
+  // Defer session/query branches until after mount — next-auth + react-query
+  // often disagree between SSR and the first client paint (hydration mismatch).
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => setHasMounted(true), []);
 
   const rawName = session?.user?.name?.trim() || "";
   const helloName = rawName
@@ -331,7 +335,8 @@ export function StudioHome() {
             </div>
           ) : null}
 
-          {authPending ||
+          {!hasMounted ||
+          authPending ||
           (signedIn &&
             loading &&
             projects.length === 0 &&

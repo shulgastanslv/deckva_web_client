@@ -24,6 +24,26 @@ function isUniqueEmail(err: unknown): boolean {
   );
 }
 
+/** Session JWT is stored in cookies — never put data URLs or OAuth secrets in it. */
+function cookieSafeImage(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  if (!/^https?:\/\//i.test(value)) return null;
+  return value;
+}
+
+function slimJwt(token: Record<string, unknown>) {
+  delete token.access_token;
+  delete token.refresh_token;
+  delete token.id_token;
+  delete token.accessToken;
+  delete token.refreshToken;
+  delete token.idToken;
+  const image = cookieSafeImage(token.image ?? token.picture);
+  token.image = image;
+  token.picture = image;
+  return token;
+}
+
 /** Keep one User row for both Google and password sign-in. Password is never cleared. */
 async function linkGoogleAccount(input: {
   email: string;
@@ -139,8 +159,9 @@ export const authOptions: AuthOptions = {
         if (typeof session.name === "string") token.name = session.name;
         if (session.name === null) token.name = null;
         if (typeof session.image === "string" || session.image === null) {
-          token.picture = session.image;
-          token.image = session.image;
+          const image = cookieSafeImage(session.image);
+          token.picture = image;
+          token.image = image;
         }
       }
 
@@ -151,43 +172,42 @@ export const authOptions: AuthOptions = {
         const dbUser = await linkGoogleAccount({
           email,
           name: user?.name,
-          image: user?.image,
+          image: cookieSafeImage(user?.image),
         });
         token.id = dbUser.id;
         token.sub = dbUser.id;
         token.email = dbUser.email;
         token.name = dbUser.name;
-        token.image = dbUser.image;
-        token.picture = dbUser.image;
+        const image = cookieSafeImage(dbUser.image);
+        token.image = image;
+        token.picture = image;
       } else if (user?.id) {
         token.id = user.id;
         token.sub = user.id;
         if (user.email) token.email = user.email;
         if (user.name !== undefined) token.name = user.name;
-        // Only keep remote URLs in the JWT — data URLs blow the cookie size limit.
-        if (
-          typeof user.image === "string" &&
-          /^https?:\/\//i.test(user.image)
-        ) {
-          token.image = user.image;
-          token.picture = user.image;
-        }
+        const image = cookieSafeImage(user.image);
+        token.image = image;
+        token.picture = image;
       }
 
       if (token.id && (user || account || !token.role)) {
         const row = await prisma.user.findUnique({
-          where: { id: token.id },
+          where: { id: token.id as string },
           select: { role: true, email: true },
         });
         if (row) {
           const role = emailIsAdmin(row.email) ? "ADMIN" : row.role;
           if (role !== row.role) {
-            await prisma.user.update({ where: { id: token.id }, data: { role } });
+            await prisma.user.update({
+              where: { id: token.id as string },
+              data: { role },
+            });
           }
           token.role = role;
         }
       }
-      return token;
+      return slimJwt(token as Record<string, unknown>) as typeof token;
     },
     async session({ session, token }) {
       if (session.user) {
@@ -195,9 +215,7 @@ export const authOptions: AuthOptions = {
         session.user.role = token.role === "ADMIN" ? "ADMIN" : "USER";
         if (token.email) session.user.email = token.email;
         session.user.name = token.name ?? null;
-        session.user.image =
-          (typeof token.picture === "string" ? token.picture : null) ??
-          (typeof token.image === "string" ? token.image : null);
+        session.user.image = cookieSafeImage(token.picture ?? token.image);
       }
       return session;
     },

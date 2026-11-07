@@ -24,6 +24,8 @@ const EXTRA = [
   "swibpCodeDarkMode",
   "swibpCodeBackground",
   "swibpCodeTransparent",
+  "swibpBaseScaleX",
+  "swibpBaseScaleY",
 ];
 
 for (const key of EXTRA) {

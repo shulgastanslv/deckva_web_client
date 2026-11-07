@@ -8,12 +8,9 @@ import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { PillSlider } from "@/components/ui/pill-slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { CodeChromeCards } from "@/components/canvas/sidebar/code-chrome-cards";
-import { SidebarSearchSelect } from "@/components/canvas/sidebar/sidebar-search-select";
+import { CodeAppearanceSelect } from "@/components/canvas/sidebar/code-chrome-cards";
 import {
-  CODE_LANGS,
   CODE_PADDINGS,
-  CODE_THEMES,
   DEFAULT_CODE_OPTIONS,
   fontSizeFromUiScale,
   readCodeOptions,
@@ -103,33 +100,13 @@ export function CodeBlockSettings({
   const chromeStyle = resolveChromeStyle(draft.chromeStyle, draft.showChrome);
   const uiScale = uiScaleFromFontSize(draft.fontSize);
 
-  const themeOptions = CODE_THEMES.map((theme) => ({
-    value: theme.id,
-    label: theme.label,
-    keywords: theme.id,
-    leading: (
-      <span
-        className="size-4 shrink-0 rounded-full"
-        style={{
-          background: `linear-gradient(140deg, ${theme.background.from}, ${theme.background.to})`,
-        }}
-      />
-    ),
-  }));
-
-  const langOptions = CODE_LANGS.map((lang) => ({
-    value: lang.id,
-    label: lang.label,
-    keywords: lang.id,
-  }));
-
   return (
     <div className="flex flex-col gap-3 text-[14px]">
       {showAddButton ? (
         <Button
           type="button"
           variant="secondary"
-          className={cn(sidebarActionBtn, "h-11 w-full text-[14px]")}
+          className={cn(sidebarActionBtn, "h-10 w-full text-[13px]")}
           onClick={() => onAdd?.(draft)}
         >
           <Code2 className="size-4" />
@@ -137,106 +114,17 @@ export function CodeBlockSettings({
         </Button>
       ) : null}
 
-      <div className="space-y-2">
-        <p className="px-1 text-[13px] font-medium text-muted-foreground">
-          Window
-        </p>
-        <CodeChromeCards
-          value={chromeStyle}
-          onChange={(style: CodeChromeStyle) =>
-            patch({ chromeStyle: style, showChrome: style !== "none" }, true)
-          }
-        />
-      </div>
-
-      {onOpenFrames ? (
-        <button
-          type="button"
-          onClick={onOpenFrames}
-          className="flex w-full items-center gap-2.5 rounded-2xl bg-muted/50 px-3 py-2.5 text-left transition-colors hover:bg-muted dark:bg-muted/25 dark:hover:bg-muted/40"
-        >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground dark:bg-muted/50">
-            <Smartphone className="size-3.5" />
-          </span>
-          <span className="min-w-0 flex-1 text-[13px] leading-snug text-muted-foreground">
-            Looking for Phone Mockups? Check out{" "}
-            <span className="font-medium text-foreground">Frames</span>
-          </span>
-          <span className="text-muted-foreground">›</span>
-        </button>
-      ) : null}
-
-      {!hasTarget ? (
-        <p className="px-1 text-[13px] text-muted-foreground">
-          Settings below apply to the next code block you add. Select a block
-          on the canvas to edit it live.
-        </p>
-      ) : null}
-
-      <textarea
-        value={draft.code}
-        onChange={(e) => patch({ code: e.target.value })}
-        rows={8}
-        spellCheck={false}
-        className="w-full resize-y rounded-[1.25rem] bg-muted/20 px-3.5 py-3 font-mono text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground focus:bg-muted/30"
-        placeholder="Paste your code…"
-        aria-label="Code"
+      <CodeAppearanceSelect
+        chromeStyle={chromeStyle}
+        theme={draft.theme}
+        lang={draft.lang}
+        darkMode={draft.darkMode}
+        onChromeChange={(style: CodeChromeStyle) =>
+          patch({ chromeStyle: style, showChrome: style !== "none" }, true)
+        }
+        onThemeChange={(next: CodeThemeId) => patch({ theme: next }, true)}
+        onLangChange={(next: CodeLang) => patch({ lang: next }, true)}
       />
-      <p className="px-1 text-[13px] text-muted-foreground">
-        Double-click the block for a larger editor.
-      </p>
-
-      <SidebarSearchSelect
-        label="Theme"
-        value={draft.theme}
-        options={themeOptions}
-        onValueChange={(next) => patch({ theme: next as CodeThemeId }, true)}
-        searchPlaceholder="Search themes…"
-        emptyText="No themes found"
-      />
-
-      <SidebarSearchSelect
-        label="Language"
-        value={draft.lang}
-        options={langOptions}
-        onValueChange={(next) => patch({ lang: next as CodeLang }, true)}
-        searchPlaceholder="Search languages…"
-        emptyText="No languages found"
-      />
-
-      <label className="relative flex h-11 w-full items-center overflow-hidden rounded-full bg-muted/20">
-        <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3.5 text-[14px] font-medium text-foreground/85">
-          Filename
-        </span>
-        <input
-          value={draft.filename}
-          onChange={(e) => patch({ filename: e.target.value })}
-          placeholder="Untitled"
-          aria-label="Filename"
-          className="h-full w-full bg-transparent pr-3.5 pl-[5.75rem] text-right text-[14px] text-foreground outline-none placeholder:text-muted-foreground"
-        />
-      </label>
-
-      <div className="space-y-1.5">
-        <p className="px-1 text-[13px] font-medium text-muted-foreground">Padding</p>
-        <div className="flex h-11 rounded-full bg-muted/20 p-1">
-          {CODE_PADDINGS.map((pad) => (
-            <button
-              key={pad}
-              type="button"
-              onClick={() => patch({ padding: pad as CodePadding }, true)}
-              className={cn(
-                "h-full flex-1 rounded-full text-[14px] font-medium transition-colors",
-                draft.padding === pad
-                  ? "bg-background text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {pad}
-            </button>
-          ))}
-        </div>
-      </div>
 
       <PillSlider
         label="UI Scale"
@@ -269,15 +157,23 @@ export function CodeBlockSettings({
       ).map(([label, key]) => (
         <label
           key={key}
-          className="flex h-11 items-center justify-between gap-2 rounded-full bg-muted/20 px-3.5"
+          className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted/20 px-3.5"
         >
-          <span className="text-[14px] font-medium text-foreground/85">{label}</span>
+          <span className="text-[13px] font-medium text-foreground/85">{label}</span>
           <Switch
             checked={draft[key]}
             onCheckedChange={(value) => patch({ [key]: value }, true)}
           />
         </label>
       ))}
+        {!hasTarget ? (
+        <p className="px-1 text-[13px] text-muted-foreground">
+          Settings below apply to the next code block you add. Select a block
+          on the canvas to edit it live.
+        </p>
+      ) : null}
+
+    
     </div>
   );
 }
