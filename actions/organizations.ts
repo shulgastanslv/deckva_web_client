@@ -284,3 +284,108 @@ export async function getActiveOrganization(): Promise<
     return { success: false, error: messages.errors.loadOrganization };
   }
 }
+
+
+// Добавьте это в конец файла @/actions/organizations.ts
+
+export async function updateOrganization(
+  organizationId: string,
+  data: { name?: string; color?: string }
+): Promise<ActionResult<{ organizationId: string }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    const membership = await prisma.organizationMember.findFirst({
+      where: { userId, organizationId },
+    });
+    
+    // Только Владелец (OWNER) или Админ (ADMIN) могут менять профиль
+    if (!membership || (membership.role !== "OWNER" && membership.role !== "ADMIN")) {
+      return { success: false, error: "У вас нет прав для изменения этой организации." };
+    }
+
+    await prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        ...(data.name ? { name: data.name } : {}),
+        ...(data.color ? { color: data.color } : {}),
+      },
+    });
+
+    revalidatePath("/studio");
+    return { success: true, organizationId };
+  } catch (err) {
+    console.error("updateOrganization error:", err);
+    return { success: false, error: "Не удалось обновить организацию." };
+  }
+}
+
+export async function deleteOrganization(
+  organizationId: string
+): Promise<ActionResult> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    const membership = await prisma.organizationMember.findFirst({
+      where: { userId, organizationId },
+    });
+    
+    // ТОЛЬКО Владелец (OWNER) может удалить организацию
+    if (!membership || membership.role !== "OWNER") {
+      return { success: false, error: "Только владелец может удалить организацию." };
+    }
+
+    // Удаляем организацию
+    await prisma.organization.delete({
+      where: { id: organizationId },
+    });
+
+    // Если удаленная организация была активной, сбрасываем activeOrganizationId
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user?.activeOrganizationId === organizationId) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { activeOrganizationId: null },
+      });
+      // Функция сама создаст дефолтную оргу или переключит на другую
+      await ensureUserOrganization(); 
+    }
+
+    revalidatePath("/studio");
+    return { success: true };
+  } catch (err) {
+    console.error("deleteOrganization error:", err);
+    return { success: false, error: "Не удалось удалить организацию." };
+  }
+}
+
+
+
+export async function getOrganizationMembers(
+  organizationId: string
+): Promise<ActionResult<{ members: any[] }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    const membership = await prisma.organizationMember.findFirst({
+      where: { userId, organizationId },
+    });
+    if (!membership) return { success: false, error: "Нет доступа." };
+
+    const members = await prisma.organizationMember.findMany({
+      where: { organizationId },
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true } }
+      },
+      orderBy: { role: 'asc' } // Первыми идут OWNER, затем ADMIN, затем MEMBER
+    });
+
+    return { success: true, members };
+  } catch (err) {
+    console.error("getOrganizationMembers error:", err);
+    return { success: false, error: "Не удалось загрузить участников." };
+  }
+}

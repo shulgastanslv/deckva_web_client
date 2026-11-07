@@ -174,6 +174,37 @@ export async function listMyNotifications(): Promise<
   }
 }
 
+export async function deleteNotification(id: string): Promise<ActionResult<object>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    
+    await prisma.notification.delete({
+      where: { id, userId }, // userId гарантирует, что удаляется только свое уведомление
+    });
+    return { success: true };
+  } catch (err) {
+    console.error("deleteNotification error:", err);
+    return { success: false, error: "Не удалось удалить уведомление" };
+  }
+}
+
+export async function toggleNotificationRead(id: string, read: boolean): Promise<ActionResult<object>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    
+    await prisma.notification.update({
+      where: { id, userId },
+      data: { readAt: read ? new Date() : null },
+    });
+    return { success: true };
+  } catch (err) {
+    console.error("toggleNotificationRead error:", err);
+    return { success: false, error: "Не удалось обновить статус уведомления" };
+  }
+}
+
 export async function markNotificationsRead(): Promise<ActionResult<object>> {
   try {
     const userId = await requireUserId();

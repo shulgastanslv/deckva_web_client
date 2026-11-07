@@ -16,7 +16,6 @@ import {
   MessageSquareText,
   Play,
 } from "lucide-react";
-import { NotificationsMenu } from "@/components/notifications-menu";
 import Logo from "@/components/logo";
 import { useSession, signOut } from "next-auth/react";
 import { AuthModal } from "@/components/auth";
@@ -241,8 +240,6 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
           <div className="mx-0.5 hidden h-5 w-px bg-border/60 sm:block" />
 
           <div className="flex items-center gap-1">
-            <NotificationsMenu />
-
             {signedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

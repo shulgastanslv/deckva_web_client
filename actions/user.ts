@@ -63,6 +63,7 @@ export async function getProfile(): Promise<
 
 export async function updateProfile(input: {
   name?: string;
+  image?: string;
   currentPassword?: string;
   newPassword?: string;
 }): Promise<ProfileResult<{ name: string | null }>> {
@@ -72,17 +73,21 @@ export async function updateProfile(input: {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { id: true, name: true, password: true },
+      select: { id: true, name: true, password: true, image: true },
     });
     if (!user) return { success: false, error: messages.errors.accountNotFound };
 
-    const data: { name?: string; password?: string } = {};
+    const data: { name?: string; password?: string; image?: string } = {};
 
     if (typeof input.name === "string") {
       const name = input.name.trim();
       if (!name) return { success: false, error: messages.errors.enterName };
       if (name.length > 80) return { success: false, error: messages.errors.nameTooLong };
       data.name = name;
+    }
+
+    if (typeof input.image === "string") {
+      data.image = input.image;
     }
 
     const wantsPassword =

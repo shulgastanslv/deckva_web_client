@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  CameraIcon,
   Check,
   CreditCard,
   KeyRound,
@@ -391,68 +392,60 @@ export function ProfileSettingsDialog({
                   {section === "profile" ? (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <Avatar size="lg" className="size-12">
-                          <AvatarImage src={avatarSrc} alt={name || email} />
-                          <AvatarFallback className="bg-primary text-sm font-semibold text-primary-foreground">
-                            {initial}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="truncate text-[13px] font-semibold">
-                            {name.trim() || "Your name"}
-                          </p>
-                          <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
-                            {email}
-                          </p>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                            <span
-                              className={cn(
-                                "rounded-full px-2 py-0.5 text-[10px] font-medium",
-                                emailVerified
-                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                  : "bg-muted text-muted-foreground",
-                              )}
-                            >
-                              {emailVerified ? "Verified" : "Unverified"}
-                            </span>
-                            {createdAt ? (
-                              <span className="text-[10px] text-muted-foreground">
-                                Joined {formatJoined(createdAt)}
-                              </span>
-                            ) : null}
+                          <div className="relative group cursor-pointer">
+                            <Avatar className="size-16 ring-1 ring-border/20">
+                              <AvatarImage src={avatarSrc} alt={name || email} className="object-cover" />
+                              <AvatarFallback className="bg-muted text-lg font-medium text-foreground">
+                                {initial}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-full transition-all">
+                              <CameraIcon className="size-5 text-white/90" />
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                              onChange={() => { }}
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium">Profile Picture</p>
+                            <p className="mt-1 text-[12px] text-muted-foreground">
+                              Click the avatar to upload a new image.
+                            </p>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="space-y-1.5">
-                        <Label htmlFor="profile-name" className="text-[12px]">
-                          Display name
-                        </Label>
-                        <Input
-                          id="profile-name"
-                          value={name}
-                          className="h-9 rounded-xl bg-muted/40 px-3"
-                          onChange={(event) => {
-                            setName(event.target.value);
-                            setSaved(false);
-                          }}
-                          placeholder="Your name"
-                          autoComplete="name"
-                        />
-                      </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="profile-name" className="text-[12px]">
+                            Display name
+                          </Label>
+                          <Input
+                            id="profile-name"
+                            value={name}
+                            className="h-9 rounded-xl bg-muted/40 px-3"
+                            onChange={(event) => {
+                              setName(event.target.value);
+                              setSaved(false);
+                            }}
+                            placeholder="Your name"
+                            autoComplete="name"
+                          />
+                        </div>
 
-                      <div className="space-y-1.5">
-                        <Label htmlFor="profile-email" className="text-[12px]">
-                          Email
-                        </Label>
-                        <Input
-                          id="profile-email"
-                          value={email}
-                          readOnly
-                          disabled
-                          className="h-9 rounded-xl bg-muted/30 px-3"
-                        />
-                      </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="profile-email" className="text-[12px]">
+                            Email
+                          </Label>
+                          <Input
+                            id="profile-email"
+                            value={email}
+                            readOnly
+                            disabled
+                            className="h-9 rounded-xl bg-muted/30 px-3"
+                          />
+                        </div>
                     </div>
                   ) : null}
 
