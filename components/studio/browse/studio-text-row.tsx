@@ -1,9 +1,8 @@
 "use client";
 
-import { FileText } from "lucide-react";
-
 import type { ArtifactListItem } from "@/actions/artifacts";
 import { formatBoardDate } from "@/components/studio/lib/format";
+import { StudioTypeArt } from "@/components/studio/ui/studio-type-art";
 import { cn } from "@/lib/utils";
 
 export const textCols =
@@ -26,9 +25,10 @@ export function StudioTextRow({
       )}
     >
       <span className="flex min-w-0 items-center gap-3">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground">
-          <FileText className="size-3.5" strokeWidth={1.75} />
-        </span>
+        <StudioTypeArt
+          kind="text"
+          seed={artifact.id.length + artifact.title.length}
+        />
         <span className="min-w-0">
           <span className="block truncate text-[14px] font-semibold text-foreground">
             {artifact.title || "Untitled text"}
@@ -41,8 +41,8 @@ export function StudioTextRow({
       <span className="hidden truncate text-[13px] text-muted-foreground md:block">
         {artifact.previewText || "—"}
       </span>
-      <span className="hidden truncate text-[13px] text-muted-foreground md:block">
-        Text
+      <span className="hidden items-center gap-1.5 text-[13px] text-muted-foreground md:flex">
+        <StudioTypeArt kind="text" seed={3} className="size-4 rounded-md" />
       </span>
       <span className="truncate text-[13px] text-muted-foreground">
         {formatBoardDate(artifact.updatedAt)}

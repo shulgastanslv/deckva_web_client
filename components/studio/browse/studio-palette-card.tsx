@@ -2,6 +2,7 @@
 
 import type { ArtifactListItem } from "@/actions/artifacts";
 import { formatBoardDate } from "@/components/studio/lib/format";
+import { StudioTypeArt } from "@/components/studio/ui/studio-type-art";
 
 export function StudioPaletteCard({
   artifact,
@@ -20,15 +21,16 @@ export function StudioPaletteCard({
         className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted/40 text-left transition-colors group-hover:bg-muted/30"
       >
         <div className="absolute inset-0 flex">
-          {(colors.length > 0 ? colors : ["#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373"]).map(
-            (color, index) => (
-              <span
-                key={`${color}-${index}`}
-                className="h-full flex-1"
-                style={{ backgroundColor: color }}
-              />
-            ),
-          )}
+          {(colors.length > 0
+            ? colors
+            : ["#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373"]
+          ).map((color, index) => (
+            <span
+              key={`${color}-${index}`}
+              className="h-full flex-1"
+              style={{ backgroundColor: color }}
+            />
+          ))}
         </div>
       </button>
 
@@ -36,8 +38,16 @@ export function StudioPaletteCard({
         <p className="truncate text-[13px] font-medium text-foreground">
           {artifact.title || artifact.previewText || "Untitled palette"}
         </p>
-        <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-          Palette · {formatBoardDate(artifact.updatedAt)}
+        <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <StudioTypeArt
+            kind="palette"
+            colors={colors}
+            seed={artifact.id.length}
+            className="size-4 rounded-md"
+          />
+          <span className="truncate">
+            Palette · {formatBoardDate(artifact.updatedAt)}
+          </span>
         </p>
       </button>
     </article>

@@ -1,7 +1,7 @@
 import { fetchAiJson } from "@/lib/ai/client";
 
 export type GenerateTextInput = {
-  /** Seed copy or topic for the post caption. */
+  /** Seed copy or topic for the post caption — maps to deckva_ai `post_text`. */
   post_text: string;
 };
 
@@ -14,12 +14,12 @@ export async function generateTextUpstream(
 ): Promise<GenerateTextResult> {
   const post_text = input.post_text.trim();
   if (post_text.length < 2) {
-    throw new Error("Describe what the post should be about");
+    throw new Error("post_text is required (min 2 characters)");
   }
 
   const payload = (await fetchAiJson(
     "/text",
-    { post_text: post_text },
+    { post_text },
     { timeoutMs: 120_000, label: "Text generation" },
   )) as Record<string, unknown>;
 

@@ -12,6 +12,7 @@ import {
 import { getUserFolders } from "@/actions/folders";
 import { getActiveOrganization, getUserOrganizations } from "@/actions/organizations";
 import { getUserProjects } from "@/actions/projects";
+import { getProfile } from "@/actions/user";
 import { readStudioResult, studioKeys, studioStaleTime } from "@/lib/studio/query-core";
 
 export { studioKeys, studioStaleTime } from "@/lib/studio/query-core";
@@ -108,6 +109,19 @@ export function useMyNotifications(enabled: boolean) {
     queryKey: studioKeys.notifications,
     queryFn: () => readStudioResult(() => listMyNotifications()),
     staleTime: studioStaleTime.notifications,
+    refetchInterval: enabled ? 12_000 : false,
+    refetchOnWindowFocus: true,
+    enabled,
+    retry: false,
+    refetchOnReconnect: true,
+  });
+}
+
+export function useMyProfile(enabled: boolean) {
+  return useQuery({
+    queryKey: studioKeys.profile,
+    queryFn: () => readStudioResult(() => getProfile()),
+    staleTime: studioStaleTime.stable,
     enabled,
     ...quiet,
   });

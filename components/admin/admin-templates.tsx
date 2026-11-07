@@ -7,8 +7,10 @@ import {
   deleteTemplate,
   getTemplates,
   importTemplateJson,
+  setTemplateReviewStatus,
   updateTemplateMeta,
   type TemplateListItem,
+  type TemplateReviewStatus,
 } from "@/actions/templates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +30,7 @@ export function AdminTemplates() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
+  const [status, setStatus] = useState<TemplateReviewStatus | "all">("PENDING");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -43,6 +46,7 @@ export function AdminTemplates() {
       const res = await getTemplates({
         category: category === "all" ? undefined : category,
         search: search.trim() || undefined,
+        status,
       });
       if (!res.success) {
         setTemplates([]);
@@ -62,7 +66,7 @@ export function AdminTemplates() {
     } finally {
       setLoading(false);
     }
-  }, [category, search]);
+  }, [category, search, status]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -111,6 +115,28 @@ export function AdminTemplates() {
         return;
       }
       setMessage("Template deleted");
+      await load();
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const review = async (id: string, next: TemplateReviewStatus) => {
+    setBusyId(id);
+    setMessage(null);
+    try {
+      const res = await setTemplateReviewStatus(id, next);
+      if (!res.success) {
+        setMessage("Failed to update review status");
+        return;
+      }
+      setMessage(
+        next === "APPROVED"
+          ? "Template approved"
+          : next === "REJECTED"
+            ? "Template rejected"
+            : "Moved to pending",
+      );
       await load();
     } finally {
       setBusyId(null);
@@ -166,6 +192,22 @@ export function AdminTemplates() {
                 {item}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={status}
+          onValueChange={(value) =>
+            setStatus(value as TemplateReviewStatus | "all")
+          }
+        >
+          <SelectTrigger className="h-9 w-[140px] rounded-full bg-muted/50">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="PENDING">Pending</SelectItem>
+            <SelectItem value="APPROVED">Approved</SelectItem>
+            <SelectItem value="REJECTED">Rejected</SelectItem>
+            <SelectItem value="all">All statuses</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -296,15 +338,49 @@ export function AdminTemplates() {
 
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                       <p className="text-[10px] text-muted-foreground">
+                        <span
+                          className={cn(
+                            "mr-1.5 inline-flex rounded-full px-2 py-0.5 font-medium",
+                            tpl.status === "PENDING" && "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+                            tpl.status === "APPROVED" && "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+                            tpl.status === "REJECTED" && "bg-destructive/10 text-destructive",
+                          )}
+                        >
+                          {tpl.status.toLowerCase()}
+                        </span>
                         {tpl.slideCount} slides · {tpl.aspectRatio}
                         {tpl.authorName ? ` · ${tpl.authorName}` : ""}
                         {" · "}
                         {new Date(tpl.createdAt).toLocaleDateString()}
                       </p>
-                      <div className="flex gap-1.5">
+                      <div className="flex flex-wrap gap-1.5">
+                        {tpl.status !== "APPROVED" ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={busy}
+                            onClick={() => void review(tpl.id, "APPROVED")}
+                            className="rounded-full"
+                          >
+                            Approve
+                          </Button>
+                        ) : null}
+                        {tpl.status !== "REJECTED" ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            disabled={busy}
+                            onClick={() => void review(tpl.id, "REJECTED")}
+                            className="rounded-full"
+                          >
+                            Reject
+                          </Button>
+                        ) : null}
                         <Button
                           type="button"
                           size="sm"
+                          variant="secondary"
                           disabled={busy}
                           onClick={() => void save(tpl.id)}
                           className="rounded-full"

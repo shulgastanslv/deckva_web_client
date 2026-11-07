@@ -36,6 +36,7 @@ export interface ProjectListItem {
   createdAt: string;
   previewUrl: string | null;
   authorName: string | null;
+  authorImage: string | null;
   folderId: string | null;
 }
 
@@ -148,7 +149,7 @@ export async function getUserProjects(options?: {
       },
       orderBy: { updatedAt: "desc" },
       include: {
-        user: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true, image: true } },
         savedBy: { where: { userId }, select: { id: true } },
         _count: { select: { slides: true } },
         slides: {
@@ -169,6 +170,7 @@ export async function getUserProjects(options?: {
       createdAt: p.createdAt.toISOString(),
       previewUrl: p.slides[0]?.thumbnail || p.thumbnail || null,
       authorName: p.user.name || p.user.email,
+      authorImage: p.user.image,
       folderId: p.folderId,
     }));
 

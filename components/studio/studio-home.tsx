@@ -29,18 +29,23 @@ import {
   StudioContentBody,
 } from "@/components/studio/ui/studio-content";
 import { StudioSectionHeader } from "@/components/studio/ui/studio-section-header";
+import { StudioTypeArt } from "@/components/studio/ui/studio-type-art";
 import { StudioViewToggle } from "@/components/studio/ui/studio-view-toggle";
 import { Button } from "@/components/ui/button";
 import { isGenerationKind } from "@/lib/studio/generation/registry";
 import type { GenerationKind } from "@/lib/studio/generation/types";
 import { getArtifactById } from "@/actions/artifacts";
+import { saveAsNewProject } from "@/actions/projects";
 import {
   aiPaletteToProjectPalette,
   parseAiPalette,
 } from "@/lib/ai/generate-palette";
+import { normalizeDocument } from "@/lib/canvas/document";
 import { loadBrandKit, writeBrandKit } from "@/lib/studio/brand-kit";
 import { reportError } from "@/lib/report-error";
 import { messages } from "@/lib/messages";
+import { parseImportedTemplate } from "@/lib/templates/parse";
+import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type ViewMode = "list" | "grid";
@@ -187,6 +192,53 @@ export function StudioHome() {
           initialType={promptType}
           onBlank={create.openBlank}
           onTemplates={create.openTemplates}
+          onBrandKit={() => router.push("/studio/brand-kit")}
+          onImportJson={async (file) => {
+            create.setGenerateError(null);
+            create.setGenerating(true);
+            try {
+              const text = await file.text();
+              const parsed = parseImportedTemplate(JSON.parse(text) as unknown);
+              if (!parsed.ok || parsed.template.slides.length === 0) {
+                throw new Error(
+                  parsed.ok === false
+                    ? parsed.error
+                    : messages.errors.notCanvasJson,
+                );
+              }
+              const template = parsed.template;
+              const aspectRatio: RatioKey = template.aspectRatio || "4:5";
+              const dims = CANVAS_RATIOS[aspectRatio];
+              const res = await saveAsNewProject({
+                title:
+                  template.title ||
+                  file.name.replace(/\.json$/i, "") ||
+                  "Imported",
+                aspectRatio,
+                width: dims.width,
+                height: dims.height,
+                slides: template.slides.map((canvasJSON) => ({
+                  canvasJSON,
+                  thumbnail: null,
+                })),
+                document: normalizeDocument(null),
+              });
+              if (!res.success || !("projectId" in res)) {
+                throw new Error(
+                  "error" in res ? res.error : messages.errors.importJson,
+                );
+              }
+              await refreshProjects();
+              router.push(`/studio/editor?project=${res.projectId}`);
+            } catch (err) {
+              reportError(err, messages.errors.importJson);
+              create.setGenerateError(
+                err instanceof Error ? err.message : messages.errors.importJson,
+              );
+            } finally {
+              create.setGenerating(false);
+            }
+          }}
           onSelectKind={setPromptType}
           onGenerate={create.generateFromPrompt}
           generating={create.generating}
@@ -267,7 +319,7 @@ export function StudioHome() {
                   type="button"
                   onClick={() => setFilter(item.id)}
                   className={cn(
-                    "inline-flex h-8 items-center rounded-full px-3 text-[13px] font-medium transition-colors",
+                    "inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 pr-3 text-[13px] font-medium transition-colors",
                     filter === item.id
                       ? "bg-foreground text-background"
                       : "bg-muted/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground",

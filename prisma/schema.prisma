@@ -355,22 +355,31 @@ model Slide {
   @@index([projectId, order])
 }
 
+enum TemplateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Template {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
   category    String
   badge       String?
   previewUrl  String?
-  aspectRatio String   @default("4:5")
+  aspectRatio String         @default("4:5")
   canvasJSON  Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  /// Community publishes start as PENDING until an admin approves.
+  status      TemplateStatus @default(APPROVED)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   authorId String?
   author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@index([category])
   @@index([authorId])
+  @@index([status])
 }
 
 /// A post from the admin desk. Publishing one also notifies every user.

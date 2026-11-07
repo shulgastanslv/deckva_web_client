@@ -13,10 +13,11 @@ import {
   Redo2,
   CloudOff,
   Focus,
-  MessageSquareText,
+  MessageCircle,
   Play,
 } from "lucide-react";
 import Logo from "@/components/logo/logo";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSession, signOut } from "next-auth/react";
 import { AuthModal } from "@/components/auth";
 import { HelpDialog } from "@/components/help-dialog";
@@ -37,6 +38,7 @@ import { ExportModal } from "./export-modal";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
+import { studioKeys, useMyProfile } from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
 
 const accountItemClass =
@@ -64,6 +66,7 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isPublishOpen, setIsPublishOpen] = useState(false);
   const { data: session, status } = useSession();
+  const queryClient = useQueryClient();
   const [showShare, setShowShare] = useState(false);
   const [showExport, setShowExport] = useState(false);
 
@@ -72,6 +75,8 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
   const projectTitle = useCanvasStore((s) => s.projectTitle);
   const { rename, isDirty } = useProject();
   const [name, setName] = useState(projectTitle);
+  const signedIn = status === "authenticated";
+  const profile = useMyProfile(signedIn);
 
   useEffect(() => {
     setName(projectTitle);
@@ -89,6 +94,15 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
     window.addEventListener("core:auth-link", onAuthLink);
     return () => window.removeEventListener("core:auth-link", onAuthLink);
   }, []);
+
+  useEffect(() => {
+    const onProfileChanged = () => {
+      void queryClient.invalidateQueries({ queryKey: studioKeys.profile });
+    };
+    window.addEventListener("studio:profile-changed", onProfileChanged);
+    return () =>
+      window.removeEventListener("studio:profile-changed", onProfileChanged);
+  }, [queryClient]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -116,11 +130,18 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
     setIsPublishOpen(true);
   };
 
-  const userEmail = session?.user?.email ?? "";
-  const userName = session?.user?.name ?? userEmail;
+  const userEmail = profile.data?.email ?? session?.user?.email ?? "";
+  const userName =
+    profile.data?.name?.trim() ||
+    session?.user?.name?.trim() ||
+    userEmail ||
+    "Account";
   const userInitial = userName ? userName[0].toUpperCase() : "?";
+  const avatarSrc =
+    profile.data?.image ||
+    session?.user?.image ||
+    `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(userName)}`;
   const slideCount = slides.length || 1;
-  const signedIn = status === "authenticated";
 
   return (
     <>
@@ -193,16 +214,6 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={onReview}
-              className={cn(labelBtn, "text-muted-foreground hover:bg-background hover:text-foreground")}
-              title="Review notes and caption"
-            >
-              <MessageSquareText className="size-4" />
-              <span className="hidden sm:inline">Review</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
               onClick={onFocus}
               className={cn(labelBtn, "text-muted-foreground hover:bg-background hover:text-foreground")}
               title="Focus mode"
@@ -260,13 +271,11 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
                     className="size-9 rounded-full p-0 ring-1 ring-border/60 hover:bg-muted/40 hover:ring-border"
                     title="Settings"
                   >
-                    <Avatar className="size-9">
+                    <Avatar className="size-9 ring-0">
                       <AvatarImage
-                        src={
-                          session.user?.image ??
-                          `https://api.dicebear.com/10.x/squircles/svg?seed=${session.user?.id}`
-                        }
+                        src={avatarSrc}
                         alt={userName}
+                        className="object-cover"
                       />
                       <AvatarFallback className="bg-muted text-[13px] font-medium">
                         {userInitial}
@@ -282,11 +291,9 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
                   <div className="flex items-center gap-2.5 px-3.5 py-3">
                     <Avatar className="size-8">
                       <AvatarImage
-                        src={
-                          session.user?.image ??
-                          `https://api.dicebear.com/10.x/squircles/svg?seed=${session.user?.id}`
-                        }
+                        src={avatarSrc}
                         alt={userName}
+                        className="object-cover"
                       />
                       <AvatarFallback className="bg-muted text-[12px] font-semibold">
                         {userInitial}
@@ -311,7 +318,7 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
                       className={accountItemClass}
                       onClick={() => setIsFeedbackOpen(true)}
                     >
-                      <MessageSquareText className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
+                      <MessageCircle className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
                       Feedback
                     </DropdownMenuItem>
                     <DropdownMenuItem

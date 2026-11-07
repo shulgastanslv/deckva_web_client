@@ -23,10 +23,11 @@ async function postApiAi<T>(
   return payload as T;
 }
 
+/** Proxies to deckva_ai `POST /text` with `{ post_text }`. */
 export function apiGenerateText(postText: string) {
   return postApiAi<{ text: string }>(
     "/api/ai/text",
-    { postText },
+    { post_text: postText },
     "Text generation failed",
   );
 }

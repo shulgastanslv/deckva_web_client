@@ -19,10 +19,11 @@ import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { THUMB_TARGET_WIDTH } from "@/lib/canvas/thumbnail";
 import { renderSlidesToImages } from "@/lib/export/carousel";
-import { cn } from "@/lib/utils";
+import { CategoryDropdown } from "@/components/studio/studio-category-dropdown";
 import {
   TEMPLATE_CATEGORIES,
   type TemplateCategory,
+  isTemplateCategory,
 } from "@/lib/templates/categories";
 
 interface PublishTemplateDialogProps {
@@ -89,6 +90,12 @@ export function PublishTemplateDialog({
 
   useEffect(() => {
     if (!open) return;
+    setTitle(useCanvasStore.getState().projectTitle);
+    setCategory(TEMPLATE_CATEGORIES[0]);
+    setDone(false);
+    setError(null);
+    setLoading(false);
+
     let cancelled = false;
     setPreviewLoading(true);
     setPreviewUrl(null);
@@ -112,13 +119,6 @@ export function PublishTemplateDialog({
   }, [open, slidesController]);
 
   const handleOpenChange = (next: boolean) => {
-    if (next) {
-      setTitle(useCanvasStore.getState().projectTitle);
-      setCategory(TEMPLATE_CATEGORIES[0]);
-      setDone(false);
-      setError(null);
-      setLoading(false);
-    }
     onOpenChange(next);
   };
 
@@ -191,7 +191,7 @@ export function PublishTemplateDialog({
             <div className="flex size-10 items-center justify-center rounded-full bg-muted">
               <Check className="size-4" />
             </div>
-            <p className="text-[13px] font-medium">Published</p>
+            <p className="text-[13px] font-medium">Submitted for review</p>
           </div>
         ) : (
           <>
@@ -226,24 +226,13 @@ export function PublishTemplateDialog({
                 className="h-8 rounded-full border-0 bg-muted/50 px-4 text-[13px] shadow-none"
               />
 
-              <div className="flex flex-wrap gap-1.5">
-                {TEMPLATE_CATEGORIES.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    disabled={loading}
-                    onClick={() => setCategory(item)}
-                    className={cn(
-                      "inline-flex h-8 items-center rounded-full px-3 text-[13px] transition-colors",
-                      category === item
-                        ? "bg-foreground text-background"
-                        : "bg-muted/50 text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              <CategoryDropdown
+                selectedCategory={category}
+                allowClear={false}
+                onSelectCategory={(value) => {
+                  if (isTemplateCategory(value)) setCategory(value);
+                }}
+              />
             </div>
 
             {error && <p className="text-[13px] text-destructive">{error}</p>}

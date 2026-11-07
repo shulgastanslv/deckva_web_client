@@ -151,7 +151,7 @@ export function AdminPanel({ email }: { email: string }) {
           </h1>
           <p className="text-[12px] text-muted-foreground">
             {section === "templates"
-              ? "Library metadata and cleanup"
+              ? "Review community publishes, edit metadata, cleanup"
               : section === "notify"
                 ? "Push a short note to every inbox"
                 : section === "news"

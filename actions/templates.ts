@@ -25,6 +25,8 @@ export interface PublishTemplateInput {
   previewUrl?: string | null;
 }
 
+export type TemplateReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 export interface TemplateListItem {
   id: string;
   title: string;
@@ -33,6 +35,7 @@ export interface TemplateListItem {
   previewUrl: string | null;
   aspectRatio: string;
   slideCount: number;
+  status: TemplateReviewStatus;
   createdAt: string;
   authorId: string | null;
   authorName: string | null;
@@ -66,27 +69,56 @@ interface TemplateListRow {
   previewUrl: string | null;
   aspectRatio: string;
   slideCount: number;
+  status: TemplateReviewStatus;
   createdAt: Date;
   authorId: string | null;
   authorName: string | null;
+}
+
+function asReviewStatus(value: string | null | undefined): TemplateReviewStatus {
+  if (value === "PENDING" || value === "REJECTED" || value === "APPROVED") {
+    return value;
+  }
+  return "APPROVED";
 }
 
 export async function getTemplates(options?: {
   category?: string;
   search?: string;
   mine?: boolean;
+  /** Admin review queue — omit for public APPROVED-only catalogue */
+  status?: TemplateReviewStatus | "all";
 }): Promise<ActionResult<{ templates: TemplateListItem[] }>> {
   try {
     const search = options?.search?.trim();
     const category = options?.category?.trim();
     const filters: Prisma.Sql[] = [Prisma.sql`TRUE`];
+    const session = await getServerSession(authOptions);
+    const user = session?.user?.id
+      ? await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { id: true, role: true, email: true },
+        })
+      : null;
+    const admin = user ? isAdminUser(user) : false;
 
     if (options?.mine) {
-      const session = await getServerSession(authOptions);
       if (!session?.user?.id) {
         return { success: true, templates: [] };
       }
       filters.push(Prisma.sql`t."authorId" = ${session.user.id}`);
+    } else if (options?.status && options.status !== "all") {
+      if (!admin) {
+        return { success: false, error: messages.errors.adminOnly };
+      }
+      filters.push(Prisma.sql`t.status = ${options.status}::"TemplateStatus"`);
+    } else if (options?.status === "all") {
+      if (!admin) {
+        return { success: false, error: messages.errors.adminOnly };
+      }
+    } else {
+      // Public catalogue: approved only (authors still see own via mine)
+      filters.push(Prisma.sql`t.status = 'APPROVED'::"TemplateStatus"`);
     }
 
     if (category && category !== "all") {
@@ -109,6 +141,7 @@ export async function getTemplates(options?: {
         t.badge,
         t."previewUrl",
         t."aspectRatio",
+        t.status::text AS status,
         t."createdAt",
         t."authorId",
         u.name AS "authorName",
@@ -133,6 +166,7 @@ export async function getTemplates(options?: {
         previewUrl: row.previewUrl,
         aspectRatio: row.aspectRatio,
         slideCount: Number(row.slideCount) || 1,
+        status: asReviewStatus(row.status),
         createdAt: new Date(row.createdAt).toISOString(),
         authorId: row.authorId,
         authorName: row.authorName,
@@ -199,6 +233,12 @@ export async function publishTemplate(
       : [input.canvasJSON as FabricCanvasJSON];
     const thumbnails = slides.map((_, index) => input.thumbnails?.[index] || null);
 
+    const author = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true, role: true, email: true },
+    });
+    const status = author && isAdminUser(author) ? "APPROVED" : "PENDING";
+
     const template = await prisma.template.create({
       data: {
         title,
@@ -206,6 +246,7 @@ export async function publishTemplate(
         badge: input.badge?.trim() || null,
         aspectRatio: input.aspectRatio,
         previewUrl: input.previewUrl ?? null,
+        status,
         canvasJSON: {
           slides,
           thumbnails,
@@ -217,10 +258,44 @@ export async function publishTemplate(
     });
 
     revalidatePath("/");
+    revalidatePath("/admin");
     return { success: true, templateId: template.id };
   } catch (err) {
     console.error("publishTemplate error:", err);
     return { success: false, error: messages.errors.publishTemplate };
+  }
+}
+
+export async function setTemplateReviewStatus(
+  templateId: string,
+  status: TemplateReviewStatus,
+): Promise<ActionResult<object>> {
+  try {
+    const user = await requireUser();
+    if (!user || !isAdminUser(user)) {
+      return { success: false, error: messages.errors.adminOnly };
+    }
+    if (!templateId) {
+      return { success: false, error: messages.errors.templateIdRequired };
+    }
+
+    const row = await prisma.template.findUnique({
+      where: { id: templateId },
+      select: { id: true },
+    });
+    if (!row) return { success: false, error: messages.errors.templateNotFound };
+
+    await prisma.template.update({
+      where: { id: templateId },
+      data: { status },
+    });
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/studio/templates");
+    return { success: true };
+  } catch (err) {
+    console.error("setTemplateReviewStatus error:", err);
+    return { success: false, error: messages.errors.updateTemplate };
   }
 }
 
@@ -284,6 +359,7 @@ export async function duplicateTemplate(
         badge: row.badge,
         previewUrl: row.previewUrl,
         aspectRatio: row.aspectRatio,
+        status: isAdminUser(user) ? "APPROVED" : "PENDING",
         canvasJSON: row.canvasJSON as Prisma.InputJsonValue,
         authorId: user.id,
       },
@@ -404,6 +480,7 @@ export async function importTemplateJson(input: {
         category,
         badge: input.badge?.trim() || null,
         aspectRatio,
+        status: "APPROVED",
         previewUrl: parsed.template.previewUrl ?? parsed.template.thumbnails[0] ?? null,
         canvasJSON: {
           slides: parsed.template.slides,

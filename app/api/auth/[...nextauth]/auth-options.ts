@@ -162,6 +162,16 @@ export const authOptions: AuthOptions = {
       } else if (user?.id) {
         token.id = user.id;
         token.sub = user.id;
+        if (user.email) token.email = user.email;
+        if (user.name !== undefined) token.name = user.name;
+        // Only keep remote URLs in the JWT — data URLs blow the cookie size limit.
+        if (
+          typeof user.image === "string" &&
+          /^https?:\/\//i.test(user.image)
+        ) {
+          token.image = user.image;
+          token.picture = user.image;
+        }
       }
 
       if (token.id && (user || account || !token.role)) {

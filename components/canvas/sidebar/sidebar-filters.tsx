@@ -1,13 +1,38 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Filter, Library, RotateCcw, SunMedium } from "lucide-react";
+import { Filter, RotateCcw, SunMedium } from "lucide-react";
+import { Shadow as FabricShadow } from "fabric";
 import { PillSlider } from "@/components/ui/pill-slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import type { FilterPresetValues } from "@/store/slices/settingsSlice";
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
+import { cn } from "@/lib/utils";
+
+type ShadowKind = "none" | "spread" | "hug";
+type ShadowIntensity = "low" | "medium" | "high";
+
+function shadowParams(
+  kind: ShadowKind,
+  intensity: ShadowIntensity,
+  light: { x: number; y: number },
+) {
+  if (kind === "none") return null;
+  const strength =
+    intensity === "low" ? 0.55 : intensity === "high" ? 1.25 : 0.9;
+  const baseBlur = kind === "hug" ? 18 : 42;
+  const baseOffset = kind === "hug" ? 8 : 22;
+  const offsetX = ((50 - light.x) / 50) * baseOffset * strength;
+  const offsetY = ((50 - light.y) / 50) * baseOffset * strength;
+  return {
+    color: `rgba(0,0,0,${Math.min(0.55, 0.28 * strength)})`,
+    blur: baseBlur * strength,
+    offsetX,
+    offsetY,
+  };
+}
 
 type Tab = "slide" | "image";
 
@@ -105,14 +130,34 @@ export function SidebarFilters() {
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [hasImageTarget, setHasImageTarget] = useState(false);
 
-  // Состояния для новых заглушек (как на скриншотах)
-  const [shadowType, setShadowType] = useState<string>("spread");
-  const [intensity, setIntensity] = useState<string>("medium");
-  const [lightSourcePos, setLightSourcePos] = useState<{ x: number; y: number }>({ x: 50, y: 40 });
+  const [shadowType, setShadowType] = useState<ShadowKind>("spread");
+  const [intensity, setIntensity] = useState<ShadowIntensity>("medium");
+  const [lightSourcePos, setLightSourcePos] = useState<{ x: number; y: number }>({
+    x: 50,
+    y: 40,
+  });
 
   const syncImageTarget = useCallback(() => {
     setHasImageTarget(Boolean(manager?.effects.resolveImageTarget()));
   }, [manager]);
+
+  const applyImageShadow = useCallback(
+    (
+      kind: ShadowKind,
+      nextIntensity: ShadowIntensity,
+      light: { x: number; y: number },
+    ) => {
+      const target = manager?.effects.resolveImageTarget();
+      if (!target || !manager) return;
+      const params = shadowParams(kind, nextIntensity, light);
+      target.set({
+        shadow: params ? new FabricShadow(params) : null,
+      });
+      manager.canvas.requestRenderAll();
+      manager.commit();
+    },
+    [manager],
+  );
 
   useEffect(() => {
     if (!manager) return;
@@ -301,87 +346,139 @@ export function SidebarFilters() {
             </p>
           )}
 
-          {/* Заглушка блока Shadow (как на картинке) */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground px-1">Shadow</span>
+            <span className="px-1 text-[13px] font-medium text-muted-foreground">
+              Shadow
+            </span>
             <div className="grid grid-cols-3 gap-1.5">
-              {[
-                { id: "none", label: "None" },
-                { id: "spread", label: "Spread" },
-                { id: "hug", label: "Hug" },
-              ].map((item) => (
+              {(
+                [
+                  { id: "none", label: "None", preview: "shadow-none" },
+                  { id: "spread", label: "Spread", preview: "shadow-[0_10px_18px_rgba(0,0,0,0.28)]" },
+                  { id: "hug", label: "Hug", preview: "shadow-[0_3px_6px_rgba(0,0,0,0.35)]" },
+                ] as const
+              ).map((item) => (
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setShadowType(item.id)}
                   disabled={!hasImageTarget}
-                  className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all ${
+                  onClick={() => {
+                    setShadowType(item.id);
+                    applyImageShadow(item.id, intensity, lightSourcePos);
+                  }}
+                  className={cn(
+                    "flex flex-col items-center justify-center rounded-2xl bg-muted/40 px-2 py-2.5 transition-colors disabled:opacity-40",
                     shadowType === item.id
-                      ? "border-primary bg-accent text-foreground font-medium"
-                      : "border-border/60 bg-muted/30 text-muted-foreground hover:bg-muted/60"
-                  }`}
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                  )}
                 >
-                  <div className="w-10 h-8 rounded bg-muted-foreground/20 mb-1" />
-                  <span className="text-[11px]">{item.label}</span>
+                  <div
+                    className={cn(
+                      "mb-1.5 flex h-8 w-10 items-center justify-center rounded-md bg-background",
+                      item.preview,
+                    )}
+                  >
+                    <div className="size-4 rounded-sm bg-foreground/20" />
+                  </div>
+                  <span className="text-[11px] font-medium">{item.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Заглушка блока Intensity (как на картинке) */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground px-1">Intensity</span>
-            <div className="grid grid-cols-3 gap-1 bg-muted/60 p-1 rounded-full">
-              {["Low", "Medium", "High"].map((item) => {
-                const id = item.toLowerCase();
+            <span className="px-1 text-[13px] font-medium text-muted-foreground">
+              Intensity
+            </span>
+            <div className="grid grid-cols-3 gap-1 rounded-full bg-muted/60 p-1 dark:bg-muted/25">
+              {(["low", "medium", "high"] as const).map((id) => {
                 const active = intensity === id;
                 return (
                   <button
                     key={id}
                     type="button"
-                    onClick={() => setIntensity(id)}
-                    disabled={!hasImageTarget}
-                    className={`py-1 text-xs rounded-full transition-all ${
+                    disabled={!hasImageTarget || shadowType === "none"}
+                    onClick={() => {
+                      setIntensity(id);
+                      applyImageShadow(shadowType, id, lightSourcePos);
+                    }}
+                    className={cn(
+                      "h-8 rounded-full text-[12px] font-medium capitalize transition-colors disabled:opacity-40",
                       active
-                        ? "bg-background text-foreground font-semibold shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
+                        ? "bg-background text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
                   >
-                    {item}
+                    {id}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Заглушка блока Light Source (интерактивная точка на превью) */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground px-1">Light Source</span>
-            <div 
-              className="relative w-full h-32 rounded-xl bg-muted/40 border border-border/60 overflow-hidden flex items-center justify-center cursor-pointer select-none"
-              onClick={(e) => {
+            <span className="px-1 text-[13px] font-medium text-muted-foreground">
+              Light source
+            </span>
+            <div
+              role="slider"
+              aria-label="Light source position"
+              className="relative flex h-32 w-full cursor-crosshair select-none items-center justify-center overflow-hidden rounded-2xl bg-muted/40"
+              onPointerDown={(e) => {
+                if (!hasImageTarget || shadowType === "none") return;
                 const rect = e.currentTarget.getBoundingClientRect();
-                const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-                const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-                setLightSourcePos({ x, y });
+                const move = (clientX: number, clientY: number) => {
+                  const x = Math.max(
+                    0,
+                    Math.min(100, Math.round(((clientX - rect.left) / rect.width) * 100)),
+                  );
+                  const y = Math.max(
+                    0,
+                    Math.min(100, Math.round(((clientY - rect.top) / rect.height) * 100)),
+                  );
+                  const next = { x, y };
+                  setLightSourcePos(next);
+                  applyImageShadow(shadowType, intensity, next);
+                };
+                move(e.clientX, e.clientY);
+                const onMove = (ev: PointerEvent) => move(ev.clientX, ev.clientY);
+                const onUp = () => {
+                  window.removeEventListener("pointermove", onMove);
+                  window.removeEventListener("pointerup", onUp);
+                };
+                window.addEventListener("pointermove", onMove);
+                window.addEventListener("pointerup", onUp);
               }}
             >
-              {/* Мини-превью контента */}
-              <div className="w-3/4 h-3/4 rounded bg-background/80 border border-border flex flex-col p-2 text-[8px] text-muted-foreground shadow">
-                <div className="w-full h-2 bg-muted rounded mb-1" />
-                <div className="w-1/2 h-2 bg-muted rounded" />
+              <div className="flex h-3/4 w-3/4 flex-col rounded-xl bg-background/80 p-2">
+                <div className="mb-1 h-2 w-full rounded-full bg-muted" />
+                <div className="h-2 w-1/2 rounded-full bg-muted" />
               </div>
-              {/* Перетаскиваемый/кликабельный источник света */}
               <div
-                className="absolute size-7 -ml-3.5 -mt-3.5 rounded-full bg-primary text-white flex items-center justify-center shadow-lg transition-all pointer-events-none"
+                className="pointer-events-none absolute flex size-7 -ml-3.5 -mt-3.5 items-center justify-center rounded-full bg-foreground text-background"
                 style={{ left: `${lightSourcePos.x}%`, top: `${lightSourcePos.y}%` }}
               >
-                <SunMedium className="size-4 animate-spin-slow" />
+                <SunMedium className="size-3.5" />
               </div>
             </div>
+            <button
+              type="button"
+              disabled={!hasImageTarget}
+              onClick={() => {
+                setShadowType("none");
+                setIntensity("medium");
+                setLightSourcePos({ x: 50, y: 40 });
+                applyImageShadow("none", "medium", { x: 50, y: 40 });
+              }}
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-muted/50 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
+            >
+              <RotateCcw className="size-3.5" />
+              Reset shadow
+            </button>
           </div>
 
-          <hr className="border-border/40 my-1" />
+          <div className="my-1 h-px bg-muted/60" />
 
           {/* Стандартные слайдеры Image */}
           <PillSlider

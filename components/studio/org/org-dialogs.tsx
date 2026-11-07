@@ -7,7 +7,6 @@ import {
   Check,
   Loader2,
   MoreHorizontal,
-  UserCircle2,
 } from "lucide-react";
 
 import {
@@ -24,6 +23,7 @@ import {
   revokeOrganizationInvite,
   sendOrganizationInvites,
 } from "@/actions/invites";
+import { StudioAvatar } from "@/components/studio/ui/studio-avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -350,16 +350,11 @@ export function ManageMembersDialog({
                     key={member.id}
                     className="flex items-center gap-3 rounded-2xl px-2 py-2"
                   >
-                    {member.user.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={member.user.image}
-                        alt=""
-                        className="size-9 rounded-full object-cover"
-                      />
-                    ) : (
-                      <UserCircle2 className="size-9 text-muted-foreground" />
-                    )}
+                    <StudioAvatar
+                      name={member.user.name || member.user.email}
+                      src={member.user.image}
+                      className="size-9 text-[12px]"
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[13px] font-medium">
                         {member.user.name || "User"}

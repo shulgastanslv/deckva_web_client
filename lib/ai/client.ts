@@ -12,6 +12,22 @@ export function upstreamErrorMessage(
   if (payload && typeof payload === "object") {
     const row = payload as { detail?: unknown; error?: unknown };
     if (typeof row.detail === "string" && row.detail.trim()) return row.detail;
+    // FastAPI validation errors: { detail: [{ loc, msg, ... }, ...] }
+    if (Array.isArray(row.detail) && row.detail.length > 0) {
+      const parts = row.detail
+        .map((item) => {
+          if (!item || typeof item !== "object") return null;
+          const entry = item as { loc?: unknown; msg?: unknown };
+          const msg = typeof entry.msg === "string" ? entry.msg.trim() : "";
+          if (!msg) return null;
+          const loc = Array.isArray(entry.loc)
+            ? entry.loc.filter((p) => typeof p === "string").join(".")
+            : "";
+          return loc ? `${loc}: ${msg}` : msg;
+        })
+        .filter((part): part is string => Boolean(part));
+      if (parts.length > 0) return parts.join("; ");
+    }
     if (typeof row.error === "string" && row.error.trim()) return row.error;
   }
   return `${fallback} (${status})`;

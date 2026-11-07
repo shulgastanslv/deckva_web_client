@@ -5,6 +5,8 @@ import { Star } from "lucide-react";
 import type { ProjectListItem } from "@/actions/projects";
 import { formatBoardDate } from "@/components/studio/lib/format";
 import { StudioProjectMenu } from "@/components/studio/browse/studio-project-menu";
+import { StudioProjectOwner } from "@/components/studio/browse/studio-project-owner";
+import { StudioTypeArt } from "@/components/studio/ui/studio-type-art";
 
 export function StudioProjectCard({
   project,
@@ -31,8 +33,15 @@ export function StudioProjectCard({
             draggable={false}
           />
         ) : (
-          <span className="flex h-full items-center justify-center px-3 text-center text-[12px] text-muted-foreground/70">
-            {project.title || "Untitled"}
+          <span className="flex h-full flex-col items-center justify-center gap-2 px-3 text-center">
+            <StudioTypeArt
+              kind="carousel"
+              seed={project.id.length}
+              className="size-12 rounded-2xl"
+            />
+            <span className="text-[12px] text-muted-foreground/70">
+              {project.title || "Untitled"}
+            </span>
           </span>
         )}
         {project.isSaved ? (
@@ -53,9 +62,16 @@ export function StudioProjectCard({
         <p className="truncate text-[13px] font-medium text-foreground">
           {project.title || "Untitled"}
         </p>
-        <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-          {project.slideCount} slides · {formatBoardDate(project.updatedAt)}
-        </p>
+        <div className="mt-1.5 flex items-center justify-between gap-2">
+          <StudioProjectOwner
+            name={project.authorName}
+            image={project.authorImage}
+            className="min-w-0"
+          />
+          <p className="shrink-0 text-[11px] text-muted-foreground">
+            {project.slideCount} · {formatBoardDate(project.updatedAt)}
+          </p>
+        </div>
       </button>
     </article>
   );

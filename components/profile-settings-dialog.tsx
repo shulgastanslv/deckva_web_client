@@ -40,6 +40,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { formatCardBrand } from "@/lib/billing/card";
 import type { BillingSnapshot } from "@/lib/billing/types";
+import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { messages } from "@/lib/messages";
 import {
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
@@ -216,14 +218,57 @@ export function ProfileSettingsDialog({
 
     setSaving(true);
     try {
-      const res = await updateProfile({ name: trimmedName });
+      const res = await updateProfile({
+        name: trimmedName,
+        image: image ?? null,
+      });
       if (!res.success) {
         setError((res as { error: string }).error);
         return;
       }
-      await update({ name: res.name });
+      // Remote URLs can live in the JWT; data URLs stay in DB + local profile cache.
+      const sessionImage =
+        typeof res.image === "string" && /^https?:\/\//i.test(res.image)
+          ? res.image
+          : null;
+      await update({ name: res.name, image: sessionImage });
+      setImage(res.image);
       setInitialName(res.name ?? trimmedName);
       setSaved(true);
+      window.dispatchEvent(new CustomEvent("studio:profile-changed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onPickAvatar = async (file: File | null) => {
+    if (!file) return;
+    setError(null);
+    setSaved(false);
+    if (!file.type.startsWith("image/")) {
+      setError(messages.errors.chooseImage);
+      return;
+    }
+    try {
+      const dataUrl = await fileToDataUrl(file, {
+        maxEdge: 384,
+        quality: 0.82,
+      });
+      if (dataUrl.length > 450_000) {
+        setError(messages.errors.assetTooLarge);
+        return;
+      }
+      setSaving(true);
+      const res = await updateProfile({ image: dataUrl });
+      if (!res.success) {
+        setError((res as { error: string }).error);
+        return;
+      }
+      setImage(res.image);
+      setSaved(true);
+      window.dispatchEvent(new CustomEvent("studio:profile-changed"));
+    } catch {
+      setError(messages.errors.readAvatar);
     } finally {
       setSaving(false);
     }
@@ -404,9 +449,14 @@ export function ProfileSettingsDialog({
                             </div>
                             <input
                               type="file"
-                              accept="image/*"
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                              onChange={() => { }}
+                              accept="image/png,image/jpeg,image/webp"
+                              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                              disabled={saving}
+                              onChange={(event) => {
+                                const file = event.target.files?.[0] ?? null;
+                                event.target.value = "";
+                                void onPickAvatar(file);
+                              }}
                             />
                           </div>
                           <div className="min-w-0">

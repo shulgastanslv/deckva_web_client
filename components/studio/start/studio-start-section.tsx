@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import type { ArtifactListItem } from "@/actions/artifacts";
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
+import { StudioTemplatesDialog } from "@/components/studio/dialogs/studio-templates-dialog";
 import { StudioBrandDialog } from "@/components/studio/dialogs/start/studio-brand-dialog";
 import { StudioCarouselDialog } from "@/components/studio/dialogs/start/studio-carousel-dialog";
 import { StudioCodeBlockDialog } from "@/components/studio/dialogs/start/studio-codeblock-dialog";
@@ -35,6 +36,8 @@ export function StudioStartSection({
   initialType = "text",
   onBlank,
   onTemplates,
+  onBrandKit,
+  onImportJson,
   onSelectKind,
   onGenerate,
   onTextGenerate,
@@ -53,6 +56,8 @@ export function StudioStartSection({
   initialType?: GenerationKind;
   onBlank: () => void;
   onTemplates: () => void;
+  onBrandKit?: () => void;
+  onImportJson?: (file: File) => void | Promise<void>;
   onSelectKind: (kind: GenerationKind) => void;
   onGenerate: (input: StudioPromptSubmit) => void | Promise<void>;
   onTextGenerate: (topic: string) => boolean | void | Promise<boolean | void>;
@@ -72,8 +77,10 @@ export function StudioStartSection({
 }) {
   void name;
   void onSelectKind;
+  void onTemplates;
 
   const [active, setActive] = useState<DialogId | null>(null);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
   const handle = normalizeHandle(defaultHandle);
   const language = inferPromptLanguage(topic ?? "");
 
@@ -95,7 +102,10 @@ export function StudioStartSection({
           </div>
           <StudioCreateMenu
             onBlank={onBlank}
-            onTemplates={onTemplates}
+            onTemplates={() => setTemplatesOpen(true)}
+            onCarousel={() => setActive("carousel")}
+            onBrandKit={onBrandKit}
+            onImportJson={onImportJson}
             label="View options"
             align="end"
           />
@@ -130,6 +140,11 @@ export function StudioStartSection({
           error={generateError}
         />
       </section>
+
+      <StudioTemplatesDialog
+        open={templatesOpen}
+        onOpenChange={setTemplatesOpen}
+      />
 
       <StudioTextDialog
         open={active === "text"}

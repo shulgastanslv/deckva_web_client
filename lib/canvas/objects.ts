@@ -528,6 +528,41 @@ export class ObjectFactory {
     return img;
   }
 
+  /**
+   * Place a device frame using a relative layout preset (0–1 coords + scale/angle).
+   * `scale: 1` fits the device to ~68% (fit) or ~88% (max) of the shorter canvas side,
+   * so preview cards and canvas placement stay aligned across device families.
+   */
+  async addFrameLayout(
+    kind: FrameKind,
+    layout: { x: number; y: number; scale: number; angle: number },
+    screen?: string,
+    options?: { fit?: "max" | "fit" },
+  ) {
+    const { width, height } = this.getLogicalSize();
+    const img = await this.addFrame(
+      kind,
+      width * layout.x,
+      height * layout.y,
+      screen,
+    );
+    const nativeW = Math.max(1, img.width || 1);
+    const nativeH = Math.max(1, img.height || 1);
+    const cover = options?.fit === "fit" ? 0.68 : 0.88;
+    const target = Math.min(width, height) * cover;
+    const base = target / Math.max(nativeW, nativeH);
+    img.set({
+      scaleX: base * layout.scale,
+      scaleY: base * layout.scale,
+      angle: layout.angle,
+      originX: "center",
+      originY: "center",
+    });
+    img.setCoords();
+    this.canvas.requestRenderAll();
+    return img;
+  }
+
   private isFrame(obj: FabricObject | null | undefined): obj is Image {
     if (!(obj instanceof Image)) return false;
     return (obj as Image & { swibpRole?: string }).swibpRole === "frame";

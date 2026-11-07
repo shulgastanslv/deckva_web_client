@@ -2,23 +2,15 @@
 
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface CollapsibleGroupProps {
   id: string;
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
-  /** Optional control on the right side of the header (e.g. Switch). */
   headerRight?: React.ReactNode;
   className?: string;
-}
-
-function readStoredOpen(id: string, fallback: boolean): boolean {
-  if (typeof window === "undefined") return fallback;
-  const stored = localStorage.getItem(`group-${id}`);
-  if (stored === null) return fallback;
-  return stored === "true";
 }
 
 export function CollapsibleGroup({
@@ -29,7 +21,14 @@ export function CollapsibleGroup({
   headerRight,
   className,
 }: CollapsibleGroupProps) {
-  const [isOpen, setIsOpen] = useState(() => readStoredOpen(id, defaultOpen));
+  // Keep SSR and first client paint aligned; restore localStorage after mount.
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(`group-${id}`);
+    if (stored === null) return;
+    setIsOpen(stored === "true");
+  }, [id]);
 
   const toggle = () => {
     const next = !isOpen;

@@ -3,6 +3,7 @@
 import type { ProjectListItem } from "@/actions/projects";
 import { formatBoardDate } from "@/components/studio/lib/format";
 import { StudioProjectMenu } from "@/components/studio/browse/studio-project-menu";
+import { StudioProjectOwner } from "@/components/studio/browse/studio-project-owner";
 import { StudioProjectThumb } from "@/components/studio/browse/studio-project-thumb";
 import { StudioBadge } from "@/components/studio/ui/studio-badge";
 import { cn } from "@/lib/utils";
@@ -39,8 +40,15 @@ export function StudioProjectRow({
             </span>
             {project.isSaved ? <StudioBadge>Starred</StudioBadge> : null}
           </span>
-          <span className="mt-0.5 block truncate text-[12px] text-neutral-500 dark:text-muted-foreground">
-            Modified by {project.authorName || "you"}
+          <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[12px] text-neutral-500 dark:text-muted-foreground">
+            <StudioProjectOwner
+              name={project.authorName}
+              image={project.authorImage}
+              showName={false}
+            />
+            <span className="truncate">
+              Modified by {project.authorName || "you"}
+            </span>
           </span>
         </span>
       </button>
@@ -53,9 +61,12 @@ export function StudioProjectRow({
       <p className="truncate text-[13px] text-neutral-500 dark:text-muted-foreground">
         {formatBoardDate(project.updatedAt)}
       </p>
-      <p className="hidden truncate text-[13px] text-neutral-500 md:block dark:text-muted-foreground">
-        {project.authorName || "You"}
-      </p>
+      <div className="hidden min-w-0 md:block">
+        <StudioProjectOwner
+          name={project.authorName}
+          image={project.authorImage}
+        />
+      </div>
       <div
         className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
         onClick={(e) => e.stopPropagation()}

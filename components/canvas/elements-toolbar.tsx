@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type DragEvent, type ReactNode } from "react";
 import {
   AlignLeft,
+  ChevronDown,
   Circle,
   Diamond,
   Ellipse,
@@ -15,6 +16,8 @@ import {
   Layers2,
   Link2,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
   Minimize2,
   Minus,
   MousePointer2,
@@ -30,18 +33,16 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
+import { CaptionControls } from "@/components/canvas/caption-controls";
+import { useSlides } from "@/hooks/use-slides";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Tooltip,
   TooltipContent,
@@ -81,7 +82,6 @@ const SHAPES: ToolDef[] = [
 ];
 
 const TEXTS: ToolDef[] = [
-  { id: "text", label: "Text", hint: "Single line of text", icon: Type, shortcut: "T", key: "t" },
   { id: "heading", label: "Heading", hint: "Large title", icon: Heading1 },
   { id: "subtitle", label: "Subtitle", hint: "Smaller title under the heading", icon: Heading2 },
   { id: "paragraph", label: "Paragraph", hint: "Body text", icon: AlignLeft },
@@ -92,23 +92,36 @@ function isTypingTarget() {
   const el = document.activeElement;
   if (
     el instanceof HTMLElement &&
-    (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable)
+    (el.tagName === "INPUT" ||
+      el.tagName === "TEXTAREA" ||
+      el.tagName === "SELECT" ||
+      el.isContentEditable)
   ) {
     return true;
   }
   return false;
 }
 
-function ToolHint({ label, shortcut, hint }: { label: string; shortcut?: string; hint?: string }) {
+function ToolHint({
+  label,
+  shortcut,
+  hint,
+}: {
+  label: string;
+  shortcut?: string;
+  hint?: string;
+}) {
   return (
     <span className="flex flex-col items-start gap-0.5">
       <span className="flex items-center gap-1.5">
         {label}
-        {shortcut && (
-          <kbd className="rounded-sm bg-background/15 px-1 font-mono text-[10px]">{shortcut}</kbd>
-        )}
+        {shortcut ? (
+          <kbd className="rounded-sm bg-background/15 px-1 font-mono text-[10px]">
+            {shortcut}
+          </kbd>
+        ) : null}
       </span>
-      {hint && <span className="opacity-80">{hint}</span>}
+      {hint ? <span className="opacity-80">{hint}</span> : null}
     </span>
   );
 }
@@ -124,7 +137,6 @@ function RailTool({
   onDragOver,
   onDragLeave,
   onDrop,
-  menu,
   children,
 }: {
   label: string;
@@ -137,64 +149,131 @@ function RailTool({
   onDragOver?: (event: DragEvent<HTMLButtonElement>) => void;
   onDragLeave?: () => void;
   onDrop?: (event: DragEvent<HTMLButtonElement>) => void;
-  menu?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <div className="relative size-9 shrink-0">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-label={shortcut ? `${label}, ${shortcut}` : label}
-            aria-pressed={active}
-            disabled={disabled}
-            onClick={onClick}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            className={cn(
-              "flex size-9 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
-              active || dragging
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            {children}
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={10}>
-          <ToolHint label={label} shortcut={shortcut} hint={hint} />
-        </TooltipContent>
-      </Tooltip>
-      {menu}
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={shortcut ? `${label}, ${shortcut}` : label}
+          aria-pressed={active}
+          disabled={disabled}
+          onClick={onClick}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          className={cn(
+            "flex size-9 shrink-0 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
+            active || dragging
+              ? "bg-foreground text-background"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          )}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={10}>
+        <ToolHint label={label} shortcut={shortcut} hint={hint} />
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
-function CornerMenu({
+function SplitTool({
   label,
+  hint,
+  shortcut,
+  active,
+  dragging,
   disabled,
+  onClick,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  open,
+  onOpenChange,
+  panel,
   children,
 }: {
   label: string;
+  hint?: string;
+  shortcut?: string;
+  active?: boolean;
+  dragging?: boolean;
   disabled?: boolean;
+  onClick?: () => void;
+  onDragOver?: (event: DragEvent<HTMLButtonElement>) => void;
+  onDragLeave?: () => void;
+  onDrop?: (event: DragEvent<HTMLButtonElement>) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  panel: ReactNode;
   children: ReactNode;
 }) {
+  const lit = Boolean(active || dragging || open);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label={label}
-          disabled={disabled}
-          className="absolute right-0 bottom-0 z-10 flex size-3 items-center justify-center text-muted-foreground disabled:pointer-events-none"
-        >
-          <span className="block size-0 border-y-[2.5px] border-l-[4px] border-y-transparent border-l-current" />
-        </button>
-      </DropdownMenuTrigger>
-      {children}
-    </DropdownMenu>
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <div
+        className={cn(
+          "flex h-9 shrink-0 items-center rounded-full p-0.5 transition-colors",
+          lit ? "bg-foreground text-background" : "bg-muted/50",
+        )}
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label={shortcut ? `${label}, ${shortcut}` : label}
+              aria-pressed={active}
+              disabled={disabled}
+              onClick={onClick}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              className={cn(
+                "flex size-8 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
+                lit
+                  ? "text-background hover:bg-background/15"
+                  : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
+              )}
+            >
+              {children}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={10}>
+            <ToolHint label={label} shortcut={shortcut} hint={hint} />
+          </TooltipContent>
+        </Tooltip>
+
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label={`${label} options`}
+            disabled={disabled}
+            className={cn(
+              "flex h-8 w-6 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
+              lit
+                ? "text-background/80 hover:bg-background/15 hover:text-background"
+                : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
+            )}
+          >
+            <ChevronDown className="size-3.5" />
+          </button>
+        </PopoverTrigger>
+      </div>
+
+      <PopoverContent
+        side="top"
+        align="center"
+        sideOffset={12}
+        className="w-auto rounded-2xl border-0 bg-popover p-2"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        {panel}
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -209,40 +288,67 @@ function ToolFlyout({
   disabled?: boolean;
   onUse: (tool: ToolDef) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const active = tools.find((tool) => tool.id === activeId) ?? tools[0];
   const Icon = active.icon;
 
   return (
-    <RailTool
+    <SplitTool
       label={active.label}
       hint={active.hint}
       shortcut={active.shortcut}
       disabled={disabled}
+      open={open}
+      onOpenChange={setOpen}
       onClick={() => onUse(active)}
-      menu={
-        <CornerMenu label={`${active.label} options`} disabled={disabled}>
-          <DropdownMenuContent side="top" align="center" sideOffset={10} className="w-52!">
-            {tools.map((tool) => {
-              const ItemIcon = tool.icon;
-              const selected = tool.id === active.id;
-              return (
-                <DropdownMenuItem
-                  key={tool.id}
-                  onSelect={() => onUse(tool)}
-                  className={cn("gap-2", selected && "bg-accent")}
-                >
-                  <ItemIcon />
-                  <span className="flex-1">{tool.label}</span>
-                  {tool.shortcut && <DropdownMenuShortcut>{tool.shortcut}</DropdownMenuShortcut>}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </CornerMenu>
+      panel={
+        <div
+          className={cn(
+            "grid gap-1",
+            tools.length > 6 ? "grid-cols-3" : "grid-cols-1",
+          )}
+        >
+          {tools.map((tool) => {
+            const ItemIcon = tool.icon;
+            const selected = tool.id === active.id;
+            return (
+              <button
+                key={tool.id}
+                type="button"
+                title={tool.hint}
+                onClick={() => {
+                  onUse(tool);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "flex h-9 items-center gap-2 rounded-full px-2.5 text-[13px] font-medium transition-colors",
+                  tools.length > 6 && "flex-col justify-center gap-1 px-2 py-2 h-auto min-w-16",
+                  selected
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                )}
+              >
+                <ItemIcon className="size-4 shrink-0" />
+                {tools.length > 6 ? (
+                  <span className="max-w-full truncate text-[11px]">{tool.label}</span>
+                ) : (
+                  <>
+                    <span className="flex-1 text-left">{tool.label}</span>
+                    {tool.shortcut ? (
+                      <kbd className="rounded-sm bg-muted/60 px-1 font-mono text-[10px] text-muted-foreground">
+                        {tool.shortcut}
+                      </kbd>
+                    ) : null}
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
       }
     >
       <Icon className="size-4" />
-    </RailTool>
+    </SplitTool>
   );
 }
 
@@ -273,8 +379,12 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   const setEraserActive = useCanvasStore((s) => s.setEraserActive);
   const zoom = useCanvasStore((s) => s.zoom);
   const setZoom = useCanvasStore((s) => s.setZoom);
+  const postCaption = useCanvasStore((s) => s.postCaption);
+  const { currentIndex, slides, canGoPrev, canGoNext, prev, next } = useSlides();
   const [shapeId, setShapeId] = useState(SHAPES[0].id);
   const [textId, setTextId] = useState(TEXTS[0].id);
+  const [imageOpen, setImageOpen] = useState(false);
+  const [enhanceOpen, setEnhanceOpen] = useState(false);
   const {
     canRun: canEnhance,
     busy: enhanceBusy,
@@ -303,9 +413,15 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return;
+      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat)
+        return;
       if (isTypingTarget()) return;
-      if (event.target instanceof Element && event.target.closest("[data-slot='dropdown-menu-content']")) return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest("[data-slot='popover-content']")
+      ) {
+        return;
+      }
       const active = manager?.getActiveObject() as { isEditing?: boolean } | null;
       if (active?.isEditing) return;
 
@@ -357,7 +473,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-4">
-        <div className="pointer-events-auto flex h-12 w-fit max-w-[calc(100vw-24px)] items-center gap-1 overflow-x-auto rounded-full border border-border/50 bg-background p-1 backdrop-blur-md">
+        <div className="pointer-events-auto flex h-12 w-fit max-w-[calc(100vw-24px)] items-center gap-1 overflow-x-auto rounded-full bg-background p-1">
           <input
             type="file"
             ref={fileInputRef}
@@ -416,66 +532,84 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             onUse={(tool) => useTool(tool, "text")}
           />
 
-          <RailTool
+          <SplitTool
             label="Image"
             hint="Upload or drop a picture"
             dragging={isDragging}
             disabled={!manager}
+            open={imageOpen}
+            onOpenChange={setImageOpen}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={onImageDragOver}
             onDragLeave={() => setIsDragging(false)}
             onDrop={onImageDrop}
-            menu={
-              <CornerMenu label="Image options" disabled={!manager}>
-              <DropdownMenuContent side="top" align="center" sideOffset={10} className="w-64!">
-                <DropdownMenuItem onSelect={() => fileInputRef.current?.click()} className="gap-2">
-                  <ImagePlus />
+            panel={
+              <div className="w-64 space-y-2 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                    setImageOpen(false);
+                  }}
+                  className="flex h-9 w-full items-center gap-2 rounded-full px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  <ImagePlus className="size-4" />
                   Upload image
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Image from a link</DropdownMenuLabel>
-                <div className="flex items-center gap-1.5 px-1.5 pb-1.5" onKeyDown={(event) => event.stopPropagation()}>
-                  <div className="relative min-w-0 flex-1">
-                    <Link2 className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      type="url"
-                      placeholder="Image URL"
-                      value={imageUrl}
-                      disabled={!manager}
-                      onChange={(event) => {
-                        setImageUrl(event.target.value);
-                        setUrlError(null);
-                      }}
-                      onKeyDown={(event) => {
-                        event.stopPropagation();
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          void addImageFromUrl();
-                        }
-                      }}
-                      className="h-9 rounded-full border-border/50 bg-muted/30 pl-7 text-[13px] shadow-none"
-                    />
+                </button>
+                <div className="space-y-1.5 px-1">
+                  <p className="text-[12px] font-medium text-muted-foreground">
+                    From link
+                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative min-w-0 flex-1">
+                      <Link2 className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        type="url"
+                        placeholder="Image URL"
+                        value={imageUrl}
+                        disabled={!manager}
+                        onChange={(event) => {
+                          setImageUrl(event.target.value);
+                          setUrlError(null);
+                        }}
+                        onKeyDown={(event) => {
+                          event.stopPropagation();
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            void addImageFromUrl().then(() => setImageOpen(false));
+                          }
+                        }}
+                        className="h-9 rounded-full border-0 bg-muted/40 pl-7 text-[13px] shadow-none"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      disabled={!manager || urlLoading || !imageUrl.trim()}
+                      onClick={() =>
+                        void addImageFromUrl().then(() => setImageOpen(false))
+                      }
+                      className="h-9 shrink-0 rounded-full px-2.5 text-[13px]"
+                    >
+                      {urlLoading ? (
+                        <Loader2 className="size-3 animate-spin" />
+                      ) : (
+                        "Add"
+                      )}
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    disabled={!manager || urlLoading || !imageUrl.trim()}
-                    onClick={() => void addImageFromUrl()}
-                    className="h-9 shrink-0 rounded-full px-2.5 text-[13px]"
-                  >
-                    {urlLoading ? <Loader2 className="size-3 animate-spin" /> : "Add"}
-                  </Button>
+                  {urlError ? (
+                    <p className="text-[13px] text-destructive">{urlError}</p>
+                  ) : null}
                 </div>
-                {urlError && <p className="px-2 pb-1.5 text-[13px] text-destructive">{urlError}</p>}
-              </DropdownMenuContent>
-              </CornerMenu>
+              </div>
             }
           >
             <ImagePlus className="size-4" />
-          </RailTool>
+          </SplitTool>
 
-          <RailTool
+          <SplitTool
             label="Enhance"
             hint={
               enhanceBusy
@@ -484,56 +618,102 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   ? enhanceError
                   : "Remove BG, upscale, magic layer — select an image"
             }
-            disabled={!canEnhance}
+            disabled={!canEnhance && !enhanceBusy}
+            open={enhanceOpen}
+            onOpenChange={setEnhanceOpen}
             onClick={() => void removeBackground()}
-            menu={
-              <CornerMenu label="Enhance options" disabled={Boolean(enhanceBusy)}>
-                <DropdownMenuContent side="top" align="center" sideOffset={10} className="w-56!">
-                  <DropdownMenuItem
+            panel={
+              <div className="w-52 space-y-0.5 p-1">
+                <button
+                  type="button"
+                  disabled={!canEnhance}
+                  onClick={() => {
+                    void removeBackground();
+                    setEnhanceOpen(false);
+                  }}
+                  className="flex h-9 w-full items-center gap-2 rounded-full px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+                >
+                  <WandSparkles className="size-4" />
+                  Remove background
+                </button>
+                <p className="px-3 pt-1.5 pb-1 text-[12px] font-medium text-muted-foreground">
+                  Upscale
+                </p>
+                {([2, 3, 4] as UpscaleScale[]).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
                     disabled={!canEnhance}
-                    onSelect={() => void removeBackground()}
-                    className="gap-2"
+                    onClick={() => {
+                      setEnhanceScale(value);
+                      void upscale(value);
+                      setEnhanceOpen(false);
+                    }}
+                    className={cn(
+                      "flex h-9 w-full items-center gap-2 rounded-full px-3 text-[13px] font-medium transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40",
+                      enhanceScale === value
+                        ? "bg-muted text-foreground"
+                        : "text-foreground",
+                    )}
                   >
-                    <WandSparkles />
-                    Remove background
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Upscale</DropdownMenuLabel>
-                  {([2, 3, 4] as UpscaleScale[]).map((value) => (
-                    <DropdownMenuItem
-                      key={value}
-                      disabled={!canEnhance}
-                      onSelect={() => {
-                        setEnhanceScale(value);
-                        void upscale(value);
-                      }}
-                      className="gap-2"
-                    >
-                      <ScanSearch />
-                      Upscale {value}×
-                      {enhanceScale === value && (
-                        <DropdownMenuShortcut className="tracking-normal">active</DropdownMenuShortcut>
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    disabled={!canEnhance}
-                    onSelect={() => void magicLayer()}
-                    className="gap-2"
-                  >
-                    <Layers2 />
-                    Magic layer
-                  </DropdownMenuItem>
-                  {enhanceError && (
-                    <p className="px-2 pb-1.5 text-[13px] text-destructive">{enhanceError}</p>
-                  )}
-                </DropdownMenuContent>
-              </CornerMenu>
+                    <ScanSearch className="size-4" />
+                    Upscale {value}×
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  disabled={!canEnhance}
+                  onClick={() => {
+                    void magicLayer();
+                    setEnhanceOpen(false);
+                  }}
+                  className="flex h-9 w-full items-center gap-2 rounded-full px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+                >
+                  <Layers2 className="size-4" />
+                  Magic layer
+                </button>
+                {enhanceError ? (
+                  <p className="px-3 pt-1 text-[13px] text-destructive">
+                    {enhanceError}
+                  </p>
+                ) : null}
+              </div>
             }
           >
             <EnhanceIcon className={cn("size-4", enhanceBusy && "animate-spin")} />
-          </RailTool>
+          </SplitTool>
+
+          <BarDivider />
+
+          <CaptionControls />
+          {postCaption.trim() ? (
+            <span
+              title={postCaption}
+              className="hidden max-w-[9rem] truncate px-1 text-[11px] text-muted-foreground sm:inline"
+            >
+              {postCaption.trim()}
+            </span>
+          ) : null}
+
+          <div className="flex h-9 items-center rounded-full bg-muted/50 p-0.5">
+            <RailTool
+              label="Previous slide"
+              disabled={!canGoPrev}
+              onClick={() => void prev()}
+            >
+              <ChevronLeft className="size-4" />
+            </RailTool>
+            <span className="min-w-10 px-1 text-center font-mono text-[11px] tabular-nums text-muted-foreground">
+              {currentIndex + 1}/{Math.max(slides.length, 1)}
+            </span>
+            <RailTool
+              label="Next slide"
+              disabled={!canGoNext}
+              onClick={() => void next()}
+            >
+              <ChevronRight className="size-4" />
+            </RailTool>
+          </div>
 
           <BarDivider />
 

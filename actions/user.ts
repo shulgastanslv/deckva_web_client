@@ -63,10 +63,10 @@ export async function getProfile(): Promise<
 
 export async function updateProfile(input: {
   name?: string;
-  image?: string;
+  image?: string | null;
   currentPassword?: string;
   newPassword?: string;
-}): Promise<ProfileResult<{ name: string | null }>> {
+}): Promise<ProfileResult<{ name: string | null; image: string | null }>> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return { success: false, error: messages.errors.signIn };
@@ -77,7 +77,7 @@ export async function updateProfile(input: {
     });
     if (!user) return { success: false, error: messages.errors.accountNotFound };
 
-    const data: { name?: string; password?: string; image?: string } = {};
+    const data: { name?: string; password?: string; image?: string | null } = {};
 
     if (typeof input.name === "string") {
       const name = input.name.trim();
@@ -86,8 +86,19 @@ export async function updateProfile(input: {
       data.name = name;
     }
 
-    if (typeof input.image === "string") {
-      data.image = input.image;
+    if (input.image === null) {
+      data.image = null;
+    } else if (typeof input.image === "string") {
+      const image = input.image.trim();
+      const isRemote = /^https?:\/\//i.test(image);
+      const isData = /^data:image\/(png|jpe?g|webp);base64,/i.test(image);
+      if (!isRemote && !isData) {
+        return { success: false, error: messages.errors.readAvatar };
+      }
+      if (isData && image.length > 450_000) {
+        return { success: false, error: messages.errors.assetTooLarge };
+      }
+      data.image = image;
     }
 
     const wantsPassword =
@@ -115,10 +126,10 @@ export async function updateProfile(input: {
     const updated = await prisma.user.update({
       where: { id: user.id },
       data,
-      select: { name: true },
+      select: { name: true, image: true },
     });
 
-    return { success: true, name: updated.name };
+    return { success: true, name: updated.name, image: updated.image };
   } catch (err) {
     console.error("updateProfile error:", err);
     return { success: false, error: messages.errors.updateProfile };

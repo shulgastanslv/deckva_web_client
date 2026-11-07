@@ -1,19 +1,16 @@
 "use client";
 
+import { useRef } from "react";
 import {
   ChevronDown,
-  LayoutTemplate,
-  FilePlus,
-  FolderGit2,
-  Upload,
   Compass,
-  Globe2,
-  ChevronRight,
-  Lock,
-  Plus
+  FilePlus,
+  LayoutTemplate,
+  Palette,
+  Upload,
 } from "lucide-react";
 
-import { StudioButton } from "@/components/studio/ui/studio-button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,11 +19,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 export function StudioCreateMenu({
   onBlank,
   onTemplates,
+  onCarousel,
+  onBrandKit,
+  onImportJson,
   className,
   label = "Create",
   align = "end",
@@ -34,88 +33,98 @@ export function StudioCreateMenu({
 }: {
   onBlank: () => void;
   onTemplates: () => void;
+  onCarousel?: () => void;
+  onBrandKit?: () => void;
+  onImportJson?: (file: File) => void | Promise<void>;
   className?: string;
   label?: string;
   align?: "start" | "center" | "end";
   triggerClassName?: string;
 }) {
+  const importRef = useRef<HTMLInputElement>(null);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="secondary"
-          className={cn(
-            "rounded-full",
-            triggerClassName,
-            className
-          )}
+    <>
+      <input
+        ref={importRef}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0] ?? null;
+          event.target.value = "";
+          if (file && onImportJson) void onImportJson(file);
+        }}
+      />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="secondary"
+            className={cn("rounded-full", triggerClassName, className)}
+          >
+            <ChevronDown className="size-3.5 stroke-[2.5] opacity-60" />
+            {label}
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align={align}
+          sideOffset={8}
+          className="w-56 rounded-2xl border-0 bg-background p-1.5"
         >
-          <ChevronDown className="size-3.5 stroke-[2.5] opacity-60" />
-          {label}
-        </Button>
-      </DropdownMenuTrigger>
+          <DropdownMenuItem
+            className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
+            onClick={onBlank}
+          >
+            <FilePlus className="size-4 text-muted-foreground" />
+            Blank carousel
+          </DropdownMenuItem>
 
-      <DropdownMenuContent
-        align={align}
-        sideOffset={8}
-        className="w-full rounded-2xl border-neutral-200/80 bg-white p-2 border-none dark:bg-neutral-900"
-        >
-        <DropdownMenuItem
-          className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-800 focus:bg-neutral-100 dark:text-neutral-200 dark:focus:bg-neutral-800"
-          onClick={onBlank}
-        >
-          <FilePlus className="size-4 text-neutral-500 dark:text-neutral-400" />
-          <span>Blank carousel</span>
-        </DropdownMenuItem>
+          {onCarousel ? (
+            <DropdownMenuItem
+              className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
+              onClick={onCarousel}
+            >
+              <LayoutTemplate className="size-4 text-muted-foreground" />
+              Generate carousel
+            </DropdownMenuItem>
+          ) : null}
 
-        {/* Пример опции с подменю (Format / Submenu example) */}
-        <DropdownMenuItem
-          className="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-800 focus:bg-neutral-100 dark:text-neutral-200 dark:focus:bg-neutral-800"
-          onClick={() => { }}
-        >
-          <div className="flex items-center gap-3">
-            <LayoutTemplate className="size-4 text-neutral-500 dark:text-neutral-400" />
-            <span>Format</span>
-          </div>
-          <ChevronRight className="size-3.5 text-neutral-400" />
-        </DropdownMenuItem>
+          {onBrandKit ? (
+            <DropdownMenuItem
+              className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
+              onClick={onBrandKit}
+            >
+              <Palette className="size-4 text-muted-foreground" />
+              Brand kit
+            </DropdownMenuItem>
+          ) : null}
 
-        {/* Пример неактивной/заблокированной опции (Space) */}
-        <DropdownMenuItem
-          className="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-800 focus:bg-neutral-100 dark:text-neutral-200 dark:focus:bg-neutral-800"
-          onClick={() => { }}
-        >
-          <div className="flex items-center gap-3">
-            <FolderGit2 className="size-4 text-neutral-500 dark:text-neutral-400" />
-            <span>Space</span>
-          </div>
-          <Lock className="size-3.5 text-neutral-400 opacity-60" />
-        </DropdownMenuItem>
+          {onImportJson ? (
+            <>
+              <DropdownMenuSeparator className="my-1.5" />
+              <DropdownMenuItem
+                className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
+                onClick={() => importRef.current?.click()}
+              >
+                <Upload className="size-4 text-muted-foreground" />
+                Import JSON
+              </DropdownMenuItem>
+            </>
+          ) : null}
 
-        <DropdownMenuSeparator className="my-1.5 bg-neutral-100 dark:bg-neutral-800" />
+          <DropdownMenuSeparator className="my-1.5" />
 
-        <DropdownMenuItem
-          className="flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-800 focus:bg-neutral-100 dark:text-neutral-200 dark:focus:bg-neutral-800"
-          onClick={() => { }}
-        >
-          <div className="flex items-center gap-3">
-            <Upload className="size-4 text-neutral-500 dark:text-neutral-400" />
-            <span>Import</span>
-          </div>
-          <ChevronRight className="size-3.5 text-neutral-400" />
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator className="my-1.5 bg-neutral-100 dark:bg-neutral-800" />
-
-        <DropdownMenuItem
-          className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-800 focus:bg-neutral-100 dark:text-neutral-200 dark:focus:bg-neutral-800"
-          onClick={onTemplates}
-        >
-          <Compass className="size-4 text-neutral-500 dark:text-neutral-400" />
-          <span>Explore templates</span>
-        </DropdownMenuItem>
-
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem
+            className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
+            onClick={onTemplates}
+          >
+            <Compass className="size-4 text-muted-foreground" />
+            Explore templates
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

@@ -16,6 +16,7 @@ export const studioKeys = {
   projectAnnotations: (projectId: string) =>
     ["studio", "annotations", projectId] as const,
   notifications: ["studio", "notifications"] as const,
+  profile: ["studio", "profile"] as const,
 };
 
 /** Same windows the previous in-memory cache used. */

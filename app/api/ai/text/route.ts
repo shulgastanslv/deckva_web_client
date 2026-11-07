@@ -17,10 +17,13 @@ export async function POST(request: Request) {
   }
 
   const row = body as Record<string, unknown>;
+  // deckva_ai expects `post_text`; accept camelCase too for resilience
   const post_text =
     typeof row.post_text === "string"
       ? row.post_text
-      : "";
+      : typeof row.postText === "string"
+        ? row.postText
+        : "";
 
   if (post_text.trim().length < 2) {
     return NextResponse.json(
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await generateTextUpstream({ post_text: post_text.trim() });
+    const result = await generateTextUpstream({ post_text });
     return NextResponse.json(result);
   } catch (err) {
     const message =

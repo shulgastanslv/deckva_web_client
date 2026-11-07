@@ -1,35 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Bell, Check, ChevronDown, Loader2, Search, 
-  Trash2, MailOpen, Mail, Maximize2 
+import {
+  Bell,
+  Check,
+  ChevronDown,
+  Loader2,
+  Mail,
+  MailOpen,
+  Maximize2,
+  Search,
+  Trash2,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-import { 
-  markNotificationsRead, 
+import {
   deleteNotification,
+  markNotificationsRead,
   toggleNotificationRead,
-  type NotificationItem 
+  type NotificationItem,
 } from "@/actions/admin";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { messages } from "@/lib/messages";
 import {
   fetchMyNotifications,
   markNotificationCacheRead,
+  studioKeys,
   useMyNotifications,
 } from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
-
-// Импорты shadcn/ui
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Filter = "unread" | "all";
 
@@ -44,36 +62,109 @@ function formatWhen(iso: string) {
       month: "short",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     }).format(new Date(iso));
   } catch {
     return "";
   }
 }
 
-// === Модальное окно для чтения Markdown ===
-function ReadModal({ 
-  item, 
-  onClose 
-}: { 
-  item: NotificationItem | null; 
+function plainPreview(body: string) {
+  return body
+    .replace(/!\[[^\]]*]\([^)]*\)/g, "")
+    .replace(/\[[^\]]*]\([^)]*\)/g, "$1")
+    .replace(/[*_`>#-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function MarkdownBody({ source }: { source: string }) {
+  return (
+    <div className="space-y-3 text-[14px] leading-relaxed text-foreground">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h1: ({ children }) => (
+            <h1 className="text-xl font-semibold tracking-tight">{children}</h1>
+          ),
+          h2: ({ children }) => (
+            <h2 className="text-lg font-semibold tracking-tight">{children}</h2>
+          ),
+          h3: ({ children }) => (
+            <h3 className="text-[15px] font-semibold">{children}</h3>
+          ),
+          p: ({ children }) => <p className="text-muted-foreground">{children}</p>,
+          strong: ({ children }) => (
+            <strong className="font-semibold text-foreground">{children}</strong>
+          ),
+          em: ({ children }) => <em className="italic">{children}</em>,
+          ul: ({ children }) => (
+            <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+              {children}
+            </ul>
+          ),
+          ol: ({ children }) => (
+            <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
+              {children}
+            </ol>
+          ),
+          li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              className="font-medium text-[#4262ff] underline underline-offset-2"
+              target={href?.startsWith("http") ? "_blank" : undefined}
+              rel={href?.startsWith("http") ? "noreferrer" : undefined}
+            >
+              {children}
+            </a>
+          ),
+          code: ({ children }) => (
+            <code className="rounded-md bg-muted/60 px-1.5 py-0.5 font-mono text-[12px]">
+              {children}
+            </code>
+          ),
+          pre: ({ children }) => (
+            <pre className="overflow-x-auto rounded-2xl bg-muted/40 p-3 font-mono text-[12px]">
+              {children}
+            </pre>
+          ),
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-2 border-muted-foreground/30 pl-3 text-muted-foreground">
+              {children}
+            </blockquote>
+          ),
+        }}
+      >
+        {source}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+function ReadModal({
+  item,
+  onClose,
+}: {
+  item: NotificationItem | null;
   onClose: () => void;
 }) {
   return (
     <Dialog open={!!item} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="overflow-y-auto flex flex-col rounded-[32px] p-0 border-none bg-white dark:bg-neutral-900 gap-0 w-xl max-h-[85vh] min-w-[500px]">
-        <DialogHeader className="p-6 pb-2 text-left">
-          <DialogTitle className="text-xl font-bold text-neutral-950 dark:text-foreground">
+      <DialogContent
+        className="flex max-h-[85vh] w-[min(36rem,calc(100vw-2rem))] flex-col gap-0 overflow-hidden rounded-3xl border-0 bg-background p-0 sm:max-w-xl"
+        showCloseButton
+      >
+        <DialogHeader className="gap-1 px-6 pt-6 pb-3 text-left">
+          <DialogTitle className="text-xl font-semibold tracking-tight">
             {item?.title}
           </DialogTitle>
-          <DialogDescription className="mt-0.5 text-xs text-neutral-500">
+          <DialogDescription className="text-[12px] text-muted-foreground">
             {item ? formatWhen(item.createdAt) : ""}
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="flex-1 p-6 pt-4">
-          <div className="prose prose-sm dark:prose-invert max-w-none text-neutral-700 dark:text-neutral-300">
-            <ReactMarkdown>{item?.body || ""}</ReactMarkdown>
-          </div>
+        <ScrollArea className="max-h-[55vh] flex-1 px-6 pb-6">
+          <MarkdownBody source={item?.body || ""} />
           {item?.href ? (
             <div className="mt-6">
               <Button
@@ -107,84 +198,106 @@ function NotificationsPanel({
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [readingItem, setReadingItem] = useState<NotificationItem | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const visible = items
     .filter((item) => (filter === "unread" ? !item.read : true))
     .filter((item) => {
       const q = searchQuery.toLowerCase();
-      return item.title.toLowerCase().includes(q) || item.body.toLowerCase().includes(q);
+      return (
+        item.title.toLowerCase().includes(q) ||
+        item.body.toLowerCase().includes(q)
+      );
     });
 
+  const patchCache = (
+    updater: (items: NotificationItem[]) => NotificationItem[],
+  ) => {
+    queryClient.setQueryData(
+      studioKeys.notifications,
+      (old: { items: NotificationItem[]; unread: number } | undefined) => {
+        if (!old) return old;
+        const nextItems = updater(old.items);
+        return {
+          ...old,
+          items: nextItems,
+          unread: nextItems.filter((item) => !item.read).length,
+        };
+      },
+    );
+  };
+
   const handleDelete = async (id: string) => {
-    queryClient.setQueryData(["my-notifications"], (old: any) => {
-      if (!old) return old;
-      return {
-        ...old,
-        items: old.items.filter((i: NotificationItem) => i.id !== id),
-      };
-    });
-    await deleteNotification(id);
-    queryClient.invalidateQueries({ queryKey: ["my-notifications"] });
+    setBusyId(id);
+    patchCache((rows) => rows.filter((item) => item.id !== id));
+    try {
+      await deleteNotification(id);
+      await queryClient.invalidateQueries({ queryKey: studioKeys.notifications });
+    } finally {
+      setBusyId(null);
+    }
   };
 
   const handleToggleRead = async (id: string, currentReadStatus: boolean) => {
-    queryClient.setQueryData(["my-notifications"], (old: any) => {
-      if (!old) return old;
-      return {
-        ...old,
-        items: old.items.map((i: NotificationItem) =>
-          i.id === id ? { ...i, read: !currentReadStatus } : i
-        ),
-      };
-    });
-    await toggleNotificationRead(id, !currentReadStatus);
-    queryClient.invalidateQueries({ queryKey: ["my-notifications"] });
+    setBusyId(id);
+    patchCache((rows) =>
+      rows.map((item) =>
+        item.id === id ? { ...item, read: !currentReadStatus } : item,
+      ),
+    );
+    try {
+      await toggleNotificationRead(id, !currentReadStatus);
+      await queryClient.invalidateQueries({ queryKey: studioKeys.notifications });
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
     <>
-      <div className="flex flex-col h-full">
-        {/* Шапка */}
+      <div className="flex h-full flex-col">
         <div className="px-6 pt-5 pb-3">
-          <h2 className="text-[17px] font-bold text-neutral-950 dark:text-foreground">
+          <h2 className="text-[17px] font-bold text-foreground">
             {messages.notifications.title}
           </h2>
         </div>
 
-        {/* Поиск и фильтры */}
         <div className="flex items-center gap-2 px-4 pb-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
+            <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Поиск..."
+              placeholder="Search…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-full bg-neutral-100 py-2 pl-10 pr-4 text-[13px] border-none focus-visible:ring-2 focus-visible:ring-[#2f5bff]/20 dark:bg-neutral-800 dark:text-foreground h-9"
+              className="h-9 w-full rounded-full border-none bg-muted/40 py-2 pr-4 pl-10 text-[13px] focus-visible:ring-2 focus-visible:ring-[#2f5bff]/20"
             />
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="secondary" 
-                className="rounded-full h-9 px-4 text-[13px] font-medium bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 border-none"
+              <Button
+                variant="secondary"
+                className="h-9 rounded-full border-none bg-muted/40 px-4 text-[13px] font-medium"
               >
                 {FILTER_LABEL[filter]}
-                <ChevronDown className="ml-1 size-3.5 text-neutral-500" />
+                <ChevronDown className="ml-1 size-3.5 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-2xl p-1.5 min-w-[120px]">
+            <DropdownMenuContent
+              align="end"
+              className="min-w-[120px] rounded-2xl border-0 p-1.5"
+            >
               {(Object.keys(FILTER_LABEL) as Filter[]).map((key) => (
                 <DropdownMenuItem
                   key={key}
                   onClick={() => setFilter(key)}
-                  className="rounded-xl px-3 py-2 text-[13px] cursor-pointer"
+                  className="cursor-pointer rounded-xl px-3 py-2 text-[13px]"
                 >
                   {filter === key ? (
-                    <Check className="size-3.5 mr-2" />
+                    <Check className="mr-2 size-3.5" />
                   ) : (
-                    <span className="size-3.5 mr-2" />
+                    <span className="mr-2 size-3.5" />
                   )}
                   {FILTER_LABEL[key]}
                 </DropdownMenuItem>
@@ -193,19 +306,20 @@ function NotificationsPanel({
           </DropdownMenu>
         </div>
 
-        {/* Список */}
         <ScrollArea className="flex-1 px-2 pb-2">
           {loading ? (
             <div className="flex h-40 items-center justify-center">
-              <Loader2 className="size-5 animate-spin text-neutral-400" />
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>
           ) : visible.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center px-8 text-center">
-              <p className="text-[18px] font-medium text-neutral-950 dark:text-foreground">
-                Ничего не найдено
+              <p className="text-[18px] font-medium text-foreground">
+                Nothing here
               </p>
-              <p className="mt-2 text-[13px] text-neutral-500 dark:text-muted-foreground">
-                {searchQuery ? "Попробуйте изменить запрос" : messages.notifications.emptyBody}
+              <p className="mt-2 text-[13px] text-muted-foreground">
+                {searchQuery
+                  ? "Try another search"
+                  : messages.notifications.emptyBody}
               </p>
             </div>
           ) : (
@@ -214,22 +328,28 @@ function NotificationsPanel({
                 <li
                   key={item.id}
                   className={cn(
-                    "group relative rounded-[20px] px-4 py-3.5 transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/50",
-                    !item.read && "bg-[#2f5bff]/[0.04] dark:bg-[#2f5bff]/10"
+                    "group relative rounded-[20px] px-4 py-3.5 transition-colors hover:bg-muted/40",
+                    !item.read && "bg-[#2f5bff]/[0.04] dark:bg-[#2f5bff]/10",
+                    busyId === item.id && "opacity-60",
                   )}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-[13px] font-bold text-neutral-950 line-clamp-1 dark:text-foreground">
-                      {item.title}
+                  <button
+                    type="button"
+                    className="w-full text-left"
+                    onClick={() => setReadingItem(item)}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="line-clamp-1 text-[13px] font-bold text-foreground">
+                        {item.title}
+                      </p>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                        {formatWhen(item.createdAt)}
+                      </span>
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground">
+                      {plainPreview(item.body)}
                     </p>
-                    <span className="shrink-0 text-[11px] text-neutral-400">
-                      {formatWhen(item.createdAt)}
-                    </span>
-                  </div>
-                  
-                  <p className="mt-1 text-[12px] leading-relaxed text-neutral-500 line-clamp-2 dark:text-muted-foreground">
-                    {item.body.replace(/\*\*/g, "")}
-                  </p>
+                  </button>
 
                   {item.href ? (
                     <div className="mt-3">
@@ -245,32 +365,35 @@ function NotificationsPanel({
                     </div>
                   ) : null}
 
-                  {/* Кнопки действий */}
                   <div className="mt-3 flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setReadingItem(item)}
-                      title="Читать полностью"
-                      className="size-8 rounded-full bg-white text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+                      title="Read"
+                      className="size-8 rounded-full"
                     >
                       <Maximize2 className="size-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleToggleRead(item.id, item.read)}
-                      title={item.read ? "Отметить непрочитанным" : "Отметить прочитанным"}
-                      className="size-8 rounded-full bg-white text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+                      onClick={() => void handleToggleRead(item.id, item.read)}
+                      title={item.read ? "Mark unread" : "Mark read"}
+                      className="size-8 rounded-full"
                     >
-                      {item.read ? <Mail className="size-3.5" /> : <MailOpen className="size-3.5" />}
+                      {item.read ? (
+                        <Mail className="size-3.5" />
+                      ) : (
+                        <MailOpen className="size-3.5" />
+                      )}
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDelete(item.id)}
-                      title="Удалить"
-                      className="size-8 rounded-full bg-white text-red-400 hover:bg-red-50 hover:text-red-600 dark:bg-neutral-800 dark:hover:bg-red-900/30 dark:hover:text-red-500"
+                      onClick={() => void handleDelete(item.id)}
+                      title="Delete"
+                      className="size-8 rounded-full text-destructive hover:text-destructive"
                     >
                       <Trash2 className="size-3.5" />
                     </Button>
@@ -295,32 +418,19 @@ export function StudioNotifications({
   const queryClient = useQueryClient();
   const { status } = useSession();
   const signedIn = status === "authenticated";
-  
+
   const notifications = useMyNotifications(signedIn);
-  
+
   const items = notifications.data?.items ?? [];
   const unread = notifications.data?.unread ?? 0;
   const loading = signedIn && !notifications.data && !notifications.isError;
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
 
-  // === АВТОМАТИЧЕСКОЕ ОБНОВЛЕНИЕ ПРИ ИЗМЕНЕНИИ ===
-  useEffect(() => {
-    if (!signedIn) return;
-    
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ["my-notifications"] });
-    }, 15000);
-
-    return () => clearInterval(interval);
-  }, [signedIn, queryClient]);
-
-  // Вызываем пометку прочитанными ТОЛЬКО когда панель открывается
   useEffect(() => {
     if (!open || !signedIn) return;
 
     let cancelled = false;
-    
     void (async () => {
       try {
         const res = await fetchMyNotifications(queryClient);
@@ -329,7 +439,7 @@ export function StudioNotifications({
         if (cancelled || !marked.success) return;
         markNotificationCacheRead(queryClient);
       } catch {
-        // Игнорируем ошибки при фоновом обновлении
+        // ignore background refresh errors
       }
     })();
 
@@ -346,22 +456,22 @@ export function StudioNotifications({
           size="icon"
           aria-label="Notifications"
           className={cn(
-            "relative flex size-10 items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-muted-foreground dark:hover:bg-neutral-800",
-            open && "bg-neutral-100 dark:bg-neutral-800",
+            "relative flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60",
+            open && "bg-muted/60",
             className,
           )}
         >
           <Bell className="size-[19px] stroke-[2]" />
           {unread > 0 ? (
-            <span className="absolute top-2 right-2.5 size-2.5 rounded-full border-2 border-white bg-[#2f5bff] dark:border-background" />
+            <span className="absolute top-2 right-2.5 size-2.5 rounded-full border-2 border-background bg-[#2f5bff]" />
           ) : null}
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent 
-        align="end" 
+      <PopoverContent
+        align="end"
         alignOffset={-4}
-        className="w-xs h-[min(480px,calc(100dvh-32px))] p-0 rounded-[28px] overflow-hidden border border-border bg-white dark:bg-neutral-900"
+        className="h-[min(480px,calc(100dvh-32px))] w-xs overflow-hidden rounded-[28px] border border-border bg-background p-0"
       >
         <NotificationsPanel
           filter={filter}

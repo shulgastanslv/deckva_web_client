@@ -1,12 +1,15 @@
 "use client";
 
-import { FileText, LayoutTemplate, Palette } from "lucide-react";
-
 import type { ArtifactListItem } from "@/actions/artifacts";
 import type { ProjectListItem } from "@/actions/projects";
 import { formatBoardDate } from "@/components/studio/lib/format";
+import { StudioProjectOwner } from "@/components/studio/browse/studio-project-owner";
 import { StudioProjectThumb } from "@/components/studio/browse/studio-project-thumb";
 import { StudioBadge } from "@/components/studio/ui/studio-badge";
+import {
+  StudioTypeArt,
+  type StudioTypeArtKind,
+} from "@/components/studio/ui/studio-type-art";
 import { cn } from "@/lib/utils";
 
 export type RecentFilter = "all" | "carousels" | "texts" | "palettes";
@@ -76,25 +79,24 @@ export function buildRecentActivity(input: {
   return items.slice(0, input.limit ?? 16);
 }
 
-function KindBadge({ kind }: { kind: RecentActivityItem["kind"] }) {
+function KindBadge({
+  kind,
+  colors,
+}: {
+  kind: RecentActivityItem["kind"];
+  colors?: string[] | null;
+}) {
   const label =
     kind === "carousel" ? "Carousel" : kind === "text" ? "Text" : "Palette";
-  return <StudioBadge>{label}</StudioBadge>;
-}
-
-function PaletteThumb({ colors }: { colors: string[] | null }) {
-  const swatches = colors?.length
-    ? colors.slice(0, 4)
-    : ["#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373"];
   return (
-    <span className="flex size-8 shrink-0 overflow-hidden rounded-lg">
-      {swatches.map((color, i) => (
-        <span
-          key={`${color}-${i}`}
-          className="h-full flex-1"
-          style={{ backgroundColor: color }}
-        />
-      ))}
+    <span className="inline-flex items-center gap-1.5">
+      <StudioTypeArt
+        kind={kind}
+        colors={colors}
+        seed={kind.length * 7}
+        className="size-5 rounded-md"
+      />
+      <StudioBadge>{label}</StudioBadge>
     </span>
   );
 }
@@ -118,7 +120,15 @@ export function StudioRecentActivityRow({
         )}
       >
         <span className="flex min-w-0 items-center gap-3">
-          <StudioProjectThumb project={project} />
+          {project.previewUrl ? (
+            <StudioProjectThumb project={project} />
+          ) : (
+            <StudioTypeArt
+              kind="carousel"
+              seed={project.id.length}
+              className="size-8"
+            />
+          )}
           <span className="min-w-0">
             <span className="flex min-w-0 items-center gap-2">
               <span className="truncate text-[14px] font-semibold text-foreground">
@@ -134,8 +144,11 @@ export function StudioRecentActivityRow({
         <span className="hidden md:block">
           <KindBadge kind="carousel" />
         </span>
-        <span className="hidden truncate text-[13px] text-muted-foreground md:block">
-          {project.authorName || "You"}
+        <span className="hidden min-w-0 md:block">
+          <StudioProjectOwner
+            name={project.authorName}
+            image={project.authorImage}
+          />
         </span>
         <span className="truncate text-[13px] text-muted-foreground">
           {formatBoardDate(project.updatedAt)}
@@ -160,16 +173,15 @@ export function StudioRecentActivityRow({
       )}
     >
       <span className="flex min-w-0 items-center gap-3">
-        {item.kind === "palette" ? (
-          <PaletteThumb colors={artifact.previewColors} />
-        ) : (
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground">
-            <FileText className="size-3.5" strokeWidth={1.75} />
-          </span>
-        )}
+        <StudioTypeArt
+          kind={item.kind}
+          colors={artifact.previewColors}
+          seed={artifact.id.length + artifact.title.length}
+        />
         <span className="min-w-0">
           <span className="block truncate text-[14px] font-semibold text-foreground">
-            {artifact.title || (item.kind === "text" ? "Untitled text" : "Untitled palette")}
+            {artifact.title ||
+              (item.kind === "text" ? "Untitled text" : "Untitled palette")}
           </span>
           <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
             {preview}
@@ -177,7 +189,7 @@ export function StudioRecentActivityRow({
         </span>
       </span>
       <span className="hidden md:block">
-        <KindBadge kind={item.kind} />
+        <KindBadge kind={item.kind} colors={artifact.previewColors} />
       </span>
       <span className="hidden truncate text-[13px] text-muted-foreground md:block">
         {preview}
@@ -218,9 +230,13 @@ export function StudioRecentActivityList({
   );
 }
 
-export const RECENT_FILTERS: { id: RecentFilter; label: string; icon: typeof LayoutTemplate }[] = [
-  { id: "all", label: "All", icon: LayoutTemplate },
-  { id: "carousels", label: "Carousels", icon: LayoutTemplate },
-  { id: "texts", label: "Texts", icon: FileText },
-  { id: "palettes", label: "Palettes", icon: Palette },
+export const RECENT_FILTERS: {
+  id: RecentFilter;
+  label: string;
+  art: StudioTypeArtKind;
+}[] = [
+  { id: "all", label: "All", art: "all" },
+  { id: "carousels", label: "Carousels", art: "carousel" },
+  { id: "texts", label: "Texts", art: "text" },
+  { id: "palettes", label: "Palettes", art: "palette" },
 ];
