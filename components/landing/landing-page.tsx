@@ -31,7 +31,7 @@ import {
   PRO_FEATURES,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
-
+import { PromptSection } from "./prompt-section";
 const LEGAL = {
   status: "Professional income tax payer",
   fullName: "Шульга Станислав",
@@ -851,41 +851,7 @@ export function LandingPage() {
       </section>
 
       <LandingSection id="start">
-        <h2 className={`${sectionTitle}`}>
-          Four starting lines
-        </h2>
-        <div className="mt-8 rounded-[1.75rem] bg-land-card p-5 sm:p-7 w[">
-          <div className="flex flex-wrap gap-2">
-            {PROMPTS.map((item, index) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => setPrompt(index)}
-                className={`h-9 rounded-full px-4 text-sm font-medium ${
-                  index === prompt
-                    ? "bg-land-ink text-land-mist"
-                    : "bg-land-mist text-land-ink"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-          <p className="mt-6 text-2xl font-medium tracking-tight text-land-ink sm:text-3xl">
-            {activePrompt.line}
-          </p>
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-land-ink/50">
-              This is the topic the slides start from.
-            </p>
-            <a
-              href={`/studio?topic=${encodeURIComponent(activePrompt.line)}`}
-              className="inline-flex h-11 items-center justify-center rounded-full bg-land-ink px-5 text-sm font-semibold text-land-mist"
-            >
-              Open studio
-            </a>
-          </div>
-        </div>
+        <PromptSection /> 
       </LandingSection>
 
       <LandingSection id="studio" className="relative z-20">
@@ -1214,7 +1180,6 @@ export function LandingPage() {
         </ul>
       </LandingSection>
 
-      <LeaveReviewBlock />
 
       <LandingSection id="faq">
           <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:gap-12">
@@ -1264,7 +1229,7 @@ export function LandingPage() {
         </ul>
       </LandingSection>
 
-      <footer className="bg-[#0e0f12] text-white">
+      <footer className="bg-[#0e0f12] text-white m-10 rounded-2xl">
         <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
             {FOOTER_COLUMNS.map((column) => (

@@ -527,12 +527,26 @@ export class CanvasManager {
         this.events.emit("editCode", target);
         return;
       }
+
+      if (this.crop.active) {
+        if (target === this.crop.image) return; // Игнорируем, если кликаем внутри области кропа
+        this.crop.apply();
+      }
+
+      if(target?.type === "image") {
+        // Начинаем кроп, передавая целевую картинку в ваш менеджер
+        this.crop.start(target); 
+        return;
+      }
+
       if (!target) {
         const group = this.objects.addCodeBlock();
         this.commit();
         this.events.emit("editCode", group);
         return;
       }
+
+
       if (target.swibpRole === "split") this.objects.pickSplitImage();
       else if (target.swibpRole === "frame") this.objects.pickFrameImage(target);
       else this.objects.pickShapeImage(target);

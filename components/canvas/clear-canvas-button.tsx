@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { BrushCleaning, BrushIcon, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -44,7 +44,7 @@ export function ClearCanvasButton() {
           className="h-8 w-8 rounded-full text-muted-foreground hover:bg-muted/80 hover:text-foreground"
           title="Clear all slides"
         >
-          <Trash2 className="size-3.5" />
+          <BrushCleaning className="size-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent>

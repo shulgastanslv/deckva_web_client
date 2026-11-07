@@ -6,21 +6,21 @@ import { motion } from "motion/react";
 import { useSectionReveal } from "@/components/landing/reveal";
 import { cn } from "@/lib/utils";
 
-/** Section / hero-scale title — modern big type */
+/** Section / hero-scale title — Miro-style massive, tight type */
 export const landTitle =
-  "text-3xl font-semibold tracking-tight leading-[1.12] sm:text-4xl sm:leading-[1.08]";
+  "text-4xl font-extrabold tracking-tighter leading-[1.05] sm:text-5xl md:text-6xl md:leading-[1]";
 
 /** Card / block title */
 export const landCardTitle =
-  "text-2xl font-extrabold tracking-tight leading-[1.12] sm:text-3xl sm:leading-[1.1]";
+  "text-2xl font-bold tracking-tight leading-[1.12] sm:text-3xl";
 
 /** Section subtitle under LandingHead */
-export const landSub = "text-base leading-relaxed text-land-ink/55 sm:text-lg";
+export const landSub = "text-lg font-medium leading-relaxed text-[#050038]/60 dark:text-white/60 sm:text-xl";
 
 /** Card body / supporting line */
-export const landCardSub = "text-base leading-relaxed sm:text-xl sm:leading-snug";
+export const landCardSub = "text-base font-medium leading-relaxed sm:text-lg text-[#050038]/60 dark:text-white/60";
 
-/** Shared layout primitives — keep section rhythm identical across the landing. */
+/** Shared layout primitives */
 export function LandingSection({
   id,
   className,
@@ -36,7 +36,7 @@ export function LandingSection({
       id={id}
       {...motionProps}
       className={cn(
-        "mx-auto w-full max-w-[1440px] scroll-mt-28 px-6 py-12 sm:px-10 sm:py-16 lg:px-[120px] lg:py-20",
+        "mx-auto w-full max-w-[1440px] scroll-mt-32 px-6 py-16 sm:px-10 sm:py-24 lg:px-[120px] lg:py-32",
         className
       )}
     >
@@ -57,12 +57,12 @@ export function LandingHead({
   light?: boolean;
 }) {
   return (
-    <div className="mb-6 max-w-3xl sm:mb-10">
+    <div className="mb-10 max-w-4xl sm:mb-16">
       {eyebrow ? (
         <p
           className={cn(
-            "text-base font-semibold tracking-wide sm:text-lg",
-            light ? "text-white/70" : "text-land-blue"
+            "mb-4 text-sm font-bold uppercase tracking-widest",
+            light ? "text-[#FFD02F]" : "text-[#4262FF]"
           )}
         >
           {eyebrow}
@@ -71,8 +71,7 @@ export function LandingHead({
       <h2
         className={cn(
           landTitle,
-          eyebrow ? "mt-2" : null,
-          light ? "text-white" : "text-land-ink"
+          light ? "text-white" : "text-[#050038] dark:text-white"
         )}
       >
         {title}
@@ -80,9 +79,9 @@ export function LandingHead({
       {text ? (
         <p
           className={cn(
-            "mt-4 max-w-2xl",
+            "mt-6 max-w-2xl",
             landSub,
-            light ? "text-white/75" : "text-land-ink/55"
+            light ? "text-white/80" : ""
           )}
         >
           {text}
@@ -102,7 +101,7 @@ export function LandingLayer({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[1.75rem] sm:rounded-[3rem]",
+        "relative overflow-hidden rounded-[2rem] border border-black/10 bg-white shadow-xl sm:rounded-[3rem] dark:border-white/10 dark:bg-[#14151C]",
         className
       )}
     >
@@ -118,7 +117,7 @@ export function LandingGrid({
   className?: string;
   children: ReactNode;
 }) {
-  return <div className={cn("grid gap-3 sm:gap-4", className)}>{children}</div>;
+  return <div className={cn("grid gap-6 sm:gap-8", className)}>{children}</div>;
 }
 
 export function LandingPad({
@@ -129,6 +128,6 @@ export function LandingPad({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("p-5 sm:p-8 lg:p-10", className)}>{children}</div>
+    <div className={cn("p-8 sm:p-12 lg:p-16", className)}>{children}</div>
   );
 }

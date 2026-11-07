@@ -27,8 +27,8 @@ export function InviteMembersDialog() {
       <DialogTrigger asChild>
         <Button
           variant="secondary"
-          className="h-9 rounded-full px-3 font-medium border-none transition-colors hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700"
-        >
+          className="h-9 rounded-full bg-blue-500 px-3.5 text-[13px] font-semibold text-white hover:bg-blue-500/50"
+          >
           <UserPlus className="mr-2 size-3.5" />
           Invite Members
         </Button>

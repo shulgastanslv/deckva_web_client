@@ -76,6 +76,7 @@ export function StudioHome() {
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       );
   }, [projects, search]);
+  
 
   return (
     <StudioContent>

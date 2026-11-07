@@ -25,55 +25,65 @@ export const MIRO_THEME = {
 } as const;
 
 const baseSvg = (size: number | string = 44, className = '') => ({
-  xmlns: "http://www.w3.org/2000/svg",
+  xmlns: 'http://www.w3.org/2000/svg',
   width: size,
   height: size,
-  viewBox: "0 0 44 44",
-  fill: "none",
+  viewBox: '0 0 44 44',
+  fill: 'none',
   className,
 });
 
-// Базовая двухслойная подложка в стиле шаблонов Miro
+// Улучшенная двухслойная подложка: добавлена тень (back) для объема и выровнен центр
 const LayeredPlate: React.FC = () => (
   <>
-     <rect
-      x="5"
-      y="8"
-      width="32"
-      height="32"
-      rx="8"
-      strokeWidth="1.2"
-      className={MIRO_THEME.plate.front}
+    {/* Задний слой (эффект объема/тени) */}
+    <rect 
+      x="8" y="8" 
+      width="28" height="28" 
+      rx="7" 
+      className={MIRO_THEME.plate.back} 
+    />
+    {/* Основная карточка */}
+    <rect 
+      x="6" y="6" 
+      width="28" height="28" 
+      rx="7" 
+      strokeWidth="1" 
+      strokeOpacity="0.08" 
+      stroke="currentColor" 
+      className={MIRO_THEME.plate.front} 
     />
   </>
 );
 
-// 1. Text — базовый ввод текста с желтым акцентным стикером Miro
+// 1. Text — базовый ввод текста с желтым акцентным маркером
 export const MiroTextIcon: React.FC<IconProps> = ({ size, className, ...props }) => (
   <svg {...baseSvg(size, className)} {...props}>
     <LayeredPlate />
+    <rect x="14" y="23" width="16" height="6" rx="2" className={MIRO_THEME.glyph.fill} />
     <path 
-      d="M12 16H28M20 16V28" 
-      strokeWidth="1" 
+      d="M14 16H30M22 16V28" 
+      strokeWidth="2" 
       strokeLinecap="round" 
       className={MIRO_THEME.glyph.stroke}
     />
   </svg>
 );
 
-// 2. Heading — заголовок первого уровня H1 с лавандовой плашкой
+// 2. Heading — заголовок H1 с фиолетовым акцентом
 export const HeadingIcon: React.FC<IconProps> = ({ size, className, ...props }) => (
   <svg {...baseSvg(size, className)} {...props}>
     <LayeredPlate />
     <path 
-      d="M12.5 16V28M19.5 16V28M12.5 22H19.5" 
-      strokeWidth="1.5" 
+      d="M13 16V28M21 16V28M13 22H21" 
+      strokeWidth="2" 
       strokeLinecap="round" 
       className={MIRO_THEME.glyph.stroke}
     />
+    {/* Цифра 1 */}
     <path 
-      d="M24 18.5L26 17V28" 
-      strokeWidth="1.5" 
+      d="M25 18L27 16V28" 
+      strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round" 
       className={MIRO_THEME.glyph.stroke}
@@ -81,18 +91,19 @@ export const HeadingIcon: React.FC<IconProps> = ({ size, className, ...props }) 
   </svg>
 );
 
-// 3. Subtitle — подзаголовок H2 со стикером цвета мяты
+// 3. Subtitle — подзаголовок H2 с мятным блоком
 export const SubtitleIcon: React.FC<IconProps> = ({ size, className, ...props }) => (
   <svg {...baseSvg(size, className)} {...props}>
     <LayeredPlate />
     <path 
-      d="M11.5 16.5V27.5M17.5 16.5V27.5M11.5 22H17.5" 
+      d="M14 17V27M20 17V27M14 22H20" 
       strokeWidth="1.5" 
       strokeLinecap="round" 
       className={MIRO_THEME.glyph.stroke}
     />
+    {/* Цифра 2 */}
     <path 
-      d="M22 19C22 17.5 23 16.5 24.8 16.5C26.5 16.5 27.5 17.5 27.5 19C27.5 21 24.5 22.5 22 25H27.5" 
+      d="M23 20.5C23 18.5 24.5 17.5 26 17.5C27.5 17.5 29 18.5 29 20C29 22 23 25 23 27.5H29" 
       strokeWidth="1.5" 
       strokeLinecap="round" 
       strokeLinejoin="round" 
@@ -101,12 +112,17 @@ export const SubtitleIcon: React.FC<IconProps> = ({ size, className, ...props })
   </svg>
 );
 
-// 4. Paragraph — строки текста с акцентным голубым маркером списка
+// 4. Paragraph — строки текста с акцентными голубыми буллитами
 export const ParagraphIcon: React.FC<IconProps> = ({ size, className, ...props }) => (
   <svg {...baseSvg(size, className)} {...props}>
     <LayeredPlate />
+    {/* Маркеры списка */}
+    <circle cx="15" cy="17" r="2" className={MIRO_THEME.accent.blue} />
+    <circle cx="15" cy="22" r="2" className={MIRO_THEME.accent.blue} />
+    <circle cx="15" cy="27" r="2" className={MIRO_THEME.accent.blue} />
+    {/* Строки текста */}
     <path 
-      d="M14 16.5H28M14 21.5H28M14 26.5H21" 
+      d="M20 17H31M20 22H31M20 27H26" 
       strokeWidth="1.5" 
       strokeLinecap="round" 
       className={MIRO_THEME.glyph.stroke}
@@ -114,67 +130,66 @@ export const ParagraphIcon: React.FC<IconProps> = ({ size, className, ...props }
   </svg>
 );
 
-// 5. Quote — цитата с парными кавычками в фирменных оттенках Miro
+// 5. Quote — цитата с геометричными кавычками и желтым стикером
 export const QuoteIcon: React.FC<IconProps> = ({ size, className, ...props }) => (
   <svg {...baseSvg(size, className)} {...props}>
     <LayeredPlate />
-    {/* Левая кавычка */}
     <path 
-      d="M12 22.5C12 19 13.5 17.5 15.5 17V18.5C14.2 18.5 13.8 19.5 13.8 20.5H16V25H12V22.5Z" 
+      d="M14 24C14 19 16.5 17 18 17V20C16.5 20 16 20.5 16 21.5H19V26H14V24Z" 
       className={MIRO_THEME.glyph.fill}
     />
-    {/* Правая кавычка с акцентным стикером */}
     <path 
-      d="M18.5 22.5C18.5 19 20 17.5 22 17V18.5C20.7 18.5 20.3 19.5 20.3 20.5H22.5V25H18.5V22.5Z" 
-      className={MIRO_THEME.accent.yellow}
+      d="M22 24C22 19 24.5 17 26 17V20C24.5 20 24 20.5 24 21.5H27V26H22V24Z" 
+      className={MIRO_THEME.glyph.fill}
     />
   </svg>
 );
 
-// 6. Code — скобки кода </> с фиолетовым акцентным слэшем
+// 6. Code — скобки кода </> с наклонным фиолетовым слэшем (сделан через заливку)
 export const CodeIcon: React.FC<IconProps> = ({ size, className, ...props }) => (
   <svg {...baseSvg(size, className)} {...props}>
     <LayeredPlate />
+    <rect 
+      x="21" y="14" 
+      width="2" height="16" 
+      rx="1" 
+      transform="rotate(20 22 22)" 
+    />
     <path 
-      d="M14 19L11 22.5L14 26M26 19L29 22.5L26 26" 
+      d="M17 17L12 22L17 27M27 17L32 22L27 27" 
       strokeWidth="1.5" 
       strokeLinecap="round" 
       strokeLinejoin="round" 
       className={MIRO_THEME.glyph.stroke}
     />
-    <path 
-      d="M21.5 16.5L18.5 28.5" 
-      strokeWidth="1.5" 
-      strokeLinecap="round" 
-      className={MIRO_THEME.accent.purple}
-    />
   </svg>
 );
 
-// 7. Pencil / Text Area — область текста с угловыми маркерами выделения
+// 7. Pencil / Text Area — область текста с курсором и точками трансформации
 export const PencilTextIcon: React.FC<IconProps> = ({ size, className, ...props }) => (
   <svg {...baseSvg(size, className)} {...props}>
     <LayeredPlate />
     <rect 
-      x="12" 
-      y="15.5" 
-      width="16" 
-      height="14" 
+      x="12.5" y="12.5" 
+      width="19" height="19" 
       rx="2" 
-      strokeWidth="1.4" 
-      strokeDasharray="2.5 2" 
+      strokeWidth="1.5" 
+      strokeDasharray="3 3" 
       className={MIRO_THEME.glyph.stroke}
+      opacity="0.4"
     />
+    {/* I-cursor в центре */}
     <path 
-      d="M18 19H22M20 19V26M18 26H22" 
-      strokeWidth="1.6" 
+      d="M20 17H24M22 17V27M20 27H24" 
+      strokeWidth="1.5" 
       strokeLinecap="round" 
+      strokeLinejoin="round" 
       className={MIRO_THEME.glyph.stroke}
     />
-    {/* Маркерные ручки фрейма Miro по углам */}
-    <rect x="11" y="14.5" width="2.5" height="2.5" rx="0.5" className={MIRO_THEME.accent.blue} />
-    <rect x="26.5" y="14.5" width="2.5" height="2.5" rx="0.5" className={MIRO_THEME.accent.blue} />
-    <rect x="11" y="27" width="2.5" height="2.5" rx="0.5" className={MIRO_THEME.accent.blue} />
-    <rect x="26.5" y="27" width="2.5" height="2.5" rx="0.5" className={MIRO_THEME.accent.blue} />
+    {/* Маркерные ручки фрейма Miro по углам (голубые квадраты) */}
+    <rect x="11" y="11" width="3" height="3" rx="0.5" className={MIRO_THEME.accent.blue} />
+    <rect x="30" y="11" width="3" height="3" rx="0.5" className={MIRO_THEME.accent.blue} />
+    <rect x="11" y="30" width="3" height="3" rx="0.5" className={MIRO_THEME.accent.blue} />
+    <rect x="30" y="30" width="3" height="3" rx="0.5" className={MIRO_THEME.accent.blue} />
   </svg>
 );
