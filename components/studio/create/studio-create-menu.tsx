@@ -9,7 +9,8 @@ import {
   Compass,
   Globe2,
   ChevronRight,
-  Lock
+  Lock,
+  Plus
 } from "lucide-react";
 
 import { StudioButton } from "@/components/studio/ui/studio-button";
@@ -21,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function StudioCreateMenu({
   onBlank,
@@ -40,8 +42,8 @@ export function StudioCreateMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <StudioButton
-          variant="create"
+        <Button
+          variant="secondary"
           className={cn(
             "rounded-full",
             triggerClassName,
@@ -50,7 +52,7 @@ export function StudioCreateMenu({
         >
           <ChevronDown className="size-3.5 stroke-[2.5] opacity-60" />
           {label}
-        </StudioButton>
+        </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent

@@ -55,7 +55,7 @@ export function StudioStartSection({
           <StudioCreateMenu
             onBlank={onBlank}
             onTemplates={onTemplates}
-            label="Create"
+            label="View options"
             align="end"
           />
         </div>
