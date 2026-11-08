@@ -27,8 +27,8 @@ import {
   type CarouselStartForm,
   type StartBlockId,
 } from "@/lib/studio/start-blocks";
-import { pipelineHeadline, pipelineSubhead } from "@/lib/studio/pipeline";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
+import { useTranslations } from "next-intl";
 
 type DialogId = StartBlockId;
 
@@ -83,6 +83,7 @@ export function StudioStartSection({
   void onSelectKind;
   void onTemplates;
 
+  const t = useTranslations("studio");
   const [active, setActive] = useState<DialogId | null>(null);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const handle = normalizeHandle(defaultHandle);
@@ -98,9 +99,9 @@ export function StudioStartSection({
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-[22px]">
-              {pipelineHeadline()}
+              {t("makeCarousel")}
             </h2>
-            <p className="text-sm text-muted-foreground">{pipelineSubhead()}</p>
+            <p className="text-sm text-muted-foreground">{t("makeCarouselSub")}</p>
           </div>
           <StudioCreateMenu
             onBlank={onBlank}
@@ -108,7 +109,7 @@ export function StudioStartSection({
             onCarousel={() => setActive("carousel")}
             onBrandKit={onBrandKit}
             onImportJson={onImportJson}
-            label="View options"
+            label={t("viewOptions")}
             align="end"
           />
         </div>

@@ -46,10 +46,12 @@ import { messages } from "@/lib/messages";
 import { parseImportedTemplate } from "@/lib/templates/parse";
 import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type ViewMode = "list" | "grid";
 
 export function StudioHome() {
+  const t = useTranslations("studio");
   const router = useRouter();
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic")?.trim() ?? "";
@@ -176,14 +178,14 @@ export function StudioHome() {
   );
 
   const emptyLabel = q
-    ? "Nothing found."
+    ? t("nothingFound")
     : filter === "texts"
-      ? "No texts yet — generate one above."
+      ? t("noTexts")
       : filter === "palettes"
-        ? "No palettes yet — generate one above."
+        ? t("noPalettes")
         : filter === "carousels"
-          ? "No carousels yet — create one above."
-          : "Nothing recent yet — create something above.";
+          ? t("noCarousels")
+          : t("nothingRecent");
 
   return (
     <StudioContent>
@@ -306,7 +308,7 @@ export function StudioHome() {
 
         <section className="mt-8">
           <StudioSectionHeader
-            title="Recent"
+            title={t("recent")}
             trailing={
               signedIn && filter === "carousels" ? (
                 <StudioViewToggle view={view} onChange={setView} />
