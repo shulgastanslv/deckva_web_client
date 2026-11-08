@@ -11,7 +11,10 @@ import {
   linkCarouselArtifact,
 } from "@/actions/artifacts";
 import { createProject } from "@/actions/projects";
-import { apiGeneratePalette, apiGenerateText } from "@/lib/ai/browser";
+import {
+  generatePalette as generatePaletteAi,
+  generateText as generateTextAi,
+} from "@/actions/ai";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
 import {
   fetchActiveOrganization,
@@ -102,7 +105,7 @@ export function useStudioCreate() {
 
     setGenerating(true);
     try {
-      const { text } = await apiGenerateText(topic);
+      const { text } = await generateTextAi(topic);
       const created = await createTextArtifact({
         prompt: topic,
         text,
@@ -137,7 +140,7 @@ export function useStudioCreate() {
 
     setGenerating(true);
     try {
-      const palette = await apiGeneratePalette(
+      const palette = await generatePaletteAi(
         topic,
         inferPromptLanguage(topic),
       );

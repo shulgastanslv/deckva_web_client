@@ -5,13 +5,11 @@ import { getToken } from "next-auth/jwt";
 import { UserRole } from "@/lib/roles";
 
 /**
- * Edge gate: landing stays public; studio, admin, and expensive API routes
- * require a session. API calls get 401 JSON; page navigations redirect home
- * with the auth modal open.
+ * Edge gate: landing stays public; studio and admin require a session.
+ * Unauthenticated visits redirect home with the auth modal open.
  */
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const isApi = pathname.startsWith("/api/");
 
   const token = await getToken({
     req: request,
@@ -19,9 +17,6 @@ export async function proxy(request: NextRequest) {
   });
 
   if (!token) {
-    if (isApi) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.search = "";
@@ -30,25 +25,13 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (pathname.startsWith("/admin")) {
-    if (token.role !== UserRole.ADMIN) {
-      if (isApi) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+  if (pathname.startsWith("/admin") && token.role !== UserRole.ADMIN) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/studio",
-    "/studio/:path*",
-    "/admin",
-    "/admin/:path*",
-    "/api/ai/:path*",
-    "/api/tools/:path*",
-  ],
+  matcher: ["/studio", "/studio/:path*", "/admin", "/admin/:path*"],
 };

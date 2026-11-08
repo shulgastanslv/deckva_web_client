@@ -53,7 +53,7 @@ import { cn } from "@/lib/utils";
 import { useElementLibrary } from "@/components/canvas/use-element-library";
 import { useImageTools } from "@/components/canvas/use-image-tools";
 import { clampZoom } from "@/components/canvas/zoom-controls";
-import type { UpscaleScale } from "@/lib/image/deckva-tools";
+import type { UpscaleScale } from "@/actions/image-tools";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
 interface ElementsToolbarProps {

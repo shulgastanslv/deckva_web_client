@@ -14,7 +14,7 @@ import {
   removeImageBackground,
   upscaleImage,
   type UpscaleScale,
-} from "@/lib/image/deckva-tools";
+} from "@/actions/image-tools";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";

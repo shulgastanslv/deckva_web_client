@@ -23,7 +23,7 @@ import {
   sidebarSurfaceIdle,
   sidebarTextarea,
 } from "@/components/canvas/sidebar/sidebar-ui";
-import { apiGenerateText } from "@/lib/ai/browser";
+import { generateText } from "@/actions/ai";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import {
@@ -88,7 +88,7 @@ export function CaptionControls() {
         postCaption.trim() ||
         buildCaptionSeedFromSlides(slides, projectTitle) ||
         projectTitle;
-      const { text } = await apiGenerateText(seed);
+      const { text } = await generateText(seed);
       if (!text) throw new Error("AI returned empty text");
 
       await persistCaption(text);

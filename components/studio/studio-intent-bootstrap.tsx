@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { saveProject } from "@/actions/projects";
-import { apiGenerateCarousel } from "@/lib/ai/browser";
+import { generateCarousel } from "@/actions/ai";
 import { takePendingCover } from "@/lib/studio/pending-cover";
 import {
   peekStudioIntent,
@@ -94,7 +94,7 @@ export function StudioIntentBootstrap() {
 
       void (async () => {
         try {
-          const result = await apiGenerateCarousel({
+          const result = await generateCarousel({
             topic: intent.topic,
             aspectRatio: intent.aspectRatio,
             slidesCount: intent.slidesCount,

@@ -20,6 +20,9 @@ const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-studio-serif",
 });
 
+/** Server Actions used by studio (AI / image tools) may run up to 3 minutes. */
+export const maxDuration = 180;
+
 export const metadata: Metadata = {
   title: "Studio",
   description: "Canvas editing, templates, folders, and PNG/ZIP slide export.",
