@@ -27,6 +27,7 @@ import {
 } from "@/components/landing/landing-shell";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { trackEvent } from "@/lib/analytics";
 import { SOCIAL_LINKS } from "@/lib/social";
 import {
   FREE_CAROUSEL_LIMIT,
@@ -178,7 +179,12 @@ const FAQ = [
   {
     value: "where",
     q: "Where do I use it?",
-    a: "In the browser, on a computer or a phone.",
+    a: "In the browser, on a computer. The studio canvas is desktop-only.",
+  },
+  {
+    value: "support",
+    q: "Where can I ask for help?",
+    a: "Write in Telegram — the support link is on the landing and in the footer.",
   },
   {
     value: "figma-in",
@@ -657,7 +663,7 @@ export function LandingPage() {
           { name: t("ctaStudio"), href: "/studio" },
           { name: t("nav.seeIt"), href: "#studio" },
           { name: t("nav.thePost"), href: "#example" },
-          { name: t("nav.examples"), href: "#reviews" },
+          { name: t("nav.examples"), href: "#examples" },
           { name: t("nav.questions"), href: "#faq" },
         ],
       },
@@ -702,7 +708,23 @@ export function LandingPage() {
     <div className="relative bg-land-mist">
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
-      <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
+      <a
+        href={SOCIAL_LINKS.telegram}
+        target="_blank"
+        rel="noreferrer"
+        onClick={() => trackEvent("landing_telegram_click", { place: "banner" })}
+        className="fixed inset-x-0 top-0 z-[80] hidden h-9 items-center justify-center gap-2 bg-[#14151c] px-3 text-[12px] font-medium text-white md:flex dark:bg-white dark:text-[#14151c]"
+      >
+        <span>{t("desktopBanner")}</span>
+        <span aria-hidden className="opacity-40">
+          ·
+        </span>
+        <span className="underline-offset-2 hover:underline">
+          {t("telegramSupport")}
+        </span>
+      </a>
+
+      <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5 md:top-9 md:pt-3">
         <div className="mx-auto flex max-w-[1200px] items-center gap-2 rounded-full border-none bg-white/70 px-2 py-1.5 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:gap-3 sm:px-3">
           <div className="flex min-w-0 items-center gap-1">
             <Button
@@ -733,6 +755,9 @@ export function LandingPage() {
               <a
                 href="/studio"
                 className="hidden px-2 text-sm font-medium text-land-ink/80 hover:text-land-ink sm:inline"
+                onClick={() =>
+                  trackEvent("landing_cta_click", { place: "nav", signedIn: true })
+                }
               >
                 {tc("openStudio")}
               </a>
@@ -749,7 +774,14 @@ export function LandingPage() {
               asChild
               className="h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90"
             >
-              <a href="/studio">{t("ctaStudio")}</a>
+              <a
+                href="/studio"
+                onClick={() =>
+                  trackEvent("landing_cta_click", { place: "nav_primary" })
+                }
+              >
+                {t("ctaStudio")}
+              </a>
             </Button>
           </div>
         </div>
@@ -856,7 +888,7 @@ export function LandingPage() {
       ) : null}
 
       <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
+        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 md:pt-[calc(9.25rem+env(safe-area-inset-top))] lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
           <motion.div
             className="flex w-full max-w-xl flex-col items-start text-left lg:w-[28rem] lg:shrink-0"
             initial={reduceMotion ? false : "hidden"}
@@ -882,13 +914,20 @@ export function LandingPage() {
               Name what it is about. The slides arrive in order, ready to edit and download.
             </motion.p>
             <motion.div
-              className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3"  
+              className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3"
             >
               <Button
                 asChild
                 className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
               >
-                <a href="/studio">{t("ctaStudio")}</a>
+                <a
+                  href="/studio"
+                  onClick={() =>
+                    trackEvent("landing_cta_click", { place: "hero" })
+                  }
+                >
+                  {t("ctaStudio")}
+                </a>
               </Button>
               <a
                 href="#studio"
@@ -897,6 +936,11 @@ export function LandingPage() {
                 See it
               </a>
             </motion.div>
+            <p className="mt-4 text-sm text-white/65">
+              {t("freeLine", { count: FREE_CAROUSEL_LIMIT })}
+              {" · "}
+              {t("desktopBanner")}
+            </p>
           </motion.div>
           <motion.div
             className="w-full max-w-[28rem] sm:max-w-[36rem]"

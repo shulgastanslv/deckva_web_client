@@ -52,6 +52,8 @@ export function StudioStartSection({
   defaultHandle,
   generating,
   generateError,
+  /** Hide helper tiles — activation focuses on the prompt → carousel path. */
+  focusMode = false,
 }: {
   name: string | null;
   topic?: string;
@@ -78,6 +80,7 @@ export function StudioStartSection({
   defaultHandle?: string;
   generating?: boolean;
   generateError?: string | null;
+  focusMode?: boolean;
 }) {
   void name;
   void onSelectKind;
@@ -93,6 +96,10 @@ export function StudioStartSection({
     if (result !== false) setActive(null);
   };
 
+  const tileOrder: StartBlockId[] = focusMode
+    ? ["carousel"]
+    : START_BLOCK_ORDER;
+
   return (
     <div className="flex flex-col">
       <section>
@@ -101,7 +108,9 @@ export function StudioStartSection({
             <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-[22px]">
               {t("makeCarousel")}
             </h2>
-            <p className="text-sm text-muted-foreground">{t("makeCarouselSub")}</p>
+            <p className="text-sm text-muted-foreground">
+              {focusMode ? t("activationSub") : t("makeCarouselSub")}
+            </p>
           </div>
           <StudioCreateMenu
             onBlank={onBlank}
@@ -113,25 +122,28 @@ export function StudioStartSection({
             align="end"
           />
         </div>
-        <div className="m-6 flex flex-row gap-4">
-          <StudioCreateTile onClick={onBlank} />
-          <StudioStartRow>
-            {START_BLOCK_ORDER.map((id) => {
-              const block = START_BLOCKS[id];
-              return (
-                <StudioStartTile
-                  key={id}
-                  title={block.title}
-                  iconName={block.iconName}
-                  onClick={() => setActive(id)}
-                />
-              );
-            })}
-          </StudioStartRow>
-        </div>
+        {!focusMode ? (
+          <div className="m-6 flex flex-row gap-4">
+            <StudioCreateTile onClick={onBlank} />
+            <StudioStartRow>
+              {tileOrder.map((id) => {
+                const block = START_BLOCKS[id];
+                return (
+                  <StudioStartTile
+                    key={id}
+                    title={block.title}
+                    iconName={block.iconName}
+                    onClick={() => setActive(id)}
+                  />
+                );
+              })}
+            </StudioStartRow>
+          </div>
+        ) : null}
         <StudioPrompt
           initialTopic={topic}
           initialType={initialType}
+          lockCarousel
           onSubmit={onGenerate}
           busy={generating}
           error={generateError}

@@ -21,6 +21,7 @@ import {
   fetchUserProjects,
   invalidateStudioArtifacts,
 } from "@/lib/studio/queries";
+import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { stashPendingCover } from "@/lib/studio/pending-cover";
@@ -237,6 +238,12 @@ export function useStudioCreate() {
 
       await invalidateStudioArtifacts(queryClient);
       notifyProjectsChanged();
+      trackEvent("carousel_created", {
+        projectId: created.projectId,
+        slidesCount,
+        aspectRatio,
+        language,
+      });
       router.push(`/studio/editor?project=${created.projectId}`);
     } catch (err) {
       reportError(err, messages.errors.startGeneration);

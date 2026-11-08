@@ -28,6 +28,10 @@
   "studio": {
     "makeCarousel": "Зрабіце карусель",
     "makeCarouselSub": "Апішыце тэму. Па жаданні спачатку накідайце тэкст ці колеры — потым сабярыце слайды.",
+    "activationSub": "Тэма → слайды → праўка → экспарт PNG або ZIP.",
+    "activationHint": "Enter → карусель · потым экспарт PNG/ZIP",
+    "tryStarter": "Або вазьміце гатовую тэму",
+    "makeLikeThis": "Зрабіць такую ж",
     "recent": "Нядаўняе",
     "blankCarousel": "Пустая карусель",
     "viewOptions": "Яшчэ варыянты",
@@ -80,8 +84,16 @@
     "ctaStudio": "Адкрыць студыю",
     "ctaSignIn": "Увайсці",
     "heroEyebrow": "Студыя каруселяў",
+    "desktopBanner": "Зручней на камп’ютары",
+    "telegramSupport": "Падтрымка ў Telegram",
+    "freeLine": "Першыя {count} каруселі бясплатна",
+    "whereDesktop": "У браўзеры на камп’ютары. Палатно студыі — толькі desktop.",
     "legalStatus": "Плацельшчык падатку на прафесійны даход",
     "legalCountry": "Рэспубліка Беларусь"
+  },
+  "share": {
+    "makeLikeThis": "Зрабіць такую ж",
+    "makeLikeThisSub": "Адкрыйце студыю і згенеруйце сваю карусель па тэме."
   },
   "notifications": {
     "title": "Апавяшчэнні",

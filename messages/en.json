@@ -28,6 +28,10 @@
   "studio": {
     "makeCarousel": "Make a carousel",
     "makeCarouselSub": "Describe the topic. Optionally draft caption or colors first — then generate the slides.",
+    "activationSub": "One topic → slides → edit → export PNG or ZIP.",
+    "activationHint": "Enter → carousel · then export PNG/ZIP",
+    "tryStarter": "Or start from a ready topic",
+    "makeLikeThis": "Make one like this",
     "recent": "Recent",
     "blankCarousel": "Blank carousel",
     "viewOptions": "View options",
@@ -80,8 +84,16 @@
     "ctaStudio": "Open studio",
     "ctaSignIn": "Sign in",
     "heroEyebrow": "Carousel studio",
+    "desktopBanner": "Best on desktop",
+    "telegramSupport": "Support in Telegram",
+    "freeLine": "First {count} carousels free",
+    "whereDesktop": "In the browser, on a computer. The studio canvas is desktop-only.",
     "legalStatus": "Professional income tax payer",
     "legalCountry": "Republic of Belarus"
+  },
+  "share": {
+    "makeLikeThis": "Make one like this",
+    "makeLikeThisSub": "Open the studio and generate your own carousel from a topic."
   },
   "notifications": {
     "title": "Notifications",

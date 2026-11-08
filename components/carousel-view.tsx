@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import Logo from "@/components/logo/logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { trackEvent } from "@/lib/analytics";
 import type { RatioKey } from "@/lib/types";
 
 const RATIO: Record<RatioKey, string> = {
@@ -36,13 +39,14 @@ const WIDTH: Record<RatioKey, string> = {
 export function ViewHeader() {
   return (
     <header className="mx-auto flex w-full max-w-6xl items-center justify-start gap-3 px-4 py-4 sm:px-6">
-        <Logo width={34} height={34} />
+      <Logo width={34} height={34} />
       <ThemeSwitcher className="text-[#5c6170] hover:bg-[#e4ebff] hover:text-[#14151c] dark:text-[#a0a0a0] dark:hover:bg-white/10 dark:hover:text-white" />
     </header>
   );
 }
 
 export function CarouselView({
+  title,
   aspectRatio,
   slides,
 }: {
@@ -50,9 +54,13 @@ export function CarouselView({
   aspectRatio: RatioKey;
   slides: Array<string | null>;
 }) {
+  const t = useTranslations("share");
   const [index, setIndex] = useState(0);
   const count = Math.max(slides.length, 1);
   const current = slides[index] ?? null;
+  const studioHref = title.trim()
+    ? `/studio?topic=${encodeURIComponent(title.trim())}`
+    : "/studio";
 
   const go = (next: number) => {
     setIndex((next + count) % count);
@@ -125,6 +133,23 @@ export function CarouselView({
               }`}
             />
           ))}
+        </div>
+
+        <div className="relative mt-8 flex max-w-sm flex-col items-center gap-2 text-center">
+          <Link
+            href={studioHref}
+            onClick={() =>
+              trackEvent("share_remix_cta", {
+                hasTopic: Boolean(title.trim()),
+              })
+            }
+            className="inline-flex h-11 items-center justify-center rounded-full bg-[#14151c] px-5 text-sm font-semibold text-white dark:bg-white dark:text-[#14151c]"
+          >
+            {t("makeLikeThis")}
+          </Link>
+          <p className="text-[13px] text-[#5c6170] dark:text-[#a0a0a0]">
+            {t("makeLikeThisSub")}
+          </p>
         </div>
       </main>
     </div>

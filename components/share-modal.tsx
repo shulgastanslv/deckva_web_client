@@ -16,6 +16,7 @@ import { Check, Copy, Loader2, Link2 } from "lucide-react";
 import { FaFacebook, FaLinkedin, FaTelegram, FaWhatsapp, FaXTwitter } from "react-icons/fa6";
 import { SiThreads } from "react-icons/si";
 import { setProjectPublic } from "@/actions/projects";
+import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { useProject } from "@/hooks/use-project";
@@ -136,6 +137,7 @@ export function ShareModal({
     const url = `${window.location.origin}/view/${id}`;
     try {
       await navigator.clipboard.writeText(url);
+      trackEvent("share_link_copied", { projectId: id });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {

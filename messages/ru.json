@@ -28,6 +28,10 @@
   "studio": {
     "makeCarousel": "Сделайте карусель",
     "makeCarouselSub": "Опишите тему. При желании сначала набросайте текст или цвета — затем соберите слайды.",
+    "activationSub": "Тема → слайды → правка → экспорт PNG или ZIP.",
+    "activationHint": "Enter → карусель · затем экспорт PNG/ZIP",
+    "tryStarter": "Или возьмите готовую тему",
+    "makeLikeThis": "Сделать такую же",
     "recent": "Недавнее",
     "blankCarousel": "Пустая карусель",
     "viewOptions": "Ещё варианты",
@@ -80,8 +84,16 @@
     "ctaStudio": "Открыть студию",
     "ctaSignIn": "Войти",
     "heroEyebrow": "Студия каруселей",
+    "desktopBanner": "Удобнее на компьютере",
+    "telegramSupport": "Поддержка в Telegram",
+    "freeLine": "Первые {count} карусели бесплатно",
+    "whereDesktop": "В браузере на компьютере. Холст студии — только desktop.",
     "legalStatus": "Плательщик налога на профессиональный доход",
     "legalCountry": "Республика Беларусь"
+  },
+  "share": {
+    "makeLikeThis": "Сделать такую же",
+    "makeLikeThisSub": "Откройте студию и сгенерируйте свою карусель по теме."
   },
   "notifications": {
     "title": "Уведомления",
