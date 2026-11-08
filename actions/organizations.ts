@@ -87,7 +87,7 @@ export async function ensureUserOrganization(): Promise<
     });
     if (!user) return { success: false, error: messages.errors.userNotFound };
 
-    let memberships = await prisma.organizationMember.findMany({
+    const memberships = await prisma.organizationMember.findMany({
       where: { userId },
       include: {
         organization: {
