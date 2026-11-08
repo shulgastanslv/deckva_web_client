@@ -55,7 +55,7 @@ export function StudioHome() {
   const topic = searchParams.get("topic")?.trim() ?? "";
   const generateParam = searchParams.get("generate")?.trim() ?? "";
   const [promptType, setPromptType] = useState<GenerationKind>(
-    isGenerationKind(generateParam) ? generateParam : "text",
+    isGenerationKind(generateParam) ? generateParam : "carousel",
   );
   const { data: session, status } = useSession();
   const authPending = status === "loading";
@@ -253,8 +253,9 @@ export function StudioHome() {
             setPromptType("text");
             await create.generateText({ topic: value });
           }}
-          onPaletteClick={() => {
+          onPaletteGenerate={async (value) => {
             setPromptType("palette");
+            await create.generatePalette({ topic: value });
           }}
           onCarouselGenerate={async (form) => {
             setPromptType("carousel");

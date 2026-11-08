@@ -1,3 +1,4 @@
+import type { AiPalette } from "@/lib/ai/generate-palette";
 import type { RatioKey } from "@/lib/types";
 
 const STORAGE_KEY = "swibp:studio-intent";
@@ -13,6 +14,10 @@ export type StudioGenerateIntent = {
   /** Cover image URL; empty string = gray placeholder on slide 1. */
   cover: string;
   parentArtifactId?: string | null;
+  /** Full caption inherited from a TEXT artifact. */
+  seedText?: string;
+  /** Locked colors inherited from a PALETTE artifact. */
+  palette?: AiPalette;
 };
 
 export type StudioInsertKind = "codeblock" | "list";
@@ -29,6 +34,25 @@ export type StudioIntent =
   | { type: "new" }
   | StudioGenerateIntent
   | StudioInsertIntent;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isPalette(value: unknown): value is AiPalette {
+  if (!isRecord(value)) return false;
+  const keys = [
+    "name",
+    "bg",
+    "text",
+    "muted",
+    "accent",
+    "accent_text",
+    "grid",
+    "photo",
+  ] as const;
+  return keys.every((key) => typeof value[key] === "string");
+}
 
 function parseIntent(raw: string): StudioIntent | null {
   try {
@@ -55,10 +79,17 @@ function parseIntent(raw: string): StudioIntent | null {
       ) {
         return null;
       }
-      return {
+      const intent: StudioGenerateIntent = {
         ...parsed,
         cover: typeof parsed.cover === "string" ? parsed.cover : "",
       };
+      if (typeof parsed.seedText === "string" && parsed.seedText.trim()) {
+        intent.seedText = parsed.seedText;
+      }
+      if (isPalette(parsed.palette)) {
+        intent.palette = parsed.palette;
+      }
+      return intent;
     }
     return null;
   } catch {

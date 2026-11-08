@@ -96,6 +96,8 @@ export function StudioIntentBootstrap() {
         try {
           const result = await generateCarousel({
             topic: intent.topic,
+            seedText: intent.seedText,
+            palette: intent.palette,
             aspectRatio: intent.aspectRatio,
             slidesCount: intent.slidesCount,
             language: intent.language,
@@ -115,11 +117,13 @@ export function StudioIntentBootstrap() {
 
           const store = useCanvasStore.getState();
           store.setProjectTitle(result.title);
-          if (result.palette) {
+          // Pipeline palette (from PALETTE artifact) wins; else AI palette.
+          const lockedPalette = intent.palette || result.palette;
+          if (lockedPalette) {
             const { aiPaletteToProjectPalette } = await import(
               "@/lib/ai/generate-palette"
             );
-            store.setPalette(aiPaletteToProjectPalette(result.palette));
+            store.setPalette(aiPaletteToProjectPalette(lockedPalette));
           }
 
           const snap = useCanvasStore.getState();
