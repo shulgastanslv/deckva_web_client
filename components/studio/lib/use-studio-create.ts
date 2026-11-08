@@ -24,11 +24,14 @@ import {
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { stashPendingCover } from "@/lib/studio/pending-cover";
+import type { AiPalette } from "@/lib/ai/generate-palette";
 import {
   stashStudioIntent,
   type StudioInsertIntent,
 } from "@/lib/studio/pending-intent";
+import { topicForCarouselGeneration } from "@/lib/studio/pipeline";
 import { FREE_CAROUSEL_LIMIT } from "@/lib/studio/plans";
+import { resolveCarouselPipelineContext } from "@/lib/studio/resolve-pipeline-context";
 import type { GenerationKind, StudioPromptSubmit } from "@/lib/studio/generation/types";
 import type { RatioKey } from "@/lib/types";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -166,18 +169,28 @@ export function useStudioCreate() {
     language?: string;
     handle?: string;
     parentArtifactId?: string | null;
+    seedText?: string;
+    palette?: AiPalette;
   }) => {
-    const topic = input.topic.trim();
-    const cover = input.cover?.trim() ?? "";
     setGenerateError(null);
     if (!(await requireCarouselSlot(queryClient))) return;
 
     setGenerating(true);
     try {
+      const ctx = await resolveCarouselPipelineContext({
+        topic: input.topic,
+        seedText: input.seedText,
+        palette: input.palette,
+        parentArtifactId: input.parentArtifactId,
+      });
+
+      const topic = ctx.topic.trim();
+      const cover = input.cover?.trim() ?? "";
+      const generationTopic = topicForCarouselGeneration(ctx);
       const aspectRatio: RatioKey = input.aspectRatio ?? "4:5";
       const slidesCount = Math.min(10, Math.max(4, input.slidesCount ?? 7));
       const language =
-        input.language?.trim() || inferPromptLanguage(topic);
+        input.language?.trim() || inferPromptLanguage(generationTopic);
       const handle = normalizeHandle(
         input.handle ||
           session?.user?.name ||
@@ -197,7 +210,7 @@ export function useStudioCreate() {
         projectId: created.projectId,
         title: draftTitle(topic),
         prompt: topic,
-        parentId: input.parentArtifactId,
+        parentId: ctx.parentArtifactId,
         topic,
       });
 
@@ -206,13 +219,15 @@ export function useStudioCreate() {
       stashStudioIntent({
         type: "generate",
         projectId: created.projectId,
-        topic,
+        topic: generationTopic,
         handle,
         language,
         aspectRatio,
         slidesCount,
         cover: intentCover,
-        parentArtifactId: input.parentArtifactId ?? null,
+        parentArtifactId: ctx.parentArtifactId ?? null,
+        seedText: ctx.seedText,
+        palette: ctx.palette,
       });
 
       const store = useCanvasStore.getState();
