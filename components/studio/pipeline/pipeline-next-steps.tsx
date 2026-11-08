@@ -7,6 +7,7 @@ import {
   type GenerationTypeDef,
 } from "@/lib/studio/generation/registry";
 import type { GenerationKind } from "@/lib/studio/generation/types";
+import { PIPELINE_PRIMARY } from "@/lib/studio/pipeline";
 import { cn } from "@/lib/utils";
 
 export function PipelineNextSteps({
@@ -21,35 +22,76 @@ export function PipelineNextSteps({
   dense?: boolean;
 }) {
   const def = GENERATION_REGISTRY[from];
-  const steps = def.nextSteps
+  const primary = def.nextSteps
+    .map((kind) => GENERATION_REGISTRY[kind])
+    .filter(Boolean) as GenerationTypeDef[];
+  const helpers = (def.helperSteps ?? [])
     .map((kind) => GENERATION_REGISTRY[kind])
     .filter(Boolean) as GenerationTypeDef[];
 
-  if (steps.length === 0) return null;
+  if (primary.length === 0 && helpers.length === 0) return null;
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
-      {!dense ? (
-        <p className="text-[12px] text-muted-foreground">Next step</p>
+    <div className={cn("space-y-3", className)}>
+      {primary.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {!dense ? (
+            <p className="w-full text-[12px] text-muted-foreground">
+              Continue to carousel
+            </p>
+          ) : null}
+          {primary.map((step) => {
+            const Icon = step.icon;
+            const isCarousel = step.kind === PIPELINE_PRIMARY;
+            return (
+              <button
+                key={step.kind}
+                type="button"
+                onClick={() => onSelect(step.kind)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors",
+                  isCarousel
+                    ? "bg-foreground text-background hover:opacity-90"
+                    : "bg-muted/40 text-foreground hover:bg-muted/60",
+                  dense && "px-2.5 py-1.5 text-[12px]",
+                )}
+              >
+                <Icon className="size-3.5 opacity-70" />
+                {isCarousel ? "Make carousel" : `Generate ${step.label.toLowerCase()}`}
+                <ArrowRight className="size-3 opacity-50" />
+              </button>
+            );
+          })}
+        </div>
       ) : null}
-      {steps.map((step) => {
-        const Icon = step.icon;
-        return (
-          <button
-            key={step.kind}
-            type="button"
-            onClick={() => onSelect(step.kind)}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full bg-muted/40 px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60",
-              dense && "px-2.5 py-1 text-[12px]",
-            )}
-          >
-            <Icon className="size-3.5 opacity-70" />
-            Generate {step.label.toLowerCase()}
-            <ArrowRight className="size-3 opacity-50" />
-          </button>
-        );
-      })}
+
+      {helpers.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {!dense ? (
+            <p className="w-full text-[12px] text-muted-foreground">
+              Or prep first
+            </p>
+          ) : null}
+          {helpers.map((step) => {
+            const Icon = step.icon;
+            return (
+              <button
+                key={step.kind}
+                type="button"
+                onClick={() => onSelect(step.kind)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full bg-muted/30 px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground",
+                  dense && "px-2.5 py-1 text-[12px]",
+                )}
+              >
+                <Icon className="size-3.5 opacity-70" />
+                {step.label}
+                <ArrowRight className="size-3 opacity-40" />
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }

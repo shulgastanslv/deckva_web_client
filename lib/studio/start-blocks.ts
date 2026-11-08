@@ -2,9 +2,9 @@ import type { StudioIconName } from "@/components/studio/ui/studio-icons";
 import type { RatioKey } from "@/lib/types";
 
 export type StartBlockId =
+  | "carousel"
   | "text"
   | "palette"
-  | "carousel"
   | "codeblock"
   | "list"
   | "brand";
@@ -22,33 +22,61 @@ export type StartBlockDef = {
   id: StartBlockId;
   title: string;
   iconName: StudioIconName;
-  /** Palette opens no dialog — handled on click. */
   hasDialog: boolean;
+  /** Primary product action vs helper / editor insert. */
+  role: "primary" | "helper" | "insert";
 };
 
 export const START_BLOCKS: Record<StartBlockId, StartBlockDef> = {
-  text: { id: "text", title: "Generate Text", iconName: "idea", hasDialog: true },
-  palette: { id: "palette", title: "Palette", iconName: "palette", hasDialog: false },
   carousel: {
     id: "carousel",
     title: "Carousel",
     iconName: "carousel",
     hasDialog: true,
+    role: "primary",
+  },
+  text: {
+    id: "text",
+    title: "Caption",
+    iconName: "idea",
+    hasDialog: true,
+    role: "helper",
+  },
+  palette: {
+    id: "palette",
+    title: "Palette",
+    iconName: "palette",
+    hasDialog: true,
+    role: "helper",
   },
   codeblock: {
     id: "codeblock",
     title: "Code Block",
     iconName: "codeblock",
     hasDialog: true,
+    role: "insert",
   },
-  list: { id: "list", title: "List of Contents", iconName: "list", hasDialog: true },
-  brand: { id: "brand", title: "Brand Kit", iconName: "brand", hasDialog: true },
+  list: {
+    id: "list",
+    title: "List of Contents",
+    iconName: "list",
+    hasDialog: true,
+    role: "insert",
+  },
+  brand: {
+    id: "brand",
+    title: "Brand Kit",
+    iconName: "brand",
+    hasDialog: true,
+    role: "insert",
+  },
 };
 
+/** Carousel first — helpers and inserts follow. */
 export const START_BLOCK_ORDER: StartBlockId[] = [
+  "carousel",
   "text",
   "palette",
-  "carousel",
   "codeblock",
   "list",
   "brand",
