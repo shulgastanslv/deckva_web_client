@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { AdminPanel } from "@/components/admin/admin-panel";
 import { emailIsAdmin } from "@/lib/auth-role";
+import { isPlatformAdmin } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminPage() {
@@ -14,7 +15,7 @@ export default async function AdminPage() {
     where: { id: session.user.id },
     select: { role: true, email: true },
   });
-  if (!user || (user.role !== "ADMIN" && !emailIsAdmin(user.email))) redirect("/");
+  if (!user || (!isPlatformAdmin(user.role) && !emailIsAdmin(user.email))) redirect("/");
 
   return <AdminPanel email={user.email} />;
 }

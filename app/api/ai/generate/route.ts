@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { requireApiSession } from "@/lib/api/require-session";
+
 import {
   generateCarouselUpstream,
   type GenerateCarouselInput,
@@ -9,6 +11,9 @@ import { isRatioKey } from "@/lib/templates/parse";
 export const maxDuration = 180;
 
 export async function POST(request: Request) {
+  const auth = await requireApiSession();
+  if (auth.error) return auth.error;
+
   let body: unknown;
   try {
     body = await request.json();

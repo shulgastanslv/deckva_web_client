@@ -10,6 +10,7 @@ import {
   setActiveOrganization,
 } from "@/actions/organizations";
 import { studioKeys, useUserOrganizations } from "@/lib/studio/queries";
+import { isOrgManager, isOrgOwner } from "@/lib/roles";
 import { StudioOrgAvatar } from "@/components/studio/org/studio-org-avatar";
 import { StudioBadge } from "@/components/studio/ui/studio-badge";
 import {
@@ -55,7 +56,7 @@ export function StudioOrgSwitcher({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const active = orgs.find((o) => o.id === activeId) ?? orgs[0] ?? null;
-  const isAdmin = active?.role === "ADMIN" || active?.role === "OWNER";
+  const isAdmin = isOrgManager(active?.role);
 
   const switchTo = async (id: string) => {
     if (busy || id === activeId) {
@@ -215,7 +216,7 @@ export function StudioOrgSwitcher({
                         <Users className="size-4 text-muted-foreground" />
                         Manage members
                       </DropdownMenuItem>
-                      {active.role === "OWNER" ? (
+                      {isOrgOwner(active.role) ? (
                         <>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -256,9 +257,9 @@ export function StudioOrgSwitcher({
                         <span className="truncate text-[13px] font-semibold text-foreground">
                           {org.name}
                         </span>
-                        {org.role === "ADMIN" || org.role === "OWNER" ? (
+                        {isOrgManager(org.role) ? (
                           <StudioBadge className="uppercase">
-                            {org.role === "OWNER" ? "Owner" : "Admin"}
+                            {isOrgOwner(org.role) ? "Owner" : "Admin"}
                           </StudioBadge>
                         ) : null}
                       </span>

@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { emailIsAdmin } from "@/lib/auth-role";
+import { UserRole, isPlatformAdmin } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 
 type ActionResult<T extends object = object> =
@@ -36,9 +37,9 @@ async function requireAdminId(): Promise<string | null> {
     select: { id: true, email: true, role: true },
   });
   if (!user) return null;
-  if (user.role === "ADMIN" || emailIsAdmin(user.email)) {
-    if (user.role !== "ADMIN") {
-      await prisma.user.update({ where: { id: user.id }, data: { role: "ADMIN" } });
+  if (isPlatformAdmin(user.role) || emailIsAdmin(user.email)) {
+    if (!isPlatformAdmin(user.role)) {
+      await prisma.user.update({ where: { id: user.id }, data: { role: UserRole.ADMIN } });
     }
     return user.id;
   }

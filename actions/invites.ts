@@ -12,8 +12,19 @@ import {
   normalizeEmail,
   sendAuthEmail,
 } from "@/lib/email";
+import {
+  InviteSendStatus,
+  OrganizationInviteStatus,
+  type InviteSendStatus as InviteSendStatusValue,
+} from "@/lib/domain/invites";
 import { messages } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
+import {
+  isOrgManager,
+  OrgMemberRole,
+  type InviteableOrgRole,
+  type OrgMemberRole as OrgMemberRoleValue,
+} from "@/lib/roles";
 
 type ActionResult<T extends object = object> =
   | ({ success: true } & T)
@@ -24,7 +35,7 @@ export type InvitePreview = {
   organizationId: string;
   organizationName: string;
   organizationColor: string;
-  role: "OWNER" | "ADMIN" | "MEMBER";
+  role: OrgMemberRoleValue;
   email: string | null;
   invitedByName: string | null;
   expiresAt: string;
@@ -36,7 +47,7 @@ export type InvitePreview = {
 
 export type InviteSendResult = {
   email: string;
-  status: "invited" | "notified" | "already_member" | "invalid";
+  status: InviteSendStatusValue;
 };
 
 const OPEN_INVITE_DAYS = 365;
@@ -60,7 +71,7 @@ async function requireOrgAdmin(userId: string, organizationId: string) {
     where: { userId, organizationId },
   });
   if (!membership) return null;
-  if (membership.role !== "OWNER" && membership.role !== "ADMIN") return null;
+  if (!isOrgManager(membership.role)) return null;
   return membership;
 }
 
@@ -107,7 +118,7 @@ export async function getOrCreateInviteLink(
       where: {
         organizationId,
         email: null,
-        status: "PENDING",
+        status: OrganizationInviteStatus.PENDING,
         expiresAt: { gt: new Date() },
       },
       orderBy: { createdAt: "desc" },
@@ -126,7 +137,7 @@ export async function getOrCreateInviteLink(
       data: {
         token,
         email: null,
-        role: "MEMBER",
+        role: OrgMemberRole.MEMBER,
         organizationId,
         invitedById: userId,
         expiresAt: new Date(Date.now() + OPEN_INVITE_DAYS * 24 * 60 * 60 * 1000),
@@ -147,7 +158,7 @@ export async function getOrCreateInviteLink(
 export async function sendOrganizationInvites(input: {
   organizationId: string;
   emails: string;
-  role?: "ADMIN" | "MEMBER";
+  role?: InviteableOrgRole;
 }): Promise<ActionResult<{ results: InviteSendResult[]; invited: number }>> {
   try {
     const userId = await requireUserId();
@@ -156,7 +167,7 @@ export async function sendOrganizationInvites(input: {
     const admin = await requireOrgAdmin(userId, input.organizationId);
     if (!admin) return { success: false, error: messages.errors.inviteForbidden };
 
-    const role = input.role === "ADMIN" ? "ADMIN" : "MEMBER";
+    const role = input.role === OrgMemberRole.ADMIN ? OrgMemberRole.ADMIN : OrgMemberRole.MEMBER;
     const emails = parseEmails(input.emails);
     if (emails.length === 0) {
       return { success: false, error: messages.errors.validEmail };
@@ -189,7 +200,7 @@ export async function sendOrganizationInvites(input: {
           where: { userId: existingUser.id, organizationId: org.id },
         });
         if (already) {
-          results.push({ email, status: "already_member" });
+          results.push({ email, status: InviteSendStatus.already_member });
           continue;
         }
       }
@@ -198,7 +209,7 @@ export async function sendOrganizationInvites(input: {
         where: {
           organizationId: org.id,
           email,
-          status: "PENDING",
+          status: OrganizationInviteStatus.PENDING,
           expiresAt: { gt: new Date() },
         },
       });
@@ -227,7 +238,7 @@ export async function sendOrganizationInvites(input: {
           body: `${inviterName} invited you to join **${org.name}** as ${role.toLowerCase()}.`,
           href: `/invite/${invite.token}`,
         });
-        results.push({ email, status: "notified" });
+        results.push({ email, status: InviteSendStatus.notified });
       } else {
         await sendAuthEmail({
           to: email,
@@ -235,7 +246,7 @@ export async function sendOrganizationInvites(input: {
           text: `${inviterName} invited you to join ${org.name} on Deckva.\n\nOpen this link to accept:\n${url}`,
           html: `<p><strong>${inviterName}</strong> invited you to join <strong>${org.name}</strong> on Deckva.</p><p><a href="${url}">Accept invite</a></p>`,
         });
-        results.push({ email, status: "invited" });
+        results.push({ email, status: InviteSendStatus.invited });
       }
 
       invited += 1;
@@ -273,7 +284,7 @@ export async function getInvitePreview(
     }
 
     const expired =
-      invite.status === "EXPIRED" || invite.expiresAt.getTime() < Date.now();
+      invite.status === OrganizationInviteStatus.EXPIRED || invite.expiresAt.getTime() < Date.now();
 
     return {
       success: true,
@@ -291,8 +302,8 @@ export async function getInvitePreview(
         expiresAt: invite.expiresAt.toISOString(),
         alreadyMember,
         expired,
-        revoked: invite.status === "REVOKED",
-        accepted: invite.status === "ACCEPTED",
+        revoked: invite.status === OrganizationInviteStatus.REVOKED,
+        accepted: invite.status === OrganizationInviteStatus.ACCEPTED,
       },
     };
   } catch (err) {
@@ -319,17 +330,17 @@ export async function acceptOrganizationInvite(
     });
     if (!invite) return { success: false, error: messages.errors.inviteNotFound };
 
-    if (invite.status === "REVOKED") {
+    if (invite.status === OrganizationInviteStatus.REVOKED) {
       return { success: false, error: messages.errors.inviteRevoked };
     }
-    if (invite.status === "ACCEPTED" && invite.email) {
+    if (invite.status === OrganizationInviteStatus.ACCEPTED && invite.email) {
       return { success: false, error: messages.errors.inviteUsed };
     }
-    if (invite.expiresAt.getTime() < Date.now() || invite.status === "EXPIRED") {
-      if (invite.status === "PENDING") {
+    if (invite.expiresAt.getTime() < Date.now() || invite.status === OrganizationInviteStatus.EXPIRED) {
+      if (invite.status === OrganizationInviteStatus.PENDING) {
         await prisma.organizationInvite.update({
           where: { id: invite.id },
-          data: { status: "EXPIRED" },
+          data: { status: OrganizationInviteStatus.EXPIRED },
         });
       }
       return { success: false, error: messages.errors.inviteExpired };
@@ -344,7 +355,7 @@ export async function acceptOrganizationInvite(
     });
 
     if (!existing) {
-      const role = invite.role === "OWNER" ? "MEMBER" : invite.role;
+      const role = invite.role === OrgMemberRole.OWNER ? OrgMemberRole.MEMBER : invite.role;
       await prisma.organizationMember.create({
         data: {
           userId,
@@ -357,7 +368,7 @@ export async function acceptOrganizationInvite(
     if (invite.email) {
       await prisma.organizationInvite.update({
         where: { id: invite.id },
-        data: { status: "ACCEPTED" },
+        data: { status: OrganizationInviteStatus.ACCEPTED },
       });
     }
 
@@ -401,10 +412,10 @@ export async function declineOrganizationInvite(
       return { success: false, error: messages.errors.inviteEmailMismatch };
     }
 
-    if (invite.email && invite.status === "PENDING") {
+    if (invite.email && invite.status === OrganizationInviteStatus.PENDING) {
       await prisma.organizationInvite.update({
         where: { id: invite.id },
-        data: { status: "REVOKED" },
+        data: { status: OrganizationInviteStatus.REVOKED },
       });
     }
 
@@ -422,7 +433,7 @@ export async function listOrganizationInvites(
     invites: Array<{
       id: string;
       email: string | null;
-      role: "OWNER" | "ADMIN" | "MEMBER";
+      role: OrgMemberRoleValue;
       status: string;
       createdAt: string;
       expiresAt: string;
@@ -440,7 +451,7 @@ export async function listOrganizationInvites(
     const rows = await prisma.organizationInvite.findMany({
       where: {
         organizationId,
-        status: "PENDING",
+        status: OrganizationInviteStatus.PENDING,
         expiresAt: { gt: new Date() },
         email: { not: null },
       },
@@ -483,7 +494,7 @@ export async function revokeOrganizationInvite(
 
     await prisma.organizationInvite.update({
       where: { id: inviteId },
-      data: { status: "REVOKED" },
+      data: { status: OrganizationInviteStatus.REVOKED },
     });
 
     return { success: true };

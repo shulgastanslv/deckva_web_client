@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { requireApiSession } from "@/lib/api/require-session";
 import { proxyToolsRequest, requireFile } from "@/lib/image/tools-proxy";
 
 export const maxDuration = 180;
@@ -7,6 +8,9 @@ export const maxDuration = 180;
 const SCALES = new Set(["2", "3", "4"]);
 
 export async function POST(request: Request) {
+  const auth = await requireApiSession();
+  if (auth.error) return auth.error;
+
   const incoming = await request.formData();
   const file = requireFile(incoming);
   if (file instanceof Response) return file;

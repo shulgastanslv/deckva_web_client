@@ -18,6 +18,7 @@ import {
 } from "@/lib/ai/generate-palette";
 import { loadBrandKit, writeBrandKit } from "@/lib/studio/brand-kit";
 import { useArtifact } from "@/lib/studio/queries";
+import { ArtifactKind } from "@/lib/domain/artifacts";
 import { reportError } from "@/lib/report-error";
 import { messages } from "@/lib/messages";
 
@@ -38,7 +39,7 @@ export function StudioPaletteArtifact({ artifactId }: { artifactId: string }) {
   const artifact = query.data?.artifact;
 
   const palette = useMemo(() => {
-    if (!artifact || artifact.kind !== "PALETTE") return null;
+    if (!artifact || artifact.kind !== ArtifactKind.PALETTE) return null;
     try {
       return parseAiPalette(artifact.payload);
     } catch {
@@ -56,7 +57,7 @@ export function StudioPaletteArtifact({ artifactId }: { artifactId: string }) {
     );
   }
 
-  if (!artifact || artifact.kind !== "PALETTE" || !palette) {
+  if (!artifact || artifact.kind !== ArtifactKind.PALETTE || !palette) {
     return (
       <StudioContent>
         <StudioContentBody className="py-16">

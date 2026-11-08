@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { sendVerificationEmail } from "@/actions/auth-email";
+import { isPasswordLongEnough } from "@/lib/auth/password";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
@@ -105,7 +106,7 @@ export async function updateProfile(input: {
       Boolean(input.newPassword?.trim()) || Boolean(input.currentPassword?.trim());
     if (wantsPassword) {
       const next = input.newPassword?.trim() ?? "";
-      if (next.length < 6) {
+      if (!isPasswordLongEnough(next)) {
         return { success: false, error: messages.errors.passwordTooShort };
       }
       if (user.password) {
@@ -178,7 +179,7 @@ export async function registerUser({ name, email, password }: RegisterInput) {
       return { error: messages.errors.validEmailAndPassword };
     }
 
-    if (password.length < 6) {
+    if (!isPasswordLongEnough(password)) {
       return { error: messages.errors.passwordTooShort };
     }
 

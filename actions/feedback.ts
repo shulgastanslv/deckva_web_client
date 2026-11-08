@@ -1,6 +1,7 @@
 "use server";
 
 import { messages } from "@/lib/messages";
+import { isPlatformAdmin } from "@/lib/roles";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
@@ -86,7 +87,7 @@ export async function listFeedbacks(): Promise<
     where: { id: session.user.id },
     select: { role: true },
   });
-  if (user?.role !== "ADMIN") return { success: false, error: messages.errors.unauthorized };
+  if (!isPlatformAdmin(user?.role)) return { success: false, error: messages.errors.unauthorized };
 
   try {
     const rows = await prisma.feedback.findMany({

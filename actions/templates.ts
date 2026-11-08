@@ -7,7 +7,9 @@ import { Prisma } from "@/lib/generated/prisma/client";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { emailIsAdmin } from "@/lib/auth-role";
+import { isPlatformAdmin } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
+import { TemplateStatus } from "@/lib/domain/templates";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
 import {
   isRatioKey,
@@ -25,7 +27,8 @@ export interface PublishTemplateInput {
   previewUrl?: string | null;
 }
 
-export type TemplateReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type TemplateReviewStatus = TemplateStatus;
+export { TemplateStatus };
 
 export interface TemplateListItem {
   id: string;
@@ -76,10 +79,10 @@ interface TemplateListRow {
 }
 
 function asReviewStatus(value: string | null | undefined): TemplateReviewStatus {
-  if (value === "PENDING" || value === "REJECTED" || value === "APPROVED") {
+  if (value === TemplateStatus.PENDING || value === TemplateStatus.REJECTED || value === TemplateStatus.APPROVED) {
     return value;
   }
-  return "APPROVED";
+  return TemplateStatus.APPROVED;
 }
 
 export async function getTemplates(options?: {
@@ -237,7 +240,7 @@ export async function publishTemplate(
       where: { id: session.user.id },
       select: { id: true, role: true, email: true },
     });
-    const status = author && isAdminUser(author) ? "APPROVED" : "PENDING";
+    const status = author && isAdminUser(author) ? TemplateStatus.APPROVED : TemplateStatus.PENDING;
 
     const template = await prisma.template.create({
       data: {
@@ -311,7 +314,7 @@ async function requireUser() {
 }
 
 function isAdminUser(user: { role: string; email: string }): boolean {
-  return user.role === "ADMIN" || emailIsAdmin(user.email);
+  return isPlatformAdmin(user.role) || emailIsAdmin(user.email);
 }
 
 export async function renameTemplate(
@@ -359,7 +362,7 @@ export async function duplicateTemplate(
         badge: row.badge,
         previewUrl: row.previewUrl,
         aspectRatio: row.aspectRatio,
-        status: isAdminUser(user) ? "APPROVED" : "PENDING",
+        status: isAdminUser(user) ? TemplateStatus.APPROVED : TemplateStatus.PENDING,
         canvasJSON: row.canvasJSON as Prisma.InputJsonValue,
         authorId: user.id,
       },
@@ -480,7 +483,7 @@ export async function importTemplateJson(input: {
         category,
         badge: input.badge?.trim() || null,
         aspectRatio,
-        status: "APPROVED",
+        status: TemplateStatus.APPROVED,
         previewUrl: parsed.template.previewUrl ?? parsed.template.thumbnails[0] ?? null,
         canvasJSON: {
           slides: parsed.template.slides,

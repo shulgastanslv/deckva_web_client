@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 
+import { requireApiSession } from "@/lib/api/require-session";
+
 import { generatePaletteUpstream } from "@/lib/ai/generate-palette";
 
 export const maxDuration = 120;
 
 export async function POST(request: Request) {
+  const auth = await requireApiSession();
+  if (auth.error) return auth.error;
+
   let body: unknown;
   try {
     body = await request.json();

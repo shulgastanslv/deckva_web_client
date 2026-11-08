@@ -1,17 +1,23 @@
+import { chargeCard } from "@/lib/billing/provider";
+import {
+  BillingPaymentKind,
+  BillingPaymentStatus,
+  isBillableSubscriptionStatus,
+  SubscriptionStatus,
+} from "@/lib/domain/billing";
 import { prisma } from "@/lib/prisma";
 import {
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
   addBillingMonth,
 } from "@/lib/studio/plans";
-import { chargeCard } from "@/lib/billing/provider";
 
 export function isProStatus(
-  status: "NONE" | "ACTIVE" | "PAST_DUE" | "CANCELED",
+  status: SubscriptionStatus,
   endsAt: Date | null | undefined,
 ) {
-  if (status !== "ACTIVE" && status !== "PAST_DUE") return false;
-  if (!endsAt) return status === "ACTIVE";
+  if (!isBillableSubscriptionStatus(status)) return false;
+  if (!endsAt) return status === SubscriptionStatus.ACTIVE;
   return endsAt.getTime() > Date.now();
 }
 
@@ -36,13 +42,13 @@ export async function userHasPro(userId: string): Promise<boolean> {
   const stillInPeriod =
     endsAt != null && endsAt.getTime() > Date.now();
 
-  if (user.subscriptionStatus === "ACTIVE" && stillInPeriod) {
+  if (user.subscriptionStatus === SubscriptionStatus.ACTIVE && stillInPeriod) {
     return true;
   }
 
   // Period ended while cancel was scheduled → move to CANCELED / NONE
   if (
-    user.subscriptionStatus === "ACTIVE" &&
+    user.subscriptionStatus === SubscriptionStatus.ACTIVE &&
     user.cancelAtPeriodEnd &&
     endsAt &&
     !stillInPeriod
@@ -50,7 +56,7 @@ export async function userHasPro(userId: string): Promise<boolean> {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        subscriptionStatus: "CANCELED",
+        subscriptionStatus: SubscriptionStatus.CANCELED,
         cancelAtPeriodEnd: false,
       },
     });
@@ -59,8 +65,8 @@ export async function userHasPro(userId: string): Promise<boolean> {
 
   // Auto-renew when period elapsed and not canceled
   if (
-    (user.subscriptionStatus === "ACTIVE" ||
-      user.subscriptionStatus === "PAST_DUE") &&
+    (user.subscriptionStatus === SubscriptionStatus.ACTIVE ||
+      user.subscriptionStatus === SubscriptionStatus.PAST_DUE) &&
     endsAt &&
     !stillInPeriod &&
     !user.cancelAtPeriodEnd
@@ -69,7 +75,7 @@ export async function userHasPro(userId: string): Promise<boolean> {
     if (!method) {
       await prisma.user.update({
         where: { id: userId },
-        data: { subscriptionStatus: "PAST_DUE" },
+        data: { subscriptionStatus: SubscriptionStatus.PAST_DUE },
       });
       return false;
     }
@@ -87,8 +93,8 @@ export async function userHasPro(userId: string): Promise<boolean> {
             paymentMethodId: method.id,
             amount: STUDIO_PRO_PRICE,
             currency: STUDIO_PRO_CURRENCY,
-            status: "FAILED",
-            kind: "SUBSCRIPTION",
+            status: BillingPaymentStatus.FAILED,
+            kind: BillingPaymentKind.SUBSCRIPTION,
             description: "Pro renewal",
             failureReason: charge.error ?? "Payment failed",
             providerRef: charge.providerRef,
@@ -96,7 +102,7 @@ export async function userHasPro(userId: string): Promise<boolean> {
         }),
         prisma.user.update({
           where: { id: userId },
-          data: { subscriptionStatus: "PAST_DUE" },
+          data: { subscriptionStatus: SubscriptionStatus.PAST_DUE },
         }),
       ]);
       return false;
@@ -110,8 +116,8 @@ export async function userHasPro(userId: string): Promise<boolean> {
           paymentMethodId: method.id,
           amount: STUDIO_PRO_PRICE,
           currency: STUDIO_PRO_CURRENCY,
-          status: "SUCCEEDED",
-          kind: "SUBSCRIPTION",
+          status: BillingPaymentStatus.SUCCEEDED,
+          kind: BillingPaymentKind.SUBSCRIPTION,
           description: "Pro renewal",
           providerRef: charge.providerRef,
           paidAt: new Date(),
@@ -120,7 +126,7 @@ export async function userHasPro(userId: string): Promise<boolean> {
       prisma.user.update({
         where: { id: userId },
         data: {
-          subscriptionStatus: "ACTIVE",
+          subscriptionStatus: SubscriptionStatus.ACTIVE,
           subscriptionEndsAt: nextEnd,
           cancelAtPeriodEnd: false,
         },

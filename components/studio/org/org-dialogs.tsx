@@ -41,6 +41,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { invalidateStudioOrganizations } from "@/lib/studio/queries";
+import {
+  INVITEABLE_ORG_ROLES,
+  OrgMemberRole,
+  isOrgManager,
+  isOrgOwner,
+  type InviteableOrgRole,
+} from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 const ORG_COLORS = [
@@ -197,9 +204,8 @@ export function ManageMembersDialog({
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const myId = session?.user?.id ?? null;
-  const isOwner = organization?.role === "OWNER";
-  const isAdmin =
-    organization?.role === "OWNER" || organization?.role === "ADMIN";
+  const isOwner = isOrgOwner(organization?.role);
+  const isAdmin = isOrgManager(organization?.role);
 
   const [members, setMembers] = useState<OrganizationMemberItem[]>([]);
   const [pending, setPending] = useState<
@@ -207,7 +213,7 @@ export function ManageMembersDialog({
   >([]);
   const [loading, setLoading] = useState(true);
   const [inviteEmails, setInviteEmails] = useState("");
-  const [inviteRole, setInviteRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
+  const [inviteRole, setInviteRole] = useState<InviteableOrgRole>(OrgMemberRole.MEMBER);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -243,7 +249,7 @@ export function ManageMembersDialog({
     if (open && organization) {
       void reload();
       setInviteEmails("");
-      setInviteRole("MEMBER");
+      setInviteRole(OrgMemberRole.MEMBER);
       setError(null);
     } else {
       setMembers([]);
@@ -296,11 +302,11 @@ export function ManageMembersDialog({
               />
               <div className="flex flex-wrap items-center gap-2">
                 <div className="grid grid-cols-2 gap-1 rounded-full bg-muted/50 p-1">
-                  {(["MEMBER", "ADMIN"] as const).map((value) => (
+                  {INVITEABLE_ORG_ROLES.map((value) => (
                     <button
                       key={value}
                       type="button"
-                      disabled={busy || (!isOwner && value === "ADMIN")}
+                      disabled={busy || (!isOwner && value === OrgMemberRole.ADMIN)}
                       onClick={() => setInviteRole(value)}
                       className={cn(
                         "h-8 rounded-full px-3 text-[12px] font-medium transition-colors",
@@ -309,7 +315,7 @@ export function ManageMembersDialog({
                           : "text-muted-foreground",
                       )}
                     >
-                      {value === "MEMBER" ? "Member" : "Admin"}
+                      {value === OrgMemberRole.MEMBER ? "Member" : "Admin"}
                     </button>
                   ))}
                 </div>
@@ -366,8 +372,8 @@ export function ManageMembersDialog({
                     <span className="rounded-full bg-muted/50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                       {member.role}
                     </span>
-                    {(isOwner || isMe || (isAdmin && member.role === "MEMBER")) &&
-                    !(isMe && member.role === "OWNER") ? (
+                    {(isOwner || isMe || (isAdmin && member.role === OrgMemberRole.MEMBER)) &&
+                    !(isMe && member.role === OrgMemberRole.OWNER) ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
@@ -383,7 +389,7 @@ export function ManageMembersDialog({
                           align="end"
                           className="w-44 rounded-2xl border-0 p-1"
                         >
-                          {isOwner && member.role !== "OWNER" ? (
+                          {isOwner && member.role !== OrgMemberRole.OWNER ? (
                             <>
                               <DropdownMenuItem
                                 className="rounded-xl text-[13px]"
@@ -393,14 +399,14 @@ export function ManageMembersDialog({
                                       organizationId: organization!.id,
                                       memberUserId: member.user.id,
                                       role:
-                                        member.role === "ADMIN"
-                                          ? "MEMBER"
-                                          : "ADMIN",
+                                        member.role === OrgMemberRole.ADMIN
+                                          ? OrgMemberRole.MEMBER
+                                          : OrgMemberRole.ADMIN,
                                     }),
                                   )
                                 }
                               >
-                                Make {member.role === "ADMIN" ? "member" : "admin"}
+                                Make {member.role === OrgMemberRole.ADMIN ? "member" : "admin"}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="rounded-xl text-[13px]"
@@ -510,7 +516,7 @@ export function DeleteOrganizationDialog({
     }
   }, [open]);
 
-  const isOwner = organization?.role === "OWNER";
+  const isOwner = isOrgOwner(organization?.role);
   const canDelete = confirmName === organization?.name;
 
   const handleDelete = async () => {

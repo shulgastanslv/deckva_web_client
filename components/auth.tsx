@@ -22,6 +22,7 @@ import {
 import { registerUser } from "@/actions/user";
 import { Loader2 } from "lucide-react";
 import Logo from "./logo/logo";
+import { PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
 
 type View = "login" | "register" | "forgot-password" | "reset-password" | "check-email";
 type CheckKind = "verify" | "reset";
@@ -548,7 +549,7 @@ export function AuthModal({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={6}
+                    minLength={PASSWORD_MIN_LENGTH}
                     className="h-10 rounded-full bg-muted/50 border-input"
                   />
                 </div>

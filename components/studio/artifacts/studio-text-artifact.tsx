@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { invalidateStudioArtifact, useArtifact } from "@/lib/studio/queries";
+import { ArtifactKind } from "@/lib/domain/artifacts";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 
@@ -66,7 +67,7 @@ export function StudioTextArtifact({ artifactId }: { artifactId: string }) {
     );
   }
 
-  if (!artifact || artifact.kind !== "TEXT") {
+  if (!artifact || artifact.kind !== ArtifactKind.TEXT) {
     return (
       <StudioContent>
         <StudioContentBody className="py-16">
