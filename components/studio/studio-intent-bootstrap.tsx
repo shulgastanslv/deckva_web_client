@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { saveProject } from "@/actions/projects";
-import type { GenerateCarouselResult } from "@/lib/ai/generate";
+import { apiGenerateCarousel } from "@/lib/ai/browser";
 import { takePendingCover } from "@/lib/studio/pending-cover";
 import {
   peekStudioIntent,
@@ -94,32 +94,15 @@ export function StudioIntentBootstrap() {
 
       void (async () => {
         try {
-          const res = await fetch("/api/ai/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              topic: intent.topic,
-              aspectRatio: intent.aspectRatio,
-              slidesCount: intent.slidesCount,
-              language: intent.language,
-              handle: intent.handle,
-              cover:
-                takePendingCover(intent.projectId) || intent.cover || "",
-            }),
+          const result = await apiGenerateCarousel({
+            topic: intent.topic,
+            aspectRatio: intent.aspectRatio,
+            slidesCount: intent.slidesCount,
+            language: intent.language,
+            handle: intent.handle,
+            cover: takePendingCover(intent.projectId) || intent.cover || "",
           });
 
-          const payload: unknown = await res.json().catch(() => null);
-          if (!res.ok) {
-            const message =
-              payload &&
-              typeof payload === "object" &&
-              typeof (payload as { error?: unknown }).error === "string"
-                ? (payload as { error: string }).error
-                : messages.errors.generateCarousel;
-            throw new Error(message);
-          }
-
-          const result = payload as GenerateCarouselResult;
           if (!result?.slides?.length || !result.aspectRatio) {
             throw new Error(messages.errors.emptyCarousel);
           }

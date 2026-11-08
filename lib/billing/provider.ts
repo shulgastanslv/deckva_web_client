@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "crypto";
+import { isAxiosError } from "axios";
 
 import {
   detectCardBrand,
@@ -7,10 +8,39 @@ import {
   validateCardInput,
 } from "@/lib/billing/card";
 import type { CardInput, ChargeResult, TokenizedCard } from "@/lib/billing/types";
+import { http } from "@/lib/api/http";
 import {
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
+
+type BepaidPaymentResponse = {
+  transaction?: {
+    status?: string;
+    uid?: string;
+    credit_card?: {
+      token?: string;
+      brand?: string;
+      last_4?: string;
+      exp_month?: number | string;
+      exp_year?: number | string;
+    };
+    message?: string;
+  };
+  message?: string;
+};
+
+function bepaidBaseUrl() {
+  return (
+    process.env.BEPAID_API_URL?.replace(/\/$/, "") || "https://gateway.bepaid.by"
+  );
+}
+
+function bepaidAuthHeader() {
+  const shopId = process.env.BEPAID_SHOP_ID!;
+  const secret = process.env.BEPAID_SECRET_KEY!;
+  return `Basic ${Buffer.from(`${shopId}:${secret}`).toString("base64")}`;
+}
 
 function bepaidConfigured() {
   return Boolean(
@@ -66,74 +96,60 @@ async function tokenizeBepaid(input: CardInput): Promise<TokenizedCard> {
   const err = validateCardInput(input);
   if (err) throw new Error(err);
 
-  const shopId = process.env.BEPAID_SHOP_ID!;
-  const secret = process.env.BEPAID_SECRET_KEY!;
   const number = digitsOnly(input.number);
   const expYear = normalizeExpiryYear(input.expYear);
-  const auth = Buffer.from(`${shopId}:${secret}`).toString("base64");
-  const base =
-    process.env.BEPAID_API_URL?.replace(/\/$/, "") ||
-    "https://gateway.bepaid.by";
 
-  const res = await fetch(`${base}/beyag/payments`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${auth}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      request: {
-        amount: 100,
-        currency: STUDIO_PRO_CURRENCY,
-        description: "Card verification",
-        test: process.env.BEPAID_TEST === "true",
-        credit_card: {
-          number,
-          verification_value: digitsOnly(input.cvv),
-          holder: input.holder?.trim() || "CARD HOLDER",
-          exp_month: String(input.expMonth).padStart(2, "0"),
-          exp_year: String(expYear),
-        },
-        additional_data: {
-          contract: ["recurring"],
+  try {
+    const { data, status } = await http.post<BepaidPaymentResponse>(
+      `${bepaidBaseUrl()}/beyag/payments`,
+      {
+        request: {
+          amount: 100,
+          currency: STUDIO_PRO_CURRENCY,
+          description: "Card verification",
+          test: process.env.BEPAID_TEST === "true",
+          credit_card: {
+            number,
+            verification_value: digitsOnly(input.cvv),
+            holder: input.holder?.trim() || "CARD HOLDER",
+            exp_month: String(input.expMonth).padStart(2, "0"),
+            exp_year: String(expYear),
+          },
+          additional_data: {
+            contract: ["recurring"],
+          },
         },
       },
-    }),
-  });
-
-  const data = (await res.json().catch(() => null)) as {
-    transaction?: {
-      status?: string;
-      uid?: string;
-      credit_card?: {
-        token?: string;
-        brand?: string;
-        last_4?: string;
-        exp_month?: number | string;
-        exp_year?: number | string;
-      };
-      message?: string;
-    };
-    message?: string;
-  } | null;
-
-  const tx = data?.transaction;
-  const token = tx?.credit_card?.token;
-  if (!res.ok || !token) {
-    throw new Error(
-      tx?.message || data?.message || "Couldn't verify card with bePaid",
+      {
+        headers: {
+          Authorization: bepaidAuthHeader(),
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        validateStatus: () => true,
+      },
     );
-  }
 
-  return {
-    token,
-    brand: detectCardBrand(number),
-    last4: tx?.credit_card?.last_4 || number.slice(-4),
-    expMonth: Number(tx?.credit_card?.exp_month) || input.expMonth,
-    expYear: Number(tx?.credit_card?.exp_year) || expYear,
-    customerId: tx?.uid,
-  };
+    const tx = data?.transaction;
+    const token = tx?.credit_card?.token;
+    if (status < 200 || status >= 300 || !token) {
+      throw new Error(
+        tx?.message || data?.message || "Couldn't verify card with bePaid",
+      );
+    }
+
+    return {
+      token,
+      brand: detectCardBrand(number),
+      last4: tx?.credit_card?.last_4 || number.slice(-4),
+      expMonth: Number(tx?.credit_card?.exp_month) || input.expMonth,
+      expYear: Number(tx?.credit_card?.exp_year) || expYear,
+      customerId: tx?.uid,
+    };
+  } catch (error) {
+    if (error instanceof Error && !isAxiosError(error)) throw error;
+    throw new Error("Couldn't verify card with bePaid");
+  }
 }
 
 async function chargeBepaid(
@@ -142,52 +158,44 @@ async function chargeBepaid(
   currency: string,
   description: string,
 ): Promise<ChargeResult> {
-  const shopId = process.env.BEPAID_SHOP_ID!;
-  const secret = process.env.BEPAID_SECRET_KEY!;
-  const auth = Buffer.from(`${shopId}:${secret}`).toString("base64");
-  const base =
-    process.env.BEPAID_API_URL?.replace(/\/$/, "") ||
-    "https://gateway.bepaid.by";
-
-  const res = await fetch(`${base}/beyag/payments`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${auth}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      request: {
-        amount: amount * 100,
-        currency,
-        description,
-        test: process.env.BEPAID_TEST === "true",
-        credit_card: { token },
+  try {
+    const { data, status } = await http.post<BepaidPaymentResponse>(
+      `${bepaidBaseUrl()}/beyag/payments`,
+      {
+        request: {
+          amount: amount * 100,
+          currency,
+          description,
+          test: process.env.BEPAID_TEST === "true",
+          credit_card: { token },
+        },
       },
-    }),
-  });
+      {
+        headers: {
+          Authorization: bepaidAuthHeader(),
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        validateStatus: () => true,
+      },
+    );
 
-  const data = (await res.json().catch(() => null)) as {
-    transaction?: {
-      status?: string;
-      uid?: string;
-      message?: string;
-    };
-    message?: string;
-  } | null;
+    const txStatus = data?.transaction?.status;
+    if (
+      status < 200 ||
+      status >= 300 ||
+      (txStatus && txStatus !== "successful" && txStatus !== "success")
+    ) {
+      return {
+        ok: false,
+        error: data?.transaction?.message || data?.message || "Payment declined",
+      };
+    }
 
-  const status = data?.transaction?.status;
-  if (!res.ok || (status && status !== "successful" && status !== "success")) {
-    return {
-      ok: false,
-      error:
-        data?.transaction?.message ||
-        data?.message ||
-        "Payment declined",
-    };
+    return { ok: true, providerRef: data?.transaction?.uid };
+  } catch {
+    return { ok: false, error: "Payment declined" };
   }
-
-  return { ok: true, providerRef: data?.transaction?.uid };
 }
 
 export function getPaymentProviderMode(): "bepaid" | "sandbox" {

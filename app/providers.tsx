@@ -8,7 +8,7 @@ import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/toaster";
 import { CanvasManagerProvider } from "@/context/canvas-manager";
-import { createStudioQueryClient } from "@/lib/studio/query-core";
+import { createStudioQueryClient } from "@/lib/studio/queries";
 
 export interface ProvidersProps {
   children: React.ReactNode;

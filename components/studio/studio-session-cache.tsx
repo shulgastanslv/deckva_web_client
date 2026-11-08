@@ -4,7 +4,11 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
-import { studioKeys } from "@/lib/studio/query-core";
+import {
+  invalidateStudioFolders,
+  invalidateStudioOrgScope,
+  invalidateStudioProjects,
+} from "@/lib/studio/queries";
 
 /** Drop studio queries on sign-out and when studio events say the lists changed. */
 export function StudioSessionCache() {
@@ -17,16 +21,13 @@ export function StudioSessionCache() {
 
   useEffect(() => {
     const onOrg = () => {
-      void queryClient.invalidateQueries({ queryKey: studioKeys.activeOrganization });
-      void queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
-      void queryClient.invalidateQueries({ queryKey: studioKeys.folders });
-      void queryClient.invalidateQueries({ queryKey: studioKeys.projectsRoot });
+      void invalidateStudioOrgScope(queryClient);
     };
     const onFolders = () => {
-      void queryClient.invalidateQueries({ queryKey: studioKeys.folders });
+      void invalidateStudioFolders(queryClient);
     };
     const onProjects = () => {
-      void queryClient.invalidateQueries({ queryKey: studioKeys.projectsRoot });
+      void invalidateStudioProjects(queryClient);
     };
 
     window.addEventListener("studio:org-changed", onOrg, true);

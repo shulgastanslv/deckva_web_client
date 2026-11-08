@@ -40,7 +40,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { studioKeys } from "@/lib/studio/queries";
+import { invalidateStudioOrganizations } from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
 
 const ORG_COLORS = [
@@ -64,8 +64,7 @@ interface OrgDialogProps {
 }
 
 function invalidateOrg(queryClient: ReturnType<typeof useQueryClient>) {
-  queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
-  queryClient.invalidateQueries({ queryKey: studioKeys.activeOrganization });
+  void invalidateStudioOrganizations(queryClient);
   window.dispatchEvent(new CustomEvent("studio:org-changed"));
 }
 

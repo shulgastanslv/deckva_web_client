@@ -14,7 +14,7 @@ import {
 } from "@/components/studio/ui/studio-content";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useArtifact, studioKeys } from "@/lib/studio/queries";
+import { invalidateStudioArtifact, useArtifact } from "@/lib/studio/queries";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 
@@ -48,8 +48,7 @@ export function StudioTextArtifact({ artifactId }: { artifactId: string }) {
         return;
       }
       setDirty(false);
-      await queryClient.invalidateQueries({ queryKey: studioKeys.artifact(artifactId) });
-      await queryClient.invalidateQueries({ queryKey: studioKeys.artifactsRoot });
+      await invalidateStudioArtifact(queryClient, artifactId);
     } catch (err) {
       reportError(err, messages.errors.generic);
     } finally {

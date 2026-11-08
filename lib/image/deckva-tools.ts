@@ -1,3 +1,5 @@
+import { httpGetBlob, httpPostForm } from "@/lib/api/http";
+
 export type UpscaleScale = 2 | 3 | 4;
 
 export type MagicLayer = {
@@ -22,9 +24,7 @@ export type MagicLayerResult = {
 };
 
 async function sourceToFile(source: string, filename = "image.png"): Promise<File> {
-  const res = await fetch(source);
-  if (!res.ok) throw new Error("Couldn't read the image");
-  const blob = await res.blob();
+  const blob = await httpGetBlob(source);
   return new File([blob], filename, { type: blob.type || "image/png" });
 }
 
@@ -41,7 +41,12 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-async function postImageTool(path: string, source: string, extra?: Record<string, string>) {
+async function postImageTool(
+  path: string,
+  source: string,
+  extra?: Record<string, string>,
+  responseType: "json" | "blob" = "blob",
+) {
   const file = await sourceToFile(source);
   const form = new FormData();
   form.append("file", file);
@@ -49,36 +54,35 @@ async function postImageTool(path: string, source: string, extra?: Record<string
     for (const [key, value] of Object.entries(extra)) form.append(key, value);
   }
 
-  const res = await fetch(path, { method: "POST", body: form });
-  if (!res.ok) {
-    const payload: unknown = await res.json().catch(() => null);
-    const message =
-      payload &&
-      typeof payload === "object" &&
-      typeof (payload as { error?: unknown }).error === "string"
-        ? (payload as { error: string }).error
-        : `Request failed (${res.status})`;
-    throw new Error(message);
-  }
-  return res;
+  return httpPostForm(path, form, {
+    responseType,
+    fallbackError: "Image tool request failed",
+    timeoutMs: 180_000,
+  });
 }
 
 /** Remove background via deckva-tools. Returns a PNG data URL with alpha. */
 export async function removeImageBackground(source: string): Promise<string> {
-  const res = await postImageTool("/api/tools/remove-bg", source);
-  return blobToDataUrl(await res.blob());
+  const blob = await postImageTool("/api/tools/remove-bg", source);
+  return blobToDataUrl(blob as Blob);
 }
 
 /** Upscale via deckva-tools. Returns a PNG data URL. */
 export async function upscaleImage(source: string, scale: UpscaleScale = 2): Promise<string> {
-  const res = await postImageTool("/api/tools/upscale", source, { scale: String(scale) });
-  return blobToDataUrl(await res.blob());
+  const blob = await postImageTool("/api/tools/upscale", source, {
+    scale: String(scale),
+  });
+  return blobToDataUrl(blob as Blob);
 }
 
 /** Split image into layers via deckva-tools. Prefers embedded data URLs. */
 export async function magicLayerImage(source: string): Promise<MagicLayerResult> {
-  const res = await postImageTool("/api/tools/magic-layer", source);
-  const payload = (await res.json()) as MagicLayerResult;
+  const payload = (await postImageTool(
+    "/api/tools/magic-layer",
+    source,
+    undefined,
+    "json",
+  )) as MagicLayerResult;
   if (!payload?.layers?.length) throw new Error("No layers returned");
   return payload;
 }

@@ -12,6 +12,7 @@ import {
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { Button } from "@/components/ui/button";
 import { useCanvasManager } from "@/context/canvas-manager";
+import { httpGetBlob } from "@/lib/api/http";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -26,7 +27,7 @@ type Props = {
 
 async function toDataUrl(src: string): Promise<string> {
   if (src.startsWith("data:")) return src;
-  const blob = await (await fetch(src)).blob();
+  const blob = await httpGetBlob(src);
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));

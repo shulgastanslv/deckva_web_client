@@ -9,7 +9,10 @@ import {
   getOrCreateInviteLink,
   sendOrganizationInvites,
 } from "@/actions/invites";
-import { studioKeys, useActiveOrganization } from "@/lib/studio/queries";
+import {
+  invalidateStudioOrganizations,
+  useActiveOrganization,
+} from "@/lib/studio/queries";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -94,7 +97,7 @@ export function InviteMembersDialog() {
       if (already) parts.push(`${already} already members`);
       setSummary(parts.join(" · ") || "Done");
       setEmails("");
-      void queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
+      void invalidateStudioOrganizations(queryClient);
     } catch {
       setError("Couldn't send invites");
     } finally {

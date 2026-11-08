@@ -26,7 +26,11 @@ import {
 import { apiGenerateText } from "@/lib/ai/browser";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
-import { useProjectAnnotations, studioKeys } from "@/lib/studio/queries";
+import {
+  invalidateStudioAnnotations,
+  invalidateStudioArtifacts,
+  useProjectAnnotations,
+} from "@/lib/studio/queries";
 import { buildCaptionSeedFromSlides } from "@/lib/studio/slide-text-seed";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
@@ -94,9 +98,7 @@ export function CaptionControls() {
           text,
           title: projectTitle || "Post caption",
         });
-        await queryClient.invalidateQueries({
-          queryKey: studioKeys.artifactsRoot,
-        });
+        await invalidateStudioArtifacts(queryClient);
       }
     } catch (err) {
       const message =
@@ -123,9 +125,7 @@ export function CaptionControls() {
         return;
       }
       setDraftNote("");
-      await queryClient.invalidateQueries({
-        queryKey: studioKeys.projectAnnotations(projectId),
-      });
+      await invalidateStudioAnnotations(queryClient, projectId);
     } catch (err) {
       reportError(err, messages.errors.generic);
     } finally {
@@ -246,10 +246,7 @@ export function CaptionControls() {
                             void updateProjectAnnotation(note.id, {
                               resolved: !note.resolved,
                             }).then(() =>
-                              queryClient.invalidateQueries({
-                                queryKey:
-                                  studioKeys.projectAnnotations(projectId),
-                              }),
+                              invalidateStudioAnnotations(queryClient, projectId),
                             );
                           }}
                         >
@@ -261,10 +258,7 @@ export function CaptionControls() {
                           onClick={() => {
                             if (!projectId) return;
                             void deleteProjectAnnotation(note.id).then(() =>
-                              queryClient.invalidateQueries({
-                                queryKey:
-                                  studioKeys.projectAnnotations(projectId),
-                              }),
+                              invalidateStudioAnnotations(queryClient, projectId),
                             );
                           }}
                         >

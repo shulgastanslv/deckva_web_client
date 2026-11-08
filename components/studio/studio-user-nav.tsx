@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { studioKeys, useMyProfile } from "@/lib/studio/queries";
+import { invalidateStudioProfile, useMyProfile } from "@/lib/studio/queries";
 
 const itemClass =
   "cursor-pointer gap-2.5 rounded-none px-3.5 py-2.5 text-[14px] text-neutral-900 focus:bg-neutral-100 dark:text-foreground dark:focus:bg-muted";
@@ -32,7 +32,7 @@ export function StudioUserNav() {
 
   useEffect(() => {
     const onProfileChanged = () => {
-      void queryClient.invalidateQueries({ queryKey: studioKeys.profile });
+      void invalidateStudioProfile(queryClient);
     };
     window.addEventListener("studio:profile-changed", onProfileChanged);
     return () =>

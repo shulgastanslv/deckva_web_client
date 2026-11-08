@@ -38,7 +38,7 @@ import { ExportModal } from "./export-modal";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
-import { studioKeys, useMyProfile } from "@/lib/studio/queries";
+import { invalidateStudioProfile, useMyProfile } from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
 
 const accountItemClass =
@@ -97,7 +97,7 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
 
   useEffect(() => {
     const onProfileChanged = () => {
-      void queryClient.invalidateQueries({ queryKey: studioKeys.profile });
+      void invalidateStudioProfile(queryClient);
     };
     window.addEventListener("studio:profile-changed", onProfileChanged);
     return () =>

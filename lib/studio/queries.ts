@@ -1,6 +1,10 @@
 "use client";
 
-import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { listMyNotifications, type NotificationItem } from "@/actions/admin";
 import {
@@ -13,15 +17,64 @@ import { getUserFolders } from "@/actions/folders";
 import { getActiveOrganization, getUserOrganizations } from "@/actions/organizations";
 import { getUserProjects } from "@/actions/projects";
 import { getProfile } from "@/actions/user";
-import { readStudioResult, studioKeys, studioStaleTime } from "@/lib/studio/query-core";
+import { messages } from "@/lib/messages";
 
-export { studioKeys, studioStaleTime } from "@/lib/studio/query-core";
-
-const quiet = {
-  retry: false as const,
-  refetchOnWindowFocus: false as const,
-  refetchOnReconnect: false as const,
+/** Shared TanStack Query keys for studio reads. */
+export const studioKeys = {
+  activeOrganization: ["studio", "active-organization"] as const,
+  organizations: ["studio", "organizations"] as const,
+  folders: ["studio", "folders"] as const,
+  projectsRoot: ["studio", "projects"] as const,
+  projects: (folderId = "") => ["studio", "projects", folderId] as const,
+  artifactsRoot: ["studio", "artifacts"] as const,
+  artifacts: (kind = "", folderId = "") =>
+    ["studio", "artifacts", kind, folderId] as const,
+  artifact: (id: string) => ["studio", "artifact", id] as const,
+  projectAnnotations: (projectId: string) =>
+    ["studio", "annotations", projectId] as const,
+  notifications: ["studio", "notifications"] as const,
+  profile: ["studio", "profile"] as const,
 };
+
+export const studioStaleTime = {
+  stable: 30_000,
+  projects: 0,
+  notifications: 5_000,
+} as const;
+
+export function createStudioQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    },
+  });
+}
+
+type SuccessOf<T> = Extract<T, { success: true }>;
+
+/**
+ * Failed server results are thrown so TanStack Query does not keep them as fresh data.
+ * The next read hits the server again. In-flight calls still share one request.
+ */
+export async function readStudioResult<T extends { success: boolean }>(
+  load: () => Promise<T>,
+): Promise<SuccessOf<T>> {
+  const result = await load();
+  if (!result.success) {
+    const error =
+      "error" in result &&
+      typeof (result as { error?: unknown }).error === "string" &&
+      (result as { error: string }).error
+        ? (result as { error: string }).error
+        : messages.errors.generic;
+    throw new Error(error);
+  }
+  return result as SuccessOf<T>;
+}
 
 export function useActiveOrganization(enabled: boolean) {
   return useQuery({
@@ -29,7 +82,6 @@ export function useActiveOrganization(enabled: boolean) {
     queryFn: () => readStudioResult(() => getActiveOrganization()),
     staleTime: studioStaleTime.stable,
     enabled,
-    ...quiet,
   });
 }
 
@@ -39,7 +91,6 @@ export function useUserOrganizations(enabled: boolean) {
     queryFn: () => readStudioResult(() => getUserOrganizations()),
     staleTime: studioStaleTime.stable,
     enabled,
-    ...quiet,
   });
 }
 
@@ -49,7 +100,6 @@ export function useUserFolders(enabled: boolean) {
     queryFn: () => readStudioResult(() => getUserFolders()),
     staleTime: studioStaleTime.stable,
     enabled,
-    ...quiet,
   });
 }
 
@@ -60,7 +110,6 @@ export function useUserProjects(folderId: string, enabled: boolean) {
       readStudioResult(() => getUserProjects(folderId ? { folderId } : undefined)),
     staleTime: studioStaleTime.projects,
     enabled,
-    ...quiet,
   });
 }
 
@@ -80,7 +129,6 @@ export function useUserArtifacts(
       ),
     staleTime: studioStaleTime.projects,
     enabled,
-    ...quiet,
   });
 }
 
@@ -90,7 +138,6 @@ export function useArtifact(artifactId: string, enabled: boolean) {
     queryFn: () => readStudioResult(() => getArtifactById(artifactId)),
     staleTime: studioStaleTime.projects,
     enabled: enabled && Boolean(artifactId),
-    ...quiet,
   });
 }
 
@@ -100,7 +147,6 @@ export function useProjectAnnotations(projectId: string, enabled: boolean) {
     queryFn: () => readStudioResult(() => listProjectAnnotations(projectId)),
     staleTime: studioStaleTime.projects,
     enabled: enabled && Boolean(projectId),
-    ...quiet,
   });
 }
 
@@ -112,7 +158,6 @@ export function useMyNotifications(enabled: boolean) {
     refetchInterval: enabled ? 12_000 : false,
     refetchOnWindowFocus: true,
     enabled,
-    retry: false,
     refetchOnReconnect: true,
   });
 }
@@ -123,7 +168,6 @@ export function useMyProfile(enabled: boolean) {
     queryFn: () => readStudioResult(() => getProfile()),
     staleTime: studioStaleTime.stable,
     enabled,
-    ...quiet,
   });
 }
 
@@ -160,9 +204,60 @@ export function invalidateStudioArtifacts(client: QueryClient) {
   return client.invalidateQueries({ queryKey: studioKeys.artifactsRoot });
 }
 
+export function invalidateStudioOrganizations(client: QueryClient) {
+  return Promise.all([
+    client.invalidateQueries({ queryKey: studioKeys.organizations }),
+    client.invalidateQueries({ queryKey: studioKeys.activeOrganization }),
+  ]);
+}
+
+export function invalidateStudioFolders(client: QueryClient) {
+  return client.invalidateQueries({ queryKey: studioKeys.folders });
+}
+
+export function invalidateStudioOrgScope(client: QueryClient) {
+  return Promise.all([
+    invalidateStudioOrganizations(client),
+    invalidateStudioFolders(client),
+    invalidateStudioProjects(client),
+  ]);
+}
+
+export function invalidateStudioProfile(client: QueryClient) {
+  return client.invalidateQueries({ queryKey: studioKeys.profile });
+}
+
+export function invalidateStudioNotifications(client: QueryClient) {
+  return client.invalidateQueries({ queryKey: studioKeys.notifications });
+}
+
+export function invalidateStudioArtifact(
+  client: QueryClient,
+  artifactId: string,
+) {
+  return Promise.all([
+    client.invalidateQueries({ queryKey: studioKeys.artifact(artifactId) }),
+    invalidateStudioArtifacts(client),
+  ]);
+}
+
+export function invalidateStudioAnnotations(
+  client: QueryClient,
+  projectId: string,
+) {
+  return client.invalidateQueries({
+    queryKey: studioKeys.projectAnnotations(projectId),
+  });
+}
+
 export function useInvalidateStudioArtifacts() {
   const client = useQueryClient();
   return () => invalidateStudioArtifacts(client);
+}
+
+export function useInvalidateStudioProjects() {
+  const client = useQueryClient();
+  return () => invalidateStudioProjects(client);
 }
 
 type NotificationCache = {
@@ -185,9 +280,4 @@ export function markNotificationCacheRead(client: QueryClient) {
     queryKey: studioKeys.notifications,
     refetchType: "none",
   });
-}
-
-export function useInvalidateStudioProjects() {
-  const client = useQueryClient();
-  return () => invalidateStudioProjects(client);
 }
