@@ -3,26 +3,19 @@
 Продуктово-техническая спецификация: три тарифа, каталог популярных моделей через **один ключ OpenRouter в env**, кредитный хаб и планировщик **CORA**.
 
 Ориентир: [Lovart pricing](https://www.lovart.ai/pricing) (кредиты + планы), Lovart MCoT → у Deckva **CORA**.  
-Ранги моделей: [OpenRouter Rankings](https://openrouter.ai/rankings) (usage через Nov 2026).
+Ранги моделей: [OpenRouter Rankings](https://openrouter.ai/rankings) (usage через Nov 2026).  
+Полная спецификация агента: [`cora-system.md`](./cora-system.md).
 
 **Принцип v1:** пользователи покупают планы/кредиты у Deckva; все LLM-вызовы идут с `OPENROUTER_API_KEY` на сервере.  
 **BYOK нет.** Ключи пользователей не храним. Локальных весов моделей нет.
 
 ---
 
-## 1. CORA — планировщик
+## 1. CORA — кратко
 
-**CORA** — *Carousel Orchestration & Reasoning Agent*
-
-| | |
-|---|---|
-| **C**arousel | Артефакт — карусель слайдов |
-| **O**rchestration | Раздача jobs моделям/tools |
-| **R**easoning | Явный JSON-план объектов |
-| **A**gent | plan → execute → assemble → edit |
-
+**CORA** — *Carousel Orchestration & Reasoning Agent*  
 Поток: brief → ANALYZE → PLAN → ROUTE → EXECUTE → ASSEMBLE → EDIT LOOP.  
-План всегда в **объектах** (text/image/role), не в пикселях — как MCoT у Lovart, но под canvas Deckva.
+План в **объектах** (text/image/role) → редактируемый canvas. Детали — в [`cora-system.md`](./cora-system.md).
 
 ---
 
