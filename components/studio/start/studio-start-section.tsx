@@ -9,6 +9,7 @@ import { StudioBrandDialog } from "@/components/studio/dialogs/start/studio-bran
 import { StudioCarouselDialog } from "@/components/studio/dialogs/start/studio-carousel-dialog";
 import { StudioCodeBlockDialog } from "@/components/studio/dialogs/start/studio-codeblock-dialog";
 import { StudioListDialog } from "@/components/studio/dialogs/start/studio-list-dialog";
+import { StudioPaletteDialog } from "@/components/studio/dialogs/start/studio-palette-dialog";
 import { StudioTextDialog } from "@/components/studio/dialogs/start/studio-text-dialog";
 import {
   StudioCreateTile,
@@ -26,14 +27,15 @@ import {
   type CarouselStartForm,
   type StartBlockId,
 } from "@/lib/studio/start-blocks";
+import { pipelineHeadline, pipelineSubhead } from "@/lib/studio/pipeline";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
 
-type DialogId = Exclude<StartBlockId, "palette">;
+type DialogId = StartBlockId;
 
 export function StudioStartSection({
   name,
   topic,
-  initialType = "text",
+  initialType = "carousel",
   onBlank,
   onTemplates,
   onBrandKit,
@@ -41,7 +43,7 @@ export function StudioStartSection({
   onSelectKind,
   onGenerate,
   onTextGenerate,
-  onPaletteClick,
+  onPaletteGenerate,
   onCarouselGenerate,
   onCodeInsert,
   onListInsert,
@@ -61,7 +63,9 @@ export function StudioStartSection({
   onSelectKind: (kind: GenerationKind) => void;
   onGenerate: (input: StudioPromptSubmit) => void | Promise<void>;
   onTextGenerate: (topic: string) => boolean | void | Promise<boolean | void>;
-  onPaletteClick: () => void;
+  onPaletteGenerate: (
+    topic: string,
+  ) => boolean | void | Promise<boolean | void>;
   onCarouselGenerate: (
     form: CarouselStartForm,
   ) => boolean | void | Promise<boolean | void>;
@@ -94,11 +98,9 @@ export function StudioStartSection({
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-[22px]">
-              Let&apos;s create something new
+              {pipelineHeadline()}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Start from a block or describe what you need below.
-            </p>
+            <p className="text-sm text-muted-foreground">{pipelineSubhead()}</p>
           </div>
           <StudioCreateMenu
             onBlank={onBlank}
@@ -120,13 +122,7 @@ export function StudioStartSection({
                   key={id}
                   title={block.title}
                   iconName={block.iconName}
-                  onClick={() => {
-                    if (id === "palette") {
-                      onPaletteClick();
-                      return;
-                    }
-                    setActive(id);
-                  }}
+                  onClick={() => setActive(id)}
                 />
               );
             })}
@@ -155,6 +151,18 @@ export function StudioStartSection({
         error={generateError}
         onSubmit={async (value) => {
           await closeIfOk(await onTextGenerate(value));
+        }}
+      />
+
+      <StudioPaletteDialog
+        open={active === "palette"}
+        onOpenChange={(open) => {
+          if (!open) setActive(null);
+        }}
+        busy={generating}
+        error={generateError}
+        onSubmit={async (value) => {
+          await closeIfOk(await onPaletteGenerate(value));
         }}
       />
 

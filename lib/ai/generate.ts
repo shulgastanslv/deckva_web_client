@@ -8,6 +8,10 @@ export { aiBaseUrl };
 
 export type GenerateCarouselInput = {
   topic: string;
+  /** Full post caption from a TEXT pipeline step. */
+  seedText?: string;
+  /** Locked palette from a PALETTE pipeline step — wins over AI palette. */
+  palette?: AiPalette;
   aspectRatio?: RatioKey;
   slidesCount?: number;
   language?: string;
@@ -48,11 +52,16 @@ export async function generateCarouselUpstream(
   const language = input.language?.trim() || inferPromptLanguage(topic);
   const handle = normalizeHandle(input.handle);
   const cover = input.cover ?? "";
+  const seedText = input.seedText?.trim() || "";
 
   const payload = (await fetchAiJson(
     "/generate",
     {
       topic,
+      // Upstream may use either key; both carry the inherited caption.
+      ...(seedText
+        ? { seed_text: seedText, post_text: seedText }
+        : {}),
       aspect_ratio: aspectRatio,
       slides_count: slidesCount,
       language,
@@ -99,10 +108,14 @@ export async function generateCarouselUpstream(
         : 1350;
 
   let palette: AiPalette | undefined;
-  try {
-    if (payload.palette) palette = parseAiPalette(payload.palette);
-  } catch {
-    palette = undefined;
+  if (input.palette) {
+    palette = input.palette;
+  } else {
+    try {
+      if (payload.palette) palette = parseAiPalette(payload.palette);
+    } catch {
+      palette = undefined;
+    }
   }
 
   return { title, aspectRatio: ratio, width, height, slides, palette };

@@ -137,13 +137,18 @@ export function StudioTextArtifact({ artifactId }: { artifactId: string }) {
         />
 
         <div className="mt-6 space-y-3">
+          <p className="text-[13px] leading-relaxed text-muted-foreground">
+            This caption feeds the carousel as seed text — slides and topic
+            inherit it when you continue.
+          </p>
           <PipelineNextSteps
             from="text"
             onSelect={(kind) => {
               const seed = text.trim() || artifact.prompt || title;
               if (kind === "carousel") {
                 void create.generateCarousel({
-                  topic: seed,
+                  topic: title.trim() || artifact.prompt || seed.slice(0, 80),
+                  seedText: text.trim() || undefined,
                   parentArtifactId: artifact.id,
                 });
                 return;

@@ -154,12 +154,17 @@ export function StudioPaletteArtifact({ artifactId }: { artifactId: string }) {
         </ul>
 
         <div className="mt-8 space-y-3">
+          <p className="text-[13px] leading-relaxed text-muted-foreground">
+            These colors lock into the carousel. If this palette came from a
+            caption, that text is carried forward automatically.
+          </p>
           <PipelineNextSteps
             from="palette"
             onSelect={(kind) => {
               if (kind === "carousel") {
                 void create.generateCarousel({
                   topic: seed,
+                  palette,
                   parentArtifactId: artifact.id,
                 });
                 return;
@@ -175,7 +180,7 @@ export function StudioPaletteArtifact({ artifactId }: { artifactId: string }) {
           {create.generating ? (
             <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
               <Loader2 className="size-3.5 animate-spin" />
-              Starting…
+              Starting carousel…
             </p>
           ) : null}
           {create.generateError ? (

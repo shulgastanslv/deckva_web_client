@@ -4,6 +4,7 @@ import {
   generateCarouselUpstream,
   type GenerateCarouselInput,
 } from "@/lib/ai/generate";
+import { parseAiPalette } from "@/lib/ai/generate-palette";
 import { isRatioKey } from "@/lib/templates/parse";
 
 export const maxDuration = 180;
@@ -29,8 +30,28 @@ export async function POST(request: Request) {
     );
   }
 
+  let palette: GenerateCarouselInput["palette"];
+  if (row.palette) {
+    try {
+      palette = parseAiPalette(row.palette);
+    } catch {
+      palette = undefined;
+    }
+  }
+
+  const seedText =
+    typeof row.seedText === "string"
+      ? row.seedText
+      : typeof row.seed_text === "string"
+        ? row.seed_text
+        : typeof row.post_text === "string"
+          ? row.post_text
+          : undefined;
+
   const input: GenerateCarouselInput = {
     topic,
+    seedText,
+    palette,
     aspectRatio:
       typeof row.aspectRatio === "string" && isRatioKey(row.aspectRatio)
         ? row.aspectRatio
