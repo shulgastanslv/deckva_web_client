@@ -1,9 +1,8 @@
 "use server";
 
-import { getServerSession } from "next-auth";
+import { requireUserId } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { messages } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 
@@ -30,10 +29,6 @@ const MAX_NAME = 80;
 const MAX_TAG = 32;
 const MAX_TAGS = 12;
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 function normalizeTags(tags: unknown): string[] {
   if (!Array.isArray(tags)) return [];

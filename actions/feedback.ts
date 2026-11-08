@@ -1,10 +1,9 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
 import { isPlatformAdmin } from "@/lib/roles";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { prisma } from "@/lib/prisma";
 
 const MESSAGE_MIN = 4;
@@ -35,8 +34,7 @@ export async function submitFeedback(input: {
   message: string;
   images?: string[];
 }): Promise<{ success: true } | { success: false; error: string }> {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
+  const userId = await requireUserId();
   if (!userId) return { success: false, error: messages.errors.signInFeedback };
 
   const raw = Array.isArray(input.images) ? input.images : [];
@@ -80,11 +78,11 @@ export async function submitFeedback(input: {
 export async function listFeedbacks(): Promise<
   { success: true; items: FeedbackItem[] } | { success: false; error: string }
 > {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, error: messages.errors.unauthorized };
+  const userId = await requireUserId();
+  if (!userId) return { success: false, error: messages.errors.unauthorized };
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { role: true },
   });
   if (!isPlatformAdmin(user?.role)) return { success: false, error: messages.errors.unauthorized };

@@ -1,9 +1,8 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { emailIsAdmin } from "@/lib/auth-role";
 import { UserRole, isPlatformAdmin } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
@@ -30,10 +29,10 @@ export interface NotificationItem {
 }
 
 async function requireAdminId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return null;
+  const userId = await requireUserId();
+  if (!userId) return null;
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { id: true, email: true, role: true },
   });
   if (!user) return null;
@@ -46,10 +45,6 @@ async function requireAdminId(): Promise<string | null> {
   return null;
 }
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 export async function listPublishedNews(): Promise<ActionResult<{ news: NewsItem[] }>> {
   try {

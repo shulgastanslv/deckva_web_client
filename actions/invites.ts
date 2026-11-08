@@ -1,11 +1,10 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { randomBytes } from "node:crypto";
 
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import {
   appBaseUrl,
   isValidEmail,
@@ -53,10 +52,6 @@ export type InviteSendResult = {
 const OPEN_INVITE_DAYS = 365;
 const EMAIL_INVITE_DAYS = 14;
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 function newToken() {
   return randomBytes(24).toString("base64url");
@@ -273,8 +268,7 @@ export async function getInvitePreview(
     });
     if (!invite) return { success: false, error: messages.errors.inviteNotFound };
 
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id ?? null;
+    const userId = await requireUserId();
     let alreadyMember = false;
     if (userId) {
       const membership = await prisma.organizationMember.findFirst({

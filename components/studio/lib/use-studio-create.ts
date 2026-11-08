@@ -66,19 +66,11 @@ function draftTitle(topic: string): string {
 export function useStudioCreate() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: session, status } = useSession();
-  const [authNeeded, setAuthNeeded] = useState(false);
+  const { data: session } = useSession();
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
 
-  const requireAuth = () => {
-    if (status === "authenticated") return true;
-    setAuthNeeded(true);
-    return false;
-  };
-
   const openBlank = async () => {
-    if (!requireAuth()) return;
     if (!(await requireCarouselSlot(queryClient))) return;
     stashStudioIntent({ type: "new" });
     router.push("/studio/editor");
@@ -87,7 +79,6 @@ export function useStudioCreate() {
   const openWithInsert = async (
     intent: Omit<StudioInsertIntent, "type">,
   ) => {
-    if (!requireAuth()) return;
     if (!(await requireCarouselSlot(queryClient))) return;
     stashStudioIntent({ type: "insert", ...intent });
     router.push("/studio/editor");
@@ -101,7 +92,6 @@ export function useStudioCreate() {
   }) => {
     const topic = input.topic.trim();
     setGenerateError(null);
-    if (!requireAuth()) return;
 
     setGenerating(true);
     try {
@@ -136,7 +126,6 @@ export function useStudioCreate() {
   }) => {
     const topic = input.topic.trim();
     setGenerateError(null);
-    if (!requireAuth()) return;
 
     setGenerating(true);
     try {
@@ -181,7 +170,6 @@ export function useStudioCreate() {
     const topic = input.topic.trim();
     const cover = input.cover?.trim() ?? "";
     setGenerateError(null);
-    if (!requireAuth()) return;
     if (!(await requireCarouselSlot(queryClient))) return;
 
     setGenerating(true);
@@ -269,8 +257,6 @@ export function useStudioCreate() {
   };
 
   return {
-    authNeeded,
-    setAuthNeeded,
     openBlank,
     openWithInsert,
     openTemplates,

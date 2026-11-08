@@ -1,8 +1,5 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import {
   magicLayerImage as magicLayerUpstream,
   removeImageBackground as removeBgUpstream,
@@ -10,31 +7,23 @@ import {
   type MagicLayerResult,
   type UpscaleScale,
 } from "@/lib/image/deckva-tools";
-import { messages } from "@/lib/messages";
 
 export type { MagicLayerResult, UpscaleScale };
 
-async function requireSignedIn() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    throw new Error(messages.errors.signIn);
-  }
-}
-
+/** Auth: proxy (studio). */
 export async function removeImageBackground(source: string): Promise<string> {
-  await requireSignedIn();
   return removeBgUpstream(source);
 }
 
+/** Auth: proxy (studio). */
 export async function upscaleImage(
   source: string,
   scale: UpscaleScale = 2,
 ): Promise<string> {
-  await requireSignedIn();
   return upscaleUpstream(source, scale);
 }
 
+/** Auth: proxy (studio). */
 export async function magicLayerImage(source: string): Promise<MagicLayerResult> {
-  await requireSignedIn();
   return magicLayerUpstream(source);
 }

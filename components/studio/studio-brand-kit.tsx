@@ -341,10 +341,9 @@ export function StudioBrandKit() {
       </StudioContentBody>
 
       <AuthModal
-        isOpen={authOpen || create.authNeeded}
+        isOpen={authOpen}
         onOpenChange={(open) => {
           setAuthOpen(open);
-          if (!open) create.setAuthNeeded(false);
         }}
       />
     </StudioContent>
