@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isOrgManager } from "@/lib/roles";
 
 /** Organization ids the user belongs to. */
 export async function userOrganizationIds(userId: string): Promise<string[]> {
@@ -41,5 +42,5 @@ export async function canManageOrgResource(
     where: { userId, organizationId: resource.organizationId },
     select: { role: true },
   });
-  return membership?.role === "OWNER" || membership?.role === "ADMIN";
+  return isOrgManager(membership?.role);
 }

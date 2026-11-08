@@ -43,6 +43,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { messages } from "@/lib/messages";
 import {
   fetchMyNotifications,
+  invalidateStudioNotifications,
   markNotificationCacheRead,
   studioKeys,
   useMyNotifications,
@@ -232,7 +233,7 @@ function NotificationsPanel({
     patchCache((rows) => rows.filter((item) => item.id !== id));
     try {
       await deleteNotification(id);
-      await queryClient.invalidateQueries({ queryKey: studioKeys.notifications });
+      await invalidateStudioNotifications(queryClient);
     } finally {
       setBusyId(null);
     }
@@ -247,7 +248,7 @@ function NotificationsPanel({
     );
     try {
       await toggleNotificationRead(id, !currentReadStatus);
-      await queryClient.invalidateQueries({ queryKey: studioKeys.notifications });
+      await invalidateStudioNotifications(queryClient);
     } finally {
       setBusyId(null);
     }

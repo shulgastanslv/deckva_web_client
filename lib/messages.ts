@@ -30,7 +30,7 @@ export const messages = {
     validEmail: "Enter a valid email",
     validEmailAndPassword: "Enter a valid email and a password",
     linkExpired: "This link is invalid or has expired",
-    passwordTooShort: "Password must be at least 6 characters",
+    passwordTooShort: "Password must be at least 8 characters",
     incorrectCredentials: "Incorrect email or password",
     confirmEmail: "Confirm your email before signing in",
     accountExists: "An account with this email already exists",

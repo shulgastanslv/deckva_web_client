@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { emailIsAdmin } from "@/lib/auth-role";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
+import { UserRole } from "@/lib/roles";
 import bcrypt from "bcryptjs";
 import { type AuthOptions, type Profile } from "next-auth";
 import type { User as DbUser } from "@/lib/generated/prisma/client";
@@ -197,7 +198,7 @@ export const authOptions: AuthOptions = {
           select: { role: true, email: true },
         });
         if (row) {
-          const role = emailIsAdmin(row.email) ? "ADMIN" : row.role;
+          const role = emailIsAdmin(row.email) ? UserRole.ADMIN : row.role;
           if (role !== row.role) {
             await prisma.user.update({
               where: { id: token.id as string },
@@ -212,7 +213,8 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
-        session.user.role = token.role === "ADMIN" ? "ADMIN" : "USER";
+        session.user.role =
+          token.role === UserRole.ADMIN ? UserRole.ADMIN : UserRole.USER;
         if (token.email) session.user.email = token.email;
         session.user.name = token.name ?? null;
         session.user.image = cookieSafeImage(token.picture ?? token.image);

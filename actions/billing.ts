@@ -1,10 +1,9 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { formatCardBrand } from "@/lib/billing/card";
 import { userHasPro } from "@/lib/billing/entitlements";
 import { chargeCard, getPaymentProviderMode, tokenizeCard } from "@/lib/billing/provider";
@@ -25,10 +24,6 @@ type ActionResult<T extends object = object> =
   | ({ success: true } & T)
   | { success: false; error: string };
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 function mapMethod(m: {
   id: string;

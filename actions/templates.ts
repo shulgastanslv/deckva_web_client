@@ -1,13 +1,14 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/lib/generated/prisma/client";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { emailIsAdmin } from "@/lib/auth-role";
+import { isPlatformAdmin } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
+import { TemplateStatus } from "@/lib/domain/templates";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
 import {
   isRatioKey,
@@ -25,7 +26,8 @@ export interface PublishTemplateInput {
   previewUrl?: string | null;
 }
 
-export type TemplateReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type TemplateReviewStatus = TemplateStatus;
+export { TemplateStatus };
 
 export interface TemplateListItem {
   id: string;
@@ -76,10 +78,10 @@ interface TemplateListRow {
 }
 
 function asReviewStatus(value: string | null | undefined): TemplateReviewStatus {
-  if (value === "PENDING" || value === "REJECTED" || value === "APPROVED") {
+  if (value === TemplateStatus.PENDING || value === TemplateStatus.REJECTED || value === TemplateStatus.APPROVED) {
     return value;
   }
-  return "APPROVED";
+  return TemplateStatus.APPROVED;
 }
 
 export async function getTemplates(options?: {
@@ -93,20 +95,20 @@ export async function getTemplates(options?: {
     const search = options?.search?.trim();
     const category = options?.category?.trim();
     const filters: Prisma.Sql[] = [Prisma.sql`TRUE`];
-    const session = await getServerSession(authOptions);
-    const user = session?.user?.id
+    const userId = await requireUserId();
+    const user = userId
       ? await prisma.user.findUnique({
-          where: { id: session.user.id },
+          where: { id: userId },
           select: { id: true, role: true, email: true },
         })
       : null;
     const admin = user ? isAdminUser(user) : false;
 
     if (options?.mine) {
-      if (!session?.user?.id) {
+      if (!userId) {
         return { success: true, templates: [] };
       }
-      filters.push(Prisma.sql`t."authorId" = ${session.user.id}`);
+      filters.push(Prisma.sql`t."authorId" = ${userId}`);
     } else if (options?.status && options.status !== "all") {
       if (!admin) {
         return { success: false, error: messages.errors.adminOnly };
@@ -219,8 +221,8 @@ export async function publishTemplate(
   input: PublishTemplateInput,
 ): Promise<ActionResult<{ templateId: string }>> {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const userId = await requireUserId();
+    if (!userId) {
       return { success: false, error: messages.errors.signInToPublish };
     }
 
@@ -234,10 +236,10 @@ export async function publishTemplate(
     const thumbnails = slides.map((_, index) => input.thumbnails?.[index] || null);
 
     const author = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { id: true, role: true, email: true },
     });
-    const status = author && isAdminUser(author) ? "APPROVED" : "PENDING";
+    const status = author && isAdminUser(author) ? TemplateStatus.APPROVED : TemplateStatus.PENDING;
 
     const template = await prisma.template.create({
       data: {
@@ -252,7 +254,7 @@ export async function publishTemplate(
           thumbnails,
           aspectRatio: input.aspectRatio,
         } as unknown as Prisma.InputJsonValue,
-        authorId: session.user.id,
+        authorId: userId,
       },
       select: { id: true },
     });
@@ -301,17 +303,17 @@ export async function setTemplateReviewStatus(
 
 
 async function requireUser() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return null;
+  const userId = await requireUserId();
+  if (!userId) return null;
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { id: true, role: true, email: true },
   });
   return user;
 }
 
 function isAdminUser(user: { role: string; email: string }): boolean {
-  return user.role === "ADMIN" || emailIsAdmin(user.email);
+  return isPlatformAdmin(user.role) || emailIsAdmin(user.email);
 }
 
 export async function renameTemplate(
@@ -359,7 +361,7 @@ export async function duplicateTemplate(
         badge: row.badge,
         previewUrl: row.previewUrl,
         aspectRatio: row.aspectRatio,
-        status: isAdminUser(user) ? "APPROVED" : "PENDING",
+        status: isAdminUser(user) ? TemplateStatus.APPROVED : TemplateStatus.PENDING,
         canvasJSON: row.canvasJSON as Prisma.InputJsonValue,
         authorId: user.id,
       },
@@ -480,7 +482,7 @@ export async function importTemplateJson(input: {
         category,
         badge: input.badge?.trim() || null,
         aspectRatio,
-        status: "APPROVED",
+        status: TemplateStatus.APPROVED,
         previewUrl: parsed.template.previewUrl ?? parsed.template.thumbnails[0] ?? null,
         canvasJSON: {
           slides: parsed.template.slides,

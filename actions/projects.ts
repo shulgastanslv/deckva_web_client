@@ -1,18 +1,16 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/lib/generated/prisma/client";
 
 import { ensureUserOrganization } from "@/actions/organizations";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 import {
   canAccessOrgResource,
   canManageOrgResource,
-  userOrganizationIds,
 } from "@/lib/studio/org-access";
 import {
   FREE_CAROUSEL_LIMIT,
@@ -70,10 +68,6 @@ type ActionResult<T extends object = object> =
   | ({ success: true } & T)
   | { success: false; error: string };
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 function isRatioKey(value: string): value is RatioKey {
   return value in CANVAS_RATIOS;
@@ -261,28 +255,23 @@ export async function getProjectById(
 ): Promise<ActionResult<{ project: ProjectDetail; isOwner: boolean }>> {
   try {
     const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
     if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
-    const orgIds = userId ? await userOrganizationIds(userId) : [];
     const project = await prisma.project.findFirst({
-      where: {
-        id: projectId,
-        OR: [
-          ...(userId ? [{ userId }] : []),
-          { isPublic: true },
-          ...(orgIds.length > 0 ? [{ organizationId: { in: orgIds } }] : []),
-        ],
-      },
+      where: { id: projectId },
       include: {
         slides: { orderBy: { order: "asc" } },
       },
     });
 
-    if (!project) return { success: false, error: messages.errors.projectNotFound };
+    if (!project || !(await canAccessOrgResource(userId, project))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
 
     return {
       success: true,
-      isOwner: !!userId && project.userId === userId,
+      isOwner: project.userId === userId,
       project: {
         id: project.id,
         title: project.title,
@@ -646,6 +635,17 @@ export async function toggleSaveProject(
     const userId = await requireUserId();
     if (!userId) return { success: false, error: messages.errors.signIn };
     if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
+
+    const project = await prisma.project.findFirst({
+      where: { id: projectId },
+      select: { id: true, userId: true, organizationId: true, isPublic: true },
+    });
+    if (
+      !project ||
+      (!(await canAccessOrgResource(userId, project)) && !project.isPublic)
+    ) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
 
     const existing = await prisma.savedProject.findUnique({
       where: { userId_projectId: { userId, projectId } },

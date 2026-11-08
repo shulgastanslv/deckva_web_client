@@ -1,11 +1,10 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 import { ensureUserOrganization } from "@/actions/organizations";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 import {
@@ -24,10 +23,6 @@ type ActionResult<T extends object = object> =
   | ({ success: true } & T)
   | { success: false; error: string };
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 export async function getUserFolders(): Promise<
   ActionResult<{ folders: FolderListItem[] }>

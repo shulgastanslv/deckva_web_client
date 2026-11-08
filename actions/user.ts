@@ -1,11 +1,11 @@
 "use server"
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
 import bcrypt from "bcryptjs";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { sendVerificationEmail } from "@/actions/auth-email";
+import { isPasswordLongEnough } from "@/lib/auth/password";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
@@ -30,11 +30,11 @@ export async function getProfile(): Promise<
   }>
 > {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return { success: false, error: messages.errors.signIn };
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: {
         name: true,
         email: true,
@@ -68,11 +68,11 @@ export async function updateProfile(input: {
   newPassword?: string;
 }): Promise<ProfileResult<{ name: string | null; image: string | null }>> {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return { success: false, error: messages.errors.signIn };
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { id: true, name: true, password: true, image: true },
     });
     if (!user) return { success: false, error: messages.errors.accountNotFound };
@@ -105,7 +105,7 @@ export async function updateProfile(input: {
       Boolean(input.newPassword?.trim()) || Boolean(input.currentPassword?.trim());
     if (wantsPassword) {
       const next = input.newPassword?.trim() ?? "";
-      if (next.length < 6) {
+      if (!isPasswordLongEnough(next)) {
         return { success: false, error: messages.errors.passwordTooShort };
       }
       if (user.password) {
@@ -141,15 +141,15 @@ export async function deleteAccount(input: {
   password?: string;
 }): Promise<ProfileResult> {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return { success: false, error: messages.errors.signIn };
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
 
     if (input.confirm.trim().toUpperCase() !== "DELETE") {
       return { success: false, error: 'Type DELETE to confirm' };
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { id: true, password: true },
     });
     if (!user) return { success: false, error: messages.errors.accountNotFound };
@@ -178,7 +178,7 @@ export async function registerUser({ name, email, password }: RegisterInput) {
       return { error: messages.errors.validEmailAndPassword };
     }
 
-    if (password.length < 6) {
+    if (!isPasswordLongEnough(password)) {
       return { error: messages.errors.passwordTooShort };
     }
 

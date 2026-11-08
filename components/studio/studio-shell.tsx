@@ -20,7 +20,6 @@ export function StudioShell({ children }: { children: ReactNode }) {
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [navOpen, setNavOpen] = useState(false);
   const create = useStudioCreate();
-  const { authNeeded, setAuthNeeded } = create;
 
   useEffect(() => {
     const onAuthLink = (event: Event) => {
@@ -34,12 +33,6 @@ export function StudioShell({ children }: { children: ReactNode }) {
     window.addEventListener("core:auth-link", onAuthLink);
     return () => window.removeEventListener("core:auth-link", onAuthLink);
   }, []);
-
-  useEffect(() => {
-    if (!authNeeded) return;
-    setAuthOpen(true);
-    setAuthNeeded(false);
-  }, [authNeeded, setAuthNeeded]);
 
   useEffect(() => {
     setNavOpen(false);

@@ -2,11 +2,16 @@ import { createHash, randomBytes } from "crypto";
 
 import { prisma } from "@/lib/prisma";
 
-export type AuthTokenType = "verify" | "reset";
+export const AuthTokenType = {
+  verify: "verify",
+  reset: "reset",
+} as const;
+
+export type AuthTokenType = (typeof AuthTokenType)[keyof typeof AuthTokenType];
 
 const TTL_MS: Record<AuthTokenType, number> = {
-  verify: 24 * 60 * 60 * 1000,
-  reset: 60 * 60 * 1000,
+  [AuthTokenType.verify]: 24 * 60 * 60 * 1000,
+  [AuthTokenType.reset]: 60 * 60 * 1000,
 };
 
 function hashToken(token: string): string {

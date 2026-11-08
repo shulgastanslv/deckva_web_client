@@ -9,7 +9,16 @@ import {
   getOrCreateInviteLink,
   sendOrganizationInvites,
 } from "@/actions/invites";
-import { studioKeys, useActiveOrganization } from "@/lib/studio/queries";
+import {
+  invalidateStudioOrganizations,
+  useActiveOrganization,
+} from "@/lib/studio/queries";
+import {
+  INVITEABLE_ORG_ROLES,
+  OrgMemberRole,
+  isOrgManager,
+  type InviteableOrgRole,
+} from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,11 +36,11 @@ export function InviteMembersDialog() {
   const queryClient = useQueryClient();
   const organization = useActiveOrganization(signedIn);
   const org = organization.data?.organization ?? null;
-  const canInvite = org?.role === "OWNER" || org?.role === "ADMIN";
+  const canInvite = isOrgManager(org?.role);
 
   const [open, setOpen] = useState(false);
   const [emails, setEmails] = useState("");
-  const [role, setRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
+  const [role, setRole] = useState<InviteableOrgRole>(OrgMemberRole.MEMBER);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +50,7 @@ export function InviteMembersDialog() {
 
   const reset = () => {
     setEmails("");
-    setRole("MEMBER");
+    setRole(OrgMemberRole.MEMBER);
     setError(null);
     setSummary(null);
     setBusy(false);
@@ -94,7 +103,7 @@ export function InviteMembersDialog() {
       if (already) parts.push(`${already} already members`);
       setSummary(parts.join(" · ") || "Done");
       setEmails("");
-      void queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
+      void invalidateStudioOrganizations(queryClient);
     } catch {
       setError("Couldn't send invites");
     } finally {
@@ -152,7 +161,7 @@ export function InviteMembersDialog() {
           </div>
 
           <div className="grid grid-cols-2 gap-1.5 rounded-2xl bg-muted/35 p-1">
-            {(["MEMBER", "ADMIN"] as const).map((value) => (
+            {INVITEABLE_ORG_ROLES.map((value) => (
               <button
                 key={value}
                 type="button"
@@ -165,7 +174,7 @@ export function InviteMembersDialog() {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {value === "MEMBER" ? "Member" : "Admin"}
+                {value === OrgMemberRole.MEMBER ? "Member" : "Admin"}
               </button>
             ))}
           </div>

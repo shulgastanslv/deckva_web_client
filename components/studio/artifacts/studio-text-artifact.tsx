@@ -14,7 +14,8 @@ import {
 } from "@/components/studio/ui/studio-content";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useArtifact, studioKeys } from "@/lib/studio/queries";
+import { invalidateStudioArtifact, useArtifact } from "@/lib/studio/queries";
+import { ArtifactKind } from "@/lib/domain/artifacts";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 
@@ -48,8 +49,7 @@ export function StudioTextArtifact({ artifactId }: { artifactId: string }) {
         return;
       }
       setDirty(false);
-      await queryClient.invalidateQueries({ queryKey: studioKeys.artifact(artifactId) });
-      await queryClient.invalidateQueries({ queryKey: studioKeys.artifactsRoot });
+      await invalidateStudioArtifact(queryClient, artifactId);
     } catch (err) {
       reportError(err, messages.errors.generic);
     } finally {
@@ -67,7 +67,7 @@ export function StudioTextArtifact({ artifactId }: { artifactId: string }) {
     );
   }
 
-  if (!artifact || artifact.kind !== "TEXT") {
+  if (!artifact || artifact.kind !== ArtifactKind.TEXT) {
     return (
       <StudioContent>
         <StudioContentBody className="py-16">
@@ -137,13 +137,18 @@ export function StudioTextArtifact({ artifactId }: { artifactId: string }) {
         />
 
         <div className="mt-6 space-y-3">
+          <p className="text-[13px] leading-relaxed text-muted-foreground">
+            This caption feeds the carousel as seed text — slides and topic
+            inherit it when you continue.
+          </p>
           <PipelineNextSteps
             from="text"
             onSelect={(kind) => {
               const seed = text.trim() || artifact.prompt || title;
               if (kind === "carousel") {
                 void create.generateCarousel({
-                  topic: seed,
+                  topic: title.trim() || artifact.prompt || seed.slice(0, 80),
+                  seedText: text.trim() || undefined,
                   parentArtifactId: artifact.id,
                 });
                 return;

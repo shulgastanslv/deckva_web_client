@@ -26,7 +26,9 @@ type Props = {
 
 async function toDataUrl(src: string): Promise<string> {
   if (src.startsWith("data:")) return src;
-  const blob = await (await fetch(src)).blob();
+  const res = await fetch(src);
+  if (!res.ok) throw new Error("Couldn't read the image");
+  const blob = await res.blob();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));

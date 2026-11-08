@@ -42,10 +42,10 @@ export function StudioTextDialog({
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
           <DialogTitle className="text-[17px] font-semibold tracking-tight">
-            Generate Text
+            Draft caption
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed">
-            Describe the idea — we&apos;ll draft the copy.
+            Optional prep — this copy becomes seed text for the carousel.
           </DialogDescription>
         </DialogHeader>
 

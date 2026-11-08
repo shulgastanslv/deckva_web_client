@@ -16,7 +16,7 @@ import { AuthModal } from "@/components/auth";
 import Logo from "@/components/logo/logo";
 import { StudioOrgAvatar } from "@/components/studio/org/studio-org-avatar";
 import { Button } from "@/components/ui/button";
-import { studioKeys } from "@/lib/studio/queries";
+import { invalidateStudioOrganizations } from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
 
 export function StudioInvitePage({ token }: { token: string }) {
@@ -72,10 +72,7 @@ export function StudioInvitePage({ token }: { token: string }) {
         setActionError("error" in res ? res.error : "Couldn't accept invite");
         return;
       }
-      await queryClient.invalidateQueries({ queryKey: studioKeys.organizations });
-      await queryClient.invalidateQueries({
-        queryKey: studioKeys.activeOrganization,
-      });
+      await invalidateStudioOrganizations(queryClient);
       window.dispatchEvent(new CustomEvent("studio:org-changed"));
       setDone("accepted");
       router.push("/studio");

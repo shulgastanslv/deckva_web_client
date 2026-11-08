@@ -39,7 +39,7 @@ export function StudioPrompt({
   busy,
   error,
   initialTopic = "",
-  initialType = "text",
+  initialType = "carousel",
 }: {
   onSubmit: (input: StudioPromptSubmit) => void | Promise<void>;
   disabled?: boolean;
@@ -157,9 +157,14 @@ export function StudioPrompt({
                   <DropdownMenuItem
                     key={type.kind}
                     onSelect={() => setGenerationType(type.kind)}
-                    className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-foreground transition-colors hover:bg-muted focus:bg-muted"
+                    className="flex cursor-pointer flex-col items-start gap-0.5 rounded-xl px-3 py-2.5 text-foreground transition-colors hover:bg-muted focus:bg-muted"
                   >
-                    {type.label}
+                    <span className="text-[14px] font-medium">{type.label}</span>
+                    {type.job ? (
+                      <span className="text-[12px] font-normal text-muted-foreground">
+                        {type.job}
+                      </span>
+                    ) : null}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

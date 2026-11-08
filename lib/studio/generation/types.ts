@@ -1,4 +1,6 @@
-export type GenerationKind = "text" | "palette" | "carousel";
+export { GenerationKind } from "@/lib/domain/artifacts";
+
+import type { GenerationKind } from "@/lib/domain/artifacts";
 
 export type StudioPromptSubmit = {
   topic: string;

@@ -3,7 +3,12 @@
 import { messages } from "@/lib/messages";
 import bcrypt from "bcryptjs";
 
-import { consumeAuthToken, issueAuthToken } from "@/lib/auth-tokens";
+import { isPasswordLongEnough } from "@/lib/auth/password";
+import {
+  AuthTokenType,
+  consumeAuthToken,
+  issueAuthToken,
+} from "@/lib/auth-tokens";
 import { appBaseUrl, isValidEmail, normalizeEmail, sendAuthEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
@@ -37,7 +42,7 @@ export async function sendVerificationEmail(email: string) {
     return { success: true as const, delivered: true };
   }
 
-  const token = await issueAuthToken(normalized, "verify", user.id);
+  const token = await issueAuthToken(normalized, AuthTokenType.verify, user.id);
   const url = `${appBaseUrl()}/?verify=${token}`;
   const sent = await sendLinkEmail({
     to: normalized,
@@ -57,7 +62,7 @@ export async function sendVerificationEmail(email: string) {
 }
 
 export async function verifyEmail(token: string) {
-  const consumed = await consumeAuthToken(token, "verify");
+  const consumed = await consumeAuthToken(token, AuthTokenType.verify);
   if (!consumed) return { error: messages.errors.linkExpired };
 
   await prisma.user.update({
@@ -74,7 +79,7 @@ export async function requestPasswordReset(email: string) {
 
   const user = await prisma.user.findUnique({ where: { email: normalized } });
   if (user) {
-    const token = await issueAuthToken(normalized, "reset", user.id);
+    const token = await issueAuthToken(normalized, AuthTokenType.reset, user.id);
     const url = `${appBaseUrl()}/?reset=${token}`;
     const sent = await sendLinkEmail({
       to: normalized,
@@ -95,11 +100,11 @@ export async function requestPasswordReset(email: string) {
 }
 
 export async function resetPassword(token: string, password: string) {
-  if (!password || password.length < 6) {
+  if (!password || !isPasswordLongEnough(password)) {
     return { error: messages.errors.passwordTooShort };
   }
 
-  const consumed = await consumeAuthToken(token, "reset");
+  const consumed = await consumeAuthToken(token, AuthTokenType.reset);
   if (!consumed) return { error: messages.errors.linkExpired };
 
   const hashedPassword = await bcrypt.hash(password, 10);

@@ -1,19 +1,24 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
+import {
+  isOrgManager,
+  OrgMemberRole,
+  type InviteableOrgRole,
+  type OrgMemberRole as OrgMemberRoleValue,
+} from "@/lib/roles";
 
 export interface OrganizationListItem {
   id: string;
   isUpgrade: boolean;
   name: string;
   color: string;
-  role: "OWNER" | "ADMIN" | "MEMBER";
+  role: OrgMemberRoleValue;
   memberCount: number;
 }
 
@@ -30,10 +35,6 @@ const ORG_COLORS = [
   "#67E8F9",
 ] as const;
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 function pickColor(seed: string) {
   let hash = 0;
@@ -46,7 +47,7 @@ async function mapOrg(
     id: string;
     name: string;
     color: string;
-    members: Array<{ role: "OWNER" | "ADMIN" | "MEMBER"; userId: string }>;
+    members: Array<{ role: OrgMemberRoleValue; userId: string }>;
     _count: { members: number };
   },
   userId: string,
@@ -57,7 +58,7 @@ async function mapOrg(
     name: org.name,
     isUpgrade: await userHasPro(userId),
     color: org.color,
-    role: mine?.role ?? "MEMBER",
+    role: mine?.role ?? OrgMemberRole.MEMBER,
     memberCount: org._count.members,
   };
 }
@@ -81,7 +82,7 @@ export async function ensureUserOrganization(): Promise<
     });
     if (!user) return { success: false, error: messages.errors.userNotFound };
 
-    let memberships = await prisma.organizationMember.findMany({
+    const memberships = await prisma.organizationMember.findMany({
       where: { userId },
       include: {
         organization: {
@@ -104,7 +105,7 @@ export async function ensureUserOrganization(): Promise<
           name,
           color: pickColor(userId),
           members: {
-            create: { userId, role: "OWNER" },
+            create: { userId, role: OrgMemberRole.OWNER },
           },
         },
         include: {
@@ -222,7 +223,7 @@ export async function createOrganization(
       data: {
         name: trimmed,
         color: pickColor(`${userId}-${trimmed}`),
-        members: { create: { userId, role: "OWNER" } },
+        members: { create: { userId, role: OrgMemberRole.OWNER } },
       },
       include: {
         members: { select: { role: true, userId: true } },
@@ -290,7 +291,7 @@ export async function getActiveOrganization(): Promise<
 
 export type OrganizationMemberItem = {
   id: string;
-  role: "OWNER" | "ADMIN" | "MEMBER";
+  role: OrgMemberRoleValue;
   createdAt: string;
   user: {
     id: string;
@@ -314,7 +315,7 @@ export async function updateOrganization(
 
     if (
       !membership ||
-      (membership.role !== "OWNER" && membership.role !== "ADMIN")
+      (!isOrgManager(membership.role))
     ) {
       return { success: false, error: messages.errors.orgEditForbidden };
     }
@@ -351,7 +352,7 @@ export async function deleteOrganization(
       where: { userId, organizationId },
     });
 
-    if (!membership || membership.role !== "OWNER") {
+    if (!membership || membership.role !== OrgMemberRole.OWNER) {
       return { success: false, error: messages.errors.orgDeleteForbidden };
     }
 
@@ -421,7 +422,7 @@ export async function getOrganizationMembers(
 export async function updateOrganizationMemberRole(input: {
   organizationId: string;
   memberUserId: string;
-  role: "ADMIN" | "MEMBER";
+  role: InviteableOrgRole;
 }): Promise<ActionResult<object>> {
   try {
     const userId = await requireUserId();
@@ -430,7 +431,7 @@ export async function updateOrganizationMemberRole(input: {
     const actor = await prisma.organizationMember.findFirst({
       where: { userId, organizationId: input.organizationId },
     });
-    if (!actor || actor.role !== "OWNER") {
+    if (!actor || actor.role !== OrgMemberRole.OWNER) {
       return { success: false, error: messages.errors.orgRoleForbidden };
     }
 
@@ -447,7 +448,7 @@ export async function updateOrganizationMemberRole(input: {
     if (!target) {
       return { success: false, error: messages.errors.orgMemberNotFound };
     }
-    if (target.role === "OWNER") {
+    if (target.role === OrgMemberRole.OWNER) {
       return { success: false, error: messages.errors.orgRoleOwner };
     }
 
@@ -491,14 +492,14 @@ export async function removeOrganizationMember(input: {
 
     const removingSelf = input.memberUserId === userId;
     if (removingSelf) {
-      if (actor.role === "OWNER") {
+      if (actor.role === OrgMemberRole.OWNER) {
         return { success: false, error: messages.errors.orgOwnerLeave };
       }
-    } else if (actor.role !== "OWNER" && actor.role !== "ADMIN") {
+    } else if (!isOrgManager(actor.role)) {
       return { success: false, error: messages.errors.orgRemoveForbidden };
-    } else if (target.role === "OWNER") {
+    } else if (target.role === OrgMemberRole.OWNER) {
       return { success: false, error: messages.errors.orgRemoveOwner };
-    } else if (actor.role === "ADMIN" && target.role === "ADMIN") {
+    } else if (actor.role === OrgMemberRole.ADMIN && target.role === OrgMemberRole.ADMIN) {
       return { success: false, error: messages.errors.orgRemoveForbidden };
     }
 
@@ -549,7 +550,7 @@ export async function transferOrganizationOwnership(input: {
     const actor = await prisma.organizationMember.findFirst({
       where: { userId, organizationId: input.organizationId },
     });
-    if (!actor || actor.role !== "OWNER") {
+    if (!actor || actor.role !== OrgMemberRole.OWNER) {
       return { success: false, error: messages.errors.orgTransferForbidden };
     }
 
@@ -566,11 +567,11 @@ export async function transferOrganizationOwnership(input: {
     await prisma.$transaction([
       prisma.organizationMember.update({
         where: { id: actor.id },
-        data: { role: "ADMIN" },
+        data: { role: OrgMemberRole.ADMIN },
       }),
       prisma.organizationMember.update({
         where: { id: target.id },
-        data: { role: "OWNER" },
+        data: { role: OrgMemberRole.OWNER },
       }),
     ]);
 

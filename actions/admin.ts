@@ -1,10 +1,10 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { emailIsAdmin } from "@/lib/auth-role";
+import { UserRole, isPlatformAdmin } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 
 type ActionResult<T extends object = object> =
@@ -29,26 +29,22 @@ export interface NotificationItem {
 }
 
 async function requireAdminId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return null;
+  const userId = await requireUserId();
+  if (!userId) return null;
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { id: true, email: true, role: true },
   });
   if (!user) return null;
-  if (user.role === "ADMIN" || emailIsAdmin(user.email)) {
-    if (user.role !== "ADMIN") {
-      await prisma.user.update({ where: { id: user.id }, data: { role: "ADMIN" } });
+  if (isPlatformAdmin(user.role) || emailIsAdmin(user.email)) {
+    if (!isPlatformAdmin(user.role)) {
+      await prisma.user.update({ where: { id: user.id }, data: { role: UserRole.ADMIN } });
     }
     return user.id;
   }
   return null;
 }
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 export async function listPublishedNews(): Promise<ActionResult<{ news: NewsItem[] }>> {
   try {

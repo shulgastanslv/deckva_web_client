@@ -57,7 +57,7 @@ import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { canFillShape } from "@/lib/canvas/objects";
 import { iconFill } from "@/lib/canvas/recolor-icon";
 import { FontSelect } from "@/components/canvas/font-select";
-import type { UpscaleScale } from "@/lib/image/deckva-tools";
+import type { UpscaleScale } from "@/actions/image-tools";
 import { cn } from "@/lib/utils";
 import {
   loadGoogleFont,

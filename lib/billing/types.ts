@@ -1,3 +1,9 @@
+import type {
+  BillingPaymentKind,
+  BillingPaymentStatus,
+  SubscriptionStatus,
+} from "@/lib/domain/billing";
+
 export type CardBrand =
   | "visa"
   | "mastercard"
@@ -33,8 +39,8 @@ export interface BillingPaymentDto {
   id: string;
   amount: number;
   currency: string;
-  status: "PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED";
-  kind: "SUBSCRIPTION" | "CARD_VERIFY" | "REFUND";
+  status: BillingPaymentStatus;
+  kind: BillingPaymentKind;
   description: string | null;
   paidAt: string | null;
   createdAt: string;
@@ -54,7 +60,7 @@ export interface PaymentMethodDto {
 
 export interface BillingSnapshot {
   isPro: boolean;
-  status: "NONE" | "ACTIVE" | "PAST_DUE" | "CANCELED";
+  status: SubscriptionStatus;
   subscriptionEndsAt: string | null;
   cancelAtPeriodEnd: boolean;
   price: number;

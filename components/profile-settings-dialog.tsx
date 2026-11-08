@@ -42,6 +42,7 @@ import { formatCardBrand } from "@/lib/billing/card";
 import type { BillingSnapshot } from "@/lib/billing/types";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { messages } from "@/lib/messages";
+import { isPasswordLongEnough, PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
 import {
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
@@ -278,7 +279,7 @@ export function ProfileSettingsDialog({
     setError(null);
     setSaved(false);
 
-    if (newPassword.length < 6) {
+    if (!isPasswordLongEnough(newPassword)) {
       setError("Password must be at least 6 characters");
       return;
     }

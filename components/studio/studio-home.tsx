@@ -10,7 +10,6 @@ import {
   useUserArtifacts,
   useUserProjects,
 } from "@/lib/studio/queries";
-import { AuthModal } from "@/components/auth";
 import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioBoardGrid } from "@/components/studio/browse/studio-board-grid";
 import { StudioProjectCard } from "@/components/studio/browse/studio-project-card";
@@ -56,12 +55,11 @@ export function StudioHome() {
   const topic = searchParams.get("topic")?.trim() ?? "";
   const generateParam = searchParams.get("generate")?.trim() ?? "";
   const [promptType, setPromptType] = useState<GenerationKind>(
-    isGenerationKind(generateParam) ? generateParam : "text",
+    isGenerationKind(generateParam) ? generateParam : "carousel",
   );
   const { data: session, status } = useSession();
-  const userId = session?.user?.id ?? undefined;
   const authPending = status === "loading";
-  const signedIn = status === "authenticated" && Boolean(userId);
+  const signedIn = status !== "unauthenticated";
   const create = useStudioCreate();
   // Defer session/query branches until after mount — next-auth + react-query
   // often disagree between SSR and the first client paint (hydration mismatch).
@@ -255,8 +253,9 @@ export function StudioHome() {
             setPromptType("text");
             await create.generateText({ topic: value });
           }}
-          onPaletteClick={() => {
+          onPaletteGenerate={async (value) => {
             setPromptType("palette");
+            await create.generatePalette({ topic: value });
           }}
           onCarouselGenerate={async (form) => {
             setPromptType("carousel");
@@ -345,20 +344,6 @@ export function StudioHome() {
             <div className="flex justify-center py-16">
               <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
-          ) : !signedIn ? (
-            <div className="max-w-md py-4">
-              <p className="text-[14px] leading-relaxed text-muted-foreground">
-                Sign in to keep texts, palettes, and carousels in one place.
-              </p>
-              <Button
-                type="button"
-                variant="ghost"
-                className="mt-2 h-auto rounded-full px-0 text-[13px] font-medium text-foreground underline-offset-4 hover:bg-transparent hover:underline"
-                onClick={() => create.setAuthNeeded(true)}
-              >
-                Sign in
-              </Button>
-            </div>
           ) : filter === "carousels" ? (
             visibleProjects.length === 0 ? (
               <p className="py-8 text-[13px] text-muted-foreground">{emptyLabel}</p>
@@ -428,12 +413,6 @@ export function StudioHome() {
         </section>
       </StudioContentBody>
 
-      <AuthModal
-        isOpen={create.authNeeded}
-        onOpenChange={(open) => {
-          if (!open) create.setAuthNeeded(false);
-        }}
-      />
     </StudioContent>
   );
 }

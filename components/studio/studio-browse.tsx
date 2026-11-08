@@ -27,15 +27,12 @@ import { StudioProjectList } from "@/components/studio/browse/studio-project-lis
 import { StudioPaletteCard } from "@/components/studio/browse/studio-palette-card";
 import { StudioTextList } from "@/components/studio/browse/studio-text-row";
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
-import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
-
 // --- Template Imports ---
 import { getTemplates, type TemplateListItem } from "@/actions/templates";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates/categories";
 import { CategoryDropdown } from "./studio-category-dropdown";
 
 // --- Shared UI Imports ---
-import { AuthModal } from "@/components/auth";
 import {
   StudioContent,
   StudioContentBody,
@@ -63,10 +60,8 @@ export function StudioBrowse() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
-  const userId = session?.user?.id;
-  const signedIn = status === "authenticated" && Boolean(userId);
-  const create = useStudioCreate();
+  const { status } = useSession();
+  const signedIn = status !== "unauthenticated";
 
   // --- Shared State ---
   const [activeTab, setActiveTab] = useState<MainTab>(
@@ -179,10 +174,6 @@ export function StudioBrowse() {
   }, [fetchTemplates, search, activeTab]);
 
   const openTemplate = (id: string) => {
-    if (!signedIn) {
-      create.setAuthNeeded(true);
-      return;
-    }
     setOpeningId(id);
     router.push(`/studio/editor?template=${id}`);
   };
@@ -345,30 +336,7 @@ export function StudioBrowse() {
               </div>
             </div>
 
-            {!signedIn && activeTab !== "templates" ? (
-              <div className="max-w-sm py-8">
-                <p className="text-[22px] text-neutral-950 dark:text-foreground" style={{ fontFamily: "var(--font-studio-serif), ui-serif, Georgia, serif" }}>
-                  Sign in to see{" "}
-                  {activeTab === "texts"
-                    ? "texts"
-                    : activeTab === "palettes"
-                      ? "palettes"
-                      : "projects"}
-                </p>
-                <p className="mt-2 text-[14px] text-neutral-500 dark:text-muted-foreground">
-                  Your{" "}
-                  {activeTab === "texts"
-                    ? "post texts"
-                    : activeTab === "palettes"
-                      ? "palettes"
-                      : "carousels"}{" "}
-                  will show up here.
-                </p>
-                <button type="button" className="mt-4 text-[13px] font-medium text-neutral-950 underline-offset-4 hover:underline dark:text-foreground" onClick={() => create.setAuthNeeded(true)}>
-                  Sign in
-                </button>
-              </div>
-            ) : activeTab === "texts" ? (
+            {activeTab === "texts" ? (
               loadingTexts && texts.length === 0 ? (
                 <div className="flex justify-center py-20">
                   <Loader2 className="size-4 animate-spin text-muted-foreground" />
@@ -500,12 +468,6 @@ export function StudioBrowse() {
         </div>
       </StudioContentBody>
 
-      <AuthModal
-        isOpen={create.authNeeded}
-        onOpenChange={(open) => {
-          if (!open) create.setAuthNeeded(false);
-        }}
-      />
     </StudioContent>
   );
 }

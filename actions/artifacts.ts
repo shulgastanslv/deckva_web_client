@@ -1,17 +1,23 @@
 "use server";
 
+import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/lib/generated/prisma/client";
 
 import { ensureUserOrganization } from "@/actions/organizations";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { prisma } from "@/lib/prisma";
 import { canAccessOrgResource } from "@/lib/studio/org-access";
 
-export type ArtifactKindValue = "TEXT" | "PALETTE" | "CAROUSEL";
-export type ArtifactStatusValue = "DRAFT" | "READY" | "FAILED";
+import {
+  ArtifactKind,
+  ArtifactStatus,
+  type ArtifactKind as ArtifactKindValue,
+  type ArtifactStatus as ArtifactStatusValue,
+} from "@/lib/domain/artifacts";
+
+export type { ArtifactKindValue, ArtifactStatusValue };
+export { ArtifactKind, ArtifactStatus };
 
 export type TextArtifactPayload = {
   text: string;
@@ -65,10 +71,6 @@ type ActionResult<T extends object = object> =
   | ({ success: true } & T)
   | { success: false; error: string };
 
-async function requireUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
 
 function asPayloadRecord(value: unknown): Record<string, unknown> {
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -79,12 +81,12 @@ function asPayloadRecord(value: unknown): Record<string, unknown> {
 
 function previewFromPayload(kind: ArtifactKindValue, payload: unknown): string | null {
   const row = asPayloadRecord(payload);
-  if (kind === "TEXT" && typeof row.text === "string") {
+  if (kind === ArtifactKind.TEXT && typeof row.text === "string") {
     const text = row.text.trim();
     if (!text) return null;
     return text.length <= 140 ? text : `${text.slice(0, 137).trimEnd()}…`;
   }
-  if (kind === "PALETTE") {
+  if (kind === ArtifactKind.PALETTE) {
     const name = typeof row.name === "string" ? row.name.trim() : "";
     return name || null;
   }
@@ -98,7 +100,7 @@ function previewColorsFromPayload(
   kind: ArtifactKindValue,
   payload: unknown,
 ): string[] | null {
-  if (kind !== "PALETTE") return null;
+  if (kind !== ArtifactKind.PALETTE) return null;
   const row = asPayloadRecord(payload);
   const colors = [row.bg, row.accent, row.text, row.photo, row.muted]
     .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
@@ -236,11 +238,11 @@ export async function createPaletteArtifact(input: {
 
     const artifact = await prisma.artifact.create({
       data: {
-        kind: "PALETTE",
+        kind: ArtifactKind.PALETTE,
         title,
         prompt,
         payload: payload as unknown as Prisma.InputJsonValue,
-        status: "READY",
+        status: ArtifactStatus.READY,
         userId,
         organizationId: org.organization.id,
         parentId: input.parentId || null,
@@ -256,10 +258,10 @@ export async function createPaletteArtifact(input: {
       artifactId: artifact.id,
       artifact: {
         id: artifact.id,
-        kind: "PALETTE",
+        kind: ArtifactKind.PALETTE,
         title: artifact.title,
         prompt: artifact.prompt,
-        status: "READY",
+        status: ArtifactStatus.READY,
         payload: payload as unknown as Record<string, unknown>,
         updatedAt: artifact.updatedAt.toISOString(),
         createdAt: artifact.createdAt.toISOString(),
@@ -304,11 +306,11 @@ export async function createTextArtifact(input: {
 
     const artifact = await prisma.artifact.create({
       data: {
-        kind: "TEXT",
+        kind: ArtifactKind.TEXT,
         title,
         prompt,
         payload: payload as unknown as Prisma.InputJsonValue,
-        status: "READY",
+        status: ArtifactStatus.READY,
         userId,
         organizationId: org.organization.id,
         parentId: input.parentId || null,
@@ -325,10 +327,10 @@ export async function createTextArtifact(input: {
       artifactId: artifact.id,
       artifact: {
         id: artifact.id,
-        kind: "TEXT",
+        kind: ArtifactKind.TEXT,
         title: artifact.title,
         prompt: artifact.prompt,
-        status: "READY",
+        status: ArtifactStatus.READY,
         payload: payload as unknown as Record<string, unknown>,
         updatedAt: artifact.updatedAt.toISOString(),
         createdAt: artifact.createdAt.toISOString(),
@@ -352,7 +354,7 @@ export async function updateTextArtifact(
     if (!userId) return { success: false, error: messages.errors.signIn };
 
     const existing = await prisma.artifact.findFirst({
-      where: { id: artifactId, userId, kind: "TEXT" },
+      where: { id: artifactId, userId, kind: ArtifactKind.TEXT },
     });
     if (!existing) return { success: false, error: messages.errors.generic };
 
@@ -377,7 +379,7 @@ export async function updateTextArtifact(
       success: true,
       artifact: {
         id: artifact.id,
-        kind: "TEXT",
+        kind: ArtifactKind.TEXT,
         title: artifact.title,
         prompt: artifact.prompt,
         status: artifact.status as ArtifactStatusValue,
@@ -433,7 +435,7 @@ export async function linkCarouselArtifact(input: {
           payload: {
             topic: input.topic?.trim() || input.prompt?.trim() || "",
           } as unknown as Prisma.InputJsonValue,
-          status: "READY",
+          status: ArtifactStatus.READY,
         },
       });
       return { success: true, artifactId: existing.id };
@@ -441,13 +443,13 @@ export async function linkCarouselArtifact(input: {
 
     const artifact = await prisma.artifact.create({
       data: {
-        kind: "CAROUSEL",
+        kind: ArtifactKind.CAROUSEL,
         title: input.title.trim() || "Untitled Carousel",
         prompt: input.prompt?.trim() || null,
         payload: {
           topic: input.topic?.trim() || input.prompt?.trim() || "",
         } as unknown as Prisma.InputJsonValue,
-        status: "READY",
+        status: ArtifactStatus.READY,
         userId,
         organizationId: org.organization.id,
         projectId: input.projectId,
@@ -475,7 +477,7 @@ export async function deleteArtifact(
       where: {
         id: artifactId,
         userId,
-        kind: { in: ["TEXT", "PALETTE"] },
+        kind: { in: [ArtifactKind.TEXT, ArtifactKind.PALETTE] },
       },
     });
     if (result.count === 0) {
