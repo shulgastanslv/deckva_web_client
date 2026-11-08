@@ -26,6 +26,7 @@ import type {
   StudioPromptSubmit,
 } from "@/lib/studio/generation/types";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export type { GenerationKind, StudioPromptSubmit };
 export type GenerationType = GenerationKind;
@@ -48,11 +49,33 @@ export function StudioPrompt({
   initialTopic?: string;
   initialType?: GenerationKind;
 }) {
+  const t = useTranslations("studio");
   const appliedTopic = useRef(false);
 
   const [value, setValue] = useState(initialTopic);
   const [recentPrompts, setRecentPrompts] = useState<string[]>([]);
   const [generationType, setGenerationType] = useState<GenerationKind>(initialType);
+
+  const typeCopy: Record<
+    GenerationKind,
+    { label: string; job: string; placeholder: string }
+  > = {
+    carousel: {
+      label: t("carousel"),
+      job: t("jobCarousel"),
+      placeholder: t("placeholderCarousel"),
+    },
+    text: {
+      label: t("caption"),
+      job: t("jobCaption"),
+      placeholder: t("placeholderCaption"),
+    },
+    palette: {
+      label: t("palette"),
+      job: t("jobPalette"),
+      placeholder: t("placeholderPalette"),
+    },
+  };
 
   useEffect(() => {
     if (appliedTopic.current || !initialTopic) return;
@@ -106,7 +129,10 @@ export function StudioPrompt({
     void onSubmit({ topic: finalTopic, type: generationType });
   };
 
-  const currentTypeData = getGenerationType(generationType);
+  const currentTypeData = {
+    ...getGenerationType(generationType),
+    ...typeCopy[generationType],
+  };
 
   return (
     <div className="w-full">
@@ -153,20 +179,21 @@ export function StudioPrompt({
                 sideOffset={10}
                 className="w-full rounded-2xl border-none border-neutral-200/80 bg-white p-2 dark:bg-neutral-900"
               >
-                {GENERATION_TYPES.map((type) => (
+                {GENERATION_TYPES.map((type) => {
+                  const copy = typeCopy[type.kind];
+                  return (
                   <DropdownMenuItem
                     key={type.kind}
                     onSelect={() => setGenerationType(type.kind)}
                     className="flex cursor-pointer flex-col items-start gap-0.5 rounded-xl px-3 py-2.5 text-foreground transition-colors hover:bg-muted focus:bg-muted"
                   >
-                    <span className="text-[14px] font-medium">{type.label}</span>
-                    {type.job ? (
-                      <span className="text-[12px] font-normal text-muted-foreground">
-                        {type.job}
-                      </span>
-                    ) : null}
+                    <span className="text-[14px] font-medium">{copy.label}</span>
+                    <span className="text-[12px] font-normal text-muted-foreground">
+                      {copy.job}
+                    </span>
                   </DropdownMenuItem>
-                ))}
+                  );
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
 

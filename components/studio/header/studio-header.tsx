@@ -7,6 +7,7 @@ import { ChevronRight, Keyboard, Menu, Send, UserPlus } from "lucide-react";
 
 import { useActiveOrganization } from "@/lib/studio/queries";
 import Logo from "@/components/logo/logo";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { KeyboardShortcutsMenu } from "./keyboard-shortcuts-menu";
 import { PlanDropdown } from "./plan-dropdown";
 import { InviteMembersDialog } from "./invite-members";
+import { useTranslations } from "next-intl";
 
 export function StudioHeader({
   onSignIn,
@@ -22,6 +24,7 @@ export function StudioHeader({
   onSignIn?: () => void;
   onMenu?: () => void;
 }) {
+  const t = useTranslations("common");
   const router = useRouter();
   const { data: session, status } = useSession();
   const signedIn = status === "authenticated";
@@ -89,6 +92,7 @@ export function StudioHeader({
 
          
 
+          <LocaleSwitcher />
           <StudioNotifications />
 
           {!signedIn ? (
@@ -98,7 +102,7 @@ export function StudioHeader({
               className="rounded-full"
               onClick={onSignIn}
             >
-              Sign in
+              {t("signIn")}
             </Button>
           ) : (
             <StudioUserNav />

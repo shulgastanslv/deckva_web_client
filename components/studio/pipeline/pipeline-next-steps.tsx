@@ -9,6 +9,7 @@ import {
 import type { GenerationKind } from "@/lib/studio/generation/types";
 import { PIPELINE_PRIMARY } from "@/lib/studio/pipeline";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export function PipelineNextSteps({
   from,
@@ -21,6 +22,7 @@ export function PipelineNextSteps({
   className?: string;
   dense?: boolean;
 }) {
+  const t = useTranslations("studio");
   const def = GENERATION_REGISTRY[from];
   const primary = def.nextSteps
     .map((kind) => GENERATION_REGISTRY[kind])
@@ -37,12 +39,18 @@ export function PipelineNextSteps({
         <div className="flex flex-wrap items-center gap-2">
           {!dense ? (
             <p className="w-full text-[12px] text-muted-foreground">
-              Continue to carousel
+              {t("continueToCarousel")}
             </p>
           ) : null}
           {primary.map((step) => {
             const Icon = step.icon;
             const isCarousel = step.kind === PIPELINE_PRIMARY;
+            const label =
+              step.kind === "text"
+                ? t("caption")
+                : step.kind === "palette"
+                  ? t("palette")
+                  : t("carousel");
             return (
               <button
                 key={step.kind}
@@ -57,7 +65,7 @@ export function PipelineNextSteps({
                 )}
               >
                 <Icon className="size-3.5 opacity-70" />
-                {isCarousel ? "Make carousel" : `Generate ${step.label.toLowerCase()}`}
+                {isCarousel ? t("makeCarouselCta") : label}
                 <ArrowRight className="size-3 opacity-50" />
               </button>
             );
@@ -69,11 +77,17 @@ export function PipelineNextSteps({
         <div className="flex flex-wrap items-center gap-2">
           {!dense ? (
             <p className="w-full text-[12px] text-muted-foreground">
-              Or prep first
+              {t("orPrepFirst")}
             </p>
           ) : null}
           {helpers.map((step) => {
             const Icon = step.icon;
+            const label =
+              step.kind === "text"
+                ? t("caption")
+                : step.kind === "palette"
+                  ? t("palette")
+                  : t("carousel");
             return (
               <button
                 key={step.kind}
@@ -85,7 +99,7 @@ export function PipelineNextSteps({
                 )}
               >
                 <Icon className="size-3.5 opacity-70" />
-                {step.label}
+                {label}
                 <ArrowRight className="size-3 opacity-40" />
               </button>
             );

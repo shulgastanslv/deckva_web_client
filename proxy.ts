@@ -6,6 +6,11 @@ import {
   AUTH_USER_ID_HEADER,
   AUTH_USER_ROLE_HEADER,
 } from "@/lib/auth/headers";
+import {
+  isAppLocale,
+  localeCookieName,
+  negotiateLocale,
+} from "@/lib/i18n/config";
 import { UserRole } from "@/lib/roles";
 
 /**
@@ -61,9 +66,22 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: { headers: requestHeaders },
   });
+
+  // Persist UI locale from Accept-Language when the user has no preference yet.
+  const existing = request.cookies.get(localeCookieName)?.value;
+  if (!isAppLocale(existing)) {
+    const locale = negotiateLocale(request.headers.get("accept-language"));
+    response.cookies.set(localeCookieName, locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+  }
+
+  return response;
 }
 
 export const config = {
