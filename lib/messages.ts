@@ -1,189 +1,44 @@
 /**
- * User-facing copy for errors and notifications.
- * Server actions return these strings. The client toasts the same catalog
- * instead of raw exception text.
+ * Locale-aware message catalogs.
+ *
+ * Prefer `await getMessages()` in Server Actions / RSC.
+ * The sync `messages` export is the default-locale catalog for gradual migration
+ * and non-request contexts — do not rely on it for UI locale.
  */
-export const messages = {
-  notifications: {
-    title: "Notifications",
-    emptyTitle: "No notifications yet",
-    emptyBody: "Updates about your carousels and workspace will show up here.",
-    emptyMenu: "No new notifications",
-  },
-  errors: {
-    generic: "Something went wrong",
-    signIn: "Sign in",
-    signInToSave: "Sign in to save",
-    cancelled: "Cancelled",
-    signInFeedback: "Sign in to send feedback",
-    adminsOnly: "Admins only",
-    adminOnly: "Admin only",
-    unauthorized: "Unauthorized",
-    titleAndTextRequired: "Title and text are required",
-    loadNews: "Couldn't load news",
-    publishNews: "Couldn't publish the news",
-    sendNotification: "Couldn't send the notification",
-    loadNotifications: "Couldn't load notifications",
-    updateNotifications: "Couldn't update notifications",
-    sendEmail: "Couldn't send the email. Try again.",
-    emailNotConfigured: "Email delivery is not configured",
-    validEmail: "Enter a valid email",
-    validEmailAndPassword: "Enter a valid email and a password",
-    linkExpired: "This link is invalid or has expired",
-    passwordTooShort: "Password must be at least 8 characters",
-    incorrectCredentials: "Incorrect email or password",
-    confirmEmail: "Confirm your email before signing in",
-    accountExists: "An account with this email already exists",
-    serverError: "Something went wrong on the server",
-    loadBilling: "Couldn't load billing",
-    saveCard: "Couldn't save card",
-    noCard: "No card on file",
-    cancelBeforeRemoveCard: "Cancel your subscription before removing the card",
-    removeCard: "Couldn't remove card",
-    addCardBeforeSubscribe: "Add a card before subscribing",
-    startSubscription: "Couldn't start subscription",
-    noActiveSubscription: "No active subscription",
-    cancelSubscription: "Couldn't cancel subscription",
-    nothingToResume: "Nothing to resume",
-    resumeSubscription: "Couldn't resume subscription",
-    feedbackImages: "Только PNG, JPEG, WebP или GIF",
-    feedbackTooLarge: "Один из файлов слишком большой (макс. 2 МБ)",
-    feedbackEmpty: "Добавьте карусель или короткий текст",
-    feedbackTooLong: "Сообщение слишком длинное",
-    saveFeedback: "Couldn't save feedback",
-    loadFeedback: "Couldn't load feedback",
-    loadOrganization: "Couldn't load organization",
-    loadOrganizations: "Couldn't load organizations",
-    createOrganization: "Couldn't create organization",
-    switchOrganization: "Couldn't switch organization",
-    updateOrganization: "Couldn't update organization",
-    deleteOrganization: "Couldn't delete organization",
-    orgEditForbidden: "Only owners and admins can edit this organization",
-    orgDeleteForbidden: "Only the owner can delete this organization",
-    loadOrgMembers: "Couldn't load members",
-    updateOrgMember: "Couldn't update member role",
-    removeOrgMember: "Couldn't remove member",
-    transferOrganization: "Couldn't transfer ownership",
-    orgRoleForbidden: "Only the owner can change roles",
-    orgRoleSelf: "You can't change your own role this way",
-    orgRoleOwner: "Transfer ownership instead of changing the owner role",
-    orgMemberNotFound: "Member not found",
-    orgOwnerLeave: "Transfer ownership before leaving",
-    orgRemoveForbidden: "You don't have permission to remove that member",
-    orgRemoveOwner: "You can't remove the owner",
-    orgTransferForbidden: "Only the owner can transfer ownership",
-    inviteForbidden: "Only owners and admins can invite members",
-    inviteFailed: "Couldn't send invites",
-    inviteNotFound: "Invite not found",
-    inviteExpired: "This invite has expired",
-    inviteRevoked: "This invite was revoked",
-    inviteUsed: "This invite was already used",
-    inviteEmailMismatch: "Sign in with the invited email to join",
-    inviteAcceptFailed: "Couldn't accept the invite",
-    inviteDeclineFailed: "Couldn't decline the invite",
-    userNotFound: "User not found",
-    organizationNotFound: "Organization not found",
-    loadFolders: "Couldn't load folders",
-    upgradeFolders: "Upgrade to Pro to create folders",
-    createFolder: "Couldn't create folder",
-    nameRequired: "Name is required",
-    folderNotFound: "Folder not found",
-    renameFolder: "Couldn't rename folder",
-    folderIdRequired: "folderId is required",
-    deleteFolder: "Couldn't delete folder",
-    moveProject: "Couldn't move project",
-    loadProjects: "Couldn't load projects",
-    ensureOrganization: "Couldn't ensure organization",
-    createProject: "Couldn't create the project",
-    createCarousel: "Couldn't create the carousel",
-    startGeneration: "Couldn't start generation",
-    projectIdRequired: "projectId is required",
-    projectNotFound: "Project not found",
-    loadProject: "Couldn't load",
-    updateAccess: "Couldn't update access",
-    carouselNotPublic: "This carousel is not public",
-    loadCarousel: "Couldn't load the carousel",
-    slideRequired: "At least one slide is required",
-    saveProject: "Couldn't save the project",
-    saveFailed: "Couldn't save",
-    slideCountChanged: "Slide count changed",
-    saveThumbnails: "Couldn't save thumbnails",
-    renameProject: "Couldn't rename the project",
-    duplicateProject: "Couldn't duplicate the project",
-    deleteProject: "Couldn't delete the project",
-    loadTemplates: "Couldn't load templates",
-    templateIdRequired: "templateId is required",
-    templateNotFound: "Template not found",
-    loadTemplate: "Couldn't load the template",
-    signInToPublish: "Sign in to publish",
-    templateName: "Enter a template name",
-    publishTemplate: "Couldn't publish the template",
-    enterName: "Enter a name",
-    renameTemplateForbidden: "You can't rename this template",
-    renameTemplate: "Couldn't rename the template",
-    duplicateTemplate: "Couldn't duplicate the template",
-    editTemplateForbidden: "You can't edit this template",
-    enterCategory: "Enter a category",
-    nothingToUpdate: "Nothing to update",
-    updateTemplate: "Couldn't update the template",
-    deleteTemplateForbidden: "You can't delete this template",
-    deleteTemplate: "Couldn't delete the template",
-    invalidTemplate: "Invalid template",
-    importTemplate: "Couldn't import that template",
-    accountNotFound: "Account not found",
-    loadProfile: "Couldn't load profile",
-    enterNameProfile: "Enter a name",
-    nameTooLong: "Name is too long",
-    currentPassword: "Enter your current password",
-    currentPasswordIncorrect: "Current password is incorrect",
-    enterPassword: "Enter your password",
-    passwordIncorrect: "Password is incorrect",
-    updateProfile: "Couldn't update profile",
-    deleteAccount: "Couldn't delete account",
-    copy: "Couldn't copy",
-    copyLink: "Couldn't copy the link",
-    publicAccess: "Couldn't update public access",
-    publicLink: "Couldn't create a public link",
-    saveFirst: "Save the project first",
-    autoFlow: "Auto Flow failed",
-    addFile: "Couldn't add that file",
-    addAsset: "Couldn't add that asset",
-    loadAssets: "Couldn't load assets",
-    saveAsset: "Couldn't save that asset",
-    deleteAsset: "Couldn't delete that asset",
-    assetNotFound: "Asset not found",
-    assetTooLarge: "Image is too large (max ~2.5 MB)",
-    assetLimit: "Asset library is full (120 max)",
-    addImage: "Couldn't add that image",
-    loadImageCors: "Couldn't load the image (CORS?)",
-    loadBackgroundCors: "Couldn't load image (CORS?)",
-    imageTool: "Couldn't run the image tool",
-    readImage: "Couldn't read that image",
-    chooseImage: "Choose an image file",
-    readAvatar: "Couldn't read that image",
-    exportFailed: "Export failed",
-    exportJson: "Couldn't export the slide JSON",
-    importJson: "Couldn't import that JSON",
-    importFirstSlide: "Couldn't import the first slide",
-    importAllSlides: "Couldn't import the slides",
-    notCanvasJson: "Not a canvas JSON file",
-    httpLink: "Use an http(s) link",
-    invalidLink: "Invalid link",
-    httpUrl: "Need http(s) URL",
-    invalidUrl: "Invalid URL",
-    noActiveSlide: "No active slide",
-    generateCarousel: "Couldn't generate the carousel",
-    emptyCarousel: "AI returned an empty carousel",
-    saveCarousel: "Couldn't save the carousel",
-    openEditor: "Couldn't open the editor",
-    templatePreview: "Couldn't prepare the template preview",
-    renderSlide: "Couldn't render that slide",
-    thumbnails: "Couldn't render thumbnails",
-    pasteImage: "Couldn't paste that image",
-    eraser: "Couldn't finish the eraser stroke",
-    slideOperation: "Slide operation failed",
-    expiry: "Use MM/YY for expiry",
-  },
+import { cache } from "react";
+import { getLocale } from "next-intl/server";
+
+import {
+  defaultLocale,
+  isAppLocale,
+  type AppLocale,
+} from "@/lib/i18n/config";
+import be from "@/messages/be.json";
+import en from "@/messages/en.json";
+import ru from "@/messages/ru.json";
+
+const catalogs = {
+  en,
+  ru,
+  be,
 } as const;
 
-export type AppMessages = typeof messages;
+export type AppMessages = typeof en;
+
+export function catalogFor(locale: AppLocale): AppMessages {
+  return catalogs[locale] ?? catalogs[defaultLocale];
+}
+
+/** Request-scoped catalog for the active UI locale. */
+export const getMessages = cache(async (): Promise<AppMessages> => {
+  try {
+    const locale = await getLocale();
+    if (isAppLocale(locale)) return catalogFor(locale);
+  } catch {
+    // Outside a next-intl request (scripts, rare edge paths).
+  }
+  return catalogFor(defaultLocale);
+});
+
+/** @deprecated Prefer `await getMessages()` — sync default-locale fallback. */
+export const messages: AppMessages = catalogFor(defaultLocale);

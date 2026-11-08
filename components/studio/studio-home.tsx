@@ -45,11 +45,15 @@ import { reportError } from "@/lib/report-error";
 import { messages } from "@/lib/messages";
 import { parseImportedTemplate } from "@/lib/templates/parse";
 import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
+import { trackEvent } from "@/lib/analytics";
+import { STARTER_CAROUSEL_PROMPTS } from "@/lib/studio/onboarding";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type ViewMode = "list" | "grid";
 
 export function StudioHome() {
+  const t = useTranslations("studio");
   const router = useRouter();
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic")?.trim() ?? "";
@@ -176,14 +180,21 @@ export function StudioHome() {
   );
 
   const emptyLabel = q
-    ? "Nothing found."
+    ? t("nothingFound")
     : filter === "texts"
-      ? "No texts yet — generate one above."
+      ? t("noTexts")
       : filter === "palettes"
-        ? "No palettes yet — generate one above."
+        ? t("noPalettes")
         : filter === "carousels"
-          ? "No carousels yet — create one above."
-          : "Nothing recent yet — create something above.";
+          ? t("noCarousels")
+          : t("nothingRecent");
+
+  const activationEmpty =
+    !q &&
+    !loading &&
+    projects.length === 0 &&
+    (filter === "all" || filter === "carousels");
+  const focusMode = !loading && projects.length === 0;
 
   return (
     <StudioContent>
@@ -192,6 +203,7 @@ export function StudioHome() {
           name={signedIn ? helloName : null}
           topic={topic}
           initialType={promptType}
+          focusMode={focusMode}
           onBlank={create.openBlank}
           onTemplates={create.openTemplates}
           onBrandKit={() => router.push("/studio/brand-kit")}
@@ -306,7 +318,7 @@ export function StudioHome() {
 
         <section className="mt-8">
           <StudioSectionHeader
-            title="Recent"
+            title={t("recent")}
             trailing={
               signedIn && filter === "carousels" ? (
                 <StudioViewToggle view={view} onChange={setView} />
@@ -314,7 +326,7 @@ export function StudioHome() {
             }
           />
 
-          {signedIn ? (
+          {signedIn && !focusMode ? (
             <div className="mb-4 flex flex-wrap gap-1.5">
               {RECENT_FILTERS.map((item) => (
                 <button
@@ -346,7 +358,37 @@ export function StudioHome() {
             </div>
           ) : filter === "carousels" ? (
             visibleProjects.length === 0 ? (
-              <p className="py-8 text-[13px] text-muted-foreground">{emptyLabel}</p>
+              activationEmpty ? (
+                <div className="py-6">
+                  <p className="text-[13px] text-muted-foreground">
+                    {t("tryStarter")}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {STARTER_CAROUSEL_PROMPTS.map((starter) => (
+                      <button
+                        key={starter.id}
+                        type="button"
+                        disabled={create.generating}
+                        onClick={() => {
+                          trackEvent("studio_starter_chip", {
+                            id: starter.id,
+                          });
+                          void create.generateCarousel({
+                            topic: starter.topic,
+                          });
+                        }}
+                        className="inline-flex h-9 items-center rounded-full bg-muted/50 px-3.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+                      >
+                        {starter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="py-8 text-[13px] text-muted-foreground">
+                  {emptyLabel}
+                </p>
+              )
             ) : view === "list" ? (
               <div className="overflow-x-auto">
                 <StudioProjectList
@@ -395,7 +437,33 @@ export function StudioHome() {
               </StudioBoardGrid>
             )
           ) : activity.length === 0 ? (
-            <p className="py-8 text-[13px] text-muted-foreground">{emptyLabel}</p>
+            activationEmpty ? (
+              <div className="py-6">
+                <p className="text-[13px] text-muted-foreground">
+                  {t("tryStarter")}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {STARTER_CAROUSEL_PROMPTS.map((starter) => (
+                    <button
+                      key={starter.id}
+                      type="button"
+                      disabled={create.generating}
+                      onClick={() => {
+                        trackEvent("studio_starter_chip", { id: starter.id });
+                        void create.generateCarousel({ topic: starter.topic });
+                      }}
+                      className="inline-flex h-9 items-center rounded-full bg-muted/50 px-3.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+                    >
+                      {starter.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="py-8 text-[13px] text-muted-foreground">
+                {emptyLabel}
+              </p>
+            )
           ) : (
             <div className="overflow-x-auto">
               <StudioRecentActivityList

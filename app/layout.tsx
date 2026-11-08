@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import { getServerSession } from "next-auth";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { htmlLang, isAppLocale, ogLocale, type AppLocale } from "@/lib/i18n/config";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -22,54 +25,52 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
-export const metadata: Metadata = {
-  applicationName: "Deckva",
-  title: {
-    default: "Deckva — студия каруселей",
-    template: "%s · Deckva",
-  },
-  description:
-    "Deckva — студия каруселей для соцсетей. Соберите слайды на холсте, отредактируйте и экспортируйте в PNG или ZIP.",
-  keywords: [
-    "Deckva",
-    "карусель",
-    "карусели",
-    "Instagram",
-    "студия",
-    "редактор слайдов",
-    "редактор каруселей",
-    "соцсети",
-    "carousel",
-    "carousel maker",
-  ],
-  authors: [{ name: "Deckva", url: "https://deckva.by" }],
-  creator: "Deckva",
-  publisher: "Deckva",
-  icons: {
-    icon: "/browser.svg",
-  },
-  openGraph: {
-    type: "website",
-    locale: "ru_BY",
-    siteName: "Deckva",
-    title: "Deckva — студия каруселей",
-    description:
-      "Шаблоны, холст и экспорт. Карусели для Instagram и других соцсетей.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Deckva — студия каруселей",
-    description:
-      "Шаблоны, холст и экспорт. Карусели для Instagram и других соцсетей.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  const localeRaw = await getLocale();
+  const locale: AppLocale = isAppLocale(localeRaw) ? localeRaw : "ru";
+
+  return {
+    applicationName: "Deckva",
+    title: {
+      default: t("titleDefault"),
+      template: t("titleTemplate"),
+    },
+    description: t("description"),
+    keywords: t("keywords")
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean),
+    authors: [{ name: "Deckva", url: "https://deckva.by" }],
+    creator: "Deckva",
+    publisher: "Deckva",
+    icons: {
+      icon: "/browser.svg",
+    },
+    openGraph: {
+      type: "website",
+      locale: ogLocale[locale],
+      siteName: "Deckva",
+      title: t("ogTitle"),
+      description: t("ogDescription"),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("ogTitle"),
+      description: t("ogDescription"),
+    },
+  };
+}
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const session = await getServerSession(authOptions);
+  const localeRaw = await getLocale();
+  const locale: AppLocale = isAppLocale(localeRaw) ? localeRaw : "ru";
+  const messages = await getMessages();
 
   return (
     <html
-      lang="ru"
+      lang={htmlLang[locale]}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} h-full antialiased`}
     >
@@ -77,7 +78,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <span className={`${montserrat.className} sr-only`} aria-hidden>
           .
         </span>
-        <Providers session={session}>{children}</Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers session={session}>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

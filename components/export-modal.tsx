@@ -22,6 +22,7 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
 import { useSession } from "next-auth/react";
 import { setProjectPublic } from "@/actions/projects";
+import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
@@ -270,6 +271,11 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
     } else {
       downloadSlidesSeparately(rendered, title, format);
     }
+    trackEvent("carousel_exported", {
+      pack,
+      format,
+      slides: rendered.length,
+    });
     setDone(true);
   };
 

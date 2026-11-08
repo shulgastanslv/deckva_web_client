@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { Check, ChevronRight, Menu, X } from "lucide-react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
@@ -24,7 +25,9 @@ import {
   landTitle,
   landSub,
 } from "@/components/landing/landing-shell";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { trackEvent } from "@/lib/analytics";
 import { SOCIAL_LINKS } from "@/lib/social";
 import {
   FREE_CAROUSEL_LIMIT,
@@ -32,48 +35,11 @@ import {
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
 import { PromptSection } from "./prompt-section";
-const LEGAL = {
-  status: "Professional income tax payer",
+
+const LEGAL_STATIC = {
   fullName: "Шульга Станислав",
   email: "hello@deckva.by",
-  country: "Republic of Belarus",
 } as const;
-
-const NAV = [
-  { name: "See it", link: "#studio" },
-  { name: "The post", link: "#example" },
-  { name: "Examples", link: "#examples" },
-  { name: "Price", link: "#pricing" },
-  { name: "Questions", link: "#faq" },
-];
-
-const MENU_GROUPS = [
-  {
-    title: "Product",
-    links: [
-      { name: "See it", href: "#studio" },
-      { name: "The post", href: "#example" },
-      { name: "Examples", href: "#examples" },
-    ],
-  },
-  {
-    title: "Make",
-    links: [
-      { name: "Starting lines", href: "#start" },
-      { name: "The example", href: "#example" },
-      { name: "Shapes", href: "#make" },
-      { name: "Ratios", href: "#ratios" },
-      { name: "Figma", href: "#figma" },
-      { name: "The picture", href: "#picture" },
-      { name: "AI generation", href: "#generate" },
-    ],
-  },
-] as const;
-
-const MENU_LINKS = [
-  { name: "Price", href: "#pricing" },
-  { name: "Questions", href: "#faq" },
-] as const;
 
 const sectionTitle =
   "max-w-3xl text-4xl font-medium tracking-tight text-land-ink sm:text-5xl sm:leading-[1.08]";
@@ -213,7 +179,12 @@ const FAQ = [
   {
     value: "where",
     q: "Where do I use it?",
-    a: "In the browser, on a computer or a phone.",
+    a: "In the browser, on a computer. The studio canvas is desktop-only.",
+  },
+  {
+    value: "support",
+    q: "Where can I ask for help?",
+    a: "Write in Telegram — the support link is on the landing and in the footer.",
   },
   {
     value: "figma-in",
@@ -610,6 +581,8 @@ export function ProjectContainerIllustration({ className = "" }: { className?: s
 }
 
 export function LandingPage() {
+  const t = useTranslations("landing");
+  const tc = useTranslations("common");
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -626,6 +599,91 @@ export function LandingPage() {
       transition: { duration: reduceMotion ? 0 : 0.75, ease: [0.22, 1, 0.36, 1] },
     },
   };
+
+  const legal = useMemo(
+    () => ({
+      status: t("legalStatus"),
+      country: t("legalCountry"),
+      fullName: LEGAL_STATIC.fullName,
+      email: LEGAL_STATIC.email,
+    }),
+    [t],
+  );
+
+  const NAV = useMemo(
+    () => [
+      { name: t("nav.seeIt"), link: "#studio" },
+      { name: t("nav.thePost"), link: "#example" },
+      { name: t("nav.examples"), link: "#examples" },
+      { name: t("nav.price"), link: "#pricing" },
+      { name: t("nav.questions"), link: "#faq" },
+    ],
+    [t],
+  );
+
+  const MENU_GROUPS = useMemo(
+    () => [
+      {
+        title: t("menu.product"),
+        links: [
+          { name: t("nav.seeIt"), href: "#studio" },
+          { name: t("nav.thePost"), href: "#example" },
+          { name: t("nav.examples"), href: "#examples" },
+        ],
+      },
+      {
+        title: t("menu.make"),
+        links: [
+          { name: t("menu.startingLines"), href: "#start" },
+          { name: t("menu.theExample"), href: "#example" },
+          { name: t("menu.shapes"), href: "#make" },
+          { name: t("menu.ratios"), href: "#ratios" },
+          { name: t("menu.figma"), href: "#figma" },
+          { name: t("menu.thePicture"), href: "#picture" },
+          { name: t("menu.aiGeneration"), href: "#generate" },
+        ],
+      },
+    ],
+    [t],
+  );
+
+  const MENU_LINKS = useMemo(
+    () => [
+      { name: t("nav.price"), href: "#pricing" },
+      { name: t("nav.questions"), href: "#faq" },
+    ],
+    [t],
+  );
+
+  const footerColumns = useMemo(
+    () => [
+      {
+        title: t("menu.product"),
+        links: [
+          { name: t("ctaStudio"), href: "/studio" },
+          { name: t("nav.seeIt"), href: "#studio" },
+          { name: t("nav.thePost"), href: "#example" },
+          { name: t("nav.examples"), href: "#examples" },
+          { name: t("nav.questions"), href: "#faq" },
+        ],
+      },
+      {
+        title: t("menu.make"),
+        links: [
+          { name: t("menu.startingLines"), href: "#start" },
+          { name: t("menu.theExample"), href: "#post" },
+          { name: t("menu.shapes"), href: "#make" },
+          { name: t("menu.ratios"), href: "#ratios" },
+          { name: t("menu.figma"), href: "#figma" },
+          { name: t("menu.thePicture"), href: "#picture" },
+          { name: t("menu.aiGeneration"), href: "#generate" },
+          { name: t("nav.price"), href: "#pricing" },
+        ],
+      },
+      FOOTER_COLUMNS[2],
+    ],
+    [t],
+  );
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -650,7 +708,23 @@ export function LandingPage() {
     <div className="relative bg-land-mist">
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
-      <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
+      <a
+        href={SOCIAL_LINKS.telegram}
+        target="_blank"
+        rel="noreferrer"
+        onClick={() => trackEvent("landing_telegram_click", { place: "banner" })}
+        className="fixed inset-x-0 top-0 z-[80] hidden h-9 items-center justify-center gap-2 bg-[#14151c] px-3 text-[12px] font-medium text-white md:flex dark:bg-white dark:text-[#14151c]"
+      >
+        <span>{t("desktopBanner")}</span>
+        <span aria-hidden className="opacity-40">
+          ·
+        </span>
+        <span className="underline-offset-2 hover:underline">
+          {t("telegramSupport")}
+        </span>
+      </a>
+
+      <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5 md:top-9 md:pt-3">
         <div className="mx-auto flex max-w-[1200px] items-center gap-2 rounded-full border-none bg-white/70 px-2 py-1.5 text-land-ink backdrop-blur-xl dark:border-white/10 dark:bg-[#14151c]/70 sm:gap-3 sm:px-3">
           <div className="flex min-w-0 items-center gap-1">
             <Button
@@ -675,13 +749,17 @@ export function LandingPage() {
           </div>
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
+            <LocaleSwitcher className="h-10 w-10 text-land-ink hover:bg-land-ink/10 hover:text-land-ink" />
             <ThemeSwitcher className="h-10 w-10 text-land-ink hover:bg-land-ink/10 hover:text-land-ink" />
             {signedIn ? (
               <a
                 href="/studio"
                 className="hidden px-2 text-sm font-medium text-land-ink/80 hover:text-land-ink sm:inline"
+                onClick={() =>
+                  trackEvent("landing_cta_click", { place: "nav", signedIn: true })
+                }
               >
-                Projects
+                {tc("openStudio")}
               </a>
             ) : (
               <button
@@ -689,14 +767,21 @@ export function LandingPage() {
                 className="hidden px-2 text-sm font-medium text-land-ink/80 hover:text-land-ink sm:inline"
                 onClick={() => setAuthOpen(true)}
               >
-                Sign in
+                {t("ctaSignIn")}
               </button>
             )}
             <Button
               asChild
               className="h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90"
             >
-              <a href="/studio">Open studio</a>
+              <a
+                href="/studio"
+                onClick={() =>
+                  trackEvent("landing_cta_click", { place: "nav_primary" })
+                }
+              >
+                {t("ctaStudio")}
+              </a>
             </Button>
           </div>
         </div>
@@ -778,7 +863,7 @@ export function LandingPage() {
                 className="mt-6 block text-center text-base font-medium"
                 onClick={() => setMenuOpen(false)}
               >
-                Projects
+                {tc("openStudio")}
               </a>
             ) : (
               <button
@@ -789,21 +874,21 @@ export function LandingPage() {
                   setAuthOpen(true);
                 }}
               >
-                Sign in
+                {t("ctaSignIn")}
               </button>
             )}
             <a
               href="/studio"
               className="mt-4 flex h-12 items-center justify-center rounded-2xl border border-black/15 text-sm font-semibold dark:border-white/20"
             >
-              Open studio
+              {t("ctaStudio")}
             </a>
           </div>
         </div>
       ) : null}
 
       <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
+        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(7.25rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(8rem+env(safe-area-inset-top))] sm:pb-20 md:pt-[calc(9.25rem+env(safe-area-inset-top))] lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
           <motion.div
             className="flex w-full max-w-xl flex-col items-start text-left lg:w-[28rem] lg:shrink-0"
             initial={reduceMotion ? false : "hidden"}
@@ -829,13 +914,20 @@ export function LandingPage() {
               Name what it is about. The slides arrive in order, ready to edit and download.
             </motion.p>
             <motion.div
-              className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3"  
+              className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3"
             >
               <Button
                 asChild
                 className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
               >
-                <a href="/studio">Open studio</a>
+                <a
+                  href="/studio"
+                  onClick={() =>
+                    trackEvent("landing_cta_click", { place: "hero" })
+                  }
+                >
+                  {t("ctaStudio")}
+                </a>
               </Button>
               <a
                 href="#studio"
@@ -844,6 +936,11 @@ export function LandingPage() {
                 See it
               </a>
             </motion.div>
+            <p className="mt-4 text-sm text-white/65">
+              {t("freeLine", { count: FREE_CAROUSEL_LIMIT })}
+              {" · "}
+              {t("desktopBanner")}
+            </p>
           </motion.div>
           <motion.div
             className="w-full max-w-[28rem] sm:max-w-[36rem]"
@@ -1153,7 +1250,7 @@ export function LandingPage() {
               href="/studio"
               className="mt-8 inline-flex h-11 items-center justify-center rounded-full bg-land-mist px-5 text-sm font-semibold text-land-ink"
             >
-              Open studio
+              {t("ctaStudio")}
             </a>
           </li>
         </ul>
@@ -1242,7 +1339,7 @@ export function LandingPage() {
       <footer className="bg-[#0e0f12] text-white m-10 rounded-2xl">
         <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-            {FOOTER_COLUMNS.map((column) => (
+            {footerColumns.map((column) => (
               <div key={column.title}>
                 <p className="text-sm font-semibold">{column.title}</p>
                 <ul className="mt-4 space-y-3">
@@ -1265,15 +1362,15 @@ export function LandingPage() {
             <div>
               <p className="text-sm font-semibold">Details</p>
               <ul className="mt-4 space-y-3 text-sm text-white/65">
-                <li>{LEGAL.status}</li>
-                <li>{LEGAL.country}</li>
-                <li className="text-white/90">{LEGAL.fullName}</li>
+                <li>{legal.status}</li>
+                <li>{legal.country}</li>
+                <li className="text-white/90">{legal.fullName}</li>
                 <li>
-                  <a
-                    href={`mailto:${LEGAL.email}`}
+                    <a
+                    href={`mailto:${legal.email}`}
                     className="hover:text-white"
                   >
-                    {LEGAL.email}
+                    {legal.email}
                   </a>
                 </li>
               </ul>
@@ -1300,8 +1397,8 @@ export function LandingPage() {
               <Logo width={22} height={22} className="text-white" />
               <span>Deckva © {new Date().getFullYear()}</span>
             </div>
-            <a href={`mailto:${LEGAL.email}`} className="hover:text-white">
-              {LEGAL.email}
+            <a href={`mailto:${legal.email}`} className="hover:text-white">
+              {legal.email}
             </a>
           </div>
         </div>
