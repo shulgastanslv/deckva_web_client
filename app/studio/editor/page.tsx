@@ -18,7 +18,6 @@ import { PreviewModal } from "@/components/canvas/preview-modal";
 import type { NavId } from "@/components/canvas/left-sidebar";
 import { EditorPhoneDock } from "@/components/canvas/editor-phone-dock";
 import { StudioIntentBootstrap } from "@/components/studio/studio-intent-bootstrap";
-import { ZoomControls } from "@/components/canvas/zoom-controls";
 import { peekStudioIntent } from "@/lib/studio/pending-intent";
 
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -95,7 +94,7 @@ export default function CarouselEditor() {
   const [activeNav, setActiveNav] = useState<NavId>("elements");
   const [showDotGrid, setShowDotGrid] = useState(true);
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
-  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
+  const [isRightCollapsed, setIsRightCollapsed] = useState(true);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewSlideId, setPreviewSlideId] = useState<number>(0);
   const [focusMode, setFocusMode] = useState(false);
@@ -217,12 +216,20 @@ export default function CarouselEditor() {
               : {}
           }
         >
-          {!focusMode && canvasChrome && (
-            <CanvasToolbar onHideChrome={() => setCanvasChrome(false)} />
-          )}
-
           <div className="relative flex min-h-0 flex-1">
-            <CanvasView />
+            <CanvasView
+              pageChrome={
+                !focusMode && canvasChrome ? (
+                  <CanvasToolbar
+                    onHideChrome={() => setCanvasChrome(false)}
+                    onFocus={() => {
+                      setPhoneSheet(null);
+                      setFocusMode(true);
+                    }}
+                  />
+                ) : null
+              }
+            />
             {focusMode && <FocusSlideNav />}
             {focusMode && <SelectionToolbar />}
             {focusMode && (
@@ -242,21 +249,21 @@ export default function CarouselEditor() {
               />
             ) : null}
           </div>
-          {!focusMode && canvasChrome && <SlideNavigator />}
         </main>
 
         {!focusMode && (
           <div
             className={cn(
               sheetFrame,
+              "md:overflow-hidden",
               phoneSheet === "style" ? "max-md:flex" : "max-md:hidden",
             )}
           >
-            <div className="relative h-full min-h-0 w-full">
+            <div className="relative h-full min-h-0 max-md:w-full md:w-auto">
               <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-[13px] text-muted-foreground md:hidden">
                 Select an object on the slide to change its style.
               </p>
-              <div className="relative z-10 flex h-full min-h-0 w-full">
+              <div className="relative z-10 flex h-full min-h-0 max-md:w-full md:w-auto">
                 <RightSidebar
                   isRightCollapsed={isRightCollapsed}
                   setIsRightCollapsed={setIsRightCollapsed}

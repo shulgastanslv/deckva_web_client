@@ -93,7 +93,7 @@ export function SidebarElements() {
   } = useElementLibrary();
 
   const { selectedObject } = useSelectedObject();
-  const [category, setCategory] = useState<Category>("frames");
+  const [category, setCategory] = useState<Category>("photos");
   const [search, setSearch] = useState("");
 
   const codeGroup =

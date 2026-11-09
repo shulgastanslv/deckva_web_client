@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const PADDING = 48;
+/** Canva-style page bar height reserved above the slide stage. */
+export const PAGE_BAR_H = 44;
 /** Re-rasterize once the stretched bitmap would look soft. */
 const ZOOM_STRETCH = 1.35;
 const ZOOM_SETTLE_MS = 90;
@@ -38,21 +40,24 @@ function stageFrame(
   nativeW: number,
   nativeH: number,
   zoomPercent: number,
+  pageBarH = 0,
 ): StageFrame {
   const availW = Math.max(viewportW - PADDING * 2, 1);
-  const availH = Math.max(viewportH - PADDING * 2, 1);
+  const availH = Math.max(viewportH - PADDING * 2 - pageBarH, 1);
   const fit = Math.min(availW / nativeW, availH / nativeH);
   const scale = Math.max(0.05, fit * (zoomPercent / 100));
   const width = Math.max(1, Math.round(nativeW * scale));
   const height = Math.max(1, Math.round(nativeH * scale));
+  const stackH = height + pageBarH;
   const contentWidth = Math.max(viewportW, width + PADDING * 2);
-  const contentHeight = Math.max(viewportH, height + PADDING * 2);
+  const contentHeight = Math.max(viewportH, stackH + PADDING * 2);
+  const stackTop = (contentHeight - stackH) / 2;
   return {
     scale,
     width,
     height,
     left: (contentWidth - width) / 2,
-    top: (contentHeight - height) / 2,
+    top: stackTop + pageBarH,
     contentWidth,
     contentHeight,
     nativeW,
@@ -60,7 +65,12 @@ function stageFrame(
   };
 }
 
-export function CanvasView() {
+export function CanvasView({
+  pageChrome = null,
+}: {
+  /** Canva-style controls docked to the top edge of the slide stage. */
+  pageChrome?: React.ReactNode;
+} = {}) {
   const canvasElementRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -87,6 +97,8 @@ export function CanvasView() {
   const prevFrameRef = useRef<StageFrame | null>(null);
   const anchorRef = useRef<ZoomAnchor | null>(null);
 
+  const pageBarH = pageChrome ? PAGE_BAR_H : 0;
+
   const frame = useMemo(() => {
     if (viewport.width <= 0 || viewport.height <= 0) return null;
     return stageFrame(
@@ -95,8 +107,9 @@ export function CanvasView() {
       canvasDimensions.width,
       canvasDimensions.height,
       zoom,
+      pageBarH,
     );
-  }, [viewport, canvasDimensions, zoom]);
+  }, [viewport, canvasDimensions, zoom, pageBarH]);
   const frameRef = useRef(frame);
   frameRef.current = frame;
 
@@ -381,6 +394,19 @@ export function CanvasView() {
             : { width: "100%", height: "100%" }
         }
       >
+        {pageChrome && frame ? (
+          <div
+            className="pointer-events-none absolute z-10"
+            style={{
+              left: frame.left,
+              top: frame.top - PAGE_BAR_H,
+              width: frame.width,
+              height: PAGE_BAR_H,
+            }}
+          >
+            <div className="pointer-events-auto h-full w-full">{pageChrome}</div>
+          </div>
+        ) : null}
         <div
           ref={stageRef}
           className="absolute bg-white shadow-2xl ring-1 ring-border/20 touch-none"

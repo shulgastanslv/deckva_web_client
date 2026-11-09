@@ -179,13 +179,10 @@ export class EffectsManager {
     this.canvas.requestRenderAll();
   }
 
+  /** Active Fabric image only — never falls back to slide background. */
   resolveImageTarget(): Image | null {
     const active = this.canvas.getActiveObject();
-    if (active instanceof Image) return active;
-    if (this.canvas.backgroundImage instanceof Image) {
-      return this.canvas.backgroundImage;
-    }
-    return null;
+    return active instanceof Image ? active : null;
   }
 
   public setImageAdjustments(adj: ImageAdjustments): boolean {

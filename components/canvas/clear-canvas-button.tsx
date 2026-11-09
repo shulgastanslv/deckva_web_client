@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BrushCleaning, BrushIcon, Trash2 } from "lucide-react";
+import { BrushCleaning } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,13 +41,13 @@ export function ClearCanvasButton() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+          className="size-9 rounded-full border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
           title="Clear all slides"
         >
-          <BrushCleaning className="size-3.5" />
+          <BrushCleaning className="size-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="rounded-3xl">
         <DialogHeader>
           <DialogTitle>Delete every slide?</DialogTitle>
           <DialogDescription>
@@ -55,10 +55,18 @@ export function ClearCanvasButton() {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" className="rounded-full" onClick={() => setOpen(false)}>
+          <Button
+            variant="secondary"
+            className="h-9 rounded-full border-none bg-muted/40 shadow-none hover:bg-muted/60"
+            onClick={() => setOpen(false)}
+          >
             Cancel
           </Button>
-          <Button variant="destructive" className="rounded-full" onClick={handleClear}>
+          <Button
+            variant="destructive"
+            className="h-9 rounded-full"
+            onClick={handleClear}
+          >
             Delete slides
           </Button>
         </DialogFooter>

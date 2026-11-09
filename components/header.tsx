@@ -3,13 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  ChevronRight,
   ArrowUp,
   Share,
   Globe,
   Undo2,
   Redo2,
-  CloudOff,
   Focus,
   Play,
 } from "lucide-react";
@@ -22,16 +20,21 @@ import { StudioUserNav } from "@/components/studio/studio-user-nav";
 import { CommandsKbd } from "@/components/commands_kbd";
 import { ShareModal } from "./share-modal";
 import { ExportModal } from "./export-modal";
+import { ProjectFileMenu } from "@/components/canvas/project-file-menu";
+import { RatioSelect } from "@/components/canvas/ratio-select";
+import { SaveStatusMenu } from "@/components/canvas/save-status-menu";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
+import { fitCanvasJSON } from "@/lib/canvas/fit-frame";
+import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const iconBtn =
-  "size-9 rounded-full text-muted-foreground hover:bg-muted/60 hover:text-foreground";
+const centerBtn =
+  "h-9 gap-1.5 rounded-full border-none px-3 text-[13px]";
 
-const labelBtn =
-  "h-9 gap-2 rounded-full px-3 text-[13px] font-medium";
+const sideBtn =
+  "h-9 gap-1.5 rounded-full border-none px-3.5 text-[13px] font-medium shadow-none";
 
 interface HeaderProps {
   onPreview?: () => void;
@@ -40,7 +43,7 @@ interface HeaderProps {
   onReview?: () => void;
 }
 
-export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
+export function Header({ onPreview, onFocus }: HeaderProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
@@ -53,13 +56,32 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
   const manager = useCanvasManager();
   const slides = useCanvasStore((s) => s.slides);
   const projectTitle = useCanvasStore((s) => s.projectTitle);
-  const { rename, isDirty } = useProject();
+  const currentRatio = useCanvasStore((s) => s.currentRatio);
+  const setCurrentRatio = useCanvasStore((s) => s.setCurrentRatio);
+  const { rename } = useProject();
   const [name, setName] = useState(projectTitle);
   const signedIn = status === "authenticated";
 
   useEffect(() => {
     setName(projectTitle);
   }, [projectTitle]);
+
+  const handleRatioChange = (ratio: RatioKey) => {
+    const to = CANVAS_RATIOS[ratio];
+    if (!to) return;
+    const state = useCanvasStore.getState();
+    const from = state.canvasDimensions;
+    if (state.currentRatio === ratio) return;
+
+    if (manager && (from.width !== to.width || from.height !== to.height)) {
+      for (const slide of state.slides) {
+        if (slide.id === state.currentSlideId) continue;
+        state.updateSlideJSONById(slide.id, fitCanvasJSON(slide.canvasJSON, from, to));
+      }
+      manager.fitToFrame(from, to);
+    }
+    setCurrentRatio(ratio);
+  };
 
   useEffect(() => {
     const onAuthLink = (event: Event) => {
@@ -74,24 +96,6 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
     return () => window.removeEventListener("core:auth-link", onAuthLink);
   }, []);
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-  };
-
-  const handleNameBlur = () => {
-    const next = name.trim() || "Untitled Carousel";
-    setName(next);
-    if (next !== projectTitle) void rename(next);
-  };
-
-  const handleUndo = () => {
-    void manager?.undo();
-  };
-
-  const handleRedo = () => {
-    void manager?.redo();
-  };
-
   const openPublish = () => {
     if (status !== "authenticated") {
       setIsAuthModalOpen(true);
@@ -100,143 +104,138 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
     setIsPublishOpen(true);
   };
 
+  const commitName = () => {
+    const next = name.trim() || "Untitled Carousel";
+    setName(next);
+    if (next !== projectTitle) void rename(next);
+  };
+
   const slideCount = slides.length || 1;
 
   return (
     <>
-      <header className="z-20 grid h-16 w-full shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 bg-background/95 px-4 text-sm select-none backdrop-blur border-b border-border/50">        {/* Project */}
+      <header className="z-20 grid h-16 w-full shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-b border-border/50 bg-background px-4 select-none">
+        {/* Project */}
         <div className="flex min-w-0 items-center gap-2">
           <Logo width={32} height={32} href="/studio" />
-          <ChevronRight className="hidden size-4 shrink-0 text-muted-foreground/40 sm:block" />
-          <div className="flex min-w-0 items-center gap-1.5">
-            <input
-              type="text"
-              value={name}
-              onChange={handleNameChange}
-              onBlur={handleNameBlur}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-              }}
-              className="h-9 min-w-0 flex-1 truncate rounded-full border border-transparent bg-muted/50 px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/70 focus:border-border/50 focus:bg-background focus:outline-none sm:max-w-[15rem] sm:flex-none"
-              placeholder="Project name..."
-              aria-label="Project name"
-            />
-            {isDirty ? (
-              <span
-                className="hidden items-center gap-1 rounded-full px-2 text-[12px] text-muted-foreground sm:inline-flex"
-                title="Unsaved changes"
-              >
-                <CloudOff className="size-3.5" />
-                Unsaved
-              </span>
-            ) : null}
+
+
+
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
+            className="h-10 min-w-0 max-w-[11rem] flex-1 truncate rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none transition-colors hover:bg-muted/60 focus:bg-muted/50 sm:max-w-[15rem]"
+            placeholder="Project name"
+            aria-label="Project name"
+          />
+
+          <ProjectFileMenu
+            onExport={() => setShowExport(true)}
+            onShare={() => setShowShare(true)}
+            onHelp={() => setIsHelpOpen(true)}
+          />
+          <RatioSelect
+            label="Resize"
+            currentRatio={currentRatio}
+            onRatioChange={(ratio) => handleRatioChange(ratio as RatioKey)}
+          />
+          <SaveStatusMenu />
+        </div>
+
+        {/* Edit tools — center */}
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={centerBtn}
+            onClick={() => void manager?.undo()}
+            title="Undo"
+          >
+            <Undo2 className="size-4" />
+            <span className="hidden lg:inline">Undo</span>
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            className={centerBtn}
+            onClick={onPreview}
+            title="Preview carousel"
+          >
+            <Play className="size-4" />
+            <span className="hidden lg:inline">Preview</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={centerBtn}
+            onClick={() => void manager?.redo()}
+            title="Redo"
+          >
+            <Redo2 className="size-4" />
+            <span className="hidden lg:inline">Redo</span>
+          </Button>
+
+          <div className="hidden xl:block">
+            <CommandsKbd />
           </div>
         </div>
 
-        {/* Edit + view */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-full bg-muted/40 p-0.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={iconBtn}
-              onClick={handleUndo}
-              title="Undo"
-            >
-              <Undo2 className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={iconBtn}
-              onClick={handleRedo}
-              title="Redo"
-            >
-              <Redo2 className="size-4" />
-            </Button>
-            <div className="hidden md:block">
-              <CommandsKbd />
-            </div>
-          </div>
-
-          <div className="flex items-center rounded-full bg-muted/40 p-0.5">
-            <Button
-              variant="default"
-              size="sm"
-              onClick={onPreview}
-              className={labelBtn}
-              title="Preview carousel"
-            >
-              <Play className="size-4" />
-              <span className="hidden sm:inline">Preview</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onFocus}
-              className={cn(labelBtn, "text-muted-foreground hover:bg-background hover:text-foreground")}
-              title="Focus mode"
-            >
-              <Focus className="size-4" />
-              <span className="hidden sm:inline">Focus</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* Share + account */}
+        {/* Share / export */}
         <div className="flex min-w-0 items-center justify-end gap-2">
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowShare(true)}
-              className={cn(labelBtn, "text-muted-foreground hover:bg-muted/60 hover:text-foreground")}
-            >
-              <Share className="size-4" />
-              <span className="hidden lg:inline">Share</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={openPublish}
-              className={cn(labelBtn, "hidden text-muted-foreground hover:bg-muted/60 hover:text-foreground sm:inline-flex")}
-              title="Publish or republish to community"
-            >
-              <Globe className="size-4" />
-              <span className="hidden lg:inline">Community</span>
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setShowExport(true)}
-              className={cn(labelBtn, "bg-foreground text-background hover:bg-foreground/90")}
-            >
-              <ArrowUp className="size-4" />
-              Export
-              <span className="hidden font-normal opacity-60 sm:inline">
-                · {slideCount} PNG
-              </span>
-            </Button>
-          </div>
-
-          <div className="mx-0.5 hidden h-5 w-px bg-border/60 sm:block" />
-
-          <div className="flex items-center gap-2">
-            {signedIn ? (
-              <StudioUserNav onCommunity={openPublish} />
-            ) : (
-              <Button
-                variant="secondary"
-                size="sm"
-                className={cn(
-                  labelBtn,
-                  "border-none bg-muted/40 shadow-none hover:bg-muted/60",
-                )}
-                onClick={() => setIsAuthModalOpen(true)}
-              >
-                Sign in
-              </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowShare(true)}
+            className={cn(
+              sideBtn,
+              "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
             )}
-          </div>
+          >
+            <Share className="size-4" />
+            <span className="hidden sm:inline">Share</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={openPublish}
+            className={cn(
+              sideBtn,
+              "hidden text-muted-foreground hover:bg-muted/60 hover:text-foreground md:inline-flex",
+            )}
+            title="Publish to community"
+          >
+            <Globe className="size-4" />
+            <span className="hidden lg:inline">Community</span>
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setShowExport(true)}
+            className={cn(
+              sideBtn,
+              "bg-foreground text-background hover:bg-foreground/90",
+            )}
+          >
+            <ArrowUp className="size-4" />
+            Export / {slideCount} PNGs / ZIP
+          </Button>
+
+          {signedIn ? (
+            <StudioUserNav onCommunity={openPublish} />
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              className={cn(sideBtn, "bg-muted/40 hover:bg-muted/60")}
+              onClick={() => setIsAuthModalOpen(true)}
+            >
+              Sign in
+            </Button>
+          )}
         </div>
       </header>
 

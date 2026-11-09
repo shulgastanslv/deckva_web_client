@@ -44,7 +44,7 @@ export const StudioAvatar = forwardRef<HTMLButtonElement, StudioAvatarProps>(
     );
 
     const shellClass = cn(
-      "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2f5bff] font-semibold text-white",
+      "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2f5bff] font-semibold text-white border-none",
       className,
     );
 

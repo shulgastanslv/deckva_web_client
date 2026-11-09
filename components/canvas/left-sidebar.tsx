@@ -176,7 +176,7 @@ export function LeftSidebar({
           {activeNav === "background" && <SidebarBackground />}
           {activeNav === "tools" && <SidebarTools />}
         </ScrollArea>
-        <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 border-t border-border/40 px-3.5 py-2.5 text-[13px] text-muted-foreground">
+        <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 px-3.5 py-2.5 text-[13px] text-muted-foreground">
           <button
             type="button"
             onClick={() => setLegal("terms")}

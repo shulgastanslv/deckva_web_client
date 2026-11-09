@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Check, Copy, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Plus } from "lucide-react";
 import { useSlides } from "@/hooks/use-slides";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { captureCanvasThumbnail } from "@/lib/canvas/thumbnail";
@@ -24,14 +24,10 @@ export function SlideNavigator() {
     currentIndex,
     canGoPrev,
     canGoNext,
-    canRemove,
     switchTo,
     next,
     prev,
     add,
-    duplicate,
-    remove,
-    move,
     reorder,
   } = useSlides();
 
@@ -242,52 +238,6 @@ export function SlideNavigator() {
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
-
-      <div className="flex shrink-0 items-center gap-0.5 border-l border-border/50 pl-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 rounded-lg px-2 text-[13px] text-muted-foreground"
-          onClick={() => move("left")}
-          disabled={!canGoPrev}
-          title="Move left"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Left</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 rounded-lg px-2 text-[13px] text-muted-foreground"
-          onClick={() => move("right")}
-          disabled={!canGoNext}
-          title="Move right"
-        >
-          <span className="hidden sm:inline">Right</span>
-          <ChevronRight className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 rounded-lg px-2 text-[13px] text-muted-foreground"
-          onClick={() => duplicate()}
-          title="Duplicate slide"
-        >
-          <Copy className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Duplicate</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 rounded-lg px-2 text-[13px] text-muted-foreground hover:text-destructive"
-          onClick={() => remove(currentSlideId)}
-          disabled={!canRemove}
-          title="Delete slide"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Delete</span>
-        </Button>
-      </div>
     </footer>
   );
 }

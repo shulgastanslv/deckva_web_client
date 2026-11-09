@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, ChevronDown, Crop, X } from "lucide-react";
+import { Search, Crop, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -14,9 +14,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface CustomRatioSelectProps {
   currentRatio: string;
   onRatioChange: (ratio: string) => void;
+  /** Trigger label — pass the live ratio (e.g. "4:5") for Deckva chrome. */
+  label?: string;
 }
 
-export function RatioSelect({ currentRatio, onRatioChange }: CustomRatioSelectProps) {
+export function RatioSelect({
+  currentRatio,
+  onRatioChange,
+  label,
+}: CustomRatioSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
@@ -28,28 +34,26 @@ export function RatioSelect({ currentRatio, onRatioChange }: CustomRatioSelectPr
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button 
-          variant="secondary" 
-          className="flex items-center gap-2 rounded-full px-5 h-10"
+        <Button
+          variant="ghost"
+          title="Canvas size"
+          className="h-10 rounded-full border-none bg-transparent px-3.5 text-[13px] font-medium tabular-nums text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 data-[state=open]:text-foreground"
         >
-          <Crop className="w-4 h-4" />
-          <span className="w-8 text-center">{currentRatio}</span>
-          <ChevronDown className="w-4 h-4 opacity-70" />
+          {label ?? currentRatio}
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent 
-        className="w-[340px] overflow-hidden rounded-3xl p-0" 
+      <PopoverContent
+        className="w-[340px] overflow-hidden rounded-2xl p-0"
         align="start"
       >
-        {/* Строка поиска */}
-        <div className="p-3 border-b">
+        <div className="border-b border-border/50 p-3">
           <div className="relative flex items-center">
-            <Search className="absolute left-3 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 size-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search..."
-              className="pl-9 bg-muted/50 border-none rounded-full h-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+              placeholder="Search sizes…"
+              className="h-9 rounded-full border-none bg-muted/40 pl-9 shadow-none focus-visible:ring-2 focus-visible:ring-ring/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -132,28 +136,29 @@ interface RatioCardProps {
 
 function RatioCard({ label, value, active, onClick, boxClassName, children }: RatioCardProps) {
   return (
-    <div className="flex flex-col items-center gap-2 cursor-pointer group" onClick={onClick}>
-      <div 
-        className={`
-          flex items-center justify-center rounded-2xl border transition-all duration-200
-          ${active 
-            ? 'bg-blue-500 text-primary-foreground shadow-md' 
-            : 'bg-muted/50 border-transparent text-foreground group-hover:bg-accent group-hover:text-accent-foreground'
-          }
-          ${boxClassName}
-        `}
+    <button
+      type="button"
+      className="group flex cursor-pointer flex-col items-center gap-2"
+      onClick={onClick}
+    >
+      <div
+        className={`flex items-center justify-center rounded-2xl border-none transition-colors ${
+          active
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted/40 text-foreground group-hover:bg-muted/60"
+        } ${boxClassName}`}
       >
         {children ? (
-          <div className={active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-accent-foreground"}>
+          <div className={active ? "text-primary-foreground" : "text-muted-foreground"}>
             {children}
           </div>
         ) : (
-          <span className="text-sm font-semibold">{value}</span>
+          <span className="text-[13px] font-semibold">{value}</span>
         )}
       </div>
-      <span className="text-xs text-muted-foreground group-hover:text-foreground font-medium transition-colors">
+      <span className="text-[12px] font-medium text-muted-foreground transition-colors group-hover:text-foreground">
         {label}
       </span>
-    </div>
+    </button>
   );
 }
