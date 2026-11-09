@@ -1,14 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Filter, RotateCcw, SunMedium } from "lucide-react";
-import { Shadow as FabricShadow } from "fabric";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import { ChevronLeft, ChevronRight, RotateCcw, SunMedium } from "lucide-react";
+import { Image as FabricImage, Shadow as FabricShadow } from "fabric";
 import { PillSlider } from "@/components/ui/pill-slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import type { FilterPresetValues } from "@/store/slices/settingsSlice";
-import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
+import { captureCanvasThumbnail } from "@/lib/canvas/thumbnail";
 import { cn } from "@/lib/utils";
 
 type ShadowKind = "none" | "spread" | "hug";
@@ -34,14 +40,8 @@ function shadowParams(
   };
 }
 
-type Tab = "slide" | "image";
-
 const PRESETS: { id: string; label: string; values: FilterPresetValues }[] = [
-  {
-    id: "none",
-    label: "None",
-    values: {},
-  },
+  { id: "none", label: "None", values: {} },
   {
     id: "film",
     label: "Film",
@@ -105,8 +105,31 @@ const PRESETS: { id: string; label: string; values: FilterPresetValues }[] = [
   },
 ];
 
-export function SidebarFilters() {
+/** Instant CSS look for the preview pad (canvas gets the real effects). */
+function presetCss(id: string): { filter: string; vignette: number } {
+  switch (id) {
+    case "film":
+      return { filter: "contrast(1.08) saturate(0.88) sepia(0.18)", vignette: 0.4 };
+    case "soft":
+      return { filter: "brightness(1.06) contrast(0.94) saturate(0.95)", vignette: 0.18 };
+    case "punch":
+      return { filter: "contrast(1.28) saturate(1.22) brightness(1.04)", vignette: 0.12 };
+    case "bw":
+      return { filter: "grayscale(1) contrast(1.12)", vignette: 0.25 };
+    case "warm":
+      return { filter: "sepia(0.28) saturate(1.1) brightness(1.02)", vignette: 0.2 };
+    case "cool":
+      return { filter: "hue-rotate(195deg) saturate(0.85) brightness(1.02)", vignette: 0.15 };
+    default:
+      return { filter: "none", vignette: 0 };
+  }
+}
+
+/** Filter controls for CollapsibleGroup — slide always; image when selected. */
+export function FiltersControls() {
   const manager = useCanvasManager();
+  const currentSlideId = useCanvasStore((s) => s.currentSlideId);
+  const slides = useCanvasStore((s) => s.slides);
   const vignette = useCanvasStore((s) => s.vignette);
   const noise = useCanvasStore((s) => s.noise);
   const warmth = useCanvasStore((s) => s.warmth);
@@ -126,9 +149,10 @@ export function SidebarFilters() {
   const resetFilters = useCanvasStore((s) => s.resetFilters);
   const applyFilterPreset = useCanvasStore((s) => s.applyFilterPreset);
 
-  const [tab, setTab] = useState<Tab>("slide");
-  const [activePreset, setActivePreset] = useState<string | null>(null);
-  const [hasImageTarget, setHasImageTarget] = useState(false);
+  const [draftId, setDraftId] = useState("none");
+  const [appliedId, setAppliedId] = useState("none");
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+  const [imageSelected, setImageSelected] = useState(false);
 
   const [shadowType, setShadowType] = useState<ShadowKind>("spread");
   const [intensity, setIntensity] = useState<ShadowIntensity>("medium");
@@ -137,9 +161,30 @@ export function SidebarFilters() {
     y: 40,
   });
 
-  const syncImageTarget = useCallback(() => {
-    setHasImageTarget(Boolean(manager?.effects.resolveImageTarget()));
+  const draftPreset = useMemo(() => {
+    if (draftId === "custom") {
+      return { id: "custom", label: "Custom", values: {} as FilterPresetValues };
+    }
+    return PRESETS.find((p) => p.id === draftId) ?? PRESETS[0]!;
+  }, [draftId]);
+  const draftLook = presetCss(draftId === "custom" ? "none" : draftId);
+  const dirty = draftId !== appliedId;
+
+  const slideThumb = useMemo(() => {
+    const slide = slides.find((s) => s.id === currentSlideId);
+    return slide?.thumbnail ?? null;
+  }, [slides, currentSlideId]);
+
+  const syncImageSelection = useCallback(() => {
+    const active = manager?.canvas.getActiveObject();
+    setImageSelected(active instanceof FabricImage);
   }, [manager]);
+
+  const refreshPreview = useCallback(() => {
+    if (!manager) return;
+    const live = captureCanvasThumbnail(manager.canvas, manager.isDisposed);
+    setPreviewSrc(live ?? slideThumb);
+  }, [manager, slideThumb]);
 
   const applyImageShadow = useCallback(
     (
@@ -161,18 +206,29 @@ export function SidebarFilters() {
 
   useEffect(() => {
     if (!manager) return;
-    syncImageTarget();
+    syncImageSelection();
+    refreshPreview();
     const canvas = manager.canvas;
-    const bump = () => syncImageTarget();
+    const bump = () => {
+      syncImageSelection();
+      refreshPreview();
+    };
     canvas.on("selection:created", bump);
     canvas.on("selection:updated", bump);
     canvas.on("selection:cleared", bump);
+    canvas.on("object:modified", bump);
     return () => {
       canvas.off("selection:created", bump);
       canvas.off("selection:updated", bump);
       canvas.off("selection:cleared", bump);
+      canvas.off("object:modified", bump);
     };
-  }, [manager, syncImageTarget]);
+  }, [manager, syncImageSelection, refreshPreview]);
+
+  useEffect(() => {
+    setPreviewSrc(slideThumb);
+    refreshPreview();
+  }, [currentSlideId, slideThumb, refreshPreview]);
 
   const applyImage = useCallback(
     (patch: Partial<{
@@ -189,10 +245,9 @@ export function SidebarFilters() {
         saturation: patch.saturation ?? saturation,
         hue: patch.hue ?? hue,
       };
-      const ok = manager?.effects.setImageAdjustments(next);
-      if (ok === false) syncImageTarget();
+      manager?.effects.setImageAdjustments(next);
     },
-    [manager, blur, brightness, contrast, saturation, hue, syncImageTarget],
+    [manager, blur, brightness, contrast, saturation, hue],
   );
 
   const applySlideFromStore = useCallback(
@@ -208,10 +263,89 @@ export function SidebarFilters() {
     [manager],
   );
 
-  const hasActive =
-    vignette > 0 ||
-    noise > 0 ||
-    Math.abs(warmth) > 0.01 ||
+  const paintPreset = useCallback(
+    (values: FilterPresetValues, withImage: boolean) => {
+      applyFilterPreset(values);
+      const next = {
+        vignette: values.vignette ?? 0,
+        noise: values.noise ?? 0,
+        warmth: values.warmth ?? 0,
+        blur: values.blur ?? 0,
+        brightness: values.brightness ?? 0,
+        contrast: values.contrast ?? 0,
+        saturation: values.saturation ?? 0,
+        hue: values.hue ?? 0,
+      };
+      applySlideFromStore(next);
+      if (withImage) manager?.effects.setImageAdjustments(next);
+    },
+    [applyFilterPreset, applySlideFromStore, manager],
+  );
+
+  const previewDraft = useCallback(
+    (id: string) => {
+      const preset = PRESETS.find((item) => item.id === id);
+      if (!preset) return;
+      setDraftId(id);
+      paintPreset(preset.values, imageSelected);
+    },
+    [imageSelected, paintPreset],
+  );
+
+  const applyDraft = () => {
+    if (draftId === "custom") {
+      setAppliedId("custom");
+      manager?.commit();
+      refreshPreview();
+      return;
+    }
+    paintPreset(draftPreset.values, imageSelected);
+    setAppliedId(draftId);
+    manager?.commit();
+    refreshPreview();
+  };
+
+  const stepDraft = useCallback(
+    (dir: -1 | 1) => {
+      const index = PRESETS.findIndex((p) => p.id === draftId);
+      const from = index < 0 ? 0 : index;
+      const next = PRESETS[(from + dir + PRESETS.length) % PRESETS.length];
+      if (next) previewDraft(next.id);
+    },
+    [draftId, previewDraft],
+  );
+
+  const swipeRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+
+  const onPadPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    swipeRef.current = { x: e.clientX, y: e.clientY, moved: false };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onPadPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const start = swipeRef.current;
+    if (!start || start.moved) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    start.moved = true;
+    stepDraft(dx < 0 ? 1 : -1);
+  };
+
+  const onPadPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    swipeRef.current = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* already released */
+    }
+  };
+
+  const hasActiveSlide =
+    vignette > 0 || noise > 0 || Math.abs(warmth) > 0.01;
+
+  const hasActiveImage =
     blur > 0 ||
     Math.abs(brightness) > 0.01 ||
     Math.abs(contrast) > 0.01 ||
@@ -220,134 +354,156 @@ export function SidebarFilters() {
 
   const handleReset = () => {
     resetFilters();
-    setActivePreset("none");
+    setDraftId("none");
+    setAppliedId("none");
     manager?.effects.clearAll();
+    manager?.commit();
+    refreshPreview();
   };
 
-  const handlePreset = (id: string, values: FilterPresetValues) => {
-    setActivePreset(id);
-    applyFilterPreset(values);
-    const next = {
-      vignette: values.vignette ?? 0,
-      noise: values.noise ?? 0,
-      warmth: values.warmth ?? 0,
-      blur: values.blur ?? 0,
-      brightness: values.brightness ?? 0,
-      contrast: values.contrast ?? 0,
-      saturation: values.saturation ?? 0,
-      hue: values.hue ?? 0,
-    };
-    applySlideFromStore(next);
-    manager?.effects.setImageAdjustments(next);
-    syncImageTarget();
-  };
+  const thumb = previewSrc ?? slideThumb;
 
   return (
-    <Tabs
-      value={tab}
-      onValueChange={(value) => setTab(value as Tab)}
-      className="gap-3 overflow-hidden p-1.5 text-[13px] p-3"
-    >
-      <div className="flex items-center gap-1">
-        <TabsList className="grid h-11 min-w-0 flex-1 grid-cols-2 rounded-full bg-muted/60 p-1 group-data-horizontal/tabs:h-11 dark:bg-muted/25">
-          <TabsTrigger
-            value="slide"
-            className="rounded-full text-[13px] font-medium shadow-none data-active:border-transparent data-active:bg-background data-active:text-foreground dark:data-active:border-transparent dark:data-active:bg-background"
+    <div className="flex min-w-0 flex-col gap-3 text-[13px]">
+      <div
+        className="relative touch-pan-y overflow-hidden rounded-2xl bg-muted/40 select-none"
+        onPointerDown={onPadPointerDown}
+        onPointerMove={onPadPointerMove}
+        onPointerUp={onPadPointerUp}
+        onPointerCancel={onPadPointerUp}
+      >
+        <div className="relative mx-auto aspect-[3/4] w-full max-w-[220px] cursor-grab active:cursor-grabbing">
+          {thumb ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={thumb}
+              alt=""
+              draggable={false}
+              className="pointer-events-none absolute inset-0 size-full object-cover"
+              style={{ filter: draftLook.filter }}
+            />
+          ) : (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-muted-foreground">
+              Slide preview
+            </div>
+          )}
+          {draftLook.vignette > 0 ? (
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                boxShadow: `inset 0 0 ${40 + draftLook.vignette * 80}px rgba(0,0,0,${0.25 + draftLook.vignette * 0.45})`,
+              }}
+            />
+          ) : null}
+
+          <button
+            type="button"
+            aria-label="Previous filter"
+            onClick={(e) => {
+              e.stopPropagation();
+              stepDraft(-1);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="absolute left-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-foreground transition-colors hover:bg-background"
           >
-            Slide
-          </TabsTrigger>
-          <TabsTrigger
-            value="image"
-            className="rounded-full text-[13px] font-medium shadow-none data-active:border-transparent data-active:bg-background data-active:text-foreground dark:data-active:border-transparent dark:data-active:bg-background"
+            <ChevronLeft className="size-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next filter"
+            onClick={(e) => {
+              e.stopPropagation();
+              stepDraft(1);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="absolute right-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-foreground transition-colors hover:bg-background"
           >
-            Image
-          </TabsTrigger>
-        </TabsList>
-        <FilterMenu
-          icon={Filter}
-          value={activePreset ?? "none"}
-          onChange={(id) => {
-            const preset = PRESETS.find((item) => item.id === id);
-            if (preset) handlePreset(preset.id, preset.values);
-          }}
-          groups={[
-            {
-              label: "Preset",
-              options: PRESETS.map((preset) => ({ id: preset.id, label: preset.label })),
-            },
-          ]}
-        />
-        {hasActive && (
+            <ChevronRight className="size-4" />
+          </button>
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
+            <span className="rounded-full bg-background/90 px-3 py-1 text-[12px] font-medium text-foreground">
+              {draftPreset.label}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-1.5">
+        <button
+          type="button"
+          disabled={!dirty}
+          onClick={applyDraft}
+          className="flex h-9 flex-1 items-center justify-center rounded-full bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-35"
+        >
+          Apply
+        </button>
+        {(hasActiveSlide || (imageSelected && hasActiveImage) || appliedId !== "none") && (
           <button
             type="button"
             onClick={handleReset}
             title="Reset"
-            className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
           >
             <RotateCcw className="size-3.5" />
           </button>
         )}
       </div>
 
-      <TabsContent value="slide">
-        <div className="flex flex-col gap-2">
-          <PillSlider
-            label="Vignette"
-            value={vignette * 100}
-            min={0}
-            max={100}
-            step={1}
-            formatValue={(n) => `${Math.round(n)}%`}
-            onValueChange={(val) => {
-              setActivePreset(null);
-              const v = val / 100;
-              setVignette(v);
-              manager?.effects.setVignette(v);
-            }}
-          />
-          <PillSlider
-            label="Grain"
-            value={noise * 100}
-            min={0}
-            max={100}
-            step={1}
-            formatValue={(n) => `${Math.round(n)}%`}
-            onValueChange={(val) => {
-              setActivePreset(null);
-              const v = val / 100;
-              setNoise(v);
-              void manager?.effects.setNoise(v);
-            }}
-          />
-          <PillSlider
-            label="Warmth"
-            value={warmth * 100}
-            min={-100}
-            max={100}
-            step={1}
-            formatValue={(n) =>
-              Math.abs(n) < 1 ? "0" : `${n > 0 ? "+" : ""}${Math.round(n)}`
-            }
-            onValueChange={(val) => {
-              setActivePreset(null);
-              const v = val / 100;
-              setWarmth(v);
-              manager?.effects.setWarmth(v);
-            }}
-          />
-        </div>
-      </TabsContent>
+      <div className="flex flex-col gap-2">
+        <PillSlider
+          label="Vignette"
+          value={vignette * 100}
+          min={0}
+          max={100}
+          step={1}
+          formatValue={(n) => `${Math.round(n)}%`}
+          onValueChange={(val) => {
+            setDraftId("custom");
+            const v = val / 100;
+            setVignette(v);
+            manager?.effects.setVignette(v);
+            refreshPreview();
+          }}
+        />
+        <PillSlider
+          label="Grain"
+          value={noise * 100}
+          min={0}
+          max={100}
+          step={1}
+          formatValue={(n) => `${Math.round(n)}%`}
+          onValueChange={(val) => {
+            setDraftId("custom");
+            const v = val / 100;
+            setNoise(v);
+            void manager?.effects.setNoise(v);
+            refreshPreview();
+          }}
+        />
+        <PillSlider
+          label="Warmth"
+          value={warmth * 100}
+          min={-100}
+          max={100}
+          step={1}
+          formatValue={(n) =>
+            Math.abs(n) < 1 ? "0" : `${n > 0 ? "+" : ""}${Math.round(n)}`
+          }
+          onValueChange={(val) => {
+            setDraftId("custom");
+            const v = val / 100;
+            setWarmth(v);
+            manager?.effects.setWarmth(v);
+            refreshPreview();
+          }}
+        />
+      </div>
 
-      <TabsContent value="image">
-        <div className="flex flex-col gap-3">
-          {!hasImageTarget && (
-            <p className="text-[13px] text-muted-foreground">
-              Select an image or use an image background.
-            </p>
-          )}
-
+      {imageSelected ? (
+        <div className="flex flex-col gap-3 border-t border-border/50 pt-3">
           <div className="flex flex-col gap-1.5">
-            <span className="px-1 text-[13px] font-medium text-muted-foreground">
+            <span className="text-[13px] font-medium text-muted-foreground">
               Shadow
             </span>
             <div className="grid grid-cols-3 gap-1.5">
@@ -361,16 +517,15 @@ export function SidebarFilters() {
                 <button
                   key={item.id}
                   type="button"
-                  disabled={!hasImageTarget}
                   onClick={() => {
                     setShadowType(item.id);
                     applyImageShadow(item.id, intensity, lightSourcePos);
                   }}
                   className={cn(
-                    "flex flex-col items-center justify-center rounded-2xl bg-muted/40 px-2 py-2.5 transition-colors disabled:opacity-40",
+                    "flex flex-col items-center justify-center rounded-2xl bg-muted/40 px-2 py-2.5 transition-colors",
                     shadowType === item.id
                       ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                   )}
                 >
                   <div
@@ -388,17 +543,17 @@ export function SidebarFilters() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="px-1 text-[13px] font-medium text-muted-foreground">
+            <span className="text-[13px] font-medium text-muted-foreground">
               Intensity
             </span>
-            <div className="grid grid-cols-3 gap-1 rounded-full bg-muted/60 p-1 dark:bg-muted/25">
+            <div className="grid grid-cols-3 gap-1 rounded-full bg-muted/40 p-0.5">
               {(["low", "medium", "high"] as const).map((id) => {
                 const active = intensity === id;
                 return (
                   <button
                     key={id}
                     type="button"
-                    disabled={!hasImageTarget || shadowType === "none"}
+                    disabled={shadowType === "none"}
                     onClick={() => {
                       setIntensity(id);
                       applyImageShadow(shadowType, id, lightSourcePos);
@@ -418,7 +573,7 @@ export function SidebarFilters() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="px-1 text-[13px] font-medium text-muted-foreground">
+            <span className="text-[13px] font-medium text-muted-foreground">
               Light source
             </span>
             <div
@@ -426,7 +581,7 @@ export function SidebarFilters() {
               aria-label="Light source position"
               className="relative flex h-32 w-full cursor-crosshair select-none items-center justify-center overflow-hidden rounded-2xl bg-muted/40"
               onPointerDown={(e) => {
-                if (!hasImageTarget || shadowType === "none") return;
+                if (shadowType === "none") return;
                 const rect = e.currentTarget.getBoundingClientRect();
                 const move = (clientX: number, clientY: number) => {
                   const x = Math.max(
@@ -462,35 +617,17 @@ export function SidebarFilters() {
                 <SunMedium className="size-3.5" />
               </div>
             </div>
-            <button
-              type="button"
-              disabled={!hasImageTarget}
-              onClick={() => {
-                setShadowType("none");
-                setIntensity("medium");
-                setLightSourcePos({ x: 50, y: 40 });
-                applyImageShadow("none", "medium", { x: 50, y: 40 });
-              }}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-muted/50 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
-            >
-              <RotateCcw className="size-3.5" />
-              Reset shadow
-            </button>
           </div>
 
-          <div className="my-1 h-px bg-muted/60" />
-
-          {/* Стандартные слайдеры Image */}
           <PillSlider
             label="Blur"
             value={blur}
             min={0}
             max={40}
             step={1}
-            disabled={!hasImageTarget}
             formatValue={(n) => `${Math.round(n)}px`}
             onValueChange={(val) => {
-              setActivePreset(null);
+              setDraftId("custom");
               setBlur(val);
               applyImage({ blur: val });
             }}
@@ -501,10 +638,9 @@ export function SidebarFilters() {
             min={-100}
             max={100}
             step={1}
-            disabled={!hasImageTarget}
             formatValue={(n) => `${n >= 0 ? "+" : ""}${Math.round(n)}`}
             onValueChange={(val) => {
-              setActivePreset(null);
+              setDraftId("custom");
               const v = val / 100;
               setBrightness(v);
               applyImage({ brightness: v });
@@ -516,10 +652,9 @@ export function SidebarFilters() {
             min={-100}
             max={100}
             step={1}
-            disabled={!hasImageTarget}
             formatValue={(n) => `${n >= 0 ? "+" : ""}${Math.round(n)}`}
             onValueChange={(val) => {
-              setActivePreset(null);
+              setDraftId("custom");
               const v = val / 100;
               setContrast(v);
               applyImage({ contrast: v });
@@ -531,10 +666,9 @@ export function SidebarFilters() {
             min={-100}
             max={100}
             step={1}
-            disabled={!hasImageTarget}
             formatValue={(n) => `${n >= 0 ? "+" : ""}${Math.round(n)}`}
             onValueChange={(val) => {
-              setActivePreset(null);
+              setDraftId("custom");
               const v = val / 100;
               setSaturation(v);
               applyImage({ saturation: v });
@@ -546,17 +680,16 @@ export function SidebarFilters() {
             min={-100}
             max={100}
             step={1}
-            disabled={!hasImageTarget}
             formatValue={(n) => `${n >= 0 ? "+" : ""}${Math.round(n)}`}
             onValueChange={(val) => {
-              setActivePreset(null);
+              setDraftId("custom");
               const v = val / 100;
               setHue(v);
               applyImage({ hue: v });
             }}
           />
         </div>
-      </TabsContent>
-    </Tabs>
+      ) : null}
+    </div>
   );
 }

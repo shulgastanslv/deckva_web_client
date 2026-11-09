@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, Move, RotateCcw } from "lucide-react";
+import { Move, RotateCcw } from "lucide-react";
 import type { FabricObject } from "fabric";
 import { PillSlider } from "@/components/ui/pill-slider";
 import { cn } from "@/lib/utils";
@@ -60,16 +60,63 @@ type ObjectTransformPanelProps = {
     width?: number;
     height?: number;
   }) => void;
+  /** Width / height controls rendered under Position. */
+  size?: {
+    width: number;
+    height: number;
+    onWidth: (value: number) => void;
+    onHeight: (value: number) => void;
+  };
 };
+
+function DimField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState(String(Math.round(value)));
+  useEffect(() => {
+    setDraft(String(Math.round(value)));
+  }, [value]);
+
+  return (
+    <label className="flex h-9 items-center gap-2 rounded-full bg-muted/40 px-3">
+      <span className="shrink-0 text-[12px] font-medium text-muted-foreground">
+        {label}
+      </span>
+      <input
+        type="number"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          const next = Number(draft);
+          if (Number.isFinite(next) && next > 0) onChange(Math.round(next));
+          else setDraft(String(Math.round(value)));
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+        className="h-7 min-w-0 flex-1 border-0 bg-transparent text-[13px] tabular-nums outline-none focus-visible:ring-0"
+      />
+    </label>
+  );
+}
 
 export function ObjectTransformPanel({
   object,
   canvas,
   onCommit,
   onFormSync,
+  size,
 }: ObjectTransformPanelProps) {
   const [tab, setTab] = useState<TransformTab>("position");
   const [preview, setPreview] = useState<string | null>(null);
+  const [nudge, setNudge] = useState({ x: 0, y: 0 });
+  const draggingRef = useRef(false);
   const dragRef = useRef<{
     x: number;
     y: number;
@@ -88,12 +135,13 @@ export function ObjectTransformPanel({
   const m = meta(object);
 
   const refreshPreview = useCallback(() => {
+    if (draggingRef.current) return;
     setPreview(objectPreviewUrl(object));
   }, [object]);
 
   useEffect(() => {
     refreshPreview();
-  }, [refreshPreview, angle, zoomPct, skewX, skewY, object.left, object.top]);
+  }, [refreshPreview, angle, zoomPct, skewX, skewY]);
 
   const paint = (commit = false) => {
     object.setCoords();
@@ -105,7 +153,7 @@ export function ObjectTransformPanel({
       height: Math.round((object.height ?? 0) * (object.scaleY ?? 1)),
     });
     if (commit) onCommit();
-    refreshPreview();
+    if (!draggingRef.current) refreshPreview();
   };
 
   const setZoom = (pct: number, commit = false) => {
@@ -144,11 +192,13 @@ export function ObjectTransformPanel({
       scaleX: bx,
       scaleY: by,
     });
+    setNudge({ x: 0, y: 0 });
     paint(true);
   };
 
   const onPreviewPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
+    draggingRef.current = true;
     dragRef.current = {
       x: e.clientX,
       y: e.clientY,
@@ -166,11 +216,13 @@ export function ObjectTransformPanel({
     const dy = e.clientY - start.y;
     if (tab === "position") {
       object.set({ left: start.left + dx * 1.4, top: start.top + dy * 1.4 });
+      setNudge({ x: dx, y: dy });
     } else {
       object.set({
         skewX: Math.max(-60, Math.min(60, start.skewX + dx * 0.35)),
         skewY: Math.max(-60, Math.min(60, start.skewY + dy * 0.35)),
       });
+      setNudge({ x: 0, y: 0 });
     }
     paint(false);
   };
@@ -178,12 +230,15 @@ export function ObjectTransformPanel({
   const onPreviewPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current) return;
     dragRef.current = null;
+    draggingRef.current = false;
+    setNudge({ x: 0, y: 0 });
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
       /* already released */
     }
     onCommit();
+    refreshPreview();
   };
 
   useEffect(() => {
@@ -192,9 +247,9 @@ export function ObjectTransformPanel({
   }, [object]);
 
   return (
-    <div>
-      <div className="mb-2.5 flex items-center gap-2">
-        <div className="flex h-10 flex-1 items-center rounded-full bg-muted/70 p-1 dark:bg-muted/35">
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <div className="flex h-9 flex-1 items-center rounded-full bg-muted/40 p-0.5">
           {(
             [
               { id: "position" as const, label: "Position" },
@@ -204,11 +259,14 @@ export function ObjectTransformPanel({
             <button
               key={opt.id}
               type="button"
-              onClick={() => setTab(opt.id)}
+              onClick={() => {
+                setTab(opt.id);
+                setNudge({ x: 0, y: 0 });
+              }}
               className={cn(
                 "flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium transition-colors",
                 tab === opt.id
-                  ? "bg-background text-foreground dark:bg-background/85"
+                  ? "bg-background text-foreground"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -220,17 +278,14 @@ export function ObjectTransformPanel({
           type="button"
           title="Reset transform"
           onClick={resetTransform}
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted/70 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:bg-muted/35"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
         >
           <RotateCcw className="size-4" />
         </button>
       </div>
 
       <div
-        className={cn(
-          "relative mb-2.5 aspect-[4/3] w-full cursor-grab overflow-hidden rounded-2xl bg-muted/50 active:cursor-grabbing dark:bg-muted/30",
-          "ring-1 ring-inset ring-border/40",
-        )}
+        className="relative aspect-[4/3] w-full cursor-grab overflow-hidden rounded-2xl bg-muted/40 active:cursor-grabbing"
         onPointerDown={onPreviewPointerDown}
         onPointerMove={onPreviewPointerMove}
         onPointerUp={onPreviewPointerUp}
@@ -242,32 +297,38 @@ export function ObjectTransformPanel({
             src={preview}
             alt=""
             draggable={false}
-            className="pointer-events-none absolute inset-0 size-full object-contain p-3"
+            className="pointer-events-none absolute inset-0 size-full object-contain p-3 will-change-transform"
             style={{
               transform:
                 tab === "tilt"
                   ? `perspective(600px) rotateX(${skewY * 0.35}deg) rotateY(${-skewX * 0.35}deg)`
-                  : undefined,
+                  : `translate3d(${nudge.x}px, ${nudge.y}px, 0)`,
             }}
           />
         ) : (
           <div className="flex size-full items-center justify-center text-[13px] text-muted-foreground">
-            Preview
+            Drag to move
           </div>
         )}
         <div
-          className={cn(
-            "pointer-events-none absolute flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground",
-            tab === "position" ? "inset-0 m-auto" : "left-3 top-3",
-          )}
+          className="pointer-events-none absolute z-10 flex size-9 items-center justify-center rounded-full bg-foreground text-background will-change-[left,top]"
+          style={{
+            left: `calc(50% + ${tab === "position" ? nudge.x : 0}px)`,
+            top: `calc(50% + ${tab === "position" ? nudge.y : 0}px)`,
+            marginLeft: -18,
+            marginTop: -18,
+          }}
         >
-          {tab === "position" ? (
-            <Camera className="size-4" />
-          ) : (
-            <Move className="size-4" />
-          )}
+          <Move className="size-3.5" />
         </div>
       </div>
+
+      {tab === "position" && size ? (
+        <div className="grid grid-cols-2 gap-2">
+          <DimField label="W" value={size.width} onChange={size.onWidth} />
+          <DimField label="H" value={size.height} onChange={size.onHeight} />
+        </div>
+      ) : null}
 
       <div className="space-y-2">
         <PillSlider

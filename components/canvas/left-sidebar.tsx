@@ -2,7 +2,6 @@
 
 import React, { ReactNode, useState } from "react";
 import {
-  FilterIcon,
   ImageIcon,
   LayersIcon,
   PanelLeftClose,
@@ -18,7 +17,6 @@ import { SidebarElements } from "@/components/canvas/sidebar/sidebar-elements";
 import { SidebarLayers } from "@/components/canvas/sidebar/sidebar-layers";
 import { SidebarSettings } from "@/components/canvas/sidebar/sidebar-settings";
 import { SidebarBackground } from "@/components/canvas/sidebar/sidebar-background";
-import { SidebarFilters } from "./sidebar/sidebar-filters";
 import { LegalDialog, type LegalKind } from "@/components/legal-dialog";
 import { SidebarAssets } from "./sidebar/sidebar-assets";
 import { SidebarTools } from "./sidebar/sidebar-tools";
@@ -33,7 +31,6 @@ export type NavId =
   | "elements"
   | "layers"
   | "settings"
-  | "filters"
   | "assets"
   | "background"
   | "tools"
@@ -43,7 +40,6 @@ export const RAIL_SHORTCUTS: NavId[] = [
   "elements",
   "layers",
   "background",
-  "filters",
   "assets",
 ];
 
@@ -78,7 +74,6 @@ const PANEL_TITLES: Record<NavId, string> = {
   layers: "Layers",
   settings: "Settings",
   assets: "Assets",
-  filters: "Filters",
   background: "Background",
   tools: "Tools",
 };
@@ -98,7 +93,6 @@ export function LeftSidebar({
     { id: "tools", icon: <ToolCase className="size-[18px] stroke-[1.5]" />, label: "Tools" },
     { id: "layers", icon: <LayersIcon className="size-[18px] stroke-[1.5]" />, label: "Layers" },
     { id: "background", icon: <ImageIcon className="size-[18px] stroke-[1.5]" />, label: "Background" },
-    { id: "filters", icon: <FilterIcon className="size-[18px] stroke-[1.5]" />, label: "Filter" },
     { id: "assets", icon: <Package className="size-[18px] stroke-[1.5]" />, label: "Assets" },
   ];
 
@@ -172,7 +166,6 @@ export function LeftSidebar({
         <ScrollArea className="h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:max-w-full [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-viewport]>div]:!max-w-full">
           {activeNav === "elements" && <SidebarElements />}
           {activeNav === "layers" && <SidebarLayers />}
-          {activeNav === "filters" && <SidebarFilters />}
           {activeNav === "assets" && <SidebarAssets />}
           {activeNav === "settings" && (
             <SidebarSettings

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { FabricObject } from "fabric";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { useSlides } from "@/hooks/use-slides";
 import { useCanvasObjects } from "@/hooks/use-canvas-objects";
@@ -12,10 +11,7 @@ import { formatSlideNumber } from "@/lib/canvas/objects";
 import { slidesFromLines, splitSlideLines, TEXT_STYLES, type TextStyleId } from "@/lib/canvas/document";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { CornerLeftUpIcon, CornerRightUpIcon } from "lucide-react";
-import { applyCarouselFont } from "@/lib/canvas/apply-carousel-font";
 import { carouselTextHits, replaceTextInJSON, replaceTextOnNodes } from "@/lib/canvas/find-text";
-import { loadGoogleFont, normalizeFontFamily, SUGGESTED_FONTS } from "@/lib/fonts/google-fonts";
-import { FontSelect } from "@/components/canvas/font-select";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -29,21 +25,6 @@ import {
 import { SidebarMockups } from "@/components/canvas/sidebar/sidebar-mockups";
 
 const NUMBER_STYLES: readonly SlideNumberStyle[] = ["1", "01", "1 / 8"];
-
-function firstFont(objects: FabricObject[]): string | null {
-  for (const obj of objects) {
-    const type = (obj.type || "").toLowerCase();
-    if (type === "text" || type === "i-text" || type === "textbox") {
-      const family = (obj as FabricObject & { fontFamily?: string }).fontFamily;
-      if (typeof family === "string" && family.trim()) return normalizeFontFamily(family);
-    }
-    const children = (obj as FabricObject & { getObjects?: () => FabricObject[] }).getObjects?.();
-    if (!children) continue;
-    const nested = firstFont(children);
-    if (nested) return nested;
-  }
-  return null;
-}
 
 const CORNERS: readonly { id: Corner; label: string }[] = [
   { id: "top-left", label: "Top left" },
@@ -93,6 +74,8 @@ const SOCIAL_NETWORKS = [
   "Newsletter",
 ] as const;
 
+type ChromeTab = "number" | "author" | "swipe" | "social" | "dots";
+
 function isCorner(value: string): value is Corner {
   return CORNERS.some((corner) => corner.id === value);
 }
@@ -114,7 +97,10 @@ function CornerSelect({
         if (isCorner(next)) onChange(next);
       }}
     >
-      <SelectTrigger className="h-10 w-[7.25rem] shrink-0 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Position">
+      <SelectTrigger
+        className="h-9 w-[7.25rem] shrink-0 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none hover:bg-muted/60 data-[size=default]:h-9"
+        aria-label="Position"
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent position="popper" align="end">
@@ -129,9 +115,9 @@ function CornerSelect({
 }
 
 const actionButton =
-  "h-10 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40 disabled:pointer-events-none disabled:opacity-40 flex items-center justify-center gap-1.5";
+  "h-9 rounded-full bg-muted/40 px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:pointer-events-none disabled:opacity-40 flex items-center justify-center gap-1.5";
 const fieldInput =
-  "h-10 w-full rounded-full bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/80 dark:focus:bg-muted/40";
+  "h-9 w-full rounded-full bg-muted/40 px-3.5 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/50";
 
 export function SidebarTools() {
   const manager = useCanvasManager();
@@ -148,48 +134,18 @@ export function SidebarTools() {
   const [socialNetwork, setSocialNetwork] = useState<string>(SOCIAL_NETWORKS[0]);
   const [socialHandle, setSocialHandle] = useState("");
   const [socialCorner, setSocialCorner] = useState<Corner>("bottom-left");
-  const [extraFonts, setExtraFonts] = useState<string[]>([]);
   const [textTick, setTextTick] = useState(0);
   const objects = useCanvasObjects();
-  const markedSlideIds = useCanvasStore((s) => s.markedSlideIds);
-  const [fontScope, setFontScope] = useState<"all" | "marked">("all");
   const [findQuery, setFindQuery] = useState("");
   const [findReplacement, setFindReplacement] = useState("");
   const [matchCase, setMatchCase] = useState(false);
   const [swipeVariant, setSwipeVariant] = useState<string>(SWIPE_VARIANTS[0]);
-  const activeFont = firstFont(objects);
-
-  useEffect(() => {
-    for (const family of SUGGESTED_FONTS) void loadGoogleFont(family);
-  }, []);
-
-  const useFont = (family: string) => {
-    if (fontScope === "marked" && markedSlideIds.length === 0) return;
-    void loadGoogleFont(family).then(() => {
-      applyCarouselFont(
-        family,
-        manager,
-        fontScope === "marked" ? markedSlideIds : undefined,
-      );
-    });
-  };
+  const [chromeTab, setChromeTab] = useState<ChromeTab>("number");
 
   const slideIndex = Math.max(currentIndex, 0);
   const slideTotal = Math.max(slides.length, 1);
   const handleText = handle.trim() || "@username";
   const handleInitial = (handleText.replace(/^@/, "")[0] || "?").toUpperCase();
-  const fontChoices = [
-    ...SUGGESTED_FONTS,
-    ...extraFonts.filter((family) => !(SUGGESTED_FONTS as readonly string[]).includes(family)),
-  ];
-
-  const addFont = (family: string) => {
-    const name = normalizeFontFamily(family);
-    setExtraFonts((prev) =>
-      prev.includes(name) || (SUGGESTED_FONTS as readonly string[]).includes(name) ? prev : [...prev, name],
-    );
-    useFont(name);
-  };
 
   const addHandle = (side: Side) => {
     void manager?.objects.addCornerHandle(handle.trim() || "@username", side, undefined, avatarUrl);
@@ -267,11 +223,275 @@ export function SidebarTools() {
     void slidesController.loadCurrent();
   };
 
+  const chromeTabs: { id: ChromeTab; label: string }[] = [
+    { id: "number", label: "Number" },
+    { id: "author", label: "Author" },
+    { id: "swipe", label: "Swipe" },
+    { id: "social", label: "Social" },
+    { id: "dots", label: "Dots" },
+  ];
+
   return (
     <div className="flex flex-col text-[13px] text-foreground">
       <SidebarMockups />
 
-      <CollapsibleGroup id="tools-find" title="Find">
+      <CollapsibleGroup id="tools-chrome" title="On slide" defaultOpen>
+        <div className="space-y-3">
+          <div className="flex gap-1 overflow-x-auto rounded-full bg-muted/40 p-0.5">
+            {chromeTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setChromeTab(tab.id)}
+                className={cn(
+                  "h-8 shrink-0 rounded-full px-2.5 text-[12px] font-medium transition-colors",
+                  chromeTab === tab.id
+                    ? "bg-background text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {chromeTab === "number" ? (
+            <div className="space-y-2">
+              <div className="flex gap-1.5">
+                <Select
+                  value={numberStyle}
+                  onValueChange={(next) => {
+                    if (next === "1" || next === "01" || next === "1 / 8") setNumberStyle(next);
+                  }}
+                >
+                  <SelectTrigger
+                    className="h-9 min-w-0 flex-1 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none hover:bg-muted/60 data-[size=default]:h-9"
+                    aria-label="Slide number"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    {NUMBER_STYLES.map((style) => (
+                      <SelectItem key={style} value={style} className="text-[13px]">
+                        {formatSlideNumber(style, slideIndex, slideTotal)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CornerSelect value={numberCorner} onChange={setNumberCorner} disabled={!manager} />
+              </div>
+              <button
+                type="button"
+                disabled={!manager}
+                onClick={() =>
+                  manager?.objects.addSlideNumber(numberStyle, slideIndex, slideTotal, numberCorner)
+                }
+                className={cn(actionButton, "w-full")}
+              >
+                Place number
+              </button>
+            </div>
+          ) : null}
+
+          {chromeTab === "author" ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2.5 rounded-2xl bg-muted/30 px-2.5 py-2">
+                <button
+                  type="button"
+                  title="Change avatar"
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground/10 text-[13px] font-semibold"
+                >
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="" className="size-full object-cover" />
+                  ) : (
+                    handleInitial
+                  )}
+                </button>
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium leading-tight">
+                  {handleText}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    avatarUrl ? setAvatarUrl(null) : avatarInputRef.current?.click()
+                  }
+                  className="shrink-0 text-[12px] text-muted-foreground hover:text-foreground"
+                >
+                  {avatarUrl ? "Remove" : "Avatar"}
+                </button>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    onAvatarFile(event.target.files?.[0]);
+                    event.target.value = "";
+                  }}
+                />
+              </div>
+              <input
+                value={handle}
+                onChange={(e) => setHandle(e.target.value)}
+                placeholder="@username"
+                aria-label="Handle"
+                className={fieldInput}
+              />
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  disabled={!manager}
+                  onClick={() => addHandle("left")}
+                  className={actionButton}
+                >
+                  <CornerLeftUpIcon className="size-3.5" />
+                  Top left
+                </button>
+                <button
+                  type="button"
+                  disabled={!manager}
+                  onClick={() => addHandle("right")}
+                  className={actionButton}
+                >
+                  <CornerRightUpIcon className="size-3.5" />
+                  Top right
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {chromeTab === "swipe" ? (
+            <div className="space-y-2">
+              <div className="flex gap-1.5">
+                <Select value={swipeVariant} onValueChange={setSwipeVariant}>
+                  <SelectTrigger
+                    className="h-9 min-w-0 flex-1 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none hover:bg-muted/60 data-[size=default]:h-9"
+                    aria-label="Swipe"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="max-h-72">
+                    {SWIPE_VARIANTS.map((variant) => (
+                      <SelectItem key={variant} value={variant} className="text-[13px]">
+                        {variant}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CornerSelect value={swipeCorner} onChange={setSwipeCorner} disabled={!manager} />
+              </div>
+              <button
+                type="button"
+                disabled={!manager}
+                onClick={() => manager?.objects.addSwipeCue(swipeVariant, swipeCorner)}
+                className={cn(actionButton, "w-full")}
+              >
+                Place swipe
+              </button>
+            </div>
+          ) : null}
+
+          {chromeTab === "social" ? (
+            <div className="space-y-2">
+              <div className="flex gap-1.5">
+                <Select value={socialNetwork} onValueChange={setSocialNetwork}>
+                  <SelectTrigger
+                    className="h-9 min-w-0 flex-1 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none hover:bg-muted/60 data-[size=default]:h-9"
+                    aria-label="Network"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="max-h-72">
+                    {SOCIAL_NETWORKS.map((network) => (
+                      <SelectItem key={network} value={network} className="text-[13px]">
+                        {network}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CornerSelect value={socialCorner} onChange={setSocialCorner} disabled={!manager} />
+              </div>
+              <input
+                value={socialHandle}
+                onChange={(event) => setSocialHandle(event.target.value)}
+                placeholder="@name"
+                aria-label="Handle"
+                className={fieldInput}
+              />
+              <button
+                type="button"
+                disabled={!manager || !socialHandle.trim()}
+                onClick={() =>
+                  manager?.objects.addSocials(
+                    [{ label: socialNetwork, value: socialHandle }],
+                    socialCorner,
+                  )
+                }
+                className={cn(actionButton, "w-full")}
+              >
+                Place social
+              </button>
+            </div>
+          ) : null}
+
+          {chromeTab === "dots" ? (
+            <div className="space-y-2">
+              <p className="px-0.5 text-[12px] leading-snug text-muted-foreground">
+                Progress indicator for the bottom of the frame.
+              </p>
+              <button
+                type="button"
+                disabled={!manager}
+                onClick={() => manager?.objects.addProgressDots(slideTotal, slideIndex)}
+                className={cn(actionButton, "w-full")}
+              >
+                Place · {slideIndex + 1}/{slideTotal}
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </CollapsibleGroup>
+
+      <CollapsibleGroup id="tools-slides" title="Slides from text">
+        <div className="space-y-2">
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="One line, one slide"
+            rows={3}
+            className="w-full resize-none rounded-2xl bg-muted/40 px-3.5 py-3 text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground focus:bg-muted/50"
+          />
+          <div className="grid grid-cols-3 gap-1">
+            {TEXT_STYLES.map((style) => (
+              <button
+                key={style.id}
+                type="button"
+                onClick={() => setSlideStyle(style.id)}
+                className={cn(
+                  "h-9 rounded-full px-1 text-[13px] font-medium transition-colors",
+                  slideStyle === style.id
+                    ? "bg-background text-foreground"
+                    : "bg-muted/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                )}
+              >
+                {style.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            disabled={!lineCount || !slidesController}
+            onClick={generateSlides}
+            className={cn(actionButton, "w-full")}
+          >
+            Generate{lineCount > 0 ? ` · ${lineCount}` : ""}
+          </button>
+        </div>
+      </CollapsibleGroup>
+
+      <CollapsibleGroup id="tools-find" title="Find & replace" defaultOpen={false}>
         <div className="space-y-1.5">
           <input
             value={findQuery}
@@ -309,235 +529,7 @@ export function SidebarTools() {
             onClick={replaceText}
             className={cn(actionButton, "w-full")}
           >
-            Replace
-          </button>
-        </div>
-      </CollapsibleGroup>
-
-      <CollapsibleGroup id="tools-slides" title="Slides from text">
-        <div className="space-y-2">
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="One line, one slide"
-          rows={3}
-          className="w-full resize-none rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 px-3.5 py-3 text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground focus:bg-muted/80 dark:focus:bg-muted/40"
-        />
-        <div className="grid grid-cols-3 gap-1">
-          {TEXT_STYLES.map((style) => (
-            <button
-              key={style.id}
-              type="button"
-              onClick={() => setSlideStyle(style.id)}
-              className={cn(
-                "h-10 rounded-full px-1 text-[13px] font-medium transition-colors",
-                slideStyle === style.id
-                  ? "bg-background text-foreground"
-                  : "bg-muted/60 dark:bg-muted/25 text-muted-foreground hover:bg-muted/80 dark:hover:bg-muted/40 hover:text-foreground",
-              )}
-            >
-              {style.label}
-            </button>
-          ))}
-        </div>
-        <button
-          type="button"
-          disabled={!lineCount || !slidesController}
-          onClick={generateSlides}
-          className={cn(actionButton, "w-full")}
-        >
-          Generate{lineCount > 0 ? ` · ${lineCount}` : ""}
-        </button>
-        </div>
-      </CollapsibleGroup>
-
-      <CollapsibleGroup id="tools-numbers" title="Slide numbers">
-        <div className="space-y-1.5">
-          <div className="flex gap-1">
-            <Select
-              value={numberStyle}
-              onValueChange={(next) => {
-                if (next === "1" || next === "01" || next === "1 / 8") setNumberStyle(next);
-              }}
-            >
-              <SelectTrigger className="h-10 min-w-0 flex-1 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Slide number">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {NUMBER_STYLES.map((style) => (
-                  <SelectItem key={style} value={style} className="text-[13px]">
-                    {formatSlideNumber(style, slideIndex, slideTotal)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <CornerSelect value={numberCorner} onChange={setNumberCorner} disabled={!manager} />
-          </div>
-          <button
-            type="button"
-            disabled={!manager}
-            onClick={() => manager?.objects.addSlideNumber(numberStyle, slideIndex, slideTotal, numberCorner)}
-            className={cn(actionButton, "w-full")}
-          >
-            Place
-          </button>
-        </div>
-      </CollapsibleGroup>
-
-      <CollapsibleGroup id="tools-handle" title="Author">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2.5 rounded-xl bg-muted/30 px-2.5 py-2">
-            <button
-              type="button"
-              title="Change avatar"
-              onClick={() => avatarInputRef.current?.click()}
-              className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground/10 text-[13px] font-semibold"
-            >
-              {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="" className="size-full object-cover" />
-              ) : (
-                handleInitial
-              )}
-            </button>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-medium leading-tight">{handleText}</span>
-            {avatarUrl ? (
-              <button
-                type="button"
-                onClick={() => setAvatarUrl(null)}
-                className="shrink-0 text-[10px] text-muted-foreground hover:text-foreground"
-              >
-                Remove
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => avatarInputRef.current?.click()}
-                className="shrink-0 text-[10px] text-muted-foreground hover:text-foreground"
-              >
-                Avatar
-              </button>
-            )}
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(event) => {
-                onAvatarFile(event.target.files?.[0]);
-                event.target.value = "";
-              }}
-            />
-          </div>
-          <input
-            value={handle}
-            onChange={(e) => setHandle(e.target.value)}
-            placeholder="@username"
-            aria-label="Handle"
-            className={fieldInput}
-          />
-          <div className="grid grid-cols-2 gap-1">
-            <button
-              type="button"
-              disabled={!manager}
-              onClick={() => addHandle("left")}
-              className={actionButton}
-            >
-              <CornerLeftUpIcon className="size-3.5" />
-              Top left
-            </button>
-            <button
-              type="button"
-              disabled={!manager}
-              onClick={() => addHandle("right")}
-              className={actionButton}
-            >
-              <CornerRightUpIcon className="size-3.5" />
-              Top right
-            </button>
-          </div>
-        </div>
-      </CollapsibleGroup>
-
-      <CollapsibleGroup id="tools-cues" title="Swipe">
-        <div className="space-y-2">
-          <div className="flex gap-1">
-            <Select value={swipeVariant} onValueChange={setSwipeVariant}>
-              <SelectTrigger className="h-10 min-w-0 flex-1 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Swipe">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent position="popper" className="max-h-72">
-                {SWIPE_VARIANTS.map((variant) => (
-                  <SelectItem key={variant} value={variant} className="text-[13px]">
-                    {variant}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <CornerSelect value={swipeCorner} onChange={setSwipeCorner} disabled={!manager} />
-          </div>
-          <button
-            type="button"
-            disabled={!manager}
-            onClick={() => manager?.objects.addSwipeCue(swipeVariant, swipeCorner)}
-            className={cn(actionButton, "w-full")}
-          >
-            Place
-          </button>
-        </div>
-      </CollapsibleGroup>
-
-      <CollapsibleGroup id="tools-socials" title="Socials">
-        <div className="space-y-1.5">
-          <div className="flex gap-1">
-            <Select value={socialNetwork} onValueChange={setSocialNetwork}>
-              <SelectTrigger className="h-10 min-w-0 flex-1 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Network">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent position="popper" className="max-h-72">
-                {SOCIAL_NETWORKS.map((network) => (
-                  <SelectItem key={network} value={network} className="text-[13px]">
-                    {network}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <CornerSelect value={socialCorner} onChange={setSocialCorner} disabled={!manager} />
-          </div>
-          <input
-            value={socialHandle}
-            onChange={(event) => setSocialHandle(event.target.value)}
-            placeholder="@name"
-            aria-label="Handle"
-            className={fieldInput}
-          />
-          <button
-            type="button"
-            disabled={!manager || !socialHandle.trim()}
-            onClick={() =>
-              manager?.objects.addSocials([{ label: socialNetwork, value: socialHandle }], socialCorner)
-            }
-            className={cn(actionButton, "w-full")}
-          >
-            Place
-          </button>
-        </div>
-      </CollapsibleGroup>
-
-      <CollapsibleGroup id="tools-progress" title="Progress dots">
-        <div className="space-y-2">
-          <p className="px-0.5 text-[12px] leading-snug text-muted-foreground">
-            Slide position indicator for the bottom of the frame.
-          </p>
-          <button
-            type="button"
-            disabled={!manager}
-            onClick={() =>
-              manager?.objects.addProgressDots(slideTotal, slideIndex)
-            }
-            className={cn(actionButton, "w-full")}
-          >
-            Place · {slideIndex + 1}/{slideTotal}
+            Replace all
           </button>
         </div>
       </CollapsibleGroup>

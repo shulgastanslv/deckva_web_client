@@ -72,8 +72,8 @@ export function CollapsibleGroup({
           isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
       >
-        <div className="overflow-hidden">
-          <div className="space-y-3 px-3 pb-4 pt-0.5">{children}</div>
+        <div className="min-w-0 overflow-hidden">
+          <div className="min-w-0 space-y-3 px-3 pb-4 pt-0.5">{children}</div>
         </div>
       </div>
     </div>

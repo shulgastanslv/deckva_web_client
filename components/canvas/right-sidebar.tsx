@@ -41,6 +41,8 @@ import {
   List,
   ListOrdered,
   ScanSearch,
+  Copy,
+  ClipboardPaste,
 } from "lucide-react";
 import { useSelectedObject } from "@/hooks/use-selected-object";
 import {
@@ -98,6 +100,7 @@ import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { InspectorAssets } from "@/components/canvas/inspector-assets";
 import { ObjectTransformPanel } from "@/components/canvas/object-transform-panel";
+import { FiltersControls } from "@/components/canvas/filters-controls";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 
 type TextAlign = "left" | "center" | "right" | "justify";
@@ -151,6 +154,51 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
     <span className="text-[13px] font-medium text-muted-foreground">
       {children}
     </span>
+  );
+}
+
+function ArrangeChip({
+  children,
+  onClick,
+  disabled,
+  title,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      disabled={disabled}
+      onClick={onClick}
+      className="flex h-9 w-full items-center justify-center gap-1.5 rounded-full bg-muted/40 px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:pointer-events-none disabled:opacity-35"
+    >
+      {children}
+    </button>
+  );
+}
+
+function ArrangeIconChip({
+  icon: Icon,
+  onClick,
+  title,
+}: {
+  icon: React.ElementType;
+  onClick: () => void;
+  title: string;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onClick={onClick}
+      className="flex h-9 w-full items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+    >
+      <Icon className="size-4" />
+    </button>
   );
 }
 
@@ -308,54 +356,6 @@ function NumberField({
   );
 }
 
-function DimInput({
-  label,
-  value,
-  onChange,
-  unit = "px",
-}: {
-  label: string;
-  value: number;
-  onChange: (next: number) => void;
-  unit?: string;
-}) {
-  const [draft, setDraft] = useState(String(Math.round(value)));
-
-  useEffect(() => {
-    setDraft(String(Math.round(value)));
-  }, [value]);
-
-  const commit = () => {
-    const parsed = Number(draft.replace(",", "."));
-    if (!Number.isFinite(parsed) || parsed < 0) {
-      setDraft(String(Math.round(value)));
-      return;
-    }
-    const next = Math.round(parsed);
-    onChange(next);
-    setDraft(String(next));
-  };
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <FieldLabel>{label}</FieldLabel>
-      <div className={`${fieldShell} h-9 px-3`}>
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
-          }}
-          className="h-7 flex-1 border-0 bg-transparent px-0.5 font-mono text-[13px] tabular-nums shadow-none focus-visible:ring-0 dark:bg-transparent"
-        />
-        <span className="shrink-0 text-[13px] text-muted-foreground">{unit}</span>
-      </div>
-    </div>
-  );
-}
 
 export function RightSidebar({
   isRightCollapsed,
@@ -926,14 +926,18 @@ export function RightSidebar({
                 Properties
               </span>
             </div>
-            <div className="flex flex-1 items-center justify-center px-6 pb-10 text-center text-[15px] leading-relaxed text-muted-foreground">
-              Select an object on the canvas to edit its style.
-            </div>
+            <ScrollArea className="min-h-0 flex-1">
+              <div className="pb-4 pt-1">
+                <CollapsibleGroup id="rs-filters-empty" title="Filters" defaultOpen>
+                  <FiltersControls />
+                </CollapsibleGroup>
+              </div>
+            </ScrollArea>
           </>
         ) : (
           <>
-        <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
-          <div className="min-w-0">
+        <div className="flex h-11 shrink-0 items-center justify-between gap-1.5 px-3">
+          <div className="min-w-0 flex-1">
             <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
               {panelTitle}
             </span>
@@ -943,22 +947,69 @@ export function RightSidebar({
               </span>
             ) : null}
           </div>
-          {formValues ? (
-            <Button
-              type="button"
-              variant={formValues.isLocked ? "secondary" : "ghost"}
-              size="icon"
-              className={`size-8 shrink-0 ${btnRound}`}
-              onClick={handleToggleLock}
-              title={formValues.isLocked ? "Unlock" : "Lock"}
-            >
-              {formValues.isLocked ? (
-                <Lock className="size-3.5" />
-              ) : (
-                <Unlock className="size-3.5" />
-              )}
-            </Button>
-          ) : null}
+          <div className="flex shrink-0 items-center gap-0.5">
+            {!isMulti ? (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
+                  onClick={handleBringForward}
+                  title="Bring forward"
+                >
+                  <BringToFront className="size-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
+                  onClick={handleSendBackwards}
+                  title="Send back"
+                >
+                  <SendToBack className="size-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
+                  onClick={copyStyle}
+                  title="Copy style"
+                >
+                  <Copy className="size-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
+                  onClick={pasteStyle}
+                  disabled={!copiedStyle}
+                  title="Paste style"
+                >
+                  <ClipboardPaste className="size-3.5" />
+                </Button>
+              </>
+            ) : null}
+            {formValues ? (
+              <Button
+                type="button"
+                variant={formValues.isLocked ? "secondary" : "ghost"}
+                size="icon"
+                className={`size-8 shrink-0 ${btnRound}`}
+                onClick={handleToggleLock}
+                title={formValues.isLocked ? "Unlock" : "Lock"}
+              >
+                {formValues.isLocked ? (
+                  <Lock className="size-3.5" />
+                ) : (
+                  <Unlock className="size-3.5" />
+                )}
+              </Button>
+            ) : null}
+          </div>
         </div>
 
         <ScrollArea className="min-h-0 flex-1">
@@ -973,63 +1024,48 @@ export function RightSidebar({
                     onFormSync={(patch) =>
                       setFormValues((prev) => (prev ? { ...prev, ...patch } : null))
                     }
+                    size={
+                      formValues
+                        ? {
+                            width: formValues.width,
+                            height: formValues.height,
+                            onWidth: setWidth,
+                            onHeight: setHeight,
+                          }
+                        : undefined
+                    }
                   />
                 </div>
               ) : null}
-              <div className="space-y-3 px-3 pb-2">
-                <div className="space-y-2">
-                  <FieldLabel>Align</FieldLabel>
-                  <div className="grid grid-cols-4 gap-1 rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 p-1.5">
-                    {(
-                      [
-                        ["left", "Left", AlignHorizontalJustifyStart],
-                        ["center", "Center", AlignHorizontalJustifyCenter],
-                        ["right", "Right", AlignHorizontalJustifyEnd],
-                        ["distribute-x", "Spread X", AlignHorizontalSpaceBetween],
-                        ["top", "Top", AlignVerticalJustifyStart],
-                        ["middle", "Middle", AlignVerticalJustifyCenter],
-                        ["bottom", "Bottom", AlignVerticalJustifyEnd],
-                        ["distribute-y", "Spread Y", AlignVerticalSpaceBetween],
-                      ] as const
-                    ).map(([mode, label, Icon]) => (
-                      <button
-                        key={mode}
-                        type="button"
-                        title={label}
-                        onClick={() => alignSelection(mode)}
-                        className="flex h-9 flex-col items-center justify-center gap-0.5 rounded-xl text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
-                      >
-                        <Icon className="size-4" />
-                      </button>
-                    ))}
-                  </div>
+              <div className="space-y-2 px-3 pb-2">
+                <FieldLabel>Arrange</FieldLabel>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {(
+                    [
+                      ["left", "Align left", AlignHorizontalJustifyStart],
+                      ["center", "Align center", AlignHorizontalJustifyCenter],
+                      ["right", "Align right", AlignHorizontalJustifyEnd],
+                      ["distribute-x", "Distribute X", AlignHorizontalSpaceBetween],
+                      ["top", "Align top", AlignVerticalJustifyStart],
+                      ["middle", "Align middle", AlignVerticalJustifyCenter],
+                      ["bottom", "Align bottom", AlignVerticalJustifyEnd],
+                      ["distribute-y", "Distribute Y", AlignVerticalSpaceBetween],
+                    ] as const
+                  ).map(([mode, label, Icon]) => (
+                    <ArrangeIconChip
+                      key={mode}
+                      icon={Icon}
+                      title={label}
+                      onClick={() => alignSelection(mode)}
+                    />
+                  ))}
                 </div>
-                <div className="space-y-1.5">
-                  <FieldLabel>Actions</FieldLabel>
-                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
-                    <button
-                      type="button"
-                      onClick={groupSelected}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      Group
-                    </button>
-                    <button
-                      type="button"
-                      onClick={copyStyle}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!copiedStyle}
-                      onClick={pasteStyle}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80 disabled:pointer-events-none disabled:opacity-35"
-                    >
-                      Paste
-                    </button>
-                  </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <ArrangeChip onClick={groupSelected}>Group</ArrangeChip>
+                  <ArrangeChip onClick={copyStyle}>Copy</ArrangeChip>
+                  <ArrangeChip onClick={pasteStyle} disabled={!copiedStyle}>
+                    Paste
+                  </ArrangeChip>
                 </div>
               </div>
               {formValues && (
@@ -1164,6 +1200,9 @@ export function RightSidebar({
                       />
                     </div>
                   </CollapsibleGroup>
+                  <CollapsibleGroup id="rs-multi-filters" title="Filters" defaultOpen={false}>
+                    <FiltersControls />
+                  </CollapsibleGroup>
                 </>
               )}
             </div>
@@ -1186,108 +1225,47 @@ export function RightSidebar({
                     onFormSync={(patch) =>
                       setFormValues((prev) => (prev ? { ...prev, ...patch } : null))
                     }
+                    size={{
+                      width: formValues.width,
+                      height: formValues.height,
+                      onWidth: setWidth,
+                      onHeight: setHeight,
+                    }}
                   />
                 </div>
               ) : null}
 
-              <div className="space-y-2 px-3 pb-2">
-                <div className="space-y-1.5">
-                  <FieldLabel>Align</FieldLabel>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={handleCenterH}
-                      className="flex h-10 items-center justify-center gap-2 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
-                    >
-                      <AlignHorizontalDistributeCenter className="size-4 shrink-0" />
-                      Center X
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCenterV}
-                      className="flex h-10 items-center justify-center gap-2 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
-                    >
-                      <AlignVerticalDistributeCenter className="size-4 shrink-0" />
-                      Center Y
-                    </button>
-                  </div>
+              {canUngroup(selectedObject) || (canImportImage && !isImage) ? (
+                <div className="space-y-2 px-3 pb-2">
+                  {canUngroup(selectedObject) ? (
+                    <ArrangeChip onClick={ungroupSelected}>
+                      {isCode ? "Break code block" : "Break group"}
+                    </ArrangeChip>
+                  ) : null}
+
+                  {canImportImage && !isImage ? (
+                    <>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Upload className="size-4" />
+                        Fill with image
+                      </Button>
+                    </>
+                  ) : null}
                 </div>
-
-                <div className="space-y-1.5">
-                  <FieldLabel>Layer</FieldLabel>
-                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
-                    <button
-                      type="button"
-                      onClick={handleBringForward}
-                      className="flex h-full flex-1 items-center justify-center gap-1.5 rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      <BringToFront className="size-3.5" />
-                      Forward
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSendBackwards}
-                      className="flex h-full flex-1 items-center justify-center gap-1.5 rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      <SendToBack className="size-3.5" />
-                      Back
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <FieldLabel>Style</FieldLabel>
-                  <div className="flex h-10 items-center rounded-full bg-muted/60 dark:bg-muted/25 p-1">
-                    <button
-                      type="button"
-                      onClick={copyStyle}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!copiedStyle}
-                      onClick={pasteStyle}
-                      className="flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium text-foreground/85 transition-colors hover:bg-background/80 disabled:pointer-events-none disabled:opacity-35"
-                    >
-                      Paste
-                    </button>
-                  </div>
-                </div>
-
-                {canUngroup(selectedObject) ? (
-                  <button
-                    type="button"
-                    onClick={ungroupSelected}
-                    className="flex h-10 w-full items-center justify-center rounded-full bg-muted/60 dark:bg-muted/25 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
-                  >
-                    {isCode ? "Break code block" : "Break group"}
-                  </button>
-                ) : null}
-
-                {canImportImage && !isImage ? (
-                  <>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      className={`h-10 w-full justify-center gap-2 text-[13px] ${btnRound}`}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="size-4" />
-                      Fill with image
-                    </Button>
-                  </>
-                ) : null}
-              </div>
+              ) : null}
 
               {(isImage || canImportImage) && selectedObject ? (
                 <InspectorAssets
@@ -1768,25 +1746,6 @@ export function RightSidebar({
                 />
               </CollapsibleGroup>
 
-              <CollapsibleGroup
-                id="rs-position"
-                title="Size"
-                defaultOpen={!isText && !isImage}
-              >
-                <div className="grid grid-cols-2 gap-2.5">
-                  <DimInput
-                    label="Width"
-                    value={formValues.width}
-                    onChange={setWidth}
-                  />
-                  <DimInput
-                    label="Height"
-                    value={formValues.height}
-                    onChange={setHeight}
-                  />
-                </div>
-              </CollapsibleGroup>
-
               <CollapsibleGroup id="rs-appearance" title="Appearance" defaultOpen={false}>
                 <NumberField
                   label="Opacity"
@@ -1891,6 +1850,7 @@ export function RightSidebar({
                   </p>
                 )}
               </CollapsibleGroup>
+
             </div>
           )}
         </ScrollArea>
