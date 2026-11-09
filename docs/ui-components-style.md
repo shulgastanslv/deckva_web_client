@@ -13,9 +13,10 @@
 | Делай | Не делай |
 |---|---|
 | Высота контрола **`h-9`** или **`h-10`** | `h-7` / `h-8` / `h-11` без причины (кроме icon-only `size-8`/`size-9`) |
-| **Без shadow** (`shadow-none`, не добавляй `shadow-*`) | `shadow-sm`, `shadow-md`, `shadow-lg` |
+| Триггеры / инпуты / чипы / кнопки — **без shadow** (`shadow-none`) | `shadow-md`, `shadow-lg` на кнопках |
 | Триггеры / инпуты / чипы — **без borders** (`border-none`) | `border-input`, outline-карточки ради «рамки» у кнопок |
-| Menus / popover / select — **`bg-popover` + `border border-border/50`**; dialogs — **`bg-background` + `border border-border/50`** | `border-0`, `bg-white`, `ring-1 ring-foreground/10`, dialog на `bg-popover` |
+| Menus / popover / select — **`bg-popover` + `shadow-sm` + `border-0`**, в dark ещё **`dark:border-border/50`** | `shadow-none` / `shadow-md+` на меню; border меню в light |
+| Dialogs — **`bg-background` + `border border-border/50` + `shadow-none`** | `bg-white`, `ring-1 ring-foreground/10`, dialog на `bg-popover` / `shadow-sm` |
 | Фон контролов через **`bg-muted/…`** и семантику | Свои hex (`#f4f4f5`, `#4262ff`), `bg-white/70`, `dark:bg-input/30` как стиль по умолчанию |
 | Текст через `text-foreground` / `text-muted-foreground` / `text-primary-foreground` | Куча `dark:`-веток под каждый оттенок |
 | Скругление **`rounded-full`** (чипы, CTA), **`rounded-2xl`** (меню), **`rounded-3xl`** (диалоги) | Случайный микс `rounded-md` + тень |
@@ -35,7 +36,7 @@
 - `bg-primary` — фирменный акцент (`text-primary-foreground`)
 - `bg-muted` — база «серой» заливки
 - `bg-muted/20` · `/30` · `/40` · `/50` · `/60` — лестница спокойных поверхностей
-- `bg-popover` — dropdown / select / popover + `border-border/50`, **без** `shadow-*`
+- `bg-popover` — dropdown / select / popover + **`shadow-sm`**; light без border, dark + `border-border/50`
 - `bg-destructive/10` + `text-destructive` — опасные действия (не сплошной красный блок)
 
 **Текст**
@@ -147,9 +148,9 @@
 Правила:
 
 - Триггер: **`h-9`**, `rounded-full`, `bg-muted/40`, **без border/shadow**
-- Content: наследует примитив `bg-popover border-border/50 shadow-none`; на call-site только размер/паддинг (`rounded-2xl p-1.5`)
+- Content: наследует примитив `bg-popover border-0 shadow-sm`; на call-site только размер/паддинг (`rounded-2xl p-1.5`)
 - Item: `rounded-xl`, focus/hover через `bg-muted/50` (не обязательно `bg-accent`, если это плодит ещё одну визуальную систему)
-- **Не** перебивай surface классами `border-0` / `bg-background` / `shadow-*` / `ring-*`
+- **Не** перебивай surface классами `border` / `bg-background` / `shadow-none` / `shadow-md` / `ring-*`
 
 ---
 
@@ -186,10 +187,10 @@
 
 Правила:
 
-- Content = тот же floating surface, что и Dialog/Popover: `bg-popover` + `border-border/50` + `shadow-none` (уже в примитиве)
+- Content = floating menu surface: `bg-popover` + `shadow-sm` + `border-0` (уже в примитиве; то же у Select/Popover)
 - Скругление панели `rounded-2xl`, пунктов `rounded-xl`
 - Open-state триггера: `data-[state=open]:bg-muted/60`
-- На call-site не ставь `border-0` / другой `bg-*` / `shadow-*` / `ring-*`
+- На call-site не ставь `border` / другой `bg-*` / `shadow-none` / `shadow-md+` / `ring-*`
 
 Ориентиры в репо: `studio-browse.tsx` (триггер `bg-muted/40`), `locale-switcher.tsx` (`rounded-2xl p-1.5`), `studio-prompt.tsx` (model menu).
 
@@ -236,18 +237,16 @@
 
 ## 9. Диалоги и меню-панели
 
-Общая рамка: `border border-border/50 shadow-none`. Фон разный:
-
 ```
-Dropdown / Select / Popover → bg-popover text-popover-foreground
-Dialog                     → bg-background text-foreground
+Dropdown / Select / Popover → bg-popover + shadow-sm + border-0 (+ dark:border-border/50)
+Dialog                     → bg-background + border-border/50 + shadow-none
 ```
 
-- Dialog оболочка: `rounded-3xl … p-0` (см. start-dialogs, org-dialogs, upgrade) — **без** `border-0` / `bg-popover`
+- Dialog оболочка: `rounded-3xl … p-0` (см. start-dialogs, org-dialogs, upgrade) — **без** `border-0` / `bg-popover` / `shadow-sm`
 - Dropdown / Popover: `rounded-2xl`
 - Внутренние поля: `bg-muted/30` → `focus:bg-muted/40`
 - CTA в футере: `h-10 rounded-full`
-- Не добавляй `shadow-*` «для глубины»
+- На меню разрешён только **`shadow-sm`**; на кнопках/диалогах — без shadow
 
 Канон живёт в `components/ui/{dropdown-menu,select,popover,dialog}.tsx`.
 
@@ -255,13 +254,13 @@ Dialog                     → bg-background text-foreground
 
 ## 10. Чеклист перед коммитом UI
 
-1. Есть ли `shadow-*`? Убери.
-2. Триггер/инпут/чип без border? Menu/popover — `border-border/50` + `bg-popover`; dialog — `border-border/50` + `bg-background`?
+1. На кнопках/диалогах нет лишнего `shadow-*`? На меню именно `shadow-sm`?
+2. Триггер/инпут/чип без border? Menu/popover — `bg-popover` + `shadow-sm`; dialog — `border-border/50` + `bg-background`?
 3. Высота действия — `h-9` / `h-10`?
 4. Фон только из `background | foreground | primary | muted(/opacity) | popover | destructive/10`?
 5. Нет ли третьей палитры (`#hex`, `land-*`, `input/30` dark-stack) рядом с `muted`?
 6. Open/hover продолжают ту же лестницу `/40` → `/60`?
-7. Call-site не перебивает surface (`border-0`, чужой `bg-*`, `ring-*`)?
+7. Call-site не перебивает surface (чужой `border` / `bg-*` / `shadow-md` / `ring-*`)?
 
 ---
 

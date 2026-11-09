@@ -18,50 +18,81 @@ import {
 } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
+type PlanState = {
+  isPro: boolean;
+  remaining: number;
+};
+
 export function PlanDropdown({
   isUpgrade,
   openUpgrade,
 }: {
+  /** Initial hint from org; live status comes from getGenerationStatus. */
   isUpgrade: boolean;
   openUpgrade: () => void;
 }) {
   const { status } = useSession();
   const signedIn = status === "authenticated";
-  const [remaining, setRemaining] = useState<number | null>(null);
+  const [plan, setPlan] = useState<PlanState>({
+    isPro: isUpgrade,
+    remaining: FREE_GENERATION_LIMIT,
+  });
 
   useEffect(() => {
-    if (!signedIn || isUpgrade) {
-      setRemaining(null);
-      return;
-    }
+    setPlan((prev) => ({ ...prev, isPro: isUpgrade }));
+  }, [isUpgrade]);
+
+  useEffect(() => {
+    if (!signedIn) return;
     let cancelled = false;
+
     void (async () => {
       try {
         const row = await getGenerationStatus();
-        if (!cancelled) setRemaining(row.entitlement.remaining);
+        if (cancelled) return;
+        const remaining = row.entitlement.isPro
+          ? FREE_GENERATION_LIMIT
+          : Number.isFinite(row.entitlement.remaining)
+            ? row.entitlement.remaining
+            : FREE_GENERATION_LIMIT;
+        setPlan({
+          isPro: row.entitlement.isPro,
+          remaining,
+        });
       } catch {
-        // ignore
+        // keep last known / optimistic free limit
       }
     })();
 
     const onChanged = (event: Event) => {
-      const next = (
-        event as CustomEvent<{ entitlement?: { remaining?: number } }>
-      ).detail?.entitlement?.remaining;
-      if (typeof next === "number") setRemaining(next);
+      const entitlement = (
+        event as CustomEvent<{
+          entitlement?: { remaining?: number; isPro?: boolean };
+        }>
+      ).detail?.entitlement;
+      if (!entitlement) return;
+      setPlan((prev) => ({
+        isPro:
+          typeof entitlement.isPro === "boolean"
+            ? entitlement.isPro
+            : prev.isPro,
+        remaining:
+          typeof entitlement.remaining === "number" &&
+          Number.isFinite(entitlement.remaining)
+            ? entitlement.remaining
+            : prev.remaining,
+      }));
     };
     window.addEventListener("studio:generations-changed", onChanged);
     return () => {
       cancelled = true;
       window.removeEventListener("studio:generations-changed", onChanged);
     };
-  }, [signedIn, isUpgrade]);
+  }, [signedIn]);
 
-  const label = isUpgrade
+  const label = plan.isPro
     ? "Pro"
-    : remaining == null
-      ? "Free"
-      : `${remaining} left`;
+    : `${plan.remaining}/${FREE_GENERATION_LIMIT}`;
 
   return (
     <Popover>
@@ -70,7 +101,7 @@ export function PlanDropdown({
           variant="secondary"
           className={cn(
             "h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
-            isUpgrade &&
+            plan.isPro &&
               "bg-primary/15 text-primary hover:bg-primary/25 data-[state=open]:bg-primary/25",
           )}
         >
@@ -80,19 +111,17 @@ export function PlanDropdown({
 
       <PopoverContent
         align="start"
-        sideOffset={12}
+        sideOffset={10}
         className="w-[300px] rounded-2xl p-5"
       >
         <div className="flex flex-col">
           <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
-            {isUpgrade ? "Pro" : "Free plan"}
+            {plan.isPro ? "Pro" : "Free plan"}
           </h3>
           <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
-            {isUpgrade
+            {plan.isPro
               ? "Unlimited AI generations on your subscription."
-              : remaining != null
-                ? `${remaining} of ${FREE_GENERATION_LIMIT} free generations left.`
-                : `${FREE_GENERATION_LIMIT} free AI generations, then Pro.`}
+              : `${plan.remaining} of ${FREE_GENERATION_LIMIT} free generations left.`}
           </p>
 
           <div className="my-4 h-px w-full bg-muted/50" />
@@ -114,7 +143,7 @@ export function PlanDropdown({
             ))}
           </ul>
 
-          {!isUpgrade ? (
+          {!plan.isPro ? (
             <Button
               onClick={openUpgrade}
               className="mt-5 h-10 w-full rounded-full font-medium shadow-none"

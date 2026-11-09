@@ -15,7 +15,7 @@ alwaysApply: true
 ## Surfaces
 
 - Use borders sparingly. Prefer spacing, typography, and background contrast over `border` outlines.
-- Do **not** use box shadows (`shadow-*`). Flat surfaces only.
+- Buttons / chips / dialogs: no box shadows. Dropdown / select / popover panels: `shadow-sm` + `border-0` (`bg-popover`); in dark also `border-border/50`. Dialogs: `border-border/50` + `shadow-none` (`bg-background`).
 
 ## Themes
 

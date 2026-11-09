@@ -9,6 +9,7 @@ import { LeftSidebar, RAIL_SHORTCUTS } from "@/components/canvas/left-sidebar";
 import { CanvasToolbar } from "@/components/canvas/canvas-toolbar";
 import { CanvasChromeRestore } from "@/components/canvas/canvas-chrome-restore";
 import { ElementsToolbar } from "@/components/canvas/elements-toolbar";
+import { FocusSlideNav } from "@/components/canvas/focus-slide-nav";
 import { CanvasView } from "@/components/canvas/canvas-view";
 import { SelectionToolbar } from "@/components/canvas/selection-toolbar";
 import { AutoFlowPrompt } from "@/components/canvas/auto-flow-prompt";
@@ -17,7 +18,9 @@ import { PreviewModal } from "@/components/canvas/preview-modal";
 import type { NavId } from "@/components/canvas/left-sidebar";
 import { EditorPhoneDock } from "@/components/canvas/editor-phone-dock";
 import { StudioIntentBootstrap } from "@/components/studio/studio-intent-bootstrap";
+import { ZoomControls } from "@/components/canvas/zoom-controls";
 import { peekStudioIntent } from "@/lib/studio/pending-intent";
+
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
 import { useAutoSave } from "@/hooks/use-auto-save";
@@ -220,6 +223,7 @@ export default function CarouselEditor() {
 
           <div className="relative flex min-h-0 flex-1">
             <CanvasView />
+            {focusMode && <FocusSlideNav />}
             {focusMode && <SelectionToolbar />}
             {focusMode && (
               <ElementsToolbar onExit={() => setFocusMode(false)} />
@@ -228,7 +232,7 @@ export default function CarouselEditor() {
               <CanvasChromeRestore onShow={() => setCanvasChrome(true)} />
             )}
             {!focusMode && <AutoFlowPrompt />}
-           
+
             {!focusMode && phoneSheet ? (
               <button
                 type="button"

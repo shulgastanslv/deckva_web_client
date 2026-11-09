@@ -43,7 +43,6 @@ export interface ProjectDetail {
   updatedAt: string;
   slides: SlideItem[];
   document: DocumentMeta;
-  postCaption: string | null;
 }
 
 export interface SaveProjectInput {
@@ -56,7 +55,6 @@ export interface SaveProjectInput {
     thumbnail?: string | null;
   }>;
   document?: DocumentMeta;
-  postCaption?: string | null;
 }
 
 type ActionResult<T extends object = object> =
@@ -224,7 +222,6 @@ export async function createProject(input?: {
         updatedAt: project.updatedAt.toISOString(),
         slides: mapSlidesForClient(project.slides),
         document: readStoredDocument(project.canvasJSON),
-        postCaption: project.postCaption ?? null,
       },
     };
   } catch (err) {
@@ -270,7 +267,6 @@ export async function getProjectById(
           project.thumbnail,
         ),
         document: readStoredDocument(project.canvasJSON),
-        postCaption: project.postCaption ?? null,
       },
     };
   } catch (err) {
@@ -397,9 +393,6 @@ export async function saveProject(
           aspectRatio: input.aspectRatio,
           width: dims.width,
           height: dims.height,
-          ...(input.postCaption !== undefined
-            ? { postCaption: input.postCaption?.trim() || null }
-            : {}),
           ...projectSnapshot(input.slides, input.document),
         },
         select: { updatedAt: true },
@@ -440,7 +433,6 @@ export async function saveAsNewProject(
         aspectRatio: input.aspectRatio,
         width: dims.width,
         height: dims.height,
-        postCaption: input.postCaption?.trim() || null,
         ...projectSnapshot(input.slides, input.document),
         slides: {
           create: input.slides.map((slide, order) => ({
@@ -531,35 +523,6 @@ export async function saveProjectThumbnails(
   } catch (err) {
     console.error("saveProjectThumbnails error:", err);
     return { success: false, error: messages.errors.saveThumbnails };
-  }
-}
-
-export async function updateProjectCaption(
-  projectId: string,
-  postCaption: string | null,
-): Promise<ActionResult<{ postCaption: string | null }>> {
-  try {
-    const userId = await requireUserId();
-    if (!userId) return { success: false, error: messages.errors.signIn };
-
-    const project = await prisma.project.findFirst({
-      where: { id: projectId },
-      select: { id: true, userId: true, organizationId: true },
-    });
-    if (!project || !(await canAccessOrgResource(userId, project))) {
-      return { success: false, error: messages.errors.projectNotFound };
-    }
-
-    const trimmed = postCaption?.trim() || null;
-    await prisma.project.update({
-      where: { id: projectId },
-      data: { postCaption: trimmed },
-    });
-
-    return { success: true, postCaption: trimmed };
-  } catch (err) {
-    console.error("updateProjectCaption error:", err);
-    return { success: false, error: messages.errors.generic };
   }
 }
 

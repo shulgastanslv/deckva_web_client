@@ -88,6 +88,11 @@ export function ChipScroll<T extends string>({
     if (next) onChange(next.id);
   };
 
+  const maskImage =
+    canLeft || canRight
+      ? `linear-gradient(to right, ${canLeft ? "transparent" : "black"} 0, black ${canLeft ? "28px" : "0"}, black calc(100% - ${canRight ? "28px" : "0px"}), ${canRight ? "transparent" : "black"} 100%)`
+      : undefined;
+
   return (
     <div className={cn("relative w-full min-w-0", className)}>
       <ScrollContainer
@@ -95,6 +100,11 @@ export function ChipScroll<T extends string>({
         hideScrollbars
         innerRef={scrollRef}
         className="w-full min-w-0 cursor-grab overflow-x-auto select-none active:cursor-grabbing"
+        style={
+          maskImage
+            ? { maskImage, WebkitMaskImage: maskImage }
+            : undefined
+        }
         onScroll={updateEdges}
       >
         <div
@@ -135,20 +145,6 @@ export function ChipScroll<T extends string>({
         </div>
       </ScrollContainer>
 
-      <div
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent transition-opacity duration-200",
-          canLeft ? "opacity-100" : "opacity-0",
-        )}
-      />
-      <div
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent transition-opacity duration-200",
-          canRight ? "opacity-100" : "opacity-0",
-        )}
-      />
     </div>
   );
 }

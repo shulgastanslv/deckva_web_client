@@ -31,7 +31,6 @@ import { reportError } from "@/lib/report-error";
 import { CANVAS_RATIOS, type FabricCanvasJSON, type RatioKey } from "@/lib/types";
 import { fitCanvasJSON } from "@/lib/canvas/fit-frame";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
-import { CaptionControls } from "@/components/canvas/caption-controls";
 import { GridControls } from "@/components/canvas/grid-controls";
 import { ClearCanvasButton } from "@/components/canvas/clear-canvas-button";
 import { ZoomControls } from "@/components/canvas/zoom-controls";
@@ -176,8 +175,7 @@ export function CanvasToolbar({
   return (
     <div className="flex h-14 w-full min-w-0 shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border/50 bg-background/60 px-3.5 backdrop-blur-md select-none">
       <div className="flex shrink-0 items-center gap-2">
-        <CaptionControls />
-
+        <ZoomControls />
         <GridControls />
         <div className="h-4 w-px bg-border/60 mx-1" />
 
@@ -286,7 +284,7 @@ export function CanvasToolbar({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-         <RatioSelect currentRatio={currentRatio} onRatioChange={handleRatioChange} />
+        <RatioSelect currentRatio={currentRatio} onRatioChange={handleRatioChange} />
 
       </div>
 
@@ -345,7 +343,7 @@ export function CanvasToolbar({
         </DropdownMenu>
 
         <ClearCanvasButton />
-        <ZoomControls />
+
         {onHideChrome ? (
           <Button
             variant="ghost"

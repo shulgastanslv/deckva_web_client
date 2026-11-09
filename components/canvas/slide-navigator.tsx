@@ -7,6 +7,7 @@ import { useSlides } from "@/hooks/use-slides";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { captureCanvasThumbnail } from "@/lib/canvas/thumbnail";
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { useScrollEdgeFade } from "@/hooks/use-scroll-edge-fade";
 import type { CanvasManager } from "@/lib/canvas/manager";
 
 const THUMB_HEIGHT = 52;
@@ -42,10 +43,16 @@ export function SlideNavigator() {
   const toggleMarkedSlide = useCanvasStore((s) => s.toggleMarkedSlide);
 
   const activeRef = useRef<HTMLButtonElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
   const dragId = useRef<number | null>(null);
   const skipClick = useRef(false);
   const [liveThumb, setLiveThumb] = useState<string | null>(null);
   const [overId, setOverId] = useState<number | null>(null);
+  const { maskImage } = useScrollEdgeFade(stripRef, {
+    axis: "horizontal",
+    size: 32,
+    deps: [slides.length, currentSlideId],
+  });
 
   const aspect = canvasDimensions.width / canvasDimensions.height;
   const thumbW = Math.round(THUMB_HEIGHT * aspect);
@@ -116,7 +123,15 @@ export function SlideNavigator() {
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
-      <div className="flex flex-1 items-center gap-2 overflow-x-auto min-w-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        ref={stripRef}
+        className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={
+          maskImage
+            ? { maskImage, WebkitMaskImage: maskImage }
+            : undefined
+        }
+      >
         {slides.map((slide, idx) => {
           const isActive = currentSlideId === slide.id;
           const marked = markedSlideIds.includes(slide.id);

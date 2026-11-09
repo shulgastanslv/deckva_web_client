@@ -12,26 +12,6 @@ function isFabricSlide(value: unknown): value is FabricCanvasJSON {
   return isRecord(value) && Array.isArray(value.objects);
 }
 
-function captionFromSlides(slides: FabricCanvasJSON[]): string {
-  const lines: string[] = [];
-  for (const slide of slides) {
-    for (const raw of slide.objects ?? []) {
-      if (!isRecord(raw)) continue;
-      const text = typeof raw.text === "string" ? raw.text.trim() : "";
-      if (!text) continue;
-      const role = typeof raw.swibpRole === "string" ? raw.swibpRole : "";
-      if (role === "handle" || role === "counter") continue;
-      const style = typeof raw.swibpStyle === "string" ? raw.swibpStyle : "";
-      if (style === "heading" || style === "body" || style === "subtitle") {
-        lines.push(text);
-        break;
-      }
-    }
-    if (lines.length >= 8) break;
-  }
-  return lines.join("\n\n");
-}
-
 /** Parse `POST /cora/run` (or saved CORA JSON) into canvas-ready slides. */
 export function parseCoraCarouselPayload(
   payload: unknown,
@@ -88,8 +68,6 @@ export function parseCoraCarouselPayload(
     palette = undefined;
   }
 
-  const caption = captionFromSlides(slides);
-
   return {
     coraRunId:
       typeof payload.coraRunId === "string" ? payload.coraRunId : "cor_unknown",
@@ -99,7 +77,6 @@ export function parseCoraCarouselPayload(
     height,
     slides,
     palette,
-    caption: caption || undefined,
     modelId:
       typeof payload.modelId === "string" ? payload.modelId : "unknown",
   };

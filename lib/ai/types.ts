@@ -38,8 +38,6 @@ export type GenerateCarouselResult = {
   height: number;
   slides: FabricCanvasJSON[];
   palette?: AiPalette;
-  /** Post caption assembled from slide copy (heading lines). */
-  caption?: string;
   modelId: string;
   entitlement: GenerationEntitlement;
 };

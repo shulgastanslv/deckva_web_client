@@ -16,8 +16,6 @@ import {
   Layers2,
   Link2,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
   Minimize2,
   Minus,
   MousePointer2,
@@ -30,11 +28,7 @@ import {
   Triangle,
   Type,
   WandSparkles,
-  ZoomIn,
-  ZoomOut,
 } from "lucide-react";
-import { CaptionControls } from "@/components/canvas/caption-controls";
-import { useSlides } from "@/hooks/use-slides";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +46,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useElementLibrary } from "@/components/canvas/use-element-library";
 import { useImageTools } from "@/components/canvas/use-image-tools";
-import { clampZoom } from "@/components/canvas/zoom-controls";
 import type { UpscaleScale } from "@/actions/image-tools";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
@@ -377,10 +370,6 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   const setHandActive = useCanvasStore((s) => s.setHandActive);
   const eraserActive = useCanvasStore((s) => s.eraserActive);
   const setEraserActive = useCanvasStore((s) => s.setEraserActive);
-  const zoom = useCanvasStore((s) => s.zoom);
-  const setZoom = useCanvasStore((s) => s.setZoom);
-  const postCaption = useCanvasStore((s) => s.postCaption);
-  const { currentIndex, slides, canGoPrev, canGoNext, prev, next } = useSlides();
   const [shapeId, setShapeId] = useState(SHAPES[0].id);
   const [textId, setTextId] = useState(TEXTS[0].id);
   const [imageOpen, setImageOpen] = useState(false);
@@ -683,46 +672,6 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             <EnhanceIcon className={cn("size-4", enhanceBusy && "animate-spin")} />
           </SplitTool>
 
-          <BarDivider />
-
-          <CaptionControls />
-
-          <div className="flex h-9 items-center rounded-full bg-muted/50 p-0.5">
-            <RailTool
-              label="Previous slide"
-              disabled={!canGoPrev}
-              onClick={() => void prev()}
-            >
-              <ChevronLeft className="size-4" />
-            </RailTool>
-            <span className="min-w-10 px-1 text-center font-mono text-[11px] tabular-nums text-muted-foreground">
-              {currentIndex + 1}/{Math.max(slides.length, 1)}
-            </span>
-            <RailTool
-              label="Next slide"
-              disabled={!canGoNext}
-              onClick={() => void next()}
-            >
-              <ChevronRight className="size-4" />
-            </RailTool>
-          </div>
-
-          <BarDivider />
-
-          <RailTool label="Zoom out" onClick={() => setZoom(clampZoom(zoom - 10))}>
-            <ZoomOut className="size-4" />
-          </RailTool>
-          <button
-            type="button"
-            onClick={() => setZoom(100)}
-            title="Reset zoom"
-            className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full font-mono text-[11px] leading-none text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
-          >
-            {Math.round(zoom)}%
-          </button>
-          <RailTool label="Zoom in" onClick={() => setZoom(clampZoom(zoom + 10))}>
-            <ZoomIn className="size-4" />
-          </RailTool>
           <BarDivider />
 
           <RailTool label="Exit" hint="Leave focus mode. Esc" onClick={onExit}>

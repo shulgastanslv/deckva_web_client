@@ -1,14 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { CircleUserRound, LayoutDashboard, LogOut } from "lucide-react";
+import {
+  Globe,
+  LogOut,
+  MessageCircle,
+  Settings,
+  User,
+} from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { signOut, useSession } from "next-auth/react";
 
 import { AuthModal } from "@/components/auth";
+import { FeedbackDialog } from "@/components/feedback-dialog";
 import { ProfileSettingsDialog } from "@/components/profile-settings-dialog";
 import { StudioAvatar } from "@/components/studio/ui/studio-avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,17 +25,47 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { invalidateStudioProfile, useMyProfile } from "@/lib/studio/queries";
+import { cn } from "@/lib/utils";
 
 const itemClass =
-  "cursor-pointer gap-2.5 rounded-xl px-3 py-2 text-[13px] text-foreground focus:bg-muted/50";
+  "cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[14px] text-foreground focus:bg-muted/50";
 
-export function StudioUserNav() {
+const iconClass = "size-4 shrink-0 stroke-[1.75] text-foreground";
+
+function NavItem({
+  icon,
+  label,
+  onSelect,
+  className,
+}: {
+  icon: ReactNode;
+  label: string;
+  onSelect: () => void;
+  className?: string;
+}) {
+  return (
+    <DropdownMenuItem className={cn(itemClass, className)} onSelect={onSelect}>
+      {icon}
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+    </DropdownMenuItem>
+  );
+}
+
+export function StudioUserNav({
+  onCommunity,
+  showFeedback = true,
+}: {
+  /** Optional editor-only mobile community publish entry. */
+  onCommunity?: () => void;
+  showFeedback?: boolean;
+}) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const signedIn = status === "authenticated" && Boolean(session?.user);
   const isAdmin = session?.user?.role === "ADMIN";
@@ -47,20 +85,21 @@ export function StudioUserNav() {
     profile.data?.name?.trim() ||
     session?.user?.name?.trim() ||
     userEmail ||
-    "Settings";
+    "Account";
   const userLetter = (userName[0] || "U").toUpperCase();
   const avatarSrc = profile.data?.image ?? session?.user?.image ?? null;
 
   if (!signedIn) {
     return (
       <>
-        <StudioAvatar
-          letter="U"
-          interactive
-          className="size-8 text-[12px]"
-          aria-label="Sign in"
+        <Button
+          type="button"
+          variant="secondary"
+          className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60"
           onClick={() => setAuthOpen(true)}
-        />
+        >
+          Sign in
+        </Button>
         <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
       </>
     );
@@ -76,7 +115,7 @@ export function StudioUserNav() {
             src={avatarSrc}
             open={menuOpen}
             interactive
-            className="size-8 text-[12px]"
+            className="size-9 text-[13px]"
             aria-label="Account menu"
           />
         </DropdownMenuTrigger>
@@ -84,51 +123,72 @@ export function StudioUserNav() {
           side="bottom"
           align="end"
           sideOffset={10}
-          className="w-[220px] overflow-hidden rounded-2xl p-1.5"
+          className="w-[260px] overflow-hidden rounded-2xl p-2"
         >
-          <div className="flex items-center gap-2.5 px-2.5 py-2.5">
+          <div className="flex items-center gap-3 px-2 py-2.5">
             <StudioAvatar
               letter={userLetter}
               name={userName}
               src={avatarSrc}
-              className="size-8 text-[12px]"
+              className="size-9 text-[13px]"
             />
-            <p className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
-              {userName}
-            </p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[14px] font-semibold tracking-tight text-foreground">
+                {userName}
+              </p>
+              {userEmail && userEmail !== userName ? (
+                <p className="truncate text-[12px] text-muted-foreground">
+                  {userEmail}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
-          <DropdownMenuItem
-            className={itemClass}
-            onClick={() => setAccountOpen(true)}
-          >
-            <CircleUserRound className="size-4 stroke-[1.75] text-muted-foreground" />
-            Settings
-          </DropdownMenuItem>
-
+          <NavItem
+            icon={<User className={iconClass} />}
+            label="Profile"
+            onSelect={() => setAccountOpen(true)}
+          />
+          {showFeedback ? (
+            <NavItem
+              icon={<MessageCircle className={iconClass} />}
+              label="Feedback"
+              onSelect={() => setFeedbackOpen(true)}
+            />
+          ) : null}
           {isAdmin ? (
-            <DropdownMenuItem
-              className={itemClass}
-              onClick={() => router.push("/admin")}
-            >
-              <LayoutDashboard className="size-4 stroke-[1.75] text-muted-foreground" />
-              Admin panel
-            </DropdownMenuItem>
+            <NavItem
+              icon={<Settings className={iconClass} />}
+              label="Admin Console"
+              onSelect={() => router.push("/admin")}
+            />
           ) : null}
 
-          <DropdownMenuItem
-            className={itemClass}
-            onClick={() => signOut({ callbackUrl: "/" })}
-          >
-            <LogOut className="size-4 stroke-[1.75] text-muted-foreground" />
-            Log out
-          </DropdownMenuItem>
+          {onCommunity ? (
+            <NavItem
+              icon={<Globe className={iconClass} />}
+              label="Community"
+              onSelect={onCommunity}
+              className="sm:hidden"
+            />
+          ) : null}
+
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+
+          <NavItem
+            icon={<LogOut className={iconClass} />}
+            label="Log out"
+            onSelect={() => signOut({ callbackUrl: "/" })}
+          />
         </DropdownMenuContent>
       </DropdownMenu>
 
       <ProfileSettingsDialog open={accountOpen} onOpenChange={setAccountOpen} />
+      {showFeedback ? (
+        <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      ) : null}
     </>
   );
 }

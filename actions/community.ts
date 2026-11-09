@@ -453,7 +453,6 @@ export async function cloneCommunityProject(
         height: project.height,
         canvasJSON: project.canvasJSON as Prisma.InputJsonValue,
         thumbnail: project.thumbnail,
-        postCaption: project.postCaption,
         isPublic: false,
         communityStatus: "DRAFT",
         communityCategory: project.communityCategory,

@@ -78,9 +78,6 @@ export function StudioIntentBootstrap() {
           if (result.palette) {
             next.setPalette(aiPaletteToProjectPalette(result.palette));
           }
-          if (result.caption) {
-            next.setPostCaption(result.caption);
-          }
 
           const snap = useCanvasStore.getState();
           const saved = await saveProject(intent.projectId, {
@@ -97,7 +94,6 @@ export function StudioIntentBootstrap() {
               textStyles: snap.textStyles,
               chrome: snap.chrome,
             },
-            postCaption: snap.postCaption,
           });
           if (!saved.success) {
             throw new Error(messages.errors.saveCarousel);

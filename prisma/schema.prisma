@@ -259,8 +259,6 @@ model Project {
   canvasJSON  Json
   thumbnail  String? @db.Text
   isPublic    Boolean  @default(false)
-  /// Caption for social preview / posting.
-  postCaption String?  @db.Text
   /// First time the project was submitted to community.
   publishedAt DateTime?
   /// Last community republish / listing update.

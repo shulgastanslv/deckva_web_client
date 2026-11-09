@@ -3,9 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  User,
   ChevronRight,
-  LogOut,
   ArrowUp,
   Share,
   Globe,
@@ -13,42 +11,21 @@ import {
   Redo2,
   CloudOff,
   Focus,
-  MessageCircle,
   Play,
 } from "lucide-react";
 import Logo from "@/components/logo/logo";
-import { useQueryClient } from "@tanstack/react-query";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { AuthModal } from "@/components/auth";
 import { HelpDialog } from "@/components/help-dialog";
-import { FeedbackDialog } from "@/components/feedback-dialog";
-import { ProfileSettingsDialog } from "@/components/profile-settings-dialog";
 import { PublishCommunityDialog } from "@/components/publish-community-dialog";
-import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
-import { PlanDropdown } from "@/components/studio/header/plan-dropdown";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { StudioUserNav } from "@/components/studio/studio-user-nav";
 import { CommandsKbd } from "@/components/commands_kbd";
 import { ShareModal } from "./share-modal";
 import { ExportModal } from "./export-modal";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
-import {
-  invalidateStudioProfile,
-  useActiveOrganization,
-  useMyProfile,
-} from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
-
-const accountItemClass =
-  "cursor-pointer gap-2.5 rounded-none px-3.5 py-2.5 text-[14px] text-neutral-900 focus:bg-neutral-100 dark:text-foreground dark:focus:bg-muted";
 
 const iconBtn =
   "size-9 rounded-full text-muted-foreground hover:bg-muted/60 hover:text-foreground";
@@ -68,16 +45,10 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isPublishOpen, setIsPublishOpen] = useState(false);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const { data: session, status } = useSession();
-  const queryClient = useQueryClient();
+  const { status } = useSession();
   const [showShare, setShowShare] = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const organization = useActiveOrganization(status === "authenticated");
-  const isUpgrade = Boolean(organization.data?.organization?.isUpgrade);
 
   const manager = useCanvasManager();
   const slides = useCanvasStore((s) => s.slides);
@@ -85,7 +56,6 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
   const { rename, isDirty } = useProject();
   const [name, setName] = useState(projectTitle);
   const signedIn = status === "authenticated";
-  const profile = useMyProfile(signedIn);
 
   useEffect(() => {
     setName(projectTitle);
@@ -103,15 +73,6 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
     window.addEventListener("core:auth-link", onAuthLink);
     return () => window.removeEventListener("core:auth-link", onAuthLink);
   }, []);
-
-  useEffect(() => {
-    const onProfileChanged = () => {
-      void invalidateStudioProfile(queryClient);
-    };
-    window.addEventListener("studio:profile-changed", onProfileChanged);
-    return () =>
-      window.removeEventListener("studio:profile-changed", onProfileChanged);
-  }, [queryClient]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -139,17 +100,6 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
     setIsPublishOpen(true);
   };
 
-  const userEmail = profile.data?.email ?? session?.user?.email ?? "";
-  const userName =
-    profile.data?.name?.trim() ||
-    session?.user?.name?.trim() ||
-    userEmail ||
-    "Account";
-  const userInitial = userName ? userName[0].toUpperCase() : "?";
-  const avatarSrc =
-    profile.data?.image ||
-    session?.user?.image ||
-    `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(userName)}`;
   const slideCount = slides.length || 1;
 
   return (
@@ -272,92 +222,15 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
 
           <div className="flex items-center gap-2">
             {signedIn ? (
-              <PlanDropdown
-                isUpgrade={isUpgrade}
-                openUpgrade={() => setUpgradeOpen(true)}
-              />
-            ) : null}
-            {signedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-9 rounded-full p-0 ring-1 ring-border/60 hover:bg-muted/40 hover:ring-border"
-                    title="Settings"
-                  >
-                    <Avatar className="size-9 ring-0">
-                      <AvatarImage
-                        src={avatarSrc}
-                        alt={userName}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-muted text-[13px] font-medium">
-                        {userInitial}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  sideOffset={10}
-                  className="w-[240px] overflow-hidden rounded-2xl p-0"
-                >
-                  <div className="flex items-center gap-2.5 px-3.5 py-3">
-                    <Avatar className="size-8">
-                      <AvatarImage
-                        src={avatarSrc}
-                        alt={userName}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-muted text-[12px] font-semibold">
-                        {userInitial}
-                      </AvatarFallback>
-                    </Avatar>
-                    <p className="min-w-0 flex-1 truncate text-[14px] font-semibold text-neutral-950 dark:text-foreground">
-                      {userName}
-                    </p>
-                  </div>
-
-                  <DropdownMenuSeparator className="mx-0 my-0 bg-neutral-200/80 dark:bg-border" />
-
-                  <div className="py-1">
-                    <DropdownMenuItem
-                      className={accountItemClass}
-                      onClick={() => setIsProfileOpen(true)}
-                    >
-                      <User className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={accountItemClass}
-                      onClick={() => setIsFeedbackOpen(true)}
-                    >
-                      <MessageCircle className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                      Feedback
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={cn(accountItemClass, "sm:hidden")}
-                      onClick={openPublish}
-                    >
-                      <Globe className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                      Community publish
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={accountItemClass}
-                      onClick={() => signOut({ callbackUrl: "/" })}
-                    >
-                      <LogOut className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                      Log out
-                    </DropdownMenuItem>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <StudioUserNav onCommunity={openPublish} />
             ) : (
               <Button
                 variant="secondary"
                 size="sm"
-                className={labelBtn}
+                className={cn(
+                  labelBtn,
+                  "border-none bg-muted/40 shadow-none hover:bg-muted/60",
+                )}
                 onClick={() => setIsAuthModalOpen(true)}
               >
                 Sign in
@@ -396,14 +269,11 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
         }}
       />
       <HelpDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
-      <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
-      <ProfileSettingsDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
       <PublishCommunityDialog
         open={isPublishOpen}
         onOpenChange={setIsPublishOpen}
         onAuthRequired={() => setIsAuthModalOpen(true)}
       />
-      <StudioUpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} />
     </>
   );
 }

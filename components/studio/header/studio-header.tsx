@@ -89,7 +89,7 @@ export function StudioHeader({
             <Button
               type="button"
               variant="secondary"
-              className="rounded-full"
+              className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60"
               onClick={onSignIn}
             >
               {t("signIn")}
