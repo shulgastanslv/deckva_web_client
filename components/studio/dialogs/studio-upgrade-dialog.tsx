@@ -123,7 +123,7 @@ export function StudioUpgradeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="gap-0 overflow-hidden rounded-2xl border-0 bg-white p-0 sm:max-w-[300px] dark:bg-background dark:ring-1 dark:ring-border"
+        className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[300px]"
       >
         <button
           type="button"
@@ -165,7 +165,7 @@ export function StudioUpgradeDialog({
                       className="flex items-center gap-2 text-[12px] text-foreground/80"
                     >
                       <Check
-                        className="size-3 shrink-0 text-[#2f5bff]"
+                        className="size-3 shrink-0 text-primary"
                         strokeWidth={3}
                       />
                       {feature}
@@ -182,10 +182,10 @@ export function StudioUpgradeDialog({
                   setStep("payment");
                 }}
                 className={cn(
-                  "mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold transition-colors",
+                  "mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold shadow-none transition-colors",
                   alreadyPro
-                    ? "cursor-default bg-muted text-muted-foreground"
-                    : "bg-[#2f5bff] text-white hover:bg-[#254ae6]",
+                    ? "cursor-default bg-muted/40 text-muted-foreground"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90",
                 )}
               >
                 {alreadyPro
@@ -206,7 +206,7 @@ export function StudioUpgradeDialog({
                 <button
                   type="button"
                   onClick={() => setShowCardForm(true)}
-                  className="mt-4 flex w-full items-center gap-2 rounded-xl bg-muted/60 px-3 py-2.5 text-left text-[12px] transition-colors hover:bg-muted"
+                  className="mt-4 flex w-full items-center gap-2 rounded-2xl bg-muted/40 px-3 py-2.5 text-left text-[12px] transition-colors hover:bg-muted/60"
                 >
                   <CreditCard className="size-3.5 text-muted-foreground" />
                   <span className="min-w-0 flex-1 truncate">
@@ -227,7 +227,7 @@ export function StudioUpgradeDialog({
                     placeholder="Card number"
                     inputMode="numeric"
                     autoComplete="cc-number"
-                    className="h-9 rounded-xl bg-muted/50 px-3 text-[13px]"
+                    className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <Input
@@ -246,7 +246,7 @@ export function StudioUpgradeDialog({
                       placeholder="MM/YY"
                       inputMode="numeric"
                       autoComplete="cc-exp"
-                      className="h-9 rounded-xl bg-muted/50 px-3 text-[13px]"
+                      className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                     />
                     <Input
                       value={cvv}
@@ -257,7 +257,7 @@ export function StudioUpgradeDialog({
                       inputMode="numeric"
                       autoComplete="cc-csc"
                       type="password"
-                      className="h-9 rounded-xl bg-muted/50 px-3 text-[13px]"
+                      className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                     />
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export function StudioUpgradeDialog({
                 type="button"
                 disabled={busy}
                 onClick={() => void subscribe()}
-                className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#2f5bff] text-[13px] font-semibold text-white transition-colors hover:bg-[#254ae6] disabled:opacity-60"
+                className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 disabled:opacity-60"
               >
                 {busy ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -283,7 +283,7 @@ export function StudioUpgradeDialog({
                   setError(null);
                   setStep("plan");
                 }}
-                className="mt-2 flex h-9 w-full items-center justify-center rounded-full text-[12px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-60"
+                className="mt-2 flex h-9 w-full items-center justify-center rounded-full border-none bg-transparent text-[12px] font-medium text-muted-foreground shadow-none transition-colors hover:bg-muted/40 hover:text-foreground disabled:opacity-60"
               >
                 Back
               </button>

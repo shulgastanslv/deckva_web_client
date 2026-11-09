@@ -11,36 +11,36 @@ export function StudioViewToggle({
   onChange: (view: "list" | "grid") => void;
 }) {
   return (
-    <div className="flex items-center gap-0.5 rounded-full bg-muted p-0.5">
+    <div className="flex h-9 items-center gap-0.5 rounded-full bg-muted/40 p-0.5">
       <Button
         type="button"
-        size="icon-sm"
+        size="icon"
         variant="ghost"
         aria-label="Grid view"
         onClick={() => onChange("grid")}
         className={cn(
-          "size-7 rounded-full",
+          "size-8 rounded-full border-none shadow-none",
           view === "grid"
-            ? "bg-background text-foreground dark:bg-background/80"
-            : "text-muted-foreground hover:text-foreground",
+            ? "bg-background text-foreground"
+            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
         )}
       >
-        <LayoutGrid className="size-3.5" />
+        <LayoutGrid className="size-4" />
       </Button>
       <Button
         type="button"
-        size="icon-sm"
+        size="icon"
         variant="ghost"
         aria-label="List view"
         onClick={() => onChange("list")}
         className={cn(
-          "size-7 rounded-full",
+          "size-8 rounded-full border-none shadow-none",
           view === "list"
-            ? "bg-background text-foreground dark:bg-background/80"
-            : "text-muted-foreground hover:text-foreground",
+            ? "bg-background text-foreground"
+            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
         )}
       >
-        <List className="size-3.5" />
+        <List className="size-4" />
       </Button>
     </div>
   );

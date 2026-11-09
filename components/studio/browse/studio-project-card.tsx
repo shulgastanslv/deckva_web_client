@@ -18,11 +18,11 @@ export function StudioProjectCard({
   onChanged: () => void;
 }) {
   return (
-    <article className="group relative flex flex-col gap-2.5 cursor-pointer select-none hover:rotate-2 transition-transform duration-300">
+    <article className="group relative flex cursor-pointer flex-col gap-2.5 select-none">
       <button
         type="button"
         onClick={onOpen}
-        className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted text-left transition-colors group-hover:bg-muted/80 cursor-pointer select-none"
+        className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted/40 text-left transition-colors group-hover:bg-muted/60"
       >
         {project.previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -45,7 +45,7 @@ export function StudioProjectCard({
           </span>
         )}
         {project.isSaved ? (
-          <span className="absolute top-2 left-2 rounded-full bg-background/90 p-1">
+          <span className="absolute top-2 left-2 rounded-full bg-background/90 p-1.5">
             <Star className="size-3 fill-current text-foreground" />
           </span>
         ) : null}

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   CameraIcon,
   Check,
   CreditCard,
   KeyRound,
+  Languages,
   Loader2,
   LogOut,
   Monitor,
@@ -16,7 +17,9 @@ import {
   Wallet,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import { useLocale } from "next-intl";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 
 import {
   attachPaymentCard,
@@ -41,6 +44,12 @@ import { Switch } from "@/components/ui/switch";
 import { formatCardBrand } from "@/lib/billing/card";
 import type { BillingSnapshot } from "@/lib/billing/types";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import {
+  localeLabels,
+  locales,
+  type AppLocale,
+} from "@/lib/i18n/config";
+import { setAppLocale } from "@/lib/i18n/set-locale";
 import { messages } from "@/lib/messages";
 import { isPasswordLongEnough, PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
 import {
@@ -55,7 +64,7 @@ const NAV: { id: Section; label: string; icon: typeof UserRound }[] = [
   { id: "profile", label: "Profile", icon: UserRound },
   { id: "billing", label: "Billing", icon: Wallet },
   { id: "security", label: "Security", icon: KeyRound },
-  { id: "preferences", label: "Theme", icon: Monitor },
+  { id: "preferences", label: "Preferences", icon: Monitor },
   { id: "account", label: "Account", icon: LogOut },
 ];
 
@@ -110,6 +119,9 @@ export function ProfileSettingsDialog({
 }) {
   const { data: session, update } = useSession();
   const { resolvedTheme, setTheme } = useTheme();
+  const router = useRouter();
+  const locale = useLocale() as AppLocale;
+  const [localePending, startLocaleTransition] = useTransition();
   const [section, setSection] = useState<Section>("profile");
   const [themeMounted, setThemeMounted] = useState(false);
 
@@ -380,7 +392,7 @@ export function ProfileSettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
-        className="gap-0 overflow-hidden rounded-2xl border-0 p-0 ring-1 ring-foreground/10 sm:max-w-[640px]"
+        className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[640px]"
       >
         <div className="flex min-h-[440px] flex-col sm:flex-row">
           <aside className="flex shrink-0 flex-col bg-muted/25 sm:w-[168px]">
@@ -513,7 +525,7 @@ export function ProfileSettingsDialog({
                                 ? billing.cancelAtPeriodEnd
                                   ? `Ends ${formatDate(billing.subscriptionEndsAt)}`
                                   : `Renews ${formatDate(billing.subscriptionEndsAt)}`
-                                : `${STUDIO_PRO_PRICE} ${STUDIO_PRO_CURRENCY}/month`}
+                                : `${billing?.freeGenerationsRemaining ?? 0} of ${billing?.freeGenerationsLimit ?? 3} free generations left · Pro ${STUDIO_PRO_PRICE} ${STUDIO_PRO_CURRENCY}/mo`}
                             </p>
                           </div>
                           {billing?.isPro ? (
@@ -808,26 +820,64 @@ export function ProfileSettingsDialog({
                   ) : null}
 
                   {section === "preferences" ? (
-                    <div className="flex items-center justify-between gap-4 rounded-2xl bg-muted/35 px-4 py-3.5">
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-medium">Appearance</p>
-                        <p className="mt-0.5 text-[12px] text-muted-foreground">
-                          Light or dark
-                        </p>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-4 rounded-2xl bg-muted/35 px-4 py-3.5">
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium">Appearance</p>
+                          <p className="mt-0.5 text-[12px] text-muted-foreground">
+                            Light or dark
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          {isDark ? (
+                            <Moon className="size-4 text-muted-foreground" />
+                          ) : (
+                            <Sun className="size-4 text-muted-foreground" />
+                          )}
+                          <Switch
+                            checked={isDark}
+                            onCheckedChange={(checked) =>
+                              setTheme(checked ? "dark" : "light")
+                            }
+                            aria-label="Dark theme"
+                          />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2.5">
-                        {isDark ? (
-                          <Moon className="size-4 text-muted-foreground" />
-                        ) : (
-                          <Sun className="size-4 text-muted-foreground" />
-                        )}
-                        <Switch
-                          checked={isDark}
-                          onCheckedChange={(checked) =>
-                            setTheme(checked ? "dark" : "light")
-                          }
-                          aria-label="Dark theme"
-                        />
+
+                      <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
+                        <div className="flex items-start gap-2.5">
+                          <Languages className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[13px] font-medium">Language</p>
+                            <p className="mt-0.5 text-[12px] text-muted-foreground">
+                              Interface language
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-1.5">
+                              {locales.map((code) => (
+                                <button
+                                  key={code}
+                                  type="button"
+                                  disabled={localePending}
+                                  onClick={() => {
+                                    if (code === locale || localePending) return;
+                                    startLocaleTransition(async () => {
+                                      const res = await setAppLocale(code);
+                                      if (res.ok) router.refresh();
+                                    });
+                                  }}
+                                  className={cn(
+                                    "inline-flex h-8 items-center rounded-full px-3 text-[12px] font-medium transition-colors disabled:opacity-60",
+                                    code === locale
+                                      ? "bg-foreground text-background"
+                                      : "bg-muted/50 text-foreground hover:bg-muted/70",
+                                  )}
+                                >
+                                  {localeLabels[code]}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ) : null}

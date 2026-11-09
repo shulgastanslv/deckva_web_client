@@ -14,7 +14,7 @@ import Logo from "@/components/logo/logo";
 import { cn } from "@/lib/utils";
 
 export type AdminSection =
-  | "templates"
+  | "community"
   | "notify"
   | "news"
   | "feedback";
@@ -24,7 +24,7 @@ const NAV: Array<{
   label: string;
   icon: typeof LayoutTemplate;
 }> = [
-  { id: "templates", label: "Templates", icon: LayoutTemplate },
+  { id: "community", label: "Community", icon: LayoutTemplate },
   { id: "notify", label: "Notify", icon: Bell },
   { id: "news", label: "News", icon: Newspaper },
   { id: "feedback", label: "Feedback", icon: MessageSquareText },

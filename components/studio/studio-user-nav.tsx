@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CircleUserRound, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CircleUserRound, LayoutDashboard, LogOut } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { signOut, useSession } from "next-auth/react";
 
@@ -18,9 +19,10 @@ import {
 import { invalidateStudioProfile, useMyProfile } from "@/lib/studio/queries";
 
 const itemClass =
-  "cursor-pointer gap-2.5 rounded-none px-3.5 py-2.5 text-[14px] text-neutral-900 focus:bg-neutral-100 dark:text-foreground dark:focus:bg-muted";
+  "cursor-pointer gap-2.5 rounded-xl px-3 py-2 text-[13px] text-foreground focus:bg-muted/50";
 
 export function StudioUserNav() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,6 +30,7 @@ export function StudioUserNav() {
   const [accountOpen, setAccountOpen] = useState(false);
 
   const signedIn = status === "authenticated" && Boolean(session?.user);
+  const isAdmin = session?.user?.role === "ADMIN";
   const profile = useMyProfile(signedIn);
 
   useEffect(() => {
@@ -81,39 +84,47 @@ export function StudioUserNav() {
           side="bottom"
           align="end"
           sideOffset={10}
-          className="w-[220px] overflow-hidden rounded-2xl border-0 bg-white p-0 dark:bg-background dark:ring-1 dark:ring-border"
+          className="w-[220px] overflow-hidden rounded-2xl p-1.5"
         >
-          <div className="flex items-center gap-2.5 px-3.5 py-3">
+          <div className="flex items-center gap-2.5 px-2.5 py-2.5">
             <StudioAvatar
               letter={userLetter}
               name={userName}
               src={avatarSrc}
               className="size-8 text-[12px]"
             />
-            <p className="min-w-0 flex-1 truncate text-[14px] font-semibold text-neutral-950 dark:text-foreground">
+            <p className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
               {userName}
             </p>
           </div>
 
-          <DropdownMenuSeparator className="mx-0 my-0 bg-neutral-200/80 dark:bg-border" />
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
-          <div className="py-1">
+          <DropdownMenuItem
+            className={itemClass}
+            onClick={() => setAccountOpen(true)}
+          >
+            <CircleUserRound className="size-4 stroke-[1.75] text-muted-foreground" />
+            Settings
+          </DropdownMenuItem>
+
+          {isAdmin ? (
             <DropdownMenuItem
               className={itemClass}
-              onClick={() => setAccountOpen(true)}
+              onClick={() => router.push("/admin")}
             >
-              <CircleUserRound className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-              Settings
+              <LayoutDashboard className="size-4 stroke-[1.75] text-muted-foreground" />
+              Admin panel
             </DropdownMenuItem>
+          ) : null}
 
-            <DropdownMenuItem
-              className={itemClass}
-              onClick={() => signOut({ callbackUrl: "/" })}
-            >
-              <LogOut className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-              Log out
-            </DropdownMenuItem>
-          </div>
+          <DropdownMenuItem
+            className={itemClass}
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
+            <LogOut className="size-4 stroke-[1.75] text-muted-foreground" />
+            Log out
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

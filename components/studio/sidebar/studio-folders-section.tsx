@@ -224,7 +224,7 @@ export function StudioFoldersSection() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="min-w-[140px] rounded-2xl border-0 bg-muted p-1.5 shadow-none"
+                    className="min-w-[140px] rounded-2xl p-1.5"
                   >
                     <DropdownMenuItem
                       className="cursor-pointer gap-2 rounded-xl text-[13px]"

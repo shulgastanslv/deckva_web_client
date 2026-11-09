@@ -65,7 +65,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
             search={sidebarSearch}
             onSearchChange={setSidebarSearch}
             onBlank={create.openBlank}
-            onTemplates={create.openTemplates}
+            onTemplates={create.openCommunity}
           />
         </div>
 
@@ -93,7 +93,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
                 search={sidebarSearch}
                 onSearchChange={setSidebarSearch}
                 onBlank={create.openBlank}
-                onTemplates={create.openTemplates}
+                onTemplates={create.openCommunity}
               />
             </div>
           </div>

@@ -33,7 +33,6 @@ type NavItem = {
 export function StudioSidebarNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
   const currentTab = searchParams.get("tab") || "all";
 
   const items: NavItem[] = [
@@ -49,11 +48,13 @@ export function StudioSidebarNav() {
       icon: FolderIcon,
       active: pathname.startsWith("/studio/browse"),
       subItems: [
-        { href: "/studio/browse?tab=all", label: "Carousels", tabId: "all" },
-        { href: "/studio/browse?tab=texts", label: "Texts", tabId: "texts" },
-        { href: "/studio/browse?tab=palettes", label: "Palettes", tabId: "palettes" },
+        { href: "/studio/browse?tab=all", label: "Projects", tabId: "all" },
         { href: "/studio/browse?tab=starred", label: "Starred", tabId: "starred" },
-        { href: "/studio/browse?tab=templates", label: "Templates", tabId: "templates" },
+        {
+          href: "/studio/browse?tab=community",
+          label: "Community",
+          tabId: "community",
+        },
       ],
     },
     {
@@ -71,20 +72,15 @@ export function StudioSidebarNav() {
           <Link
             href={item.href}
             className={cn(
-              "flex h-9 items-center gap-2.5 rounded-xl px-2.5 text-[13px] font-medium transition-colors w-full",
+              "flex h-9 w-full items-center gap-2.5 rounded-xl px-2.5 text-[13px] font-medium transition-colors",
               item.active
                 ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:bg-background/70 hover:text-foreground dark:hover:bg-muted/50"
+                : "text-muted-foreground hover:bg-background/70 hover:text-foreground dark:hover:bg-muted/50",
             )}
           >
-            <item.icon
-              className={cn(
-                "size-4 shrink-0 stroke-[1.75]",
-                item.active && item.label === "Starred" && "fill-current"
-              )}
-            />
+            <item.icon className="size-4 shrink-0 stroke-[1.75]" />
             <span className="flex-1 text-left">{item.label}</span>
-            {item.subItems && <ChevronRight className="size-3.5 opacity-50" />}
+            {item.subItems ? <ChevronRight className="size-3.5 opacity-50" /> : null}
           </Link>
         );
 
@@ -92,15 +88,13 @@ export function StudioSidebarNav() {
           return (
             <HoverCard key={item.href} openDelay={100} closeDelay={150}>
               <HoverCardTrigger asChild>
-                {/* Оборачиваем в div, чтобы HoverCardTrigger корректно работал с Link */}
                 <div>{LinkContent}</div>
               </HoverCardTrigger>
-              
-              <HoverCardContent 
-                side="right" 
-                align="start" 
+              <HoverCardContent
+                side="right"
+                align="start"
                 sideOffset={12}
-                className="w-36 flex flex-col gap-0.5 rounded-2xl bg-popover p-1.5 shadow-md"
+                className="flex w-36 flex-col gap-0.5 rounded-2xl bg-popover p-1.5 shadow-none"
               >
                 {item.subItems.map((sub) => {
                   const isActiveSub = item.active && currentTab === sub.tabId;
@@ -111,8 +105,8 @@ export function StudioSidebarNav() {
                       className={cn(
                         "flex h-8 items-center rounded-md px-2.5 text-[13px] transition-colors",
                         isActiveSub
-                          ? "bg-muted text-foreground font-medium"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                          ? "bg-muted font-medium text-foreground"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                       )}
                     >
                       {sub.label}

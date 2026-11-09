@@ -7,12 +7,6 @@ import {
 } from "@tanstack/react-query";
 
 import { listMyNotifications, type NotificationItem } from "@/actions/admin";
-import {
-  getArtifactById,
-  getUserArtifacts,
-  listProjectAnnotations,
-  type ArtifactKindValue,
-} from "@/actions/artifacts";
 import { getUserFolders } from "@/actions/folders";
 import { getActiveOrganization, getUserOrganizations } from "@/actions/organizations";
 import { getUserProjects } from "@/actions/projects";
@@ -26,12 +20,6 @@ export const studioKeys = {
   folders: ["studio", "folders"] as const,
   projectsRoot: ["studio", "projects"] as const,
   projects: (folderId = "") => ["studio", "projects", folderId] as const,
-  artifactsRoot: ["studio", "artifacts"] as const,
-  artifacts: (kind = "", folderId = "") =>
-    ["studio", "artifacts", kind, folderId] as const,
-  artifact: (id: string) => ["studio", "artifact", id] as const,
-  projectAnnotations: (projectId: string) =>
-    ["studio", "annotations", projectId] as const,
   notifications: ["studio", "notifications"] as const,
   profile: ["studio", "profile"] as const,
 };
@@ -113,43 +101,6 @@ export function useUserProjects(folderId: string, enabled: boolean) {
   });
 }
 
-export function useUserArtifacts(
-  kind: ArtifactKindValue | "",
-  enabled: boolean,
-  folderId = "",
-) {
-  return useQuery({
-    queryKey: studioKeys.artifacts(kind, folderId),
-    queryFn: () =>
-      readStudioResult(() =>
-        getUserArtifacts({
-          ...(kind ? { kind } : {}),
-          ...(folderId ? { folderId } : {}),
-        }),
-      ),
-    staleTime: studioStaleTime.projects,
-    enabled,
-  });
-}
-
-export function useArtifact(artifactId: string, enabled: boolean) {
-  return useQuery({
-    queryKey: studioKeys.artifact(artifactId),
-    queryFn: () => readStudioResult(() => getArtifactById(artifactId)),
-    staleTime: studioStaleTime.projects,
-    enabled: enabled && Boolean(artifactId),
-  });
-}
-
-export function useProjectAnnotations(projectId: string, enabled: boolean) {
-  return useQuery({
-    queryKey: studioKeys.projectAnnotations(projectId),
-    queryFn: () => readStudioResult(() => listProjectAnnotations(projectId)),
-    staleTime: studioStaleTime.projects,
-    enabled: enabled && Boolean(projectId),
-  });
-}
-
 export function useMyNotifications(enabled: boolean) {
   return useQuery({
     queryKey: studioKeys.notifications,
@@ -200,10 +151,6 @@ export function invalidateStudioProjects(client: QueryClient) {
   return client.invalidateQueries({ queryKey: studioKeys.projectsRoot });
 }
 
-export function invalidateStudioArtifacts(client: QueryClient) {
-  return client.invalidateQueries({ queryKey: studioKeys.artifactsRoot });
-}
-
 export function invalidateStudioOrganizations(client: QueryClient) {
   return Promise.all([
     client.invalidateQueries({ queryKey: studioKeys.organizations }),
@@ -229,30 +176,6 @@ export function invalidateStudioProfile(client: QueryClient) {
 
 export function invalidateStudioNotifications(client: QueryClient) {
   return client.invalidateQueries({ queryKey: studioKeys.notifications });
-}
-
-export function invalidateStudioArtifact(
-  client: QueryClient,
-  artifactId: string,
-) {
-  return Promise.all([
-    client.invalidateQueries({ queryKey: studioKeys.artifact(artifactId) }),
-    invalidateStudioArtifacts(client),
-  ]);
-}
-
-export function invalidateStudioAnnotations(
-  client: QueryClient,
-  projectId: string,
-) {
-  return client.invalidateQueries({
-    queryKey: studioKeys.projectAnnotations(projectId),
-  });
-}
-
-export function useInvalidateStudioArtifacts() {
-  const client = useQueryClient();
-  return () => invalidateStudioArtifacts(client);
 }
 
 export function useInvalidateStudioProjects() {

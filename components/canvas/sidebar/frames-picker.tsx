@@ -272,7 +272,7 @@ export function FramesPicker({
           align="start"
           sideOffset={8}
           collisionPadding={12}
-          className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] border-0 bg-popover p-0"
+          className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] p-0"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <div className="max-h-[min(22rem,50vh)] overflow-y-auto overscroll-contain px-2.5 pt-2.5 pb-2 [scrollbar-width:thin]">

@@ -33,7 +33,33 @@ export function upstreamErrorMessage(
     }
     if (typeof row.error === "string" && row.error.trim()) return row.error;
   }
+  if (status === 402) return "Upgrade to Pro to keep generating";
   return `${fallback} (${status})`;
+}
+
+function aiUrl(path: string) {
+  return `${aiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+async function throwUpstream(
+  error: unknown,
+  label: string,
+): Promise<never> {
+  if (error instanceof Error && error.message.includes("returned an empty response")) {
+    throw error;
+  }
+  if (isTimeoutError(error)) {
+    throw new Error(`${label} timed out`);
+  }
+  if (isAxiosError(error)) {
+    if (!error.response) {
+      throw new Error("Couldn't reach the Deckva AI server");
+    }
+    throw new Error(
+      upstreamErrorMessage(error.response.data, error.response.status, label),
+    );
+  }
+  throw new Error(await httpErrorMessage(error, label));
 }
 
 export async function fetchAiJson(
@@ -43,10 +69,9 @@ export async function fetchAiJson(
 ): Promise<unknown> {
   const timeoutMs = options?.timeoutMs ?? 120_000;
   const label = options?.label ?? "AI request";
-  const url = `${aiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
 
   try {
-    const { data } = await http.post(url, body, {
+    const { data } = await http.post(aiUrl(path), body, {
       timeout: timeoutMs,
       headers: { "Content-Type": "application/json" },
     });
@@ -55,20 +80,27 @@ export async function fetchAiJson(
     }
     return data;
   } catch (error) {
-    if (error instanceof Error && error.message.includes("returned an empty response")) {
-      throw error;
+    return throwUpstream(error, label);
+  }
+}
+
+export async function fetchAiGet(
+  path: string,
+  options?: { timeoutMs?: number; label?: string; params?: Record<string, string | number> },
+): Promise<unknown> {
+  const timeoutMs = options?.timeoutMs ?? 30_000;
+  const label = options?.label ?? "AI request";
+
+  try {
+    const { data } = await http.get(aiUrl(path), {
+      timeout: timeoutMs,
+      params: options?.params,
+    });
+    if (!data || typeof data !== "object") {
+      throw new Error(`${label} returned an empty response`);
     }
-    if (isTimeoutError(error)) {
-      throw new Error(`${label} timed out`);
-    }
-    if (isAxiosError(error)) {
-      if (!error.response) {
-        throw new Error("Couldn't reach the Deckva AI server");
-      }
-      throw new Error(
-        upstreamErrorMessage(error.response.data, error.response.status, label),
-      );
-    }
-    throw new Error(await httpErrorMessage(error, label));
+    return data;
+  } catch (error) {
+    return throwUpstream(error, label);
   }
 }

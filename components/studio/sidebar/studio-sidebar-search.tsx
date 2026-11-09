@@ -48,7 +48,7 @@ export function StudioSidebarSearch({
         <DropdownMenuContent
           align="end"
           sideOffset={8}
-          className="min-w-[180px] rounded-2xl border-0 bg-muted p-1.5 shadow-none"
+          className="min-w-[180px] rounded-2xl p-1.5"
         >
           <DropdownMenuItem
             className="cursor-pointer rounded-xl text-[13px]"

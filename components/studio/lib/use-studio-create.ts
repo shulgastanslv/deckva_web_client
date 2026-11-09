@@ -2,63 +2,30 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
-import {
-  createPaletteArtifact,
-  createTextArtifact,
-  linkCarouselArtifact,
-} from "@/actions/artifacts";
+import { getGenerationStatus } from "@/actions/ai";
 import { createProject } from "@/actions/projects";
-import {
-  generatePalette as generatePaletteAi,
-  generateText as generateTextAi,
-} from "@/actions/ai";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
-import {
-  fetchActiveOrganization,
-  fetchUserProjects,
-  invalidateStudioArtifacts,
-} from "@/lib/studio/queries";
 import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { stashPendingCover } from "@/lib/studio/pending-cover";
-import type { AiPalette } from "@/lib/ai/generate-palette";
-import {
-  stashStudioIntent,
-  type StudioInsertIntent,
-} from "@/lib/studio/pending-intent";
-import { topicForCarouselGeneration } from "@/lib/studio/pipeline";
-import { FREE_CAROUSEL_LIMIT } from "@/lib/studio/plans";
-import { resolveCarouselPipelineContext } from "@/lib/studio/resolve-pipeline-context";
-import type { GenerationKind, StudioPromptSubmit } from "@/lib/studio/generation/types";
+import { stashStudioIntent } from "@/lib/studio/pending-intent";
+import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import type { RatioKey } from "@/lib/types";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
-async function requireCarouselSlot(client: QueryClient): Promise<boolean> {
-  const [orgResult, projectsResult] = await Promise.allSettled([
-    fetchActiveOrganization(client),
-    fetchUserProjects(client),
-  ]);
-  if (
-    orgResult.status === "fulfilled" &&
-    orgResult.value.organization?.isUpgrade
-  ) {
+async function canGenerate(): Promise<boolean> {
+  try {
+    const status = await getGenerationStatus();
+    if (status.entitlement.canGenerate) return true;
+  } catch {
+    // Not signed in / offline — let the flow surface the real error
     return true;
   }
-  const count =
-    projectsResult.status === "fulfilled" ? projectsResult.value.projects.length : 0;
-  if (count >= FREE_CAROUSEL_LIMIT) {
-    window.dispatchEvent(new CustomEvent("studio:open-upgrade"));
-    return false;
-  }
-  return true;
-}
-
-function notifyProjectsChanged() {
-  window.dispatchEvent(new CustomEvent("core:projects-changed"));
+  window.dispatchEvent(new CustomEvent("studio:open-upgrade"));
+  return false;
 }
 
 function draftTitle(topic: string): string {
@@ -67,136 +34,44 @@ function draftTitle(topic: string): string {
   return `${trimmed.slice(0, 61).trimEnd()}…`;
 }
 
+/** Create a project, stash generate intent, open editor. CORA runs in the editor. */
 export function useStudioCreate() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
 
   const openBlank = async () => {
-    if (!(await requireCarouselSlot(queryClient))) return;
     stashStudioIntent({ type: "new" });
     router.push("/studio/editor");
   };
 
-  const openWithInsert = async (
-    intent: Omit<StudioInsertIntent, "type">,
-  ) => {
-    if (!(await requireCarouselSlot(queryClient))) return;
-    stashStudioIntent({ type: "insert", ...intent });
-    router.push("/studio/editor");
-  };
-
-  const openTemplates = () => router.push("/studio/browse?tab=templates");
-
-  const generateText = async (input: {
-    topic: string;
-    parentArtifactId?: string | null;
-  }) => {
-    const topic = input.topic.trim();
-    setGenerateError(null);
-
-    setGenerating(true);
-    try {
-      const { text } = await generateTextAi(topic);
-      const created = await createTextArtifact({
-        prompt: topic,
-        text,
-        parentId: input.parentArtifactId,
-      });
-      if (!created.success) {
-        setGenerateError(
-          "error" in created ? created.error : messages.errors.generic,
-        );
-        return;
-      }
-      await invalidateStudioArtifacts(queryClient);
-      notifyProjectsChanged();
-      router.push(`/studio/artifacts/${created.artifactId}`);
-    } catch (err) {
-      reportError(err, messages.errors.startGeneration);
-      setGenerateError(
-        err instanceof Error ? err.message : messages.errors.startGeneration,
-      );
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const generatePalette = async (input: {
-    topic: string;
-    parentArtifactId?: string | null;
-  }) => {
-    const topic = input.topic.trim();
-    setGenerateError(null);
-
-    setGenerating(true);
-    try {
-      const palette = await generatePaletteAi(
-        topic,
-        inferPromptLanguage(topic),
-      );
-      const created = await createPaletteArtifact({
-        prompt: topic,
-        palette,
-        title: palette.name,
-        parentId: input.parentArtifactId,
-      });
-      if (!created.success) {
-        setGenerateError(
-          "error" in created ? created.error : messages.errors.generic,
-        );
-        return;
-      }
-      await invalidateStudioArtifacts(queryClient);
-      notifyProjectsChanged();
-      router.push(`/studio/artifacts/${created.artifactId}`);
-    } catch (err) {
-      reportError(err, messages.errors.startGeneration);
-      setGenerateError(
-        err instanceof Error ? err.message : messages.errors.startGeneration,
-      );
-    } finally {
-      setGenerating(false);
-    }
-  };
+  const openCommunity = () => router.push("/studio/browse?tab=community");
 
   const generateCarousel = async (input: {
     topic: string;
+    modelId?: string;
     cover?: string;
     aspectRatio?: RatioKey;
     slidesCount?: number;
     language?: string;
     handle?: string;
-    parentArtifactId?: string | null;
-    seedText?: string;
-    palette?: AiPalette;
   }) => {
     setGenerateError(null);
-    if (!(await requireCarouselSlot(queryClient))) return;
+    if (!(await canGenerate())) return;
 
     setGenerating(true);
     try {
-      const ctx = await resolveCarouselPipelineContext({
-        topic: input.topic,
-        seedText: input.seedText,
-        palette: input.palette,
-        parentArtifactId: input.parentArtifactId,
-      });
-
-      const topic = ctx.topic.trim();
-      const cover = input.cover?.trim() ?? "";
-      const generationTopic = topicForCarouselGeneration(ctx);
+      const topic = input.topic.trim();
       const aspectRatio: RatioKey = input.aspectRatio ?? "4:5";
       const slidesCount = Math.min(10, Math.max(4, input.slidesCount ?? 7));
-      const language =
-        input.language?.trim() || inferPromptLanguage(generationTopic);
+      const language = input.language?.trim() || inferPromptLanguage(topic);
       const handle = normalizeHandle(
         input.handle ||
           session?.user?.name ||
           session?.user?.email?.split("@")[0],
       );
+      const cover = input.cover?.trim() ?? "";
 
       const created = await createProject({
         title: draftTitle(topic),
@@ -207,28 +82,17 @@ export function useStudioCreate() {
         return;
       }
 
-      await linkCarouselArtifact({
-        projectId: created.projectId,
-        title: draftTitle(topic),
-        prompt: topic,
-        parentId: ctx.parentArtifactId,
-        topic,
-      });
-
-      const intentCover = cover.startsWith("data:") ? "" : cover;
       stashPendingCover(created.projectId, cover);
       stashStudioIntent({
         type: "generate",
         projectId: created.projectId,
-        topic: generationTopic,
+        topic,
         handle,
         language,
         aspectRatio,
         slidesCount,
-        cover: intentCover,
-        parentArtifactId: ctx.parentArtifactId ?? null,
-        seedText: ctx.seedText,
-        palette: ctx.palette,
+        cover: cover.startsWith("data:") ? "" : cover,
+        modelId: input.modelId,
       });
 
       const store = useCanvasStore.getState();
@@ -236,60 +100,39 @@ export function useStudioCreate() {
       store.setProjectTitle(draftTitle(topic));
       store.setGeneratingCarousel(true);
 
-      await invalidateStudioArtifacts(queryClient);
-      notifyProjectsChanged();
       trackEvent("carousel_created", {
         projectId: created.projectId,
         slidesCount,
         aspectRatio,
         language,
+        modelId: input.modelId ?? null,
       });
       router.push(`/studio/editor?project=${created.projectId}`);
     } catch (err) {
       reportError(err, messages.errors.startGeneration);
-      setGenerateError(messages.errors.startGeneration);
+      setGenerateError(
+        err instanceof Error ? err.message : messages.errors.startGeneration,
+      );
     } finally {
       setGenerating(false);
     }
   };
 
-  const generateFromPrompt = async (
-    input: StudioPromptSubmit & { cover?: string },
-  ) => {
-    const shared = {
-      topic: input.topic,
-      parentArtifactId: input.parentArtifactId,
-    };
-    if (input.type === "text") {
-      await generateText(shared);
-      return;
-    }
-    if (input.type === "palette") {
-      await generatePalette(shared);
-      return;
-    }
+  const generateFromPrompt = async (input: StudioPromptSubmit) => {
     await generateCarousel({
-      ...shared,
-      cover: input.cover,
+      topic: input.topic,
+      modelId: input.modelId,
     });
-  };
-
-  const openGenerateKind = (kind: GenerationKind) => {
-    router.push(`/studio?generate=${kind}`);
   };
 
   return {
     openBlank,
-    openWithInsert,
-    openTemplates,
-    openGenerateKind,
+    openCommunity,
     generating,
     setGenerating,
     generateError,
     setGenerateError,
     generateFromPrompt,
-    generateText,
-    generatePalette,
     generateCarousel,
   };
 }

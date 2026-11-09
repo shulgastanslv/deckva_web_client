@@ -251,7 +251,7 @@ export function AuthModal({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         showCloseButton={!required}
-        className="w-full max-w-md rounded-3xl p-0 gap-0 border border-border"
+        className="w-full max-w-md gap-0 rounded-3xl p-0"
         onPointerDownOutside={required ? (e) => e.preventDefault() : undefined}
         onEscapeKeyDown={required ? (e) => e.preventDefault() : undefined}
         onInteractOutside={required ? (e) => e.preventDefault() : undefined}

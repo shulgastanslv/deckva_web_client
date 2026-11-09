@@ -88,7 +88,7 @@ export function FeedbackDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-[420px]"
+        className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[420px]"
       >
         <div className="relative flex items-center gap-4 bg-muted px-5 pt-5 pb-4">
           <DialogClose asChild>

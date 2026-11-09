@@ -30,7 +30,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { trackEvent } from "@/lib/analytics";
 import { SOCIAL_LINKS } from "@/lib/social";
 import {
-  FREE_CAROUSEL_LIMIT,
+  FREE_GENERATION_LIMIT,
   PRO_FEATURES,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
@@ -174,7 +174,7 @@ const FAQ = [
   {
     value: "price",
     q: "What does it cost?",
-    a: `The first ${FREE_CAROUSEL_LIMIT} carousels are free. After that, Pro is ${STUDIO_PRO_PRICE} Br a month. Cancel any time. Access stays until the end of the paid period.`,
+    a: `The first ${FREE_GENERATION_LIMIT} AI generations are free. After that, Pro is ${STUDIO_PRO_PRICE} Br a month. Cancel any time. Access stays until the end of the paid period.`,
   },
   {
     value: "where",
@@ -234,7 +234,7 @@ const FAQ = [
   {
     value: "pro",
     q: "What is on Pro that is not free?",
-    a: `Unlimited private carousels, high-resolution exports, folders and brand kits, and priority support. The first ${FREE_CAROUSEL_LIMIT} carousels stay free.`,
+    a: `Unlimited AI generations, high-resolution exports, folders and brand kits, and priority support. The first ${FREE_GENERATION_LIMIT} generations stay free.`,
   },
   {
     value: "cancel",
@@ -937,7 +937,7 @@ export function LandingPage() {
               </a>
             </motion.div>
             <p className="mt-4 text-sm text-white/65">
-              {t("freeLine", { count: FREE_CAROUSEL_LIMIT })}
+              {t("freeLine", { count: FREE_GENERATION_LIMIT })}
               {" · "}
               {t("desktopBanner")}
             </p>
@@ -1208,7 +1208,7 @@ export function LandingPage() {
             <ul className="mt-6 flex-1 space-y-3 text-base text-land-ink/75">
               <li className="flex items-start gap-2">
                 <Check className="mt-0.5 size-4 shrink-0 text-land-blue" strokeWidth={2.5} />
-                {FREE_CAROUSEL_LIMIT} editable carousels
+                {FREE_GENERATION_LIMIT} free AI generations
               </li>
               <li className="flex items-start gap-2">
                 <Check className="mt-0.5 size-4 shrink-0 text-land-blue" strokeWidth={2.5} />
@@ -1255,7 +1255,7 @@ export function LandingPage() {
           </li>
         </ul>
         <p className={`mt-6 max-w-xl ${landSub}`}>
-          The first {FREE_CAROUSEL_LIMIT} carousels are free. The next one is Pro, {STUDIO_PRO_PRICE} Br a month.
+          The first {FREE_GENERATION_LIMIT} AI generations are free. Then Pro — {STUDIO_PRO_PRICE} Br a month.
         </p>
 
         <h2 id="generate" className={`${sectionTitle} mt-16 scroll-mt-28 sm:mt-20`}>

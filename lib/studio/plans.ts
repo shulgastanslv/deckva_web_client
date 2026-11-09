@@ -3,11 +3,14 @@ export const STUDIO_PRO_PRICE = 15;
 export const STUDIO_PRO_CURRENCY = "BYN";
 export const STUDIO_PRO_PRICE_LABEL = `${STUDIO_PRO_PRICE} BYN`;
 
-/** Free plan max editable carousels per user. */
-export const FREE_CAROUSEL_LIMIT = 3;
+/** Free plan: successful AI generations before upgrade is required. */
+export const FREE_GENERATION_LIMIT = 3;
+
+/** @deprecated Use FREE_GENERATION_LIMIT — kept for landing copy migration. */
+export const FREE_CAROUSEL_LIMIT = FREE_GENERATION_LIMIT;
 
 export const PRO_FEATURES = [
-  "Unlimited private carousels",
+  "Unlimited AI generations",
   "High-resolution exports",
   "Folders & brand kits",
   "Priority support",
@@ -24,8 +27,13 @@ export function isUpgradeRequiredError(error: string | null | undefined) {
   return Boolean(error?.includes("Upgrade to Pro"));
 }
 
-export function freeCarouselLimitMessage(limit = FREE_CAROUSEL_LIMIT) {
-  return `You've reached the limit of ${limit} editable carousels. Unlock unlimited carousels and more.`;
+export function freeGenerationLimitMessage(limit = FREE_GENERATION_LIMIT) {
+  return `You've used your ${limit} free generations. Upgrade to Pro for unlimited AI.`;
+}
+
+/** @deprecated Use freeGenerationLimitMessage */
+export function freeCarouselLimitMessage(limit = FREE_GENERATION_LIMIT) {
+  return freeGenerationLimitMessage(limit);
 }
 
 export function addBillingMonth(from = new Date()): Date {

@@ -37,7 +37,7 @@ export function StudioCodeBlockDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[min(32rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-lg"
+        className="w-[min(32rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-lg"
         showCloseButton
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">

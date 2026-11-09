@@ -268,7 +268,7 @@ function SplitTool({
         side="top"
         align="center"
         sideOffset={12}
-        className="w-auto rounded-2xl border-0 bg-popover p-2"
+        className="w-auto rounded-2xl p-2"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         {panel}

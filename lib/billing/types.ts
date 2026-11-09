@@ -35,6 +35,42 @@ export interface ChargeResult {
   error?: string;
 }
 
+/** Normalized webhook event from any payment provider. */
+export type PaymentWebhookEvent = {
+  type:
+    | "payment.succeeded"
+    | "payment.failed"
+    | "subscription.canceled"
+    | "unknown";
+  providerRef?: string;
+  userId?: string;
+  amount?: number;
+  currency?: string;
+  raw: unknown;
+};
+
+export type PaymentProviderId = "sandbox" | "bepaid";
+
+/** Provider-agnostic payment adapter. Swap implementations via PAYMENT_PROVIDER. */
+export interface PaymentProvider {
+  readonly id: PaymentProviderId;
+  tokenizeCard(input: CardInput): Promise<TokenizedCard>;
+  chargeCard(params: {
+    token: string;
+    amount: number;
+    currency: string;
+    description: string;
+  }): Promise<ChargeResult>;
+  /**
+   * Verify signature / parse provider callback body into a normalized event.
+   * Return null if the payload is not for this provider.
+   */
+  parseWebhook?(
+    request: Request,
+    body: unknown,
+  ): Promise<PaymentWebhookEvent | null>;
+}
+
 export interface BillingPaymentDto {
   id: string;
   amount: number;
@@ -67,4 +103,8 @@ export interface BillingSnapshot {
   currency: string;
   paymentMethod: PaymentMethodDto | null;
   payments: BillingPaymentDto[];
+  /** Free-plan generation quota (ignored when isPro). */
+  freeGenerationsUsed: number;
+  freeGenerationsLimit: number;
+  freeGenerationsRemaining: number;
 }

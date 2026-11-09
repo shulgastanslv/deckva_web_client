@@ -58,7 +58,7 @@ export function CodeBlockEditDialog() {
         if (!next) close();
       }}
     >
-      <DialogContent className="flex max-h-[min(40rem,90dvh)] w-[min(42rem,calc(100vw-2rem))] flex-col gap-4 overflow-hidden rounded-3xl border-0 bg-background p-5 sm:max-w-2xl">
+      <DialogContent className="flex max-h-[min(40rem,90dvh)] w-[min(42rem,calc(100vw-2rem))] flex-col gap-4 overflow-hidden rounded-3xl p-5 sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit code</DialogTitle>
           <DialogDescription>

@@ -26,6 +26,8 @@ const EXTRA = [
   "swibpCodeTransparent",
   "swibpBaseScaleX",
   "swibpBaseScaleY",
+  /** Stable CORA object binding id from deckva_ai assemble. */
+  "coraObjectId",
 ];
 
 for (const key of EXTRA) {

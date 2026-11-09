@@ -122,7 +122,7 @@ export function GridControls({ menuSide = "bottom" }: { menuSide?: "bottom" | "r
           side={menuSide}
           align="start"
           sideOffset={8}
-          className="w-64 rounded-2xl p-0 overflow-hidden border-none backdrop-blur-md"
+          className="w-64 overflow-hidden rounded-2xl p-0"
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <div className="px-3.5 py-3 border-b border-border/40">

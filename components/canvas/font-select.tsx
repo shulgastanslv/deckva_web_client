@@ -154,7 +154,7 @@ export function FontSelect({
           onOpenAutoFocus={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => event.preventDefault()}
           className={cn(
-            "flex w-64 flex-col gap-0 overflow-hidden rounded-2xl border border-border/60 p-0 shadow-none",
+            "flex w-64 flex-col gap-0 overflow-hidden rounded-2xl p-0",
             !compact && "w-[var(--radix-popover-trigger-width)] min-w-64",
           )}
         >

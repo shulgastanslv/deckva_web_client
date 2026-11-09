@@ -130,7 +130,7 @@ export function InviteMembersDialog() {
       </DialogTrigger>
 
       <DialogContent
-        className="w-[min(30rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-md"
+        className="w-[min(30rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-md"
         showCloseButton
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">

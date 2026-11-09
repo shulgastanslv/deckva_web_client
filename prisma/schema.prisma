@@ -41,18 +41,6 @@ enum BillingPaymentKind {
   REFUND
 }
 
-enum ArtifactKind {
-  TEXT
-  PALETTE
-  CAROUSEL
-}
-
-enum ArtifactStatus {
-  DRAFT
-  READY
-  FAILED
-}
-
 enum OrganizationInviteStatus {
   PENDING
   ACCEPTED
@@ -77,25 +65,28 @@ model User {
   subscriptionStatus   SubscriptionStatus @default(NONE)
   subscriptionEndsAt   DateTime?
   cancelAtPeriodEnd    Boolean            @default(false)
-  bepaidCustomerId     String?
+  /// Provider customer id (bePaid / Stripe / …) — set by the active payment adapter.
+  paymentCustomerId    String?
+
+  /// Successful AI generations used on the free plan (Pro ignores this).
+  freeGenerationsUsed Int @default(0)
 
   activeOrganizationId String?
   activeOrganization   Organization? @relation("UserActiveOrganization", fields: [activeOrganizationId], references: [id], onDelete: SetNull)
 
   projects        Project[]
-  artifacts       Artifact[]
   folders         Folder[]
   memberships     OrganizationMember[]
   sentInvites     OrganizationInvite[] @relation("OrganizationInviteSender")
   savedProjects   SavedProject[]
   authTokens      AuthToken[]
-  templates       Template[]
   news            News[]
   notifications   Notification[]
   feedbacks       Feedback[]
   paymentMethods  PaymentMethod[]
   billingPayments BillingPayment[]
   mediaAssets     MediaAsset[]
+  communityEdits  Project[]            @relation("CommunityEditor")
 
   @@index([activeOrganizationId])
   @@index([subscriptionStatus])
@@ -132,7 +123,6 @@ model Organization {
   invites        OrganizationInvite[]
   folders        Folder[]
   projects       Project[]
-  artifacts      Artifact[]
   activeForUsers User[]               @relation("UserActiveOrganization")
 }
 
@@ -165,7 +155,7 @@ model PaymentMethod {
   last4            String
   expMonth         Int
   expYear          Int
-  /// Provider token (bePaid card token or sandbox token).
+  /// Opaque token from the active payment provider (never store PAN/CVV).
   providerToken    String
   providerCustomer String?
   isDefault        Boolean  @default(true)
@@ -231,8 +221,7 @@ model Folder {
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  projects  Project[]
-  artifacts Artifact[]
+  projects Project[]
 
   @@index([userId])
   @@index([userId, updatedAt])
@@ -254,6 +243,13 @@ model AuthToken {
   @@index([email, type])
 }
 
+enum CommunityStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Project {
   id          String   @id @default(cuid())
   title       String   @default("Untitled Carousel")
@@ -265,11 +261,22 @@ model Project {
   isPublic    Boolean  @default(false)
   /// Caption for social preview / posting.
   postCaption String?  @db.Text
+  /// First time the project was submitted to community.
+  publishedAt DateTime?
+  /// Last community republish / listing update.
+  communityUpdatedAt DateTime?
+  communityStatus CommunityStatus @default(DRAFT)
+  /// Browse filter (Business, Lifestyle, …).
+  communityCategory String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Who last republished / updated the community listing.
+  communityUpdatedById String?
+  communityUpdatedBy   User?   @relation("CommunityEditor", fields: [communityUpdatedById], references: [id], onDelete: SetNull)
 
   folderId String?
   folder   Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
@@ -279,67 +286,17 @@ model Project {
 
   slides       Slide[]
   savedBy      SavedProject[]
-  artifact     Artifact?
-  annotations  ProjectAnnotation[]
 
   @@index([userId])
   @@index([userId, updatedAt])
   @@index([folderId])
   @@index([organizationId])
+  @@index([communityStatus, publishedAt])
+  @@index([isPublic, communityStatus])
+  @@index([communityCategory, communityStatus])
+  @@index([communityUpdatedAt])
 }
 
-/// Studio generation artifact (text posts today; palette later). Carousels link to Project.
-model Artifact {
-  id        String         @id @default(cuid())
-  kind      ArtifactKind
-  title     String
-  prompt    String?        @db.Text
-  payload   Json
-  thumbnail String?        @db.Text
-  status    ArtifactStatus @default(READY)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-
-  parentId String?
-  parent   Artifact?  @relation("ArtifactLineage", fields: [parentId], references: [id], onDelete: SetNull)
-  children Artifact[] @relation("ArtifactLineage")
-
-  projectId String?  @unique
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-
-  folderId String?
-  folder   Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
-
-  @@index([userId, kind, updatedAt])
-  @@index([userId, updatedAt])
-  @@index([organizationId])
-  @@index([parentId])
-  @@index([folderId])
-}
-
-/// Personal review notes pinned to a slide (not collaborative threads).
-model ProjectAnnotation {
-  id         String   @id @default(cuid())
-  slideIndex Int      @default(0)
-  x          Float?
-  y          Float?
-  body       String   @db.Text
-  resolved   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@index([projectId, slideIndex])
-  @@index([projectId, createdAt])
-}
 
 /// One Fabric canvas snapshot in a carousel project.
 /// Client uses ephemeral numeric ids; persistence key is `id` + `order`.
@@ -353,33 +310,6 @@ model Slide {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId, order])
-}
-
-enum TemplateStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-model Template {
-  id          String         @id @default(cuid())
-  title       String
-  category    String
-  badge       String?
-  previewUrl  String?
-  aspectRatio String         @default("4:5")
-  canvasJSON  Json
-  /// Community publishes start as PENDING until an admin approves.
-  status      TemplateStatus @default(APPROVED)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  authorId String?
-  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
-
-  @@index([category])
-  @@index([authorId])
-  @@index([status])
 }
 
 /// A post from the admin desk. Publishing one also notifies every user.

@@ -1,3 +1,4 @@
+import { normalizeFabricSlide } from "@/lib/ai/normalize-fabric";
 import { withRemoteImageCors } from "@/lib/canvas/image-cors";
 import type { FabricCanvasJSON, RatioKey, SlideItem } from "@/lib/types";
 import { CANVAS_RATIOS } from "@/lib/types";
@@ -121,6 +122,10 @@ function collectSlides(list: unknown[], parentThumbs?: unknown): CollectedSlides
 
 function templateBody(raw: Record<string, unknown>): Record<string, unknown> | null {
   if (Array.isArray(raw.slides) || isFabricJSON(raw)) return raw;
+  // CORA `/cora/run` response or saved run export.
+  if (isRecord(raw.carousel) && Array.isArray(raw.carousel.slides)) {
+    return raw.carousel;
+  }
   const nested = isRecord(raw.canvasJSON)
     ? raw.canvasJSON
     : isRecord(raw.template)
@@ -173,17 +178,26 @@ export function parseImportedTemplate(raw: unknown): ImportedTemplateResult {
   if (collected.ok === false) return { ok: false, error: collected.error };
 
   const previewUrl = readText(raw.previewUrl) ?? (nested ? readText(nested.previewUrl) : undefined);
+  const carousel = isRecord(raw.carousel) ? raw.carousel : null;
   const title =
     readText(raw.title) ??
     readText(raw.name) ??
+    (carousel ? readText(carousel.title) : undefined) ??
     (nested ? readText(nested.title) ?? readText(nested.name) : undefined);
 
   return {
     ok: true,
     template: {
       title,
-      aspectRatio: readRatio(raw.aspectRatio, nested?.aspectRatio, body.aspectRatio),
-      slides: collected.slides.map((slide) => withRemoteImageCors(slide)),
+      aspectRatio: readRatio(
+        raw.aspectRatio,
+        carousel?.aspectRatio,
+        nested?.aspectRatio,
+        body.aspectRatio,
+      ),
+      slides: collected.slides.map((slide) =>
+        withRemoteImageCors(normalizeFabricSlide(slide)),
+      ),
       thumbnails: collected.thumbnails,
       previewUrl: previewUrl ?? null,
     },

@@ -1,8 +1,6 @@
-import { fetchAiJson } from "@/lib/ai/client";
-import { inferPromptLanguage } from "@/lib/ai/prompt";
 import type { ProjectPalette } from "@/lib/canvas/document";
 
-/** Palette shape returned by deckva_ai `POST /palette`. */
+/** Palette shape returned inside CORA `POST /cora/run`. */
 export type AiPalette = {
   name: string;
   bg: string;
@@ -13,13 +11,6 @@ export type AiPalette = {
   grid: string;
   photo: string;
 };
-
-export type GeneratePaletteInput = {
-  topic: string;
-  language?: string;
-};
-
-export type GeneratePaletteResult = AiPalette;
 
 const HEX = /^#[0-9A-Fa-f]{6}$/;
 
@@ -59,22 +50,4 @@ export function aiPaletteToProjectPalette(palette: AiPalette): ProjectPalette {
     accent: palette.accent,
     card: palette.photo,
   };
-}
-
-export async function generatePaletteUpstream(
-  input: GeneratePaletteInput,
-): Promise<GeneratePaletteResult> {
-  const topic = input.topic.trim();
-  if (topic.length < 2) {
-    throw new Error("Describe the mood or brand for palette generation");
-  }
-
-  const language = input.language?.trim() || inferPromptLanguage(topic);
-  const payload = await fetchAiJson(
-    "/palette",
-    { topic, language },
-    { timeoutMs: 120_000, label: "Palette generation" },
-  );
-
-  return parseAiPalette(payload);
 }

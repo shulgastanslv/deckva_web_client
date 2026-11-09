@@ -362,7 +362,7 @@ export function CodeAppearanceSelect({
         align="start"
         sideOffset={8}
         collisionPadding={12}
-        className="w-[min(24rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] border-0 bg-popover p-0"
+        className="w-[min(24rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] p-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="flex items-center gap-2.5 border-b border-border/40 px-4 py-3">

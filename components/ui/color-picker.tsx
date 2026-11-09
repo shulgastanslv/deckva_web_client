@@ -99,7 +99,7 @@ function ColorPickerPopover({
         {children}
       </PopoverTrigger>
       <PopoverContent
-        className="w-[220px] space-y-3 bg-background p-3 dark:bg-background"
+        className="w-[220px] space-y-3 p-3"
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >

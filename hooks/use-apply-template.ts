@@ -2,7 +2,6 @@
 
 import { useCallback } from "react";
 
-import { getTemplateById } from "@/actions/templates";
 import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { renderMissingThumbnails } from "@/lib/canvas/thumbnail";
@@ -12,6 +11,7 @@ import type { FabricCanvasJSON, RatioKey, SlideItem } from "@/lib/types";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 
+/** Apply slide payloads from CORA, JSON import, or similar (not the old Template catalogue). */
 export function useApplyTemplate() {
   const slidesController = useSlidesController();
 
@@ -58,24 +58,6 @@ export function useApplyTemplate() {
     [slidesController],
   );
 
-  const applyTemplateById = useCallback(
-    async (templateId: string) => {
-      const res = await getTemplateById(templateId);
-      if (!res.success) return res;
-
-      await applyPayload({
-        title: res.template.title,
-        aspectRatio: res.template.aspectRatio,
-        slides: res.template.slides,
-        thumbnails: res.template.thumbnails,
-        previewUrl: res.template.previewUrl,
-      });
-
-      return { success: true as const, title: res.template.title };
-    },
-    [applyPayload],
-  );
-
   const insertTemplateSlide = useCallback(
     async (canvasJSON: FabricCanvasJSON, thumbnail: string | null) => {
       if (!slidesController) return { success: false as const };
@@ -85,5 +67,5 @@ export function useApplyTemplate() {
     [slidesController],
   );
 
-  return { applyTemplateById, applyPayload, insertTemplateSlide };
+  return { applyPayload, insertTemplateSlide };
 }

@@ -10,16 +10,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Компонент для стилизации кнопок клавиш
 const Kbd = ({ children }: { children: React.ReactNode }) => (
-  <kbd className="ml-1 inline-flex h-5 items-center justify-center rounded-[4px] border border-neutral-700 bg-neutral-800 px-1.5 text-[11px] font-medium text-neutral-300 shadow-sm first:ml-0">
+  <kbd className="ml-1 inline-flex h-5 items-center justify-center rounded-[4px] border border-border/50 bg-muted/40 px-1.5 text-[11px] font-medium text-muted-foreground first:ml-0">
     {children}
   </kbd>
 );
 
-// Компонент для строки с шорткатом
 const ShortcutItem = ({ label, keys }: { label: string; keys: React.ReactNode[] }) => (
-  <DropdownMenuItem className="flex cursor-default items-center justify-between rounded-md px-3 py-2 text-[13px] text-neutral-200 hover:bg-neutral-800 focus:bg-neutral-800">
+  <DropdownMenuItem className="flex cursor-default items-center justify-between rounded-xl px-3 py-2 text-[13px] text-foreground focus:bg-muted/50">
     <span>{label}</span>
     <div className="flex items-center gap-1">
       {keys.map((key, i) => (
@@ -36,23 +34,20 @@ export function KeyboardShortcutsMenu() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground border-none shadow-none outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex h-9 w-9 items-center justify-center rounded-full border-none bg-muted/40 text-muted-foreground shadow-none outline-none transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
           title="Keyboard shortcuts"
         >
           <Keyboard className="size-4" />
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent 
-        align="end" 
-        className="w-[280px] rounded-2xl border-neutral-800 bg-[#1e1e1e] p-2 shadow-2xl dark:border-neutral-800 dark:bg-[#1e1e1e]"
-      >
-        <DropdownMenuLabel className="px-3 py-2 text-[15px] font-semibold text-white">
+      <DropdownMenuContent align="end" className="w-[280px] rounded-2xl p-2">
+        <DropdownMenuLabel className="px-3 py-2 text-[15px] font-semibold text-foreground">
           Shortcuts
         </DropdownMenuLabel>
 
         <div className="mt-2">
-          <div className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-neutral-500 uppercase">
+          <div className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
             General
           </div>
           <DropdownMenuGroup>
@@ -64,7 +59,7 @@ export function KeyboardShortcutsMenu() {
         </div>
 
         <div className="mt-4">
-          <div className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-neutral-500 uppercase">
+          <div className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
             Animation Editing
           </div>
           <DropdownMenuGroup>

@@ -39,7 +39,7 @@ export function RatioSelect({ currentRatio, onRatioChange }: CustomRatioSelectPr
       </PopoverTrigger>
 
       <PopoverContent 
-        className="w-[340px] p-0 rounded-3xl overflow-hidden border" 
+        className="w-[340px] overflow-hidden rounded-3xl p-0" 
         align="start"
       >
         {/* Строка поиска */}

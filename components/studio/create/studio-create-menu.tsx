@@ -5,7 +5,6 @@ import {
   ChevronDown,
   Compass,
   FilePlus,
-  LayoutTemplate,
   Palette,
   Upload,
 } from "lucide-react";
@@ -20,10 +19,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
+const itemClass =
+  "cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium focus:bg-muted/50";
+
 export function StudioCreateMenu({
   onBlank,
   onTemplates,
-  onCarousel,
   onBrandKit,
   onImportJson,
   className,
@@ -33,7 +34,6 @@ export function StudioCreateMenu({
 }: {
   onBlank: () => void;
   onTemplates: () => void;
-  onCarousel?: () => void;
   onBrandKit?: () => void;
   onImportJson?: (file: File) => void | Promise<void>;
   className?: string;
@@ -61,41 +61,29 @@ export function StudioCreateMenu({
         <DropdownMenuTrigger asChild>
           <Button
             variant="secondary"
-            className={cn("rounded-full", triggerClassName, className)}
+            className={cn(
+              "h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
+              triggerClassName,
+              className,
+            )}
           >
-            <ChevronDown className="size-3.5 stroke-[2.5] opacity-60" />
             {label}
+            <ChevronDown className="size-3.5 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
           align={align}
           sideOffset={8}
-          className="w-56 rounded-2xl border-0 bg-background p-1.5"
+          className="w-56 rounded-2xl p-1.5"
         >
-          <DropdownMenuItem
-            className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
-            onClick={onBlank}
-          >
+          <DropdownMenuItem className={itemClass} onClick={onBlank}>
             <FilePlus className="size-4 text-muted-foreground" />
-            Blank carousel
+            Blank project
           </DropdownMenuItem>
 
-          {onCarousel ? (
-            <DropdownMenuItem
-              className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
-              onClick={onCarousel}
-            >
-              <LayoutTemplate className="size-4 text-muted-foreground" />
-              Generate carousel
-            </DropdownMenuItem>
-          ) : null}
-
           {onBrandKit ? (
-            <DropdownMenuItem
-              className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
-              onClick={onBrandKit}
-            >
+            <DropdownMenuItem className={itemClass} onClick={onBrandKit}>
               <Palette className="size-4 text-muted-foreground" />
               Brand kit
             </DropdownMenuItem>
@@ -103,9 +91,9 @@ export function StudioCreateMenu({
 
           {onImportJson ? (
             <>
-              <DropdownMenuSeparator className="my-1.5" />
+              <DropdownMenuSeparator className="my-1.5 bg-border/50" />
               <DropdownMenuItem
-                className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
+                className={itemClass}
                 onClick={() => importRef.current?.click()}
               >
                 <Upload className="size-4 text-muted-foreground" />
@@ -114,14 +102,11 @@ export function StudioCreateMenu({
             </>
           ) : null}
 
-          <DropdownMenuSeparator className="my-1.5" />
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
-          <DropdownMenuItem
-            className="cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium"
-            onClick={onTemplates}
-          >
+          <DropdownMenuItem className={itemClass} onClick={onTemplates}>
             <Compass className="size-4 text-muted-foreground" />
-            Explore templates
+            Explore community
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

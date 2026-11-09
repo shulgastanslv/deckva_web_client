@@ -153,7 +153,7 @@ function ReadModal({
   return (
     <Dialog open={!!item} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="flex max-h-[85vh] w-[min(36rem,calc(100vw-2rem))] flex-col gap-0 overflow-hidden rounded-3xl border-0 bg-background p-0 sm:max-w-xl"
+        className="flex max-h-[85vh] w-[min(36rem,calc(100vw-2rem))] flex-col gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-xl"
         showCloseButton
       >
         <DialogHeader className="gap-1 px-6 pt-6 pb-3 text-left">
@@ -287,7 +287,7 @@ function NotificationsPanel({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-[120px] rounded-2xl border-0 p-1.5"
+              className="min-w-[120px] rounded-2xl p-1.5"
             >
               {(Object.keys(FILTER_LABEL) as Filter[]).map((key) => (
                 <DropdownMenuItem
@@ -472,7 +472,7 @@ export function StudioNotifications({
       <PopoverContent
         align="end"
         alignOffset={-4}
-        className="h-[min(480px,calc(100dvh-32px))] w-xs overflow-hidden rounded-[28px] border border-border bg-background p-0"
+        className="h-[min(480px,calc(100dvh-32px))] w-xs overflow-hidden rounded-[28px] p-0"
       >
         <NotificationsPanel
           filter={filter}

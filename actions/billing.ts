@@ -6,15 +6,18 @@ import { revalidatePath } from "next/cache";
 
 import { formatCardBrand } from "@/lib/billing/card";
 import { userHasPro } from "@/lib/billing/entitlements";
+import { getGenerationEntitlement } from "@/lib/billing/generations";
 import { chargeCard, getPaymentProviderMode, tokenizeCard } from "@/lib/billing/provider";
 import type {
   BillingPaymentDto,
   BillingSnapshot,
   CardInput,
   PaymentMethodDto,
+  PaymentProviderId,
 } from "@/lib/billing/types";
 import { prisma } from "@/lib/prisma";
 import {
+  FREE_GENERATION_LIMIT,
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
   addBillingMonth,
@@ -96,6 +99,7 @@ async function buildSnapshot(userId: string): Promise<BillingSnapshot> {
   });
 
   const isPro = await userHasPro(userId);
+  const gens = await getGenerationEntitlement(userId);
 
   return {
     isPro,
@@ -108,11 +112,16 @@ async function buildSnapshot(userId: string): Promise<BillingSnapshot> {
       ? mapMethod(user.paymentMethods[0])
       : null,
     payments: user.billingPayments.map(mapPayment),
+    freeGenerationsUsed: gens.isPro ? 0 : gens.used,
+    freeGenerationsLimit: FREE_GENERATION_LIMIT,
+    freeGenerationsRemaining: gens.isPro
+      ? FREE_GENERATION_LIMIT
+      : gens.remaining,
   };
 }
 
 export async function getBilling(): Promise<
-  ActionResult<{ billing: BillingSnapshot; providerMode: "bepaid" | "sandbox" }>
+  ActionResult<{ billing: BillingSnapshot; providerMode: PaymentProviderId }>
 > {
   try {
     const userId = await requireUserId();
@@ -158,7 +167,7 @@ export async function attachPaymentCard(
       if (tokenized.customerId) {
         await tx.user.update({
           where: { id: userId },
-          data: { bepaidCustomerId: tokenized.customerId },
+          data: { paymentCustomerId: tokenized.customerId },
         });
       }
     });

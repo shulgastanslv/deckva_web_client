@@ -201,6 +201,8 @@
     "saveThumbnails": "Не ўдалося захаваць прэв'ю",
     "renameProject": "Не ўдалося перайменаваць праект",
     "duplicateProject": "Не ўдалося дубляваць праект",
+    "loadCommunity": "Не ўдалося загрузіць супольнасць",
+    "publishCommunity": "Не ўдалося апублікаваць у супольнасці",
     "deleteProject": "Не ўдалося выдаліць праект",
     "loadTemplates": "Не ўдалося загрузіць шаблоны",
     "templateIdRequired": "Патрэбны templateId",

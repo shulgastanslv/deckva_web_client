@@ -15,8 +15,6 @@ import {
   Loader2,
   Share2,
 } from "lucide-react";
-import { FaFacebook, FaLinkedin, FaTelegram, FaWhatsapp, FaXTwitter } from "react-icons/fa6";
-import { SiThreads } from "react-icons/si";
 import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
@@ -38,9 +36,6 @@ import {
   blobToShareFile,
   canNativeShareFiles,
   nativeShareFiles,
-  SOCIAL_NETWORKS,
-  socialShareUrl,
-  type SocialNetwork,
 } from "@/lib/share/social";
 
 interface ExportModalProps {
@@ -52,15 +47,6 @@ interface ExportModalProps {
 type PackMode = "zip" | "files";
 type ScaleOption = 1 | 2;
 type Panel = "download" | "share";
-
-const NETWORK_ICONS: Record<SocialNetwork, React.ElementType> = {
-  x: FaXTwitter,
-  telegram: FaTelegram,
-  linkedin: FaLinkedin,
-  threads: SiThreads,
-  facebook: FaFacebook,
-  whatsapp: FaWhatsapp,
-};
 
 function Segmented<T extends string | number>({
   value,
@@ -321,21 +307,25 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
     }
   };
 
-  const openSocial = async (network: SocialNetwork) => {
+  const handleCopyLink = async () => {
     const url = shareUrl || (await ensureShareLink());
-    if (!url) return;
-    const href = socialShareUrl(network, {
-      url,
-      text: `${projectTitle} — carousel`,
-    });
-    window.open(href, "_blank", "noopener,noreferrer");
+    if (!url || typeof navigator === "undefined") return;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : messages.errors.copyLink;
+      reportError(err, message);
+      setError(message);
+    }
   };
 
   const busy = exporting || sharing || linkBusy;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden rounded-2xl border-none p-0 sm:max-w-[400px]">
+      <DialogContent className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[400px]">
         <DialogHeader className="space-y-1 px-5 pt-5 text-left">
           <DialogTitle className="text-base font-semibold tracking-tight">
             Export
@@ -439,14 +429,32 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
         ) : (
           <div className="space-y-3.5 px-5 py-4">
             <p className="text-[13px] leading-snug text-muted-foreground">
-              Post the carousel link, or hand images straight to Instagram,
-              Stories, and Messages when your device supports it.
+              Copy a public view link, or share slide images from this device
+              when supported.
             </p>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="lg"
+              className="w-full rounded-full"
+              disabled={busy}
+              onClick={() => void handleCopyLink()}
+            >
+              {linkBusy ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : copied ? (
+                <Check className="size-4" />
+              ) : (
+                <Copy className="size-4" />
+              )}
+              {linkBusy ? "Preparing…" : copied ? "Copied" : "Copy view link"}
+            </Button>
 
             {nativeShareOk ? (
               <Button
                 type="button"
-                variant="secondary"
+                variant="outline"
                 size="lg"
                 className="w-full rounded-full"
                 disabled={busy || exportSlides.length === 0}
@@ -460,33 +468,6 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
                 {sharing ? "Preparing…" : "Share images"}
               </Button>
             ) : null}
-
-            <div className="space-y-1.5">
-              <FieldLabel>Social</FieldLabel>
-              <div className="grid grid-cols-3 gap-1.5">
-                {SOCIAL_NETWORKS.map((network) => {
-                  const Icon = NETWORK_ICONS[network.id];
-                  return (
-                    <Button
-                      key={network.id}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-9 rounded-full text-[13px]"
-                      disabled={busy}
-                      onClick={() => void openSocial(network.id)}
-                    >
-                      <Icon className="size-3.5" />
-                      {network.label}
-                    </Button>
-                  );
-                })}
-              </div>
-              <p className="text-[11px] leading-snug text-muted-foreground">
-                Social buttons open a public view link. Sign in if the project
-                is not saved yet.
-              </p>
-            </div>
           </div>
         )}
 

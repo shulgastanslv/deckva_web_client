@@ -23,7 +23,7 @@ export function StudioProjectRow({
   return (
     <div
       className={cn(
-        "group grid items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-black/[0.03] dark:hover:bg-muted/40 cursor-pointer select-none",
+        "group grid cursor-pointer items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors select-none hover:bg-muted/40",
         recentCols,
       )}
     >
@@ -35,12 +35,12 @@ export function StudioProjectRow({
         <StudioProjectThumb project={project} />
         <span className="min-w-0">
           <span className="flex min-w-0 items-center gap-2">
-            <span className="truncate text-[14px] font-semibold text-neutral-950 dark:text-foreground">
+            <span className="truncate text-[14px] font-medium text-foreground">
               {project.title || "Untitled"}
             </span>
             {project.isSaved ? <StudioBadge>Starred</StudioBadge> : null}
           </span>
-          <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[12px] text-neutral-500 dark:text-muted-foreground">
+          <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[12px] text-muted-foreground">
             <StudioProjectOwner
               name={project.authorName}
               image={project.authorImage}
@@ -52,13 +52,13 @@ export function StudioProjectRow({
           </span>
         </span>
       </button>
-      <p className="hidden truncate text-[13px] text-neutral-500 md:block dark:text-muted-foreground">
+      <p className="hidden truncate text-[13px] text-muted-foreground md:block">
         {project.slideCount} slides
       </p>
-      <p className="hidden truncate text-[13px] text-neutral-500 md:block dark:text-muted-foreground">
+      <p className="hidden truncate text-[13px] text-muted-foreground md:block">
         {project.aspectRatio}
       </p>
-      <p className="truncate text-[13px] text-neutral-500 dark:text-muted-foreground">
+      <p className="truncate text-[13px] text-muted-foreground">
         {formatBoardDate(project.updatedAt)}
       </p>
       <div className="hidden min-w-0 md:block">

@@ -6,16 +6,11 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/lib/generated/prisma/client";
 
 import { ensureUserOrganization } from "@/actions/organizations";
-import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 import {
   canAccessOrgResource,
   canManageOrgResource,
 } from "@/lib/studio/org-access";
-import {
-  FREE_CAROUSEL_LIMIT,
-  freeCarouselLimitMessage,
-} from "@/lib/studio/plans";
 import {
   CANVAS_RATIOS,
   type FabricCanvasJSON,
@@ -188,18 +183,6 @@ export async function createProject(input?: {
       return { success: false, error: messages.errors.ensureOrganization };
     }
     const organizationId = org.organization.id;
-
-    if (!(await userHasPro(userId))) {
-      const count = await prisma.project.count({
-        where: { userId },
-      });
-      if (count >= FREE_CAROUSEL_LIMIT) {
-        return {
-          success: false,
-          error: `Upgrade to Pro — ${freeCarouselLimitMessage()}`,
-        };
-      }
-    }
 
     const aspectRatio = input?.aspectRatio ?? "4:5";
     const dims = CANVAS_RATIOS[aspectRatio] ?? CANVAS_RATIOS["4:5"];
@@ -548,6 +531,35 @@ export async function saveProjectThumbnails(
   } catch (err) {
     console.error("saveProjectThumbnails error:", err);
     return { success: false, error: messages.errors.saveThumbnails };
+  }
+}
+
+export async function updateProjectCaption(
+  projectId: string,
+  postCaption: string | null,
+): Promise<ActionResult<{ postCaption: string | null }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    const project = await prisma.project.findFirst({
+      where: { id: projectId },
+      select: { id: true, userId: true, organizationId: true },
+    });
+    if (!project || !(await canAccessOrgResource(userId, project))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    const trimmed = postCaption?.trim() || null;
+    await prisma.project.update({
+      where: { id: projectId },
+      data: { postCaption: trimmed },
+    });
+
+    return { success: true, postCaption: trimmed };
+  } catch (err) {
+    console.error("updateProjectCaption error:", err);
+    return { success: false, error: messages.errors.generic };
   }
 }
 

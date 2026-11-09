@@ -25,8 +25,8 @@ export const maxDuration = 180;
 
 export const metadata: Metadata = {
   title: "Studio",
-  description: "Canvas editing, templates, folders, and PNG/ZIP slide export.",
-  keywords: ["Deckva", "studio", "carousel editor", "canvas", "templates", "export PNG"],
+  description: "Canvas editing, community, folders, and PNG/ZIP slide export.",
+  keywords: ["Deckva", "studio", "carousel editor", "canvas", "community", "export PNG"],
   authors: [{ name: "Deckva", url: "https://deckva.by" }],
   creator: "Deckva",
   publisher: "Deckva",

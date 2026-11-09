@@ -13,8 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Check, Copy, Loader2, Link2 } from "lucide-react";
-import { FaFacebook, FaLinkedin, FaTelegram, FaWhatsapp, FaXTwitter } from "react-icons/fa6";
-import { SiThreads } from "react-icons/si";
 import { setProjectPublic } from "@/actions/projects";
 import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
@@ -22,20 +20,6 @@ import { reportError } from "@/lib/report-error";
 import { useProject } from "@/hooks/use-project";
 import { useSession } from "next-auth/react";
 import { useCanvasStore } from "@/store/useCanvasStore";
-import {
-  SOCIAL_NETWORKS,
-  socialShareUrl,
-  type SocialNetwork,
-} from "@/lib/share/social";
-
-const NETWORK_ICONS: Record<SocialNetwork, React.ElementType> = {
-  x: FaXTwitter,
-  telegram: FaTelegram,
-  linkedin: FaLinkedin,
-  threads: SiThreads,
-  facebook: FaFacebook,
-  whatsapp: FaWhatsapp,
-};
 
 interface ShareModalProps {
   open: boolean;
@@ -51,7 +35,6 @@ export function ShareModal({
 }: ShareModalProps) {
   const { status } = useSession();
   const { currentProjectId, persist } = useProject();
-  const projectTitle = useCanvasStore((s) => s.projectTitle);
   const [copied, setCopied] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -145,23 +128,9 @@ export function ShareModal({
     }
   };
 
-  const openSocial = async (network: SocialNetwork) => {
-    const id = projectId ?? (await ensureSavedAndPublic());
-    if (!id || typeof window === "undefined") return;
-    const url = `${window.location.origin}/view/${id}`;
-    window.open(
-      socialShareUrl(network, {
-        url,
-        text: `${projectTitle} — carousel`,
-      }),
-      "_blank",
-      "noopener,noreferrer",
-    );
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm rounded-2xl border-border p-5">
+      <DialogContent className="max-w-sm rounded-3xl p-5">
         <DialogHeader className="space-y-1.5 border-b border-border/40 pb-3 text-left">
           <DialogTitle className="text-[13px] font-semibold tracking-tight">
             Share Project
@@ -222,26 +191,6 @@ export function ShareModal({
                     </>
                   )}
                 </Button>
-              </div>
-
-              <div className="grid grid-cols-3 gap-1.5">
-                {SOCIAL_NETWORKS.map((network) => {
-                  const Icon = NETWORK_ICONS[network.id];
-                  return (
-                    <Button
-                      key={network.id}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-9 rounded-full text-[13px]"
-                      disabled={busy}
-                      onClick={() => void openSocial(network.id)}
-                    >
-                      <Icon className="size-3.5" />
-                      {network.label}
-                    </Button>
-                  );
-                })}
               </div>
 
               {!projectId && (

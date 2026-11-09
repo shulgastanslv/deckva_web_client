@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Clock, Loader2, Trash2 } from "lucide-react";
+import { ArrowUp, Loader2 } from "lucide-react";
 
+import { listAiModels } from "@/actions/ai";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,17 +12,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { trackEvent } from "@/lib/analytics";
-import { GenerationKind } from "@/lib/studio/generation/types";
+import type { AiModelInfo } from "@/lib/ai/types";
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-export type { GenerationKind, StudioPromptSubmit };
-export type GenerationType = GenerationKind;
-
-const RECENT_KEY = "studio_recent_prompts";
-const MAX_RECENTS = 5;
+const MODEL_KEY = "studio_ai_model";
 
 export function StudioPrompt({
   onSubmit,
@@ -29,29 +25,20 @@ export function StudioPrompt({
   busy,
   error,
   initialTopic = "",
-  /** Kept for API compat — activation path always generates a carousel. */
-  initialType = "carousel",
-  lockCarousel = true,
 }: {
   onSubmit: (input: StudioPromptSubmit) => void | Promise<void>;
   disabled?: boolean;
   busy?: boolean;
   error?: string | null;
   initialTopic?: string;
-  initialType?: GenerationKind;
-  /** When true (default), hide type switcher and force carousel. */
-  lockCarousel?: boolean;
 }) {
   const t = useTranslations("studio");
   const tc = useTranslations("common");
   const appliedTopic = useRef(false);
-  void initialType;
 
   const [value, setValue] = useState(initialTopic);
-  const [recentPrompts, setRecentPrompts] = useState<string[]>([]);
-  const generationType: GenerationKind = lockCarousel
-    ? GenerationKind.carousel
-    : initialType;
+  const [models, setModels] = useState<AiModelInfo[]>([]);
+  const [modelId, setModelId] = useState("");
 
   useEffect(() => {
     if (appliedTopic.current || !initialTopic) return;
@@ -61,58 +48,53 @@ export function StudioPrompt({
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(RECENT_KEY);
-      if (stored) {
-        setRecentPrompts(JSON.parse(stored));
-      }
+      const stored = localStorage.getItem(MODEL_KEY);
+      if (stored) setModelId(stored);
     } catch {
-      // ignore parse errors
+      // ignore
     }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const catalog = await listAiModels();
+        if (cancelled) return;
+        setModels(catalog.models);
+        setModelId((prev) => {
+          if (prev && catalog.models.some((m) => m.modelId === prev)) return prev;
+          return catalog.models[0]?.modelId ?? "";
+        });
+      } catch {
+        // AI server may be offline — generation will surface the error
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const saveRecent = (promptText: string) => {
-    try {
-      const filtered = recentPrompts.filter((item) => item !== promptText);
-      const updated = [promptText, ...filtered].slice(0, MAX_RECENTS);
-      setRecentPrompts(updated);
-      localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
-    } catch {
-      // ignore write errors
-    }
-  };
+  const selected = models.find((m) => m.modelId === modelId) ?? models[0];
+  const trimmed = value.trim();
+  const canSend = trimmed.length >= 2 && !disabled && !busy;
 
-  const clearRecents = () => {
-    setRecentPrompts([]);
+  const pickModel = (id: string) => {
+    setModelId(id);
     try {
-      localStorage.removeItem(RECENT_KEY);
+      localStorage.setItem(MODEL_KEY, id);
     } catch {
       // ignore
     }
   };
 
-  const trimmed = value.trim();
-  const canSend = trimmed.length >= 2 && !disabled && !busy;
-
-  const submit = (topic = trimmed) => {
-    const finalTopic = topic.trim();
-    if (finalTopic.length < 2 || disabled || busy) return;
-
-    saveRecent(finalTopic);
-    trackEvent("studio_prompt_submit", {
-      type: generationType,
-      topicLength: finalTopic.length,
-    });
-    void onSubmit({ topic: finalTopic, type: generationType });
+  const submit = () => {
+    if (!canSend) return;
+    void onSubmit({ topic: trimmed, modelId: selected?.modelId });
   };
 
   return (
     <div className="w-full">
-      <div
-        className={cn(
-          "rounded-[1.75rem] bg-muted/20 p-2 transition-colors",
-          "focus-within:bg-muted/30",
-        )}
-      >
+      <div className="rounded-[1.75rem] bg-muted/20 p-2 transition-colors focus-within:bg-muted/30">
         <textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -127,62 +109,56 @@ export function StudioPrompt({
           placeholder={t("placeholderCarousel")}
           className={cn(
             "field-sizing-content min-h-[88px] w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-[15px] leading-relaxed text-foreground outline-none",
-            "placeholder:text-muted-foreground/70",
-            "disabled:cursor-not-allowed disabled:opacity-60",
+            "placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-60",
           )}
         />
 
         <div className="flex items-center justify-between gap-3 px-2 pb-1">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="inline-flex h-8 items-center rounded-full bg-foreground px-3.5 text-[13px] font-medium text-background">
-              {t("carousel")}
-            </span>
-
-            {recentPrompts.length > 0 && (
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            {models.length > 0 ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
                     disabled={disabled || busy}
-                    title="Recent prompts"
-                    className="inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    className="inline-flex h-9 max-w-[200px] items-center rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60"
                   >
-                    <Clock className="size-4" />
+                    <span className="truncate">
+                      {selected?.displayName ?? "Model"}
+                    </span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
                   sideOffset={10}
-                  className="w-[280px] rounded-2xl border border-border/50 bg-background p-2"
+                  className="w-[280px] rounded-2xl p-1.5"
                 >
-                  <div className="flex items-center justify-between px-3 py-1.5">
-                    <DropdownMenuLabel className="p-0 text-[12px] font-medium text-muted-foreground">
-                      Recent prompts
-                    </DropdownMenuLabel>
-                    <button
-                      type="button"
-                      onClick={clearRecents}
-                      className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground transition-colors hover:text-destructive"
-                    >
-                      <Trash2 className="size-3.5" />
-                      Clear
-                    </button>
-                  </div>
+                  <DropdownMenuLabel className="px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
+                    Model
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator className="my-1.5 bg-border/50" />
-                  {recentPrompts.map((recentItem, idx) => (
+                  {models.map((model) => (
                     <DropdownMenuItem
-                      key={idx}
-                      className="flex cursor-pointer items-center rounded-xl px-3 py-2.5 text-[14px] text-foreground transition-colors hover:bg-muted focus:bg-muted"
-                      onSelect={() => setValue(recentItem)}
+                      key={model.modelId}
+                      className={cn(
+                        "flex cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50",
+                        model.modelId === selected?.modelId && "bg-muted/50",
+                      )}
+                      onSelect={() => pickModel(model.modelId)}
                     >
-                      <span className="truncate">{recentItem}</span>
+                      <span className="truncate">{model.displayName}</span>
+                      {model.isFree ? (
+                        <span className="ml-auto shrink-0 text-[12px] text-muted-foreground">
+                          Free
+                        </span>
+                      ) : null}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
+            ) : null}
 
-            <p className="hidden truncate pl-2 text-[12px] text-muted-foreground md:block">
+            <p className="hidden truncate text-[12px] text-muted-foreground md:block">
               {busy ? tc("generating") : t("activationHint")}
             </p>
           </div>
@@ -190,8 +166,7 @@ export function StudioPrompt({
           <button
             type="button"
             disabled={!canSend}
-            onClick={() => submit()}
-            title="Send"
+            onClick={submit}
             className={cn(
               "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
               canSend
@@ -208,7 +183,9 @@ export function StudioPrompt({
         </div>
       </div>
 
-      {error && <p className="mt-3 px-2 text-[13px] text-destructive">{error}</p>}
+      {error ? (
+        <p className="mt-3 px-2 text-[13px] text-destructive">{error}</p>
+      ) : null}
     </div>
   );
 }

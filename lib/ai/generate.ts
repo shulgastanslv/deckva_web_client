@@ -1,121 +1,50 @@
-import { fetchAiJson, aiBaseUrl } from "@/lib/ai/client";
-import { parseAiPalette, type AiPalette } from "@/lib/ai/generate-palette";
+import { aiBaseUrl, fetchAiJson } from "@/lib/ai/client";
+import { parseCoraCarouselPayload } from "@/lib/ai/parse-cora";
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
-import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
-import { isRatioKey } from "@/lib/templates/parse";
+import type {
+  GenerateCarouselInput,
+  GenerateCarouselResult,
+} from "@/lib/ai/types";
 
 export { aiBaseUrl };
-
-export type GenerateCarouselInput = {
-  topic: string;
-  /** Full post caption from a TEXT pipeline step. */
-  seedText?: string;
-  /** Locked palette from a PALETTE pipeline step — wins over AI palette. */
-  palette?: AiPalette;
-  aspectRatio?: RatioKey;
-  slidesCount?: number;
-  language?: string;
-  handle?: string;
-  cover?: string;
-};
-
-export type GenerateCarouselResult = {
-  title: string;
-  aspectRatio: RatioKey;
-  width: number;
-  height: number;
-  slides: FabricCanvasJSON[];
-  palette?: AiPalette;
-};
+export type { GenerateCarouselInput, GenerateCarouselResult };
 
 const TIMEOUT_MS = 180_000;
 
-function isFabricSlide(value: unknown): value is FabricCanvasJSON {
-  return (
-    !!value &&
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    Array.isArray((value as { objects?: unknown }).objects)
-  );
-}
-
+/** Call CORA only — free-gen / Pro gate lives in `actions/ai.ts`. */
 export async function generateCarouselUpstream(
   input: GenerateCarouselInput,
-): Promise<GenerateCarouselResult> {
+): Promise<Omit<GenerateCarouselResult, "entitlement">> {
   const topic = input.topic.trim();
   if (topic.length < 2) {
     throw new Error("Describe what the carousel should be about");
   }
+  const userId = input.userId.trim();
+  if (!userId) throw new Error("Sign in to generate");
 
   const aspectRatio = input.aspectRatio ?? "4:5";
   const slidesCount = Math.min(10, Math.max(4, input.slidesCount ?? 7));
   const language = input.language?.trim() || inferPromptLanguage(topic);
   const handle = normalizeHandle(input.handle);
-  const cover = input.cover ?? "";
-  const seedText = input.seedText?.trim() || "";
 
-  const payload = (await fetchAiJson(
-    "/generate",
+  const payload = await fetchAiJson(
+    "/cora/run",
     {
+      userId,
       topic,
-      ...(seedText
-        ? { seed_text: seedText, post_text: seedText }
-        : {}),
-      aspect_ratio: aspectRatio,
-      slides_count: slidesCount,
       language,
+      ratio: aspectRatio,
+      slidesCount,
       handle,
-      cover,
+      cover: input.cover ?? "",
+      mode: input.mode ?? "fast",
+      plan: input.plan ?? "free",
+      ...(input.modelId ? { modelId: input.modelId } : {}),
+      ...(input.seedText?.trim() ? { seedText: input.seedText.trim() } : {}),
       save: false,
     },
     { timeoutMs: TIMEOUT_MS, label: "Carousel generation" },
-  )) as Record<string, unknown>;
+  );
 
-  const carousel =
-    payload.carousel && typeof payload.carousel === "object"
-      ? (payload.carousel as Record<string, unknown>)
-      : payload;
-
-  const title =
-    (typeof payload.title === "string" && payload.title.trim()) ||
-    (typeof carousel.title === "string" && carousel.title.trim()) ||
-    topic.slice(0, 80);
-
-  const ratioRaw =
-    (typeof payload.aspectRatio === "string" && payload.aspectRatio) ||
-    (typeof carousel.aspectRatio === "string" && carousel.aspectRatio) ||
-    aspectRatio;
-  const ratio: RatioKey = isRatioKey(ratioRaw) ? ratioRaw : aspectRatio;
-
-  const slidesRaw = Array.isArray(carousel.slides) ? carousel.slides : [];
-  const slides = slidesRaw.filter(isFabricSlide);
-  if (slides.length === 0) {
-    throw new Error("AI returned no slides");
-  }
-
-  const width =
-    typeof payload.width === "number"
-      ? payload.width
-      : typeof carousel.width === "number"
-        ? carousel.width
-        : 1080;
-  const height =
-    typeof payload.height === "number"
-      ? payload.height
-      : typeof carousel.height === "number"
-        ? carousel.height
-        : 1350;
-
-  let palette: AiPalette | undefined;
-  if (input.palette) {
-    palette = input.palette;
-  } else {
-    try {
-      if (payload.palette) palette = parseAiPalette(payload.palette);
-    } catch {
-      palette = undefined;
-    }
-  }
-
-  return { title, aspectRatio: ratio, width, height, slides, palette };
+  return parseCoraCarouselPayload(payload, { topic, aspectRatio });
 }

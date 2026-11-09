@@ -23,7 +23,9 @@ import { AuthModal } from "@/components/auth";
 import { HelpDialog } from "@/components/help-dialog";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { ProfileSettingsDialog } from "@/components/profile-settings-dialog";
-import { PublishTemplateDialog } from "@/components/publish-template-dialog";
+import { PublishCommunityDialog } from "@/components/publish-community-dialog";
+import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
+import { PlanDropdown } from "@/components/studio/header/plan-dropdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -38,7 +40,11 @@ import { ExportModal } from "./export-modal";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
-import { invalidateStudioProfile, useMyProfile } from "@/lib/studio/queries";
+import {
+  invalidateStudioProfile,
+  useActiveOrganization,
+  useMyProfile,
+} from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
 
 const accountItemClass =
@@ -65,10 +71,13 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isPublishOpen, setIsPublishOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
   const [showShare, setShowShare] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const organization = useActiveOrganization(status === "authenticated");
+  const isUpgrade = Boolean(organization.data?.organization?.isUpgrade);
 
   const manager = useCanvasManager();
   const slides = useCanvasStore((s) => s.slides);
@@ -241,10 +250,10 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
               size="sm"
               onClick={openPublish}
               className={cn(labelBtn, "hidden text-muted-foreground hover:bg-muted/60 hover:text-foreground sm:inline-flex")}
-              title="Publish as template"
+              title="Publish or republish to community"
             >
               <Globe className="size-4" />
-              <span className="hidden lg:inline">Publish</span>
+              <span className="hidden lg:inline">Community</span>
             </Button>
             <Button
               size="sm"
@@ -261,7 +270,13 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
 
           <div className="mx-0.5 hidden h-5 w-px bg-border/60 sm:block" />
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            {signedIn ? (
+              <PlanDropdown
+                isUpgrade={isUpgrade}
+                openUpgrade={() => setUpgradeOpen(true)}
+              />
+            ) : null}
             {signedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -286,7 +301,7 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
                 <DropdownMenuContent
                   align="end"
                   sideOffset={10}
-                  className="w-[240px] overflow-hidden rounded-2xl border-0 bg-white p-0 dark:bg-background dark:ring-1 dark:ring-border"
+                  className="w-[240px] overflow-hidden rounded-2xl p-0"
                 >
                   <div className="flex items-center gap-2.5 px-3.5 py-3">
                     <Avatar className="size-8">
@@ -326,7 +341,7 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
                       onClick={openPublish}
                     >
                       <Globe className="size-4 stroke-[1.75] text-neutral-800 dark:text-muted-foreground" />
-                      Publish template
+                      Community publish
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className={accountItemClass}
@@ -383,11 +398,12 @@ export function Header({ onPreview, onFocus, onReview }: HeaderProps) {
       <HelpDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
       <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
       <ProfileSettingsDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
-      <PublishTemplateDialog
+      <PublishCommunityDialog
         open={isPublishOpen}
         onOpenChange={setIsPublishOpen}
         onAuthRequired={() => setIsAuthModalOpen(true)}
       />
+      <StudioUpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} />
     </>
   );
 }

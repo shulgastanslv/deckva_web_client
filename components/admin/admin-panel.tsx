@@ -14,7 +14,7 @@ import {
   AdminShell,
   type AdminSection,
 } from "@/components/admin/admin-shell";
-import { AdminTemplates } from "@/components/admin/admin-templates";
+import { AdminCommunity } from "@/components/admin/admin-community";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -108,7 +108,7 @@ function FeedList({
 }
 
 export function AdminPanel({ email }: { email: string }) {
-  const [section, setSection] = useState<AdminSection>("templates");
+  const [section, setSection] = useState<AdminSection>("community");
   const [news, setNews] = useState<NewsItem[]>([]);
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,7 +132,7 @@ export function AdminPanel({ email }: { email: string }) {
   }, []);
 
   const titles: Record<AdminSection, string> = {
-    templates: "Templates",
+    community: "Community",
     notify: "Notify everyone",
     news: "News desk",
     feedback: "Feedback",
@@ -150,8 +150,8 @@ export function AdminPanel({ email }: { email: string }) {
             {titles[section]}
           </h1>
           <p className="text-[12px] text-muted-foreground">
-            {section === "templates"
-              ? "Review community publishes, edit metadata, cleanup"
+            {section === "community"
+              ? "Approve or reject community carousel submissions"
               : section === "notify"
                 ? "Push a short note to every inbox"
                 : section === "news"
@@ -176,7 +176,7 @@ export function AdminPanel({ email }: { email: string }) {
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-16 sm:px-8">
-        {section === "templates" ? <AdminTemplates /> : null}
+        {section === "community" ? <AdminCommunity /> : null}
 
         {section === "notify" ? (
           <div className="pt-4">

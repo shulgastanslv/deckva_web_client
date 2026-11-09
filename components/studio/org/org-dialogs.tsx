@@ -117,7 +117,7 @@ export function EditProfileDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[min(28rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-md"
+        className="w-[min(28rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-md"
         showCloseButton
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
@@ -277,7 +277,7 @@ export function ManageMembersDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[min(32rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-lg"
+        className="w-[min(32rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-lg"
         showCloseButton
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
@@ -387,7 +387,7 @@ export function ManageMembersDialog({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="w-44 rounded-2xl border-0 p-1"
+                          className="w-44 rounded-2xl p-1"
                         >
                           {isOwner && member.role !== OrgMemberRole.OWNER ? (
                             <>
@@ -541,7 +541,7 @@ export function DeleteOrganizationDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[min(28rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl border-0 p-0 sm:max-w-md"
+        className="w-[min(28rem,calc(100vw-2rem))] gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-md"
         showCloseButton
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">

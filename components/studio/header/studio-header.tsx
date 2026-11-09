@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ChevronRight, Keyboard, Menu, Send, UserPlus } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { useActiveOrganization } from "@/lib/studio/queries";
 import Logo from "@/components/logo/logo";
-import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-dialog";
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
@@ -26,7 +25,7 @@ export function StudioHeader({
 }) {
   const t = useTranslations("common");
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const signedIn = status === "authenticated";
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const organization = useActiveOrganization(signedIn);
@@ -49,8 +48,8 @@ export function StudioHeader({
 
   return (
     <>
-      <header className="flex shrink-0 items-center justify-between gap-2 bg-muted/20 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 sm:gap-3 sm:px-6 rounded-t-2xl">
-        <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+      <header className="flex shrink-0 items-center justify-between gap-2 rounded-t-2xl bg-muted/20 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 sm:gap-3 sm:px-6">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
           {onMenu ? (
             <button
               type="button"
@@ -74,25 +73,16 @@ export function StudioHeader({
               className="shrink-0 hover:rotate-0"
             />
           </button>
-          <PlanDropdown isUpgrade={isUpgrade} openUpgrade={openUpgrade} />
+          {signedIn ? (
+            <PlanDropdown isUpgrade={isUpgrade} openUpgrade={openUpgrade} />
+          ) : null}
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="flex items-center gap-3">
-
-           <KeyboardShortcutsMenu />
-           <InviteMembersDialog />
-
+            <KeyboardShortcutsMenu />
+            <InviteMembersDialog />
           </div>
-          {session?.user?.role === "ADMIN" ? (
-            <Button variant="secondary" className="hidden h-9 rounded-full sm:inline-flex" onClick={() => router.push("/admin")}>
-              Admin panel <ChevronRight className="size-4" />
-            </Button>
-          ) : null}
-
-         
-
-          <LocaleSwitcher />
           <StudioNotifications />
 
           {!signedIn ? (

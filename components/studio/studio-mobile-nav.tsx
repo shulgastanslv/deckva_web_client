@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   FolderIcon,
   HomeIcon,
-  LayoutTemplateIcon,
+  UsersIcon,
   PaletteIcon,
   Plus,
 } from "lucide-react";
@@ -35,10 +35,10 @@ export function StudioMobileNav({
       active: pathname.startsWith("/studio/browse"),
     },
     {
-      href: "/studio/templates",
-      label: "Templates",
-      icon: LayoutTemplateIcon,
-      active: pathname.startsWith("/studio/templates"),
+      href: "/studio/browse?tab=community",
+      label: "Community",
+      icon: UsersIcon,
+      active: pathname.includes("tab=community"),
     },
     {
       href: "/studio/brand-kit",

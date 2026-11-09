@@ -191,7 +191,7 @@ export function StudioBrandKit() {
               </Button>
               <StudioCreateMenu
                 onBlank={create.openBlank}
-                onTemplates={create.openTemplates}
+                onTemplates={create.openCommunity}
                 align="end"
               />
             </div>

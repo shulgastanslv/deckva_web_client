@@ -45,7 +45,7 @@ export function FilterMenu({
       <DropdownMenuContent
         align="start"
         sideOffset={6}
-        className="w-52! min-w-52! rounded-xl border-0 bg-muted/50 p-1.5 text-[13px]! shadow-xl ring-0 backdrop-blur-md"
+        className="w-52! min-w-52! rounded-2xl p-1.5 text-[13px]!"
       >
         {groups.map((group, index) => (
           <div key={group.label ?? index}>

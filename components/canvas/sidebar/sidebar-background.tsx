@@ -560,7 +560,7 @@ export function SidebarBackground() {
       </CollapsibleGroup>
 
       <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
-        <DialogContent className="grid max-h-[min(40rem,85dvh)] w-[min(36rem,calc(100vw-2rem))] grid-rows-[auto_minmax(0,1fr)] gap-3 overflow-hidden rounded-3xl border-0 bg-background p-4 sm:max-w-xl">
+        <DialogContent className="grid max-h-[min(40rem,85dvh)] w-[min(36rem,calc(100vw-2rem))] grid-rows-[auto_minmax(0,1fr)] gap-3 overflow-hidden rounded-3xl p-4 sm:max-w-xl">
           <DialogHeader>
             <DialogTitle className="text-[15px] font-semibold">
               3D backgrounds

@@ -166,7 +166,7 @@ export function StudioOrgSwitcher({
           <DropdownMenuContent
             align="start"
             sideOffset={8}
-            className="w-[280px] overflow-hidden rounded-2xl border-0 bg-background p-0 shadow-lg dark:bg-muted"
+            className="w-[280px] overflow-hidden rounded-2xl p-0"
           >
             {active ? (
               <div className="flex items-center gap-2.5 px-3 py-3">
@@ -198,7 +198,7 @@ export function StudioOrgSwitcher({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-48 rounded-2xl border-0 p-1"
+                      className="w-48 rounded-2xl p-1"
                     >
                       {isAdmin ? (
                         <DropdownMenuItem

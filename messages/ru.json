@@ -201,6 +201,8 @@
     "saveThumbnails": "Не удалось сохранить превью",
     "renameProject": "Не удалось переименовать проект",
     "duplicateProject": "Не удалось дублировать проект",
+    "loadCommunity": "Не удалось загрузить сообщество",
+    "publishCommunity": "Не удалось опубликовать в сообществе",
     "deleteProject": "Не удалось удалить проект",
     "loadTemplates": "Не удалось загрузить шаблоны",
     "templateIdRequired": "Нужен templateId",

@@ -33,6 +33,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const itemClass =
+  "cursor-pointer gap-2.5 rounded-xl px-3 py-2 text-[13px] focus:bg-muted/50";
+
 export function StudioProjectMenu({
   project,
   onChanged,
@@ -72,21 +75,21 @@ export function StudioProjectMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7 rounded-full bg-background text-muted-foreground opacity-100 ring-1 ring-border/60 transition-opacity hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
+          className="size-8 rounded-full border-none bg-muted/40 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
           onClick={(event) => event.stopPropagation()}
         >
-          <MoreHorizontal className="h-3.5 w-3.5" />
+          <MoreHorizontal className="size-4" />
           <span className="sr-only">More</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        sideOffset={6}
-        className="w-56 rounded-2xl p-1.5 shadow-xl"
+        sideOffset={8}
+        className="w-56 rounded-2xl p-1.5"
         onClick={(event) => event.stopPropagation()}
       >
         {renaming ? (
-          <div className="px-1.5 py-1.5">
+          <div className="px-1 py-1">
             <Input
               autoFocus
               value={draft}
@@ -99,52 +102,52 @@ export function StudioProjectMenu({
                 }
                 if (e.key === "Escape") setRenaming(false);
               }}
-              className="h-8 text-[13px]"
+              className="h-9 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none focus-visible:ring-2 focus-visible:ring-ring/20"
             />
           </div>
         ) : (
           <DropdownMenuItem
-            className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
+            className={itemClass}
             onSelect={(e) => {
               e.preventDefault();
               setRenaming(true);
             }}
           >
-            <Pencil className="size-4" />
+            <Pencil className="size-4 text-muted-foreground" />
             Rename
           </DropdownMenuItem>
         )}
 
         <DropdownMenuItem
-          className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
+          className={itemClass}
           onClick={async () => {
             await duplicateProject(project.id);
             onChanged();
           }}
         >
-          <Copy className="size-4" />
+          <Copy className="size-4 text-muted-foreground" />
           Duplicate
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
+          className={itemClass}
           onClick={async () => {
             await toggleSaveProject(project.id);
             onChanged();
           }}
         >
-          <Star className="size-4" />
+          <Star className="size-4 text-muted-foreground" />
           {project.isSaved ? "Unstar" : "Star"}
         </DropdownMenuItem>
 
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]">
-            <FolderInput className="size-4" />
+          <DropdownMenuSubTrigger className={itemClass}>
+            <FolderInput className="size-4 text-muted-foreground" />
             Move to folder
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="min-w-[180px] rounded-xl p-1.5">
+          <DropdownMenuSubContent className="min-w-[180px] rounded-2xl p-1.5">
             <DropdownMenuItem
-              className="cursor-pointer gap-2 rounded-lg text-[13px]"
+              className={itemClass}
               onClick={() => void moveTo(null)}
             >
               {!project.folderId ? (
@@ -157,7 +160,7 @@ export function StudioProjectMenu({
             {folders.map((folder) => (
               <DropdownMenuItem
                 key={folder.id}
-                className="cursor-pointer gap-2 rounded-lg text-[13px]"
+                className={itemClass}
                 onClick={() => void moveTo(folder.id)}
               >
                 {project.folderId === folder.id ? (
@@ -169,18 +172,18 @@ export function StudioProjectMenu({
               </DropdownMenuItem>
             ))}
             {folders.length === 0 ? (
-              <p className="px-2.5 py-2 text-[12px] text-muted-foreground">
+              <p className="px-3 py-2 text-[12px] text-muted-foreground">
                 Create a folder in the sidebar first.
               </p>
             ) : null}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
         <DropdownMenuItem
           variant="destructive"
-          className="cursor-pointer gap-2.5 rounded-lg px-2.5 py-2 text-[13px]"
+          className={itemClass}
           onClick={async () => {
             await deleteProject(project.id);
             onChanged();

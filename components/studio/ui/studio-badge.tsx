@@ -12,7 +12,7 @@ export function StudioBadge({
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center rounded-md bg-neutral-200/80 px-1.5 py-0.5 text-[10px] font-medium text-neutral-600 dark:bg-muted dark:text-muted-foreground",
+        "inline-flex h-5 shrink-0 items-center rounded-full bg-muted/50 px-2 text-[11px] font-medium text-muted-foreground",
         className,
       )}
     >
