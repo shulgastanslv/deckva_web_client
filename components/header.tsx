@@ -4,12 +4,13 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUp,
-  Share,
+  ChevronDown,
   Globe,
-  Undo2,
-  Redo2,
-  Focus,
   Play,
+  Redo2,
+  Share,
+  Smartphone,
+  Undo2,
 } from "lucide-react";
 import Logo from "@/components/logo/logo";
 import { useSession } from "next-auth/react";
@@ -23,6 +24,12 @@ import { ExportModal } from "./export-modal";
 import { ProjectFileMenu } from "@/components/canvas/project-file-menu";
 import { RatioSelect } from "@/components/canvas/ratio-select";
 import { SaveStatusMenu } from "@/components/canvas/save-status-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
@@ -36,6 +43,12 @@ const centerBtn =
 const sideBtn =
   "h-9 gap-1.5 rounded-full border-none px-3.5 text-[13px] font-medium shadow-none";
 
+const chipTrigger =
+  "inline-flex h-10 items-center gap-1.5 rounded-full border-none bg-transparent px-3.5 text-[13px] font-medium text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 data-[state=open]:text-foreground";
+
+const menuItem =
+  "cursor-pointer gap-2 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50";
+
 interface HeaderProps {
   onPreview?: () => void;
   onPhonePreview?: () => void;
@@ -43,7 +56,7 @@ interface HeaderProps {
   onReview?: () => void;
 }
 
-export function Header({ onPreview, onFocus }: HeaderProps) {
+export function Header({ onPreview, onPhonePreview }: HeaderProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
@@ -116,10 +129,8 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
     <>
       <header className="z-20 grid h-16 w-full shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-b border-border/50 bg-background px-4 select-none">
         {/* Project */}
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-2">
           <Logo width={32} height={32} href="/studio" />
-
-
 
           <input
             type="text"
@@ -144,6 +155,9 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             currentRatio={currentRatio}
             onRatioChange={(ratio) => handleRatioChange(ratio as RatioKey)}
           />
+
+
+
           <SaveStatusMenu />
         </div>
 
@@ -159,16 +173,38 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             <Undo2 className="size-4" />
             <span className="hidden lg:inline">Undo</span>
           </Button>
-          <Button
-            variant="default"
-            size="sm"
-            className={centerBtn}
-            onClick={onPreview}
-            title="Preview carousel"
-          >
-            <Play className="size-4" />
-            <span className="hidden lg:inline">Preview</span>
-          </Button>
+          {(onPreview || onPhonePreview) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="default" className="h-9 gap-1.5 rounded-full border-none px-3.5 text-[13px] shadow-none">
+                  <Play className="size-3.5 opacity-80" />
+                  Preview
+                  <ChevronDown className="size-3.5 opacity-70" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                sideOffset={8}
+                className="w-52 rounded-2xl p-1.5"
+              >
+                {onPreview ? (
+                  <DropdownMenuItem className={menuItem} onSelect={onPreview}>
+                    <Play className="size-4" />
+                    Preview Carousel
+                  </DropdownMenuItem>
+                ) : null}
+                {onPhonePreview ? (
+                  <DropdownMenuItem
+                    className={menuItem}
+                    onSelect={onPhonePreview}
+                  >
+                    <Smartphone className="size-4" />
+                    Preview on Phone
+                  </DropdownMenuItem>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -179,10 +215,10 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             <Redo2 className="size-4" />
             <span className="hidden lg:inline">Redo</span>
           </Button>
-
           <div className="hidden xl:block">
             <CommandsKbd />
           </div>
+
         </div>
 
         {/* Share / export */}
@@ -221,7 +257,7 @@ export function Header({ onPreview, onFocus }: HeaderProps) {
             )}
           >
             <ArrowUp className="size-4" />
-            Export / {slideCount} PNGs / ZIP
+            Export • {slideCount}x PNGs / ZIP
           </Button>
 
           {signedIn ? (

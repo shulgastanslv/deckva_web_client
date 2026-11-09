@@ -462,7 +462,7 @@ export function StudioNotifications({
             className,
           )}
         >
-          <Bell className="size-[19px] stroke-[2]" />
+          <Bell className="size-4 stroke-[2]" />
           {unread > 0 ? (
             <span className="absolute top-2 right-2.5 size-2.5 rounded-full border-2 border-background bg-[#2f5bff]" />
           ) : null}

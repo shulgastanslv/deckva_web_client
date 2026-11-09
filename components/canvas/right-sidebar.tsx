@@ -1343,7 +1343,7 @@ export function RightSidebar({
                   {cropping ? (
                     <div className="space-y-3 rounded-2xl bg-muted/40 p-3">
                       <p className="text-[13px] leading-snug text-muted-foreground">
-                        Drag the picture to move it inside the frame.
+                        Drag to reframe. Scroll to zoom. Esc cancels.
                       </p>
                       <NumberField
                         label="Zoom"
@@ -1490,7 +1490,7 @@ export function RightSidebar({
                     value={formValues.text ?? ""}
                     onChange={(e) => updateProp("text", e.target.value)}
                     placeholder="Text content"
-                    className="resize-none rounded-2xl bg-muted/40 p-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+                    className="resize-none rounded-2xl bg-muted/40 p-3 w-full text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
                   />
                   <p
                     className={cn(

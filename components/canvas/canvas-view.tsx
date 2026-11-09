@@ -328,6 +328,8 @@ export function CanvasView({
 
     const onWheel = (event: WheelEvent) => {
       if (!event.ctrlKey && !event.metaKey) return;
+      // Crop session owns wheel zoom while reframing a photo.
+      if (managerRef.current?.crop.active) return;
       event.preventDefault();
       const stage = stageRef.current;
       if (stage && stage.offsetWidth > 0 && stage.offsetHeight > 0) {

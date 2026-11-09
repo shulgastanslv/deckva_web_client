@@ -21,6 +21,7 @@ import {
   Type,
 } from "lucide-react";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { rememberRecentPhoto } from "@/lib/canvas/recent-photos";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -101,7 +102,10 @@ export function useElementLibrary() {
   const addImageFromFile = (file: File) => {
     if (!file.type.startsWith("image/") || !manager) return;
     void fileToDataUrl(file)
-      .then((dataUrl) => manager.objects.addImage(dataUrl))
+      .then(async (dataUrl) => {
+        await manager.objects.addImage(dataUrl);
+        void rememberRecentPhoto(dataUrl);
+      })
       .catch((err) => {
         reportError(err, messages.errors.addImage);
       });
@@ -110,7 +114,10 @@ export function useElementLibrary() {
   const fillFrameFromFile = (file: File) => {
     if (!file.type.startsWith("image/") || !manager) return;
     void fileToDataUrl(file)
-      .then((dataUrl) => manager.objects.fillActiveFrame(dataUrl))
+      .then(async (dataUrl) => {
+        await manager.objects.fillActiveFrame(dataUrl);
+        void rememberRecentPhoto(dataUrl);
+      })
       .catch((err) => {
         reportError(err, messages.errors.addImage);
       });
@@ -147,7 +154,9 @@ export function useElementLibrary() {
     setUrlError(null);
     setUrlLoading(true);
     try {
-      await manager.objects.addImage(parsed.toString());
+      const src = parsed.toString();
+      await manager.objects.addImage(src);
+      void rememberRecentPhoto(src);
       setImageUrl("");
     } catch (err) {
       reportError(err, messages.errors.loadImageCors);
@@ -155,6 +164,14 @@ export function useElementLibrary() {
     } finally {
       setUrlLoading(false);
     }
+  };
+
+  const placeRecentPhoto = (src: string) => {
+    if (!manager || !src) return;
+    void manager.objects
+      .addImage(src)
+      .then(() => rememberRecentPhoto(src))
+      .catch((err) => reportError(err, messages.errors.addImage));
   };
 
   const sections: ElementSection[] = useMemo(
@@ -208,5 +225,6 @@ export function useElementLibrary() {
     handleImageFileChange,
     handleFrameFileChange,
     addImageFromUrl,
+    placeRecentPhoto,
   };
 }

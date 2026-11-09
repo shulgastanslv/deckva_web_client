@@ -19,6 +19,8 @@ import {
 interface PreviewModalProps {
   open: boolean;
   initialSlideId: number;
+  /** Opens on slides (carousel) or phone mockup. */
+  initialView?: "slides" | "phone";
   onClose: () => void;
 }
 
@@ -35,7 +37,12 @@ interface SlideSnapshot {
 const PREVIEW_LONG_EDGE = 1600;
 const THUMB_LONG_EDGE = 280;
 
-export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProps) {
+export function PreviewModal({
+  open,
+  initialSlideId,
+  initialView = "slides",
+  onClose,
+}: PreviewModalProps) {
   const slides = useCanvasStore((s) => s.slides);
   const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
   const projectTitle = useCanvasStore((s) => s.projectTitle);
@@ -46,15 +53,17 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
   const [activeId, setActiveId] = useState(initialSlideId);
   const [snapshots, setSnapshots] = useState<SlideSnapshot[]>([]);
   const [rendering, setRendering] = useState(false);
-  const [view, setView] = useState<"slides" | "phone">("slides");
+  const [view, setView] = useState<"slides" | "phone">(initialView);
   const [network, setNetwork] = useState<SocialPreviewNetwork>("instagram");
 
-  const isMountedRef = useRef(true);
+  const renderGenRef = useRef(0);
   const offscreenRef = useRef<FabricCanvas | null>(null);
 
   const slideIds = slides.map((s) => s.id);
   const activeIdx = Math.max(0, slideIds.indexOf(activeId));
   const aspectRatio = canvasDimensions.width / canvasDimensions.height;
+  const canvasWidth = canvasDimensions.width;
+  const canvasHeight = canvasDimensions.height;
   const author =
     projectTitle
       .trim()
@@ -62,17 +71,25 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
       .replace(/[^a-z0-9_]+/g, "")
       .slice(0, 18) || "deckva";
 
+  // Keep view in sync without restarting the offscreen Fabric render pass.
   useEffect(() => {
     if (!open) return;
-    isMountedRef.current = true;
+    setView(initialView);
+    setActiveId(initialSlideId);
+  }, [open, initialView, initialSlideId]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const gen = ++renderGenRef.current;
+    const alive = () =>
+      renderGenRef.current === gen && offscreenRef.current !== null;
 
     slidesController?.saveCurrent();
 
     const freshSlides = useCanvasStore.getState().slides;
-    const { width, height } = canvasDimensions;
-    const longEdge = Math.max(width, height);
+    const longEdge = Math.max(canvasWidth, canvasHeight);
 
-    setActiveId(initialSlideId);
     setSnapshots(
       freshSlides.map((s) => ({
         id: s.id,
@@ -87,12 +104,12 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
     setRendering(true);
 
     const offscreenEl = document.createElement("canvas");
-    offscreenEl.width = width;
-    offscreenEl.height = height;
+    offscreenEl.width = canvasWidth;
+    offscreenEl.height = canvasHeight;
 
     const offscreenCanvas = new FabricCanvas(offscreenEl, {
-      width,
-      height,
+      width: canvasWidth,
+      height: canvasHeight,
       renderOnAddRemove: false,
       enableRetinaScaling: false,
     });
@@ -103,9 +120,9 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
 
     (async () => {
       for (const slide of freshSlides) {
-        if (!isMountedRef.current) break;
+        if (!alive()) break;
         if (!slide.canvasJSON) {
-          if (isMountedRef.current) {
+          if (alive()) {
             setSnapshots((prev) =>
               prev.map((s) => (s.id === slide.id ? { ...s, loading: false } : s)),
             );
@@ -115,6 +132,8 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
 
         try {
           await offscreenCanvas.loadFromJSON(withRemoteImageCors(slide.canvasJSON));
+          // Strict Mode / reopen can dispose mid-await — never touch a dead canvas.
+          if (!alive() || offscreenRef.current !== offscreenCanvas) break;
 
           if (!offscreenCanvas.backgroundColor) {
             offscreenCanvas.backgroundColor = "#ffffff";
@@ -133,7 +152,7 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
             quality: 0.72,
           });
 
-          if (!isMountedRef.current) break;
+          if (!alive()) break;
 
           updateSlideThumbnail(slide.id, thumbURL);
           setSnapshots((prev) =>
@@ -144,30 +163,44 @@ export function PreviewModal({ open, initialSlideId, onClose }: PreviewModalProp
             ),
           );
         } catch (error) {
+          if (!alive()) break;
           reportError(error, messages.errors.renderSlide);
-          if (isMountedRef.current) {
-            setSnapshots((prev) =>
-              prev.map((s) => (s.id === slide.id ? { ...s, loading: false } : s)),
-            );
-          }
+          setSnapshots((prev) =>
+            prev.map((s) => (s.id === slide.id ? { ...s, loading: false } : s)),
+          );
         }
       }
 
       if (offscreenRef.current === offscreenCanvas) {
-        offscreenCanvas.dispose();
+        try {
+          void offscreenCanvas.dispose();
+        } catch {
+          // ignore dispose races
+        }
         offscreenRef.current = null;
       }
-      if (isMountedRef.current) setRendering(false);
+      if (renderGenRef.current === gen) setRendering(false);
     })();
 
     return () => {
-      isMountedRef.current = false;
-      if (offscreenRef.current) {
-        offscreenRef.current.dispose();
+      renderGenRef.current += 1;
+      if (offscreenRef.current === offscreenCanvas) {
+        try {
+          void offscreenCanvas.dispose();
+        } catch {
+          // ignore dispose races
+        }
         offscreenRef.current = null;
       }
     };
-  }, [open, slidesController, initialSlideId, canvasDimensions, updateSlideThumbnail]);
+  }, [
+    open,
+    slidesController,
+    initialSlideId,
+    canvasWidth,
+    canvasHeight,
+    updateSlideThumbnail,
+  ]);
 
   useEffect(() => {
     if (!open) return;

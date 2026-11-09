@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ComponentType } from "react";
+import { useEffect, useMemo, useState, type ComponentType } from "react";
 import {
   Code2,
   ImageIcon,
@@ -24,8 +24,16 @@ import { ImageUploadIcon } from "@/components/canvas/shapes-icons";
 import { FramesPicker } from "@/components/canvas/sidebar/frames-picker";
 import { CodeBlockSettings } from "@/components/canvas/code-block-inspector";
 import { ChipScroll } from "@/components/canvas/sidebar/chip-scroll";
+import { GalleryCard, GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 import { useSelectedObject } from "@/hooks/use-selected-object";
+import {
+  clearRecentPhotos,
+  readRecentPhotos,
+  resolveRecentPlaceSrc,
+  RECENT_PHOTOS_CHANGED,
+  type RecentPhoto,
+} from "@/lib/canvas/recent-photos";
 
 type Category = "photos" | "text" | "shapes" | "frames" | "code";
 
@@ -90,11 +98,30 @@ export function SidebarElements() {
     handleImageFileChange,
     handleFrameFileChange,
     addImageFromUrl,
+    placeRecentPhoto,
   } = useElementLibrary();
 
   const { selectedObject } = useSelectedObject();
   const [category, setCategory] = useState<Category>("photos");
   const [search, setSearch] = useState("");
+  const [recentPhotos, setRecentPhotos] = useState<RecentPhoto[]>([]);
+
+  useEffect(() => {
+    const sync = () => setRecentPhotos(readRecentPhotos());
+    sync();
+    window.addEventListener(RECENT_PHOTOS_CHANGED, sync);
+    return () => window.removeEventListener(RECENT_PHOTOS_CHANGED, sync);
+  }, []);
+
+  const filteredRecent = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return recentPhotos;
+    return recentPhotos.filter(
+      (item) =>
+        item.placeSrc.toLowerCase().includes(q) ||
+        item.src.toLowerCase().includes(q),
+    );
+  }, [recentPhotos, search]);
 
   const codeGroup =
     selectedObject && isCodeBlock(selectedObject)
@@ -141,27 +168,27 @@ export function SidebarElements() {
       />
 
       <div className="sticky top-0 z-10 w-full min-w-0 space-y-3 bg-background/95 px-3 pt-3 pb-2 backdrop-blur-sm">
-        {category !== "code" ? (
-          <label className="flex h-10 min-w-0 items-center gap-2 rounded-full bg-muted/70 px-3.5 dark:bg-muted/35">
-            <Search className="size-4 shrink-0 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={
-                category === "photos"
-                  ? "Search photos..."
-                  : category === "text"
-                    ? "Search text..."
-                    : category === "shapes"
-                      ? "Search shapes..."
-                      : category === "frames"
-                        ? "Search devices..."
+        <label className="flex h-10 min-w-0 items-center gap-2 rounded-full bg-muted/70 px-3.5 dark:bg-muted/35">
+          <Search className="size-4 shrink-0 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={
+              category === "photos"
+                ? "Search photos..."
+                : category === "text"
+                  ? "Search text..."
+                  : category === "shapes"
+                    ? "Search shapes..."
+                    : category === "frames"
+                      ? "Search devices..."
+                      : category === "code"
+                        ? "Search themes..."
                         : "Search..."
-              }
-              className="h-full min-w-0 w-full bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
-            />
-          </label>
-        ) : null}
+            }
+            className="h-full min-w-0 w-full bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
+          />
+        </label>
 
         <ChipScroll
           items={tabItems}
@@ -252,6 +279,26 @@ export function SidebarElements() {
             {urlError ? (
               <p className="text-[14px] text-destructive">{urlError}</p>
             ) : null}
+
+            {filteredRecent.length > 0 ? (
+              <GallerySection
+                title="Recently used"
+                action="Clear"
+                onAction={() => clearRecentPhotos()}
+              >
+                {filteredRecent.map((item, index) => (
+                  <GalleryCard
+                    key={item.id}
+                    title={`Photo ${index + 1}`}
+                    previewUrl={item.src}
+                    onClick={() => {
+                      if (!manager) return;
+                      placeRecentPhoto(resolveRecentPlaceSrc(item));
+                    }}
+                  />
+                ))}
+              </GallerySection>
+            ) : null}
           </div>
         ) : null}
 
@@ -341,9 +388,8 @@ export function SidebarElements() {
         {category === "code" ? (
           <CodeBlockSettings
             group={codeGroup}
-            showAddButton
+            search={search}
             onAdd={(options) => manager?.objects.addCodeBlock(options)}
-            onOpenFrames={() => setCategory("frames")}
           />
         ) : null}
       </div>

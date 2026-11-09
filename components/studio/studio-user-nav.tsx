@@ -169,9 +169,8 @@ export function StudioUserNav({
           {onCommunity ? (
             <NavItem
               icon={<Globe className={iconClass} />}
-              label="Community"
+              label="Publish"
               onSelect={onCommunity}
-              className="sm:hidden"
             />
           ) : null}
 

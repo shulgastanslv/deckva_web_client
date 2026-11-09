@@ -2,15 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Group } from "fabric";
-import { Code2, Smartphone } from "lucide-react";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { PillSlider } from "@/components/ui/pill-slider";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { CodeAppearanceSelect } from "@/components/canvas/sidebar/code-chrome-cards";
 import {
-  CODE_PADDINGS,
   DEFAULT_CODE_OPTIONS,
   fontSizeFromUiScale,
   readCodeOptions,
@@ -19,11 +16,8 @@ import {
   type CodeBlockOptions,
   type CodeChromeStyle,
   type CodeLang,
-  type CodePadding,
   type CodeThemeId,
 } from "@/lib/canvas/code-block";
-import { cn } from "@/lib/utils";
-import { sidebarActionBtn } from "@/components/canvas/sidebar/sidebar-ui";
 
 function useCodeDraft(group: Group | null) {
   const manager = useCanvasManager();
@@ -87,14 +81,12 @@ function useCodeDraft(group: Group | null) {
 
 export function CodeBlockSettings({
   group,
-  showAddButton,
+  search = "",
   onAdd,
-  onOpenFrames,
 }: {
   group: Group | null;
-  showAddButton?: boolean;
+  search?: string;
   onAdd?: (options: CodeBlockOptions) => void;
-  onOpenFrames?: () => void;
 }) {
   const { draft, patch, hasTarget } = useCodeDraft(group);
   const chromeStyle = resolveChromeStyle(draft.chromeStyle, draft.showChrome);
@@ -102,28 +94,19 @@ export function CodeBlockSettings({
 
   return (
     <div className="flex flex-col gap-3 text-[14px]">
-      {showAddButton ? (
-        <Button
-          type="button"
-          variant="secondary"
-          className={cn(sidebarActionBtn, "h-10 w-full text-[13px]")}
-          onClick={() => onAdd?.(draft)}
-        >
-          <Code2 className="size-4" />
-          Add code block
-        </Button>
-      ) : null}
-
       <CodeAppearanceSelect
         chromeStyle={chromeStyle}
         theme={draft.theme}
         lang={draft.lang}
         darkMode={draft.darkMode}
+        search={search}
+        active={hasTarget}
         onChromeChange={(style: CodeChromeStyle) =>
           patch({ chromeStyle: style, showChrome: style !== "none" }, true)
         }
         onThemeChange={(next: CodeThemeId) => patch({ theme: next }, true)}
         onLangChange={(next: CodeLang) => patch({ lang: next }, true)}
+        onPlace={onAdd ? () => onAdd(draft) : undefined}
       />
 
       <PillSlider
@@ -166,14 +149,12 @@ export function CodeBlockSettings({
           />
         </label>
       ))}
-        {!hasTarget ? (
+
+      {!hasTarget ? (
         <p className="px-1 text-[13px] text-muted-foreground">
-          Settings below apply to the next code block you add. Select a block
-          on the canvas to edit it live.
+          Tap the preview to add a code block. Select one on the canvas to edit it live.
         </p>
       ) : null}
-
-    
     </div>
   );
 }

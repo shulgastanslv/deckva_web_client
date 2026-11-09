@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown, Crown } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import { getGenerationStatus } from "@/actions/ai";
@@ -26,10 +26,13 @@ type PlanState = {
 export function PlanDropdown({
   isUpgrade,
   openUpgrade,
+  variant = "usage",
 }: {
   /** Initial hint from org; live status comes from getGenerationStatus. */
   isUpgrade: boolean;
   openUpgrade: () => void;
+  /** `usage` = remaining count; `upgrade` = Upgrade to Pro / Pro ▾ */
+  variant?: "usage" | "upgrade";
 }) {
   const { status } = useSession();
   const signedIn = status === "authenticated";
@@ -90,7 +93,7 @@ export function PlanDropdown({
     };
   }, [signedIn]);
 
-  const label = plan.isPro
+  const usageLabel = plan.isPro
     ? "Pro"
     : `${plan.remaining}/${FREE_GENERATION_LIMIT}`;
 
@@ -100,17 +103,29 @@ export function PlanDropdown({
         <Button
           variant="secondary"
           className={cn(
-            "h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
+            "h-9 gap-1.5 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
             plan.isPro &&
               "bg-primary/15 text-primary hover:bg-primary/25 data-[state=open]:bg-primary/25",
           )}
         >
-          {label}
+          {variant === "upgrade" && !plan.isPro ? (
+            <>
+              <Crown className="size-3.5" />
+              <span>Upgrade to Pro</span>
+            </>
+          ) : variant === "upgrade" && plan.isPro ? (
+            <>
+              <span>Pro</span>
+              <ChevronDown className="size-3.5 opacity-70" />
+            </>
+          ) : (
+            usageLabel
+          )}
         </Button>
       </PopoverTrigger>
 
       <PopoverContent
-        align="start"
+        align={variant === "upgrade" ? "end" : "start"}
         sideOffset={10}
         className="w-[300px] rounded-2xl p-5"
       >

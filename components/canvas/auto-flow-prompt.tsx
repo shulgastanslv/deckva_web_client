@@ -143,29 +143,35 @@ export function AutoFlowPrompt() {
   };
 
   return (
-    <div className="pointer-events-none absolute bottom-20 left-1/2 z-30 -translate-x-1/2 px-3">
-      <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-border/60 bg-background/95 px-3 py-2 backdrop-blur-md">
-        <Layers className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        <p className="max-w-[280px] text-[13px] text-foreground">
-          {continuing
-            ? "This text runs past the slide. Continue it on the next slide?"
-            : "This object runs past the slide edge. Create the next slide and move it?"}
-        </p>
+    <div className="pointer-events-none absolute inset-x-0 bottom-20 z-30 flex justify-center p-2">
+      <div className="pointer-events-auto flex max-w-[min(420px,calc(100vw-24px))] items-center gap-2 rounded-full bg-popover p-2 text-popover-foreground shadow-sm dark:border dark:border-border/50">
+        <div className="flex min-w-0 flex-1 items-center gap-2 pl-2.5">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground">
+            <Layers className="size-3.5" />
+          </span>
+          <p className="min-w-0 truncate text-[13px] leading-snug text-foreground">
+            {continuing
+              ? "Text runs past the slide — continue on the next one?"
+              : "Object past the edge — move it to a new slide?"}
+          </p>
+        </div>
         <Button
+          type="button"
           size="sm"
-          className="h-7 shrink-0 rounded-xl px-2.5 text-[13px]"
+          className="h-9 shrink-0 rounded-full px-3.5 text-[13px] font-medium"
           onClick={() => void accept()}
         >
           {continuing ? "Continue" : "Create"}
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="icon"
-          className="h-7 w-7 rounded-full shrink-0"
+          className="size-9 shrink-0 rounded-full text-muted-foreground hover:bg-muted/40 hover:text-foreground"
           onClick={dismiss}
           title="Dismiss"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="size-3.5" />
         </Button>
       </div>
     </div>

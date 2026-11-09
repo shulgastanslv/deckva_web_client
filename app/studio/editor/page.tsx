@@ -97,6 +97,7 @@ export default function CarouselEditor() {
   const [isRightCollapsed, setIsRightCollapsed] = useState(true);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewSlideId, setPreviewSlideId] = useState<number>(0);
+  const [previewView, setPreviewView] = useState<"slides" | "phone">("slides");
   const [focusMode, setFocusMode] = useState(false);
   const [canvasChrome, setCanvasChrome] = useState(true);
   const [phoneSheet, setPhoneSheet] = useState<"library" | "style" | null>(null);
@@ -170,6 +171,13 @@ export default function CarouselEditor() {
           onPreview={() => {
             const storeCurrentId = useCanvasStore.getState().currentSlideId;
             setPreviewSlideId(storeCurrentId);
+            setPreviewView("slides");
+            setShowPreviewModal(true);
+          }}
+          onPhonePreview={() => {
+            const storeCurrentId = useCanvasStore.getState().currentSlideId;
+            setPreviewSlideId(storeCurrentId);
+            setPreviewView("phone");
             setShowPreviewModal(true);
           }}
           onFocus={() => {
@@ -292,6 +300,7 @@ export default function CarouselEditor() {
       <PreviewModal
         open={showPreviewModal}
         initialSlideId={previewSlideId}
+        initialView={previewView}
         onClose={() => setShowPreviewModal(false)}
       />
     </div>

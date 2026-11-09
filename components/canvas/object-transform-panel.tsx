@@ -310,15 +310,8 @@ export function ObjectTransformPanel({
             Drag to move
           </div>
         )}
-        <div
-          className="pointer-events-none absolute z-10 flex size-9 items-center justify-center rounded-full bg-foreground text-background will-change-[left,top]"
-          style={{
-            left: `calc(50% + ${tab === "position" ? nudge.x : 0}px)`,
-            top: `calc(50% + ${tab === "position" ? nudge.y : 0}px)`,
-            marginLeft: -18,
-            marginTop: -18,
-          }}
-        >
+        {/* Stay centered — only the preview nudges while dragging. */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-foreground text-background">
           <Move className="size-3.5" />
         </div>
       </div>

@@ -32,8 +32,8 @@ export function placeWindow(
 }
 
 /**
- * Scene drag, in source pixels. Dragging the picture right reveals what was on its left,
- * so the caller subtracts this from the crop center.
+ * Scene drag → source pixels. Dragging the picture right reveals what was on its left,
+ * so the caller subtracts this from the crop / pan center.
  */
 export function sourceDelta(
   dx: number,
@@ -54,6 +54,123 @@ export function sourceDelta(
   return {
     x: localX / (scaleX || 1),
     y: localY / (scaleY || 1),
+  };
+}
+
+/** Source-pixel offset → scene delta (inverse of sourceDelta). */
+export function sceneDelta(
+  srcX: number,
+  srcY: number,
+  angleDeg: number,
+  scaleX: number,
+  scaleY: number,
+  flipX: boolean,
+  flipY: boolean,
+) {
+  let localX = srcX * (scaleX || 1);
+  let localY = srcY * (scaleY || 1);
+  if (flipX) localX = -localX;
+  if (flipY) localY = -localY;
+  const rad = (angleDeg * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  return {
+    x: localX * cos - localY * sin,
+    y: localX * sin + localY * cos,
+  };
+}
+
+/**
+ * Where the frame sits in source space for an expanded (cropX=0) image.
+ * Image and frame share the same angle / flips.
+ */
+export function frameInSource(
+  imgCenter: { x: number; y: number },
+  frameCenter: { x: number; y: number },
+  frameW: number,
+  frameH: number,
+  naturalW: number,
+  naturalH: number,
+  angleDeg: number,
+  scaleX: number,
+  scaleY: number,
+  flipX: boolean,
+  flipY: boolean,
+) {
+  const delta = sourceDelta(
+    frameCenter.x - imgCenter.x,
+    frameCenter.y - imgCenter.y,
+    angleDeg,
+    scaleX,
+    scaleY,
+    flipX,
+    flipY,
+  );
+  const srcW = frameW / (scaleX || 1);
+  const srcH = frameH / (scaleY || 1);
+  return placeWindow(
+    naturalW / 2 + delta.x,
+    naturalH / 2 + delta.y,
+    srcW,
+    srcH,
+    naturalW,
+    naturalH,
+  );
+}
+
+/** Push image center so the frame stays covered by the photo. */
+export function clampImageCenterToCover(
+  imgCenter: { x: number; y: number },
+  frameCenter: { x: number; y: number },
+  frameW: number,
+  frameH: number,
+  naturalW: number,
+  naturalH: number,
+  angleDeg: number,
+  scaleX: number,
+  scaleY: number,
+  flipX: boolean,
+  flipY: boolean,
+) {
+  const placed = frameInSource(
+    imgCenter,
+    frameCenter,
+    frameW,
+    frameH,
+    naturalW,
+    naturalH,
+    angleDeg,
+    scaleX,
+    scaleY,
+    flipX,
+    flipY,
+  );
+  const desiredSrcCx = placed.cropX + placed.width / 2;
+  const desiredSrcCy = placed.cropY + placed.height / 2;
+  const current = sourceDelta(
+    frameCenter.x - imgCenter.x,
+    frameCenter.y - imgCenter.y,
+    angleDeg,
+    scaleX,
+    scaleY,
+    flipX,
+    flipY,
+  );
+  const currentSrcCx = naturalW / 2 + current.x;
+  const currentSrcCy = naturalH / 2 + current.y;
+  const fix = sceneDelta(
+    desiredSrcCx - currentSrcCx,
+    desiredSrcCy - currentSrcCy,
+    angleDeg,
+    scaleX,
+    scaleY,
+    flipX,
+    flipY,
+  );
+  // Image must move opposite to the source-center fix relative to the fixed frame.
+  return {
+    x: imgCenter.x - fix.x,
+    y: imgCenter.y - fix.y,
   };
 }
 

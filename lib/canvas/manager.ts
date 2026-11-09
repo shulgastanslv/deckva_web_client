@@ -521,21 +521,21 @@ export class CanvasManager {
     };
 
     this.canvas.on("mouse:dblclick", (e) => {
-      if (this.crop.active) return;
       const target = e.target as FabricObject & { swibpRole?: string } | undefined;
+
+      if (this.crop.active) {
+        if (target === this.crop.image) return;
+        this.crop.apply();
+        return;
+      }
+
       if (target?.swibpRole === "code") {
         this.events.emit("editCode", target);
         return;
       }
 
-      if (this.crop.active) {
-        if (target === this.crop.image) return; // Игнорируем, если кликаем внутри области кропа
-        this.crop.apply();
-      }
-
-      if(target?.type === "image") {
-        // Начинаем кроп, передавая целевую картинку в ваш менеджер
-        this.crop.start(target); 
+      if (target?.type === "image") {
+        this.crop.start(target);
         return;
       }
 
@@ -545,7 +545,6 @@ export class CanvasManager {
         this.events.emit("editCode", group);
         return;
       }
-
 
       if (target.swibpRole === "split") this.objects.pickSplitImage();
       else if (target.swibpRole === "frame") this.objects.pickFrameImage(target);
