@@ -1,7 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Loader2, X } from "lucide-react";
+import {
+  SpinnerGap as Loader2,
+  X,
+} from "@phosphor-icons/react";
 
 import { ToolAvatar, ToolAvatarTile } from "@/components/canvas/sidebar/tool-avatars";
 import {
@@ -51,12 +55,19 @@ import { cn } from "@/lib/utils";
 
 const NUMBER_STYLES: readonly SlideNumberStyle[] = ["1", "01", "1 / 8"];
 
-const CORNERS: readonly { id: Corner; label: string }[] = [
-  { id: "top-left", label: "Top left" },
-  { id: "top-right", label: "Top right" },
-  { id: "bottom-left", label: "Bottom left" },
-  { id: "bottom-right", label: "Bottom right" },
+const CORNER_IDS: readonly Corner[] = [
+  "top-left",
+  "top-right",
+  "bottom-left",
+  "bottom-right",
 ];
+
+const CORNER_MSG: Record<Corner, "workspace.topLeft" | "workspace.topRight" | "workspace.bottomLeft" | "workspace.bottomRight"> = {
+  "top-left": "workspace.topLeft",
+  "top-right": "workspace.topRight",
+  "bottom-left": "workspace.bottomLeft",
+  "bottom-right": "workspace.bottomRight",
+};
 
 const SWIPE_VARIANTS = ["swipe →", "next →", "→", "more →", "keep going →"] as const;
 
@@ -69,12 +80,34 @@ const DEVICE_OPTIONS: { id: FrameKind; label: string }[] = [
 
 const ROW_COUNTS = [3, 4, 5] as const;
 
+
+const CATALOG_KEY: Record<StudioToolId, "mockups" | "slidesFromText" | "slideNumber" | "author" | "swipeCue" | "progressDots" | "findReplace"> = {
+  mockups: "mockups",
+  "slides-from-text": "slidesFromText",
+  "slide-number": "slideNumber",
+  author: "author",
+  "swipe-cue": "swipeCue",
+  "progress-dots": "progressDots",
+  "find-replace": "findReplace",
+};
+
+function localizeCatalogTool(tool: StudioTool, t: (key: string) => string): StudioTool {
+  const key = CATALOG_KEY[tool.id];
+  return {
+    ...tool,
+    title: t(`catalog.${key}.title`),
+    description: t(`catalog.${key}.description`),
+    longDescription: t(`catalog.${key}.long`),
+    runLabel: t(`catalog.${key}.run`),
+  };
+}
+
 function FieldLabel({ children }: { children: ReactNode }) {
   return <p className="px-0.5 text-[12px] font-medium text-muted-foreground">{children}</p>;
 }
 
 function isCorner(value: string): value is Corner {
-  return CORNERS.some((corner) => corner.id === value);
+  return (CORNER_IDS as readonly string[]).includes(value);
 }
 
 export function ToolPreviewArt({ tool, className }: { tool: StudioTool; className?: string }) {
@@ -91,6 +124,9 @@ export function ToolPreviewArt({ tool, className }: { tool: StudioTool; classNam
 }
 
 function SlideNumberPanel() {
+  const t = useTranslations("editor.tools");
+  const tc = useTranslations("common");
+
   const manager = useCanvasManager();
   const { currentIndex, slides } = useSlides();
   const [numberStyle, setNumberStyle] = useState<SlideNumberStyle>("1");
@@ -101,14 +137,14 @@ function SlideNumberPanel() {
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <FieldLabel>Format</FieldLabel>
+        <FieldLabel>{t("workspace.format")}</FieldLabel>
         <Select
           value={numberStyle}
           onValueChange={(next) => {
             if (next === "1" || next === "01" || next === "1 / 8") setNumberStyle(next);
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Number format">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.numberFormat")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -121,20 +157,20 @@ function SlideNumberPanel() {
         </Select>
       </div>
       <div className="space-y-1.5">
-        <FieldLabel>Corner</FieldLabel>
+        <FieldLabel>{t("workspace.corner")}</FieldLabel>
         <Select
           value={numberCorner}
           onValueChange={(next) => {
             if (isCorner(next)) setNumberCorner(next);
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Corner">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.corner")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
-            {CORNERS.map((corner) => (
-              <SelectItem key={corner.id} value={corner.id} className="text-[13px]">
-                {corner.label}
+            {CORNER_IDS.map((corner) => (
+              <SelectItem key={corner} value={corner} className="text-[13px]">
+                {t(CORNER_MSG[corner])}
               </SelectItem>
             ))}
           </SelectContent>
@@ -155,6 +191,9 @@ function SlideNumberPanel() {
 }
 
 function AuthorPanel() {
+  const t = useTranslations("editor.tools");
+  const tc = useTranslations("common");
+
   const manager = useCanvasManager();
   const [handle, setHandle] = useState("@username");
   const [corner, setCorner] = useState<"left" | "right">("left");
@@ -164,11 +203,11 @@ function AuthorPanel() {
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <FieldLabel>Handle</FieldLabel>
+        <FieldLabel>{t("workspace.handle")}</FieldLabel>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            title="Upload avatar"
+            title={t("workspace.uploadAvatar")}
             onClick={() => avatarInputRef.current?.click()}
             className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted/60 text-[12px] font-semibold dark:bg-muted/25"
           >
@@ -182,8 +221,8 @@ function AuthorPanel() {
           <input
             value={handle}
             onChange={(event) => setHandle(event.target.value)}
-            placeholder="@username"
-            aria-label="Handle"
+            placeholder={t("workspace.username")}
+            aria-label={t("workspace.handle")}
             className={sidebarFieldInput}
           />
           <input
@@ -203,22 +242,22 @@ function AuthorPanel() {
         </div>
       </div>
       <div className="space-y-1.5">
-        <FieldLabel>Position</FieldLabel>
+        <FieldLabel>{t("workspace.position")}</FieldLabel>
         <Select
           value={corner}
           onValueChange={(next) => {
             if (next === "left" || next === "right") setCorner(next);
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Position">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.position")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
             <SelectItem value="left" className="text-[13px]">
-              Top left
+              {t("workspace.topLeft")}
             </SelectItem>
             <SelectItem value="right" className="text-[13px]">
-              Top right
+              {t("workspace.topRight")}
             </SelectItem>
           </SelectContent>
         </Select>
@@ -236,13 +275,16 @@ function AuthorPanel() {
         }
         className={cn(sidebarActionBtn, "w-full")}
       >
-        Add author
+        {t("workspace.addAuthor")}
       </button>
     </div>
   );
 }
 
 function SwipeCuePanel() {
+  const t = useTranslations("editor.tools");
+  const tc = useTranslations("common");
+
   const manager = useCanvasManager();
   const [swipeVariant, setSwipeVariant] = useState<string>(SWIPE_VARIANTS[0]);
   const [swipeCorner, setSwipeCorner] = useState<Corner>("bottom-right");
@@ -250,9 +292,9 @@ function SwipeCuePanel() {
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <FieldLabel>Text</FieldLabel>
+        <FieldLabel>{t("workspace.text")}</FieldLabel>
         <Select value={swipeVariant} onValueChange={setSwipeVariant}>
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Swipe text">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.swipeText")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -265,20 +307,20 @@ function SwipeCuePanel() {
         </Select>
       </div>
       <div className="space-y-1.5">
-        <FieldLabel>Corner</FieldLabel>
+        <FieldLabel>{t("workspace.corner")}</FieldLabel>
         <Select
           value={swipeCorner}
           onValueChange={(next) => {
             if (isCorner(next)) setSwipeCorner(next);
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Corner">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.corner")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
-            {CORNERS.map((corner) => (
-              <SelectItem key={corner.id} value={corner.id} className="text-[13px]">
-                {corner.label}
+            {CORNER_IDS.map((corner) => (
+              <SelectItem key={corner} value={corner} className="text-[13px]">
+                {t(CORNER_MSG[corner])}
               </SelectItem>
             ))}
           </SelectContent>
@@ -290,13 +332,16 @@ function SwipeCuePanel() {
         onClick={() => manager?.objects.addSwipeCue(swipeVariant, swipeCorner)}
         className={cn(sidebarActionBtn, "w-full")}
       >
-        Add swipe
+        {t("workspace.addSwipe")}
       </button>
     </div>
   );
 }
 
 function ProgressDotsPanel() {
+  const t = useTranslations("editor.tools");
+  const tc = useTranslations("common");
+
   const manager = useCanvasManager();
   const { currentIndex, slides } = useSlides();
   const slideIndex = Math.max(currentIndex, 0);
@@ -313,13 +358,16 @@ function ProgressDotsPanel() {
         onClick={() => manager?.objects.addProgressDots(slideTotal, slideIndex)}
         className={cn(sidebarActionBtn, "w-full")}
       >
-        Add progress dots
+        {t("workspace.addProgressDots")}
       </button>
     </div>
   );
 }
 
 function SlidesFromTextPanel() {
+  const t = useTranslations("editor.tools");
+  const tc = useTranslations("common");
+
   const slidesController = useSlidesController();
   const [prompt, setPrompt] = useState("");
   const [slideStyle, setSlideStyle] = useState<TextStyleId>("heading");
@@ -347,17 +395,17 @@ function SlidesFromTextPanel() {
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <FieldLabel>One line = one slide</FieldLabel>
+        <FieldLabel>{t("workspace.oneLineOneSlide")}</FieldLabel>
         <textarea
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
-          placeholder={"Hook line\nProof point\nCall to action"}
+          placeholder={t("workspace.titlesPlaceholder")}
           rows={4}
           className={sidebarTextarea}
         />
       </div>
       <div className="space-y-1.5">
-        <FieldLabel>Text style</FieldLabel>
+        <FieldLabel>{t("workspace.textStyle")}</FieldLabel>
         <Select
           value={slideStyle}
           onValueChange={(next) => {
@@ -366,7 +414,7 @@ function SlidesFromTextPanel() {
             }
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Text style">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.textStyle")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -384,13 +432,16 @@ function SlidesFromTextPanel() {
         onClick={generateSlides}
         className={cn(sidebarActionBtn, "w-full")}
       >
-        {lineCount > 0 ? `Make ${lineCount} slides` : "Make slides"}
+        {lineCount > 0 ? `Make ${lineCount} slides` : t("workspace.makeSlides")}
       </button>
     </div>
   );
 }
 
 function FindReplacePanel() {
+  const t = useTranslations("editor.tools");
+  const tc = useTranslations("common");
+
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
   const { currentSlideId, slides } = useSlides();
@@ -446,31 +497,31 @@ function FindReplacePanel() {
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <FieldLabel>Find</FieldLabel>
+        <FieldLabel>{t("workspace.find")}</FieldLabel>
         <input
           value={findQuery}
           onChange={(event) => setFindQuery(event.target.value)}
-          placeholder="Text to find"
-          aria-label="Find text"
+          placeholder={t("workspace.textToFind")}
+          aria-label={t("workspace.findText")}
           className={sidebarFieldInput}
         />
       </div>
       <div className="space-y-1.5">
-        <FieldLabel>Replace with</FieldLabel>
+        <FieldLabel>{t("workspace.replaceWith")}</FieldLabel>
         <input
           value={findReplacement}
           onChange={(event) => setFindReplacement(event.target.value)}
-          placeholder="New text"
-          aria-label="Replacement text"
+          placeholder={t("workspace.newText")}
+          aria-label={t("workspace.replacementText")}
           className={sidebarFieldInput}
         />
       </div>
       <p className="text-[12px] text-muted-foreground">
         {findQuery.trim()
           ? textHits.count === 0
-            ? "No matches"
+            ? t("workspace.noMatches")
             : `${textHits.count} match${textHits.count === 1 ? "" : "es"}`
-          : "Type to search across all slides"}
+          : t("workspace.typeToSearch")}
       </p>
       <button
         type="button"
@@ -478,13 +529,16 @@ function FindReplacePanel() {
         onClick={replaceText}
         className={cn(sidebarActionBtn, "w-full")}
       >
-        Replace all
+        {t("workspace.replaceAll")}
       </button>
     </div>
   );
 }
 
 function MockupsPanel() {
+  const t = useTranslations("editor.tools");
+  const tc = useTranslations("common");
+
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
   const fillInputRef = useRef<HTMLInputElement>(null);
@@ -512,7 +566,7 @@ function MockupsPanel() {
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <FieldLabel>Device</FieldLabel>
+        <FieldLabel>{t("workspace.device")}</FieldLabel>
         <Select
           value={device}
           onValueChange={(value) => {
@@ -521,7 +575,7 @@ function MockupsPanel() {
             }
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Device">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.device")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -535,25 +589,25 @@ function MockupsPanel() {
       </div>
 
       <div className="space-y-1.5">
-        <FieldLabel>Action</FieldLabel>
+        <FieldLabel>{t("workspace.action")}</FieldLabel>
         <Select
           value={action}
           onValueChange={(value) => {
             if (value === "list" || value === "row" || value === "fill") setAction(value);
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Action">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.action")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
             <SelectItem value="list" className="text-[13px]">
-              Ranked list from titles
+              {t("workspace.rankedList")}
             </SelectItem>
             <SelectItem value="row" className="text-[13px]">
-              Row on this slide
+              {t("workspace.rowOnSlide")}
             </SelectItem>
             <SelectItem value="fill" className="text-[13px]">
-              Fill screenshots
+              {t("workspace.fillScreenshots")}
             </SelectItem>
           </SelectContent>
         </Select>
@@ -561,7 +615,7 @@ function MockupsPanel() {
 
       {action === "list" ? (
         <div className="space-y-1.5">
-          <FieldLabel>Titles (one per line)</FieldLabel>
+          <FieldLabel>{t("workspace.titles")}</FieldLabel>
           <textarea
             value={titles}
             onChange={(event) => setTitles(event.target.value)}
@@ -574,7 +628,7 @@ function MockupsPanel() {
 
       {action === "row" ? (
         <div className="space-y-1.5">
-          <FieldLabel>Count</FieldLabel>
+          <FieldLabel>{t("workspace.count")}</FieldLabel>
           <Select
             value={String(rowCount)}
             onValueChange={(value) => {
@@ -584,7 +638,7 @@ function MockupsPanel() {
               }
             }}
           >
-            <SelectTrigger className={sidebarSelectTrigger} aria-label="Row count">
+            <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.rowCount")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent position="popper">
@@ -655,18 +709,21 @@ function MockupsPanel() {
       >
         {busy ? <Loader2 className="size-3.5 animate-spin" /> : null}
         {busy
-          ? "Working…"
+          ? t("workspace.working")
           : action === "list"
             ? `Build ${lineCount || ""} slides`
             : action === "row"
               ? `Place ${rowCount} devices`
-              : "Pick screenshots"}
+              : t("workspace.pickScreenshots")}
       </button>
     </div>
   );
 }
 
 export function ToolPanel({ id }: { id: StudioToolId }) {
+  const t = useTranslations("editor.tools");
+  const tc = useTranslations("common");
+
   switch (id) {
     case "mockups":
       return <MockupsPanel />;
@@ -698,11 +755,13 @@ export function ToolDetailDialog({
   onOpenChange: (open: boolean) => void;
   onRun: (id: StudioToolId) => void;
 }) {
+  const t = useTranslations("editor.tools");
   const [cached, setCached] = useState<StudioTool | null>(null);
   useEffect(() => {
     if (toolId) setCached(getTool(toolId) ?? null);
   }, [toolId]);
-  const tool = (toolId ? getTool(toolId) : null) ?? cached;
+  const raw = (toolId ? getTool(toolId) : null) ?? cached;
+  const tool = raw ? localizeCatalogTool(raw, t) : null;
   if (!tool) return null;
 
   return (
@@ -719,7 +778,7 @@ export function ToolDetailDialog({
             size="icon-sm"
             className="rounded-md"
             onClick={() => onOpenChange(false)}
-            aria-label="Close"
+            aria-label={t("workspace.close")}
           >
             <X className="size-5" />
           </Button>
@@ -738,7 +797,7 @@ export function ToolDetailDialog({
             className="h-10 w-full rounded-md bg-foreground text-background hover:bg-foreground/90"
             onClick={() => onRun(tool.id)}
           >
-            Run
+            {tool.runLabel}
           </Button>
         </div>
       </DialogContent>
@@ -755,11 +814,13 @@ export function ToolRunDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("editor.tools");
   const [cached, setCached] = useState<StudioTool | null>(null);
   useEffect(() => {
     if (toolId) setCached(getTool(toolId) ?? null);
   }, [toolId]);
-  const tool = (toolId ? getTool(toolId) : null) ?? cached;
+  const raw = (toolId ? getTool(toolId) : null) ?? cached;
+  const tool = raw ? localizeCatalogTool(raw, t) : null;
   if (!tool) return null;
 
   return (
@@ -779,7 +840,7 @@ export function ToolRunDialog({
             size="icon-sm"
             className="rounded-md"
             onClick={() => onOpenChange(false)}
-            aria-label="Close"
+            aria-label={t("workspace.close")}
           >
             <X className="size-5" />
           </Button>

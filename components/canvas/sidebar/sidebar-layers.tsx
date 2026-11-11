@@ -1,26 +1,27 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  ChevronsDown,
-  ChevronsUp,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  CaretUp as ChevronUp,
+  CaretDoubleDown as ChevronsDown,
+  CaretDoubleUp as ChevronsUp,
   Copy,
   Eye,
-  EyeOff,
+  EyeSlash as EyeOff,
   Folder,
   Image as ImageIcon,
   Lock,
-  MoreHorizontal,
-  Pencil,
+  DotsThree as MoreHorizontal,
+  PencilSimple as Pencil,
   Square,
-  Trash2,
-  Type,
-  Unlock,
-  Ungroup,
-} from "lucide-react";
+  Trash as Trash2,
+  TextT as Type,
+  LockOpen as Unlock,
+  SelectionInverse as Ungroup,
+} from "@phosphor-icons/react";
 import { ActiveSelection, type FabricObject } from "fabric";
 import {
   DropdownMenu,
@@ -88,6 +89,7 @@ function isRowSelected(active: FabricObject | null, obj: FabricObject) {
 }
 
 export function SidebarLayers() {
+  const t = useTranslations("editor.layers");
   const manager = useCanvasManager();
   const objects = useCanvasObjects();
   const [selected, setSelected] = useState<FabricObject | null>(null);
@@ -230,7 +232,7 @@ export function SidebarLayers() {
     <div className={cn(sidebarPanel, "gap-0.5")}>
       {rows.length === 0 && (
         <p className="px-1 py-6 text-left text-[13px] text-muted-foreground">
-          No objects yet. Add elements from the Elements tab.
+          {t("empty")}
         </p>
       )}
 
@@ -370,7 +372,7 @@ export function SidebarLayers() {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      aria-label="Layer actions"
+                      aria-label={t("actionsAria")}
                       onClick={(event) => event.stopPropagation()}
                       onPointerDown={(event) => event.stopPropagation()}
                       className="flex size-7 items-center justify-center rounded-md text-muted-foreground opacity-0 hover:bg-background/70 hover:text-foreground group-hover/row:opacity-100 data-[state=open]:bg-muted/60 data-[state=open]:opacity-100"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   useCallback,
   useEffect,
@@ -8,7 +9,12 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { ChevronLeft, ChevronRight, RotateCcw, SunMedium } from "lucide-react";
+import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  ArrowCounterClockwise as RotateCcw,
+  Sun as SunMedium,
+} from "@phosphor-icons/react";
 import { Image as FabricImage, Shadow as FabricShadow, filters as fabricFilters } from "fabric";
 import { PillSlider } from "@/components/ui/pill-slider";
 import { useCanvasManager } from "@/context/canvas-manager";
@@ -36,34 +42,34 @@ const EMPTY: ImageAdjustments = {
 type Preset = { id: string; label: string; values: Partial<ImageAdjustments>; css: string };
 
 const PRESETS: Preset[] = [
-  { id: "none", label: "None", values: {}, css: "none" },
+  { id: "none", label: "none", values: {}, css: "none" },
   {
     id: "soft",
-    label: "Soft",
+    label: "soft",
     values: { blur: 2, brightness: 0.06, contrast: -0.06, saturation: -0.05 },
     css: "brightness(1.06) contrast(0.94) saturate(0.95) blur(0.4px)",
   },
   {
     id: "punch",
-    label: "Punch",
+    label: "punch",
     values: { contrast: 0.28, saturation: 0.22, brightness: 0.04 },
     css: "contrast(1.28) saturate(1.22) brightness(1.04)",
   },
   {
     id: "bw",
-    label: "B&W",
+    label: "bw",
     values: { saturation: -1, contrast: 0.12 },
     css: "grayscale(1) contrast(1.12)",
   },
   {
     id: "warm",
-    label: "Warm",
+    label: "warm",
     values: { hue: 0.08, saturation: 0.08, brightness: 0.03 },
     css: "sepia(0.2) saturate(1.1) brightness(1.03)",
   },
   {
     id: "cool",
-    label: "Cool",
+    label: "cool",
     values: { hue: -0.12, saturation: -0.05, brightness: 0.02 },
     css: "hue-rotate(195deg) saturate(0.9) brightness(1.02)",
   },
@@ -113,6 +119,8 @@ function imagePreviewSrc(img: FabricImage): string | null {
 
 /** Image-only filter controls — requires a selected Fabric image. */
 export function FiltersControls() {
+  const t = useTranslations("editor.filters");
+  const tc = useTranslations("common");
   const manager = useCanvasManager();
   const [target, setTarget] = useState<FabricImage | null>(null);
   const [adj, setAdj] = useState<ImageAdjustments>(EMPTY);
@@ -296,13 +304,13 @@ export function FiltersControls() {
             />
           ) : (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-muted-foreground">
-              Image
+              {t("image")}
             </div>
           )}
 
           <button
             type="button"
-            aria-label="Previous filter"
+            aria-label={t("previous")}
             onClick={(e) => {
               e.stopPropagation();
               stepDraft(-1);
@@ -314,7 +322,7 @@ export function FiltersControls() {
           </button>
           <button
             type="button"
-            aria-label="Next filter"
+            aria-label={t("next")}
             onClick={(e) => {
               e.stopPropagation();
               stepDraft(1);
@@ -327,7 +335,7 @@ export function FiltersControls() {
 
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
             <span className="rounded-md bg-background/90 px-3 py-1 text-[12px] font-medium text-foreground">
-              {draftPreset.label}
+              {t(`presets.${draftPreset.id}` as "presets.none")}
             </span>
           </div>
         </div>
@@ -340,13 +348,13 @@ export function FiltersControls() {
           onClick={applyDraft}
           className="flex h-9 flex-1 items-center justify-center rounded-md bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-35"
         >
-          Apply
+          {t("apply")}
         </button>
         {(hasActive || appliedId !== "none" || shadowType !== "none") && (
           <button
             type="button"
             onClick={handleReset}
-            title="Reset"
+            title={tc("reset")}
             className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
           >
             <RotateCcw className="size-3.5" />
@@ -356,13 +364,13 @@ export function FiltersControls() {
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-medium text-muted-foreground">Shadow</span>
+          <span className="text-[13px] font-medium text-muted-foreground">{t("shadow")}</span>
           <div className="grid grid-cols-3 gap-1.5">
             {(
               [
-                { id: "none", label: "None", preview: "shadow-none" },
-                { id: "spread", label: "Spread", preview: "shadow-[0_10px_18px_rgba(0,0,0,0.28)]" },
-                { id: "hug", label: "Hug", preview: "shadow-[0_3px_6px_rgba(0,0,0,0.35)]" },
+                { id: "none", label: t("presets.none"), preview: "shadow-none" },
+                { id: "spread", label: t("shadowModes.spread"), preview: "shadow-[0_10px_18px_rgba(0,0,0,0.28)]" },
+                { id: "hug", label: t("shadowModes.hug"), preview: "shadow-[0_3px_6px_rgba(0,0,0,0.35)]" },
               ] as const
             ).map((item) => (
               <button
@@ -394,7 +402,7 @@ export function FiltersControls() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-medium text-muted-foreground">Intensity</span>
+          <span className="text-[13px] font-medium text-muted-foreground">{t("intensity")}</span>
           <div className="grid grid-cols-3 gap-1 rounded-md bg-muted/40 p-0.5">
             {(["low", "medium", "high"] as const).map((id) => {
               const active = intensity === id;
@@ -422,10 +430,10 @@ export function FiltersControls() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-medium text-muted-foreground">Light source</span>
+          <span className="text-[13px] font-medium text-muted-foreground">{t("lightSource")}</span>
           <div
             role="slider"
-            aria-label="Light source position"
+            aria-label={t("lightSourcePosition")}
             className="relative flex h-32 w-full cursor-crosshair select-none items-center justify-center overflow-hidden rounded-2xl bg-muted/40"
             onPointerDown={(e) => {
               if (shadowType === "none") return;
@@ -467,7 +475,7 @@ export function FiltersControls() {
         </div>
 
         <PillSlider
-          label="Blur"
+          label={t("blur")}
           value={adj.blur}
           min={0}
           max={40}
@@ -479,7 +487,7 @@ export function FiltersControls() {
           }}
         />
         <PillSlider
-          label="Brightness"
+          label={t("brightness")}
           value={adj.brightness * 100}
           min={-100}
           max={100}
@@ -491,7 +499,7 @@ export function FiltersControls() {
           }}
         />
         <PillSlider
-          label="Contrast"
+          label={t("contrast")}
           value={adj.contrast * 100}
           min={-100}
           max={100}
@@ -503,7 +511,7 @@ export function FiltersControls() {
           }}
         />
         <PillSlider
-          label="Saturation"
+          label={t("saturation")}
           value={adj.saturation * 100}
           min={-100}
           max={100}
@@ -515,7 +523,7 @@ export function FiltersControls() {
           }}
         />
         <PillSlider
-          label="Hue"
+          label={t("hue")}
           value={adj.hue * 100}
           min={-100}
           max={100}

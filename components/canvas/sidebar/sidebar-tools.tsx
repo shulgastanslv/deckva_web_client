@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import {
+  MagnifyingGlass as Search,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { ToolAvatar } from "@/components/canvas/sidebar/tool-avatars";
@@ -29,6 +32,29 @@ import {
 import { cn } from "@/lib/utils";
 
 type Scope = "all" | "recents" | "suggested";
+
+const CATALOG_KEY: Record<StudioToolId, string> = {
+  mockups: "mockups",
+  "slides-from-text": "slidesFromText",
+  "slide-number": "slideNumber",
+  author: "author",
+  "swipe-cue": "swipeCue",
+  "progress-dots": "progressDots",
+  "find-replace": "findReplace",
+};
+
+type TranslateFn = (key: string) => string;
+
+function localizedTool(tool: StudioTool, t: TranslateFn): StudioTool {
+  const key = CATALOG_KEY[tool.id];
+  return {
+    ...tool,
+    title: t(`catalog.${key}.title`),
+    description: t(`catalog.${key}.description`),
+    longDescription: t(`catalog.${key}.long`),
+    runLabel: t(`catalog.${key}.run`),
+  };
+}
 
 function ToolListRow({
   tool,
@@ -73,6 +99,7 @@ function ToolListRow({
 }
 
 export function SidebarTools() {
+  const t = useTranslations("editor.tools");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ToolCategory | "all">("all");
   const [scope, setScope] = useState<Scope>("all");
@@ -84,10 +111,15 @@ export function SidebarTools() {
     setRecents(loadToolRecents());
   }, []);
 
+  const localizedTools = useMemo(
+    () => STUDIO_TOOLS.map((tool) => localizedTool(tool, t)),
+    [t],
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const recentSet = new Set(recents);
-    return STUDIO_TOOLS.filter((tool) => {
+    return localizedTools.filter((tool) => {
       if (category !== "all" && tool.category !== category) return false;
       if (scope === "recents" && !recentSet.has(tool.id)) return false;
       if (scope === "suggested" && !tool.suggested) return false;
@@ -98,7 +130,7 @@ export function SidebarTools() {
         tool.category.includes(q)
       );
     });
-  }, [query, category, scope, recents]);
+  }, [query, category, scope, recents, localizedTools]);
 
   const ordered = useMemo(() => {
     if (scope !== "recents") return filtered;
@@ -134,6 +166,8 @@ export function SidebarTools() {
     setRunId(id);
   };
 
+  const categoryLabel = (id: ToolCategory | "all") => t(`categories.${id}`);
+
   return (
     <div className={sidebarPanel}>
       <div className="flex items-center gap-1.5">
@@ -142,30 +176,30 @@ export function SidebarTools() {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search all tools"
-            aria-label="Search tools"
+            placeholder={t("searchAll")}
+            aria-label={t("search")}
             className={cn(sidebarFieldInput, "pl-9")}
           />
         </div>
         <FilterMenu
           value={filterValue}
           defaultValue="all"
-          ariaLabel="Filter tools"
+          ariaLabel={t("search")}
           onChange={onFilterChange}
           groups={[
             {
-              label: "Show",
+              label: t("show"),
               options: [
-                { id: "all", label: "All tools" },
-                { id: "scope:recents", label: "Recents" },
-                { id: "scope:suggested", label: "Suggested" },
+                { id: "all", label: t("allTools") },
+                { id: "scope:recents", label: t("recents") },
+                { id: "scope:suggested", label: t("suggested") },
               ],
             },
             {
-              label: "Category",
+              label: t("category"),
               options: TOOL_CATEGORIES.filter((item) => item.id !== "all").map((item) => ({
                 id: `cat:${item.id}`,
-                label: item.label,
+                label: categoryLabel(item.id),
               })),
             },
           ]}
@@ -182,8 +216,8 @@ export function SidebarTools() {
       {ordered.length === 0 ? (
         <p className={cn(sidebarHint, "px-1 py-6 text-center")}>
           {scope === "recents"
-            ? "Run a tool once and it shows up here."
-            : "No tools match this filter."}
+            ? t("emptyRecents")
+            : t("noMatch")}
         </p>
       ) : (
         <div className="flex flex-col">

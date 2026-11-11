@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import {
   ArrowUp,
-  ChevronDown,
+  CaretDown as ChevronDown,
   Globe,
   Play,
-  Share,
-  Smartphone,
-} from "lucide-react";
+  ShareNetwork as Share,
+  DeviceMobile as Smartphone,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { AuthModal } from "@/components/auth";
 import { ExportModal } from "@/components/export-modal";
@@ -52,6 +53,8 @@ export function EditorPanelActions({
   const [shareOpen, setShareOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
+  const t = useTranslations("editor");
+  const tc = useTranslations("common");
 
   useEffect(() => {
     const onAuthLink = (event: Event) => {
@@ -90,7 +93,7 @@ export function EditorPanelActions({
                 type="button"
                 className="h-9 gap-1 rounded-md border-none bg-primary px-3 text-[12px] font-medium text-primary-foreground shadow-none hover:bg-primary/90"
               >
-                Share
+                {tc("share")}
                 <ChevronDown className="size-3 opacity-80" />
               </Button>
             </DropdownMenuTrigger>
@@ -100,21 +103,21 @@ export function EditorPanelActions({
                 onSelect={() => requireAuth(() => setShareOpen(true))}
               >
                 <Share className="size-5" />
-                Share link
+                {t("shareLink")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className={menuItem}
                 onSelect={() => requireAuth(() => setPublishOpen(true))}
               >
                 <Globe className="size-5" />
-                Publish to community
+                {t("publishCommunity")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className={menuItem}
                 onSelect={() => requireAuth(() => setExportOpen(true))}
               >
                 <ArrowUp className="size-5" />
-                Export · {slideCount} PNG / ZIP
+                {t("header.exportPngZipShort", { count: slideCount })}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -127,8 +130,8 @@ export function EditorPanelActions({
                 variant="ghost"
                 size="icon"
                 className={iconBtn}
-                title="Preview"
-                aria-label="Preview"
+                title={t("header.preview")}
+                aria-label={t("header.preview")}
               >
                 <Play className="size-5" />
               </Button>
@@ -137,13 +140,13 @@ export function EditorPanelActions({
               {onPreview ? (
                 <DropdownMenuItem className={menuItem} onSelect={onPreview}>
                   <Play className="size-5" />
-                  Preview carousel
+                  {t("header.previewCarousel")}
                 </DropdownMenuItem>
               ) : null}
               {onPhonePreview ? (
                 <DropdownMenuItem className={menuItem} onSelect={onPhonePreview}>
                   <Smartphone className="size-5" />
-                  Preview on phone
+                  {t("header.previewPhone")}
                 </DropdownMenuItem>
               ) : null}
             </DropdownMenuContent>

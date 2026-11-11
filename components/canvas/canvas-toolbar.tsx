@@ -20,25 +20,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Check,
-  ChevronDown,
-  ChevronUp,
-  CopyPlus,
-  Download,
+  CaretDown as ChevronDown,
+  CaretUp as ChevronUp,
+  CopySimple as CopyPlus,
+  DownloadSimple as Download,
   Eraser,
   Eye,
-  EyeOff,
+  EyeSlash as EyeOff,
   FilePlus,
   Hand,
   Lock,
-  Focus,
-  MoreHorizontal,
-  MousePointer2,
-  PanelTopClose,
-  Trash2,
-  Unlock,
-  Upload,
-  Workflow,
-} from "lucide-react";
+  Crosshair as Focus,
+  DotsThree as MoreHorizontal,
+  Cursor as MousePointer2,
+  Browser as PanelTopClose,
+  Trash as Trash2,
+  LockOpen as Unlock,
+  UploadSimple as Upload,
+  FlowArrow as Workflow,
+} from "@phosphor-icons/react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -55,6 +55,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useSlides } from "@/hooks/use-slides";
+import { useTranslations } from "next-intl";
 
 const iconBtn =
   "size-9 shrink-0 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
@@ -110,6 +111,8 @@ export function CanvasToolbar({
   onHideChrome?: () => void;
   onFocus?: () => void;
 } = {}) {
+  const t = useTranslations("editor.toolbar");
+  const tc = useTranslations("common");
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
   const { applyPayload } = useApplyTemplate();
@@ -146,8 +149,9 @@ export function CanvasToolbar({
   const targetHidden = target ? target.visible === false : false;
   const targetLocked = target ? isLayerLocked(target) : false;
   const selectActive = !handActive && !eraserActive;
-  const pageLabel = `Slide ${currentIndex + 1}${projectTitle.trim() ? ` — ${projectTitle.trim()}` : ""
-    }`;
+  const pageLabel = projectTitle.trim()
+    ? t("slideTitleNamed", { n: currentIndex + 1, title: projectTitle.trim() })
+    : t("slideTitle", { n: currentIndex + 1 });
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -294,21 +298,21 @@ export function CanvasToolbar({
       <div className="flex shrink-0 items-center gap-1.5">
         <div className="flex items-center rounded-md p-0.5">
           <PageIcon
-            title="Move slide earlier"
+            title={t("moveEarlier")}
             disabled={!canGoPrev}
             onClick={() => move("left")}
           >
             <ChevronUp className="size-5" />
           </PageIcon>
           <PageIcon
-            title="Move slide later"
+            title={t("moveLater")}
             disabled={!canGoNext}
             onClick={() => move("right")}
           >
             <ChevronDown className="size-5" />
           </PageIcon>
           <PageIcon
-            title={target ? (targetHidden ? "Show object" : "Hide object") : "Select an object to hide"}
+            title={target ? (targetHidden ? t("showObject") : t("hideObject")) : t("selectObjectToHide")}
             disabled={!target}
             pressed={targetHidden}
             onClick={toggleHidden}
@@ -316,25 +320,25 @@ export function CanvasToolbar({
             {targetHidden ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
           </PageIcon>
           <PageIcon
-            title={target ? (targetLocked ? "Unlock object" : "Lock object") : "Select an object to lock"}
+            title={target ? (targetLocked ? t("unlockObject") : t("lockObject")) : t("selectObjectToLock")}
             disabled={!target}
             pressed={targetLocked}
             onClick={toggleLocked}
           >
             {targetLocked ? <Lock className="size-5" /> : <Unlock className="size-5" />}
           </PageIcon>
-          <PageIcon title="Duplicate slide" onClick={() => void duplicate()}>
+          <PageIcon title={t("duplicateSlide")} onClick={() => void duplicate()}>
             <CopyPlus className="size-5" />
           </PageIcon>
           <PageIcon
-            title="Delete slide"
+            title={t("deleteSlide")}
             disabled={!canRemove}
             destructive
             onClick={() => void remove(currentSlideId)}
           >
             <Trash2 className="size-5" />
           </PageIcon>
-          <PageIcon title="Add slide" onClick={() => void add()}>
+          <PageIcon title={t("addSlide")} onClick={() => void add()}>
             <FilePlus className="size-5" />
           </PageIcon>
         </div>
@@ -356,8 +360,8 @@ export function CanvasToolbar({
               variant="ghost"
               size="icon"
               className={iconBtn}
-              title="Options"
-              aria-label="Canvas options"
+              title={t("options")}
+              aria-label={t("canvasOptions")}
             >
               <MoreHorizontal className="size-5" />
             </Button>
@@ -371,7 +375,7 @@ export function CanvasToolbar({
               }}
             >
               <MousePointer2 className="size-5" />
-              <span className="flex-1">Select</span>
+              <span className="flex-1">{t("select")}</span>
               <kbd className="font-mono text-[11px] text-muted-foreground">V</kbd>
               <Check className={cn("size-5", selectActive ? "opacity-100" : "opacity-0")} />
             </DropdownMenuItem>
@@ -380,7 +384,7 @@ export function CanvasToolbar({
               onSelect={() => setHandActive(true)}
             >
               <Hand className="size-5" />
-              <span className="flex-1">Hand</span>
+              <span className="flex-1">{t("hand")}</span>
               <kbd className="font-mono text-[11px] text-muted-foreground">H</kbd>
               <Check className={cn("size-5", handActive ? "opacity-100" : "opacity-0")} />
             </DropdownMenuItem>
@@ -389,7 +393,7 @@ export function CanvasToolbar({
               onSelect={() => setEraserActive(!eraserActive)}
             >
               <Eraser className="size-5" />
-              <span className="flex-1">Eraser</span>
+              <span className="flex-1">{t("eraser")}</span>
               <kbd className="font-mono text-[11px] text-muted-foreground">E</kbd>
               <Check className={cn("size-5", eraserActive ? "opacity-100" : "opacity-0")} />
             </DropdownMenuItem>
@@ -397,7 +401,7 @@ export function CanvasToolbar({
             {onFocus ? (
               <DropdownMenuItem className={menuItem} onSelect={onFocus}>
                 <Focus className="size-5" />
-                <span className="flex-1">Focus mode</span>
+                <span className="flex-1">{t("focusMode")}</span>
               </DropdownMenuItem>
             ) : null}
 
@@ -406,7 +410,7 @@ export function CanvasToolbar({
             <div className="flex items-center justify-between gap-2 rounded-xl px-3 py-2">
               <div className="flex items-center gap-2 text-[13px]">
                 <Workflow className="size-4 text-muted-foreground" />
-                Auto Flow
+                {t("autoFlow")}
               </div>
               <Switch
                 checked={autoFlowEnabled}
@@ -422,7 +426,7 @@ export function CanvasToolbar({
               )}
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="text-[13px] text-muted-foreground">Edge</span>
+                <span className="text-[13px] text-muted-foreground">{t("edge")}</span>
                 <Input
                   type="number"
                   min={0}
@@ -436,7 +440,7 @@ export function CanvasToolbar({
                 />
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-[13px] text-muted-foreground">Padding</span>
+                <span className="text-[13px] text-muted-foreground">{t("padding")}</span>
                 <Input
                   type="number"
                   min={0}
@@ -458,20 +462,20 @@ export function CanvasToolbar({
               onSelect={() => void handleExportJSON()}
             >
               {copied ? <Check className="size-4 text-green-500" /> : <Download className="size-5" />}
-              {copied ? "Exported" : "Export JSON"}
+              {copied ? t("exported") : t("exportJson")}
             </DropdownMenuItem>
             <DropdownMenuItem
               className={menuItem}
               onSelect={() => importRef.current?.click()}
             >
               <Upload className="size-5" />
-              Import JSON
+              {t("importJson")}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="bg-border/50" />
 
             <div className="flex items-center justify-between gap-2 px-3 py-2">
-              <span className="text-[13px] text-muted-foreground">Clear slides</span>
+              <span className="text-[13px] text-muted-foreground">{t("clearSlides")}</span>
               <ClearCanvasButton />
             </div>
 
@@ -480,7 +484,7 @@ export function CanvasToolbar({
                 <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem className={menuItem} onSelect={onHideChrome}>
                   <PanelTopClose className="size-5" />
-                  <span className="flex-1">Hide bars</span>
+                  <span className="flex-1">{t("hideBars")}</span>
                   <kbd className="font-mono text-[11px] text-muted-foreground">\</kbd>
                 </DropdownMenuItem>
               </>
@@ -492,10 +496,9 @@ export function CanvasToolbar({
       <Dialog open={pendingImport !== null} onOpenChange={(open) => !open && closeImportDialog()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import slides?</DialogTitle>
+            <DialogTitle>{t("importSlidesTitle")}</DialogTitle>
             <DialogDescription>
-              This file has {slideCount} slides. Load only the first into the current slide, or
-              replace the whole carousel.
+              {t("importSlidesBody", { count: slideCount })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-between">
@@ -505,7 +508,7 @@ export function CanvasToolbar({
               disabled={importing}
               onClick={closeImportDialog}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button
@@ -514,14 +517,14 @@ export function CanvasToolbar({
                 disabled={importing}
                 onClick={() => void importFirstOnly()}
               >
-                First slide
+                {t("firstSlide")}
               </Button>
               <Button
                 className="h-9 rounded-md"
                 disabled={importing}
                 onClick={() => void importAllSlides()}
               >
-                All slides
+                {t("allSlides")}
               </Button>
             </div>
           </DialogFooter>

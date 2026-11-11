@@ -1,6 +1,10 @@
 "use client";
 
-import { Shapes, SlidersHorizontal } from "lucide-react";
+import {
+  Shapes,
+  Sliders as SlidersHorizontal,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
@@ -15,9 +19,11 @@ export function EditorPhoneDock({
   onLibrary: () => void;
   onStyle: () => void;
 }) {
+  const t = useTranslations("editor.panels");
+
   return (
     <nav
-      aria-label="Editor"
+      aria-label={t("editor")}
       className="flex shrink-0 items-stretch justify-around bg-muted/20 pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <button
@@ -30,7 +36,7 @@ export function EditorPhoneDock({
         )}
       >
         <Shapes className="size-5 stroke-[1.75]" />
-        Library
+        {t("library")}
       </button>
       <button
         type="button"
@@ -42,7 +48,7 @@ export function EditorPhoneDock({
         )}
       >
         <SlidersHorizontal className="size-5 stroke-[1.75]" />
-        Style
+        {t("style")}
       </button>
     </nav>
   );

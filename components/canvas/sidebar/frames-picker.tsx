@@ -1,12 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ChevronsUpDown,
-  Ellipsis,
-  RectangleHorizontal,
-  RectangleVertical,
-} from "lucide-react";
+  CaretUpDown as ChevronsUpDown,
+  DotsThree as Ellipsis,
+  Rectangle as RectangleHorizontal,
+  Rectangle as RectangleVertical,
+} from "@phosphor-icons/react";
 
 import { ColorPicker } from "@/components/ui/color-picker";
 import {
@@ -152,6 +153,7 @@ export function FramesPicker({
   ) => void;
   onBackground?: (color: string) => void;
 }) {
+  const t = useTranslations("editor.frames");
   const projectPalette = useCanvasStore((s) => s.palette);
   const [brandKit, setBrandKit] = useState(defaultBrandKit);
   const [selectedKind, setSelectedKind] = useState<FrameKind>("iphone18pro");
@@ -316,7 +318,7 @@ export function FramesPicker({
             </div>
             {devices.length === 0 ? (
               <p className="px-2 py-10 text-center text-[13px] text-muted-foreground">
-                No devices found
+                {t("noDevices")}
               </p>
             ) : null}
           </div>
@@ -324,7 +326,7 @@ export function FramesPicker({
           <div className="flex items-center gap-2 border-t border-border/40 px-3 py-2.5">
             <div
               role="group"
-              aria-label="Background color"
+              aria-label={t("backgroundColor")}
               className="flex min-w-0 flex-1 items-center gap-1.5"
             >
               {footerSwatches.map((swatch) => {
@@ -349,8 +351,8 @@ export function FramesPicker({
               })}
               <button
                 type="button"
-                title="Transparent"
-                aria-label="Transparent background"
+                title={t("transparent")}
+                aria-label={t("transparentBackground")}
                 aria-pressed={bgColor === "transparent"}
                 disabled={disabled}
                 onClick={() => applyColor("transparent")}
@@ -365,19 +367,19 @@ export function FramesPicker({
                 disabled={disabled}
                 value={bgColor === "transparent" ? "#ffffff" : bgColor}
                 onChange={applyColor}
-                title="Custom color"
+                title={t("customColor")}
                 className="[&_button]:size-6"
               />
             </div>
 
             <div
               role="group"
-              aria-label="Orientation"
+              aria-label={t("orientation")}
               className="flex h-8 shrink-0 items-center rounded-md bg-muted/50 p-0.5 dark:bg-muted/30"
             >
               <button
                 type="button"
-                title="Portrait"
+                title={t("portrait")}
                 aria-pressed={orientation === "portrait"}
                 onClick={() => setOrientation("portrait")}
                 className={cn(
@@ -391,7 +393,7 @@ export function FramesPicker({
               </button>
               <button
                 type="button"
-                title="Landscape"
+                title={t("landscape")}
                 aria-pressed={orientation === "landscape"}
                 onClick={() => setOrientation("landscape")}
                 className={cn(
@@ -407,8 +409,8 @@ export function FramesPicker({
 
             <button
               type="button"
-              title="More"
-              aria-label="More options"
+              title={t("more")}
+              aria-label={t("moreOptions")}
               className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Ellipsis className="size-3.5" />

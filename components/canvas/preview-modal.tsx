@@ -2,7 +2,12 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  X,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useSlidesController } from "@/context/canvas-manager";
 import { Canvas as FabricCanvas } from "fabric";
@@ -10,6 +15,7 @@ import { withRemoteImageCors } from "@/lib/canvas/image-cors";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import {
   SOCIAL_PREVIEW_NETWORKS,
   SocialPhonePreview,
@@ -43,6 +49,7 @@ export function PreviewModal({
   initialView = "slides",
   onClose,
 }: PreviewModalProps) {
+  const t = useTranslations("editor.preview");
   const slides = useCanvasStore((s) => s.slides);
   const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
   const projectTitle = useCanvasStore((s) => s.projectTitle);
@@ -250,7 +257,7 @@ export function PreviewModal({
           {rendering && (
             <span className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
               <Loader2 className="size-3 animate-spin" />
-              Preparing slides…
+              {t("preparing")}
             </span>
           )}
         </div>
@@ -263,7 +270,7 @@ export function PreviewModal({
               view === "slides" ? "bg-background text-foreground" : "text-muted-foreground",
             )}
           >
-            Slides
+            {t("slides")}
           </button>
           <button
             type="button"
@@ -273,7 +280,7 @@ export function PreviewModal({
               view === "phone" ? "bg-background text-foreground" : "text-muted-foreground",
             )}
           >
-            Phone
+            {t("phone")}
           </button>
         </div>
         <div className="flex items-center justify-self-end gap-3">
@@ -355,13 +362,13 @@ export function PreviewModal({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={activeImage}
-                alt={`Slide ${activeIdx + 1}`}
+                alt={t("slideAlt", { n: activeIdx + 1 })}
                 className="h-full w-full object-contain"
                 draggable={false}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center border border-dashed border-border/60 bg-background">
-                <span className="text-[13px] text-muted-foreground">Empty slide</span>
+                <span className="text-[13px] text-muted-foreground">{t("emptySlide")}</span>
               </div>
             )}
           </div>
@@ -403,7 +410,7 @@ export function PreviewModal({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={stripSrc}
-                  alt={`Preview ${i + 1}`}
+                  alt={t("previewAlt", { n: i + 1 })}
                   className="h-full w-full object-cover"
                   draggable={false}
                 />

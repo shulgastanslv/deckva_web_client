@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { BrushCleaning } from "lucide-react";
+import {
+  Broom as BrushCleaning,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +22,8 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 export function ClearCanvasButton() {
   const slides = useSlidesController();
   const [open, setOpen] = useState(false);
+  const t = useTranslations("editor.clear");
+  const tc = useTranslations("common");
 
   const handleClear = () => {
     const store = useCanvasStore.getState();
@@ -42,16 +47,16 @@ export function ClearCanvasButton() {
           variant="ghost"
           size="icon"
           className="size-9 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
-          title="Clear all slides"
+          title={t("aria")}
         >
           <BrushCleaning className="size-5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="rounded-3xl">
         <DialogHeader>
-          <DialogTitle>Delete every slide?</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            The carousel goes back to one empty slide. This cannot be undone.
+            {t("body")}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -60,14 +65,14 @@ export function ClearCanvasButton() {
             className="h-9 rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
             onClick={() => setOpen(false)}
           >
-            Cancel
+            {tc("cancel")}
           </Button>
           <Button
             variant="destructive"
             className="h-9 rounded-md"
             onClick={handleClear}
           >
-            Delete slides
+            {t("confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

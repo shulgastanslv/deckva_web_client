@@ -1,7 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Move, RotateCcw } from "lucide-react";
+import {
+  ArrowsOutCardinal as Move,
+  ArrowCounterClockwise as RotateCcw,
+} from "@phosphor-icons/react";
 import type { FabricObject } from "fabric";
 import { PillSlider } from "@/components/ui/pill-slider";
 import { cn } from "@/lib/utils";
@@ -113,6 +117,7 @@ export function ObjectTransformPanel({
   onFormSync,
   size,
 }: ObjectTransformPanelProps) {
+  const t = useTranslations("editor.transform");
   const [tab, setTab] = useState<TransformTab>("position");
   const [preview, setPreview] = useState<string | null>(null);
   const [nudge, setNudge] = useState({ x: 0, y: 0 });
@@ -252,8 +257,8 @@ export function ObjectTransformPanel({
         <div className="flex h-9 flex-1 items-center rounded-md bg-muted/40 p-0.5">
           {(
             [
-              { id: "position" as const, label: "Position" },
-              { id: "tilt" as const, label: "Tilt" },
+              { id: "position" as const, label: t("position") },
+              { id: "tilt" as const, label: t("tilt") },
             ] as const
           ).map((opt) => (
             <button
@@ -276,7 +281,7 @@ export function ObjectTransformPanel({
         </div>
         <button
           type="button"
-          title="Reset transform"
+          title={t("reset")}
           onClick={resetTransform}
           className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
         >
@@ -307,7 +312,7 @@ export function ObjectTransformPanel({
           />
         ) : (
           <div className="flex size-full items-center justify-center text-[13px] text-muted-foreground">
-            Drag to move
+            {t("dragToMove")}
           </div>
         )}
         {/* Stay centered — only the preview nudges while dragging. */}
@@ -325,7 +330,7 @@ export function ObjectTransformPanel({
 
       <div className="space-y-2">
         <PillSlider
-          label="Zoom"
+          label={t("zoom")}
           value={zoomPct}
           min={10}
           max={300}
@@ -335,7 +340,7 @@ export function ObjectTransformPanel({
           onValueCommit={(v) => setZoom(v, true)}
         />
         <PillSlider
-          label="Rotation"
+          label={t("rotation")}
           value={normalizeAngle(angle)}
           min={-180}
           max={180}
@@ -347,7 +352,7 @@ export function ObjectTransformPanel({
         {tab === "tilt" ? (
           <>
             <PillSlider
-              label="Tilt X"
+              label={t("tiltX")}
               value={skewX}
               min={-45}
               max={45}
@@ -357,7 +362,7 @@ export function ObjectTransformPanel({
               onValueCommit={(v) => setSkew("skewX", v, true)}
             />
             <PillSlider
-              label="Tilt Y"
+              label={t("tiltY")}
               value={skewY}
               min={-45}
               max={45}

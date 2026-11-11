@@ -2,13 +2,19 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Check, Plus } from "lucide-react";
+import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  Check,
+  Plus,
+} from "@phosphor-icons/react";
 import { useSlides } from "@/hooks/use-slides";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { captureCanvasThumbnail } from "@/lib/canvas/thumbnail";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useScrollEdgeFade } from "@/hooks/use-scroll-edge-fade";
 import type { CanvasManager } from "@/lib/canvas/manager";
+import { useTranslations } from "next-intl";
 
 const THUMB_HEIGHT = 52;
 
@@ -17,6 +23,7 @@ function captureLiveThumbnail(manager: CanvasManager): string | null {
 }
 
 export function SlideNavigator() {
+  const t = useTranslations("editor.slides");
   const manager = useCanvasManager();
   const {
     slides,
@@ -94,7 +101,7 @@ export function SlideNavigator() {
     <footer className="z-10 flex h-[72px] shrink-0 items-center gap-2 border-t border-border/50 bg-background px-3 select-none sm:gap-3 sm:px-3.5">
       <div className="w-12 shrink-0 leading-tight sm:w-[72px]">
         <div className="text-[13px] uppercase tracking-wide text-muted-foreground">
-          Slide
+          {t("slide")}
         </div>
         <div className="text-[13px] tabular-nums text-foreground">
           {currentIndex + 1}
@@ -102,7 +109,7 @@ export function SlideNavigator() {
           {slides.length}
           {markedSlideIds.length > 0 && (
             <span className="mt-0.5 block text-[11px] text-muted-foreground">
-              {markedSlideIds.length} marked
+              {t("markedCount", { n: markedSlideIds.length })}
             </span>
           )}
         </div>
@@ -114,7 +121,7 @@ export function SlideNavigator() {
         className="h-8 w-8 shrink-0 rounded-lg text-muted-foreground"
         onClick={prev}
         disabled={!canGoPrev}
-        title="Previous slide"
+        title={t("prev")}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -170,7 +177,7 @@ export function SlideNavigator() {
                 if (skipClick.current) return;
                 switchTo(slide.id);
               }}
-              title={`Slide ${idx + 1}. Drag to reorder.`}
+              title={t("dragReorder", { n: idx + 1 })}
               className={`relative shrink-0 cursor-grab overflow-hidden rounded-md border bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing ${
                 isActive
                   ? "border-foreground/70"
@@ -194,8 +201,8 @@ export function SlideNavigator() {
               <span
                 role="checkbox"
                 aria-checked={marked}
-                aria-label={marked ? `Unmark slide ${idx + 1}` : `Mark slide ${idx + 1}`}
-                title={marked ? "Unmark" : "Mark for font, palette, and export"}
+                aria-label={marked ? t("unmarkSlide", { n: idx + 1 }) : t("markSlide", { n: idx + 1 })}
+                title={marked ? t("unmark") : t("markHint")}
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -220,8 +227,8 @@ export function SlideNavigator() {
         <button
           type="button"
           onClick={add}
-          title="Add slide"
-          aria-label="Add slide"
+          title={t("add")}
+          aria-label={t("add")}
           className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground dark:bg-muted/35 dark:hover:bg-muted/50"
         >
           <Plus className="size-6 stroke-[1.5]" />
@@ -234,7 +241,7 @@ export function SlideNavigator() {
         className="h-8 w-8 shrink-0 rounded-lg text-muted-foreground"
         onClick={next}
         disabled={!canGoNext}
-        title="Next slide"
+        title={t("next")}
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

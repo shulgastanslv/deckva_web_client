@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   useCallback,
   useEffect,
@@ -10,22 +11,22 @@ import {
   type ReactNode,
 } from "react";
 import {
-  AlignCenter,
-  AlignJustify,
-  AlignLeft,
-  AlignRight,
-  Bold,
-  CaseSensitive,
-  ChevronDown,
-  Italic,
+  AlignCenterHorizontal as AlignCenter,
+  TextAlignJustify as AlignJustify,
+  TextAlignLeft as AlignLeft,
+  TextAlignRight as AlignRight,
+  TextB as Bold,
+  TextAa as CaseSensitive,
+  CaretDown as ChevronDown,
+  TextItalic as Italic,
   List,
-  ListOrdered,
+  ListNumbers as ListOrdered,
   Minus,
-  Paintbrush,
+  PaintBrush as Paintbrush,
   Plus,
-  Strikethrough,
-  Underline,
-} from "lucide-react";
+  TextStrikethrough as Strikethrough,
+  TextUnderline as Underline,
+} from "@phosphor-icons/react";
 import type { FabricObject, FabricText } from "fabric";
 import { HexColorPicker } from "react-colorful";
 import { FontSelect } from "@/components/canvas/font-select";
@@ -195,6 +196,7 @@ function TextColorButton({
   value: string;
   onChange: (hex: string) => void;
 }) {
+  const t = useTranslations("editor.selection");
   const [open, setOpen] = useState(false);
   const picker = toPickerHex(value || "#000000");
   const [draft, setDraft] = useState(picker);
@@ -217,7 +219,7 @@ function TextColorButton({
           <PopoverTrigger asChild>
             <button
               type="button"
-              aria-label="Text color"
+              aria-label={t("textColor")}
               className="inline-flex size-9 shrink-0 flex-col items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted/70"
             >
               <span className="text-[13px] font-semibold leading-none">A</span>
@@ -233,7 +235,7 @@ function TextColorButton({
           </PopoverTrigger>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-[13px]">
-          Text color
+          {t("textColor")}
         </TooltipContent>
       </Tooltip>
       <PopoverContent
@@ -315,6 +317,7 @@ function sameAnchor(a: ToolbarAnchor | null, b: ToolbarAnchor | null): boolean {
 }
 
 export function SelectionToolbar() {
+  const t = useTranslations("editor.selection");
   const manager = useCanvasManager();
   const selectedObject = useCanvasStore((s) => s.selectedObject);
   const handActive = useCanvasStore((s) => s.handActive);
@@ -520,7 +523,7 @@ export function SelectionToolbar() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  aria-label="Font size"
+                  aria-label={t("fontSize")}
                   value={textState.fontSize}
                   onChange={(e) => {
                     const parsed = Number(e.target.value.replace(/\D/g, ""));
@@ -587,7 +590,7 @@ export function SelectionToolbar() {
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        aria-label="Alignment"
+                        aria-label={t("alignment")}
                         className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <AlignIcon className="size-5" />
@@ -636,7 +639,7 @@ export function SelectionToolbar() {
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        aria-label="List"
+                        aria-label={t("list")}
                         className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <List className="size-5" />
@@ -677,7 +680,7 @@ export function SelectionToolbar() {
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        aria-label="Spacing"
+                        aria-label={t("spacing")}
                         className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <span className="relative flex h-3.5 w-3.5 flex-col justify-between">
@@ -728,7 +731,7 @@ export function SelectionToolbar() {
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        aria-label="Transparency"
+                        aria-label={t("transparency")}
                         className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <span
@@ -776,7 +779,7 @@ export function SelectionToolbar() {
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        aria-label="Transparency"
+                        aria-label={t("transparency")}
                         className="inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         Opacity

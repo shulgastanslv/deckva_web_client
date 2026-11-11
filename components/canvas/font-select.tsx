@@ -1,7 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
+import {
+  Check,
+  CaretUpDown as ChevronsUpDown,
+  SpinnerGap as Loader2,
+  MagnifyingGlass as Search,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import {
   fetchGoogleFontFamilies,
@@ -39,6 +45,7 @@ export function FontSelect({
   compact = false,
   className,
 }: FontSelectProps) {
+  const t = useTranslations("editor.typography");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [families, setFamilies] = useState<string[]>([]);
@@ -66,9 +73,9 @@ export function FontSelect({
     setError(null);
     void fetchGoogleFontFamilies()
       .then((list) => setFamilies(list))
-      .catch(() => setError("Couldn't load the font list"))
+      .catch(() => setError(t("loadError")))
       .finally(() => setLoadingList(false));
-  }, [open, families.length, loadingList]);
+  }, [open, families.length, loadingList, t]);
 
   const options = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -87,10 +94,10 @@ export function FontSelect({
         .slice(0, MAX_VISIBLE);
       return {
         groups: [
-          ...(brand.length > 0 ? [{ label: "Brand kit", items: brand }] : []),
-          { label: "System", items: [...system] },
-          { label: "Popular", items: [...popular] },
-          { label: "Google Fonts", items: rest },
+          ...(brand.length > 0 ? [{ label: t("groups.brandKit"), items: brand }] : []),
+          { label: t("groups.system"), items: [...system] },
+          { label: t("groups.popular"), items: [...popular] },
+          { label: t("groups.googleFonts"), items: rest },
         ],
       };
     }
@@ -102,7 +109,7 @@ export function FontSelect({
     return {
       groups: [{ label: `Found (${matched.length})`, items: matched }],
     };
-  }, [query, families, brandFonts]);
+  }, [query, families, brandFonts, t]);
 
   const applyFont = async (family: string) => {
     setLoadingFont(true);
@@ -118,7 +125,7 @@ export function FontSelect({
 
   return (
     <div className={cn("relative flex flex-col", compact ? "gap-0" : "gap-1.5", className)}>
-      {!compact && <span className="text-[13px] text-muted-foreground">Font</span>}
+      {!compact && <span className="text-[13px] text-muted-foreground">{t("font")}</span>}
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -164,7 +171,7 @@ export function FontSelect({
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search Google Fonts…"
+              placeholder={t("searchGoogleFonts")}
               className="h-8 w-full rounded-md bg-muted/40 pl-8 pr-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus:ring-1 focus:ring-ring"
             />
           </div>
@@ -173,7 +180,7 @@ export function FontSelect({
             {loadingList && families.length === 0 ? (
               <div className="flex items-center justify-center gap-2 py-6 text-[13px] text-muted-foreground">
                 <Loader2 className="size-3.5 animate-spin" />
-                Loading fonts…
+                {t("loadingFonts")}
               </div>
             ) : error ? (
               <p className="px-3 py-4 text-center text-[13px] text-destructive">{error}</p>

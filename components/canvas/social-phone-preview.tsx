@@ -1,22 +1,23 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef, type ReactNode } from "react";
 import {
   Bookmark,
-  ChartNoAxesColumn,
+  ChartBar as ChartNoAxesColumn,
   Heart,
-  Home,
-  MessageCircle,
-  MoreHorizontal,
+  House as Home,
+  ChatCircle as MessageCircle,
+  DotsThree as MoreHorizontal,
   Plus,
-  Repeat2,
-  Search,
-  Send,
-  Share,
+  ArrowsClockwise as Repeat2,
+  MagnifyingGlass as Search,
+  PaperPlaneTilt as Send,
+  ShareNetwork as Share,
   ThumbsUp,
   User,
   X as XIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { FaThreads } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { PhoneFrame } from "@/components/canvas/phone-frame";
@@ -195,6 +196,7 @@ function SlideImage({
   badge?: string;
   maxHeight?: string;
 }) {
+  const t = useTranslations("editor.phonePreview");
   return (
     <div
       className={cn("relative w-full overflow-hidden bg-neutral-100", className)}
@@ -215,7 +217,7 @@ function SlideImage({
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center text-[11px] text-neutral-400">
-          Empty slide
+          {t("emptySlide")}
         </div>
       )}
       {badge ? (
@@ -274,11 +276,14 @@ function TabIcon({
 }
 
 function InstagramChrome(props: Props) {
+  const t = useTranslations("editor.phonePreview");
+  const tc = useTranslations("common");
+
   const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
   const body = captionOrFallback(
     caption,
-    slideTotal > 1 ? `Slide ${slideIndex + 1} of ${slideTotal}` : "New post",
+    slideTotal > 1 ? `Slide ${slideIndex + 1} of ${slideTotal}` : t("newPost"),
   );
 
   return (
@@ -323,7 +328,7 @@ function InstagramChrome(props: Props) {
           <span className="font-semibold">{author}</span>{" "}
           <span className="text-neutral-800">{body}</span>
         </p>
-        <p className="text-[13px] text-neutral-500">View all comments</p>
+        <p className="text-[13px] text-neutral-500">{t("viewAllComments")}</p>
       </div>
 
       <nav className="flex h-12 shrink-0 items-center justify-around border-t border-neutral-200/80 px-1">
@@ -349,13 +354,16 @@ function InstagramChrome(props: Props) {
 }
 
 function ThreadsChrome(props: Props) {
+  const t = useTranslations("editor.phonePreview");
+  const tc = useTranslations("common");
+
   const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
   const body = captionOrFallback(
     caption,
     slideTotal > 1
       ? `Carousel preview · ${slideIndex + 1}/${slideTotal}`
-      : "Previewing this slide in Threads",
+      : t("previewingThreads"),
   );
 
   return (
@@ -416,6 +424,9 @@ function ThreadsChrome(props: Props) {
 }
 
 function TikTokChrome(props: Props) {
+  const t = useTranslations("editor.phonePreview");
+  const tc = useTranslations("common");
+
   const { author = "deckva", slideIndex, slideTotal, image, loading } = props;
 
   return (
@@ -428,7 +439,7 @@ function TikTokChrome(props: Props) {
           <img src={image} alt="" className="h-full w-full object-cover" draggable={false} />
         ) : (
           <div className="flex h-full items-center justify-center text-[12px] text-white/40">
-            Empty slide
+            {t("emptySlide")}
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/65" />
@@ -437,7 +448,7 @@ function TikTokChrome(props: Props) {
       <div className="relative z-10">
         <StatusBar tone="light" />
         <div className="flex items-center justify-center gap-5 pt-1 text-[14px]">
-          <span className="text-white/55">Following</span>
+          <span className="text-white/55">{t("following")}</span>
           <span className="relative font-semibold">
             For You
             <span className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-md bg-white" />
@@ -451,7 +462,7 @@ function TikTokChrome(props: Props) {
           <p className="line-clamp-2 text-[13px] leading-snug text-white/95">
             {slideTotal > 1
               ? `Slide ${slideIndex + 1} of ${slideTotal} · swipe to preview`
-              : "Previewing this slide on TikTok"}
+              : t("previewingTikTok")}
           </p>
           <div className="flex items-center gap-2 text-[12px] text-white/80">
             <span className="truncate rounded bg-white/10 px-1.5 py-0.5">♪ Original sound - {author}</span>
@@ -487,7 +498,7 @@ function TikTokChrome(props: Props) {
           </div>
           <div className="flex flex-col items-center gap-0.5">
             <Share className="size-8" strokeWidth={1.5} />
-            <span className="text-[11px] font-semibold">Share</span>
+            <span className="text-[11px] font-semibold">{t("share")}</span>
           </div>
         </div>
       </div>
@@ -511,6 +522,9 @@ function TikTokChrome(props: Props) {
 }
 
 function StoriesChrome(props: Props) {
+  const t = useTranslations("editor.phonePreview");
+  const tc = useTranslations("common");
+
   const { author = "deckva", slideIndex, slideTotal, image, loading } = props;
 
   return (
@@ -523,7 +537,7 @@ function StoriesChrome(props: Props) {
           <img src={image} alt="" className="h-full w-full object-cover" draggable={false} />
         ) : (
           <div className="flex h-full items-center justify-center text-[12px] text-white/40">
-            Empty slide
+            {t("emptySlide")}
           </div>
         )}
         <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/55 to-transparent" />
@@ -548,7 +562,7 @@ function StoriesChrome(props: Props) {
           <Avatar name={author} size="sm" />
           <span className="text-[13px] font-semibold tracking-tight">{author}</span>
           <span className="text-[12px] text-white/65">2h</span>
-          <button type="button" className="ml-auto" aria-label="Close">
+          <button type="button" className="ml-auto" aria-label={t("close")}>
             <XIcon className="size-5" strokeWidth={2} />
           </button>
         </div>
@@ -569,13 +583,16 @@ function StoriesChrome(props: Props) {
 }
 
 function XChrome(props: Props) {
+  const t = useTranslations("editor.phonePreview");
+  const tc = useTranslations("common");
+
   const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
   const body = captionOrFallback(
     caption,
     slideTotal > 1
       ? `Previewing slide ${slideIndex + 1} of ${slideTotal}`
-      : "Previewing this slide on X",
+      : t("previewingX"),
   );
 
   return (
@@ -583,7 +600,7 @@ function XChrome(props: Props) {
       <StatusBar tone="light" />
       <header className="flex h-11 shrink-0 items-center gap-6 px-3">
         <XIcon className="size-5" strokeWidth={2} />
-        <span className="text-[17px] font-bold tracking-tight">Post</span>
+        <span className="text-[17px] font-bold tracking-tight">{t("post")}</span>
       </header>
 
       <div className="min-h-0 flex-1 overflow-hidden px-3 pt-1">
@@ -653,13 +670,16 @@ function BellDot() {
 }
 
 function LinkedInChrome(props: Props) {
+  const t = useTranslations("editor.phonePreview");
+  const tc = useTranslations("common");
+
   const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
   const body = captionOrFallback(
     caption,
     slideTotal > 1
       ? `Slide ${slideIndex + 1} of ${slideTotal} — carousel preview`
-      : "Previewing this slide on LinkedIn",
+      : t("previewingLinkedIn"),
   );
 
   return (
@@ -681,7 +701,7 @@ function LinkedInChrome(props: Props) {
             <Avatar name={author} size="md" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-semibold leading-tight">{author}</p>
-              <p className="truncate text-[11px] text-neutral-500">Founder · 1,240 followers</p>
+              <p className="truncate text-[11px] text-neutral-500">{t("demoBio")}</p>
               <p className="text-[11px] text-neutral-500">2h · 🌐</p>
             </div>
             <MoreHorizontal className="size-5 text-neutral-500" strokeWidth={1.75} />
@@ -728,6 +748,9 @@ function LinkedInChrome(props: Props) {
 }
 
 function CleanChrome(props: Props) {
+  const t = useTranslations("editor.phonePreview");
+  const tc = useTranslations("common");
+
   const { slideIndex, slideTotal, image, loading, aspectRatio } = props;
   return (
     <div className="flex h-full w-full flex-col bg-neutral-950">
@@ -764,6 +787,9 @@ const CHROME: Record<SocialPreviewNetwork, (props: Props) => ReactNode> = {
 };
 
 export function SocialPhonePreview(props: Props) {
+  const t = useTranslations("editor.phonePreview");
+  const tc = useTranslations("common");
+
   const startX = useRef<number | null>(null);
 
   return (
