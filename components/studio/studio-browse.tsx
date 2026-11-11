@@ -236,7 +236,7 @@ export function StudioBrowse() {
                       >
                         <div className="flex w-4 items-center justify-center">
                           {communitySort === option.id ? (
-                            <Check className="size-4" />
+                            <Check className="size-5" />
                           ) : null}
                         </div>
                         {option.label}
@@ -258,7 +258,7 @@ export function StudioBrowse() {
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}
                   >
-                    <LayoutGrid className="size-4" />
+                    <LayoutGrid className="size-5" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -272,7 +272,7 @@ export function StudioBrowse() {
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}
                   >
-                    <List className="size-4" />
+                    <List className="size-5" />
                   </Button>
                 </div>
               </>
@@ -305,7 +305,7 @@ export function StudioBrowse() {
                         className="flex cursor-pointer items-center gap-2 rounded-xl text-[13px] focus:bg-muted/50"
                       >
                         <div className="flex w-4 items-center justify-center">
-                          {sort === option.id ? <Check className="size-4" /> : null}
+                          {sort === option.id ? <Check className="size-5" /> : null}
                         </div>
                         {option.label}
                       </DropdownMenuItem>
@@ -325,7 +325,7 @@ export function StudioBrowse() {
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}
                   >
-                    <LayoutGrid className="size-4" />
+                    <LayoutGrid className="size-5" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -338,7 +338,7 @@ export function StudioBrowse() {
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}
                   >
-                    <List className="size-4" />
+                    <List className="size-5" />
                   </Button>
                 </div>
               </>

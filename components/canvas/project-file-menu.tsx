@@ -37,8 +37,8 @@ import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 
-const chipTrigger =
-  "inline-flex h-9 items-center gap-1.5 rounded-md border-none bg-muted/40 px-3 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60";
+const ghostTrigger =
+  "inline-flex h-9 items-center gap-1.5 rounded-md border-none bg-transparent px-2.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/40 data-[state=open]:bg-muted/40";
 
 const menuItem =
   "gap-2 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50";
@@ -123,7 +123,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="ghost" className={chipTrigger}>
+        <Button type="button" variant="ghost" className={ghostTrigger}>
           File
           <ChevronDown className="size-3.5 opacity-70" />
         </Button>
@@ -172,7 +172,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
               "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
             )}
           >
-            <Crop className="size-4" />
+            <Crop className="size-5" />
             Canvas size
             <span className="ml-auto tabular-nums text-muted-foreground">{currentRatio}</span>
           </DropdownMenuSubTrigger>
@@ -206,7 +206,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
 
         <DropdownMenuItem asChild className={menuItem}>
           <Link href="/studio">
-            <Plus className="size-4" />
+            <Plus className="size-5" />
             New design
           </Link>
         </DropdownMenuItem>
@@ -218,7 +218,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
             void handleMakeCopy();
           }}
         >
-          <Copy className="size-4" />
+          <Copy className="size-5" />
           Make a copy
         </DropdownMenuItem>
 
@@ -231,7 +231,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
               "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
             )}
           >
-            <Grid3X3 className="size-4" />
+            <Grid3X3 className="size-5" />
             Layout grid
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent
@@ -253,19 +253,19 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
             void persist();
           }}
         >
-          <Save className="size-4" />
+          <Save className="size-5" />
           Save
           <kbd className="ml-auto font-mono text-[11px] text-muted-foreground">⌘S</kbd>
         </DropdownMenuItem>
         {onShare ? (
           <DropdownMenuItem className={menuItem} onSelect={onShare}>
-            <Share2 className="size-4" />
+            <Share2 className="size-5" />
             Share
           </DropdownMenuItem>
         ) : null}
         {onExport ? (
           <DropdownMenuItem className={menuItem} onSelect={onExport}>
-            <Download className="size-4" />
+            <Download className="size-5" />
             Download
           </DropdownMenuItem>
         ) : null}
@@ -274,7 +274,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
           <>
             <DropdownMenuSeparator className="bg-border/50" />
             <DropdownMenuItem className={menuItem} onSelect={onHelp}>
-              <HelpCircle className="size-4" />
+              <HelpCircle className="size-5" />
               Help
             </DropdownMenuItem>
           </>

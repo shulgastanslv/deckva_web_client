@@ -87,7 +87,7 @@ const PANEL_TITLES: Record<NavId, string> = {
 };
 
 const railBtn =
-  "size-9 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
+  "size-10 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
 
 export function LeftSidebar({
   activeNav,

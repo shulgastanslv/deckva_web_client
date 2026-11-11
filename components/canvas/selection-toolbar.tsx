@@ -515,7 +515,7 @@ export function SelectionToolbar() {
 
               <div className="flex h-9 items-center rounded-md bg-muted/40 px-0.5">
                 <ToolBtn label="Smaller" onClick={() => bumpFontSize(-1)}>
-                  <Minus className="size-4" />
+                  <Minus className="size-5" />
                 </ToolBtn>
                 <input
                   type="text"
@@ -531,7 +531,7 @@ export function SelectionToolbar() {
                   className="h-7 w-8 border-0 bg-transparent text-center text-[13px] tabular-nums text-foreground outline-none"
                 />
                 <ToolBtn label="Larger" onClick={() => bumpFontSize(1)}>
-                  <Plus className="size-4" />
+                  <Plus className="size-5" />
                 </ToolBtn>
               </div>
 
@@ -552,31 +552,31 @@ export function SelectionToolbar() {
                 active={textState.isBold}
                 onClick={() => toggleStyle("bold")}
               >
-                <Bold className="size-4" />
+                <Bold className="size-5" />
               </ToolBtn>
               <ToolBtn
                 label="Italic"
                 active={textState.isItalic}
                 onClick={() => toggleStyle("italic")}
               >
-                <Italic className="size-4" />
+                <Italic className="size-5" />
               </ToolBtn>
               <ToolBtn
                 label="Underline"
                 active={textState.isUnderline}
                 onClick={() => toggleStyle("underline")}
               >
-                <Underline className="size-4" />
+                <Underline className="size-5" />
               </ToolBtn>
               <ToolBtn
                 label="Strikethrough"
                 active={textState.isStrike}
                 onClick={() => toggleStyle("strike")}
               >
-                <Strikethrough className="size-4" />
+                <Strikethrough className="size-5" />
               </ToolBtn>
               <ToolBtn label="Change case" onClick={applyCase}>
-                <CaseSensitive className="size-4" />
+                <CaseSensitive className="size-5" />
               </ToolBtn>
 
               <BarDivider />
@@ -590,7 +590,7 @@ export function SelectionToolbar() {
                         aria-label="Alignment"
                         className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
-                        <AlignIcon className="size-4" />
+                        <AlignIcon className="size-5" />
                         <ChevronDown className="ml-0.5 size-2.5 opacity-60" />
                       </button>
                     </PopoverTrigger>
@@ -624,7 +624,7 @@ export function SelectionToolbar() {
                           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                       )}
                     >
-                      <Icon className="size-4" />
+                      <Icon className="size-5" />
                     </button>
                   ))}
                 </PopoverContent>
@@ -639,7 +639,7 @@ export function SelectionToolbar() {
                         aria-label="List"
                         className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
-                        <List className="size-4" />
+                        <List className="size-5" />
                       </button>
                     </PopoverTrigger>
                   </TooltipTrigger>
@@ -655,7 +655,7 @@ export function SelectionToolbar() {
                     className="h-9 rounded-md gap-1.5 px-2.5 text-[13px]"
                     onClick={() => applyTextList("bullet")}
                   >
-                    <List className="size-4" />
+                    <List className="size-5" />
                     Bullets
                   </Button>
                   <Button
@@ -665,7 +665,7 @@ export function SelectionToolbar() {
                     className="h-9 rounded-md gap-1.5 px-2.5 text-[13px]"
                     onClick={() => applyTextList("number")}
                   >
-                    <ListOrdered className="size-4" />
+                    <ListOrdered className="size-5" />
                     Numbers
                   </Button>
                 </PopoverContent>
@@ -814,7 +814,7 @@ export function SelectionToolbar() {
             active={copiedStyle}
             onClick={copyOrPasteStyle}
           >
-            <Paintbrush className="size-4" />
+            <Paintbrush className="size-5" />
           </ToolBtn>
         </div>
       </div>

@@ -298,14 +298,14 @@ export function CanvasToolbar({
             disabled={!canGoPrev}
             onClick={() => move("left")}
           >
-            <ChevronUp className="size-4" />
+            <ChevronUp className="size-5" />
           </PageIcon>
           <PageIcon
             title="Move slide later"
             disabled={!canGoNext}
             onClick={() => move("right")}
           >
-            <ChevronDown className="size-4" />
+            <ChevronDown className="size-5" />
           </PageIcon>
           <PageIcon
             title={target ? (targetHidden ? "Show object" : "Hide object") : "Select an object to hide"}
@@ -313,7 +313,7 @@ export function CanvasToolbar({
             pressed={targetHidden}
             onClick={toggleHidden}
           >
-            {targetHidden ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {targetHidden ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
           </PageIcon>
           <PageIcon
             title={target ? (targetLocked ? "Unlock object" : "Lock object") : "Select an object to lock"}
@@ -321,10 +321,10 @@ export function CanvasToolbar({
             pressed={targetLocked}
             onClick={toggleLocked}
           >
-            {targetLocked ? <Lock className="size-4" /> : <Unlock className="size-4" />}
+            {targetLocked ? <Lock className="size-5" /> : <Unlock className="size-5" />}
           </PageIcon>
           <PageIcon title="Duplicate slide" onClick={() => void duplicate()}>
-            <CopyPlus className="size-4" />
+            <CopyPlus className="size-5" />
           </PageIcon>
           <PageIcon
             title="Delete slide"
@@ -332,10 +332,10 @@ export function CanvasToolbar({
             destructive
             onClick={() => void remove(currentSlideId)}
           >
-            <Trash2 className="size-4" />
+            <Trash2 className="size-5" />
           </PageIcon>
           <PageIcon title="Add slide" onClick={() => void add()}>
-            <FilePlus className="size-4" />
+            <FilePlus className="size-5" />
           </PageIcon>
         </div>
 
@@ -359,7 +359,7 @@ export function CanvasToolbar({
               title="Options"
               aria-label="Canvas options"
             >
-              <MoreHorizontal className="size-4" />
+              <MoreHorizontal className="size-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={8} className="w-72 rounded-2xl p-1.5">
@@ -370,33 +370,33 @@ export function CanvasToolbar({
                 setEraserActive(false);
               }}
             >
-              <MousePointer2 className="size-4" />
+              <MousePointer2 className="size-5" />
               <span className="flex-1">Select</span>
               <kbd className="font-mono text-[11px] text-muted-foreground">V</kbd>
-              <Check className={cn("size-4", selectActive ? "opacity-100" : "opacity-0")} />
+              <Check className={cn("size-5", selectActive ? "opacity-100" : "opacity-0")} />
             </DropdownMenuItem>
             <DropdownMenuItem
               className={menuItem}
               onSelect={() => setHandActive(true)}
             >
-              <Hand className="size-4" />
+              <Hand className="size-5" />
               <span className="flex-1">Hand</span>
               <kbd className="font-mono text-[11px] text-muted-foreground">H</kbd>
-              <Check className={cn("size-4", handActive ? "opacity-100" : "opacity-0")} />
+              <Check className={cn("size-5", handActive ? "opacity-100" : "opacity-0")} />
             </DropdownMenuItem>
             <DropdownMenuItem
               className={menuItem}
               onSelect={() => setEraserActive(!eraserActive)}
             >
-              <Eraser className="size-4" />
+              <Eraser className="size-5" />
               <span className="flex-1">Eraser</span>
               <kbd className="font-mono text-[11px] text-muted-foreground">E</kbd>
-              <Check className={cn("size-4", eraserActive ? "opacity-100" : "opacity-0")} />
+              <Check className={cn("size-5", eraserActive ? "opacity-100" : "opacity-0")} />
             </DropdownMenuItem>
 
             {onFocus ? (
               <DropdownMenuItem className={menuItem} onSelect={onFocus}>
-                <Focus className="size-4" />
+                <Focus className="size-5" />
                 <span className="flex-1">Focus mode</span>
               </DropdownMenuItem>
             ) : null}
@@ -457,14 +457,14 @@ export function CanvasToolbar({
               className={menuItem}
               onSelect={() => void handleExportJSON()}
             >
-              {copied ? <Check className="size-4 text-green-500" /> : <Download className="size-4" />}
+              {copied ? <Check className="size-4 text-green-500" /> : <Download className="size-5" />}
               {copied ? "Exported" : "Export JSON"}
             </DropdownMenuItem>
             <DropdownMenuItem
               className={menuItem}
               onSelect={() => importRef.current?.click()}
             >
-              <Upload className="size-4" />
+              <Upload className="size-5" />
               Import JSON
             </DropdownMenuItem>
 
@@ -479,7 +479,7 @@ export function CanvasToolbar({
               <>
                 <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem className={menuItem} onSelect={onHideChrome}>
-                  <PanelTopClose className="size-4" />
+                  <PanelTopClose className="size-5" />
                   <span className="flex-1">Hide bars</span>
                   <kbd className="font-mono text-[11px] text-muted-foreground">\</kbd>
                 </DropdownMenuItem>

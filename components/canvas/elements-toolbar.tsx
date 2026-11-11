@@ -321,7 +321,7 @@ function ToolFlyout({
                     : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                 )}
               >
-                <ItemIcon className="size-4 shrink-0" />
+                <ItemIcon className="size-5 shrink-0" />
                 {tools.length > 6 ? (
                   <span className="max-w-full truncate text-[11px]">{tool.label}</span>
                 ) : (
@@ -340,7 +340,7 @@ function ToolFlyout({
         </div>
       }
     >
-      <Icon className="size-4" />
+      <Icon className="size-5" />
     </SplitTool>
   );
 }
@@ -483,7 +483,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
               setEraserActive(false);
             }}
           >
-            <MousePointer2 className="size-4" />
+            <MousePointer2 className="size-5" />
           </RailTool>
           <RailTool
             label="Hand"
@@ -493,7 +493,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             disabled={!manager}
             onClick={() => setHandActive(!handActive)}
           >
-            <Hand className="size-4" />
+            <Hand className="size-5" />
           </RailTool>
           <RailTool
             label="Eraser"
@@ -503,7 +503,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             disabled={!manager}
             onClick={() => setEraserActive(!eraserActive)}
           >
-            <Eraser className="size-4" />
+            <Eraser className="size-5" />
           </RailTool>
 
           <BarDivider />
@@ -542,7 +542,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   }}
                   className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted"
                 >
-                  <ImagePlus className="size-4" />
+                  <ImagePlus className="size-5" />
                   Upload image
                 </button>
                 <div className="space-y-1.5 px-1">
@@ -595,7 +595,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
               </div>
             }
           >
-            <ImagePlus className="size-4" />
+            <ImagePlus className="size-5" />
           </SplitTool>
 
           <SplitTool
@@ -622,7 +622,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   }}
                   className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                 >
-                  <WandSparkles className="size-4" />
+                  <WandSparkles className="size-5" />
                   Remove background
                 </button>
                 <p className="px-3 pt-1.5 pb-1 text-[12px] font-medium text-muted-foreground">
@@ -645,7 +645,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                         : "text-foreground",
                     )}
                   >
-                    <ScanSearch className="size-4" />
+                    <ScanSearch className="size-5" />
                     Upscale {value}×
                   </button>
                 ))}
@@ -658,7 +658,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   }}
                   className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                 >
-                  <Layers2 className="size-4" />
+                  <Layers2 className="size-5" />
                   Magic layer
                 </button>
                 {enhanceError ? (
@@ -669,13 +669,13 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
               </div>
             }
           >
-            <EnhanceIcon className={cn("size-4", enhanceBusy && "animate-spin")} />
+            <EnhanceIcon className={cn("size-5", enhanceBusy && "animate-spin")} />
           </SplitTool>
 
           <BarDivider />
 
           <RailTool label="Exit" hint="Leave focus mode. Esc" onClick={onExit}>
-            <Minimize2 className="size-4" />
+            <Minimize2 className="size-5" />
           </RailTool>
         </div>
       </div>

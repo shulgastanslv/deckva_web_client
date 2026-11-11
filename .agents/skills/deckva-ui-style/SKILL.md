@@ -29,7 +29,7 @@ description: >-
 8. Триггеры и чипы: `rounded-md` + `bg-muted/40` + `hover:bg-muted/60`.
 9. Меню: `rounded-2xl`, пункты `rounded-xl` + `focus:bg-muted/50`. Диалоги: `rounded-3xl`.
 10. Left sidebar panels: общий `sidebarPanel` (`px-3.5 py-3 gap-3`).
-11. Иконки nav/rail в студии и эдиторе: `size-4 stroke-[1.75]`.
+11. Иконки как в Miro: **`size-5 stroke-[1.5]`** (`navIconClass` / `menuIconClass`). Мелкие шевроны — `size-3`–`size-3.5`.
 
 ## Floating surface (обязательно)
 

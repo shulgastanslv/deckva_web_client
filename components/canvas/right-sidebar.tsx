@@ -200,7 +200,7 @@ function ArrangeIconChip({
       onClick={onClick}
       className="flex h-9 w-full items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
     >
-      <Icon className="size-4" />
+      <Icon className="size-5" />
     </button>
   );
 }
@@ -239,7 +239,7 @@ function Segmented<T extends string>({
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {Icon ? <Icon className="size-4" /> : null}
+            {Icon ? <Icon className="size-5" /> : null}
             {opt.label ? <span>{opt.label}</span> : null}
           </button>
         );
@@ -941,7 +941,7 @@ export function RightSidebar({
             onClick={toggleRightCollapsed}
             title="Expand panel"
           >
-            <PanelRightOpen className="size-4" />
+            <PanelRightOpen className="size-5" />
           </Button>
         </aside>
       ) : null}
@@ -969,7 +969,7 @@ export function RightSidebar({
               onClick={toggleRightCollapsed}
               title="Collapse panel"
             >
-              <PanelRightClose className="size-4" />
+              <PanelRightClose className="size-5" />
             </Button>
           </div>
           <div className="flex items-center justify-between gap-2">
@@ -1144,7 +1144,7 @@ export function RightSidebar({
                           className={`size-8 ${btnRound}`}
                           onClick={() => toggleTextStyle("bold")}
                         >
-                          <Bold className="size-4" />
+                          <Bold className="size-5" />
                         </Button>
                         <Button
                           type="button"
@@ -1153,7 +1153,7 @@ export function RightSidebar({
                           className={`size-8 ${btnRound}`}
                           onClick={() => toggleTextStyle("italic")}
                         >
-                          <Italic className="size-4" />
+                          <Italic className="size-5" />
                         </Button>
                         <Button
                           type="button"
@@ -1162,7 +1162,7 @@ export function RightSidebar({
                           className={`size-8 ${btnRound}`}
                           onClick={() => toggleTextStyle("underline")}
                         >
-                          <Underline className="size-4" />
+                          <Underline className="size-5" />
                         </Button>
                       </ToolCluster>
                       <FontSelect
@@ -1320,7 +1320,7 @@ export function RightSidebar({
                         className={`h-9 w-full justify-center gap-2 text-[13px] ${btnRound}`}
                         onClick={() => fileInputRef.current?.click()}
                       >
-                        <Upload className="size-4" />
+                        <Upload className="size-5" />
                         Fill with image
                       </Button>
                     </>
@@ -1383,7 +1383,7 @@ export function RightSidebar({
                         onClick={() => selectedObject && manager?.crop.start(selectedObject)}
                         disabled={imageToolBusy}
                       >
-                        <Crop className="size-4" />
+                        <Crop className="size-5" />
                         Crop
                       </Button>
                       <input
@@ -1401,7 +1401,7 @@ export function RightSidebar({
                         onClick={() => fileInputRef.current?.click()}
                         disabled={imageToolBusy}
                       >
-                        <Upload className="size-4" />
+                        <Upload className="size-5" />
                         Replace
                       </Button>
                     </div>
@@ -1420,7 +1420,7 @@ export function RightSidebar({
                       {enhanceBusy === "remove-bg" ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        <WandSparkles className="size-4" />
+                        <WandSparkles className="size-5" />
                       )}
                       {enhanceBusy === "remove-bg" ? "Removing background…" : "Remove background"}
                     </Button>
@@ -1446,7 +1446,7 @@ export function RightSidebar({
                         {enhanceBusy === "upscale" ? (
                           <Loader2 className="size-4 animate-spin" />
                         ) : (
-                          <ScanSearch className="size-4" />
+                          <ScanSearch className="size-5" />
                         )}
                         Upscale
                       </Button>
@@ -1462,7 +1462,7 @@ export function RightSidebar({
                       {enhanceBusy === "magic-layer" ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        <Layers2 className="size-4" />
+                        <Layers2 className="size-5" />
                       )}
                       {enhanceBusy === "magic-layer" ? "Splitting layers…" : "Magic layer"}
                     </Button>
@@ -1511,7 +1511,7 @@ export function RightSidebar({
                         onClick={() => toggleTextStyle("bold")}
                         title="Bold"
                       >
-                        <Bold className="size-4" />
+                        <Bold className="size-5" />
                       </Button>
                       <Button
                         type="button"
@@ -1521,7 +1521,7 @@ export function RightSidebar({
                         onClick={() => toggleTextStyle("italic")}
                         title="Italic"
                       >
-                        <Italic className="size-4" />
+                        <Italic className="size-5" />
                       </Button>
                       <Button
                         type="button"
@@ -1531,7 +1531,7 @@ export function RightSidebar({
                         onClick={() => toggleTextStyle("underline")}
                         title="Underline"
                       >
-                        <Underline className="size-4" />
+                        <Underline className="size-5" />
                       </Button>
                     </ToolCluster>
                     <Segmented

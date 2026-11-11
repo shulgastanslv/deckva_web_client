@@ -193,7 +193,7 @@ export function StudioOrgSwitcher({
                         aria-label="Organization settings"
                         className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       >
-                        <MoreHorizontal className="size-4" />
+                        <MoreHorizontal className="size-5" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -223,7 +223,7 @@ export function StudioOrgSwitcher({
                             onClick={() => setIsDeleteOpen(true)}
                             className="cursor-pointer gap-2.5 rounded-xl py-2 text-[13px] text-destructive focus:bg-destructive/10 focus:text-destructive"
                           >
-                            <Trash2 className="size-4" />
+                            <Trash2 className="size-5" />
                             Delete organization
                           </DropdownMenuItem>
                         </>

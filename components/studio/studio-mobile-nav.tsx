@@ -66,7 +66,7 @@ export function StudioMobileNav({
             active ? "text-foreground" : "text-muted-foreground",
           )}
         >
-          <Icon className="size-4 stroke-[1.75]" />
+          <Icon className="size-5 stroke-[1.5]" />
           {label}
         </Link>
       ))}

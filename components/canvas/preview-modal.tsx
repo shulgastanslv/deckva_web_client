@@ -284,7 +284,7 @@ export function PreviewModal({
             onClick={onClose}
             className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
           >
-            <X className="size-4" />
+            <X className="size-5" />
           </Button>
         </div>
       </div>

@@ -37,7 +37,7 @@ export function KeyboardShortcutsMenu() {
           className="flex h-9 w-9 items-center justify-center rounded-md border-none bg-muted/40 text-muted-foreground shadow-none outline-none transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
           title="Keyboard shortcuts"
         >
-          <Keyboard className="size-4" />
+          <Keyboard className="size-5" />
         </button>
       </DropdownMenuTrigger>
 

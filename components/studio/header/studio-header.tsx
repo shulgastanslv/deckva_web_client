@@ -57,7 +57,7 @@ export function StudioHeader({
               aria-label="Open menu"
               className="flex size-9 items-center justify-center rounded-md text-foreground md:hidden"
             >
-              <Menu className="size-4 stroke-[1.75]" />
+              <Menu className="size-5 stroke-[1.5]" />
             </button>
           ) : null}
           <button

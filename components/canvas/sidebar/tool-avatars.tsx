@@ -319,7 +319,7 @@ export function ToolsBannerCollage({ className }: { className?: string }) {
 
   return (
     <div className={cn("bg-[#1C1C1E] px-2.5 pb-2 pt-2.5", className)}>
-      <div className="grid grid-cols-6 gap-1.5">{tiles.slice(0, 12)}</div>
+      <div className="grid grid-cols-4 gap-1.5">{tiles.slice(0, 12)}</div>
     </div>
   );
 }

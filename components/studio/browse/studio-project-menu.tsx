@@ -78,7 +78,7 @@ export function StudioProjectMenu({
           className="size-8 rounded-md border-none bg-muted/40 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
           onClick={(event) => event.stopPropagation()}
         >
-          <MoreHorizontal className="size-4" />
+          <MoreHorizontal className="size-5" />
           <span className="sr-only">More</span>
         </Button>
       </DropdownMenuTrigger>
@@ -190,7 +190,7 @@ export function StudioProjectMenu({
             window.dispatchEvent(new CustomEvent("studio:folders-changed"));
           }}
         >
-          <Trash2 className="size-4" />
+          <Trash2 className="size-5" />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>

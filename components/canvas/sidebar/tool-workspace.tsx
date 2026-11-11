@@ -721,7 +721,7 @@ export function ToolDetailDialog({
             onClick={() => onOpenChange(false)}
             aria-label="Close"
           >
-            <X className="size-4" />
+            <X className="size-5" />
           </Button>
         </div>
 
@@ -781,7 +781,7 @@ export function ToolRunDialog({
             onClick={() => onOpenChange(false)}
             aria-label="Close"
           >
-            <X className="size-4" />
+            <X className="size-5" />
           </Button>
         </div>
 

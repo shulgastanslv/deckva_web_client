@@ -382,7 +382,7 @@ export function ManageMembersDialog({
                             className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                             aria-label="Member actions"
                           >
-                            <MoreHorizontal className="size-4" />
+                            <MoreHorizontal className="size-5" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent

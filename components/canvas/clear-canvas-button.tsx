@@ -44,7 +44,7 @@ export function ClearCanvasButton() {
           className="size-9 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
           title="Clear all slides"
         >
-          <BrushCleaning className="size-4" />
+          <BrushCleaning className="size-5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="rounded-3xl">

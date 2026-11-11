@@ -58,7 +58,7 @@ export function FilterMenu({
             className,
           )}
         >
-          <Icon className="size-4 shrink-0 stroke-[1.75]" />
+          <Icon className="size-5 shrink-0 stroke-[1.5]" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

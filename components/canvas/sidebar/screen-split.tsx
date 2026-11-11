@@ -183,7 +183,7 @@ export function ScreenSplit() {
         {busy ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          <ImagePlus className="size-4" />
+          <ImagePlus className="size-5" />
         )}
         {busy ? "Adding…" : active ? `Add image · ${active.label}` : "Choose a layout first"}
       </button>

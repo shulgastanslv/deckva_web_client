@@ -25,7 +25,7 @@ export function StudioViewToggle({
             : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
         )}
       >
-        <LayoutGrid className="size-4" />
+        <LayoutGrid className="size-5" />
       </Button>
       <Button
         type="button"
@@ -40,7 +40,7 @@ export function StudioViewToggle({
             : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
         )}
       >
-        <List className="size-4" />
+        <List className="size-5" />
       </Button>
     </div>
   );

@@ -310,7 +310,7 @@ export function FiltersControls() {
             onPointerDown={(e) => e.stopPropagation()}
             className="absolute left-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-md bg-background/90 text-foreground transition-colors hover:bg-background"
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-5" />
           </button>
           <button
             type="button"
@@ -322,7 +322,7 @@ export function FiltersControls() {
             onPointerDown={(e) => e.stopPropagation()}
             className="absolute right-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-md bg-background/90 text-foreground transition-colors hover:bg-background"
           >
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-5" />
           </button>
 
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">

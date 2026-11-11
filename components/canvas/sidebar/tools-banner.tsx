@@ -39,7 +39,7 @@ export function ToolsBanner({
           </Button>
           <Button
             type="button"
-            className="h-8 rounded-lg bg-[#0D99FF] px-3 text-[12px] font-medium text-white shadow-none hover:bg-[#0D99FF]/90"
+            className="h-8 rounded-lg bg-foreground px-3 text-[12px] font-medium text-background shadow-none hover:bg-foreground/90"
             onClick={() => onExplore?.()}
           >
             Got it

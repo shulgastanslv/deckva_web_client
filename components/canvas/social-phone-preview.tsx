@@ -497,7 +497,7 @@ function TikTokChrome(props: Props) {
         <Search className="size-6 text-white/55" strokeWidth={1.6} />
         <div className="flex h-7 w-11 items-center justify-center rounded-lg bg-gradient-to-r from-[#25f4ee] via-white to-[#fe2c55] p-[1.5px]">
           <span className="flex h-full w-full items-center justify-center rounded-[7px] bg-black">
-            <Plus className="size-4" strokeWidth={2.25} />
+            <Plus className="size-5" strokeWidth={2.25} />
           </span>
         </div>
         <MessageCircle className="size-6 text-white/55" strokeWidth={1.6} />
@@ -705,7 +705,7 @@ function LinkedInChrome(props: Props) {
                 key={label}
                 className="flex flex-col items-center gap-0.5 rounded-lg py-1.5 text-neutral-600"
               >
-                <Icon className="size-4" strokeWidth={1.7} />
+                <Icon className="size-5" strokeWidth={1.7} />
                 <span className="text-[10px] font-semibold">{label}</span>
               </div>
             ))}

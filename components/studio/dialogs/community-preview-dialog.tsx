@@ -304,7 +304,7 @@ export function CommunityPreviewDialog({
                     onClick={editOwn}
                     className="h-11 w-full gap-2 rounded-md text-[14px] font-medium shadow-none"
                   >
-                    <Pencil className="size-4" />
+                    <Pencil className="size-5" />
                     Edit my template
                   </Button>
                   <p className="text-center text-[12px] leading-relaxed text-muted-foreground">
@@ -323,7 +323,7 @@ export function CommunityPreviewDialog({
                     {busy ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      <Sparkles className="size-4" />
+                      <Sparkles className="size-5" />
                     )}
                     Customize this design
                   </Button>

@@ -208,7 +208,7 @@ export function StudioFoldersSection() {
                   href={`/studio/browse?folder=${folder.id}`}
                   className="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 text-[13px] font-medium"
                 >
-                  <Folder className="size-4 shrink-0 stroke-[1.75]" />
+                  <Folder className="size-5 shrink-0 stroke-[1.5]" />
                   <span className="truncate">{folder.name}</span>
                 </Link>
 

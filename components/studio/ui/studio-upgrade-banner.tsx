@@ -84,7 +84,7 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
           onClick={dismiss}
           className="shrink-0 rounded-md p-1 opacity-80 transition-opacity hover:bg-primary-foreground/15 hover:opacity-100"
         >
-          <X className="size-4" />
+          <X className="size-5" />
         </button>
       </div>
     </div>

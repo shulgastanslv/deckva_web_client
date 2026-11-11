@@ -85,7 +85,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
                   onClick={() => setNavOpen(false)}
                   className="flex size-9 items-center justify-center rounded-md text-foreground"
                 >
-                  <X className="size-4" />
+                  <X className="size-5" />
                 </button>
               </div>
               <StudioSidebar

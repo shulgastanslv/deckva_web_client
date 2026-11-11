@@ -99,21 +99,21 @@ export function EditorPanelActions({
                 className={menuItem}
                 onSelect={() => requireAuth(() => setShareOpen(true))}
               >
-                <Share className="size-4" />
+                <Share className="size-5" />
                 Share link
               </DropdownMenuItem>
               <DropdownMenuItem
                 className={menuItem}
                 onSelect={() => requireAuth(() => setPublishOpen(true))}
               >
-                <Globe className="size-4" />
+                <Globe className="size-5" />
                 Publish to community
               </DropdownMenuItem>
               <DropdownMenuItem
                 className={menuItem}
                 onSelect={() => requireAuth(() => setExportOpen(true))}
               >
-                <ArrowUp className="size-4" />
+                <ArrowUp className="size-5" />
                 Export · {slideCount} PNG / ZIP
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -130,19 +130,19 @@ export function EditorPanelActions({
                 title="Preview"
                 aria-label="Preview"
               >
-                <Play className="size-4" />
+                <Play className="size-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" sideOffset={8} className="w-52 rounded-2xl p-1.5">
               {onPreview ? (
                 <DropdownMenuItem className={menuItem} onSelect={onPreview}>
-                  <Play className="size-4" />
+                  <Play className="size-5" />
                   Preview carousel
                 </DropdownMenuItem>
               ) : null}
               {onPhonePreview ? (
                 <DropdownMenuItem className={menuItem} onSelect={onPhonePreview}>
-                  <Smartphone className="size-4" />
+                  <Smartphone className="size-5" />
                   Preview on phone
                 </DropdownMenuItem>
               ) : null}

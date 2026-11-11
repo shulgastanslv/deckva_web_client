@@ -82,7 +82,7 @@ export function CommunityCategoryDropdown({
             )}
           >
             <span className="flex w-4 shrink-0 items-center justify-center">
-              {value === "all" ? <Check className="size-4" /> : null}
+              {value === "all" ? <Check className="size-5" /> : null}
             </span>
             All categories
           </button>
@@ -105,7 +105,7 @@ export function CommunityCategoryDropdown({
                 )}
               >
                 <span className="flex w-4 shrink-0 items-center justify-center">
-                  {value === cat ? <Check className="size-4" /> : null}
+                  {value === cat ? <Check className="size-5" /> : null}
                 </span>
                 {cat}
               </button>

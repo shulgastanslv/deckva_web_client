@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { menuIconClass } from "@/components/canvas/sidebar/sidebar-ui";
 import { useProject } from "@/hooks/use-project";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,44 @@ function formatLastSaved(iso: string | null, now: number) {
   const hrs = Math.floor(min / 60);
   if (hrs < 24) return `${hrs}h ago`;
   return new Date(iso).toLocaleString();
+}
+
+function SaveStatusArt({ dirty, saving }: { dirty: boolean; saving: boolean }) {
+  const tone = saving ? "#2F5BFF" : dirty ? "#F59E0B" : "#22C55E";
+  return (
+    <div className="relative overflow-hidden rounded-xl bg-[#F4F1EA] dark:bg-muted/30">
+      <svg viewBox="0 0 320 120" className="h-[104px] w-full" aria-hidden>
+        <rect width="320" height="120" fill="transparent" />
+        <rect x="28" y="22" width="120" height="76" rx="10" fill="#FFFFFF" className="dark:fill-background" />
+        <rect x="40" y="36" width="72" height="6" rx="3" fill="#D6D3D1" />
+        <rect x="40" y="50" width="96" height="6" rx="3" fill="#E7E5E4" />
+        <rect x="40" y="64" width="58" height="6" rx="3" fill="#E7E5E4" />
+        <rect x="40" y="78" width="80" height="6" rx="3" fill="#E7E5E4" />
+
+        <rect x="168" y="30" width="124" height="60" rx="10" fill="#FFFFFF" className="dark:fill-background" />
+        <rect x="182" y="44" width="64" height="6" rx="3" fill="#D6D3D1" />
+        <rect x="182" y="58" width="88" height="6" rx="3" fill="#E7E5E4" />
+        <rect x="182" y="72" width="48" height="6" rx="3" fill="#E7E5E4" />
+
+        <path
+          d="M132 58h40"
+          stroke={tone}
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray={saving ? "4 6" : undefined}
+        />
+        <circle cx="172" cy="58" r="10" fill={tone} />
+        <path
+          d="M168 58l3 3 5-6"
+          fill="none"
+          stroke="white"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
 }
 
 export function SaveStatusMenu() {
@@ -67,14 +106,14 @@ export function SaveStatusMenu() {
           title={title}
           aria-label={title}
           className={cn(
-            "size-10 shrink-0 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground",
-            "data-[state=open]:bg-muted/60 data-[state=open]:text-foreground",
+            "size-9 shrink-0 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/40 hover:text-foreground",
+            "data-[state=open]:bg-muted/40 data-[state=open]:text-foreground",
             isSaving && "animate-pulse text-primary",
             isDirty && !isSaving && "text-muted-foreground",
             !isDirty && !isSaving && "text-foreground",
           )}
         >
-          <Icon className="size-4" />
+          <Icon className={menuIconClass} />
         </Button>
       </PopoverTrigger>
 
@@ -83,6 +122,10 @@ export function SaveStatusMenu() {
         sideOffset={8}
         className="w-80 overflow-hidden rounded-2xl p-0"
       >
+        <div className="p-3 pb-0">
+          <SaveStatusArt dirty={isDirty} saving={isSaving} />
+        </div>
+
         <div className="px-4 py-3.5">
           <p className="text-[15px] font-semibold text-foreground">{title}</p>
           <p className="mt-1 text-[13px] text-muted-foreground">{subtitle}</p>
@@ -105,7 +148,7 @@ export function SaveStatusMenu() {
             }}
             className="h-10 w-full gap-2 rounded-md border-none bg-foreground text-[13px] font-medium text-background shadow-none hover:bg-foreground/90 disabled:opacity-40"
           >
-            <Save className="size-4" />
+            <Save className={menuIconClass} />
             {isSaving ? "Saving…" : isDirty ? "Save now" : "All changes saved"}
           </Button>
         </div>

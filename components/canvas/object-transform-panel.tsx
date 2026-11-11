@@ -280,7 +280,7 @@ export function ObjectTransformPanel({
           onClick={resetTransform}
           className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
         >
-          <RotateCcw className="size-4" />
+          <RotateCcw className="size-5" />
         </button>
       </div>
 
