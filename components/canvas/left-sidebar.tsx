@@ -205,7 +205,7 @@ export function LeftSidebar({
         )}
       >
         <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
-          <h2 className="text-[13px] font-semibold tracking-tight text-foreground">
+          <h2 className="text-[14px] font-semibold tracking-tight text-foreground">
             {PANEL_TITLES[activeNav] ?? activeNav}
           </h2>
           <div className="flex items-center gap-1">

@@ -245,7 +245,7 @@ export function drawPatternTile(
   base: string,
   look: PatternLook = {},
 ): HTMLCanvasElement {
-  const scale = Math.min(2.2, Math.max(0.7, look.scale ?? 1));
+  const scale = Math.min(4, Math.max(0.7, look.scale ?? 1));
   const opacity = Math.min(0.8, Math.max(0.08, look.opacity ?? 0.28));
   const size = Math.round(TILE_SIZE[id] * scale);
   const canvas = document.createElement("canvas");

@@ -130,7 +130,7 @@ export function BackgroundPattern() {
           <PillSlider
             label="Size"
             min={0.7}
-            max={2}
+            max={4}
             step={0.05}
             value={patternScale}
             formatValue={(n) => n.toFixed(2)}

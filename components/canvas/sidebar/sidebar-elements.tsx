@@ -25,6 +25,7 @@ import { FramesPicker } from "@/components/canvas/sidebar/frames-picker";
 import { CodeBlockSettings } from "@/components/canvas/code-block-inspector";
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { GalleryCard, GallerySection } from "@/components/canvas/sidebar/gallery-card";
+import { UploadOrDrop } from "@/components/canvas/sidebar/upload-or-drop";
 import { sidebarFieldInput, sidebarPanel } from "@/components/canvas/sidebar/sidebar-ui";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 import { useSelectedObject } from "@/hooks/use-selected-object";
@@ -86,17 +87,13 @@ export function SidebarElements() {
   const {
     manager,
     sections,
-    fileInputRef,
     frameInputRef,
-    isDragging,
-    setIsDragging,
     imageUrl,
     setImageUrl,
     urlLoading,
     urlError,
     setUrlError,
     addImageFromFile,
-    handleImageFileChange,
     handleFrameFileChange,
     addImageFromUrl,
     placeRecentPhoto,
@@ -141,14 +138,6 @@ export function SidebarElements() {
 
   return (
     <div className={cn(sidebarPanel, "w-full max-w-full overflow-x-hidden")}>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleImageFileChange}
-        accept="image/*"
-        className="hidden"
-        disabled={!manager}
-      />
       <input
         type="file"
         ref={frameInputRef}
@@ -206,37 +195,16 @@ export function SidebarElements() {
       >
         {category === "photos" ? (
           <div className="space-y-2.5">
-            <button
-              type="button"
+            <UploadOrDrop
               disabled={!manager}
-              title="Upload, drop, or paste an image with Ctrl+V"
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault();
-                if (manager) setIsDragging(true);
-              }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setIsDragging(false);
-                const file = e.dataTransfer.files?.[0];
+              title="Upload or drop"
+              hint="PNG, JPG — or paste with Ctrl+V"
+              minHeightClass="min-h-32"
+              onFiles={(files) => {
+                const file = files instanceof FileList ? files[0] : files[0];
                 if (file) addImageFromFile(file);
               }}
-              className={cn(
-                "flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-[1.25rem] bg-muted/60 px-4 py-6 text-center transition-colors disabled:opacity-40 dark:bg-muted/25",
-                isDragging
-                  ? "bg-muted/40"
-                  : "hover:bg-muted/80 dark:hover:bg-muted/40",
-              )}
-            >
-              <ImageUploadIcon size={44} className="shrink-0" />
-              <span className="text-[15px] font-medium text-foreground/80">
-                Upload or drop
-              </span>
-              <span className="text-[13px] text-muted-foreground">
-                PNG, JPG — or paste with Ctrl+V
-              </span>
-            </button>
+            />
 
             <div className="flex items-center gap-1.5">
               <div className="relative min-w-0 flex-1">
@@ -342,7 +310,7 @@ export function SidebarElements() {
                   title={item.title ?? item.label}
                   disabled={!manager}
                   onClick={item.action}
-                  className="flex min-w-0 flex-col items-center gap-2 overflow-hidden rounded-2xl bg-muted/50 px-1.5 py-3 text-center transition-colors hover:bg-muted disabled:opacity-40 dark:bg-muted/25 dark:hover:bg-muted/40"
+                  className="flex min-w-0 flex-col items-center gap-2 overflow-hidden rounded-2xl bg-muted/50 px-1.5 py-3 text-center transition-colors hover:bg-muted/70 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45"
                 >
                   <span className="flex h-14 w-full items-center justify-center text-foreground">
                     <Icon size={44} />

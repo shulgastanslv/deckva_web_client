@@ -14,12 +14,13 @@ export function ToolsBanner({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-2xl bg-background dark:bg-background",
+        "overflow-hidden rounded-2xl bg-background ring-1 ring-border/40 dark:ring-border/50",
         className,
       )}
     >
       <ToolsBannerCollage />
-      <div className="space-y-3 bg-background px-4 py-4">
+      {/* Pull the content up so it covers the bottom row of tiles (reference bleed). */}
+      <div className="relative z-[1] -mt-10 space-y-3 bg-background px-4 pt-4 pb-4">
         <div className="space-y-1">
           <p className="text-[13px] font-semibold tracking-tight text-foreground">
             More carousel tools to explore
@@ -32,14 +33,14 @@ export function ToolsBanner({
           <Button
             type="button"
             variant="secondary"
-            className="h-8 rounded-lg border-none bg-muted/50 px-3 text-[12px] font-medium text-foreground shadow-none hover:bg-muted/70"
+            className="h-8 rounded-md border border-border/60 bg-background px-3 text-[12px] font-medium text-foreground shadow-none hover:bg-muted/50"
             onClick={() => onExplore?.()}
           >
             Learn more
           </Button>
           <Button
             type="button"
-            className="h-8 rounded-lg bg-foreground px-3 text-[12px] font-medium text-background shadow-none hover:bg-foreground/90"
+            className="h-8 rounded-md px-3 text-[12px] font-medium"
             onClick={() => onExplore?.()}
           >
             Got it

@@ -81,7 +81,7 @@ export function ToolPreviewArt({ tool, className }: { tool: StudioTool; classNam
   return (
     <div
       className={cn(
-        "relative flex min-h-28 items-center justify-center overflow-hidden rounded-2xl bg-[#F7F4EE] p-5 dark:bg-muted/30",
+        "relative flex min-h-28 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 p-5 dark:bg-muted/25",
         className,
       )}
     >

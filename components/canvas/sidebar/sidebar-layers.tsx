@@ -229,14 +229,13 @@ export function SidebarLayers() {
   return (
     <div className={cn(sidebarPanel, "gap-0.5")}>
       {rows.length === 0 && (
-        <p className="px-2 py-6 text-center text-[13px] text-muted-foreground">
+        <p className="px-1 py-6 text-left text-[13px] text-muted-foreground">
           No objects yet. Add elements from the Elements tab.
         </p>
       )}
 
       {rows.map(({ obj, depth }) => {
         const id = ensureLayerId(obj);
-        const uniqueId = `${id}-${depth}-${Math.random()}`;
         const children = isLayerGroup(obj) ? obj.getObjects().some(isUserLayer) : false;
         const open = !collapsed.has(id);
         const hidden = obj.visible === false;
@@ -245,9 +244,11 @@ export function SidebarLayers() {
         const renaming = renamingId === id;
         const Icon = layerGlyph(obj);
         const mark = drop?.id === id ? drop.edge : null;
+        const menuItem =
+          "cursor-pointer gap-2 rounded-xl px-2 py-1.5 text-[13px] text-foreground focus:bg-muted/50 focus:text-foreground";
 
         return (
-          <div key={uniqueId} className="relative" style={{ paddingLeft: depth * 12 }}>
+          <div key={id} className="relative" style={{ paddingLeft: depth * 12 }}>
             {mark === "before" && <div className="absolute inset-x-1 top-0 z-10 h-0.5 rounded-md bg-foreground" />}
             {mark === "after" && <div className="absolute inset-x-1 bottom-0 z-10 h-0.5 rounded-md bg-foreground" />}
             <div
@@ -256,7 +257,7 @@ export function SidebarLayers() {
               onDragEnd={endDrag}
               onClick={(event) => select(obj, event.shiftKey)}
               className={cn(
-                "group/row flex h-9 cursor-pointer items-center gap-1.5 rounded-xl px-1 pr-1.5 transition-colors",
+                "group/row flex h-9 cursor-pointer items-center gap-1 rounded-md px-1 pr-1 transition-colors",
                 active
                   ? "bg-muted/80 text-foreground dark:bg-muted/50"
                   : "hover:bg-muted/60 dark:hover:bg-muted/30",
@@ -280,7 +281,7 @@ export function SidebarLayers() {
                   });
                 }}
                 className={cn(
-                  "flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground",
+                  "flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground",
                   children && "hover:bg-background/80 hover:text-foreground",
                   !children && "invisible",
                 )}
@@ -296,39 +297,44 @@ export function SidebarLayers() {
                   event.stopPropagation();
                   startRename(obj);
                 }}
-                className="flex min-w-0 flex-1 items-center gap-1.5"
+                className="flex min-w-0 flex-1 items-center gap-2 text-left"
               >
-              <Icon className="size-4 shrink-0 text-muted-foreground" />
+                <Icon className="size-5 shrink-0 stroke-[1.5] text-muted-foreground" />
 
-              {renaming ? (
-                <input
-                  autoFocus
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
-                  onClick={(event) => event.stopPropagation()}
-                  onDoubleClick={(event) => event.stopPropagation()}
-                  onBlur={() => commitName(obj)}
-                  onKeyDown={(event) => {
-                    event.stopPropagation();
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      commitName(obj);
-                    } else if (event.key === "Escape") {
-                      event.preventDefault();
-                      setRenamingId(null);
-                    }
-                  }}
-                  placeholder={layerLabel(obj)}
-                  className="h-7 min-w-0 flex-1 rounded-lg bg-background px-1.5 text-[13px] text-foreground outline-none ring-1 ring-border"
-                />
-              ) : (
-                <span className="min-w-0 max-w-40 flex-1 truncate text-[13px] font-medium">
-                  {layerLabel(obj)}
-                </span>
-              )}
+                {renaming ? (
+                  <input
+                    autoFocus
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    onClick={(event) => event.stopPropagation()}
+                    onDoubleClick={(event) => event.stopPropagation()}
+                    onBlur={() => commitName(obj)}
+                    onKeyDown={(event) => {
+                      event.stopPropagation();
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        commitName(obj);
+                      } else if (event.key === "Escape") {
+                        event.preventDefault();
+                        setRenamingId(null);
+                      }
+                    }}
+                    placeholder={layerLabel(obj)}
+                    className="h-7 min-w-0 flex-1 rounded-md bg-background px-1.5 text-left text-[13px] text-foreground outline-none ring-1 ring-border/50"
+                  />
+                ) : (
+                  <span className="min-w-0 flex-1 truncate text-left text-[13px] font-medium text-foreground">
+                    {layerLabel(obj)}
+                  </span>
+                )}
               </div>
 
-              <div className={cn("flex shrink-0 items-center gap-0.5", !hidden && !locked && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100")}>
+              <div
+                className={cn(
+                  "flex shrink-0 items-center gap-0.5",
+                  !hidden && !locked && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100",
+                )}
+              >
                 <button
                   type="button"
                   aria-label={hidden ? "Show" : "Hide"}
@@ -338,7 +344,7 @@ export function SidebarLayers() {
                     run(() => setLayerVisible(obj, hidden));
                   }}
                   className={cn(
-                    "flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-background/70 hover:text-foreground",
+                    "flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-background/70 hover:text-foreground",
                     !hidden && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100",
                   )}
                 >
@@ -353,7 +359,7 @@ export function SidebarLayers() {
                     run(() => setLayerLocked(obj, !locked));
                   }}
                   className={cn(
-                    "flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-background/70 hover:text-foreground",
+                    "flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-background/70 hover:text-foreground",
                     !locked && "opacity-0 group-hover/row:opacity-100 max-md:opacity-100",
                   )}
                 >
@@ -367,63 +373,91 @@ export function SidebarLayers() {
                       aria-label="Layer actions"
                       onClick={(event) => event.stopPropagation()}
                       onPointerDown={(event) => event.stopPropagation()}
-                      className="flex size-7 items-center justify-center rounded-lg text-muted-foreground opacity-0 hover:bg-background/70 hover:text-foreground group-hover/row:opacity-100 data-[state=open]:opacity-100"
+                      className="flex size-7 items-center justify-center rounded-md text-muted-foreground opacity-0 hover:bg-background/70 hover:text-foreground group-hover/row:opacity-100 data-[state=open]:bg-muted/60 data-[state=open]:opacity-100"
                     >
                       <MoreHorizontal className="size-3.5" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" side="right" className="w-48">
-                    <DropdownMenuItem onSelect={() => startRename(obj)}>
-                      <Pencil />
+                  <DropdownMenuContent
+                    align="end"
+                    side="bottom"
+                    sideOffset={6}
+                    className="w-52 rounded-2xl p-1.5 text-[13px]"
+                  >
+                    <DropdownMenuItem className={menuItem} onSelect={() => startRename(obj)}>
+                      <Pencil className="size-4" />
                       Rename
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => duplicate(obj)}>
-                      <Copy />
+                    <DropdownMenuItem className={menuItem} onSelect={() => duplicate(obj)}>
+                      <Copy className="size-4" />
                       Duplicate
                       <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "front"))}>
-                      <ChevronsUp />
+                    <DropdownMenuSeparator className="my-1 bg-border/50" />
+                    <DropdownMenuItem
+                      className={menuItem}
+                      onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "front"))}
+                    >
+                      <ChevronsUp className="size-4" />
                       Bring to front
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "forward"))}>
-                      <ChevronUp />
+                    <DropdownMenuItem
+                      className={menuItem}
+                      onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "forward"))}
+                    >
+                      <ChevronUp className="size-4" />
                       Bring forward
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "backward"))}>
-                      <ChevronDown />
+                    <DropdownMenuItem
+                      className={menuItem}
+                      onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "backward"))}
+                    >
+                      <ChevronDown className="size-4" />
                       Send backward
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "back"))}>
-                      <ChevronsDown />
+                    <DropdownMenuItem
+                      className={menuItem}
+                      onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "back"))}
+                    >
+                      <ChevronsDown className="size-4" />
                       Send to back
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => run(() => setLayerVisible(obj, hidden))}>
-                      {hidden ? <Eye /> : <EyeOff />}
+                    <DropdownMenuSeparator className="my-1 bg-border/50" />
+                    <DropdownMenuItem
+                      className={menuItem}
+                      onSelect={() => run(() => setLayerVisible(obj, hidden))}
+                    >
+                      {hidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
                       {hidden ? "Show" : "Hide"}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => run(() => setLayerLocked(obj, !locked))}>
-                      {locked ? <Unlock /> : <Lock />}
+                    <DropdownMenuItem
+                      className={menuItem}
+                      onSelect={() => run(() => setLayerLocked(obj, !locked))}
+                    >
+                      {locked ? <Unlock className="size-4" /> : <Lock className="size-4" />}
                       {locked ? "Unlock" : "Lock"}
                     </DropdownMenuItem>
                     {isLayerGroup(obj) && (
                       <DropdownMenuItem
+                        className={menuItem}
                         onSelect={() => {
                           if (!manager) return;
                           manager.selectObject(obj);
                           manager.transact(() => ungroupSelection(manager.canvas));
                         }}
                       >
-                        <Ungroup />
+                        <Ungroup className="size-4" />
                         Ungroup
                         <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" onSelect={() => run(() => removeLayer(manager!.canvas, obj))}>
-                      <Trash2 />
+                    <DropdownMenuSeparator className="my-1 bg-border/50" />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      className={cn(menuItem, "text-destructive focus:text-destructive")}
+                      onSelect={() => run(() => removeLayer(manager!.canvas, obj))}
+                    >
+                      <Trash2 className="size-4" />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

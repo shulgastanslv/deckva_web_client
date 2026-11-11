@@ -200,6 +200,8 @@ export function PreviewModal({
     canvasWidth,
     canvasHeight,
     updateSlideThumbnail,
+    // Re-render when slide set changes while the modal is open.
+    slideIds.join(","),
   ]);
 
   useEffect(() => {

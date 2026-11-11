@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { UploadCloud, Loader2, Plus, ImageIcon, Palette, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Plus, ImageIcon, Palette, Check } from "lucide-react";
 import {
   SOLID_PRESETS,
   GRADIENT_PRESETS,
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScreenSplit } from "@/components/canvas/sidebar/screen-split";
 import { BackgroundPattern } from "@/components/canvas/sidebar/background-pattern";
+import { UploadOrDrop } from "@/components/canvas/sidebar/upload-or-drop";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { BackgroundSlideSets } from "@/components/canvas/sidebar/background-slide-sets";
@@ -49,7 +50,6 @@ import {
   sidebarSegmentedItem,
   sidebarSegmentedItemActive,
   sidebarSegmentedItemIdle,
-  sidebarSurfaceIdle,
   sidebarSwatchGrid,
   sidebarTabsList,
   sidebarTabsTrigger,
@@ -111,9 +111,7 @@ const FILL_TABS: { id: Tab; label: string }[] = [
 
 export function SidebarBackground() {
   const manager = useCanvasManager();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<Tab>("color");
-  const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [urlLoading, setUrlLoading] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -348,50 +346,13 @@ export function SidebarBackground() {
 
         <TabsContent value="image">
           <div className="flex min-w-0 flex-col gap-2.5">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
+            <UploadOrDrop
+              disabled={!manager}
+              onFiles={(files) => {
+                const file = files instanceof FileList ? files[0] : files[0];
                 if (file) applyImageFile(file);
-                e.target.value = "";
               }}
-              accept="image/*"
-              className="hidden"
             />
-
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => fileInputRef.current?.click()}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  fileInputRef.current?.click();
-                }
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDragging(true);
-              }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setIsDragging(false);
-                const file = e.dataTransfer.files?.[0];
-                if (file) applyImageFile(file);
-              }}
-              className={cn(
-                "flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-6 text-center transition-colors",
-                isDragging
-                  ? "border-foreground/40 bg-muted/40"
-                  : cn("border-border/80 hover:bg-muted/80 dark:hover:bg-muted/40", sidebarSurfaceIdle),
-              )}
-            >
-              <UploadCloud className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[13px] font-medium">Upload or drop</span>
-              <span className="text-[13px] text-muted-foreground">PNG, JPG</span>
-            </div>
 
             <div className="flex min-w-0 flex-col gap-1.5">
               <p className="flex items-center gap-1 font-medium text-muted-foreground">

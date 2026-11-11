@@ -147,8 +147,8 @@ interface InspectedProperties {
   shadowOffsetY: number;
 }
 
-/** Shared shell for inspector fields — muted pill, fully rounded. */
-const fieldShell = "flex items-center rounded-md bg-muted/40";
+/** Shared shell for inspector fields — muted soft rect. */
+const fieldShell = "flex items-center rounded-md bg-muted/50 dark:bg-muted/30";
 
 const btnRound = "rounded-md";
 
@@ -372,9 +372,6 @@ export function RightSidebar({
   const [formValues, setFormValues] = useState<InspectedProperties | null>(
     null,
   );
-  const zoom = useCanvasStore((s) => s.zoom);
-  const setZoom = useCanvasStore((s) => s.setZoom);
-
   const [imageUrlInput, setImageUrlInput] = useState("");
   const {
     canRun: canEnhance,
@@ -954,49 +951,32 @@ export function RightSidebar({
             : "pointer-events-none md:w-0 md:flex-none md:opacity-0",
         )}
       >
-        {/* Figma-style panel chrome */}
-        <div className="flex shrink-0 flex-col gap-2 border-b border-border/40 px-3 pb-2.5 pt-3">
-          <div className="flex items-center justify-between gap-2">
-            <EditorPanelActions
-              onPreview={onPreview}
-              onPhonePreview={onPhonePreview}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={`size-8 shrink-0 text-muted-foreground hover:text-foreground ${btnRound}`}
-              onClick={toggleRightCollapsed}
-              title="Collapse panel"
-            >
-              <PanelRightClose className="size-5" />
-            </Button>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <div className="inline-flex h-8 items-center rounded-md bg-muted/40 p-0.5">
-              <span className="rounded-md bg-background px-2.5 py-1 text-[12px] font-medium text-foreground">
-                Design
-              </span>
-              <span className="px-2.5 py-1 text-[12px] text-muted-foreground">
-                {selectedObject ? panelTitle : "Page"}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setZoom(100)}
-              title="Reset zoom"
-              className="h-8 rounded-md px-2 font-mono text-[12px] tabular-nums text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-            >
-              {Math.round(zoom)}%
-            </button>
-          </div>
+        {/* Panel chrome: actions only — zoom / context live on the canvas bar */}
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/40 px-3 py-2.5">
+          <EditorPanelActions
+            onPreview={onPreview}
+            onPhonePreview={onPhonePreview}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={`size-8 shrink-0 text-muted-foreground hover:text-foreground ${btnRound}`}
+            onClick={toggleRightCollapsed}
+            title="Collapse panel"
+          >
+            <PanelRightClose className="size-5" />
+          </Button>
         </div>
 
         {!selectedObject ? (
           <ScrollArea className="min-h-0 flex-1">
-            <p className="px-3.5 py-6 text-[13px] leading-snug text-muted-foreground">
-              Select an object on the slide to edit its style.
-            </p>
+            <div className="space-y-2 px-3.5 py-6">
+              <p className="text-[13px] font-medium text-foreground">Page</p>
+              <p className="text-[13px] leading-snug text-muted-foreground">
+                Select an object on the slide to edit its style.
+              </p>
+            </div>
           </ScrollArea>
         ) : (
           <>

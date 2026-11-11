@@ -14,7 +14,7 @@ export function clampZoom(value: number) {
 }
 
 const cell =
-  "size-8 shrink-0 rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground";
+  "size-9 shrink-0 rounded-full text-muted-foreground hover:bg-muted/60 hover:text-foreground";
 
 export function ZoomControls({
   showTools = true,
@@ -65,16 +65,13 @@ export function ZoomControls({
   const selectActive = !handActive && !eraserActive;
 
   return (
-    <div className="flex h-9 shrink-0 items-center gap-0.5 rounded-md bg-muted/40 p-0.5">
+    <div className="flex w-11 shrink-0 flex-col items-center gap-0.5 rounded-full bg-muted/50 p-1 shadow-sm dark:bg-muted/35">
       {showTools ? (
         <>
           <Button
             variant="ghost"
             size="icon"
-            className={cn(
-              cell,
-              selectActive && "bg-background text-foreground",
-            )}
+            className={cn(cell, selectActive && "bg-background text-foreground")}
             onClick={() => {
               setHandActive(false);
               setEraserActive(false);
@@ -82,7 +79,7 @@ export function ZoomControls({
             title="Select. Move and edit objects (V)"
             aria-pressed={selectActive}
           >
-            <MousePointer2 className="size-3.5" />
+            <MousePointer2 className="size-4 stroke-[1.5]" />
           </Button>
           <Button
             variant="ghost"
@@ -92,7 +89,7 @@ export function ZoomControls({
             title="Hand. Drag to move around the canvas. Hold Space (H)"
             aria-pressed={handActive}
           >
-            <Hand className="size-3.5" />
+            <Hand className="size-4 stroke-[1.5]" />
           </Button>
           <Button
             variant="ghost"
@@ -102,27 +99,11 @@ export function ZoomControls({
             title="Eraser. Brush away pixels on images (E)"
             aria-pressed={eraserActive}
           >
-            <Eraser className="size-3.5" />
+            <Eraser className="size-4 stroke-[1.5]" />
           </Button>
+          <div className="my-0.5 h-px w-5 bg-border/60" />
         </>
       ) : null}
-      <Button
-        variant="ghost"
-        size="icon"
-        className={cell}
-        onClick={() => setZoom(clampZoom(zoom - 10))}
-        title="Zoom out"
-      >
-        <ZoomOut className="size-3.5" />
-      </Button>
-      <button
-        type="button"
-        className="flex h-8 min-w-12 shrink-0 items-center justify-center rounded-md px-1 font-mono text-[13px] font-medium tabular-nums text-foreground hover:bg-muted/60"
-        onClick={() => setZoom(100)}
-        title="Reset zoom. Ctrl + scroll also zooms"
-      >
-        {Math.round(zoom)}%
-      </button>
       <Button
         variant="ghost"
         size="icon"
@@ -130,7 +111,24 @@ export function ZoomControls({
         onClick={() => setZoom(clampZoom(zoom + 10))}
         title="Zoom in"
       >
-        <ZoomIn className="size-3.5" />
+        <ZoomIn className="size-4 stroke-[1.5]" />
+      </Button>
+      <button
+        type="button"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-medium tabular-nums text-foreground hover:bg-muted/60"
+        onClick={() => setZoom(100)}
+        title="Reset zoom. Ctrl + scroll also zooms"
+      >
+        {Math.round(zoom)}
+      </button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cell}
+        onClick={() => setZoom(clampZoom(zoom - 10))}
+        title="Zoom out"
+      >
+        <ZoomOut className="size-4 stroke-[1.5]" />
       </Button>
     </div>
   );

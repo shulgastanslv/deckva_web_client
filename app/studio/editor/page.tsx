@@ -14,6 +14,7 @@ import { SelectionToolbar } from "@/components/canvas/selection-toolbar";
 import { AutoFlowPrompt } from "@/components/canvas/auto-flow-prompt";
 import { RightSidebar } from "@/components/canvas/right-sidebar";
 import { PreviewModal } from "@/components/canvas/preview-modal";
+import { ZoomControls } from "@/components/canvas/zoom-controls";
 import type { NavId } from "@/components/canvas/left-sidebar";
 import { EditorPhoneDock } from "@/components/canvas/editor-phone-dock";
 import { StudioIntentBootstrap } from "@/components/studio/studio-intent-bootstrap";

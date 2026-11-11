@@ -43,7 +43,7 @@ function ToolListRow({
         <button
           type="button"
           onClick={() => onOpen(tool.id)}
-          className="flex w-full items-center gap-3 rounded-2xl px-1.5 py-2 text-left transition-colors hover:bg-muted/40"
+          className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-muted/50 dark:hover:bg-muted/30"
         >
           <ToolAvatar tool={tool} />
           <span className="min-w-0 flex-1">

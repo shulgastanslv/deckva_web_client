@@ -59,7 +59,7 @@ function stageFrame(
   const width = Math.max(1, Math.round(nativeW * scale));
   const height = Math.max(1, Math.round(nativeH * scale));
   const count = Math.max(1, slideCount);
-  const addSlotW = Math.max(72, Math.min(120, Math.round(width * 0.2)));
+  const addSlotW = 112;
   const pagesWidth =
     count * width + Math.max(0, count - 1) * SLIDE_GAP + SLIDE_GAP + addSlotW;
   const stackH = height + pageBarH;
@@ -619,59 +619,25 @@ export function CanvasView({
               aria-label="Add slide"
               onClick={addSlideAtEnd}
               className={cn(
-                "absolute z-[1] flex items-center justify-center rounded-2xl",
-                "bg-muted/30 text-muted-foreground",
-                "transition-colors hover:bg-muted/50 hover:text-foreground",
+                "absolute z-[1] flex size-28 items-center justify-center rounded-full",
+                "bg-muted/60 text-muted-foreground dark:bg-muted/35",
+                "transition-colors hover:bg-muted/80 hover:text-foreground dark:hover:bg-muted/50",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
               )}
               style={{
-                width: frame.addSlotW,
-                height: Math.min(frame.height, Math.max(96, frame.height * 0.45)),
                 left: slideLeft(frame, frame.count),
-                top: frame.top + (frame.height - Math.min(frame.height, Math.max(96, frame.height * 0.45))) / 2,
-                opacity: Math.max(0.35, 1 - haze * 0.75),
+                top: frame.top + (frame.height - 112) / 2,
+                opacity: Math.max(0.5, 1 - haze * 0.75),
                 filter: haze > 0.15 ? `blur(${haze * 6}px)` : undefined,
                 transition: "opacity 220ms ease, filter 220ms ease, background-color 150ms ease",
               }}
             >
-              <Plus className="size-6 stroke-[1.5]" />
+              <Plus className="size-8 stroke-[1.5]" />
             </button>
           ) : null}
         </div>
-        {(isLoadingProject || isGeneratingCarousel) && (
-          <div
-            className="absolute inset-0 z-20 flex items-center justify-center bg-muted/40"
-            aria-busy="true"
-            aria-label={
-              isGeneratingCarousel ? "Generating carousel" : "Loading project"
-            }
-          >
-            <div
-              className="flex flex-col gap-4 bg-background p-8 ring-1 ring-border/20"
-              style={{
-                aspectRatio: `${canvasDimensions.width} / ${canvasDimensions.height}`,
-                width: frame && frame.width > 0 ? frame.width : undefined,
-                height: frame && frame.height > 0 ? frame.height : undefined,
-                maxWidth: "calc(100% - 32px)",
-                maxHeight: "calc(100% - 32px)",
-              }}
-            >
-              <Skeleton className="h-8 w-2/3 rounded-md" />
-              <Skeleton className="min-h-24 w-full flex-1 rounded-md" />
-              <Skeleton className="h-4 w-full rounded-md" />
-              <Skeleton className="h-4 w-4/5 rounded-md" />
-              {isGeneratingCarousel ? (
-                <p className="text-center text-[13px] text-muted-foreground">
-                  Generating carousel…
-                </p>
-              ) : null}
-            </div>
-          </div>
-        )}
         <CodeBlockEditDialog />
       </div>
-
-     
     </div>
   );
 }

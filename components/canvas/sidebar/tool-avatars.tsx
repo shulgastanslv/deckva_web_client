@@ -18,7 +18,14 @@ function Tile({
   children: ReactNode;
 }) {
   return (
-    <svg viewBox="0 0 40 40" className={className} aria-hidden>
+    <svg
+      viewBox="0 0 40 40"
+      width="100%"
+      height="100%"
+      preserveAspectRatio="xMidYMid slice"
+      className={cn("block", className)}
+      aria-hidden
+    >
       <rect width="40" height="40" rx="12" fill={fill} />
       {children}
     </svg>
@@ -298,28 +305,33 @@ export function ToolAvatarTile({
   );
 }
 
-/** Dense dark collage like Figma Weave tools banner */
+/** Dense dark collage — in-flow grid that bleeds past the card clip. */
 export function ToolsBannerCollage({ className }: { className?: string }) {
   const toolIds = Object.keys(MARKS) as StudioToolId[];
-  const tiles: ReactNode[] = [
-    ...toolIds.map((id) => {
-      const Mark = MARKS[id];
-      return (
-        <div key={id} className="aspect-square overflow-hidden rounded-xl">
-          <Mark className="size-full" />
-        </div>
-      );
-    }),
-    ...BANNER_EXTRAS.map((Extra, index) => (
-      <div key={`extra-${index}`} className="aspect-square overflow-hidden rounded-xl">
-        <Extra className="size-full" />
-      </div>
-    )),
+  const marks = [
+    ...toolIds.map((id) => ({ key: id, Mark: MARKS[id] })),
+    ...BANNER_EXTRAS.map((Extra, index) => ({ key: `extra-${index}`, Mark: Extra })),
   ];
 
+  const dense = Array.from({ length: 12 }, (_, index) => {
+    const item = marks[index % marks.length]!;
+    const Mark = item.Mark;
+    return (
+      <div
+        key={`${item.key}-${index}`}
+        className="aspect-square overflow-hidden rounded-[10px] bg-zinc-800"
+      >
+        <Mark />
+      </div>
+    );
+  });
+
   return (
-    <div className={cn("bg-[#1C1C1E] px-2.5 pb-2 pt-2.5", className)}>
-      <div className="grid grid-cols-4 gap-1.5">{tiles.slice(0, 12)}</div>
+    <div className={cn("bg-[#1C1C1E]", className)} aria-hidden>
+      {/* Negative margins push tiles past the clip edges (top / sides). */}
+      <div className="-mx-2 -mt-4 mb-0 grid grid-cols-4 gap-1.5 p-2">
+        {dense}
+      </div>
     </div>
   );
 }

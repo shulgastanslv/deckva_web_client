@@ -9,7 +9,6 @@ import {
 } from "react";
 import {
   Eye,
-  ImagePlus,
   Loader2,
   Pencil,
   Plus,
@@ -29,6 +28,7 @@ import {
 } from "@/actions/assets";
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { GallerySection } from "@/components/canvas/sidebar/gallery-card";
+import { UploadOrDrop } from "@/components/canvas/sidebar/upload-or-drop";
 import {
   sidebarActionBtn,
   sidebarFieldInput,
@@ -77,13 +77,11 @@ function parseTagInput(value: string): string[] {
 
 export function SidebarAssets() {
   const manager = useCanvasManager();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [assets, setAssets] = useState<MediaAssetDTO[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [logos, setLogos] = useState<BrandKitLogo[]>([]);
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -255,18 +253,6 @@ export function SidebarAssets() {
 
   return (
     <div className={cn(sidebarPanel, "overflow-hidden")}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={(e) => {
-          void addFiles(e.target.files);
-          e.target.value = "";
-        }}
-      />
-
       <div className="flex items-center gap-1.5">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -316,35 +302,13 @@ export function SidebarAssets() {
         />
       </div>
 
-      <button
-        type="button"
-        disabled={!manager || uploading}
-        onClick={() => fileInputRef.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          void addFiles(e.dataTransfer.files);
-        }}
-        className={cn(
-          "flex min-h-28 w-full flex-col items-center justify-center gap-2 rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 px-4 py-6 text-center text-[13px] transition-colors disabled:opacity-40",
-          dragging ? "bg-muted/40" : "hover:bg-muted/80 dark:hover:bg-muted/40",
-        )}
-      >
-        {uploading ? (
-          <Loader2 className="size-5 shrink-0 animate-spin text-muted-foreground" />
-        ) : (
-          <ImagePlus className="size-5 shrink-0 text-muted-foreground" />
-        )}
-        <span className="font-medium text-foreground/80">
-          {uploading ? "Uploading…" : "Upload or drop"}
-        </span>
-        <span className="text-muted-foreground">PNG, JPG, SVG · saved to library</span>
-      </button>
+      <UploadOrDrop
+        multiple
+        disabled={!manager}
+        busy={uploading}
+        hint="PNG, JPG, SVG · saved to library"
+        onFiles={(files) => void addFiles(files)}
+      />
 
       {error ? <p className="text-[13px] text-destructive">{error}</p> : null}
 
@@ -546,7 +510,7 @@ function AssetTile({
         disabled={disabled}
         onClick={onAdd}
         className={cn(
-          "flex aspect-square min-w-0 w-full items-center justify-center rounded-xl bg-muted/60 dark:bg-muted/25 p-2 transition-colors",
+          "flex aspect-square min-w-0 w-full items-center justify-center rounded-xl bg-muted/50 p-2 transition-colors dark:bg-muted/30",
           "hover:bg-muted/80 dark:hover:bg-muted/40 disabled:opacity-50",
         )}
       >

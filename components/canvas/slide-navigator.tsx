@@ -221,10 +221,10 @@ export function SlideNavigator() {
           type="button"
           onClick={add}
           title="Add slide"
-          className="flex h-[52px] shrink-0 items-center gap-1.5 rounded-lg border border-dashed border-border/70 px-2.5 text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+          aria-label="Add slide"
+          className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground dark:bg-muted/35 dark:hover:bg-muted/50"
         >
-          <Plus className="h-3.5 w-3.5" />
-          <span className="text-[13px]">Add</span>
+          <Plus className="size-6 stroke-[1.5]" />
         </button>
       </div>
 
