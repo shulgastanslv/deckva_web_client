@@ -30,6 +30,22 @@ import {
   landTitle,
   landSub,
 } from "@/components/landing/landing-shell";
+import {
+  FileArt,
+  JOB_ARTS,
+  LeaveWithPostArt,
+  MagicLayerArt,
+  NothingLockedArt,
+  OnTheSlideArt,
+  OnTheWayOutArt,
+  RatioArt,
+  RemoveBgArt,
+  ShapeArt,
+  SlidesArt,
+  SubjectEnoughArt,
+  TopicArt,
+  UpscaleArt,
+} from "@/components/landing/landing-line-arts";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { trackEvent } from "@/lib/analytics";
@@ -88,29 +104,31 @@ function ArtCard({
   return (
     <li className={cn("rounded-[2rem] bg-land-card p-3 sm:p-4", className)}>
       {framed ? (
-        <ArtWell className="flex min-h-44 items-center justify-center sm:min-h-56">
+        <ArtWell className="flex aspect-[5/4] w-full items-center justify-center sm:aspect-[4/3]">
           {art}
         </ArtWell>
       ) : (
-        <div className="min-h-44 overflow-hidden rounded-[1.5rem] sm:min-h-56 sm:rounded-[1.75rem]">
+        <div className="aspect-[5/4] w-full overflow-hidden rounded-[1.5rem] sm:aspect-[4/3] sm:rounded-[1.75rem]">
           {art}
         </div>
       )}
-      <div className="px-2 pb-2 pt-5 sm:px-3">
+      <div className="px-2 pb-3 pt-5 sm:px-3 sm:pt-6">
         {step ? (
-          <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-land-mist px-2.5 text-[12px] font-semibold tabular-nums text-land-ink">
+          <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[#E8EEF8] px-2.5 text-[13px] font-semibold tabular-nums text-land-ink dark:bg-white/10">
             {step}
           </span>
         ) : null}
         <h3
           className={cn(
-            "text-2xl font-medium tracking-tight text-land-ink",
-            step ? "mt-3" : null,
+            "text-[1.65rem] font-semibold tracking-tight text-land-ink sm:text-2xl",
+            step ? "mt-3.5" : null,
           )}
         >
           {title}
         </h3>
-        <p className="mt-3 text-base leading-relaxed text-land-ink/60">{text}</p>
+        <p className="mt-2.5 text-[15px] leading-relaxed text-land-ink/55 sm:text-base">
+          {text}
+        </p>
       </div>
     </li>
   );
@@ -208,11 +226,6 @@ const RATIOS = [
   { label: "9:16", frame: "aspect-[9/16] w-full" },
   { label: "16:9", frame: "aspect-video w-full" },
 ] as const;
-
-/** Empty slot inside an ArtWell / ArtCard (no second gray surface). */
-function Place({ className }: { className?: string }) {
-  return <div aria-hidden className={cn("min-h-40 w-full", className)} />;
-}
 
 const POSTS = [
   "/reviews/1.jpg",
@@ -1093,33 +1106,24 @@ export function LandingPage() {
           <SequenceIllustration className="min-h-56 w-full sm:min-h-72" />
         </div>
         <ul className="mt-8 grid gap-4 sm:grid-cols-3">
-          {(
-            [
-              [
-                "01",
-                "The subject is enough",
-                "A topic, a template, or an empty project. A topic already lays the slides out in order.",
-              ],
-              [
-                "02",
-                "Nothing is locked",
-                "Rewrite a line, swap the cover, move a slide. The project stays the same one.",
-              ],
-              [
-                "03",
-                "You leave with the post",
-                "A PNG of one slide, or a ZIP of the carousel. No watermark on the file.",
-              ],
-            ] as const
-          ).map(([step, title, text]) => (
-            <ArtCard
-              key={title}
-              step={step}
-              title={title}
-              text={text}
-              art={<Place className="min-h-36 sm:min-h-44" />}
-            />
-          ))}
+          <ArtCard
+            step="01"
+            title="The subject is enough"
+            text="A topic, a template, or an empty project. A topic already lays the slides out in order."
+            art={<SubjectEnoughArt />}
+          />
+          <ArtCard
+            step="02"
+            title="Nothing is locked"
+            text="Rewrite a line, swap the cover, move a slide. The project stays the same one."
+            art={<NothingLockedArt />}
+          />
+          <ArtCard
+            step="03"
+            title="You leave with the post"
+            text="A PNG of one slide, or a ZIP of the carousel. No watermark on the file."
+            art={<LeaveWithPostArt />}
+          />
         </ul>
       </LandingSection>
 
@@ -1146,7 +1150,9 @@ export function LandingPage() {
             a separate file to rebuild.
           </p>
           <div className="mt-10 grid items-center gap-6 rounded-[1.75rem] bg-white/5 p-3 sm:grid-cols-2 sm:p-4">
-            <ArtWell className="min-h-56 bg-white/10 dark:bg-white/10" />
+            <ArtWell className="flex min-h-56 items-center justify-center bg-[#F2F2F2] dark:bg-[#2a2b33]">
+              <OnTheSlideArt />
+            </ArtWell>
             <div className="px-2 sm:px-3">
               <p className="text-sm font-medium text-white/50">On the slide</p>
               <h3 className="mt-2 text-3xl font-medium tracking-tight">
@@ -1160,7 +1166,9 @@ export function LandingPage() {
           </div>
           <div className="mt-4 grid items-center gap-6 rounded-[1.75rem] bg-white/5 p-3 sm:grid-cols-2 sm:p-4">
             <div className="sm:order-2">
-              <ArtWell className="min-h-56 bg-white/10 dark:bg-white/10" />
+              <ArtWell className="flex min-h-56 items-center justify-center bg-[#F2F2F2] dark:bg-[#2a2b33]">
+                <OnTheWayOutArt />
+              </ArtWell>
             </div>
             <div className="px-2 sm:px-3">
               <p className="text-sm font-medium text-white/50">On the way out</p>
@@ -1179,15 +1187,18 @@ export function LandingPage() {
       <LandingSection id="make">
         <h2 className={sectionTitle}>Posts with a job to do</h2>
         <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {JOBS.map(([title, text], index) => (
-            <ArtCard
-              key={title}
-              step={String(index + 1).padStart(2, "0")}
-              title={title}
-              text={text}
-              art={<Place className="min-h-44 sm:min-h-56" />}
-            />
-          ))}
+          {JOBS.map(([title, text], index) => {
+            const Art = JOB_ARTS[title as keyof typeof JOB_ARTS];
+            return (
+              <ArtCard
+                key={title}
+                step={String(index + 1).padStart(2, "0")}
+                title={title}
+                text={text}
+                art={Art ? <Art /> : null}
+              />
+            );
+          })}
         </ul>
       </LandingSection>
 
@@ -1199,7 +1210,11 @@ export function LandingPage() {
         <ul className="mt-8 grid grid-cols-2 items-end gap-3 sm:grid-cols-4 sm:gap-4">
           {RATIOS.map((item) => (
             <li key={item.label} className="rounded-[1.75rem] bg-land-card p-2 sm:rounded-[2rem] sm:p-3">
-              <ArtWell className={`${item.frame} rounded-[1.25rem] sm:rounded-[1.5rem]`} />
+              <ArtWell
+                className={`${item.frame} flex items-center justify-center rounded-[1.25rem] sm:rounded-[1.5rem]`}
+              >
+                <RatioArt ratio={item.label} />
+              </ArtWell>
               <p className="mt-3 px-1 text-sm font-medium text-land-ink/60">{item.label}</p>
             </li>
           ))}
@@ -1226,7 +1241,9 @@ export function LandingPage() {
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="grid items-center gap-4 pb-2 sm:grid-cols-[7.5rem_1fr]">
-                    <ArtWell className="h-24 rounded-[1.25rem] sm:rounded-[1.5rem]" />
+                    <ArtWell className="flex h-24 items-center justify-center rounded-[1.25rem] sm:rounded-[1.5rem]">
+                      <ShapeArt kind={item.value as "story"} className="max-h-20 p-2" />
+                    </ArtWell>
                     <p className="text-base leading-relaxed text-land-ink/60">
                       {item.text}
                     </p>
@@ -1244,19 +1261,24 @@ export function LandingPage() {
           Three tools on a selected image. The slide stays the same project.
         </p>
         <ul className="mt-8 grid gap-4 lg:grid-cols-3">
-          {[
-            ["01", "Remove background", "The subject stays. The backdrop goes."],
-            ["02", "Magic layer", "One picture splits into layers you can move."],
-            ["03", "Upscale", "2×, 3×, or 4×. The sharper image stays on the slide."],
-          ].map(([step, title, text]) => (
-            <ArtCard
-              key={title}
-              step={step}
-              title={title}
-              text={text}
-              art={<Place className="min-h-44 sm:min-h-56" />}
-            />
-          ))}
+          <ArtCard
+            step="01"
+            title="Remove background"
+            text="The subject stays. The backdrop goes."
+            art={<RemoveBgArt />}
+          />
+          <ArtCard
+            step="02"
+            title="Magic layer"
+            text="One picture splits into layers you can move."
+            art={<MagicLayerArt />}
+          />
+          <ArtCard
+            step="03"
+            title="Upscale"
+            text="2×, 3×, or 4×. The sharper image stays on the slide."
+            art={<UpscaleArt />}
+          />
         </ul>
       </LandingSection>
 
@@ -1353,19 +1375,24 @@ export function LandingPage() {
           the file leaves.
         </p>
         <ul className="mt-8 grid gap-4 lg:grid-cols-3">
-          {[
-            ["01", "The topic", "One sentence about the post. The language follows the words you type."],
-            ["02", "The slides", "Four to ten frames, in order, at the ratio of a feed."],
-            ["03", "The file", "Rewrite a line, swap the cover, move a slide. Download PNG or ZIP."],
-          ].map(([step, title, text]) => (
-            <ArtCard
-              key={title}
-              step={step}
-              title={title}
-              text={text}
-              art={<Place className="min-h-40 sm:min-h-48" />}
-            />
-          ))}
+          <ArtCard
+            step="01"
+            title="The topic"
+            text="One sentence about the post. The language follows the words you type."
+            art={<TopicArt />}
+          />
+          <ArtCard
+            step="02"
+            title="The slides"
+            text="Four to ten frames, in order, at the ratio of a feed."
+            art={<SlidesArt />}
+          />
+          <ArtCard
+            step="03"
+            title="The file"
+            text="Rewrite a line, swap the cover, move a slide. Download PNG or ZIP."
+            art={<FileArt />}
+          />
         </ul>
       </LandingSection>
 
