@@ -107,7 +107,10 @@
     "ungroup": "Разгруппировать",
     "cut": "Вырезать",
     "play": "Воспроизвести",
-    "pause": "Пауза"
+    "pause": "Пауза",
+    "toggleTheme": "Переключить тему",
+    "switchToLightTheme": "Переключить на светлую тему",
+    "switchToDarkTheme": "Переключить на тёмную тему"
   },
   "meta": {
     "titleDefault": "Deckva — студия каруселей",
@@ -205,7 +208,14 @@
       "gridView": "Сетка",
       "listView": "Список",
       "cardsView": "Карточки",
-      "rowsView": "Строки"
+      "rowsView": "Строки",
+      "folderSub": "Управляйте проектами в этой папке.",
+      "starredSub": "Быстрый доступ к избранным проектам.",
+      "folderEmpty": "Папка пуста",
+      "sortNewest": "Сначала новые",
+      "sortUpdated": "Недавно обновлённые",
+      "sortOldest": "Сначала старые",
+      "sortAZ": "А–Я"
     },
     "projectMenu": {
       "more": "Ещё",
@@ -215,7 +225,8 @@
       "createFolderFirst": "Сначала создайте папку в боковой панели.",
       "delete": "Удалить",
       "star": "В избранное",
-      "unstar": "Убрать из избранного"
+      "unstar": "Убрать из избранного",
+      "noFolder": "Без папки"
     },
     "folders": {
       "title": "Папки",
@@ -256,7 +267,14 @@
       "remove": "Удалить",
       "typeNameConfirm": "Введите {name} для подтверждения",
       "managePeople": "Управление людьми в {name}.",
-      "thisOrganization": "этой организации"
+      "thisOrganization": "этой организации",
+      "organization": "Организация",
+      "membersTitle": "Участники",
+      "makeMember": "Сделать участником",
+      "makeAdmin": "Сделать админом",
+      "youSuffix": " (вы)",
+      "pending": "ожидает",
+      "user": "Пользователь"
     },
     "invite": {
       "title": "Пригласить участников",
@@ -286,8 +304,16 @@
         "decline": "Отклонить",
         "goToStudio": "В студию",
         "openStudio": "Открыть студию",
-        "signIn": "Войти"
-      }
+        "signIn": "Войти",
+        "invitedBy": "{name} приглашает вас присоединиться как {role}.",
+        "invitedGeneric": "Вас пригласили присоединиться как {role}.",
+        "sentTo": "Отправлено на {email}.",
+        "invalidOrGone": "Эта ссылка-приглашение недействительна или больше не работает."
+      },
+      "inviteTo": "Пригласить в {name}",
+      "description": "Зарегистрированные аккаунты получат уведомление в приложении. Остальные смогут присоединиться по ссылке.",
+      "copyFailed": "Не удалось скопировать ссылку-приглашение",
+      "sendFailed": "Не удалось отправить приглашения"
     },
     "brandKit": {
       "title": "Бренд-кит",
@@ -372,7 +398,8 @@
       "title": "Сочетания",
       "keyboard": "Горячие клавиши",
       "general": "Общие",
-      "animationEditing": "Редактирование анимации"
+      "animationEditing": "Редактирование анимации",
+      "playPause": "Play / Pause"
     },
     "communityPreview": {
       "template": "Шаблон",
@@ -382,7 +409,13 @@
       "editMyTemplate": "Редактировать мой шаблон",
       "opensCopy": "Откроет копию в вашем редакторе.",
       "prevSlide": "Предыдущий слайд",
-      "nextSlide": "Следующий слайд"
+      "nextSlide": "Следующий слайд",
+      "title": "Превью шаблона",
+      "customize": "Кастомизировать дизайн",
+      "opensCopyHint": "Откроет копию в редакторе. Оригинал не изменится.",
+      "ownerHint": "Откроет исходный проект. Опубликуйте снова из редактора, когда закончите.",
+      "updatedBy": "Обновлено {when} · {name}",
+      "slidesMeta": "{count, plural, one {# слайд} few {# слайда} many {# слайдов} other {# слайда}} · {ratio}"
     },
     "prompt": {
       "add": "Добавить",
@@ -397,7 +430,8 @@
       "free": "Бесплатно",
       "recentHistory": "Недавняя история",
       "recentPrompts": "Недавние промпты",
-      "searchModels": "Поиск моделей"
+      "searchModels": "Поиск моделей",
+      "model": "Модель"
     }
   },
   "landing": {
@@ -654,7 +688,12 @@
       "deleteSlide": "Удалить слайд",
       "addSlide": "Добавить слайд",
       "options": "Параметры",
-      "canvasOptions": "Параметры холста"
+      "canvasOptions": "Параметры холста",
+      "selectObjectToHide": "Выберите объект, чтобы скрыть",
+      "selectObjectToLock": "Выберите объект, чтобы зафиксировать",
+      "importSlidesBody": "В файле {count} слайдов. Загрузить только первый в текущий слайд или заменить всю карусель.",
+      "slideTitle": "Слайд {n}",
+      "slideTitleNamed": "Слайд {n} — {title}"
     },
     "panels": {
       "tools": "Инструменты",
@@ -675,7 +714,11 @@
       "next": "Следующий слайд",
       "slide": "Слайд",
       "unmark": "Снять метку",
-      "markHint": "Отметить для шрифта, палитры и экспорта"
+      "markHint": "Отметить для шрифта, палитры и экспорта",
+      "markedCount": "{n} отмечено",
+      "dragReorder": "Слайд {n}. Перетащите, чтобы изменить порядок.",
+      "unmarkSlide": "Снять отметку со слайда {n}",
+      "markSlide": "Отметить слайд {n}"
     },
     "zoom": {
       "toolSelect": "Выделение. Перемещайте и редактируйте объекты (V)",
@@ -690,7 +733,13 @@
       "unsaved": "Есть несохранённые изменения",
       "saved": "Изменения сохранены",
       "allSaved": "Все изменения сохранены",
-      "saveNow": "Сохранить сейчас"
+      "saveNow": "Сохранить сейчас",
+      "writingEdits": "Сохраняем последние правки",
+      "lastSaved": "Сохранено: {time}",
+      "autoSaveHint": "Deckva синхронизирует карусель во время работы. Нажмите ⌘S, чтобы сохранить сейчас.",
+      "secondsAgo": "{n} с назад",
+      "minutesAgo": "{n} мин назад",
+      "hoursAgo": "{n} ч назад"
     },
     "header": {
       "projectName": "Название проекта",
@@ -699,7 +748,9 @@
       "previewCarousel": "Превью карусели",
       "previewPhone": "Превью на телефоне",
       "community": "Сообщество",
-      "publishCommunity": "Опубликовать в сообществе"
+      "publishCommunity": "Опубликовать в сообществе",
+      "exportPngZip": "Экспорт • {count}x PNG / ZIP",
+      "exportPngZipShort": "Экспорт · {count} PNG / ZIP"
     },
     "fileMenu": {
       "file": "Файл",
@@ -709,7 +760,8 @@
       "newDesign": "Новый дизайн",
       "makeCopy": "Создать копию",
       "layoutGrid": "Сетка макета",
-      "help": "Справка"
+      "help": "Справка",
+      "slidesMeta": "{count, plural, one {# слайд} few {# слайда} many {# слайдов} other {# слайда}} · {width}×{height}"
     },
     "preview": {
       "preparing": "Подготовка слайдов…",
@@ -752,7 +804,11 @@
       "transparency": "Прозрачность",
       "opacity": "Непрозрачность",
       "copyStyle": "Копировать стиль",
-      "pasteStyle": "Вставить стиль"
+      "pasteStyle": "Вставить стиль",
+      "left": "Слева",
+      "center": "По центру",
+      "right": "Справа",
+      "justify": "По ширине"
     },
     "filters": {
       "image": "Изображение",
@@ -796,7 +852,8 @@
         "heading": "Заголовок",
         "subtitle": "Подзаголовок",
         "body": "Основной"
-      }
+      },
+      "loadError": "Не удалось загрузить список шрифтов"
     },
     "grid": {
       "layoutGrid": "Сетка макета",
@@ -851,7 +908,19 @@
       "shapes": "Фигуры",
       "frames": "Фреймы",
       "code": "Код",
-      "category": "Категория"
+      "category": "Категория",
+      "pngJpg": "PNG, JPG",
+      "uploading": "Загрузка…",
+      "searchPhotos": "Поиск фото…",
+      "searchText": "Поиск текста…",
+      "searchShapes": "Поиск фигур…",
+      "searchDevices": "Поиск устройств…",
+      "pasteHint": "PNG, JPG — или вставьте Ctrl+V",
+      "elementCategory": "Категория элементов",
+      "smallerTitleUnder": "Меньший заголовок под основным",
+      "addHeading": "Добавить заголовок",
+      "addSubheading": "Добавить подзаголовок",
+      "addBodyText": "Добавить немного текста"
     },
     "layers": {
       "empty": "Пока нет объектов. Добавьте элементы на вкладке «Элементы».",
@@ -903,7 +972,11 @@
       "slides": "Слайды",
       "fewerSlides": "Меньше слайдов",
       "moreSlides": "Больше слайдов",
-      "screenSplitHint": "Макет фиксирует слот изображения на слайде."
+      "screenSplitHint": "Макет фиксирует слот изображения на слайде.",
+      "thisSlide": "Этот слайд",
+      "thisSlideHint": "Цвета только на этом слайде. Общий фон карусели не меняется.",
+      "allScope": "Все",
+      "markedScope": "Отмеченные"
     },
     "assets": {
       "title": "Ассеты",
@@ -928,7 +1001,10 @@
       "tagsComma": "Теги через запятую",
       "preview": "Превью",
       "tags": "Теги",
-      "allTags": "Все теги"
+      "allTags": "Все теги",
+      "filterByTag": "Фильтр по тегу",
+      "pngJpgSvg": "PNG, JPG, SVG · в библиотеке",
+      "asset": "Ассет"
     },
     "settings": {
       "title": "Настройки холста",
@@ -1057,8 +1133,15 @@
         "rowCount": "Число рядов",
         "close": "Закрыть",
         "titlesPlaceholder": "Хук\nДоказательство…",
-        "rankedPlaceholder": "Next.js\nRemix\nNuxt"
-      }
+        "rankedPlaceholder": "Next.js\nRemix\nNuxt",
+        "noMatches": "Нет совпадений",
+        "typeToSearch": "Введите текст для поиска по слайдам",
+        "working": "Работаем…",
+        "pickScreenshots": "Выбрать скриншоты",
+        "makeSlides": "Сделать слайды"
+      },
+      "working": "Работаем…",
+      "imageToolsHint": "Удалить фон, апскейл, magic layer — выберите изображение"
     },
     "mockups": {
       "intro": "Топ-листы и карусели скриншотов в рамках устройств.",
@@ -1069,7 +1152,10 @@
       "fillHint": "Выберите несколько фото по порядку, чтобы заполнить каждый экран.",
       "listScreenshots": "Список + скриншоты",
       "device": "Устройство",
-      "titlesPlaceholder": "Один заголовок в строке\nNext.js\nRemix\nNuxt"
+      "titlesPlaceholder": "Один заголовок в строке\nNext.js\nRemix\nNuxt",
+      "placing": "Размещаем…",
+      "onePerSlide": "По одному на слайд",
+      "thisSlide": "Этот слайд"
     },
     "code": {
       "editCode": "Редактировать код",
@@ -1121,7 +1207,12 @@
       "comment": "Комментарий",
       "repost": "Репост",
       "send": "Отправить",
-      "close": "Закрыть"
+      "close": "Закрыть",
+      "newPost": "Новый пост",
+      "previewingThreads": "Превью слайда в Threads",
+      "previewingTikTok": "Превью слайда в TikTok",
+      "previewingX": "Превью слайда в X",
+      "previewingLinkedIn": "Превью слайда в LinkedIn"
     },
     "commands": {
       "title": "Команды",
@@ -1226,7 +1317,20 @@
       "marked": "Отмеченные",
       "this": "Этот",
       "markHint": "Отмечайте слайды галочкой в углу",
-      "updateMarked": "Обновить отмеченные слайды"
+      "updateMarked": "Обновить отмеченные слайды",
+      "alignTop": "Выровнять сверху",
+      "alignMiddle": "Выровнять по центру",
+      "alignBottom": "Выровнять снизу",
+      "distributeX": "Распределить по X",
+      "distributeY": "Распределить по Y",
+      "properties": "Свойства",
+      "selection": "Выделение",
+      "shape": "Фигура",
+      "text": "Текст",
+      "textColor": "Цвет текста",
+      "blur": "Размытие",
+      "offset": "Смещение",
+      "thisSlide": "Этот слайд"
     }
   },
   "dialogs": {
@@ -1267,7 +1371,12 @@
       "phName": "Иван Иванов",
       "phPasswordMin": "Не менее 6 символов",
       "googleUnconfirmed": "Google не подтвердил этот email.",
-      "googleFailed": "Не удалось войти через Google. Попробуйте снова."
+      "googleFailed": "Не удалось войти через Google. Попробуйте снова.",
+      "emailConfirmed": "Email подтверждён. Можно войти.",
+      "accountCreatedNoEmail": "Аккаунт создан. Email не настроен, поэтому ссылка подтверждения выведена в лог сервера.",
+      "resetLinkMissing": "Ссылка сброса отсутствует. Запросите новую.",
+      "passwordUpdated": "Пароль обновлён. Войдите с новым.",
+      "tryAgain": "Что-то пошло не так. Попробуйте ещё раз."
     },
     "settings": {
       "title": "Настройки",
@@ -1334,7 +1443,9 @@
         "passwordsMismatch": "Пароли не совпадают",
         "currentPassword": "Введите текущий пароль",
         "expiry": "Укажите срок в формате ММ/ГГ"
-      }
+      },
+      "deleteAccountHint": "Навсегда удаляет проекты, данные биллинга и аккаунт.",
+      "cardExpires": "До {month}/{year}"
     },
     "export": {
       "title": "Экспорт",
@@ -1365,7 +1476,9 @@
       "copyFirstSlide": "Скопировать изображение первого слайда",
       "previewAlt": "Превью экспорта",
       "shareText": "Карусель из Deckva",
-      "shareUnavailable": "Это устройство не умеет делиться файлами изображений. Скачайте вместо этого."
+      "shareUnavailable": "Это устройство не умеет делиться файлами изображений. Скачайте вместо этого.",
+      "exporting": "Экспорт…",
+      "marked": "Отмеченные"
     },
     "share": {
       "title": "Поделиться проектом",
@@ -1486,7 +1599,12 @@
       "remove": "Убрать из сообщества",
       "republished": "Опубликовано снова",
       "submitted": "Отправлено на проверку",
-      "metaLine": "{title} · {count, plural, one {# слайд} few {# слайда} many {# слайдов} other {# слайда}}"
+      "metaLine": "{title} · {count, plural, one {# слайд} few {# слайда} many {# слайдов} other {# слайда}}",
+      "published": "Опубликовано",
+      "republish": "Обновить",
+      "removedDone": "Удалено из сообщества",
+      "lastUpdate": "Последнее обновление · {when}",
+      "pendingReview": "на проверке"
     },
     "upgrade": {
       "onPro": "У вас Pro",

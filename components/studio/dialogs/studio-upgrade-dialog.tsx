@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, CreditCard, Loader2, X } from "lucide-react";
+import {
+  Check,
+  CreditCard,
+  SpinnerGap as Loader2,
+  X,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import {
   attachPaymentCard,
@@ -11,7 +17,6 @@ import {
 import type { BillingSnapshot } from "@/lib/billing/types";
 import { formatCardBrand } from "@/lib/billing/card";
 import {
-  PRO_FEATURES,
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
@@ -25,6 +30,12 @@ import { cn } from "@/lib/utils";
 
 type Step = "plan" | "payment";
 
+const FEATURE_KEYS = [
+  "unlimitedAi",
+  "hiResExports",
+  "foldersBrand",
+] as const;
+
 function formatCardNumber(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 19);
   return digits.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
@@ -37,6 +48,9 @@ export function StudioUpgradeDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("dialogs.upgrade");
+  const ts = useTranslations("studio.upgrade");
+  const tv = useTranslations("dialogs.settings.validation");
   const [billing, setBilling] = useState<BillingSnapshot | null>(null);
   const [step, setStep] = useState<Step>("plan");
   const [busy, setBusy] = useState(false);
@@ -82,7 +96,7 @@ export function StudioUpgradeDialog({
       if (!hasCard || showCardForm) {
         const parsed = parseExp();
         if (!parsed) {
-          setError("Use MM/YY for expiry");
+          setError(tv("expiry"));
           return;
         }
         const attached = await attachPaymentCard({
@@ -127,7 +141,7 @@ export function StudioUpgradeDialog({
       >
         <button
           type="button"
-          aria-label="Close"
+          aria-label={t("close")}
           onClick={() => onOpenChange(false)}
           className="absolute top-2.5 right-2.5 z-10 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
@@ -138,14 +152,14 @@ export function StudioUpgradeDialog({
           {step === "plan" || alreadyPro ? (
             <>
               <DialogTitle className="text-[17px] font-semibold tracking-tight text-foreground">
-                {alreadyPro ? "You're on Pro" : "Pro"}
+                {alreadyPro ? t("onPro") : t("pro")}
               </DialogTitle>
               <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
                 {alreadyPro
                   ? billing?.cancelAtPeriodEnd
-                    ? "Cancels at period end."
-                    : "Personal plan · billed monthly."
-                  : "Personal plan. Cancel anytime."}
+                    ? t("cancelsAtEnd")
+                    : t("billedMonthly")
+                  : t("cancelAnytime")}
               </p>
 
               <div className="mt-4 flex items-baseline gap-1">
@@ -159,16 +173,16 @@ export function StudioUpgradeDialog({
 
               {!alreadyPro ? (
                 <ul className="mt-3.5 space-y-1.5">
-                  {PRO_FEATURES.slice(0, 3).map((feature) => (
+                  {FEATURE_KEYS.map((key) => (
                     <li
-                      key={feature}
+                      key={key}
                       className="flex items-center gap-2 text-[12px] text-foreground/80"
                     >
                       <Check
                         className="size-3 shrink-0 text-primary"
                         strokeWidth={3}
                       />
-                      {feature}
+                      {ts(`features.${key}`)}
                     </li>
                   ))}
                 </ul>
@@ -189,17 +203,20 @@ export function StudioUpgradeDialog({
                 )}
               >
                 {alreadyPro
-                  ? "Current plan"
-                  : `Continue · ${STUDIO_PRO_PRICE} ${STUDIO_PRO_CURRENCY}`}
+                  ? t("currentPlan")
+                  : t("continuePrice", {
+                      price: STUDIO_PRO_PRICE,
+                      currency: STUDIO_PRO_CURRENCY,
+                    })}
               </button>
             </>
           ) : (
             <>
               <DialogTitle className="text-[17px] font-semibold tracking-tight text-foreground">
-                Add a card
+                {t("addCard")}
               </DialogTitle>
               <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
-                Saved for monthly Pro billing. Manage later in Settings.
+                {t("cardSavedHint")}
               </p>
 
               {hasCard && !showCardForm && billing?.paymentMethod ? (
@@ -213,7 +230,7 @@ export function StudioUpgradeDialog({
                     {formatCardBrand(billing.paymentMethod.brand)} ····{" "}
                     {billing.paymentMethod.last4}
                   </span>
-                  <span className="text-muted-foreground">Change</span>
+                  <span className="text-muted-foreground">{t("change")}</span>
                 </button>
               ) : null}
 
@@ -224,7 +241,7 @@ export function StudioUpgradeDialog({
                     onChange={(e) =>
                       setCardNumber(formatCardNumber(e.target.value))
                     }
-                    placeholder="Card number"
+                    placeholder={t("cardNumber")}
                     inputMode="numeric"
                     autoComplete="cc-number"
                     className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
@@ -243,7 +260,7 @@ export function StudioUpgradeDialog({
                         }
                         setExp(v.slice(0, 7));
                       }}
-                      placeholder="MM/YY"
+                      placeholder={t("exp")}
                       inputMode="numeric"
                       autoComplete="cc-exp"
                       className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
@@ -253,7 +270,7 @@ export function StudioUpgradeDialog({
                       onChange={(e) =>
                         setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))
                       }
-                      placeholder="CVV"
+                      placeholder={t("cvv")}
                       inputMode="numeric"
                       autoComplete="cc-csc"
                       type="password"
@@ -272,7 +289,10 @@ export function StudioUpgradeDialog({
                 {busy ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
-                  `Subscribe · ${STUDIO_PRO_PRICE} ${STUDIO_PRO_CURRENCY}`
+                  t("subscribePrice", {
+                    price: STUDIO_PRO_PRICE,
+                    currency: STUDIO_PRO_CURRENCY,
+                  })
                 )}
               </button>
 
@@ -285,7 +305,7 @@ export function StudioUpgradeDialog({
                 }}
                 className="mt-2 flex h-9 w-full items-center justify-center rounded-md border-none bg-transparent text-[12px] font-medium text-muted-foreground shadow-none transition-colors hover:bg-muted/40 hover:text-foreground disabled:opacity-60"
               >
-                Back
+                {t("back")}
               </button>
             </>
           )}

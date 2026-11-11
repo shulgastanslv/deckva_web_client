@@ -2,22 +2,22 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
-  CameraIcon,
+  Camera as CameraIcon,
   Check,
   CreditCard,
-  KeyRound,
-  Languages,
-  Loader2,
-  LogOut,
+  Key as KeyRound,
+  Translate as Languages,
+  SpinnerGap as Loader2,
+  SignOut as LogOut,
   Monitor,
   Moon,
   Sun,
-  Trash2,
-  UserRound,
+  Trash as Trash2,
+  User as UserRound,
   Wallet,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { signOut, useSession } from "next-auth/react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 
@@ -60,12 +60,12 @@ import { cn } from "@/lib/utils";
 
 type Section = "profile" | "billing" | "security" | "preferences" | "account";
 
-const NAV: { id: Section; label: string; icon: typeof UserRound }[] = [
-  { id: "profile", label: "Profile", icon: UserRound },
-  { id: "billing", label: "Billing", icon: Wallet },
-  { id: "security", label: "Security", icon: KeyRound },
-  { id: "preferences", label: "Preferences", icon: Monitor },
-  { id: "account", label: "Account", icon: LogOut },
+const NAV_IDS: { id: Section; icon: typeof UserRound }[] = [
+  { id: "profile", icon: UserRound },
+  { id: "billing", icon: Wallet },
+  { id: "security", icon: KeyRound },
+  { id: "preferences", icon: Monitor },
+  { id: "account", icon: LogOut },
 ];
 
 function formatJoined(iso: string) {
@@ -97,16 +97,16 @@ function formatCardNumber(value: string) {
   return digits.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
 }
 
-function paymentStatusLabel(status: string) {
+function paymentStatusKey(status: string) {
   switch (status) {
     case "SUCCEEDED":
-      return "Paid";
+      return "paymentStatus.paid" as const;
     case "FAILED":
-      return "Failed";
+      return "paymentStatus.failed" as const;
     case "REFUNDED":
-      return "Refunded";
+      return "paymentStatus.refunded" as const;
     default:
-      return "Pending";
+      return "paymentStatus.pending" as const;
   }
 }
 
@@ -121,7 +121,12 @@ export function ProfileSettingsDialog({
   const { resolvedTheme, setTheme } = useTheme();
   const router = useRouter();
   const locale = useLocale() as AppLocale;
+  const t = useTranslations("dialogs.settings");
   const [localePending, startLocaleTransition] = useTransition();
+  const nav = NAV_IDS.map((item) => ({
+    ...item,
+    label: t(`nav.${item.id}`),
+  }));
   const [section, setSection] = useState<Section>("profile");
   const [themeMounted, setThemeMounted] = useState(false);
 
@@ -216,8 +221,8 @@ export function ProfileSettingsDialog({
   }, [open]);
 
   const sectionTitle = useMemo(
-    () => NAV.find((item) => item.id === section)?.label ?? "Settings",
-    [section],
+    () => nav.find((item) => item.id === section)?.label ?? t("title"),
+    [nav, section, t],
   );
 
   const onSaveProfile = async () => {
@@ -225,7 +230,7 @@ export function ProfileSettingsDialog({
     setSaved(false);
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setError("Enter a name");
+      setError(t("validation.enterName"));
       return;
     }
 
@@ -292,15 +297,15 @@ export function ProfileSettingsDialog({
     setSaved(false);
 
     if (!isPasswordLongEnough(newPassword)) {
-      setError("Password must be at least 6 characters");
+      setError(t("validation.passwordMin"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("validation.passwordsMismatch"));
       return;
     }
     if (hasPassword && !currentPassword) {
-      setError("Enter your current password");
+      setError(t("validation.currentPassword"));
       return;
     }
 
@@ -378,7 +383,7 @@ export function ProfileSettingsDialog({
     void runBilling(async () => {
       const parsed = parseExp();
       if (!parsed) {
-        return { success: false as const, error: "Use MM/YY for expiry" };
+        return { success: false as const, error: t("validation.expiry") };
       }
       return attachPaymentCard({
         number: cardNumber,
@@ -398,15 +403,15 @@ export function ProfileSettingsDialog({
           <aside className="flex shrink-0 flex-col bg-muted/25 sm:w-[168px]">
             <div className="px-4 pt-4 pb-2">
               <DialogTitle className="text-[13px] font-semibold tracking-tight">
-                Settings
+                {t("title")}
               </DialogTitle>
               <DialogDescription className="mt-0.5 text-[11px] text-muted-foreground">
-                Account & billing
+                {t("accountBilling")}
               </DialogDescription>
             </div>
 
             <nav className="flex gap-1 overflow-x-auto px-2 pb-3 sm:flex-col sm:overflow-visible sm:px-2 sm:pb-4">
-              {NAV.map((item) => {
+              {nav.map((item) => {
                 const Icon = item.icon;
                 const active = section === item.id;
                 return (
@@ -473,16 +478,16 @@ export function ProfileSettingsDialog({
                             />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium">Profile Picture</p>
+                            <p className="text-sm font-medium">{t("profilePicture")}</p>
                             <p className="mt-1 text-[12px] text-muted-foreground">
-                              Click the avatar to upload a new image.
+                              {t("profilePictureHint")}
                             </p>
                           </div>
                         </div>
 
                         <div className="space-y-1.5">
                           <Label htmlFor="profile-name" className="text-[12px]">
-                            Display name
+                            {t("displayName")}
                           </Label>
                           <Input
                             id="profile-name"
@@ -492,14 +497,14 @@ export function ProfileSettingsDialog({
                               setName(event.target.value);
                               setSaved(false);
                             }}
-                            placeholder="Your name"
+                            placeholder={t("yourName")}
                             autoComplete="name"
                           />
                         </div>
 
                         <div className="space-y-1.5">
                           <Label htmlFor="profile-email" className="text-[12px]">
-                            Email
+                            {t("email")}
                           </Label>
                           <Input
                             id="profile-email"
@@ -518,14 +523,19 @@ export function ProfileSettingsDialog({
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-[13px] font-semibold">
-                              {billing?.isPro ? "Pro" : "Free"}
+                              {billing?.isPro ? t("planPro") : t("planFree")}
                             </p>
                             <p className="mt-0.5 text-[12px] text-muted-foreground">
                               {billing?.isPro
                                 ? billing.cancelAtPeriodEnd
-                                  ? `Ends ${formatDate(billing.subscriptionEndsAt)}`
-                                  : `Renews ${formatDate(billing.subscriptionEndsAt)}`
-                                : `${billing?.freeGenerationsRemaining ?? 0} of ${billing?.freeGenerationsLimit ?? 3} free generations left · Pro ${STUDIO_PRO_PRICE} ${STUDIO_PRO_CURRENCY}/mo`}
+                                  ? t("ends", { date: formatDate(billing.subscriptionEndsAt) })
+                                  : t("renews", { date: formatDate(billing.subscriptionEndsAt) })
+                                : t("generationsLeft", {
+                                    remaining: billing?.freeGenerationsRemaining ?? 0,
+                                    limit: billing?.freeGenerationsLimit ?? 3,
+                                    price: STUDIO_PRO_PRICE,
+                                    currency: STUDIO_PRO_CURRENCY,
+                                  })}
                             </p>
                           </div>
                           {billing?.isPro ? (
@@ -539,7 +549,7 @@ export function ProfileSettingsDialog({
                                   void runBilling(() => resumeSubscription())
                                 }
                               >
-                                Resume
+                                {t("resume")}
                               </Button>
                             ) : (
                               <Button
@@ -551,7 +561,7 @@ export function ProfileSettingsDialog({
                                   void runBilling(() => cancelSubscription())
                                 }
                               >
-                                Cancel
+                                {t("cancel")}
                               </Button>
                             )
                           ) : (
@@ -566,7 +576,7 @@ export function ProfileSettingsDialog({
                               {billingBusy ? (
                                 <Loader2 className="size-3.5 animate-spin" />
                               ) : (
-                                "Subscribe"
+                                t("subscribe")
                               )}
                             </Button>
                           )}
@@ -576,7 +586,7 @@ export function ProfileSettingsDialog({
                       <div>
                         <div className="mb-2 flex items-center justify-between">
                           <p className="text-[12px] font-medium text-foreground">
-                            Payment method
+                            {t("paymentMethod")}
                           </p>
                           {billing?.paymentMethod && !showCardForm ? (
                             <button
@@ -584,7 +594,7 @@ export function ProfileSettingsDialog({
                               className="text-[11px] font-medium text-[#2f5bff]"
                               onClick={() => setShowCardForm(true)}
                             >
-                              Replace
+                              {t("replace")}
                             </button>
                           ) : null}
                         </div>
@@ -598,12 +608,10 @@ export function ProfileSettingsDialog({
                                 ···· {billing.paymentMethod.last4}
                               </p>
                               <p className="text-[11px] text-muted-foreground">
-                                Exp{" "}
-                                {String(billing.paymentMethod.expMonth).padStart(
-                                  2,
-                                  "0",
-                                )}
-                                /{String(billing.paymentMethod.expYear).slice(-2)}
+                                {t("cardExpires", {
+                                  month: String(billing.paymentMethod.expMonth).padStart(2, "0"),
+                                  year: String(billing.paymentMethod.expYear).slice(-2),
+                                })}
                               </p>
                             </div>
                             <Button
@@ -617,7 +625,7 @@ export function ProfileSettingsDialog({
                                 )
                               }
                             >
-                              Remove
+                              {t("remove")}
                             </Button>
                           </div>
                         ) : (
@@ -627,7 +635,7 @@ export function ProfileSettingsDialog({
                               onChange={(e) =>
                                 setCardNumber(formatCardNumber(e.target.value))
                               }
-                              placeholder="Card number"
+                              placeholder={t("cardNumber")}
                               inputMode="numeric"
                               autoComplete="cc-number"
                               className="h-9 rounded-xl bg-muted/40 px-3 text-[13px]"
@@ -646,7 +654,7 @@ export function ProfileSettingsDialog({
                                   }
                                   setExp(v.slice(0, 7));
                                 }}
-                                placeholder="MM/YY"
+                                placeholder={t("exp")}
                                 inputMode="numeric"
                                 autoComplete="cc-exp"
                                 className="h-9 rounded-xl bg-muted/40 px-3 text-[13px]"
@@ -658,7 +666,7 @@ export function ProfileSettingsDialog({
                                     e.target.value.replace(/\D/g, "").slice(0, 4),
                                   )
                                 }
-                                placeholder="CVV"
+                                placeholder={t("cvv")}
                                 inputMode="numeric"
                                 autoComplete="cc-csc"
                                 type="password"
@@ -673,7 +681,7 @@ export function ProfileSettingsDialog({
                                   className="h-8 rounded-md text-[12px]"
                                   onClick={() => setShowCardForm(false)}
                                 >
-                                  Cancel
+                                  {t("cancel")}
                                 </Button>
                               ) : null}
                               <Button
@@ -685,7 +693,7 @@ export function ProfileSettingsDialog({
                                 {billingBusy ? (
                                   <Loader2 className="size-3.5 animate-spin" />
                                 ) : (
-                                  "Save card"
+                                  t("saveCard")
                                 )}
                               </Button>
                             </div>
@@ -694,7 +702,7 @@ export function ProfileSettingsDialog({
                       </div>
 
                       <div>
-                        <p className="mb-2 text-[12px] font-medium">History</p>
+                        <p className="mb-2 text-[12px] font-medium">{t("history")}</p>
                         {billing?.payments.length ? (
                           <ul className="space-y-1">
                             {billing.payments.map((p) => (
@@ -704,12 +712,12 @@ export function ProfileSettingsDialog({
                               >
                                 <div className="min-w-0">
                                   <p className="truncate font-medium">
-                                    {p.description || "Payment"}
+                                    {p.description || t("payment")}
                                   </p>
                                   <p className="text-[11px] text-muted-foreground">
                                     {formatDate(p.paidAt ?? p.createdAt)}
                                     {p.cardLast4
-                                      ? ` · ${p.cardBrand ?? "Card"} ···· ${p.cardLast4}`
+                                      ? ` · ${p.cardBrand ?? t("card")} ···· ${p.cardLast4}`
                                       : null}
                                   </p>
                                 </div>
@@ -727,7 +735,7 @@ export function ProfileSettingsDialog({
                                           : "text-muted-foreground",
                                     )}
                                   >
-                                    {paymentStatusLabel(p.status)}
+                                    {t(paymentStatusKey(p.status))}
                                   </p>
                                 </div>
                               </li>
@@ -735,7 +743,7 @@ export function ProfileSettingsDialog({
                           </ul>
                         ) : (
                           <p className="text-[12px] text-muted-foreground">
-                            No payments yet.
+                            {t("noPayments")}
                           </p>
                         )}
                       </div>
@@ -750,8 +758,8 @@ export function ProfileSettingsDialog({
                     <div className="space-y-3.5">
                       <p className="text-[12px] leading-relaxed text-muted-foreground">
                         {hasPassword
-                          ? "Change the password you use to sign in."
-                          : "Set a password to also sign in with email."}
+                          ? t("changePasswordHint")
+                          : t("setPasswordHint")}
                       </p>
 
                       {hasPassword ? (
@@ -760,7 +768,7 @@ export function ProfileSettingsDialog({
                             htmlFor="profile-current-password"
                             className="text-[12px]"
                           >
-                            Current password
+                            {t("currentPassword")}
                           </Label>
                           <Input
                             id="profile-current-password"
@@ -781,7 +789,7 @@ export function ProfileSettingsDialog({
                           htmlFor="profile-new-password"
                           className="text-[12px]"
                         >
-                          New password
+                          {t("newPassword")}
                         </Label>
                         <Input
                           id="profile-new-password"
@@ -793,7 +801,7 @@ export function ProfileSettingsDialog({
                           }}
                           autoComplete="new-password"
                           className="h-9 rounded-xl bg-muted/40 px-3"
-                          placeholder="At least 6 characters"
+                          placeholder={t("passwordMin")}
                         />
                       </div>
 
@@ -802,7 +810,7 @@ export function ProfileSettingsDialog({
                           htmlFor="profile-confirm-password"
                           className="text-[12px]"
                         >
-                          Confirm password
+                          {t("confirmPassword")}
                         </Label>
                         <Input
                           id="profile-confirm-password"
@@ -823,9 +831,9 @@ export function ProfileSettingsDialog({
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-4 rounded-2xl bg-muted/35 px-4 py-3.5">
                         <div className="min-w-0">
-                          <p className="text-[13px] font-medium">Appearance</p>
+                          <p className="text-[13px] font-medium">{t("appearance")}</p>
                           <p className="mt-0.5 text-[12px] text-muted-foreground">
-                            Light or dark
+                            {t("appearanceHint")}
                           </p>
                         </div>
                         <div className="flex items-center gap-2.5">
@@ -839,7 +847,7 @@ export function ProfileSettingsDialog({
                             onCheckedChange={(checked) =>
                               setTheme(checked ? "dark" : "light")
                             }
-                            aria-label="Dark theme"
+                            aria-label={t("darkThemeAria")}
                           />
                         </div>
                       </div>
@@ -848,9 +856,9 @@ export function ProfileSettingsDialog({
                         <div className="flex items-start gap-2.5">
                           <Languages className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                           <div className="min-w-0 flex-1">
-                            <p className="text-[13px] font-medium">Language</p>
+                            <p className="text-[13px] font-medium">{t("language")}</p>
                             <p className="mt-0.5 text-[12px] text-muted-foreground">
-                              Interface language
+                              {t("languageHint")}
                             </p>
                             <div className="mt-3 flex flex-wrap gap-1.5">
                               {locales.map((code) => (
@@ -885,9 +893,9 @@ export function ProfileSettingsDialog({
                   {section === "account" ? (
                     <div className="space-y-3.5">
                       <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
-                        <p className="text-[13px] font-medium">Sign out</p>
+                        <p className="text-[13px] font-medium">{t("signOut")}</p>
                         <p className="mt-0.5 text-[12px] text-muted-foreground">
-                          End this session on this device.
+                          {t("signOutHint")}
                         </p>
                         <Button
                           type="button"
@@ -899,23 +907,22 @@ export function ProfileSettingsDialog({
                           }}
                         >
                           <LogOut className="size-3.5" />
-                          Sign out
+                          {t("signOut")}
                         </Button>
                       </div>
 
                       <div className="rounded-2xl bg-destructive/5 px-4 py-3.5 ring-1 ring-destructive/10">
                         <p className="text-[13px] font-medium text-destructive">
-                          Delete account
+                          {t("deleteAccount")}
                         </p>
                         <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">
-                          Permanently removes projects, billing data, and your
-                          account.
+                          {t("deleteAccountHint")}
                         </p>
 
                         {hasPassword ? (
                           <div className="mt-3 space-y-1.5">
                             <Label htmlFor="delete-password" className="text-[12px]">
-                              Password
+                              {t("deletePassword")}
                             </Label>
                             <Input
                               id="delete-password"
@@ -932,7 +939,7 @@ export function ProfileSettingsDialog({
 
                         <div className="mt-3 space-y-1.5">
                           <Label htmlFor="delete-confirm" className="text-[12px]">
-                            Type DELETE to confirm
+                            {t("typeDelete")}
                           </Label>
                           <Input
                             id="delete-confirm"
@@ -940,7 +947,7 @@ export function ProfileSettingsDialog({
                             onChange={(event) =>
                               setDeleteConfirm(event.target.value)
                             }
-                            placeholder="DELETE"
+                            placeholder={t("deletePlaceholder")}
                             className="h-9 rounded-xl bg-background/80 px-3"
                             autoComplete="off"
                           />
@@ -962,7 +969,7 @@ export function ProfileSettingsDialog({
                           ) : (
                             <Trash2 className="size-3.5" />
                           )}
-                          Delete account
+                          {t("deleteAccount")}
                         </Button>
                       </div>
 
@@ -983,7 +990,7 @@ export function ProfileSettingsDialog({
                   ) : saved ? (
                     <p className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                       <Check className="size-3.5" />
-                      Saved
+                      {t("saved")}
                     </p>
                   ) : null}
                 </div>
@@ -995,7 +1002,7 @@ export function ProfileSettingsDialog({
                     onClick={() => onOpenChange(false)}
                     disabled={saving}
                   >
-                    Cancel
+                    {t("cancel")}
                   </Button>
                   <Button
                     type="button"
@@ -1015,7 +1022,7 @@ export function ProfileSettingsDialog({
                     {saving ? (
                       <Loader2 className="size-3.5 animate-spin" />
                     ) : (
-                      "Save"
+                      t("save")
                     )}
                   </Button>
                 </div>

@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import {
+  Image as ImagePlus,
+  SpinnerGap as Loader2,
+  X,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { submitFeedback } from "@/actions/feedback";
 import { Button } from "@/components/ui/button";
@@ -35,6 +40,8 @@ export function FeedbackDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("dialogs.feedback");
+  const te = useTranslations("errors");
   const [message, setMessage] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -58,13 +65,13 @@ export function FeedbackDialog({
     for (const file of Array.from(files)) {
       if (next.length >= IMAGE_MAX) break;
       if (!file.type.startsWith("image/")) {
-        setError("Only image files");
+        setError(te("feedbackImages"));
         continue;
       }
       try {
         next.push(await readFileAsDataUrl(file));
       } catch {
-        setError("Couldn't read that image");
+        setError(te("readImage"));
       }
     }
     setImages(next.slice(0, IMAGE_MAX));
@@ -92,7 +99,7 @@ export function FeedbackDialog({
       >
         <button
           type="button"
-          aria-label="Close"
+          aria-label={t("closeAria")}
           onClick={() => onOpenChange(false)}
           className="absolute top-2.5 right-2.5 z-10 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
         >
@@ -102,26 +109,28 @@ export function FeedbackDialog({
         <div className="px-5 pt-5 pb-1 pr-12">
           <DialogHeader className="gap-1 text-left">
             <DialogTitle className="text-[17px] font-semibold tracking-tight text-foreground">
-              Feedback
+              {t("title")}
             </DialogTitle>
             <p className="text-[13px] leading-relaxed text-muted-foreground">
-              A bug, an idea, or something missing.
+              {t("subtitle")}
             </p>
           </DialogHeader>
         </div>
 
         {sent ? (
           <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
-            <p className="text-[14px] font-semibold text-foreground">Thanks — we got it</p>
+            <p className="text-[14px] font-semibold text-foreground">
+              {t("thanksTitle")}
+            </p>
             <p className="max-w-xs text-[13px] text-muted-foreground">
-              Your note is on the list. We read every one.
+              {t("thanksBody")}
             </p>
             <Button
               type="button"
               className="mt-1 h-10 rounded-md px-5 text-[13px] font-medium shadow-none"
               onClick={() => onOpenChange(false)}
             >
-              Close
+              {t("close")}
             </Button>
           </div>
         ) : (
@@ -132,7 +141,7 @@ export function FeedbackDialog({
             <Textarea
               value={message}
               onChange={(event) => setMessage(event.target.value)}
-              placeholder="Tell us what happened or what you want…"
+              placeholder={t("placeholder")}
               rows={5}
               required
               className="min-h-[120px] resize-y rounded-2xl border-none bg-muted/40 px-3.5 py-3 text-[13px] shadow-none placeholder:text-muted-foreground/70 focus-visible:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
@@ -149,9 +158,11 @@ export function FeedbackDialog({
                     <img src={src} alt="" className="size-full object-cover" />
                     <button
                       type="button"
-                      aria-label="Remove image"
+                      aria-label={t("removeImage")}
                       onClick={() =>
-                        setImages((current) => current.filter((_, i) => i !== index))
+                        setImages((current) =>
+                          current.filter((_, i) => i !== index),
+                        )
                       }
                       className="absolute top-1 right-1 grid size-5 place-items-center rounded-md bg-background/90 text-foreground"
                     >
@@ -182,7 +193,7 @@ export function FeedbackDialog({
                   onClick={() => inputRef.current?.click()}
                 >
                   <ImagePlus className="size-3.5" />
-                  Add images
+                  {t("addImages")}
                 </Button>
               </div>
               <Button
@@ -190,7 +201,7 @@ export function FeedbackDialog({
                 disabled={busy}
                 className="h-9 rounded-md px-4 text-[13px] font-medium shadow-none"
               >
-                {busy ? <Loader2 className="size-3.5 animate-spin" /> : "Send"}
+                {busy ? <Loader2 className="size-3.5 animate-spin" /> : t("send")}
               </Button>
             </div>
 

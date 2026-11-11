@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ChevronLeft, ChevronRight, Loader2, Pencil, Sparkles } from "lucide-react";
+import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  SpinnerGap as Loader2,
+  PencilSimple as Pencil,
+  Sparkle as Sparkles,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import {
   cloneCommunityProject,
@@ -52,6 +59,8 @@ export function CommunityPreviewDialog({
   onOpenChange: (open: boolean) => void;
   onAuthRequired?: () => void;
 }) {
+  const t = useTranslations("studio.communityPreview");
+  const tb = useTranslations("studio.browse");
   const router = useRouter();
   const { status } = useSession();
   const [preview, setPreview] = useState<CommunityPreview | null>(null);
@@ -157,7 +166,7 @@ export function CommunityPreviewDialog({
         )}
       >
         <DialogTitle className="sr-only">
-          {preview?.title ?? "Template preview"}
+          {preview?.title ?? t("title")}
         </DialogTitle>
 
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
@@ -165,7 +174,7 @@ export function CommunityPreviewDialog({
             <div className="relative flex min-h-0 flex-1 items-center justify-center gap-2 px-3 py-6 sm:gap-4 sm:px-8">
               <button
                 type="button"
-                aria-label="Previous slide"
+                aria-label={t("prevSlide")}
                 disabled={count <= 1}
                 onClick={() => go(index - 1)}
                 className="hidden size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
@@ -191,14 +200,14 @@ export function CommunityPreviewDialog({
                   />
                 ) : (
                   <div className="flex size-full items-center justify-center px-6 text-center text-[13px] text-muted-foreground">
-                    Preview unavailable
+                    {t("previewUnavailable")}
                   </div>
                 )}
               </div>
 
               <button
                 type="button"
-                aria-label="Next slide"
+                aria-label={t("nextSlide")}
                 disabled={count <= 1}
                 onClick={() => go(index + 1)}
                 className="hidden size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
@@ -246,16 +255,17 @@ export function CommunityPreviewDialog({
             <div className="space-y-4">
               <div>
                 <p className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">
-                  {preview?.category ?? "Community"}
+                  {preview?.category ?? tb("community")}
                 </p>
                 <h2 className="mt-1.5 text-[22px] leading-tight font-semibold tracking-tight text-foreground">
-                  {preview?.title ?? (loading ? "Loading…" : "Template")}
+                  {preview?.title ?? (loading ? t("loading") : t("template"))}
                 </h2>
                 {preview ? (
                   <p className="mt-2 text-[13px] text-muted-foreground">
-                    {preview.slideCount} slide
-                    {preview.slideCount === 1 ? "" : "s"} ·{" "}
-                    {preview.aspectRatio}
+                    {t("slidesMeta", {
+                      count: preview.slideCount,
+                      ratio: preview.aspectRatio,
+                    })}
                   </p>
                 ) : null}
               </div>
@@ -274,17 +284,21 @@ export function CommunityPreviewDialog({
                     </Avatar>
                     <div className="min-w-0">
                       <p className="truncate text-[13px] font-medium text-foreground">
-                        {preview.authorName ?? "Creator"}
+                        {preview.authorName ?? tb("creator")}
                       </p>
-                      <p className="text-[12px] text-muted-foreground">Author</p>
+                      <p className="text-[12px] text-muted-foreground">
+                        {t("author")}
+                      </p>
                     </div>
                   </div>
                   {updatedAt ? (
                     <p className="text-[12px] leading-relaxed text-muted-foreground">
-                      Updated {updatedAt}
                       {preview.updatedByName
-                        ? ` by ${preview.updatedByName}`
-                        : ""}
+                        ? t("updatedBy", {
+                            when: updatedAt,
+                            name: preview.updatedByName,
+                          })
+                        : tb("updatedWhen", { when: updatedAt })}
                     </p>
                   ) : null}
                 </div>
@@ -305,11 +319,10 @@ export function CommunityPreviewDialog({
                     className="h-11 w-full gap-2 rounded-md text-[14px] font-medium shadow-none"
                   >
                     <Pencil className="size-5" />
-                    Edit my template
+                    {t("editMyTemplate")}
                   </Button>
                   <p className="text-center text-[12px] leading-relaxed text-muted-foreground">
-                    Open the original project. Republish from the editor when
-                    you&apos;re done.
+                    {t("ownerHint")}
                   </p>
                 </>
               ) : (
@@ -325,10 +338,10 @@ export function CommunityPreviewDialog({
                     ) : (
                       <Sparkles className="size-5" />
                     )}
-                    Customize this design
+                    {t("customize")}
                   </Button>
                   <p className="text-center text-[12px] leading-relaxed text-muted-foreground">
-                    Opens a copy in your editor. The original stays untouched.
+                    {t("opensCopyHint")}
                   </p>
                 </>
               )}

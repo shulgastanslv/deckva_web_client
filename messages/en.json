@@ -107,7 +107,10 @@
     "ungroup": "Ungroup",
     "cut": "Cut",
     "play": "Play",
-    "pause": "Pause"
+    "pause": "Pause",
+    "toggleTheme": "Toggle theme",
+    "switchToLightTheme": "Switch to light theme",
+    "switchToDarkTheme": "Switch to dark theme"
   },
   "meta": {
     "titleDefault": "Deckva — carousel studio",
@@ -205,7 +208,14 @@
       "gridView": "Grid view",
       "listView": "List view",
       "cardsView": "Cards view",
-      "rowsView": "Rows view"
+      "rowsView": "Rows view",
+      "folderSub": "Manage projects in this folder.",
+      "starredSub": "Quick access to starred projects.",
+      "folderEmpty": "Folder is empty",
+      "sortNewest": "Newest",
+      "sortUpdated": "Recently updated",
+      "sortOldest": "Oldest",
+      "sortAZ": "A–Z"
     },
     "projectMenu": {
       "more": "More",
@@ -215,7 +225,8 @@
       "createFolderFirst": "Create a folder in the sidebar first.",
       "delete": "Delete",
       "star": "Star",
-      "unstar": "Unstar"
+      "unstar": "Unstar",
+      "noFolder": "No folder"
     },
     "folders": {
       "title": "Folders",
@@ -256,7 +267,14 @@
       "remove": "Remove",
       "typeNameConfirm": "Type {name} to confirm",
       "managePeople": "Manage people in {name}.",
-      "thisOrganization": "this organization"
+      "thisOrganization": "this organization",
+      "organization": "Organization",
+      "membersTitle": "Members",
+      "makeMember": "Make member",
+      "makeAdmin": "Make admin",
+      "youSuffix": " (you)",
+      "pending": "pending",
+      "user": "User"
     },
     "invite": {
       "title": "Invite Members",
@@ -286,8 +304,16 @@
         "decline": "Decline",
         "goToStudio": "Go to studio",
         "openStudio": "Open studio",
-        "signIn": "Sign in"
-      }
+        "signIn": "Sign in",
+        "invitedBy": "{name} invited you to join as {role}.",
+        "invitedGeneric": "You've been invited to join as {role}.",
+        "sentTo": "Sent to {email}.",
+        "invalidOrGone": "This invite link is invalid or no longer works."
+      },
+      "inviteTo": "Invite to {name}",
+      "description": "Registered accounts get an in-app notification. Others can join via the invite link.",
+      "copyFailed": "Couldn't copy invite link",
+      "sendFailed": "Couldn't send invites"
     },
     "brandKit": {
       "title": "Brand kit",
@@ -372,7 +398,8 @@
       "title": "Shortcuts",
       "keyboard": "Keyboard shortcuts",
       "general": "General",
-      "animationEditing": "Animation Editing"
+      "animationEditing": "Animation Editing",
+      "playPause": "Play / Pause"
     },
     "communityPreview": {
       "template": "Template",
@@ -382,7 +409,13 @@
       "editMyTemplate": "Edit my template",
       "opensCopy": "Opens a copy in your editor.",
       "prevSlide": "Previous slide",
-      "nextSlide": "Next slide"
+      "nextSlide": "Next slide",
+      "title": "Template preview",
+      "customize": "Customize this design",
+      "opensCopyHint": "Opens a copy in your editor. The original stays untouched.",
+      "ownerHint": "Open the original project. Republish from the editor when you're done.",
+      "updatedBy": "Updated {when} by {name}",
+      "slidesMeta": "{count, plural, one {# slide} other {# slides}} · {ratio}"
     },
     "prompt": {
       "add": "Add",
@@ -397,7 +430,8 @@
       "free": "Free",
       "recentHistory": "Recent history",
       "recentPrompts": "Recent prompts",
-      "searchModels": "Search models"
+      "searchModels": "Search models",
+      "model": "Model"
     }
   },
   "landing": {
@@ -654,7 +688,12 @@
       "deleteSlide": "Delete slide",
       "addSlide": "Add slide",
       "options": "Options",
-      "canvasOptions": "Canvas options"
+      "canvasOptions": "Canvas options",
+      "selectObjectToHide": "Select an object to hide",
+      "selectObjectToLock": "Select an object to lock",
+      "importSlidesBody": "This file has {count} slides. Load only the first into the current slide, or replace the whole carousel.",
+      "slideTitle": "Slide {n}",
+      "slideTitleNamed": "Slide {n} — {title}"
     },
     "panels": {
       "tools": "Tools",
@@ -675,7 +714,11 @@
       "next": "Next slide",
       "slide": "Slide",
       "unmark": "Unmark",
-      "markHint": "Mark for font, palette, and export"
+      "markHint": "Mark for font, palette, and export",
+      "markedCount": "{n} marked",
+      "dragReorder": "Slide {n}. Drag to reorder.",
+      "unmarkSlide": "Unmark slide {n}",
+      "markSlide": "Mark slide {n}"
     },
     "zoom": {
       "toolSelect": "Select. Move and edit objects (V)",
@@ -690,7 +733,13 @@
       "unsaved": "Unsaved changes",
       "saved": "Changes saved",
       "allSaved": "All changes saved",
-      "saveNow": "Save now"
+      "saveNow": "Save now",
+      "writingEdits": "Writing your latest edits",
+      "lastSaved": "Last saved: {time}",
+      "autoSaveHint": "Deckva keeps your carousel in sync while you edit. Press ⌘S anytime to save now.",
+      "secondsAgo": "{n}s ago",
+      "minutesAgo": "{n}m ago",
+      "hoursAgo": "{n}h ago"
     },
     "header": {
       "projectName": "Project name",
@@ -699,7 +748,9 @@
       "previewCarousel": "Preview Carousel",
       "previewPhone": "Preview on Phone",
       "community": "Community",
-      "publishCommunity": "Publish to community"
+      "publishCommunity": "Publish to community",
+      "exportPngZip": "Export • {count}x PNGs / ZIP",
+      "exportPngZipShort": "Export · {count} PNG / ZIP"
     },
     "fileMenu": {
       "file": "File",
@@ -709,7 +760,8 @@
       "newDesign": "New design",
       "makeCopy": "Make a copy",
       "layoutGrid": "Layout grid",
-      "help": "Help"
+      "help": "Help",
+      "slidesMeta": "{count, plural, one {# slide} other {# slides}} · {width}×{height}"
     },
     "preview": {
       "preparing": "Preparing slides…",
@@ -752,7 +804,11 @@
       "transparency": "Transparency",
       "opacity": "Opacity",
       "copyStyle": "Copy style",
-      "pasteStyle": "Paste style"
+      "pasteStyle": "Paste style",
+      "left": "Left",
+      "center": "Center",
+      "right": "Right",
+      "justify": "Justify"
     },
     "filters": {
       "image": "Image",
@@ -796,7 +852,8 @@
         "heading": "Heading",
         "subtitle": "Subtitle",
         "body": "Body"
-      }
+      },
+      "loadError": "Couldn't load the font list"
     },
     "grid": {
       "layoutGrid": "Layout grid",
@@ -851,7 +908,19 @@
       "shapes": "Shapes",
       "frames": "Frames",
       "code": "Code",
-      "category": "Category"
+      "category": "Category",
+      "pngJpg": "PNG, JPG",
+      "uploading": "Uploading…",
+      "searchPhotos": "Search photos...",
+      "searchText": "Search text...",
+      "searchShapes": "Search shapes...",
+      "searchDevices": "Search devices...",
+      "pasteHint": "PNG, JPG — or paste with Ctrl+V",
+      "elementCategory": "Element category",
+      "smallerTitleUnder": "Smaller title under the heading",
+      "addHeading": "Add a heading",
+      "addSubheading": "Add a subheading",
+      "addBodyText": "Add a little bit of body text"
     },
     "layers": {
       "empty": "No objects yet. Add elements from the Elements tab.",
@@ -903,7 +972,11 @@
       "slides": "Slides",
       "fewerSlides": "Fewer slides",
       "moreSlides": "More slides",
-      "screenSplitHint": "Layout locks an image slot on the slide."
+      "screenSplitHint": "Layout locks an image slot on the slide.",
+      "thisSlide": "This slide",
+      "thisSlideHint": "Colors land on this slide only. The carousel default stays as it is.",
+      "allScope": "All",
+      "markedScope": "Marked"
     },
     "assets": {
       "title": "Assets",
@@ -928,7 +1001,10 @@
       "tagsComma": "Tags, comma separated",
       "preview": "Preview",
       "tags": "Tags",
-      "allTags": "All tags"
+      "allTags": "All tags",
+      "filterByTag": "Filter by tag",
+      "pngJpgSvg": "PNG, JPG, SVG · saved to library",
+      "asset": "Asset"
     },
     "settings": {
       "title": "Canvas Preferences",
@@ -1057,8 +1133,15 @@
         "rowCount": "Row count",
         "close": "Close",
         "titlesPlaceholder": "Hook line\nProof…",
-        "rankedPlaceholder": "Next.js\nRemix\nNuxt"
-      }
+        "rankedPlaceholder": "Next.js\nRemix\nNuxt",
+        "noMatches": "No matches",
+        "typeToSearch": "Type to search across all slides",
+        "working": "Working…",
+        "pickScreenshots": "Pick screenshots",
+        "makeSlides": "Make slides"
+      },
+      "working": "Working…",
+      "imageToolsHint": "Remove BG, upscale, magic layer — select an image"
     },
     "mockups": {
       "intro": "Top lists and screenshot carousels for device frames.",
@@ -1069,7 +1152,10 @@
       "fillHint": "Multi-select photos in order to fill each screen.",
       "listScreenshots": "List + screenshots",
       "device": "Device",
-      "titlesPlaceholder": "One title per line\nNext.js\nRemix\nNuxt"
+      "titlesPlaceholder": "One title per line\nNext.js\nRemix\nNuxt",
+      "placing": "Placing…",
+      "onePerSlide": "One per slide",
+      "thisSlide": "This slide"
     },
     "code": {
       "editCode": "Edit code",
@@ -1121,7 +1207,12 @@
       "comment": "Comment",
       "repost": "Repost",
       "send": "Send",
-      "close": "Close"
+      "close": "Close",
+      "newPost": "New post",
+      "previewingThreads": "Previewing this slide in Threads",
+      "previewingTikTok": "Previewing this slide on TikTok",
+      "previewingX": "Previewing this slide on X",
+      "previewingLinkedIn": "Previewing this slide on LinkedIn"
     },
     "commands": {
       "title": "Commands",
@@ -1226,7 +1317,20 @@
       "marked": "Marked",
       "this": "This",
       "markHint": "Mark slides with the corner check",
-      "updateMarked": "Update marked slides"
+      "updateMarked": "Update marked slides",
+      "alignTop": "Align top",
+      "alignMiddle": "Align middle",
+      "alignBottom": "Align bottom",
+      "distributeX": "Distribute X",
+      "distributeY": "Distribute Y",
+      "properties": "Properties",
+      "selection": "Selection",
+      "shape": "Shape",
+      "text": "Text",
+      "textColor": "Text color",
+      "blur": "Blur",
+      "offset": "Offset",
+      "thisSlide": "This slide"
     }
   },
   "dialogs": {
@@ -1267,7 +1371,12 @@
       "phName": "John Doe",
       "phPasswordMin": "At least 6 characters",
       "googleUnconfirmed": "Google did not confirm this email.",
-      "googleFailed": "Couldn't sign in with Google. Try again."
+      "googleFailed": "Couldn't sign in with Google. Try again.",
+      "emailConfirmed": "Email confirmed. You can sign in.",
+      "accountCreatedNoEmail": "Account created. Email is not configured, so the confirmation link was printed in the server log.",
+      "resetLinkMissing": "This reset link is missing. Request a new one.",
+      "passwordUpdated": "Password updated. Sign in with the new one.",
+      "tryAgain": "Something went wrong. Try again."
     },
     "settings": {
       "title": "Settings",
@@ -1334,7 +1443,9 @@
         "passwordsMismatch": "Passwords do not match",
         "currentPassword": "Enter your current password",
         "expiry": "Use MM/YY for expiry"
-      }
+      },
+      "deleteAccountHint": "Permanently removes projects, billing data, and your account.",
+      "cardExpires": "Exp {month}/{year}"
     },
     "export": {
       "title": "Export",
@@ -1365,7 +1476,9 @@
       "copyFirstSlide": "Copy first slide image",
       "previewAlt": "Export preview",
       "shareText": "Carousel from Deckva",
-      "shareUnavailable": "This device can't share image files. Download instead."
+      "shareUnavailable": "This device can't share image files. Download instead.",
+      "exporting": "Exporting…",
+      "marked": "Marked"
     },
     "share": {
       "title": "Share Project",
@@ -1486,7 +1599,12 @@
       "remove": "Remove from community",
       "republished": "Republished",
       "submitted": "Submitted for review",
-      "metaLine": "{title} · {count, plural, one {# slide} other {# slides}}"
+      "metaLine": "{title} · {count, plural, one {# slide} other {# slides}}",
+      "published": "Published",
+      "republish": "Republish",
+      "removedDone": "Removed from community",
+      "lastUpdate": "Last community update · {when}",
+      "pendingReview": "pending review"
     },
     "upgrade": {
       "onPro": "You're on Pro",

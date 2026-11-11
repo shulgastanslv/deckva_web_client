@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Loader2, Plus, X } from "lucide-react";
+import {
+  ArrowRight,
+  SpinnerGap as Loader2,
+  Plus,
+  X,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +32,7 @@ export function StudioListDialog({
   busy?: boolean;
   error?: string | null;
 }) {
+  const t = useTranslations("dialogs.list");
   const [items, setItems] = useState<string[]>([""]);
 
   useEffect(() => {
@@ -43,10 +50,10 @@ export function StudioListDialog({
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
           <DialogTitle className="text-[17px] font-semibold tracking-tight">
-            List of Contents
+            {t("title")}
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed">
-            Fill a todo-style list — each row becomes a point on the canvas.
+            {t("subtitle")}
           </DialogDescription>
         </DialogHeader>
 
@@ -74,7 +81,7 @@ export function StudioListDialog({
                       setItems((prev) => [...prev, ""]);
                     }
                   }}
-                  placeholder="List item…"
+                  placeholder={t("itemPlaceholder")}
                   className={cn(
                     "h-10 flex-1 rounded-2xl bg-muted/30 px-3.5 text-[14px] text-foreground outline-none",
                     "placeholder:text-muted-foreground/70 focus:bg-muted/40",
@@ -89,7 +96,7 @@ export function StudioListDialog({
                       setItems((prev) => prev.filter((_, i) => i !== index))
                     }
                     className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
-                    aria-label="Remove item"
+                    aria-label={t("removeItem")}
                   >
                     <X className="size-3.5" />
                   </button>
@@ -108,7 +115,7 @@ export function StudioListDialog({
             className="h-9 rounded-md px-3 text-[13px]"
           >
             <Plus className="size-3.5" />
-            Add item
+            {t("addItem")}
           </Button>
 
           {error ? (
@@ -125,7 +132,7 @@ export function StudioListDialog({
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <>
-                Place on canvas
+                {t("place")}
                 <ArrowRight className="size-3.5 opacity-70" />
               </>
             )}
