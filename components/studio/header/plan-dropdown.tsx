@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, ChevronDown, Crown } from "lucide-react";
+import {
+  Check,
+  CaretDown as ChevronDown,
+  Crown,
+} from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 import { getGenerationStatus } from "@/actions/ai";
 import { Button } from "@/components/ui/button";
@@ -13,7 +18,6 @@ import {
 } from "@/components/ui/popover";
 import {
   FREE_GENERATION_LIMIT,
-  PRO_FEATURES,
   STUDIO_PRO_PRICE_LABEL,
 } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
@@ -22,6 +26,13 @@ type PlanState = {
   isPro: boolean;
   remaining: number;
 };
+
+const FEATURE_KEYS = [
+  "unlimitedAi",
+  "hiResExports",
+  "foldersBrand",
+  "prioritySupport",
+] as const;
 
 export function PlanDropdown({
   isUpgrade,
@@ -34,6 +45,7 @@ export function PlanDropdown({
   /** `usage` = remaining count; `upgrade` = Upgrade to Pro / Pro ▾ */
   variant?: "usage" | "upgrade";
 }) {
+  const t = useTranslations("studio.upgrade");
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const [plan, setPlan] = useState<PlanState>({
@@ -94,7 +106,7 @@ export function PlanDropdown({
   }, [signedIn]);
 
   const usageLabel = plan.isPro
-    ? "Pro"
+    ? t("planPro")
     : `${plan.remaining}/${FREE_GENERATION_LIMIT}`;
 
   return (
@@ -111,11 +123,11 @@ export function PlanDropdown({
           {variant === "upgrade" && !plan.isPro ? (
             <>
               <Crown className="size-3.5" />
-              <span>Upgrade to Pro</span>
+              <span>{t("upgradeToPro")}</span>
             </>
           ) : variant === "upgrade" && plan.isPro ? (
             <>
-              <span>Pro</span>
+              <span>{t("planPro")}</span>
               <ChevronDown className="size-3.5 opacity-70" />
             </>
           ) : (
@@ -131,28 +143,31 @@ export function PlanDropdown({
       >
         <div className="flex flex-col">
           <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
-            {plan.isPro ? "Pro" : "Free plan"}
+            {plan.isPro ? t("planPro") : t("freePlan")}
           </h3>
           <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
             {plan.isPro
-              ? "Unlimited AI generations on your subscription."
-              : `${plan.remaining} of ${FREE_GENERATION_LIMIT} free generations left.`}
+              ? t("unlimitedOnSub")
+              : t("remainingFree", {
+                  remaining: plan.remaining,
+                  limit: FREE_GENERATION_LIMIT,
+                })}
           </p>
 
           <div className="my-4 h-px w-full bg-muted/50" />
 
           <p className="mb-3 text-[13px] font-medium text-foreground">
-            Pro includes
+            {t("proIncludes")}
           </p>
 
           <ul className="flex flex-col gap-2.5">
-            {PRO_FEATURES.map((feature) => (
+            {FEATURE_KEYS.map((feature) => (
               <li key={feature} className="flex items-start gap-2.5">
                 <div className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-md bg-muted/50 text-foreground">
                   <Check className="size-3" strokeWidth={3} />
                 </div>
                 <p className="text-[13px] leading-snug text-muted-foreground">
-                  {feature}
+                  {t(`features.${feature}`)}
                 </p>
               </li>
             ))}
@@ -163,7 +178,7 @@ export function PlanDropdown({
               onClick={openUpgrade}
               className="mt-5 h-10 w-full rounded-md font-medium shadow-none"
             >
-              Upgrade · {STUDIO_PRO_PRICE_LABEL}/mo
+              {t("upgrade")} · {STUDIO_PRO_PRICE_LABEL}/mo
             </Button>
           ) : null}
         </div>

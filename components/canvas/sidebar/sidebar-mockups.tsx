@@ -1,7 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import { Loader2, Smartphone, Images } from "lucide-react";
+import {
+  SpinnerGap as Loader2,
+  DeviceMobile as Smartphone,
+  Images,
+} from "@phosphor-icons/react";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { cn } from "@/lib/utils";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
@@ -55,6 +60,7 @@ async function filesToDataUrls(files: FileList | File[]): Promise<string[]> {
 }
 
 export function SidebarMockups() {
+  const t = useTranslations("editor.mockups");
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
   const fillInputRef = useRef<HTMLInputElement>(null);
@@ -108,7 +114,7 @@ export function SidebarMockups() {
             }
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label="Device">
+          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("device")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -148,7 +154,7 @@ export function SidebarMockups() {
           ) : (
             <Smartphone className="size-3.5" />
           )}
-          {busy === "ranked" ? "Building…" : `List · ${lineCount} slides`}
+          {busy === "ranked" ? t("building") : `List · ${lineCount} slides`}
         </button>
 
         <div className="flex gap-1.5">
@@ -184,16 +190,16 @@ export function SidebarMockups() {
           className={cn(sidebarActionBtn, "w-full")}
         >
           {busy === "row" ? <Loader2 className="size-3.5 animate-spin" /> : null}
-          {busy === "row" ? "Placing…" : `Row of ${rowCount} on this slide`}
+          {busy === "row" ? t("placing") : `Row of ${rowCount} on this slide`}
         </button>
 
         <div className="space-y-1.5">
-          <p className={cn(sidebarHint, "font-medium")}>Fill screens</p>
+          <p className={cn(sidebarHint, "font-medium")}>{t("fillScreens")}</p>
           <div className={sidebarSegmented}>
             {(
               [
-                ["per-slide", "One per slide"],
-                ["this-slide", "This slide"],
+                ["per-slide", t("onePerSlide")],
+                ["this-slide", t("thisSlide")],
               ] as const
             ).map(([id, label]) => (
               <button
@@ -231,10 +237,10 @@ export function SidebarMockups() {
             ) : (
               <Images className="size-3.5" />
             )}
-            {busy === "fill" ? "Filling…" : "Pick screenshots"}
+            {busy === "fill" ? t("filling") : t("pickScreenshots")}
           </button>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Multi-select photos in order. One per slide walks the carousel; This slide fills left → right.
+            Multi-select photos in order. {t("onePerSlide")} walks the carousel; {t("thisSlide")} fills left → right.
           </p>
         </div>
 
@@ -265,7 +271,7 @@ export function SidebarMockups() {
           className={cn(sidebarActionBtn, "w-full")}
         >
           {busy === "ranked-fill" ? <Loader2 className="size-3.5 animate-spin" /> : null}
-          {busy === "ranked-fill" ? "Building…" : "List + screenshots"}
+          {busy === "ranked-fill" ? t("building") : t("listScreenshots")}
         </button>
       </div>
   );

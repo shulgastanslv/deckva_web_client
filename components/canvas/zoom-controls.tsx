@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { Eraser, Hand, MousePointer2, ZoomIn, ZoomOut } from "lucide-react";
+import {
+  Eraser,
+  Hand,
+  Cursor as MousePointer2,
+  MagnifyingGlassPlus as ZoomIn,
+  MagnifyingGlassMinus as ZoomOut,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -28,6 +35,7 @@ export function ZoomControls({
   const setHandActive = useCanvasStore((s) => s.setHandActive);
   const eraserActive = useCanvasStore((s) => s.eraserActive);
   const setEraserActive = useCanvasStore((s) => s.setEraserActive);
+  const t = useTranslations("editor.zoom");
 
   useEffect(() => {
     if (!showTools) return;
@@ -76,7 +84,7 @@ export function ZoomControls({
               setHandActive(false);
               setEraserActive(false);
             }}
-            title="Select. Move and edit objects (V)"
+            title={t("toolSelect")}
             aria-pressed={selectActive}
           >
             <MousePointer2 className="size-4 stroke-[1.5]" />
@@ -86,7 +94,7 @@ export function ZoomControls({
             size="icon"
             className={cn(cell, handActive && "bg-background text-foreground")}
             onClick={() => setHandActive(true)}
-            title="Hand. Drag to move around the canvas. Hold Space (H)"
+            title={t("toolHand")}
             aria-pressed={handActive}
           >
             <Hand className="size-4 stroke-[1.5]" />
@@ -96,7 +104,7 @@ export function ZoomControls({
             size="icon"
             className={cn(cell, eraserActive && "bg-background text-foreground")}
             onClick={() => setEraserActive(!eraserActive)}
-            title="Eraser. Brush away pixels on images (E)"
+            title={t("toolEraser")}
             aria-pressed={eraserActive}
           >
             <Eraser className="size-4 stroke-[1.5]" />
@@ -109,7 +117,7 @@ export function ZoomControls({
         size="icon"
         className={cell}
         onClick={() => setZoom(clampZoom(zoom + 10))}
-        title="Zoom in"
+        title={t("in")}
       >
         <ZoomIn className="size-4 stroke-[1.5]" />
       </Button>
@@ -117,7 +125,7 @@ export function ZoomControls({
         type="button"
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-medium tabular-nums text-foreground hover:bg-muted/60"
         onClick={() => setZoom(100)}
-        title="Reset zoom. Ctrl + scroll also zooms"
+        title={t("reset")}
       >
         {Math.round(zoom)}
       </button>
@@ -126,7 +134,7 @@ export function ZoomControls({
         size="icon"
         className={cell}
         onClick={() => setZoom(clampZoom(zoom - 10))}
-        title="Zoom out"
+        title={t("out")}
       >
         <ZoomOut className="size-4 stroke-[1.5]" />
       </Button>

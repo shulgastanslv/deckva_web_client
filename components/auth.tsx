@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import {
   checkCredentials,
   requestPasswordReset,
@@ -20,7 +21,9 @@ import {
   verifyEmail,
 } from "@/actions/auth-email";
 import { registerUser } from "@/actions/user";
-import { Loader2 } from "lucide-react";
+import {
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
 import Logo from "./logo/logo";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
 
@@ -36,11 +39,6 @@ function queryParam(name: string): string | null {
 
 function callbackUrlFromQuery(): string {
   return queryParam("callbackUrl") || "/studio";
-}
-
-function authErrorMessage(code: string): string {
-  if (code === "AccessDenied") return "Google did not confirm this email.";
-  return "Couldn't sign in with Google. Try again.";
 }
 
 function verifyEmailOnce(token: string) {
@@ -66,6 +64,8 @@ export function AuthModal({
   verifyToken = null,
   resetToken = null,
 }: AuthModalProps) {
+  const t = useTranslations("dialogs.auth");
+  const te = useTranslations("errors");
   const [view, setView] = useState<View>("login");
   const [checkKind, setCheckKind] = useState<CheckKind>("verify");
   const [email, setEmail] = useState("");
@@ -100,13 +100,13 @@ export function AuthModal({
       if (cancelled) return;
       setIsLoading(false);
       if ("error" in res && res.error) setErrorMessage(res.error);
-      else setInfoMessage("Email confirmed. You can sign in.");
+      else setInfoMessage(t("emailConfirmed"));
     });
 
     return () => {
       cancelled = true;
     };
-  }, [verifyToken]);
+  }, [verifyToken, t]);
 
   useEffect(() => {
     if (!resetToken) return;
@@ -123,11 +123,13 @@ export function AuthModal({
     shownAuthError.current = true;
     setView("login");
     setInfoMessage(null);
-    setErrorMessage(authErrorMessage(code));
+    setErrorMessage(
+      code === "AccessDenied" ? t("googleUnconfirmed") : t("googleFailed"),
+    );
     const url = new URL(window.location.href);
     url.searchParams.delete("error");
     window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
-  }, []);
+  }, [t]);
 
   const handleSwitchView = (newView: View) => {
     setView(newView);
@@ -142,8 +144,6 @@ export function AuthModal({
     }
     onOpenChange?.(open);
   };
-
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,8 +168,8 @@ export function AuthModal({
           "error" in res && res.error
             ? res.error
             : "delivered" in res && res.delivered === false
-              ? "Account created. Email is not configured, so the confirmation link was printed in the server log."
-              : `We sent a confirmation link to ${email.trim()}.`,
+              ? t("accountCreatedNoEmail")
+              : t("sentConfirm", { email: email.trim() }),
         );
         setIsLoading(false);
         return;
@@ -193,7 +193,7 @@ export function AuthModal({
         });
 
         if (res?.error) {
-          setErrorMessage("Incorrect email or password");
+          setErrorMessage(te("incorrectCredentials"));
         } else {
           onOpenChange?.(false);
           router.refresh();
@@ -211,8 +211,8 @@ export function AuthModal({
           setView("check-email");
           setInfoMessage(
             "delivered" in res && res.delivered === false
-              ? "Email is not configured. If this account exists, the reset link was printed in the server log."
-              : "If an account exists for that email, we sent a reset link.",
+              ? t("emailNotConfiguredDev")
+              : t("sentResetIfExists"),
           );
         }
         setIsLoading(false);
@@ -221,7 +221,7 @@ export function AuthModal({
 
       if (view === "reset-password") {
         if (!resetToken) {
-          setErrorMessage("This reset link is missing. Request a new one.");
+          setErrorMessage(t("resetLinkMissing"));
           setIsLoading(false);
           return;
         }
@@ -231,12 +231,12 @@ export function AuthModal({
         } else {
           setPassword("");
           setView("login");
-          setInfoMessage("Password updated. Sign in with the new one.");
+          setInfoMessage(t("passwordUpdated"));
         }
         setIsLoading(false);
       }
     } catch {
-      setErrorMessage("Something went wrong. Try again.");
+      setErrorMessage(t("tryAgain"));
       setIsLoading(false);
     }
   };
@@ -275,12 +275,12 @@ export function AuthModal({
                         setErrorMessage(null);
                         setCheckKind("verify");
                         setView("check-email");
-                        setInfoMessage(`We sent a confirmation link to ${unverifiedEmail}.`);
+                        setInfoMessage(t("sentConfirm", { email: unverifiedEmail }));
                       }
                     });
                   }}
                 >
-                  Resend confirmation email
+                  {t("resendConfirm")}
                 </button>
               )}
             </div>
@@ -300,10 +300,10 @@ export function AuthModal({
                   <Logo width={36} height={36} />
                 </div>
                 <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-                  Welcome back
+                  {t("welcomeBack")}
                 </DialogTitle>
                 <DialogDescription className="text-[13px] text-muted-foreground">
-                  Sign in and pick up right where you left off.
+                  {t("welcomeSub")}
                 </DialogDescription>
               </DialogHeader>
 
@@ -319,19 +319,19 @@ export function AuthModal({
                   <path fill="#FBBC05" d="M5.5 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.8 7.3C.7 9.5 0 10.7 0 12.5s.7 3 1.8 5.2l3.7-2.9z" />
                   <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.6-2.2-6.5-5.2L1.8 15.8C3.7 19.5 7.5 23 12 23z" />
                 </svg>
-                Continue with Google
+                {t("continueGoogle")}
               </Button>
 
-              <Divider text="Or continue with email" />
+              <Divider text={t("orContinueEmail")} />
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    Email
+                    {t("email")}
                   </label>
                   <Input
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder={t("phEmail")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -341,14 +341,14 @@ export function AuthModal({
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[13px] font-medium text-foreground">
-                      Password
+                      {t("password")}
                     </label>
                     <button
                       type="button"
                       onClick={() => handleSwitchView("forgot-password")}
                       className="text-[13px] text-muted-foreground hover:text-primary transition-colors bg-transparent p-0"
                     >
-                      Forgot password?
+                      {t("forgotPassword")}
                     </button>
                   </div>
                   <Input
@@ -366,18 +366,18 @@ export function AuthModal({
                   disabled={isLoading}
                   className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
                 >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign in"}
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("signIn")}
                 </Button>
               </form>
 
               <div className="text-center mt-6 text-[13px] text-muted-foreground">
-                Don&apos;t have an account?{" "}
+                {t("noAccount")}{" "}
                 <button
                   type="button"
                   onClick={() => handleSwitchView("register")}
                   className="text-primary font-medium hover:underline bg-transparent p-0"
                 >
-                  Sign up
+                  {t("signUp")}
                 </button>
               </div>
             </>
@@ -391,10 +391,10 @@ export function AuthModal({
                   <Logo width={36} height={36} />
                 </div>
                 <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-                  Create an account
+                  {t("createTitle")}
                 </DialogTitle>
                 <DialogDescription className="text-[13px] text-muted-foreground">
-                  Sign up to get started and create carousels.
+                  {t("createSub")}
                 </DialogDescription>
               </DialogHeader>
 
@@ -410,19 +410,19 @@ export function AuthModal({
                   <path fill="#FBBC05" d="M5.5 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.8 7.3C.7 9.5 0 10.7 0 12.5s.7 3 1.8 5.2l3.7-2.9z" />
                   <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.6-2.2-6.5-5.2L1.8 15.8C3.7 19.5 7.5 23 12 23z" />
                 </svg>
-                Continue with Google
+                {t("continueGoogle")}
               </Button>
 
-              <Divider text="Or register with email" />
+              <Divider text={t("orRegisterEmail")} />
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    Full Name
+                    {t("fullName")}
                   </label>
                   <Input
                     type="text"
-                    placeholder="John Doe"
+                    placeholder={t("phName")}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -431,11 +431,11 @@ export function AuthModal({
                 </div>
                 <div>
                   <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    Email
+                    {t("email")}
                   </label>
                   <Input
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder={t("phEmail")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -444,11 +444,11 @@ export function AuthModal({
                 </div>
                 <div>
                   <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    Password
+                    {t("password")}
                   </label>
                   <Input
                     type="password"
-                    placeholder="At least 6 characters"
+                    placeholder={t("phPasswordMin")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -461,18 +461,18 @@ export function AuthModal({
                   disabled={isLoading}
                   className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
                 >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("createAccount")}
                 </Button>
               </form>
 
               <div className="text-center mt-6 text-[13px] text-muted-foreground">
-                Already have an account?{" "}
+                {t("haveAccount")}{" "}
                 <button
                   type="button"
                   onClick={() => handleSwitchView("login")}
                   className="text-primary font-medium hover:underline bg-transparent p-0"
                 >
-                  Sign in
+                  {t("signIn")}
                 </button>
               </div>
             </>
@@ -483,21 +483,21 @@ export function AuthModal({
             <>
               <DialogHeader className="space-y-1 mb-6 text-center">
                 <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-                  Reset password
+                  {t("resetTitle")}
                 </DialogTitle>
                 <DialogDescription className="text-[13px] text-muted-foreground">
-                  Enter your email and we&apos;ll send you a link to reset your password.
+                  {t("resetSub")}
                 </DialogDescription>
               </DialogHeader>
 
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div>
                   <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    Email
+                    {t("email")}
                   </label>
                   <Input
                     type="email"
-                    placeholder="john@example.com"
+                    placeholder={t("phEmail")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -510,18 +510,18 @@ export function AuthModal({
                   disabled={isLoading}
                   className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
                 >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send reset link"}
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("sendResetLink")}
                 </Button>
               </form>
 
               <div className="text-center mt-6 text-[13px] text-muted-foreground">
-                Remember your password?{" "}
+                {t("rememberPassword")}{" "}
                 <button
                   type="button"
                   onClick={() => handleSwitchView("login")}
                   className="text-primary font-medium hover:underline bg-transparent p-0"
                 >
-                  Back to Sign in
+                  {t("backToSignIn")}
                 </button>
               </div>
             </>
@@ -531,21 +531,21 @@ export function AuthModal({
             <>
               <DialogHeader className="space-y-1 mb-6 text-center">
                 <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-                  Choose a new password
+                  {t("choosePasswordTitle")}
                 </DialogTitle>
                 <DialogDescription className="text-[13px] text-muted-foreground">
-                  This link works once and expires in one hour.
+                  {t("choosePasswordSub")}
                 </DialogDescription>
               </DialogHeader>
 
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div>
                   <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    New password
+                    {t("newPassword")}
                   </label>
                   <Input
                     type="password"
-                    placeholder="At least 6 characters"
+                    placeholder={t("phPasswordMin")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -559,7 +559,7 @@ export function AuthModal({
                   disabled={isLoading}
                   className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
                 >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update password"}
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("updatePassword")}
                 </Button>
               </form>
             </>
@@ -569,12 +569,12 @@ export function AuthModal({
             <>
               <DialogHeader className="space-y-1 mb-6 text-center">
                 <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
-                  Check your email
+                  {t("checkEmailTitle")}
                 </DialogTitle>
                 <DialogDescription className="text-[13px] text-muted-foreground">
                   {checkKind === "verify"
-                    ? "Open the confirmation link, then come back and sign in."
-                    : "Open the reset link in the message to choose a new password."}
+                    ? t("checkEmailConfirm")
+                    : t("checkEmailReset")}
                 </DialogDescription>
               </DialogHeader>
 
@@ -584,7 +584,7 @@ export function AuthModal({
                 className="w-full h-10 rounded-md text-[13px]"
                 onClick={() => handleSwitchView("login")}
               >
-                Back to Sign in
+                {t("backToSignIn")}
               </Button>
             </>
           )}

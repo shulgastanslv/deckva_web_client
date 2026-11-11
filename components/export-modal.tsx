@@ -11,10 +11,11 @@ import { Button } from "@/components/ui/button";
 import {
   Check,
   Copy,
-  Download,
-  Loader2,
-  Share2,
-} from "lucide-react";
+  DownloadSimple as Download,
+  SpinnerGap as Loader2,
+  ShareNetwork as Share2,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
@@ -90,6 +91,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 }
 
 export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps) {
+  const t = useTranslations("dialogs.export");
   const slidesController = useSlidesController();
   const slides = useCanvasStore((s) => s.slides);
   const markedSlideIds = useCanvasStore((s) => s.markedSlideIds);
@@ -297,10 +299,10 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
       );
       const result = await nativeShareFiles(files, {
         title: projectTitle,
-        text: "Карусель из Deckva",
+        text: t("shareText"),
       });
       if (result === "unavailable") {
-        setError("This device can't share image files. Download instead.");
+        setError(t("shareUnavailable"));
       }
     } finally {
       setSharing(false);
@@ -328,12 +330,12 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
       <DialogContent className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[400px]">
         <DialogHeader className="space-y-1 px-5 pt-5 text-left">
           <DialogTitle className="text-base font-semibold tracking-tight">
-            Export
+            {t("title")}
           </DialogTitle>
           <p className="text-[13px] text-muted-foreground">
             {scope === "marked"
-              ? `${exportSlides.length} of ${slides.length} marked`
-              : `${slides.length} slide${slides.length === 1 ? "" : "s"}`}
+              ? t("markedCount", { n: exportSlides.length, total: slides.length })
+              : t("slideCount", { count: slides.length })}
             {" · "}
             {sizeLabel}
           </p>
@@ -344,7 +346,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview}
-              alt="Export preview"
+              alt={t("previewAlt")}
               className="mx-auto max-h-40 w-auto object-contain"
             />
           </div>
@@ -356,8 +358,8 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
             disabled={busy}
             onChange={(v) => setPanel(v as Panel)}
             options={[
-              { value: "download", label: "Download" },
-              { value: "share", label: "Share" },
+              { value: "download", label: t("download") },
+              { value: "share", label: t("share") },
             ]}
           />
         </div>
@@ -365,38 +367,38 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
         {panel === "download" ? (
           <div className="space-y-3.5 px-5 py-4">
             <div className="space-y-1.5">
-              <FieldLabel>Slides</FieldLabel>
+              <FieldLabel>{t("slides")}</FieldLabel>
               <Segmented
                 value={scope}
                 disabled={busy}
                 onChange={(value) => setScope(value as "all" | "marked")}
                 options={[
-                  { value: "all", label: "All" },
+                  { value: "all", label: t("all") },
                   {
                     value: "marked",
                     label:
                       markedSlideIds.length > 0
-                        ? `Marked ${markedSlideIds.length}`
-                        : "Marked",
+                        ? t("markedN", { n: markedSlideIds.length })
+                        : t("marked"),
                   },
                 ]}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <FieldLabel>Format</FieldLabel>
+                <FieldLabel>{t("format")}</FieldLabel>
                 <Segmented
                   value={format}
                   disabled={busy}
                   onChange={(v) => setFormat(v as ExportFormat)}
                   options={[
-                    { value: "png", label: "PNG" },
-                    { value: "jpeg", label: "JPEG" },
+                    { value: "png", label: t("png") },
+                    { value: "jpeg", label: t("jpeg") },
                   ]}
                 />
               </div>
               <div className="space-y-1.5">
-                <FieldLabel>Scale</FieldLabel>
+                <FieldLabel>{t("scale")}</FieldLabel>
                 <Segmented
                   value={scale}
                   disabled={busy}
@@ -409,28 +411,27 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
               </div>
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Pack</FieldLabel>
+              <FieldLabel>{t("pack")}</FieldLabel>
               <Segmented
                 value={pack}
                 disabled={busy}
                 onChange={(v) => setPack(v as PackMode)}
                 options={[
-                  { value: "zip", label: "ZIP" },
-                  { value: "files", label: "Files" },
+                  { value: "zip", label: t("zip") },
+                  { value: "files", label: t("files") },
                 ]}
               />
             </div>
             {scope === "marked" && exportSlides.length === 0 && (
               <p className="text-[13px] text-muted-foreground">
-                Mark slides with the corner check on the strip.
+                {t("markHint")}
               </p>
             )}
           </div>
         ) : (
           <div className="space-y-3.5 px-5 py-4">
             <p className="text-[13px] leading-snug text-muted-foreground">
-              Copy a public view link, or share slide images from this device
-              when supported.
+              {t("shareHint")}
             </p>
 
             <Button
@@ -448,7 +449,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
               ) : (
                 <Copy className="size-4" />
               )}
-              {linkBusy ? "Preparing…" : copied ? "Copied" : "Copy view link"}
+              {linkBusy ? t("preparing") : copied ? t("copied") : t("copyViewLink")}
             </Button>
 
             {nativeShareOk ? (
@@ -465,7 +466,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
                 ) : (
                   <Share2 className="size-4" />
                 )}
-                {sharing ? "Preparing…" : "Share images"}
+                {sharing ? t("preparing") : t("shareImages")}
               </Button>
             ) : null}
           </div>
@@ -474,7 +475,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
         {(exporting || done) && (
           <div className="space-y-1.5 px-5 pb-2">
             <div className="flex justify-between text-[13px] text-muted-foreground">
-              <span>{done ? "Done" : "Rendering…"}</span>
+              <span>{done ? t("done") : t("rendering")}</span>
               <span className="tabular-nums">{progress}%</span>
             </div>
             <div className="h-1 overflow-hidden rounded-md bg-muted">
@@ -498,10 +499,10 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
             className="rounded-md"
             disabled={busy || exportSlides.length === 0}
             onClick={() => void handleCopyFirst()}
-            title="Copy first slide image"
+            title={t("copyFirstSlide")}
           >
             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-            {copied ? "Copied" : "Copy"}
+            {copied ? t("copied") : t("copy")}
           </Button>
           <Button
             type="button"
@@ -517,7 +518,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
             ) : (
               <Download className="size-4" />
             )}
-            {exporting ? "Exporting…" : done ? "Downloaded" : "Download"}
+            {exporting ? t("exporting") : done ? t("downloaded") : t("download")}
           </Button>
         </div>
       </DialogContent>

@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Cloud, CloudOff, Save } from "lucide-react";
+import {
+  Cloud,
+  CloudSlash as CloudOff,
+  FloppyDisk as Save,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -13,18 +18,23 @@ import { useProject } from "@/hooks/use-project";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
 
-function formatLastSaved(iso: string | null, now: number) {
-  if (!iso) return "Not saved yet";
+function formatLastSaved(
+  iso: string | null,
+  now: number,
+  t: ReturnType<typeof useTranslations<"editor.saveStatus">>,
+  tc: ReturnType<typeof useTranslations<"common">>,
+) {
+  if (!iso) return tc("notSavedYet");
   const then = new Date(iso).getTime();
-  if (!Number.isFinite(then)) return "Not saved yet";
+  if (!Number.isFinite(then)) return tc("notSavedYet");
   const delta = Math.max(0, now - then);
   const sec = Math.floor(delta / 1000);
-  if (sec < 20) return "Just now";
-  if (sec < 60) return `${sec}s ago`;
+  if (sec < 20) return tc("justNow");
+  if (sec < 60) return t("secondsAgo", { n: sec });
   const min = Math.floor(sec / 60);
-  if (min < 60) return `${min}m ago`;
+  if (min < 60) return t("minutesAgo", { n: min });
   const hrs = Math.floor(min / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return t("hoursAgo", { n: hrs });
   return new Date(iso).toLocaleString();
 }
 
@@ -71,6 +81,8 @@ export function SaveStatusMenu() {
   const lastSavedAt = useCanvasStore((s) => s.lastSavedAt);
   const [open, setOpen] = useState(false);
   const [tick, setTick] = useState(() => Date.now());
+  const t = useTranslations("editor.saveStatus");
+  const tc = useTranslations("common");
 
   useEffect(() => {
     if (!open) return;
@@ -79,14 +91,14 @@ export function SaveStatusMenu() {
   }, [open]);
 
   const title = isSaving
-    ? "Saving…"
+    ? tc("saving")
     : isDirty
-      ? "Unsaved changes"
-      : "Changes saved";
+      ? t("unsaved")
+      : t("saved");
 
   const subtitle = isSaving
-    ? "Writing your latest edits"
-    : `Last saved: ${formatLastSaved(lastSavedAt, tick)}`;
+    ? t("writingEdits")
+    : t("lastSaved", { time: formatLastSaved(lastSavedAt, tick, t, tc) });
 
   const Icon = isDirty || isSaving ? CloudOff : Cloud;
 
@@ -132,10 +144,9 @@ export function SaveStatusMenu() {
         </div>
 
         <div className="border-t border-border/50 px-4 py-3.5">
-          <p className="text-[13px] font-medium text-foreground">Auto-save</p>
+          <p className="text-[13px] font-medium text-foreground">{t("autoSave")}</p>
           <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
-            Deckva keeps your carousel in sync while you edit. Press ⌘S anytime
-            to save now.
+            {t("autoSaveHint")}
           </p>
         </div>
 
@@ -149,7 +160,7 @@ export function SaveStatusMenu() {
             className="h-10 w-full gap-2 rounded-md border-none bg-foreground text-[13px] font-medium text-background shadow-none hover:bg-foreground/90 disabled:opacity-40"
           >
             <Save className={menuIconClass} />
-            {isSaving ? "Saving…" : isDirty ? "Save now" : "All changes saved"}
+            {isSaving ? tc("saving") : isDirty ? t("saveNow") : t("allSaved")}
           </Button>
         </div>
       </PopoverContent>

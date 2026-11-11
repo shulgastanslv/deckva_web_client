@@ -3,7 +3,9 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { Languages } from "lucide-react";
+import {
+  Translate as Languages,
+} from "@phosphor-icons/react";
 
 import { setAppLocale } from "@/lib/i18n/set-locale";
 import {

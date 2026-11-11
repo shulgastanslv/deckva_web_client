@@ -2,17 +2,18 @@
 
 import React, { ReactNode, useState } from "react";
 import {
-  ImageIcon,
-  LayersIcon,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Redo2,
-  Settings,
-  ShapesIcon,
-  ToolCase,
+  Image as ImageIcon,
+  Stack as LayersIcon,
+  SidebarSimple as PanelLeftClose,
+  Sidebar as PanelLeftOpen,
+  ArrowClockwise as Redo2,
+  Gear as Settings,
+  Shapes as ShapesIcon,
+  Toolbox as ToolCase,
   Package,
-  Undo2,
-} from "lucide-react";
+  ArrowCounterClockwise as Undo2,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import Logo from "@/components/logo/logo";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -77,15 +78,6 @@ function RailTooltip({
   );
 }
 
-const PANEL_TITLES: Record<NavId, string> = {
-  elements: "Elements",
-  layers: "Layers",
-  settings: "Settings",
-  assets: "Assets",
-  background: "Background",
-  tools: "Tools",
-};
-
 const railBtn =
   "size-10 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
 
@@ -99,13 +91,24 @@ export function LeftSidebar({
 }: LeftSidebarProps) {
   const [legal, setLegal] = useState<LegalKind | null>(null);
   const manager = useCanvasManager();
+  const t = useTranslations("editor.panels");
+  const tc = useTranslations("common");
+
+  const panelTitles: Record<NavId, string> = {
+    elements: t("elements"),
+    layers: t("layers"),
+    settings: t("settings"),
+    assets: t("assets"),
+    background: t("background"),
+    tools: t("tools"),
+  };
 
   const navItems: { id: NavId; icon: ReactNode; label: string }[] = [
-    { id: "tools", icon: <ToolCase className={navIconClass} />, label: "Tools" },
-    { id: "elements", icon: <ShapesIcon className={navIconClass} />, label: "Elements" },
-    { id: "layers", icon: <LayersIcon className={navIconClass} />, label: "Layers" },
-    { id: "background", icon: <ImageIcon className={navIconClass} />, label: "Background" },
-    { id: "assets", icon: <Package className={navIconClass} />, label: "Assets" },
+    { id: "tools", icon: <ToolCase className={navIconClass} />, label: t("tools") },
+    { id: "elements", icon: <ShapesIcon className={navIconClass} />, label: t("elements") },
+    { id: "layers", icon: <LayersIcon className={navIconClass} />, label: t("layers") },
+    { id: "background", icon: <ImageIcon className={navIconClass} />, label: t("background") },
+    { id: "assets", icon: <Package className={navIconClass} />, label: t("assets") },
   ];
 
   const openNav = (id: NavId) => {
@@ -141,34 +144,34 @@ export function LeftSidebar({
           </div>
 
           <div className="flex flex-col items-center gap-1.5">
-            <RailTooltip label="Undo">
+            <RailTooltip label={tc("undo")}>
               <Button
                 variant="ghost"
                 size="icon"
                 className={railBtn}
-                aria-label="Undo"
+                aria-label={tc("undo")}
                 onClick={() => void manager?.undo()}
               >
                 <Undo2 className={navIconClass} />
               </Button>
             </RailTooltip>
-            <RailTooltip label="Redo">
+            <RailTooltip label={tc("redo")}>
               <Button
                 variant="ghost"
                 size="icon"
                 className={railBtn}
-                aria-label="Redo"
+                aria-label={tc("redo")}
                 onClick={() => void manager?.redo()}
               >
                 <Redo2 className={navIconClass} />
               </Button>
             </RailTooltip>
-            <RailTooltip label={isLeftCollapsed ? "Expand panel" : "Collapse panel"}>
+            <RailTooltip label={isLeftCollapsed ? t("expandPanel") : t("collapsePanel")}>
               <Button
                 variant="ghost"
                 size="icon"
                 className={railBtn}
-                aria-label={isLeftCollapsed ? "Expand panel" : "Collapse panel"}
+                aria-label={isLeftCollapsed ? t("expandPanel") : t("collapsePanel")}
                 onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
               >
                 {isLeftCollapsed ? (
@@ -178,7 +181,7 @@ export function LeftSidebar({
                 )}
               </Button>
             </RailTooltip>
-            <RailTooltip label="Settings">
+            <RailTooltip label={t("settings")}>
               <Button
                 variant="ghost"
                 size="icon"
@@ -188,7 +191,7 @@ export function LeftSidebar({
                     !isLeftCollapsed &&
                     "bg-muted/50 text-foreground hover:bg-muted/60",
                 )}
-                aria-label="Settings"
+                aria-label={t("settings")}
                 onClick={() => openNav("settings")}
               >
                 <Settings className={navIconClass} />
@@ -206,7 +209,7 @@ export function LeftSidebar({
       >
         <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
           <h2 className="text-[14px] font-semibold tracking-tight text-foreground">
-            {PANEL_TITLES[activeNav] ?? activeNav}
+            {panelTitles[activeNav] ?? activeNav}
           </h2>
           <div className="flex items-center gap-1">
             <ProjectFileMenu />
@@ -234,7 +237,7 @@ export function LeftSidebar({
             onClick={() => setLegal("terms")}
             className="transition-colors hover:text-foreground hover:underline underline-offset-4"
           >
-            Terms
+            {tc("terms")}
           </button>
           <span className="text-muted-foreground/40">·</span>
           <button
@@ -242,7 +245,7 @@ export function LeftSidebar({
             onClick={() => setLegal("privacy")}
             className="transition-colors hover:text-foreground hover:underline underline-offset-4"
           >
-            Privacy
+            {tc("privacy")}
           </button>
         </div>
       </div>

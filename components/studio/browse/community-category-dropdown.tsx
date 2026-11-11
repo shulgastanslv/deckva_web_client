@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, Search } from "lucide-react";
+import {
+  Check,
+  CaretDown as ChevronDown,
+  MagnifyingGlass as Search,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { COMMUNITY_CATEGORIES } from "@/lib/community/categories";
 import { Button } from "@/components/ui/button";
@@ -19,6 +24,7 @@ export function CommunityCategoryDropdown({
   value: string;
   onChange: (next: string) => void;
 }) {
+  const t = useTranslations("studio.browse");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -30,7 +36,7 @@ export function CommunityCategoryDropdown({
     );
   }, [query]);
 
-  const label = value === "all" ? "All categories" : value;
+  const label = value === "all" ? t("allCategories") : value;
 
   const pick = (next: string) => {
     onChange(next);
@@ -65,7 +71,7 @@ export function CommunityCategoryDropdown({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filter categories"
+            placeholder={t("filterCategories")}
             className="h-9 w-full rounded-md bg-muted/40 pr-3 pl-9 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus:bg-muted/50"
           />
         </div>
@@ -84,12 +90,12 @@ export function CommunityCategoryDropdown({
             <span className="flex w-4 shrink-0 items-center justify-center">
               {value === "all" ? <Check className="size-5" /> : null}
             </span>
-            All categories
+            {t("allCategories")}
           </button>
 
           {filtered.length === 0 ? (
             <p className="px-3 py-3 text-[12px] text-muted-foreground">
-              No categories found
+              {t("noCategories")}
             </p>
           ) : (
             filtered.map((cat) => (

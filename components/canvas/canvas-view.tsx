@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useRef, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import {
+  Plus,
+} from "@phosphor-icons/react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useAttachCanvas, useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { CodeBlockEditDialog } from "@/components/canvas/code-block-edit-dialog";

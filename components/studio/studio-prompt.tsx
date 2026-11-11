@@ -3,15 +3,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUp,
-  Clock3,
-  LayoutTemplate,
-  Loader2,
+  Clock as Clock3,
+  Layout as LayoutTemplate,
+  SpinnerGap as Loader2,
   Paperclip,
   Plus,
-  ScrollText,
-  Search,
+  Scroll as ScrollText,
+  MagnifyingGlass as Search,
   Shapes,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import { listAiModels } from "@/actions/ai";
 import {
@@ -230,7 +230,7 @@ export function StudioPrompt({
                 <button
                   type="button"
                   disabled={disabled || busy}
-                  aria-label="Add"
+                  aria-label={t("prompt.add")}
                   className="inline-flex size-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted/60 disabled:opacity-50"
                 >
                   <Plus className={menuIconClass} />
@@ -242,24 +242,24 @@ export function StudioPrompt({
                   onSelect={() => fileInputRef.current?.click()}
                 >
                   <Paperclip className={menuIconClass} />
-                  Add files
+                  {t("prompt.addFiles")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-1 bg-border/50" />
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
                     <ScrollText className={menuIconClass} />
-                    <span className="flex-1 text-left">Skills</span>
+                    <span className="flex-1 text-left">{t("prompt.skills")}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent sideOffset={8} className="w-56 rounded-2xl p-1.5">
                     <DropdownMenuItem disabled className="rounded-xl px-2.5 py-2 text-[13px] text-muted-foreground">
-                      Coming soon
+                      {t("prompt.comingSoon")}
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
                     <LayoutTemplate className={menuIconClass} />
-                    <span className="flex-1 text-left">Connectors</span>
+                    <span className="flex-1 text-left">{t("prompt.connectors")}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent sideOffset={8} className="w-64 rounded-2xl p-2">
                     {CONNECTORS.map((item) => (
@@ -279,7 +279,7 @@ export function StudioPrompt({
                             event.stopPropagation();
                           }}
                         >
-                          Connect
+                          {t("prompt.connect")}
                         </button>
                       </div>
                     ))}
@@ -290,8 +290,8 @@ export function StudioPrompt({
                   className="cursor-default gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] text-muted-foreground"
                 >
                   <Shapes className={menuIconClass} />
-                  Add assets
-                  <span className="ml-auto text-[11px]">Soon</span>
+                  {t("prompt.addAssets")}
+                  <span className="ml-auto text-[11px]">{t("prompt.soon")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -314,7 +314,7 @@ export function StudioPrompt({
                     className="inline-flex h-9 max-w-[220px] items-center gap-2 rounded-md px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60"
                   >
                     {selected ? <AiModelIcon modelId={selected.modelId} /> : null}
-                    <span className="truncate">{selected?.displayName ?? "Model"}</span>
+                    <span className="truncate">{selected?.displayName ?? t("prompt.model")}</span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -334,7 +334,7 @@ export function StudioPrompt({
                         ref={modelSearchRef}
                         value={modelQuery}
                         onChange={(event) => setModelQuery(event.target.value)}
-                        placeholder="Search models"
+                        placeholder={t("prompt.searchModels")}
                         className="h-9 w-full rounded-md bg-muted/40 pr-3 pl-8 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/60"
                       />
                     </div>
@@ -358,7 +358,11 @@ export function StudioPrompt({
                                 <BrandIcon brand={item.id} className="size-3.5" />
                               </span>
                             ) : null}
-                            {item.label}
+                            {item.id === "all"
+                              ? tc("all")
+                              : item.id === "free"
+                                ? t("prompt.free")
+                                : item.label}
                           </button>
                         );
                       })}
@@ -370,7 +374,7 @@ export function StudioPrompt({
                   <div className="max-h-64 overflow-y-auto overscroll-contain">
                     {filteredModels.length === 0 ? (
                       <p className="px-3 py-6 text-center text-[12px] text-muted-foreground">
-                        No models match
+                        {t("prompt.noModelsMatch")}
                       </p>
                     ) : (
                       filteredModels.map((model) => (
@@ -385,7 +389,7 @@ export function StudioPrompt({
                           <AiModelIcon modelId={model.modelId} />
                           <span className="min-w-0 flex-1 truncate">{model.displayName}</span>
                           {model.isFree ? (
-                            <span className="shrink-0 text-[12px] text-muted-foreground">Free</span>
+                            <span className="shrink-0 text-[12px] text-muted-foreground">{t("prompt.free")}</span>
                           ) : null}
                         </DropdownMenuItem>
                       ))
@@ -401,7 +405,7 @@ export function StudioPrompt({
                   <button
                     type="button"
                     disabled={disabled || busy}
-                    aria-label="Recent prompts"
+                    aria-label={t("prompt.recentPrompts")}
                     className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50"
                   >
                     <Clock3 className={menuIconClass} />
@@ -409,7 +413,7 @@ export function StudioPrompt({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" sideOffset={8} className="w-72 rounded-2xl p-1.5">
                   <DropdownMenuLabel className="px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
-                    Recent history
+                    {t("prompt.recentHistory")}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="my-1 bg-border/50" />
                   {history.map((item) => (

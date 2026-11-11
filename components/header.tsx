@@ -4,14 +4,14 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUp,
-  ChevronDown,
+  CaretDown as ChevronDown,
   Globe,
   Play,
-  Redo2,
-  Share,
-  Smartphone,
-  Undo2,
-} from "lucide-react";
+  ArrowClockwise as Redo2,
+  ShareNetwork as Share,
+  DeviceMobile as Smartphone,
+  ArrowCounterClockwise as Undo2,
+} from "@phosphor-icons/react";
 import Logo from "@/components/logo/logo";
 import { useSession } from "next-auth/react";
 import { AuthModal } from "@/components/auth";
@@ -36,6 +36,7 @@ import { useProject } from "@/hooks/use-project";
 import { fitCanvasJSON } from "@/lib/canvas/fit-frame";
 import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const centerBtn =
   "h-9 gap-1.5 rounded-md border-none px-3 text-[13px]";
@@ -65,6 +66,9 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
   const { status } = useSession();
   const [showShare, setShowShare] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const t = useTranslations("editor.header");
+  const tc = useTranslations("common");
+  const te = useTranslations("editor");
 
   const manager = useCanvasManager();
   const slides = useCanvasStore((s) => s.slides);
@@ -118,7 +122,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
   };
 
   const commitName = () => {
-    const next = name.trim() || "Untitled Carousel";
+    const next = name.trim() || tc("untitledCarousel");
     setName(next);
     if (next !== projectTitle) void rename(next);
   };
@@ -141,8 +145,8 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
               if (e.key === "Enter") (e.target as HTMLInputElement).blur();
             }}
             className="h-10 min-w-0 max-w-[11rem] flex-1 truncate rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none transition-colors hover:bg-muted/60 focus:bg-muted/50 sm:max-w-[15rem]"
-            placeholder="Project name"
-            aria-label="Project name"
+            placeholder={t("projectName")}
+            aria-label={t("projectName")}
           />
 
           <ProjectFileMenu
@@ -151,7 +155,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
             onHelp={() => setIsHelpOpen(true)}
           />
           <RatioSelect
-            label="Resize"
+            label={t("resize")}
             currentRatio={currentRatio}
             onRatioChange={(ratio) => handleRatioChange(ratio as RatioKey)}
           />
@@ -168,17 +172,17 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
             size="sm"
             className={centerBtn}
             onClick={() => void manager?.undo()}
-            title="Undo"
+            title={tc("undo")}
           >
             <Undo2 className="size-4" />
-            <span className="hidden lg:inline">Undo</span>
+            <span className="hidden lg:inline">{tc("undo")}</span>
           </Button>
           {(onPreview || onPhonePreview) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button type="button" variant="default" className="h-9 gap-1.5 rounded-md border-none px-3.5 text-[13px] shadow-none">
                   <Play className="size-3.5 opacity-80" />
-                  Preview
+                  {t("preview")}
                   <ChevronDown className="size-3.5 opacity-70" />
                 </Button>
               </DropdownMenuTrigger>
@@ -190,7 +194,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
                 {onPreview ? (
                   <DropdownMenuItem className={menuItem} onSelect={onPreview}>
                     <Play className="size-4" />
-                    Preview Carousel
+                    {t("previewCarousel")}
                   </DropdownMenuItem>
                 ) : null}
                 {onPhonePreview ? (
@@ -199,7 +203,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
                     onSelect={onPhonePreview}
                   >
                     <Smartphone className="size-4" />
-                    Preview on Phone
+                    {t("previewPhone")}
                   </DropdownMenuItem>
                 ) : null}
               </DropdownMenuContent>
@@ -210,10 +214,10 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
             size="sm"
             className={centerBtn}
             onClick={() => void manager?.redo()}
-            title="Redo"
+            title={tc("redo")}
           >
             <Redo2 className="size-4" />
-            <span className="hidden lg:inline">Redo</span>
+            <span className="hidden lg:inline">{tc("redo")}</span>
           </Button>
           <div className="hidden xl:block">
             <CommandsKbd />
@@ -233,7 +237,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
             )}
           >
             <Share className="size-4" />
-            <span className="hidden sm:inline">Share</span>
+            <span className="hidden sm:inline">{tc("share")}</span>
           </Button>
           <Button
             variant="ghost"
@@ -243,10 +247,10 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
               sideBtn,
               "hidden text-muted-foreground hover:bg-muted/60 hover:text-foreground md:inline-flex",
             )}
-            title="Publish to community"
+            title={te("publishCommunity")}
           >
             <Globe className="size-4" />
-            <span className="hidden lg:inline">Community</span>
+            <span className="hidden lg:inline">{t("community")}</span>
           </Button>
           <Button
             size="sm"
@@ -257,7 +261,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
             )}
           >
             <ArrowUp className="size-4" />
-            Export • {slideCount}x PNGs / ZIP
+            {t("exportPngZip", { count: slideCount })}
           </Button>
 
           {signedIn ? (
@@ -269,7 +273,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
               className={cn(sideBtn, "bg-muted/40 hover:bg-muted/60")}
               onClick={() => setIsAuthModalOpen(true)}
             >
-              Sign in
+              {tc("signIn")}
             </Button>
           )}
         </div>

@@ -1,6 +1,10 @@
 "use client";
 
-import { Plus, SearchIcon } from "lucide-react";
+import {
+  Plus,
+  MagnifyingGlass as SearchIcon,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +26,10 @@ export function StudioSidebarSearch({
   onBlank: () => void;
   onTemplates: () => void;
 }) {
+  const t = useTranslations("studio");
+  const tc = useTranslations("common");
+  const tCreate = useTranslations("studio.create");
+
   return (
     <div className="flex items-center gap-1.5 px-3 pb-3">
       <div className="relative min-w-0 flex-1">
@@ -29,7 +37,7 @@ export function StudioSidebarSearch({
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search"
+          placeholder={tc("search")}
           className="h-9 rounded-md border-0 bg-background pl-8 text-[13px] shadow-none placeholder:text-muted-foreground focus-visible:ring-1 dark:bg-muted/40"
         />
       </div>
@@ -39,7 +47,7 @@ export function StudioSidebarSearch({
             type="button"
             size="icon"
             variant="secondary"
-            aria-label="Create"
+            aria-label={tCreate("create")}
             className="size-9 shrink-0 rounded-md border-0 bg-background text-foreground shadow-none hover:bg-background/80 dark:bg-muted dark:hover:bg-muted/80"
           >
             <Plus className="size-4 stroke-[2]" />
@@ -54,13 +62,13 @@ export function StudioSidebarSearch({
             className="cursor-pointer rounded-xl text-[13px]"
             onClick={onBlank}
           >
-            Blank carousel
+            {t("blankCarousel")}
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer rounded-xl text-[13px]"
             onClick={onTemplates}
           >
-            From template
+            {tCreate("fromTemplate")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

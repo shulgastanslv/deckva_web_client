@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
   Dialog,
   DialogContent,
@@ -13,27 +15,29 @@ interface HelpDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const NOTES = [
-  { label: "Move", text: "Drag objects. Space pans. Scroll zooms." },
-  { label: "Object", text: "Right-click for actions on the selection." },
-  { label: "Panels", text: "Keys 1–9 switch panels. Esc leaves focus." },
-];
-
 export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
+  const t = useTranslations("dialogs.help");
+
+  const notes = [
+    { label: t("moveTitle"), text: t("moveBody") },
+    { label: t("objectTitle"), text: t("objectBody") },
+    { label: t("panelsTitle"), text: t("panelsBody") },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm gap-0 rounded-2xl border-border p-5">
         <DialogHeader className="space-y-1.5 border-b border-border/40 pb-3 text-left">
           <DialogTitle className="text-[13px] font-semibold tracking-tight">
-            Help
+            {t("title")}
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed text-muted-foreground">
-            One slide at a time. The strip under the canvas is the carousel.
+            {t("intro")}
           </DialogDescription>
         </DialogHeader>
 
         <ul className="pt-1">
-          {NOTES.map((note) => (
+          {notes.map((note) => (
             <li
               key={note.label}
               className="flex items-baseline gap-3 border-b border-border/40 py-3 last:border-b-0 last:pb-0"

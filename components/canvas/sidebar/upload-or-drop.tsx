@@ -1,7 +1,11 @@
 "use client";
 
 import { useRef, useState, type ReactNode } from "react";
-import { ImagePlus, Loader2 } from "lucide-react";
+import {
+  Image as ImagePlus,
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 type UploadOrDropProps = {
@@ -25,16 +29,20 @@ export function UploadOrDrop({
   busy,
   multiple = false,
   accept = "image/*",
-  title = "Upload or drop",
-  hint = "PNG, JPG",
-  busyLabel = "Uploading…",
+  title,
+  hint,
+  busyLabel,
   icon,
   className,
   minHeightClass = "min-h-28",
 }: UploadOrDropProps) {
+  const t = useTranslations("editor.elements");
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const idle = !disabled && !busy;
+  const resolvedTitle = title ?? t("uploadOrDrop");
+  const resolvedHint = hint ?? t("pngJpg");
+  const resolvedBusy = busyLabel ?? t("uploading");
 
   const take = (files: FileList | File[] | null | undefined) => {
     if (!files || (files instanceof FileList ? files.length === 0 : files.length === 0)) return;
@@ -58,7 +66,7 @@ export function UploadOrDrop({
       <button
         type="button"
         disabled={!idle}
-        title={title}
+        title={resolvedTitle}
         onClick={() => inputRef.current?.click()}
         onDragOver={(event) => {
           event.preventDefault();
@@ -87,9 +95,9 @@ export function UploadOrDrop({
           (icon ?? <ImagePlus className="size-5 shrink-0 text-muted-foreground" />)
         )}
         <span className="text-[13px] font-medium text-foreground/80">
-          {busy ? busyLabel : title}
+          {busy ? resolvedBusy : resolvedTitle}
         </span>
-        {hint ? <span className="text-[13px] text-muted-foreground">{hint}</span> : null}
+        {resolvedHint ? <span className="text-[13px] text-muted-foreground">{resolvedHint}</span> : null}
       </button>
     </>
   );

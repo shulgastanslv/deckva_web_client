@@ -2,24 +2,24 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  ArrowUpDown,
-  ChartNoAxesColumn,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
+  ArrowsDownUp as ArrowUpDown,
+  ChartBar as ChartNoAxesColumn,
+  CaretDown as ChevronDown,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
   Heart,
-  Home,
+  House as Home,
   Image as ImageIcon,
-  ListFilter,
-  Maximize2,
-  MessageCircle,
-  MoreHorizontal,
+  Funnel as ListFilter,
+  ArrowsOut as Maximize2,
+  ChatCircle as MessageCircle,
+  DotsThree as MoreHorizontal,
   Plus,
-  Repeat2,
-  Search,
-  Send,
+  ArrowsClockwise as Repeat2,
+  MagnifyingGlass as Search,
+  PaperPlaneTilt as Send,
   User,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { FaThreads } from "react-icons/fa6";
 import { motion, useReducedMotion } from "motion/react";
 

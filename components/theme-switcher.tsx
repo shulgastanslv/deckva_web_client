@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  Moon,
+  Sun,
+} from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,6 +14,7 @@ import { cn } from "@/lib/utils";
 export function ThemeSwitcher({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const t = useTranslations("common");
 
   useEffect(() => {
     setMounted(true);
@@ -29,16 +34,16 @@ export function ThemeSwitcher({ className }: { className?: string }) {
       title={
         mounted
           ? dark
-            ? "Switch to light"
-            : "Switch to dark"
-          : "Toggle theme"
+            ? t("switchToLight")
+            : t("switchToDark")
+          : t("toggleTheme")
       }
       aria-label={
         mounted
           ? dark
-            ? "Switch to light theme"
-            : "Switch to dark theme"
-          : "Toggle theme"
+            ? t("switchToLightTheme")
+            : t("switchToDarkTheme")
+          : t("toggleTheme")
       }
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >

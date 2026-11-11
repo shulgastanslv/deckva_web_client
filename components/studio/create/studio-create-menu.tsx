@@ -2,12 +2,13 @@
 
 import { useRef } from "react";
 import {
-  ChevronDown,
+  CaretDown as ChevronDown,
   Compass,
   FilePlus,
   Palette,
-  Upload,
-} from "lucide-react";
+  UploadSimple as Upload,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,7 @@ export function StudioCreateMenu({
   onBrandKit,
   onImportJson,
   className,
-  label = "Create",
+  label,
   align = "end",
   triggerClassName,
 }: {
@@ -41,7 +42,9 @@ export function StudioCreateMenu({
   align?: "start" | "center" | "end";
   triggerClassName?: string;
 }) {
+  const t = useTranslations("studio.create");
   const importRef = useRef<HTMLInputElement>(null);
+  const triggerLabel = label ?? t("create");
 
   return (
     <>
@@ -67,7 +70,7 @@ export function StudioCreateMenu({
               className,
             )}
           >
-            {label}
+            {triggerLabel}
             <ChevronDown className="size-3.5 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
@@ -79,13 +82,13 @@ export function StudioCreateMenu({
         >
           <DropdownMenuItem className={itemClass} onClick={onBlank}>
             <FilePlus className="size-4 text-muted-foreground" />
-            Blank project
+            {t("blankProject")}
           </DropdownMenuItem>
 
           {onBrandKit ? (
             <DropdownMenuItem className={itemClass} onClick={onBrandKit}>
               <Palette className="size-4 text-muted-foreground" />
-              Brand kit
+              {t("brandKit")}
             </DropdownMenuItem>
           ) : null}
 
@@ -97,7 +100,7 @@ export function StudioCreateMenu({
                 onClick={() => importRef.current?.click()}
               >
                 <Upload className="size-4 text-muted-foreground" />
-                Import JSON
+                {t("importJson")}
               </DropdownMenuItem>
             </>
           ) : null}
@@ -106,7 +109,7 @@ export function StudioCreateMenu({
 
           <DropdownMenuItem className={itemClass} onClick={onTemplates}>
             <Compass className="size-4 text-muted-foreground" />
-            Explore community
+            {t("exploreCommunity")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

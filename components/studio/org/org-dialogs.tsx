@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Check,
-  Loader2,
-  MoreHorizontal,
-} from "lucide-react";
+  SpinnerGap as Loader2,
+  DotsThree as MoreHorizontal,
+} from "@phosphor-icons/react";
 
 import {
   deleteOrganization,
@@ -80,6 +81,9 @@ export function EditProfileDialog({
   onOpenChange,
   organization,
 }: OrgDialogProps) {
+  const t = useTranslations("studio.org");
+  const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const queryClient = useQueryClient();
   const [name, setName] = useState(organization?.name || "");
   const [color, setColor] = useState(organization?.color || "");
@@ -104,7 +108,7 @@ export function EditProfileDialog({
         color,
       });
       if (!res.success) {
-        setError("error" in res ? res.error : "Couldn't update organization");
+        setError("error" in res ? res.error : te("updateOrganization"));
         return;
       }
       invalidateOrg(queryClient);
@@ -122,30 +126,30 @@ export function EditProfileDialog({
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
           <DialogTitle className="text-[17px] font-semibold tracking-tight">
-            Edit organization
+            {t("edit")}
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed">
-            Update the name and avatar color for this workspace.
+            {t("editSub")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 px-5 pb-5">
           <label className="block space-y-1.5">
             <span className="text-[12px] font-medium text-muted-foreground">
-              Name
+              {t("name")}
             </span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={busy}
-              placeholder="Organization name"
+              placeholder={t("orgName")}
               className="h-10 w-full rounded-2xl bg-muted/30 px-3.5 text-[14px] outline-none focus:bg-muted/40 disabled:opacity-60"
             />
           </label>
 
           <div className="space-y-2">
             <span className="text-[12px] font-medium text-muted-foreground">
-              Color
+              {t("color")}
             </span>
             <div className="flex flex-wrap gap-2">
               {ORG_COLORS.map((c) => (
@@ -180,14 +184,14 @@ export function EditProfileDialog({
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button
               type="submit"
               className="rounded-md"
               disabled={busy || name.trim().length < 2}
             >
-              {busy ? <Loader2 className="size-4 animate-spin" /> : "Save"}
+              {busy ? <Loader2 className="size-4 animate-spin" /> : tc("save")}
             </Button>
           </div>
         </form>
@@ -201,6 +205,8 @@ export function ManageMembersDialog({
   onOpenChange,
   organization,
 }: OrgDialogProps) {
+  const t = useTranslations("studio.org");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const myId = session?.user?.id ?? null;
@@ -264,7 +270,7 @@ export function ManageMembersDialog({
     try {
       const res = await fn();
       if (!res.success) {
-        setError(res.error || "Something went wrong");
+        setError(res.error || tc("somethingWentWrong"));
         return;
       }
       invalidateOrg(queryClient);
@@ -282,10 +288,12 @@ export function ManageMembersDialog({
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
           <DialogTitle className="text-[17px] font-semibold tracking-tight">
-            Members
+            {t("membersTitle")}
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed">
-            Manage people in {organization?.name ?? "this organization"}.
+            {t("managePeople", {
+              name: organization?.name ?? t("thisOrganization"),
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -297,7 +305,7 @@ export function ManageMembersDialog({
                 onChange={(e) => setInviteEmails(e.target.value)}
                 disabled={busy}
                 rows={2}
-                placeholder="Invite by email…"
+                placeholder={t("inviteByEmail")}
                 className="min-h-[64px] w-full resize-none rounded-2xl bg-muted/30 px-3.5 py-2.5 text-[13px] outline-none placeholder:text-muted-foreground/70 disabled:opacity-60"
               />
               <div className="flex flex-wrap items-center gap-2">
@@ -315,7 +323,7 @@ export function ManageMembersDialog({
                           : "text-muted-foreground",
                       )}
                     >
-                      {value === OrgMemberRole.MEMBER ? "Member" : "Admin"}
+                      {value === OrgMemberRole.MEMBER ? t("member") : t("admin")}
                     </button>
                   ))}
                 </div>
@@ -336,7 +344,7 @@ export function ManageMembersDialog({
                     })
                   }
                 >
-                  Invite
+                  {t("invite")}
                 </Button>
               </div>
             </div>
@@ -362,8 +370,8 @@ export function ManageMembersDialog({
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[13px] font-medium">
-                        {member.user.name || "User"}
-                        {isMe ? " (you)" : ""}
+                        {member.user.name || t("user")}
+                        {isMe ? t("youSuffix") : ""}
                       </p>
                       <p className="truncate text-[12px] text-muted-foreground">
                         {member.user.email}
@@ -380,7 +388,7 @@ export function ManageMembersDialog({
                             type="button"
                             disabled={busy}
                             className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                            aria-label="Member actions"
+                            aria-label={t("memberActions")}
                           >
                             <MoreHorizontal className="size-5" />
                           </button>
@@ -406,7 +414,9 @@ export function ManageMembersDialog({
                                   )
                                 }
                               >
-                                Make {member.role === OrgMemberRole.ADMIN ? "member" : "admin"}
+                                {member.role === OrgMemberRole.ADMIN
+                                  ? t("makeMember")
+                                  : t("makeAdmin")}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="rounded-xl text-[13px]"
@@ -419,7 +429,7 @@ export function ManageMembersDialog({
                                   )
                                 }
                               >
-                                Transfer ownership
+                                {t("transferOwnership")}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                             </>
@@ -437,7 +447,7 @@ export function ManageMembersDialog({
                               })
                             }
                           >
-                            {isMe ? "Leave organization" : "Remove"}
+                            {isMe ? t("leave") : t("remove")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -453,7 +463,7 @@ export function ManageMembersDialog({
           {pending.length > 0 ? (
             <div className="space-y-2">
               <p className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">
-                Pending invites
+                {t("pendingInvites")}
               </p>
               <ul className="space-y-1">
                 {pending.map((invite) => (
@@ -466,7 +476,7 @@ export function ManageMembersDialog({
                         {invite.email}
                       </p>
                       <p className="text-[12px] text-muted-foreground">
-                        {invite.role.toLowerCase()} · pending
+                        {invite.role.toLowerCase()} · {t("pending")}
                       </p>
                     </div>
                     {isAdmin ? (
@@ -481,7 +491,7 @@ export function ManageMembersDialog({
                           )
                         }
                       >
-                        Revoke
+                        {t("revoke")}
                       </Button>
                     ) : null}
                   </li>
@@ -504,6 +514,9 @@ export function DeleteOrganizationDialog({
   onOpenChange,
   organization,
 }: OrgDialogProps) {
+  const t = useTranslations("studio.org");
+  const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const queryClient = useQueryClient();
   const [confirmName, setConfirmName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -526,7 +539,7 @@ export function DeleteOrganizationDialog({
     try {
       const res = await deleteOrganization(organization.id);
       if (!res.success) {
-        setError("error" in res ? res.error : "Couldn't delete organization");
+        setError("error" in res ? res.error : te("deleteOrganization"));
         return;
       }
       invalidateOrg(queryClient);
@@ -546,24 +559,22 @@ export function DeleteOrganizationDialog({
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
           <DialogTitle className="text-[17px] font-semibold tracking-tight text-destructive">
-            Delete organization
+            {t("delete")}
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed">
-            This permanently removes the organization workspace.
+            {t("deleteBody")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 px-5 pb-5">
           {!isOwner ? (
             <p className="rounded-2xl bg-muted/40 px-3.5 py-3 text-[13px] text-muted-foreground">
-              Only the owner can delete this organization.
+              {t("deleteOwnerOnly")}
             </p>
           ) : (
             <>
               <p className="text-[13px] leading-relaxed text-muted-foreground">
-                Type <span className="font-semibold text-foreground">{organization?.name}</span>{" "}
-                to confirm. Projects stay with their owners, but org membership
-                is removed.
+                {t("typeNameConfirm", { name: organization?.name ?? "" })}
               </p>
               <input
                 value={confirmName}
@@ -586,7 +597,7 @@ export function DeleteOrganizationDialog({
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {tc("cancel")}
             </Button>
             <Button
               type="button"
@@ -598,7 +609,7 @@ export function DeleteOrganizationDialog({
               {busy ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
-                "Delete organization"
+                t("delete")
               )}
             </Button>
           </DialogFooter>

@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
-  FolderIcon,
-  HomeIcon,
-  PaletteIcon,
-  ChevronRight,
-} from "lucide-react";
+  Folder as FolderIcon,
+  House as HomeIcon,
+  Palette as PaletteIcon,
+  CaretRight as ChevronRight,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { navIconClass } from "@/components/canvas/sidebar/sidebar-ui";
@@ -32,6 +33,7 @@ type NavItem = {
 };
 
 export function StudioSidebarNav() {
+  const t = useTranslations("studio.nav");
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "all";
@@ -39,28 +41,32 @@ export function StudioSidebarNav() {
   const items: NavItem[] = [
     {
       href: "/studio",
-      label: "Home",
+      label: t("home"),
       icon: HomeIcon,
       active: pathname === "/studio",
     },
     {
       href: "/studio/browse",
-      label: "Browse",
+      label: t("browse"),
       icon: FolderIcon,
       active: pathname.startsWith("/studio/browse"),
       subItems: [
-        { href: "/studio/browse?tab=all", label: "Projects", tabId: "all" },
-        { href: "/studio/browse?tab=starred", label: "Starred", tabId: "starred" },
+        { href: "/studio/browse?tab=all", label: t("projects"), tabId: "all" },
+        {
+          href: "/studio/browse?tab=starred",
+          label: t("starred"),
+          tabId: "starred",
+        },
         {
           href: "/studio/browse?tab=community",
-          label: "Community",
+          label: t("community"),
           tabId: "community",
         },
       ],
     },
     {
       href: "/studio/brand-kit",
-      label: "Brand kit",
+      label: t("brandKit"),
       icon: PaletteIcon,
       active: pathname.startsWith("/studio/brand-kit"),
     },

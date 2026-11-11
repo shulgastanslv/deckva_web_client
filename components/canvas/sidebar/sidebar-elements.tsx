@@ -1,16 +1,17 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import {
-  Code2,
-  ImageIcon,
-  Link2,
-  Loader2,
-  Search,
+  Code as Code2,
+  Image as ImageIcon,
+  Link as Link2,
+  SpinnerGap as Loader2,
+  MagnifyingGlass as Search,
   Shapes,
-  Smartphone,
-  Type,
-} from "lucide-react";
+  DeviceMobile as Smartphone,
+  TextT as Type,
+} from "@phosphor-icons/react";
 import type { Group } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,6 +85,8 @@ function filterItems(items: ElementItem[], search: string) {
 }
 
 export function SidebarElements() {
+  const t = useTranslations("editor.elements");
+  const tc = useTranslations("common");
   const {
     manager,
     sections,
@@ -197,8 +200,8 @@ export function SidebarElements() {
           <div className="space-y-2.5">
             <UploadOrDrop
               disabled={!manager}
-              title="Upload or drop"
-              hint="PNG, JPG — or paste with Ctrl+V"
+              title={t("uploadOrDrop")}
+              hint={t("pasteHint")}
               minHeightClass="min-h-32"
               onFiles={(files) => {
                 const file = files instanceof FileList ? files[0] : files[0];
@@ -211,7 +214,7 @@ export function SidebarElements() {
                 <Link2 className="pointer-events-none absolute top-1/2 left-3.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="url"
-                  placeholder="Paste image URL"
+                  placeholder={t("pasteImageUrl")}
                   value={imageUrl}
                   disabled={!manager}
                   onChange={(e) => {
@@ -248,7 +251,7 @@ export function SidebarElements() {
 
             {filteredRecent.length > 0 ? (
               <GallerySection
-                title="Recently used"
+                title={t("recentlyUsed")}
                 action="Clear"
                 onAction={() => clearRecentPhotos()}
               >
@@ -293,7 +296,7 @@ export function SidebarElements() {
             })}
             {textItems.length === 0 ? (
               <p className="py-10 text-center text-[14px] text-muted-foreground">
-                No text styles found
+                {t("noTextStyles")}
               </p>
             ) : null}
           </div>
@@ -323,7 +326,7 @@ export function SidebarElements() {
             })}
             {shapeItems.length === 0 ? (
               <p className="col-span-3 py-10 text-center text-[14px] text-muted-foreground">
-                No shapes found
+                {t("noShapes")}
               </p>
             ) : null}
           </div>

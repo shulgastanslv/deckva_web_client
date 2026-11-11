@@ -5,16 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Check,
-  ChevronDown,
+  CaretDown as ChevronDown,
   Copy,
   Crop,
-  Download,
-  Grid3X3,
-  HelpCircle,
+  DownloadSimple as Download,
+  GridFour as Grid3X3,
+  Question as HelpCircle,
   Plus,
-  Save,
-  Share2,
-} from "lucide-react";
+  FloppyDisk as Save,
+  ShareNetwork as Share2,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,6 +36,7 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const ghostTrigger =
   "inline-flex h-9 items-center gap-1.5 rounded-md border-none bg-transparent px-2.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/40 data-[state=open]:bg-muted/40";
@@ -53,6 +54,8 @@ type ProjectFileMenuProps = {
 
 export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuProps) {
   useSyncLayoutGrid();
+  const t = useTranslations("editor.fileMenu");
+  const tc = useTranslations("common");
   const router = useRouter();
   const manager = useCanvasManager();
   const { rename, persist } = useProject();
@@ -72,7 +75,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
   }, [projectTitle, open]);
 
   const commitName = () => {
-    const next = name.trim() || "Untitled Carousel";
+    const next = name.trim() || tc("untitledCarousel");
     setName(next);
     if (next !== projectTitle) void rename(next);
   };
@@ -124,7 +127,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button type="button" variant="ghost" className={ghostTrigger}>
-          File
+          {t("file")}
           <ChevronDown className="size-3.5 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
@@ -136,7 +139,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
       >
         <div className="space-y-2 px-2 py-2">
           <label className="px-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-            Name
+            {t("name")}
           </label>
           <input
             type="text"
@@ -154,12 +157,15 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
             onClick={(event) => event.stopPropagation()}
             onPointerDown={(event) => event.stopPropagation()}
             className="h-9 w-full rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none hover:bg-muted/50 focus:bg-muted/50"
-            placeholder="Project name"
-            aria-label="Project name"
+            placeholder={t("projectName")}
+            aria-label={t("projectName")}
           />
           <p className="px-1 text-[12px] text-muted-foreground">
-            {slides.length} slide{slides.length === 1 ? "" : "s"} · {canvasDimensions.width}×
-            {canvasDimensions.height}
+            {t("slidesMeta", {
+              count: slides.length,
+              width: canvasDimensions.width,
+              height: canvasDimensions.height,
+            })}
           </p>
         </div>
 
@@ -173,7 +179,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
             )}
           >
             <Crop className="size-5" />
-            Canvas size
+            {t("canvasSize")}
             <span className="ml-auto tabular-nums text-muted-foreground">{currentRatio}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent sideOffset={8} className="w-56 rounded-2xl p-1.5">
@@ -207,7 +213,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
         <DropdownMenuItem asChild className={menuItem}>
           <Link href="/studio">
             <Plus className="size-5" />
-            New design
+            {t("newDesign")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -219,7 +225,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
           }}
         >
           <Copy className="size-5" />
-          Make a copy
+          {t("makeCopy")}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator className="bg-border/50" />
@@ -232,7 +238,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
             )}
           >
             <Grid3X3 className="size-5" />
-            Layout grid
+            {t("layoutGrid")}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent
             sideOffset={8}
@@ -254,19 +260,19 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
           }}
         >
           <Save className="size-5" />
-          Save
+          {tc("save")}
           <kbd className="ml-auto font-mono text-[11px] text-muted-foreground">⌘S</kbd>
         </DropdownMenuItem>
         {onShare ? (
           <DropdownMenuItem className={menuItem} onSelect={onShare}>
             <Share2 className="size-5" />
-            Share
+            {tc("share")}
           </DropdownMenuItem>
         ) : null}
         {onExport ? (
           <DropdownMenuItem className={menuItem} onSelect={onExport}>
             <Download className="size-5" />
-            Download
+            {tc("download")}
           </DropdownMenuItem>
         ) : null}
 
@@ -275,7 +281,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
             <DropdownMenuSeparator className="bg-border/50" />
             <DropdownMenuItem className={menuItem} onSelect={onHelp}>
               <HelpCircle className="size-5" />
-              Help
+              {t("help")}
             </DropdownMenuItem>
           </>
         ) : null}

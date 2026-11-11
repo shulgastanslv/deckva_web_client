@@ -1,6 +1,9 @@
 "use client";
 
-import { Check, Crop } from "lucide-react";
+import {
+  Check,
+  Crop,
+} from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import {

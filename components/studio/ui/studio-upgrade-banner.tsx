@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUpCircle, X } from "lucide-react";
+import {
+  ArrowCircleUp as ArrowUpCircle,
+  X,
+} from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 import { getGenerationStatus } from "@/actions/ai";
-import { freeGenerationLimitMessage } from "@/lib/studio/plans";
+import { FREE_GENERATION_LIMIT } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 const DISMISS_KEY = "studio:upgrade-banner-dismissed";
 
 export function StudioUpgradeBanner({ className }: { className?: string }) {
+  const t = useTranslations("studio.upgrade");
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const [exhausted, setExhausted] = useState(false);
@@ -69,18 +74,18 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
           aria-hidden
         />
         <p className="min-w-0 flex-1 text-[13px] leading-snug sm:text-[14px]">
-          {freeGenerationLimitMessage()}{" "}
+          {t("freeLimitReached", { limit: FREE_GENERATION_LIMIT })}{" "}
           <button
             type="button"
             onClick={openUpgrade}
             className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-90"
           >
-            Upgrade
+            {t("upgrade")}
           </button>
         </p>
         <button
           type="button"
-          aria-label="Dismiss"
+          aria-label={t("dismiss")}
           onClick={dismiss}
           className="shrink-0 rounded-md p-1 opacity-80 transition-opacity hover:bg-primary-foreground/15 hover:opacity-100"
         >

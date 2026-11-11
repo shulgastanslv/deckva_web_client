@@ -3,7 +3,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { FabricObject } from "fabric";
 import { Button } from "@/components/ui/button";
-import { Layers, X } from "lucide-react";
+import {
+  Stack as Layers,
+  X,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import {
@@ -28,6 +32,8 @@ export function AutoFlowPrompt() {
   const autoFlowEdgeTolerance = useCanvasStore((s) => s.autoFlowEdgeTolerance);
   const autoFlowPadding = useCanvasStore((s) => s.autoFlowPadding);
   const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
+  const t = useTranslations("editor.autoFlow");
+  const tc = useTranslations("common");
 
   const [pending, setPending] = useState<FabricObject | null>(null);
   const dismissedFor = useRef<WeakSet<FabricObject>>(new WeakSet());
@@ -151,8 +157,8 @@ export function AutoFlowPrompt() {
           </span>
           <p className="min-w-0 truncate text-[13px] leading-snug text-foreground">
             {continuing
-              ? "Text runs past the slide — continue on the next one?"
-              : "Object past the edge — move it to a new slide?"}
+              ? t("textOverflow")
+              : t("objectOverflow")}
           </p>
         </div>
         <Button
@@ -161,7 +167,7 @@ export function AutoFlowPrompt() {
           className="h-9 shrink-0 rounded-md px-3.5 text-[13px] font-medium"
           onClick={() => void accept()}
         >
-          {continuing ? "Continue" : "Create"}
+          {continuing ? t("continue") : t("create")}
         </Button>
         <Button
           type="button"
@@ -169,7 +175,7 @@ export function AutoFlowPrompt() {
           size="icon"
           className="size-9 shrink-0 rounded-md text-muted-foreground hover:bg-muted/40 hover:text-foreground"
           onClick={dismiss}
-          title="Dismiss"
+          title={tc("dismiss")}
         >
           <X className="size-3.5" />
         </Button>

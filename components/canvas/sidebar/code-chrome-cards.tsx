@@ -1,7 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronsUpDown, Search } from "lucide-react";
+import {
+  Check,
+  CaretUpDown as ChevronsUpDown,
+  MagnifyingGlass as Search,
+} from "@phosphor-icons/react";
 import {
   CODE_CHROME_STYLES,
   CODE_LANGS,
@@ -279,6 +284,7 @@ export function CodeAppearanceSelect({
   /** Click the preview to add / place a code block. */
   onPlace?: () => void;
 }) {
+  const t = useTranslations("editor.code");
   const [open, setOpen] = useState(false);
   const [pane, setPane] = useState<Pane>("themes");
   const [query, setQuery] = useState("");
@@ -345,7 +351,7 @@ export function CodeAppearanceSelect({
           <button
             type="button"
             disabled={disabled}
-            aria-label="Code theme"
+            aria-label={t("codeThemeAria")}
             className="flex h-12 w-full min-w-0 items-center gap-2.5 rounded-2xl bg-muted/60 px-2.5 text-left transition-colors hover:bg-muted disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45"
           >
             <span className="size-7 shrink-0 overflow-hidden rounded-xl">
@@ -425,12 +431,12 @@ export function CodeAppearanceSelect({
                 })}
                 {filteredThemes.length === 0 ? (
                   <p className="col-span-3 px-2 py-10 text-center text-[13px] text-muted-foreground">
-                    No themes found
+                    {t("noThemes")}
                   </p>
                 ) : null}
               </div>
             ) : (
-              <div role="listbox" aria-label="Language" className="space-y-1">
+              <div role="listbox" aria-label={t("language")} className="space-y-1">
                 {filteredLangs.map((item) => {
                   const active = item.id === lang;
                   return (
@@ -466,7 +472,7 @@ export function CodeAppearanceSelect({
                 })}
                 {filteredLangs.length === 0 ? (
                   <p className="px-3 py-8 text-center text-[13px] text-muted-foreground">
-                    No languages found
+                    {t("noLanguages")}
                   </p>
                 ) : null}
               </div>
@@ -476,7 +482,7 @@ export function CodeAppearanceSelect({
           <div className="flex items-center gap-2 border-t border-border/40 px-3 py-2.5">
             <div
               role="group"
-              aria-label="Window style"
+              aria-label={t("windowStyle")}
               className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto [scrollbar-width:none]"
             >
               {CODE_CHROME_STYLES.map((item) => {
@@ -505,7 +511,7 @@ export function CodeAppearanceSelect({
             <div className="flex h-8 shrink-0 items-center rounded-md bg-muted/50 p-0.5 dark:bg-muted/30">
               <button
                 type="button"
-                title="Themes"
+                title={t("themes")}
                 aria-pressed={pane === "themes"}
                 onClick={() => {
                   setPane("themes");
@@ -522,7 +528,7 @@ export function CodeAppearanceSelect({
               </button>
               <button
                 type="button"
-                title="Language"
+                title={t("language")}
                 aria-pressed={pane === "languages"}
                 onClick={() => {
                   setPane("languages");
@@ -560,7 +566,7 @@ export function CodeAppearanceSelect({
           chromeStyle={chromeStyle}
           darkMode={darkMode}
         />
-        <span className="sr-only">Add code block</span>
+        <span className="sr-only">{t("addCodeBlock")}</span>
       </button>
     </div>
   );

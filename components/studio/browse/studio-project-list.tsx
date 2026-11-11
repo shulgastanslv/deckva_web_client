@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { ProjectListItem } from "@/actions/projects";
 import {
   recentCols,
@@ -16,6 +18,7 @@ export function StudioProjectList({
   onOpen: (id: string) => void;
   onChanged: () => void;
 }) {
+  const t = useTranslations("studio.browse");
   return (
     <div className="min-w-0">
       <div
@@ -24,11 +27,11 @@ export function StudioProjectList({
           recentCols,
         )}
       >
-        <span>Name</span>
-        <span className="hidden md:block">Slides</span>
-        <span className="hidden md:block">Format</span>
-        <span>Last opened</span>
-        <span className="hidden md:block">Owner</span>
+        <span>{t("colName")}</span>
+        <span className="hidden md:block">{t("colSlides")}</span>
+        <span className="hidden md:block">{t("colFormat")}</span>
+        <span>{t("colLastOpened")}</span>
+        <span className="hidden md:block">{t("colOwner")}</span>
         <span />
       </div>
       <div>

@@ -12,14 +12,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Check, Copy, Loader2, Link2 } from "lucide-react";
+import {
+  Check,
+  Copy,
+  SpinnerGap as Loader2,
+  Link as Link2,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import { setProjectPublic } from "@/actions/projects";
 import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { useProject } from "@/hooks/use-project";
 import { useSession } from "next-auth/react";
-import { useCanvasStore } from "@/store/useCanvasStore";
 
 interface ShareModalProps {
   open: boolean;
@@ -33,6 +38,7 @@ export function ShareModal({
   onOpenChange,
   onNeedAuth,
 }: ShareModalProps) {
+  const t = useTranslations("dialogs.share");
   const { status } = useSession();
   const { currentProjectId, persist } = useProject();
   const [copied, setCopied] = useState(false);
@@ -133,28 +139,27 @@ export function ShareModal({
       <DialogContent className="max-w-sm rounded-3xl p-5">
         <DialogHeader className="space-y-1.5 border-b border-border/40 pb-3 text-left">
           <DialogTitle className="text-[13px] font-semibold tracking-tight">
-            Share Project
+            {t("title")}
           </DialogTitle>
           <DialogDescription className="text-[13px] text-muted-foreground">
-            Anyone with the link can open the carousel.
-            You can turn public access off at any time.
+            {t("description")} {t("descriptionOffHint")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-3 pt-2">
           {status !== "authenticated" ? (
             <p className="text-[13px] text-muted-foreground">
-              Sign in to share this project.
+              {t("signInHint")}
             </p>
           ) : (
             <>
               <div className="flex items-center justify-between gap-3 rounded-2xl bg-muted/30 px-3 py-2.5">
                 <div className="min-w-0">
                   <Label htmlFor="share-public" className="text-[13px] font-medium">
-                    Public link
+                    {t("publicLink")}
                   </Label>
                   <p className="text-[13px] text-muted-foreground">
-                    {isPublic ? "Anyone with the link can open it" : "Off"}
+                    {isPublic ? t("anyoneCanOpen") : t("off")}
                   </p>
                 </div>
                 <Switch
@@ -168,7 +173,7 @@ export function ShareModal({
               <div className="flex items-center gap-2">
                 <Input
                   readOnly
-                  value={shareUrl || "Save the project to get a link"}
+                  value={shareUrl || t("saveForLink")}
                   className="h-8 rounded-md border-border/60 bg-muted/40 font-mono text-[13px]"
                 />
                 <Button
@@ -182,12 +187,12 @@ export function ShareModal({
                   ) : copied ? (
                     <>
                       <Check className="h-3.5 w-3.5 text-emerald-500" />
-                      <span>Copied</span>
+                      <span>{t("copied")}</span>
                     </>
                   ) : (
                     <>
                       <Copy className="h-3.5 w-3.5" />
-                      <span>Copy</span>
+                      <span>{t("copy")}</span>
                     </>
                   )}
                 </Button>
@@ -202,7 +207,7 @@ export function ShareModal({
                   onClick={() => void ensureSavedAndPublic()}
                 >
                   <Link2 className="h-3.5 w-3.5" />
-                  Save and create link
+                  {t("saveCreateLink")}
                 </Button>
               )}
             </>

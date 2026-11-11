@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Check, Loader2 } from "lucide-react";
+import {
+  Check,
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import {
   getProjectCommunityMeta,
@@ -73,6 +77,8 @@ export function PublishCommunityDialog({
   onOpenChange,
   onAuthRequired,
 }: PublishCommunityDialogProps) {
+  const t = useTranslations("dialogs.publish");
+  const tc = useTranslations("common");
   const { status } = useSession();
   const slidesController = useSlidesController();
   const { currentProjectId, persist } = useProject();
@@ -85,7 +91,7 @@ export function PublishCommunityDialog({
   const [previewLoading, setPreviewLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-  const [doneLabel, setDoneLabel] = useState("Published");
+  const [doneLabel, setDoneLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<CommunityProjectMeta | null>(null);
   const [category, setCategory] = useState<CommunityCategory>("Other");
@@ -93,6 +99,7 @@ export function PublishCommunityDialog({
   useEffect(() => {
     if (!open) return;
     setDone(false);
+    setDoneLabel("");
     setError(null);
     setLoading(false);
     setMeta(null);
@@ -181,7 +188,7 @@ export function PublishCommunityDialog({
         return;
       }
 
-      setDoneLabel(res.republished ? "Republished" : "Submitted for review");
+      setDoneLabel(res.republished ? t("republished") : t("submitted"));
       setDone(true);
       window.dispatchEvent(new CustomEvent("core:community-changed"));
       setTimeout(() => onOpenChange(false), 700);
@@ -203,7 +210,7 @@ export function PublishCommunityDialog({
         setError("error" in res ? res.error : messages.errors.generic);
         return;
       }
-      setDoneLabel("Removed from community");
+      setDoneLabel(t("removedDone"));
       setDone(true);
       window.dispatchEvent(new CustomEvent("core:community-changed"));
       setTimeout(() => onOpenChange(false), 700);
@@ -222,16 +229,21 @@ export function PublishCommunityDialog({
       <DialogContent className="gap-5 rounded-3xl p-5 sm:max-w-[400px]">
         <DialogHeader className="space-y-1 text-left">
           <DialogTitle className="text-base font-semibold tracking-tight">
-            {isRepublish ? "Update community post" : "Publish to community"}
+            {isRepublish ? t("updateTitle") : t("title")}
           </DialogTitle>
           <p className="text-[13px] text-muted-foreground">
-            {projectTitle.trim() || "Untitled"} · {slides.length} slide
-            {slides.length === 1 ? "" : "s"} · {currentRatio}
+            {t("metaLine", {
+              title: projectTitle.trim() || tc("untitled"),
+              count: slides.length,
+            })}{" "}
+            · {currentRatio}
           </p>
           {isRepublish && updatedLabel ? (
             <p className="text-[12px] text-muted-foreground">
-              Last community update · {updatedLabel}
-              {meta?.communityStatus === "PENDING" ? " · pending review" : ""}
+              {t("lastUpdate", { when: updatedLabel })}
+              {meta?.communityStatus === "PENDING"
+                ? ` · ${t("pendingReview")}`
+                : ""}
             </p>
           ) : null}
         </DialogHeader>
@@ -253,12 +265,12 @@ export function PublishCommunityDialog({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={previewUrl}
-                    alt="First slide preview"
+                    alt={t("firstSlidePreview")}
                     className="max-h-36 max-w-full object-contain"
                   />
                 ) : (
                   <p className="px-4 text-center text-[13px] text-muted-foreground">
-                    First slide preview unavailable
+                    {t("previewUnavailable")}
                   </p>
                 )}
               </div>
@@ -266,7 +278,7 @@ export function PublishCommunityDialog({
 
             <div className="space-y-2">
               <p className="text-[12px] font-medium text-muted-foreground">
-                Category
+                {t("category")}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {COMMUNITY_CATEGORIES.map((item) => (
@@ -288,9 +300,7 @@ export function PublishCommunityDialog({
             </div>
 
             <p className="text-[13px] leading-snug text-muted-foreground">
-              {isRepublish
-                ? "Republish refreshes the public listing with your latest slides and marks who updated it."
-                : "Your carousel gets a public link and appears in Community after review."}
+              {isRepublish ? t("republishHint") : t("description")}
             </p>
 
             {error ? <p className="text-[13px] text-destructive">{error}</p> : null}
@@ -305,9 +315,9 @@ export function PublishCommunityDialog({
                 {loading ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : isRepublish ? (
-                  "Republish"
+                  t("republish")
                 ) : (
-                  "Publish"
+                  tc("publish")
                 )}
               </Button>
               {isRepublish ? (
@@ -318,7 +328,7 @@ export function PublishCommunityDialog({
                   disabled={loading}
                   onClick={() => void handleUnpublish()}
                 >
-                  Remove from community
+                  {t("remove")}
                 </Button>
               ) : null}
             </div>

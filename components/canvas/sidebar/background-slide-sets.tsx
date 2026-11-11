@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Minus, Plus } from "lucide-react";
+import {
+  Minus,
+  Plus,
+} from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";

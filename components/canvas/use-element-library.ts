@@ -1,25 +1,24 @@
 "use client";
 
 import { useMemo, useRef, useState, type ChangeEvent } from "react";
-import type { LucideIcon } from "lucide-react";
 import {
-  AlignLeft,
+  TextAlignLeft as AlignLeft,
   Circle,
   Diamond,
-  Ellipse,
+  Circle as Ellipse,
   Hexagon,
   Laptop,
   Minus,
-  Pencil,
-  Quote,
-  Smartphone,
+  PencilSimple as Pencil,
+  Quotes as Quote,
+  DeviceMobile as Smartphone,
   Square,
   Star,
-  Tablet,
+  DeviceTablet as Tablet,
   Triangle,
-  Tv,
-  Type,
-} from "lucide-react";
+  Television as Tv,
+  TextT as Type,
+} from "@phosphor-icons/react";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { rememberRecentPhoto } from "@/lib/canvas/recent-photos";
 import { useCanvasManager } from "@/context/canvas-manager";

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
-  PaletteIcon,
+  Folder as FolderIcon,
+  House as HomeIcon,
+  Users as UsersIcon,
+  Palette as PaletteIcon,
   Plus,
-} from "lucide-react";
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
@@ -19,30 +20,31 @@ export function StudioMobileNav({
   drawerOpen: boolean;
   onCreate: () => void;
 }) {
+  const t = useTranslations("studio.nav");
   const pathname = usePathname();
 
   const items = [
     {
       href: "/studio",
-      label: "Home",
+      label: t("home"),
       icon: HomeIcon,
       active: pathname === "/studio",
     },
     {
       href: "/studio/browse",
-      label: "Projects",
+      label: t("projects"),
       icon: FolderIcon,
       active: pathname.startsWith("/studio/browse"),
     },
     {
       href: "/studio/browse?tab=community",
-      label: "Community",
+      label: t("community"),
       icon: UsersIcon,
       active: pathname.includes("tab=community"),
     },
     {
       href: "/studio/brand-kit",
-      label: "Brand",
+      label: t("brand"),
       icon: PaletteIcon,
       active: pathname.startsWith("/studio/brand-kit"),
     },
@@ -50,7 +52,7 @@ export function StudioMobileNav({
 
   return (
     <nav
-      aria-label="Studio"
+      aria-label={t("studio")}
       className={cn(
         "flex shrink-0 items-stretch justify-around bg-muted/20 px-1 pb-[env(safe-area-inset-bottom)] md:hidden",
         drawerOpen && "invisible",
@@ -73,7 +75,7 @@ export function StudioMobileNav({
       <button
         type="button"
         onClick={onCreate}
-        aria-label="New project"
+        aria-label={t("newProject")}
         className="flex min-w-0 flex-1 items-center justify-center text-foreground"
       >
         <span className="flex size-9 items-center justify-center rounded-md bg-foreground text-background">

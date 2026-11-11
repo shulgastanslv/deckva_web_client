@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +30,7 @@ export function StudioCodeBlockDialog({
   busy?: boolean;
   error?: string | null;
 }) {
+  const t = useTranslations("dialogs.codeblock");
   const [code, setCode] = useState("");
 
   useEffect(() => {
@@ -42,10 +47,10 @@ export function StudioCodeBlockDialog({
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
           <DialogTitle className="text-[17px] font-semibold tracking-tight">
-            Code Block
+            {t("title")}
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed">
-            Paste the snippet to place on the canvas.
+            {t("subtitle")}
           </DialogDescription>
         </DialogHeader>
 
@@ -78,7 +83,7 @@ export function StudioCodeBlockDialog({
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <>
-                Place on canvas
+                {t("place")}
                 <ArrowRight className="size-3.5 opacity-70" />
               </>
             )}

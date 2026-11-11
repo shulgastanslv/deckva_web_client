@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ToolsBannerCollage } from "@/components/canvas/sidebar/tool-avatars";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,8 @@ export function ToolsBanner({
   onExplore?: () => void;
   className?: string;
 }) {
+  const t = useTranslations("editor.tools");
+
   return (
     <div
       className={cn(
@@ -23,10 +26,10 @@ export function ToolsBanner({
       <div className="relative z-[1] -mt-10 space-y-3 bg-background px-4 pt-4 pb-4">
         <div className="space-y-1">
           <p className="text-[13px] font-semibold tracking-tight text-foreground">
-            More carousel tools to explore
+            {t("bannerTitle")}
           </p>
           <p className="text-[12px] leading-snug text-muted-foreground">
-            Try Deckva tools for mockups, chrome, and text — or build your own.
+            {t("bannerBody")}
           </p>
         </div>
         <div className="flex items-center justify-end gap-2">
@@ -36,14 +39,14 @@ export function ToolsBanner({
             className="h-8 rounded-md border border-border/60 bg-background px-3 text-[12px] font-medium text-foreground shadow-none hover:bg-muted/50"
             onClick={() => onExplore?.()}
           >
-            Learn more
+            {t("learnMore")}
           </Button>
           <Button
             type="button"
             className="h-8 rounded-md px-3 text-[12px] font-medium"
             onClick={() => onExplore?.()}
           >
-            Got it
+            {t("gotIt")}
           </Button>
         </div>
       </div>

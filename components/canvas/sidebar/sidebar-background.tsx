@@ -1,7 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { Loader2, Plus, ImageIcon, Palette, Check } from "lucide-react";
+import {
+  SpinnerGap as Loader2,
+  Plus,
+  Image as ImageIcon,
+  Palette,
+  Check,
+} from "@phosphor-icons/react";
 import {
   SOLID_PRESETS,
   GRADIENT_PRESETS,
@@ -59,12 +66,14 @@ type Tab = "color" | "gradient" | "image" | "shapes";
 
 const DDDEPTH_QUICK = 9;
 
-const SET_SWATCHES: { key: keyof Pick<SuggestedSet, "background" | "text" | "accent" | "card">; label: string }[] = [
-  { key: "background", label: "Background" },
-  { key: "text", label: "Text" },
-  { key: "accent", label: "Accent" },
-  { key: "card", label: "Card" },
-];
+const SET_SWATCH_KEYS = [
+  "background",
+  "text",
+  "accent",
+  "card",
+] as const satisfies ReadonlyArray<
+  keyof Pick<SuggestedSet, "background" | "text" | "accent" | "card">
+>;
 
 function SuggestedSetRow({
   set,
@@ -75,41 +84,45 @@ function SuggestedSetRow({
   onFillSlide: () => void;
   onApply: () => void;
 }) {
+  const t = useTranslations("editor.background");
   return (
     <div className="flex items-center gap-2 rounded-md py-1 pr-1 pl-1 hover:bg-muted/40">
       <button
         type="button"
-        title={`Fill this slide with ${set.background}`}
+        title={`${t("thisSlide")}: ${set.background}`}
         onClick={onFillSlide}
         className="h-7 w-7 shrink-0 rounded-md border border-border/40 transition-transform hover:scale-105 active:scale-95"
         style={{ backgroundColor: set.background }}
       />
       <div className="flex min-w-0 flex-1 items-center gap-1">
-        {SET_SWATCHES.slice(1).map((swatch) => (
+        {SET_SWATCH_KEYS.slice(1).map((key) => (
           <span
-            key={swatch.key}
-            title={`${swatch.label} ${set[swatch.key]}`}
+            key={key}
+            title={`${t(key)} ${set[key]}`}
             className="h-3.5 w-3.5 rounded-md border border-border/40"
-            style={{ backgroundColor: set[swatch.key] }}
+            style={{ backgroundColor: set[key] }}
           />
         ))}
         <span className="truncate text-foreground">{set.label}</span>
       </div>
       <Button type="button" size="xs" variant="secondary" className="rounded-md" onClick={onApply}>
-        Apply
+        {t("apply")}
       </Button>
     </div>
   );
 }
 
-const FILL_TABS: { id: Tab; label: string }[] = [
-  { id: "color", label: "Color" },
-  { id: "gradient", label: "Gradient" },
-  { id: "shapes", label: "3D" },
-  { id: "image", label: "Image" },
-];
-
 export function SidebarBackground() {
+  const t = useTranslations("editor.background");
+  const tc = useTranslations("common");
+
+  const fillTabs: { id: Tab; label: string }[] = [
+    { id: "color", label: t("color") },
+    { id: "gradient", label: t("gradient") },
+    { id: "shapes", label: t("threeD") },
+    { id: "image", label: t("image") },
+  ];
+
   const manager = useCanvasManager();
   const [tab, setTab] = useState<Tab>("color");
   const [imageUrl, setImageUrl] = useState("");
@@ -235,10 +248,10 @@ export function SidebarBackground() {
 
   return (
     <div className="flex min-w-0 flex-col text-[13px] text-foreground">
-      <CollapsibleGroup id="background-fill" title="Fill" defaultOpen>
+      <CollapsibleGroup id="background-fill" title={t("fill")} defaultOpen>
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="gap-3">
         <TabsList className={cn(sidebarTabsList, "grid-cols-4")}>
-          {FILL_TABS.map((item) => (
+          {fillTabs.map((item) => (
             <TabsTrigger
               key={item.id}
               value={item.id}
@@ -260,7 +273,7 @@ export function SidebarBackground() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={activeBg} alt="" className="size-full object-cover" />
                 <span className="absolute inset-x-0 bottom-0 bg-background/70 px-2.5 py-1.5 text-left text-[12px] font-medium backdrop-blur-sm">
-                  Change background
+                  {t("change")}
                 </span>
               </button>
             ) : null}
@@ -271,7 +284,7 @@ export function SidebarBackground() {
                   <button
                     key={src}
                     type="button"
-                    title="Set as background"
+                    title={t("setAsBackground")}
                     onClick={() => applyDddepth(src)}
                     className={cn(
                       "relative aspect-square overflow-hidden rounded-xl bg-muted/40",
@@ -312,14 +325,14 @@ export function SidebarBackground() {
               />
             ))}
             <div
-              title="Custom color"
+              title={t("customColor")}
               className="relative flex aspect-square items-center justify-center rounded-md border border-dashed border-border/80 bg-muted/30 transition-transform hover:scale-110"
             >
               <ColorPicker
                 compact
                 value="#ffffff"
                 onChange={(hex) => applySolid(hex)}
-                title="Custom color"
+                title={t("customColor")}
                 className="absolute inset-0 flex items-center justify-center [&_button]:size-full [&_button]:rounded-md [&_button]:ring-0 [&_button]:hover:scale-100"
               />
               <Plus className="pointer-events-none relative z-10 h-4 w-4 text-muted-foreground" />
@@ -357,7 +370,7 @@ export function SidebarBackground() {
             <div className="flex min-w-0 flex-col gap-1.5">
               <p className="flex items-center gap-1 font-medium text-muted-foreground">
                 <ImageIcon className="h-3 w-3" />
-                Or paste a link
+                {t("orPasteLink")}
               </p>
               <div className="flex gap-1.5">
                 <Input
@@ -397,16 +410,16 @@ export function SidebarBackground() {
         </Tabs>
       </CollapsibleGroup>
 
-      <CollapsibleGroup id="background-split" title="Screen split" defaultOpen={false}>
+      <CollapsibleGroup id="background-split" title={t("screenSplit")} defaultOpen={false}>
         <ScreenSplit />
       </CollapsibleGroup>
 
-      <CollapsibleGroup id="background-pattern" title="Pattern" defaultOpen={false}>
+      <CollapsibleGroup id="background-pattern" title={t("pattern")} defaultOpen={false}>
         <BackgroundPattern />
       </CollapsibleGroup>
 
       {brandKit ? (
-        <CollapsibleGroup id="background-brand" title="Brand kit" defaultOpen>
+        <CollapsibleGroup id="background-brand" title={t("brandKit")} defaultOpen>
           <div className="flex items-center gap-2 rounded-2xl bg-muted/30 p-2">
             <div className="flex flex-1 items-center gap-1.5">
               {PALETTE_SLOTS.map((slot) => (
@@ -448,12 +461,12 @@ export function SidebarBackground() {
             </Button>
           </div>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Apply loads palette and type styles from studio Brand kit onto this carousel.
+            {t("brandKitHint")}
           </p>
         </CollapsibleGroup>
       ) : null}
 
-      <CollapsibleGroup id="background-palette" title="Palette" defaultOpen={false}>
+      <CollapsibleGroup id="background-palette" title={t("palette")} defaultOpen={false}>
         <div className={sidebarSegmented}>
           {(
             [
@@ -480,10 +493,10 @@ export function SidebarBackground() {
         </div>
         <p className="text-[11px] leading-snug text-muted-foreground">
           {paletteScope === "slide"
-            ? "Colors land on this slide only. The carousel default stays as it is."
+            ? t("thisSlideHint")
             : paletteScope === "marked"
-              ? "Colors land on marked slides. Mark them with the corner check."
-              : "Text, accent, and cards use these colors on the whole carousel."}
+              ? t("markedHint")
+              : t("paletteHint")}
         </p>
         <div className="flex flex-col">
           {PALETTE_SLOTS.map((slot) => (
@@ -514,7 +527,7 @@ export function SidebarBackground() {
 
       <BackgroundSlideSets />
 
-      <CollapsibleGroup id="background-sets" title="Suggest a set" defaultOpen={false}>
+      <CollapsibleGroup id="background-sets" title={t("suggestSet")} defaultOpen={false}>
         <div className="flex flex-col gap-1">
           {SUGGESTED_SETS.map((set) => (
             <SuggestedSetRow
@@ -526,7 +539,7 @@ export function SidebarBackground() {
           ))}
         </div>
         <p className="text-[11px] leading-snug text-muted-foreground">
-          The large swatch fills this slide. Apply follows All, Marked, or This slide.
+          {t("swatchHint")} Apply follows All, Marked, or This slide.
         </p>
       </CollapsibleGroup>
 
@@ -545,7 +558,7 @@ export function SidebarBackground() {
                   <button
                     key={src}
                     type="button"
-                    title="Set as background"
+                    title={t("setAsBackground")}
                     onClick={() => applyDddepth(src, true)}
                     className={cn(
                       "relative aspect-square overflow-hidden rounded-2xl bg-muted/40",

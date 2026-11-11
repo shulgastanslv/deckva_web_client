@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Check, ChevronRight, Menu, X } from "lucide-react";
+import {
+  Check,
+  CaretRight as ChevronRight,
+  List as Menu,
+  X,
+} from "@phosphor-icons/react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
 import Logo from "@/components/logo/logo";
@@ -25,6 +30,22 @@ import {
   landTitle,
   landSub,
 } from "@/components/landing/landing-shell";
+import {
+  FileArt,
+  JOB_ARTS,
+  LeaveWithPostArt,
+  MagicLayerArt,
+  NothingLockedArt,
+  OnTheSlideArt,
+  OnTheWayOutArt,
+  RatioArt,
+  RemoveBgArt,
+  ShapeArt,
+  SlidesArt,
+  SubjectEnoughArt,
+  TopicArt,
+  UpscaleArt,
+} from "@/components/landing/landing-line-arts";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { trackEvent } from "@/lib/analytics";
@@ -35,11 +56,83 @@ import {
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
 import { PromptSection } from "./prompt-section";
+import { cn } from "@/lib/utils";
 
 const LEGAL_STATIC = {
   fullName: "Шульга Станислав",
   email: "hello@deckva.by",
 } as const;
+
+/** AlignCanvas-style soft gray illustration well. */
+function ArtWell({
+  className,
+  children,
+}: {
+  className?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div
+      aria-hidden={children ? undefined : true}
+      className={cn(
+        "overflow-hidden rounded-[1.5rem] bg-[#F2F2F2] dark:bg-[#2a2b33] sm:rounded-[1.75rem]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** White feature card: inset gray art + text below. */
+function ArtCard({
+  art,
+  title,
+  text,
+  step,
+  className,
+  /** When false, art already includes its own gray well (e.g. Figma arts). */
+  framed = true,
+}: {
+  art: ReactNode;
+  title: string;
+  text: string;
+  step?: string;
+  className?: string;
+  framed?: boolean;
+}) {
+  return (
+    <li className={cn("rounded-[2rem] bg-land-card p-3 sm:p-4", className)}>
+      {framed ? (
+        <ArtWell className="flex aspect-[5/4] w-full items-center justify-center sm:aspect-[4/3]">
+          {art}
+        </ArtWell>
+      ) : (
+        <div className="aspect-[5/4] w-full overflow-hidden rounded-[1.5rem] sm:aspect-[4/3] sm:rounded-[1.75rem]">
+          {art}
+        </div>
+      )}
+      <div className="px-2 pb-3 pt-5 sm:px-3 sm:pt-6">
+        {step ? (
+          <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[#E8EEF8] px-2.5 text-[13px] font-semibold tabular-nums text-land-ink dark:bg-white/10">
+            {step}
+          </span>
+        ) : null}
+        <h3
+          className={cn(
+            "text-[1.65rem] font-semibold tracking-tight text-land-ink sm:text-2xl",
+            step ? "mt-3.5" : null,
+          )}
+        >
+          {title}
+        </h3>
+        <p className="mt-2.5 text-[15px] leading-relaxed text-land-ink/55 sm:text-base">
+          {text}
+        </p>
+      </div>
+    </li>
+  );
+}
 
 const sectionTitle =
   "max-w-3xl text-4xl font-medium tracking-tight text-land-ink sm:text-5xl sm:leading-[1.08]";
@@ -133,15 +226,6 @@ const RATIOS = [
   { label: "9:16", frame: "aspect-[9/16] w-full" },
   { label: "16:9", frame: "aspect-video w-full" },
 ] as const;
-
-function Place({ className }: { className?: string }) {
-  return (
-    <div
-      aria-hidden
-      className={`bg-[#c8c8c8] dark:bg-[#4a4a4a] ${className ?? ""}`}
-    />
-  );
-}
 
 const POSTS = [
   "/reviews/1.jpg",
@@ -251,7 +335,7 @@ const FAQ = [
 export function SequenceIllustration({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`relative flex items-center justify-center overflow-hidden bg-[#F6F6F5] border border-black/[0.06] p-6 sm:p-10 select-none ${className}`}
+      className={`relative flex items-center justify-center overflow-hidden rounded-[1.75rem] bg-[#F2F2F2] p-6 sm:rounded-[2rem] sm:p-10 select-none dark:bg-[#2a2b33] ${className}`}
     >
       <svg
         viewBox="0 0 920 420"
@@ -452,7 +536,7 @@ const SOCIAL = [
 export function ProjectContainerIllustration({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`relative flex items-center justify-center overflow-hidden bg-[#F6F6F5] border border-black/[0.06] p-6 sm:p-8 select-none ${className}`}
+      className={`relative flex items-center justify-center overflow-hidden rounded-[1.75rem] bg-[#F2F2F2] p-6 sm:rounded-[2rem] sm:p-8 select-none dark:bg-[#2a2b33] ${className}`}
     >
       <svg
         viewBox="0 0 540 400"
@@ -966,8 +1050,10 @@ export function LandingPage() {
         <p className={`mt-4 max-w-xl ${landSub}`}>
           From the sentence you write to the slides you can download.
         </p>
-        <div className="mt-8 overflow-hidden rounded-[1.75rem] bg-land-card">
-          <StudioVideo />
+        <div className="mt-8 rounded-[2rem] bg-land-card p-3 sm:p-4">
+          <ArtWell className="rounded-[1.5rem] sm:rounded-[1.75rem]">
+            <StudioVideo />
+          </ArtWell>
         </div>
       </LandingSection>
 
@@ -983,14 +1069,16 @@ export function LandingPage() {
           {POSTS.slice(0, 4).map((src, index) => (
             <li
               key={src}
-              className="overflow-hidden rounded-[1.75rem] bg-land-card"
+              className="rounded-[1.75rem] bg-land-card p-2 sm:rounded-[2rem] sm:p-3"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt={`Slide ${index + 1} from the example carousel`}
-                className="aspect-[4/5] w-full object-cover object-top"
-              />
+              <ArtWell className="rounded-[1.25rem] sm:rounded-[1.5rem]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={`Slide ${index + 1} from the example carousel`}
+                  className="aspect-[4/5] w-full object-cover object-top"
+                />
+              </ArtWell>
             </li>
           ))}
         </ul>
@@ -1014,47 +1102,41 @@ export function LandingPage() {
           a feed. Then you change the words, the cover, and the sequence until
           the post is yours.
         </p>
-        <ul className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-6">
-          <li>
-            <h3 className="text-xl font-medium tracking-tight text-land-ink">
-              The subject is enough
-            </h3>
-            <p className="mt-2 text-base leading-relaxed text-land-ink/60">
-              A topic, a template, or an empty project. A topic already lays
-              the slides out in order.
-            </p>
-          </li>
-          <li>
-            <h3 className="text-xl font-medium tracking-tight text-land-ink">
-              Nothing is locked
-            </h3>
-            <p className="mt-2 text-base leading-relaxed text-land-ink/60">
-              Rewrite a line, swap the cover, move a slide. The project stays
-              the same one.
-            </p>
-          </li>
-          <li>
-            <h3 className="text-xl font-medium tracking-tight text-land-ink">
-              You leave with the post
-            </h3>
-            <p className="mt-2 text-base leading-relaxed text-land-ink/60">
-              A PNG of one slide, or a ZIP of the carousel. No watermark on
-              the file.
-            </p>
-          </li>
+        <div className="mt-8 rounded-[2rem] bg-land-card p-3 sm:p-4">
+          <SequenceIllustration className="min-h-56 w-full sm:min-h-72" />
+        </div>
+        <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+          <ArtCard
+            step="01"
+            title="The subject is enough"
+            text="A topic, a template, or an empty project. A topic already lays the slides out in order."
+            art={<SubjectEnoughArt />}
+          />
+          <ArtCard
+            step="02"
+            title="Nothing is locked"
+            text="Rewrite a line, swap the cover, move a slide. The project stays the same one."
+            art={<NothingLockedArt />}
+          />
+          <ArtCard
+            step="03"
+            title="You leave with the post"
+            text="A PNG of one slide, or a ZIP of the carousel. No watermark on the file."
+            art={<LeaveWithPostArt />}
+          />
         </ul>
       </LandingSection>
 
       <LandingSection>
-        <div className="grid items-center gap-8 rounded-[1.75rem] bg-land-card p-6 sm:p-10 lg:grid-cols-2 lg:gap-12 lg:p-12">
-          <div>
+        <div className="grid items-center gap-6 rounded-[2rem] bg-land-card p-3 sm:gap-8 sm:p-4 lg:grid-cols-2 lg:gap-10 lg:p-5">
+          <div className="px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
             <h2 className={sectionTitle}>One project holds the carousel</h2>
             <p className={`mt-4 ${landSub}`}>
               The topic, the slides, the edits, and the download live together.
               You take the file when the carousel is finished.
             </p>
           </div>
-          <Place className="min-h-64 rounded-2xl" />
+          <ProjectContainerIllustration className="min-h-64 w-full" />
         </div>
       </LandingSection>
 
@@ -1067,9 +1149,11 @@ export function LandingPage() {
             Cover, type, and order are the work. The studio does not hand you
             a separate file to rebuild.
           </p>
-          <div className="mt-10 grid items-center gap-6 rounded-[1.5rem] bg-white/5 p-4 sm:grid-cols-2 sm:p-6">
-            <Place className="min-h-56 rounded-2xl" />
-            <div>
+          <div className="mt-10 grid items-center gap-6 rounded-[1.75rem] bg-white/5 p-3 sm:grid-cols-2 sm:p-4">
+            <ArtWell className="flex min-h-56 items-center justify-center bg-[#F2F2F2] dark:bg-[#2a2b33]">
+              <OnTheSlideArt />
+            </ArtWell>
+            <div className="px-2 sm:px-3">
               <p className="text-sm font-medium text-white/50">On the slide</p>
               <h3 className="mt-2 text-3xl font-medium tracking-tight">
                 Cover, type, and order
@@ -1080,11 +1164,13 @@ export function LandingPage() {
               </p>
             </div>
           </div>
-          <div className="mt-4 grid items-center gap-6 rounded-[1.5rem] bg-white/5 p-4 sm:grid-cols-2 sm:p-6">
+          <div className="mt-4 grid items-center gap-6 rounded-[1.75rem] bg-white/5 p-3 sm:grid-cols-2 sm:p-4">
             <div className="sm:order-2">
-              <Place className="min-h-56 rounded-2xl" />
+              <ArtWell className="flex min-h-56 items-center justify-center bg-[#F2F2F2] dark:bg-[#2a2b33]">
+                <OnTheWayOutArt />
+              </ArtWell>
             </div>
-            <div>
+            <div className="px-2 sm:px-3">
               <p className="text-sm font-medium text-white/50">On the way out</p>
               <h3 className="mt-2 text-3xl font-medium tracking-tight">
                 A file with nothing extra
@@ -1101,22 +1187,18 @@ export function LandingPage() {
       <LandingSection id="make">
         <h2 className={sectionTitle}>Posts with a job to do</h2>
         <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {JOBS.map(([title, text]) => (
-            <li
-              key={title}
-              className="overflow-hidden rounded-[1.75rem] bg-land-card"
-            >
-              <Place className="h-40 w-full sm:h-52" />
-              <div className="p-6">
-                <h3 className="text-2xl font-medium tracking-tight text-land-ink">
-                  {title}
-                </h3>
-                <p className="mt-3 text-base leading-relaxed text-land-ink/60">
-                  {text}
-                </p>
-              </div>
-            </li>
-          ))}
+          {JOBS.map(([title, text], index) => {
+            const Art = JOB_ARTS[title as keyof typeof JOB_ARTS];
+            return (
+              <ArtCard
+                key={title}
+                step={String(index + 1).padStart(2, "0")}
+                title={title}
+                text={text}
+                art={Art ? <Art /> : null}
+              />
+            );
+          })}
         </ul>
       </LandingSection>
 
@@ -1125,11 +1207,15 @@ export function LandingPage() {
         <p className={`mt-4 max-w-xl ${landSub}`}>
           A feed, a square, a story, and a wide frame. The sequence stays one project.
         </p>
-        <ul className="mt-8 grid grid-cols-2 items-end gap-4 sm:grid-cols-4">
+        <ul className="mt-8 grid grid-cols-2 items-end gap-3 sm:grid-cols-4 sm:gap-4">
           {RATIOS.map((item) => (
-            <li key={item.label}>
-              <Place className={`${item.frame} rounded-[1.75rem]`} />
-              <p className="mt-3 text-sm font-medium text-land-ink/60">{item.label}</p>
+            <li key={item.label} className="rounded-[1.75rem] bg-land-card p-2 sm:rounded-[2rem] sm:p-3">
+              <ArtWell
+                className={`${item.frame} flex items-center justify-center rounded-[1.25rem] sm:rounded-[1.5rem]`}
+              >
+                <RatioArt ratio={item.label} />
+              </ArtWell>
+              <p className="mt-3 px-1 text-sm font-medium text-land-ink/60">{item.label}</p>
             </li>
           ))}
         </ul>
@@ -1154,8 +1240,10 @@ export function LandingPage() {
                   {item.title}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="grid items-center gap-4 pb-2 sm:grid-cols-[7rem_1fr]">
-                    <Place className="h-24 rounded-2xl" />
+                  <div className="grid items-center gap-4 pb-2 sm:grid-cols-[7.5rem_1fr]">
+                    <ArtWell className="flex h-24 items-center justify-center rounded-[1.25rem] sm:rounded-[1.5rem]">
+                      <ShapeArt kind={item.value as "story"} className="max-h-20 p-2" />
+                    </ArtWell>
                     <p className="text-base leading-relaxed text-land-ink/60">
                       {item.text}
                     </p>
@@ -1173,26 +1261,47 @@ export function LandingPage() {
           Three tools on a selected image. The slide stays the same project.
         </p>
         <ul className="mt-8 grid gap-4 lg:grid-cols-3">
-          {[
-            ["Remove background", "The subject stays. The backdrop goes."],
-            ["Magic layer", "One picture splits into layers you can move."],
-            ["Upscale", "2×, 3×, or 4×. The sharper image stays on the slide."],
-          ].map(([title, text]) => (
-            <li
-              key={title}
-              className="overflow-hidden rounded-[1.75rem] bg-land-card"
-            >
-              <Place className="h-40 w-full sm:h-52" />
-              <div className="p-6">
-                <h3 className="text-2xl font-medium tracking-tight text-land-ink">
-                  {title}
-                </h3>
-                <p className="mt-3 text-base leading-relaxed text-land-ink/60">
-                  {text}
-                </p>
-              </div>
-            </li>
-          ))}
+          <ArtCard
+            step="01"
+            title="Remove background"
+            text="The subject stays. The backdrop goes."
+            art={<RemoveBgArt />}
+          />
+          <ArtCard
+            step="02"
+            title="Magic layer"
+            text="One picture splits into layers you can move."
+            art={<MagicLayerArt />}
+          />
+          <ArtCard
+            step="03"
+            title="Upscale"
+            text="2×, 3×, or 4×. The sharper image stays on the slide."
+            art={<UpscaleArt />}
+          />
+        </ul>
+      </LandingSection>
+
+      <LandingSection id="figma">
+        <h2 className={sectionTitle}>Figma in, Figma out</h2>
+        <p className={`mt-4 max-w-xl ${landSub}`}>
+          Bring a frame into the studio, or take the finished slides back as a file.
+        </p>
+        <ul className="mt-8 grid gap-4 lg:grid-cols-2">
+          <ArtCard
+            framed={false}
+            step="01"
+            title="Import from Figma"
+            text="Drop a frame into Deckva and keep editing the carousel on the canvas."
+            art={<FigmaImportArt />}
+          />
+          <ArtCard
+            framed={false}
+            step="02"
+            title="Export to Figma"
+            text="Send finished slides out as a clean handoff — same order, same ratios."
+            art={<FigmaExportArt />}
+          />
         </ul>
       </LandingSection>
 
@@ -1266,27 +1375,28 @@ export function LandingPage() {
           the file leaves.
         </p>
         <ul className="mt-8 grid gap-4 lg:grid-cols-3">
-          {[
-            ["01", "The topic", "One sentence about the post. The language follows the words you type."],
-            ["02", "The slides", "Four to ten frames, in order, at the ratio of a feed."],
-            ["03", "The file", "Rewrite a line, swap the cover, move a slide. Download PNG or ZIP."],
-          ].map(([step, title, text]) => (
-            <li
-              key={title}
-              className="flex min-h-56 flex-col rounded-[1.75rem] bg-white p-6 dark:bg-[#2a2c38] sm:p-8"
-            >
-              <p className="text-sm font-medium text-land-blue">{step}</p>
-              <h3 className="mt-6 text-2xl font-medium tracking-tight text-land-ink">
-                {title}
-              </h3>
-              <p className="mt-3 text-base leading-relaxed text-land-ink/60">
-                {text}
-              </p>
-            </li>
-          ))}
+          <ArtCard
+            step="01"
+            title="The topic"
+            text="One sentence about the post. The language follows the words you type."
+            art={<TopicArt />}
+          />
+          <ArtCard
+            step="02"
+            title="The slides"
+            text="Four to ten frames, in order, at the ratio of a feed."
+            art={<SlidesArt />}
+          />
+          <ArtCard
+            step="03"
+            title="The file"
+            text="Rewrite a line, swap the cover, move a slide. Download PNG or ZIP."
+            art={<FileArt />}
+          />
         </ul>
       </LandingSection>
 
+      <LeaveReviewBlock />
 
       <LandingSection id="faq">
           <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:gap-12">

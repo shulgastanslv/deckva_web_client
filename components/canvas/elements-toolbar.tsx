@@ -1,35 +1,38 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, type DragEvent, type ReactNode } from "react";
 import {
-  AlignLeft,
-  ChevronDown,
+  TextAlignLeft as AlignLeft,
+  CaretDown as ChevronDown,
   Circle,
   Diamond,
-  Ellipse,
+  Circle as Ellipse,
   Eraser,
   Hand,
-  Heading1,
-  Heading2,
+  TextHOne as Heading1,
+  TextHTwo as Heading2,
   Hexagon,
-  ImagePlus,
-  Layers2,
-  Link2,
-  Loader2,
-  Minimize2,
+  Image as ImagePlus,
+  Stack as Layers2,
+  Link as Link2,
+  SpinnerGap as Loader2,
+  ArrowsIn as Minimize2,
   Minus,
-  MousePointer2,
-  Quote,
-  ScanSearch,
-  SeparatorHorizontal,
-  Sparkles,
+  Cursor as MousePointer2,
+  Quotes as Quote,
+  MagnifyingGlass as ScanSearch,
+  Minus as SeparatorHorizontal,
+  Sparkle as Sparkles,
   Square,
   Star,
   Triangle,
-  Type,
-  WandSparkles,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+  TextT as Type,
+  MagicWand as WandSparkles,
+} from "@phosphor-icons/react";
+import {
+  type Icon as LucideIcon,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -55,6 +58,8 @@ interface ElementsToolbarProps {
 
 interface ToolDef {
   id: string;
+  /** Stable English key matching useElementLibrary item labels. */
+  actionKey: string;
   label: string;
   hint: string;
   icon: LucideIcon;
@@ -62,24 +67,6 @@ interface ToolDef {
   key?: string;
 }
 
-const SHAPES: ToolDef[] = [
-  { id: "rectangle", label: "Rectangle", hint: "Rectangle", icon: Square, shortcut: "R", key: "r" },
-  { id: "ellipse", label: "Ellipse", hint: "Oval", icon: Ellipse, shortcut: "O", key: "o" },
-  { id: "circle", label: "Circle", hint: "Circle", icon: Circle },
-  { id: "line", label: "Line", hint: "Straight line", icon: Minus, shortcut: "L", key: "l" },
-  { id: "triangle", label: "Triangle", hint: "Triangle", icon: Triangle },
-  { id: "diamond", label: "Diamond", hint: "Diamond", icon: Diamond },
-  { id: "star", label: "Star", hint: "Five-point star", icon: Star },
-  { id: "hexagon", label: "Hexagon", hint: "Hexagon", icon: Hexagon },
-  { id: "divider", label: "Divider", hint: "Thin horizontal rule", icon: SeparatorHorizontal },
-];
-
-const TEXTS: ToolDef[] = [
-  { id: "heading", label: "Heading", hint: "Large title", icon: Heading1 },
-  { id: "subtitle", label: "Subtitle", hint: "Smaller title under the heading", icon: Heading2 },
-  { id: "paragraph", label: "Paragraph", hint: "Body text", icon: AlignLeft },
-  { id: "quote", label: "Quote", hint: "Quoted line", icon: Quote },
-];
 
 function isTypingTarget() {
   const el = document.activeElement;
@@ -350,6 +337,36 @@ function BarDivider() {
 }
 
 export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
+  const t = useTranslations("editor");
+  const tc = useTranslations("common");
+
+
+  const SHAPES: ToolDef[] = useMemo(
+    () => [
+      { id: "rectangle", actionKey: "Rectangle", label: t("elements.rectangle"), hint: t("elements.rectangle"), icon: Square, shortcut: "R", key: "r" },
+      { id: "ellipse", actionKey: "Ellipse", label: t("elements.ellipse"), hint: t("elements.oval"), icon: Ellipse, shortcut: "O", key: "o" },
+      { id: "circle", actionKey: "Circle", label: t("elements.circle"), hint: t("elements.circle"), icon: Circle },
+      { id: "line", actionKey: "Line", label: t("elements.line"), hint: t("elements.straightLine"), icon: Minus, shortcut: "L", key: "l" },
+      { id: "triangle", actionKey: "Triangle", label: t("elements.triangle"), hint: t("elements.triangle"), icon: Triangle },
+      { id: "diamond", actionKey: "Diamond", label: t("elements.diamond"), hint: t("elements.diamond"), icon: Diamond },
+      { id: "star", actionKey: "Star", label: t("elements.star"), hint: t("elements.fivePointStar"), icon: Star },
+      { id: "hexagon", actionKey: "Hexagon", label: t("elements.hexagon"), hint: t("elements.hexagon"), icon: Hexagon },
+      { id: "divider", actionKey: "Divider", label: t("elements.divider"), hint: t("elements.thinRule"), icon: SeparatorHorizontal },
+    ],
+    [t],
+  );
+
+  const TEXTS: ToolDef[] = useMemo(
+    () => [
+      { id: "heading", actionKey: "Heading", label: t("elements.heading"), hint: t("elements.largeTitle"), icon: Heading1 },
+      { id: "subtitle", actionKey: "Subtitle", label: t("elements.subtitle"), hint: t("elements.smallerTitleUnder"), icon: Heading2 },
+      { id: "paragraph", actionKey: "Paragraph", label: t("elements.paragraph"), hint: t("elements.bodyText"), icon: AlignLeft },
+      { id: "quote", actionKey: "Quote", label: t("elements.quote"), hint: t("elements.quotedLine"), icon: Quote },
+    ],
+    [t],
+  );
+
+
   const {
     manager,
     sections,
@@ -397,7 +414,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   const useTool = (tool: ToolDef, slot: "shape" | "text") => {
     if (slot === "shape") setShapeId(tool.id);
     else setTextId(tool.id);
-    actions.get(tool.label)?.();
+    actions.get(tool.actionKey)?.();
   };
 
   useEffect(() => {
@@ -473,8 +490,8 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
           />
 
           <RailTool
-            label="Move"
-            hint="Select and move objects"
+            label={t("tools.move")}
+            hint={t("tools.moveHint")}
             shortcut="V"
             active={!handActive && !eraserActive}
             disabled={!manager}
@@ -486,8 +503,8 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             <MousePointer2 className="size-5" />
           </RailTool>
           <RailTool
-            label="Hand"
-            hint="Drag to pan. Hold Space"
+            label={t("tools.hand")}
+            hint={t("tools.handHint")}
             shortcut="H"
             active={handActive}
             disabled={!manager}
@@ -496,8 +513,8 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
             <Hand className="size-5" />
           </RailTool>
           <RailTool
-            label="Eraser"
-            hint="Brush away pixels on images"
+            label={t("tools.eraser")}
+            hint={t("tools.eraserHint")}
             shortcut="E"
             active={eraserActive}
             disabled={!manager}
@@ -522,8 +539,8 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
           />
 
           <SplitTool
-            label="Image"
-            hint="Upload or drop a picture"
+            label={t("tools.image")}
+            hint={t("tools.imageHint")}
             dragging={isDragging}
             disabled={!manager}
             open={imageOpen}
@@ -543,18 +560,18 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted"
                 >
                   <ImagePlus className="size-5" />
-                  Upload image
+                  {t("tools.uploadImage")}
                 </button>
                 <div className="space-y-1.5 px-1">
                   <p className="text-[12px] font-medium text-muted-foreground">
-                    From link
+                    {t("tools.fromLink")}
                   </p>
                   <div className="flex items-center gap-1.5">
                     <div className="relative min-w-0 flex-1">
                       <Link2 className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         type="url"
-                        placeholder="Image URL"
+                        placeholder={t("tools.imageUrl")}
                         value={imageUrl}
                         disabled={!manager}
                         onChange={(event) => {
@@ -584,7 +601,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                       {urlLoading ? (
                         <Loader2 className="size-3 animate-spin" />
                       ) : (
-                        "Add"
+                        t("tools.add")
                       )}
                     </Button>
                   </div>
@@ -599,13 +616,13 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
           </SplitTool>
 
           <SplitTool
-            label="Enhance"
+            label={t("tools.enhance")}
             hint={
               enhanceBusy
-                ? "Working…"
+                ? t("tools.working")
                 : enhanceError
                   ? enhanceError
-                  : "Remove BG, upscale, magic layer — select an image"
+                  : t("tools.imageToolsHint")
             }
             disabled={!canEnhance && !enhanceBusy}
             open={enhanceOpen}
@@ -623,10 +640,10 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                 >
                   <WandSparkles className="size-5" />
-                  Remove background
+                  {t("tools.removeBg")}
                 </button>
                 <p className="px-3 pt-1.5 pb-1 text-[12px] font-medium text-muted-foreground">
-                  Upscale
+                  {t("tools.upscale")}
                 </p>
                 {([2, 3, 4] as UpscaleScale[]).map((value) => (
                   <button
@@ -646,7 +663,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                     )}
                   >
                     <ScanSearch className="size-5" />
-                    Upscale {value}×
+                    {`${t("tools.upscale")} ${value}×`}
                   </button>
                 ))}
                 <button
@@ -659,7 +676,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                   className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                 >
                   <Layers2 className="size-5" />
-                  Magic layer
+                  {t("tools.magicLayer")}
                 </button>
                 {enhanceError ? (
                   <p className="px-3 pt-1 text-[13px] text-destructive">
@@ -674,7 +691,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
 
           <BarDivider />
 
-          <RailTool label="Exit" hint="Leave focus mode. Esc" onClick={onExit}>
+          <RailTool label={t("tools.exit")} hint={t("tools.exitHint")} onClick={onExit}>
             <Minimize2 className="size-5" />
           </RailTool>
         </div>

@@ -1,6 +1,9 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useSlides } from "@/hooks/use-slides";
 

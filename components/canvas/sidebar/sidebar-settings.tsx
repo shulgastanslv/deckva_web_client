@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { sidebarPanel, sidebarSurfaceIdle } from "@/components/canvas/sidebar/sidebar-ui";
 import { cn } from "@/lib/utils";
@@ -14,17 +15,18 @@ interface SidebarSettingsProps {
 export function SidebarSettings({ showDotGrid, setShowDotGrid }: SidebarSettingsProps) {
   const autoSave = useCanvasStore((state) => state.autoSave);
   const setAutoSave = useCanvasStore((state) => state.setAutoSave);
+  const t = useTranslations("editor.settings");
 
   return (
     <div className={sidebarPanel}>
-      <span className="font-medium text-muted-foreground">Canvas Preferences</span>
+      <span className="font-medium text-muted-foreground">{t("title")}</span>
       <label
         className={cn(
           "flex cursor-pointer items-center justify-between rounded-md p-3 text-foreground",
           sidebarSurfaceIdle,
         )}
       >
-        <span>Show dot grid background</span>
+        <span>{t("dotGrid")}</span>
         <input
           type="checkbox"
           checked={showDotGrid}
@@ -39,8 +41,8 @@ export function SidebarSettings({ showDotGrid, setShowDotGrid }: SidebarSettings
         )}
       >
         <span>
-          Autosave
-          <span className="mt-0.5 block text-muted-foreground">Saves quietly in the background</span>
+          {t("autosave")}
+          <span className="mt-0.5 block text-muted-foreground">{t("autosaveHint")}</span>
         </span>
         <input
           type="checkbox"

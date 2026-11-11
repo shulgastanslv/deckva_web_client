@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   useEffect,
   useEffectEvent,
@@ -9,14 +10,14 @@ import {
 } from "react";
 import {
   Eye,
-  Loader2,
-  Pencil,
+  SpinnerGap as Loader2,
+  PencilSimple as Pencil,
   Plus,
-  Search,
+  MagnifyingGlass as Search,
   Tag,
-  Trash2,
+  Trash as Trash2,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import {
   createMediaAsset,
@@ -76,6 +77,8 @@ function parseTagInput(value: string): string[] {
 }
 
 export function SidebarAssets() {
+  const t = useTranslations("editor.assets");
+  const tc = useTranslations("common");
   const manager = useCanvasManager();
   const [assets, setAssets] = useState<MediaAssetDTO[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
@@ -259,13 +262,13 @@ export function SidebarAssets() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search name or tag"
+            placeholder={t("searchNameOrTag")}
             className={cn(sidebarFieldInput, "pl-9 pr-9")}
           />
           {query ? (
             <button
               type="button"
-              title="Clear"
+              title={t("clear")}
               onClick={() => setQuery("")}
               className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/40 hover:text-foreground"
             >
@@ -297,7 +300,7 @@ export function SidebarAssets() {
         <input
           value={uploadTags}
           onChange={(e) => setUploadTags(e.target.value)}
-          placeholder="Tags for uploads (logo, icon)"
+          placeholder={t("tagsForUploads")}
           className={cn(sidebarFieldInput, "pl-9")}
         />
       </div>
@@ -306,14 +309,14 @@ export function SidebarAssets() {
         multiple
         disabled={!manager}
         busy={uploading}
-        hint="PNG, JPG, SVG · saved to library"
+        hint={t("pngJpgSvg")}
         onFiles={(files) => void addFiles(files)}
       />
 
       {error ? <p className="text-[13px] text-destructive">{error}</p> : null}
 
       {logos.length > 0 ? (
-        <GallerySection title="Brand logos">
+        <GallerySection title={t("brandLogos")}>
           {logos.map((item) => (
             <AssetTile
               key={item.id}
@@ -334,7 +337,7 @@ export function SidebarAssets() {
       ) : assets.length === 0 ? (
         logos.length === 0 ? (
           <p className="py-8 text-center text-[13px] text-muted-foreground">
-            Upload logos and photos here. Tag them to find them later.
+            {t("libraryHint")}
           </p>
         ) : null
       ) : (
@@ -383,7 +386,7 @@ export function SidebarAssets() {
                     </span>
                   ))
                 ) : (
-                  <span className="text-[12px] text-muted-foreground">No tags</span>
+                  <span className="text-[12px] text-muted-foreground">{t("noTags")}</span>
                 )}
               </div>
               <p className="text-[12px] text-muted-foreground">
@@ -411,7 +414,7 @@ export function SidebarAssets() {
                 onClick={() => preview && openEdit(preview)}
               >
                 <Pencil className="mr-1.5 size-3.5" />
-                Edit
+                {t("edit")}
               </button>
               <button
                 type="button"
@@ -433,7 +436,7 @@ export function SidebarAssets() {
               onClick={() => preview && void addToCanvas(preview)}
             >
               <Plus className="size-3.5" />
-              Add to canvas
+              {t("addToCanvas")}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -442,19 +445,19 @@ export function SidebarAssets() {
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent className="max-w-sm gap-4 rounded-[1.5rem] p-5">
           <DialogHeader className="gap-1 pr-6">
-            <DialogTitle className="text-[15px]">Edit asset</DialogTitle>
+            <DialogTitle className="text-[15px]">{t("editAsset")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <input
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              placeholder="Name"
+              placeholder={t("name")}
               className={sidebarFieldInput}
             />
             <input
               value={editTags}
               onChange={(e) => setEditTags(e.target.value)}
-              placeholder="Tags, comma separated"
+              placeholder={t("tagsComma")}
               className={sidebarFieldInput}
             />
           </div>
@@ -502,6 +505,7 @@ function AssetTile({
   onEdit?: () => void;
   onRemove?: () => void;
 }) {
+  const t = useTranslations("editor.assets");
   return (
     <div className="group relative min-w-0">
       <button
@@ -530,7 +534,7 @@ function AssetTile({
         {onPreview ? (
           <button
             type="button"
-            title="Preview"
+            title={t("preview")}
             onClick={(e) => {
               e.stopPropagation();
               onPreview();
@@ -543,7 +547,7 @@ function AssetTile({
         {onEdit ? (
           <button
             type="button"
-            title="Edit"
+            title={t("edit")}
             onClick={(e) => {
               e.stopPropagation();
               onEdit();
@@ -556,7 +560,7 @@ function AssetTile({
         {onRemove ? (
           <button
             type="button"
-            title="Remove"
+            title={t("remove")}
             onClick={(e) => {
               e.stopPropagation();
               onRemove();

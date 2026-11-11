@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { messages } from "@/lib/messages";
@@ -10,40 +11,40 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import {
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  Bold,
-  Italic,
-  Underline,
-  BringToFront,
-  SendToBack,
-  AlignHorizontalDistributeCenter,
-  AlignVerticalDistributeCenter,
-  AlignHorizontalJustifyStart,
-  AlignHorizontalJustifyCenter,
-  AlignHorizontalJustifyEnd,
-  AlignVerticalJustifyStart,
-  AlignVerticalJustifyCenter,
-  AlignVerticalJustifyEnd,
-  AlignHorizontalSpaceBetween,
-  AlignVerticalSpaceBetween,
-  PanelRightClose,
-  PanelRightOpen,
-  Upload,
+  TextAlignLeft as AlignLeft,
+  AlignCenterHorizontal as AlignCenter,
+  TextAlignRight as AlignRight,
+  TextAlignJustify as AlignJustify,
+  TextB as Bold,
+  TextItalic as Italic,
+  TextUnderline as Underline,
+  ArrowFatLinesUp as BringToFront,
+  ArrowFatLinesDown as SendToBack,
+  AlignCenterHorizontalSimple as AlignHorizontalDistributeCenter,
+  AlignCenterVerticalSimple as AlignVerticalDistributeCenter,
+  AlignLeft as AlignHorizontalJustifyStart,
+  AlignCenterHorizontal as AlignHorizontalJustifyCenter,
+  AlignRight as AlignHorizontalJustifyEnd,
+  AlignTop as AlignVerticalJustifyStart,
+  AlignCenterVertical as AlignVerticalJustifyCenter,
+  AlignBottom as AlignVerticalJustifyEnd,
+  AlignCenterHorizontalSimple as AlignHorizontalSpaceBetween,
+  AlignCenterVerticalSimple as AlignVerticalSpaceBetween,
+  SidebarSimple as PanelRightClose,
+  Sidebar as PanelRightOpen,
+  UploadSimple as Upload,
   Crop,
-  Layers2,
-  WandSparkles,
-  Loader2,
+  Stack as Layers2,
+  MagicWand as WandSparkles,
+  SpinnerGap as Loader2,
   Lock,
-  Unlock,
+  LockOpen as Unlock,
   List,
-  ListOrdered,
-  ScanSearch,
+  ListNumbers as ListOrdered,
+  MagnifyingGlass as ScanSearch,
   Copy,
-  ClipboardPaste,
-} from "lucide-react";
+  Clipboard as ClipboardPaste,
+} from "@phosphor-icons/react";
 import { useSelectedObject } from "@/hooks/use-selected-object";
 import {
   FabricImage,
@@ -366,6 +367,10 @@ export function RightSidebar({
   onPreview,
   onPhonePreview,
 }: RightSidebarProps) {
+  const t = useTranslations("editor.inspector");
+  const tc = useTranslations("common");
+  const te = useTranslations("editor");
+
   const { selectedObject, updateSelected } = useSelectedObject();
   const manager = useCanvasManager();
   const copiedStyle = useSyncExternalStore(subscribeCopiedStyle, hasCopiedStyle, () => false);
@@ -891,29 +896,29 @@ export function RightSidebar({
   const canImportImage = canFillShape(formValues?.type);
 
   const typeLabel: Record<string, string> = {
-    rect: "Rectangle",
-    circle: "Circle",
-    triangle: "Triangle",
-    image: "Image",
-    text: "Text",
-    "i-text": "Text",
-    textbox: "Text",
-    path: "Shape",
-    group: isCode ? "Code" : "Group",
+    rect: te("elements.rectangle"),
+    circle: te("elements.circle"),
+    triangle: te("elements.triangle"),
+    image: t("image"),
+    text: t("text"),
+    "i-text": t("text"),
+    textbox: t("text"),
+    path: t("shape"),
+    group: isCode ? t("code") : tc("group"),
   };
 
   const panelTitle = isMulti
-    ? "Selection"
+    ? t("selection")
     : formValues
       ? (typeLabel[formValues.type] ?? formValues.type)
-      : "Properties";
+      : t("properties");
 
   const textAlignOptions = (
     [
-      { id: "left" as const, icon: AlignLeft, title: "Align left" },
-      { id: "center" as const, icon: AlignCenter, title: "Align center" },
-      { id: "right" as const, icon: AlignRight, title: "Align right" },
-      { id: "justify" as const, icon: AlignJustify, title: "Justify" },
+      { id: "left" as const, icon: AlignLeft, title: t("alignLeft") },
+      { id: "center" as const, icon: AlignCenter, title: t("alignCenter") },
+      { id: "right" as const, icon: AlignRight, title: t("alignRight") },
+      { id: "justify" as const, icon: AlignJustify, title: t("justify") },
     ]
   );
 
@@ -936,7 +941,7 @@ export function RightSidebar({
             size="icon"
             className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
             onClick={toggleRightCollapsed}
-            title="Expand panel"
+            title={t("expandPanel")}
           >
             <PanelRightOpen className="size-5" />
           </Button>
@@ -963,7 +968,7 @@ export function RightSidebar({
             size="icon"
             className={`size-8 shrink-0 text-muted-foreground hover:text-foreground ${btnRound}`}
             onClick={toggleRightCollapsed}
-            title="Collapse panel"
+            title={t("collapsePanel")}
           >
             <PanelRightClose className="size-5" />
           </Button>
@@ -972,9 +977,9 @@ export function RightSidebar({
         {!selectedObject ? (
           <ScrollArea className="min-h-0 flex-1">
             <div className="space-y-2 px-3.5 py-6">
-              <p className="text-[13px] font-medium text-foreground">Page</p>
+              <p className="text-[13px] font-medium text-foreground">{t("page")}</p>
               <p className="text-[13px] leading-snug text-muted-foreground">
-                Select an object on the slide to edit its style.
+                {t("emptyHint")}
               </p>
             </div>
           </ScrollArea>
@@ -1000,7 +1005,7 @@ export function RightSidebar({
                   size="icon"
                   className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
                   onClick={handleBringForward}
-                  title="Bring forward"
+                  title={t("bringForward")}
                 >
                   <BringToFront className="size-3.5" />
                 </Button>
@@ -1010,7 +1015,7 @@ export function RightSidebar({
                   size="icon"
                   className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
                   onClick={handleSendBackwards}
-                  title="Send back"
+                  title={t("sendBack")}
                 >
                   <SendToBack className="size-3.5" />
                 </Button>
@@ -1020,7 +1025,7 @@ export function RightSidebar({
                   size="icon"
                   className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
                   onClick={copyStyle}
-                  title="Copy style"
+                  title={t("copyStyle")}
                 >
                   <Copy className="size-3.5" />
                 </Button>
@@ -1031,7 +1036,7 @@ export function RightSidebar({
                   className={`size-8 text-muted-foreground hover:text-foreground ${btnRound}`}
                   onClick={pasteStyle}
                   disabled={!copiedStyle}
-                  title="Paste style"
+                  title={t("pasteStyle")}
                 >
                   <ClipboardPaste className="size-3.5" />
                 </Button>
@@ -1044,7 +1049,7 @@ export function RightSidebar({
                 size="icon"
                 className={`size-8 shrink-0 ${btnRound}`}
                 onClick={handleToggleLock}
-                title={formValues.isLocked ? "Unlock" : "Lock"}
+                title={formValues.isLocked ? t("unlock") : t("lock")}
               >
                 {formValues.isLocked ? (
                   <Lock className="size-3.5" />
@@ -1082,18 +1087,18 @@ export function RightSidebar({
                 </div>
               ) : null}
               <div className="space-y-2 px-3 pb-2">
-                <FieldLabel>Arrange</FieldLabel>
+                <FieldLabel>{t("arrange")}</FieldLabel>
                 <div className="grid grid-cols-4 gap-1.5">
                   {(
                     [
-                      ["left", "Align left", AlignHorizontalJustifyStart],
-                      ["center", "Align center", AlignHorizontalJustifyCenter],
-                      ["right", "Align right", AlignHorizontalJustifyEnd],
-                      ["distribute-x", "Distribute X", AlignHorizontalSpaceBetween],
-                      ["top", "Align top", AlignVerticalJustifyStart],
-                      ["middle", "Align middle", AlignVerticalJustifyCenter],
-                      ["bottom", "Align bottom", AlignVerticalJustifyEnd],
-                      ["distribute-y", "Distribute Y", AlignVerticalSpaceBetween],
+                      ["left", t("alignLeft"), AlignHorizontalJustifyStart],
+                      ["center", t("alignCenter"), AlignHorizontalJustifyCenter],
+                      ["right", t("alignRight"), AlignHorizontalJustifyEnd],
+                      ["distribute-x", t("distributeX"), AlignHorizontalSpaceBetween],
+                      ["top", t("alignTop"), AlignVerticalJustifyStart],
+                      ["middle", t("alignMiddle"), AlignVerticalJustifyCenter],
+                      ["bottom", t("alignBottom"), AlignVerticalJustifyEnd],
+                      ["distribute-y", t("distributeY"), AlignVerticalSpaceBetween],
                     ] as const
                   ).map(([mode, label, Icon]) => (
                     <ArrangeIconChip
@@ -1105,8 +1110,8 @@ export function RightSidebar({
                   ))}
                 </div>
                 <div className="grid grid-cols-3 gap-1.5">
-                  <ArrangeChip onClick={groupSelected}>Group</ArrangeChip>
-                  <ArrangeChip onClick={copyStyle}>Copy</ArrangeChip>
+                  <ArrangeChip onClick={groupSelected}>{tc("group")}</ArrangeChip>
+                  <ArrangeChip onClick={copyStyle}>{tc("copy")}</ArrangeChip>
                   <ArrangeChip onClick={pasteStyle} disabled={!copiedStyle}>
                     Paste
                   </ArrangeChip>
@@ -1115,7 +1120,7 @@ export function RightSidebar({
               {formValues && (
                 <>
                   {sharedText && (
-                    <CollapsibleGroup id="rs-multi-text" title="Typography" defaultOpen>
+                    <CollapsibleGroup id="rs-multi-text" title={t("typography")} defaultOpen>
                       <ToolCluster>
                         <Button
                           type="button"
@@ -1154,7 +1159,7 @@ export function RightSidebar({
                         }}
                       />
                       <NumberField
-                        label="Size"
+                        label={t("size")}
                         value={formValues.fontSize ?? 32}
                         onChange={(v) => updateProp("fontSize", v)}
                         min={8}
@@ -1162,7 +1167,7 @@ export function RightSidebar({
                         unit="px"
                       />
                       <NumberField
-                        label="Line height"
+                        label={t("lineHeight")}
                         value={formValues.lineHeight ?? 1.16}
                         onChange={(v) => updateProp("lineHeight", v)}
                         min={0.8}
@@ -1177,9 +1182,9 @@ export function RightSidebar({
                       />
                     </CollapsibleGroup>
                   )}
-                  <CollapsibleGroup id="rs-multi-color" title="Color" defaultOpen>
+                  <CollapsibleGroup id="rs-multi-color" title={t("color")} defaultOpen>
                     <ColorPicker
-                      label="Fill"
+                      label={t("fill")}
                       value={formValues.fill}
                       onChange={(hex) => {
                         setFormValues((prev) =>
@@ -1192,12 +1197,12 @@ export function RightSidebar({
                       }}
                     />
                     <ColorPicker
-                      label="Stroke"
+                      label={t("stroke")}
                       value={formValues.stroke}
                       onChange={(hex) => updateProp("stroke", hex)}
                     />
                     <NumberField
-                      label="Stroke width"
+                      label={t("strokeWidth")}
                       value={formValues.strokeWidth}
                       onChange={(v) => updateProp("strokeWidth", v)}
                       min={0}
@@ -1205,9 +1210,9 @@ export function RightSidebar({
                       unit="px"
                     />
                   </CollapsibleGroup>
-                  <CollapsibleGroup id="rs-multi-look" title="Appearance" defaultOpen={false}>
+                  <CollapsibleGroup id="rs-multi-look" title={t("appearance")} defaultOpen={false}>
                     <NumberField
-                      label="Opacity"
+                      label={t("opacity")}
                       value={Math.round(formValues.opacity * 100)}
                       onChange={(v) => updateProp("opacity", v / 100)}
                       min={0}
@@ -1240,7 +1245,7 @@ export function RightSidebar({
                         size="sm"
                         checked={formValues.hasShadow}
                         onCheckedChange={toggleShadow}
-                        aria-label="Enable shadow"
+                        aria-label={t("enableShadow")}
                       />
                     </div>
                   </CollapsibleGroup>
@@ -1280,7 +1285,7 @@ export function RightSidebar({
                 <div className="space-y-2 px-3 pb-2">
                   {canUngroup(selectedObject) ? (
                     <ArrangeChip onClick={ungroupSelected}>
-                      {isCode ? "Break code block" : "Break group"}
+                      {isCode ? t("breakCodeBlock") : t("breakGroup")}
                     </ArrangeChip>
                   ) : null}
 
@@ -1301,7 +1306,7 @@ export function RightSidebar({
                         onClick={() => fileInputRef.current?.click()}
                       >
                         <Upload className="size-5" />
-                        Fill with image
+                        {t("fillWithImage")}
                       </Button>
                     </>
                   ) : null}
@@ -1317,14 +1322,14 @@ export function RightSidebar({
               ) : null}
 
               {isImage && (
-                <CollapsibleGroup id="rs-image" title="Image" defaultOpen>
+                <CollapsibleGroup id="rs-image" title={t("image")} defaultOpen>
                   {cropping ? (
                     <div className="space-y-3 rounded-2xl bg-muted/40 p-3">
                       <p className="text-[13px] leading-snug text-muted-foreground">
-                        Drag to reframe. Scroll to zoom. Esc cancels.
+                        {t("reframeHint")}
                       </p>
                       <NumberField
-                        label="Zoom"
+                        label={t("zoom")}
                         value={cropZoom}
                         min={1}
                         max={cropMax}
@@ -1388,7 +1393,7 @@ export function RightSidebar({
                   )}
 
                   <div className="space-y-2">
-                    <FieldLabel>Enhance</FieldLabel>
+                    <FieldLabel>{t("enhance")}</FieldLabel>
                     <Button
                       type="button"
                       variant="default"
@@ -1402,7 +1407,7 @@ export function RightSidebar({
                       ) : (
                         <WandSparkles className="size-5" />
                       )}
-                      {enhanceBusy === "remove-bg" ? "Removing background…" : "Remove background"}
+                      {enhanceBusy === "remove-bg" ? t("removingBg") : t("removeBg")}
                     </Button>
                     <div className="flex gap-1.5">
                       <Segmented
@@ -1444,7 +1449,7 @@ export function RightSidebar({
                       ) : (
                         <Layers2 className="size-5" />
                       )}
-                      {enhanceBusy === "magic-layer" ? "Splitting layers…" : "Magic layer"}
+                      {enhanceBusy === "magic-layer" ? t("splittingLayers") : t("magicLayer")}
                     </Button>
                     {enhanceError ? (
                       <p className="text-[13px] leading-snug text-destructive">
@@ -1456,18 +1461,18 @@ export function RightSidebar({
               )}
 
               {isImage ? (
-                <CollapsibleGroup id="rs-filters" title="Filters" defaultOpen>
+                <CollapsibleGroup id="rs-filters" title={t("filters")} defaultOpen>
                   <FiltersControls />
                 </CollapsibleGroup>
               ) : null}
 
               {isText && (
-                <CollapsibleGroup id="rs-text" title="Typography" defaultOpen>
+                <CollapsibleGroup id="rs-text" title={t("typography")} defaultOpen>
                   <textarea
                     rows={3}
                     value={formValues.text ?? ""}
                     onChange={(e) => updateProp("text", e.target.value)}
-                    placeholder="Text content"
+                    placeholder={t("textContent")}
                     className="resize-none rounded-2xl bg-muted/40 p-3 w-full text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
                   />
                   <p
@@ -1489,7 +1494,7 @@ export function RightSidebar({
                         size="icon"
                         className={`size-8 ${btnRound}`}
                         onClick={() => toggleTextStyle("bold")}
-                        title="Bold"
+                        title={t("bold")}
                       >
                         <Bold className="size-5" />
                       </Button>
@@ -1499,7 +1504,7 @@ export function RightSidebar({
                         size="icon"
                         className={`size-8 ${btnRound}`}
                         onClick={() => toggleTextStyle("italic")}
-                        title="Italic"
+                        title={t("italic")}
                       >
                         <Italic className="size-5" />
                       </Button>
@@ -1509,7 +1514,7 @@ export function RightSidebar({
                         size="icon"
                         className={`size-8 ${btnRound}`}
                         onClick={() => toggleTextStyle("underline")}
-                        title="Underline"
+                        title={t("underline")}
                       >
                         <Underline className="size-5" />
                       </Button>
@@ -1584,7 +1589,7 @@ export function RightSidebar({
                           disabled={markedSlideIds.length === 0}
                           title={
                             markedSlideIds.length === 0
-                              ? "Mark slides with the corner check"
+                              ? t("markHint")
                               : `Use ${fontOffer} on ${markedSlideIds.length} marked slides`
                           }
                           onClick={() => {
@@ -1608,7 +1613,7 @@ export function RightSidebar({
                   )}
 
                   <NumberField
-                    label="Size"
+                    label={t("size")}
                     value={formValues.fontSize ?? 32}
                     onChange={(v) => {
                       updateProp("fontSize", v);
@@ -1619,7 +1624,7 @@ export function RightSidebar({
                     unit="px"
                   />
                   <NumberField
-                    label="Line height"
+                    label={t("lineHeight")}
                     value={formValues.lineHeight ?? 1.16}
                     onChange={(v) => updateProp("lineHeight", v)}
                     min={0.8}
@@ -1628,7 +1633,7 @@ export function RightSidebar({
                     decimals={2}
                   />
                   <NumberField
-                    label="Letter spacing"
+                    label={t("letterSpacing")}
                     value={formValues.charSpacing ?? 0}
                     onChange={(v) => updateProp("charSpacing", v)}
                     min={-200}
@@ -1660,12 +1665,12 @@ export function RightSidebar({
                           disabled={markedSlideIds.length === 0}
                           title={
                             markedSlideIds.length === 0
-                              ? "Mark slides with the corner check"
-                              : "Update marked slides"
+                              ? t("markHint")
+                              : t("updateMarked")
                           }
                           onClick={() => applyStyleToSlides(markedSlideIds)}
                         >
-                          Marked
+                          {t("marked")}
                         </Button>
                         <Button
                           type="button"
@@ -1684,7 +1689,7 @@ export function RightSidebar({
 
               <CollapsibleGroup
                 id="rs-fill"
-                title="Color"
+                title={t("color")}
                 defaultOpen={!isImage}
               >
                 {!isImage ? (
@@ -1714,8 +1719,8 @@ export function RightSidebar({
                     <Segmented
                       value={formValues.gradientFrom ? "gradient" : "solid"}
                       options={[
-                        { id: "solid", label: "Solid" },
-                        { id: "gradient", label: "Gradient" },
+                        { id: "solid", label: t("solid") },
+                        { id: "gradient", label: t("gradient") },
                       ]}
                       onChange={(mode) => {
                         if (mode === "solid") {
@@ -1731,19 +1736,19 @@ export function RightSidebar({
                     {formValues.gradientFrom && formValues.gradientTo ? (
                       <>
                         <ColorPicker
-                          label="Start"
+                          label={t("start")}
                           value={formValues.gradientFrom}
                           onChange={(hex) => setGradient(hex, formValues.gradientTo || "#ffffff")}
                         />
                         <ColorPicker
-                          label="End"
+                          label={t("end")}
                           value={formValues.gradientTo}
                           onChange={(hex) => setGradient(formValues.gradientFrom || "#111111", hex)}
                         />
                       </>
                     ) : (
                       <ColorPicker
-                        label={isText ? "Text color" : "Fill"}
+                        label={isText ? t("textColor") : t("fill")}
                         value={formValues.fill}
                         onChange={(hex) => {
                           setFormValues((prev) => (prev ? { ...prev, fill: hex } : null));
@@ -1758,7 +1763,7 @@ export function RightSidebar({
                 ) : null}
                 {isText && (
                   <ColorPicker
-                    label="Background"
+                    label={t("background")}
                     value={
                       formValues.backgroundColor === "transparent"
                         ? ""
@@ -1779,12 +1784,12 @@ export function RightSidebar({
                   />
                 )}
                 <ColorPicker
-                  label="Stroke"
+                  label={t("stroke")}
                   value={formValues.stroke}
                   onChange={(hex) => updateProp("stroke", hex)}
                 />
                 <NumberField
-                  label="Stroke width"
+                  label={t("strokeWidth")}
                   value={formValues.strokeWidth}
                   onChange={(v) => updateProp("strokeWidth", v)}
                   min={0}
@@ -1793,9 +1798,9 @@ export function RightSidebar({
                 />
               </CollapsibleGroup>
 
-              <CollapsibleGroup id="rs-appearance" title="Appearance" defaultOpen={false}>
+              <CollapsibleGroup id="rs-appearance" title={t("appearance")} defaultOpen={false}>
                 <NumberField
-                  label="Opacity"
+                  label={t("opacity")}
                   value={Math.round(formValues.opacity * 100)}
                   onChange={(v) => updateProp("opacity", v / 100)}
                   min={0}
@@ -1804,7 +1809,7 @@ export function RightSidebar({
                 />
                 {canHaveRadius && (
                   <NumberField
-                    label="Corner radius"
+                    label={t("cornerRadius")}
                     value={formValues.rx ?? 0}
                     onChange={updateCornerRadius}
                     min={0}
@@ -1813,7 +1818,7 @@ export function RightSidebar({
                   />
                 )}
                 <NumberField
-                  label="Padding"
+                  label={t("padding")}
                   value={formValues.padding}
                   onChange={(v) => updateProp("padding", v)}
                   min={0}
@@ -1821,13 +1826,13 @@ export function RightSidebar({
                   unit="px"
                 />
                 <div className="flex flex-col gap-1.5">
-                  <FieldLabel>Mask</FieldLabel>
+                  <FieldLabel>{t("mask")}</FieldLabel>
                   <Segmented
                     value={(formValues.mask ?? "none") as MaskKind}
                     options={[
-                      { id: "none" as MaskKind, label: "None" },
-                      { id: "circle" as MaskKind, label: "Circle" },
-                      { id: "rounded" as MaskKind, label: "Round" },
+                      { id: "none" as MaskKind, label: t("maskNone") },
+                      { id: "circle" as MaskKind, label: t("maskCircle") },
+                      { id: "rounded" as MaskKind, label: t("maskRound") },
                     ]}
                     onChange={setMask}
                   />
@@ -1856,26 +1861,26 @@ export function RightSidebar({
 
               <CollapsibleGroup
                 id="rs-effects"
-                title="Shadow"
+                title={t("shadow")}
                 defaultOpen={false}
                 headerRight={
                   <Switch
                     size="sm"
                     checked={formValues.hasShadow}
                     onCheckedChange={toggleShadow}
-                    aria-label="Enable shadow"
+                    aria-label={t("enableShadow")}
                   />
                 }
               >
                 {formValues.hasShadow ? (
                   <div className="flex flex-col gap-3">
                     <ColorPicker
-                      label="Color"
+                      label={t("color")}
                       value={formValues.shadowColor.slice(0, 7)}
                       onChange={(hex) => updateShadowProp("shadowColor", hex)}
                     />
                     <NumberField
-                      label="Blur"
+                      label={t("blur")}
                       value={formValues.shadowBlur}
                       onChange={(v) => updateShadowProp("shadowBlur", v)}
                       min={0}
@@ -1883,7 +1888,7 @@ export function RightSidebar({
                       unit="px"
                     />
                     <NumberField
-                      label="Offset"
+                      label={t("offset")}
                       value={formValues.shadowOffsetY}
                       onChange={(v) => updateShadowProp("shadowOffsetY", v)}
                       min={-30}
@@ -1893,7 +1898,7 @@ export function RightSidebar({
                   </div>
                 ) : (
                   <p className="text-[13px] text-muted-foreground">
-                    Turn on the switch to add a drop shadow.
+                    {t("shadowHint")}
                   </p>
                 )}
               </CollapsibleGroup>

@@ -1,7 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ExternalLink, Loader2, Search } from "lucide-react";
+import {
+  ArrowSquareOut as ExternalLink,
+  SpinnerGap as Loader2,
+  MagnifyingGlass as Search,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 
 import {

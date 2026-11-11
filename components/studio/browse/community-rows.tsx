@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { CommunityProjectListItem } from "@/actions/community";
 import { cn } from "@/lib/utils";
@@ -27,6 +29,7 @@ export function CommunityRows({
   items: CommunityProjectListItem[];
   onOpen: (id: string) => void;
 }) {
+  const t = useTranslations("studio.browse");
   return (
     <div className="min-w-0 overflow-x-auto">
       <div
@@ -35,11 +38,11 @@ export function CommunityRows({
           cols,
         )}
       >
-        <span>Name</span>
-        <span>Slides</span>
-        <span>Category</span>
-        <span>Updated</span>
-        <span>Author</span>
+        <span>{t("colName")}</span>
+        <span>{t("colSlides")}</span>
+        <span>{t("colCategory")}</span>
+        <span>{t("colUpdated")}</span>
+        <span>{t("colAuthor")}</span>
       </div>
 
       <div className="min-w-[640px] divide-y-0">
@@ -47,7 +50,7 @@ export function CommunityRows({
           const when = formatWhen(
             item.communityUpdatedAt ?? item.publishedAt,
           );
-          const editor = item.updatedByName ?? item.authorName ?? "Creator";
+          const editor = item.updatedByName ?? item.authorName ?? t("creator");
 
           return (
             <button
@@ -89,8 +92,8 @@ export function CommunityRows({
               </span>
               <div className="min-w-0">
                 <p className="truncate text-[13px] text-foreground">{when}</p>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  by {editor}
+                  <p className="truncate text-[11px] text-muted-foreground">
+                  {t("byAuthor", { name: editor })}
                 </p>
               </div>
               <div className="flex min-w-0 items-center gap-2">
@@ -101,7 +104,7 @@ export function CommunityRows({
                   </AvatarFallback>
                 </Avatar>
                 <span className="truncate text-[13px] text-foreground">
-                  {item.authorName ?? "Creator"}
+                  {item.authorName ?? t("creator")}
                 </span>
               </div>
             </button>

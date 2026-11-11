@@ -4,12 +4,13 @@ import { useState } from "react";
 import {
   Check,
   Copy,
-  FolderInput,
-  MoreHorizontal,
-  Pencil,
+  FolderSimple as FolderInput,
+  DotsThree as MoreHorizontal,
+  PencilSimple as Pencil,
   Star,
-  Trash2,
-} from "lucide-react";
+  Trash as Trash2,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { moveProjectToFolder } from "@/actions/folders";
 import { useUserFolders } from "@/lib/studio/queries";
@@ -43,6 +44,7 @@ export function StudioProjectMenu({
   project: ProjectListItem;
   onChanged: () => void;
 }) {
+  const t = useTranslations("studio.projectMenu");
   const [open, setOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState(project.title);
@@ -79,7 +81,7 @@ export function StudioProjectMenu({
           onClick={(event) => event.stopPropagation()}
         >
           <MoreHorizontal className="size-5" />
-          <span className="sr-only">More</span>
+          <span className="sr-only">{t("more")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -114,7 +116,7 @@ export function StudioProjectMenu({
             }}
           >
             <Pencil className="size-4 text-muted-foreground" />
-            Rename
+            {t("rename")}
           </DropdownMenuItem>
         )}
 
@@ -126,7 +128,7 @@ export function StudioProjectMenu({
           }}
         >
           <Copy className="size-4 text-muted-foreground" />
-          Duplicate
+          {t("duplicate")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -137,13 +139,13 @@ export function StudioProjectMenu({
           }}
         >
           <Star className="size-4 text-muted-foreground" />
-          {project.isSaved ? "Unstar" : "Star"}
+          {project.isSaved ? t("unstar") : t("star")}
         </DropdownMenuItem>
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className={itemClass}>
             <FolderInput className="size-4 text-muted-foreground" />
-            Move to folder
+            {t("moveToFolder")}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="min-w-[180px] rounded-2xl p-1.5">
             <DropdownMenuItem
@@ -155,7 +157,7 @@ export function StudioProjectMenu({
               ) : (
                 <span className="size-3.5" />
               )}
-              No folder
+              {t("noFolder")}
             </DropdownMenuItem>
             {folders.map((folder) => (
               <DropdownMenuItem
@@ -173,7 +175,7 @@ export function StudioProjectMenu({
             ))}
             {folders.length === 0 ? (
               <p className="px-3 py-2 text-[12px] text-muted-foreground">
-                Create a folder in the sidebar first.
+                {t("createFolderFirst")}
               </p>
             ) : null}
           </DropdownMenuSubContent>
@@ -191,7 +193,7 @@ export function StudioProjectMenu({
           }}
         >
           <Trash2 className="size-5" />
-          Delete
+          {t("delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
