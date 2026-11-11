@@ -1,13 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ArrowsOutCardinal as Move,
-  ArrowCounterClockwise as RotateCcw,
-} from "@phosphor-icons/react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowCounterClockwise as RotateCcw } from "@phosphor-icons/react";
 import type { FabricObject } from "fabric";
 import { PillSlider } from "@/components/ui/pill-slider";
+import {
+  getSceneBoundingRect,
+  moveObjectBoundingRectTo,
+} from "@/lib/canvas/auto-flow";
 import { cn } from "@/lib/utils";
 
 function normalizeAngle(deg: number): number {
@@ -52,6 +53,19 @@ function objectPreviewUrl(obj: FabricObject): string | null {
   return null;
 }
 
+function canvasSceneSize(object: FabricObject): { width: number; height: number } {
+  const canvas = object.canvas;
+  if (!canvas) return { width: 1080, height: 1080 };
+  const zoom = canvas.getZoom() || 1;
+  return {
+    width: (canvas.getWidth() || 1080) / zoom,
+    height: (canvas.getHeight() || 1080) / zoom,
+  };
+}
+
+const GRID_COLS = 5;
+const GRID_ROWS = 3;
+
 type ObjectTransformPanelProps = {
   object: FabricObject;
   canvas: {
@@ -73,39 +87,67 @@ type ObjectTransformPanelProps = {
   };
 };
 
+/** CapCut-like labeled number field: label | value. */
 function DimField({
   label,
   value,
   onChange,
+  suffix,
+  allowNegative = true,
+  decimals = 0,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
+  suffix?: string;
+  allowNegative?: boolean;
+  decimals?: number;
 }) {
-  const [draft, setDraft] = useState(String(Math.round(value)));
+  const format = (n: number) =>
+    decimals > 0 ? n.toFixed(decimals) : String(Math.round(n));
+  const [draft, setDraft] = useState(format(value));
   useEffect(() => {
-    setDraft(String(Math.round(value)));
-  }, [value]);
+    setDraft(format(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, decimals]);
+
+  const commit = () => {
+    const next = Number(draft);
+    if (!Number.isFinite(next)) {
+      setDraft(format(value));
+      return;
+    }
+    if (!allowNegative && next <= 0) {
+      setDraft(format(value));
+      return;
+    }
+    const rounded =
+      decimals > 0
+        ? Math.round(next * 10 ** decimals) / 10 ** decimals
+        : Math.round(next);
+    onChange(rounded);
+  };
 
   return (
-    <label className="flex h-9 items-center gap-2 rounded-md bg-muted/40 px-3">
-      <span className="shrink-0 text-[12px] font-medium text-muted-foreground">
+    <label className="flex h-10 min-w-0 items-center overflow-hidden rounded-md bg-muted/40">
+      <span className="shrink-0 px-3 text-[12px] font-medium text-muted-foreground">
         {label}
       </span>
+      <span className="h-4 w-px shrink-0 bg-border/50" aria-hidden />
       <input
         type="number"
+        step={decimals > 0 ? 10 ** -decimals : 1}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        onBlur={() => {
-          const next = Number(draft);
-          if (Number.isFinite(next) && next > 0) onChange(Math.round(next));
-          else setDraft(String(Math.round(value)));
-        }}
+        onBlur={commit}
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
         }}
-        className="h-7 min-w-0 flex-1 border-0 bg-transparent text-[13px] tabular-nums outline-none focus-visible:ring-0"
+        className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-right text-[13px] tabular-nums outline-none focus-visible:ring-0"
       />
+      {suffix ? (
+        <span className="pr-3 text-[12px] text-muted-foreground">{suffix}</span>
+      ) : null}
     </label>
   );
 }
@@ -120,16 +162,7 @@ export function ObjectTransformPanel({
   const t = useTranslations("editor.transform");
   const [tab, setTab] = useState<TransformTab>("position");
   const [preview, setPreview] = useState<string | null>(null);
-  const [nudge, setNudge] = useState({ x: 0, y: 0 });
-  const draggingRef = useRef(false);
-  const dragRef = useRef<{
-    x: number;
-    y: number;
-    left: number;
-    top: number;
-    skewX: number;
-    skewY: number;
-  } | null>(null);
+  const [posTick, setPosTick] = useState(0);
 
   const angle = Math.round(object.angle ?? 0);
   const scaleX = object.scaleX ?? 1;
@@ -139,14 +172,29 @@ export function ObjectTransformPanel({
   const skewY = Math.round(object.skewY ?? 0);
   const m = meta(object);
 
+  const scene = useMemo(() => canvasSceneSize(object), [object, posTick]);
+  const rect = useMemo(() => getSceneBoundingRect(object), [object, posTick]);
+  const posX = Math.round(rect.left);
+  const posY = Math.round(rect.top);
+
+  const selectedCell = useMemo(() => {
+    const maxX = Math.max(1, scene.width - rect.width);
+    const maxY = Math.max(1, scene.height - rect.height);
+    const col = Math.round((rect.left / maxX) * (GRID_COLS - 1));
+    const row = Math.round((rect.top / maxY) * (GRID_ROWS - 1));
+    return {
+      col: Math.max(0, Math.min(GRID_COLS - 1, col)),
+      row: Math.max(0, Math.min(GRID_ROWS - 1, row)),
+    };
+  }, [rect, scene]);
+
   const refreshPreview = useCallback(() => {
-    if (draggingRef.current) return;
     setPreview(objectPreviewUrl(object));
   }, [object]);
 
   useEffect(() => {
     refreshPreview();
-  }, [refreshPreview, angle, zoomPct, skewX, skewY]);
+  }, [refreshPreview, angle, zoomPct, skewX, skewY, posTick]);
 
   const paint = (commit = false) => {
     object.setCoords();
@@ -157,8 +205,9 @@ export function ObjectTransformPanel({
       width: Math.round((object.width ?? 0) * (object.scaleX ?? 1)),
       height: Math.round((object.height ?? 0) * (object.scaleY ?? 1)),
     });
+    setPosTick((n) => n + 1);
     if (commit) onCommit();
-    if (!draggingRef.current) refreshPreview();
+    refreshPreview();
   };
 
   const setZoom = (pct: number, commit = false) => {
@@ -179,6 +228,19 @@ export function ObjectTransformPanel({
     paint(commit);
   };
 
+  const setPosition = (left: number, top: number, commit = false) => {
+    moveObjectBoundingRectTo(object, left, top);
+    paint(commit);
+  };
+
+  const snapToCell = (col: number, row: number) => {
+    const maxX = Math.max(0, scene.width - rect.width);
+    const maxY = Math.max(0, scene.height - rect.height);
+    const left = (col / (GRID_COLS - 1)) * maxX;
+    const top = (row / (GRID_ROWS - 1)) * maxY;
+    setPosition(left, top, true);
+  };
+
   const ensureBaseScale = () => {
     if (typeof m.swibpBaseScaleX !== "number") {
       m.swibpBaseScaleX = Math.abs(object.scaleX ?? 1);
@@ -197,53 +259,7 @@ export function ObjectTransformPanel({
       scaleX: bx,
       scaleY: by,
     });
-    setNudge({ x: 0, y: 0 });
     paint(true);
-  };
-
-  const onPreviewPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    draggingRef.current = true;
-    dragRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      left: object.left ?? 0,
-      top: object.top ?? 0,
-      skewX: object.skewX ?? 0,
-      skewY: object.skewY ?? 0,
-    };
-  };
-
-  const onPreviewPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const start = dragRef.current;
-    if (!start) return;
-    const dx = e.clientX - start.x;
-    const dy = e.clientY - start.y;
-    if (tab === "position") {
-      object.set({ left: start.left + dx * 1.4, top: start.top + dy * 1.4 });
-      setNudge({ x: dx, y: dy });
-    } else {
-      object.set({
-        skewX: Math.max(-60, Math.min(60, start.skewX + dx * 0.35)),
-        skewY: Math.max(-60, Math.min(60, start.skewY + dy * 0.35)),
-      });
-      setNudge({ x: 0, y: 0 });
-    }
-    paint(false);
-  };
-
-  const onPreviewPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragRef.current) return;
-    dragRef.current = null;
-    draggingRef.current = false;
-    setNudge({ x: 0, y: 0 });
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      /* already released */
-    }
-    onCommit();
-    refreshPreview();
   };
 
   useEffect(() => {
@@ -264,15 +280,12 @@ export function ObjectTransformPanel({
             <button
               key={opt.id}
               type="button"
-              onClick={() => {
-                setTab(opt.id);
-                setNudge({ x: 0, y: 0 });
-              }}
+              onClick={() => setTab(opt.id)}
               className={cn(
                 "flex h-full flex-1 items-center justify-center rounded-md text-[13px] font-medium transition-colors",
                 tab === opt.id
-                  ? "bg-background text-primary-foreground"
-                  : "text-muted-foreground hover:text-primary-foreground",
+                  ? "bg-background text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {opt.label}
@@ -289,56 +302,123 @@ export function ObjectTransformPanel({
         </button>
       </div>
 
-      <div
-        className="relative aspect-[4/3] w-full cursor-grab overflow-hidden rounded-2xl bg-muted/20 active:cursor-grabbing"
-        onPointerDown={onPreviewPointerDown}
-        onPointerMove={onPreviewPointerMove}
-        onPointerUp={onPreviewPointerUp}
-        onPointerCancel={onPreviewPointerUp}
-      >
-        {preview ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={preview}
-            alt=""
-            draggable={false}
-            className="pointer-events-none absolute inset-0 size-full object-contain p-3 will-change-transform"
-            style={{
-              transform:
-                tab === "tilt"
-                  ? `perspective(600px) rotateX(${skewY * 0.35}deg) rotateY(${-skewX * 0.35}deg)`
-                  : `translate3d(${nudge.x}px, ${nudge.y}px, 0)`,
-            }}
+      {/* Zoom — thumbnail + scale, CapCut-like gray block */}
+      <div className="flex items-center gap-2.5 rounded-xl bg-muted/30 p-2.5">
+        <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-muted/50">
+          {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={preview}
+              alt=""
+              draggable={false}
+              className="size-full object-contain p-1"
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center text-[10px] text-muted-foreground">
+              —
+            </div>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <DimField
+            label={t("zoom")}
+            value={zoomPct / 100}
+            suffix="x"
+            decimals={2}
+            allowNegative={false}
+            onChange={(v) => setZoom(Math.max(0.05, v) * 100, true)}
           />
-        ) : (
-          <div className="flex size-full items-center justify-center text-[13px] text-muted-foreground">
-            {t("dragToMove")}
-          </div>
-        )}
-        {/* Stay centered — only the preview nudges while dragging. */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-md bg-foreground text-background">
-          <Move className="size-3.5" />
         </div>
       </div>
 
-      {tab === "position" && size ? (
-        <div className="grid grid-cols-2 gap-2">
-          <DimField label="W" value={size.width} onChange={size.onWidth} />
-          <DimField label="H" value={size.height} onChange={size.onHeight} />
+      {tab === "position" ? (
+        <div className="space-y-2.5">
+          {/* Position pad — 5×3 snap grid */}
+          <div className="rounded-xl bg-muted/30 px-3 py-4">
+            <div
+              className="mx-auto grid w-full max-w-[11rem] gap-y-5"
+              style={{
+                gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))`,
+              }}
+              role="group"
+              aria-label={t("position")}
+            >
+              {Array.from({ length: GRID_ROWS * GRID_COLS }, (_, i) => {
+                const col = i % GRID_COLS;
+                const row = Math.floor(i / GRID_COLS);
+                const active =
+                  selectedCell.col === col && selectedCell.row === row;
+                return (
+                  <button
+                    key={`${col}-${row}`}
+                    type="button"
+                    aria-label={`${t("position")} ${col + 1},${row + 1}`}
+                    aria-pressed={active}
+                    onClick={() => snapToCell(col, row)}
+                    className="relative flex h-4 items-center justify-center"
+                  >
+                    <span
+                      className={cn(
+                        "rounded-full transition-all",
+                        active
+                          ? "size-3.5 bg-primary ring-2 ring-primary/30 ring-offset-2 ring-offset-muted/30"
+                          : "size-1.5 bg-muted-foreground/45 hover:bg-muted-foreground/70",
+                      )}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <DimField
+              label="X"
+              value={posX}
+              onChange={(v) => setPosition(v, rect.top, true)}
+            />
+            <DimField
+              label="Y"
+              value={posY}
+              onChange={(v) => setPosition(rect.left, v, true)}
+            />
+          </div>
+
+          {size ? (
+            <div className="grid grid-cols-2 gap-2">
+              <DimField
+                label="W"
+                value={size.width}
+                allowNegative={false}
+                onChange={size.onWidth}
+              />
+              <DimField
+                label="H"
+                value={size.height}
+                allowNegative={false}
+                onChange={size.onHeight}
+              />
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <DimField
+            label="X"
+            value={skewX}
+            suffix="°"
+            onChange={(v) => setSkew("skewX", Math.max(-45, Math.min(45, v)), true)}
+          />
+          <DimField
+            label="Y"
+            value={skewY}
+            suffix="°"
+            onChange={(v) => setSkew("skewY", Math.max(-45, Math.min(45, v)), true)}
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
-        <PillSlider
-          label={t("zoom")}
-          value={zoomPct}
-          min={10}
-          max={300}
-          step={1}
-          formatValue={(v) => `${Math.round(v)}%`}
-          onValueChange={(v) => setZoom(v, false)}
-          onValueCommit={(v) => setZoom(v, true)}
-        />
         <PillSlider
           label={t("rotation")}
           value={normalizeAngle(angle)}

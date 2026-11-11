@@ -4,7 +4,7 @@ function Canvas({ children }: { children: ReactNode }) {
   return (
     <div
       aria-hidden
-      className="flex h-72 w-full items-center overflow-hidden bg-[#f6f7f9] px-4 sm:h-80 sm:px-7 [background-image:radial-gradient(circle,rgba(28,29,38,0.14)_1px,transparent_1px)] [background-size:18px_18px]"
+      className="flex h-full min-h-56 w-full items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#F2F2F2] px-5 sm:min-h-64 sm:rounded-[1.75rem] sm:px-8 dark:bg-[#2a2b33]"
     >
       {children}
     </div>

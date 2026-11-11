@@ -106,7 +106,7 @@ export function LeaveReviewBlock() {
             />
 
             {sent ? (
-              <div className="flex min-h-[220px] flex-col justify-center rounded-[1.5rem] bg-land-mist px-6 py-8 sm:px-8">
+              <div className="flex min-h-[220px] flex-col justify-center rounded-[1.75rem] bg-[#F2F2F2] px-6 py-8 sm:rounded-[2rem] sm:px-8 dark:bg-[#2a2b33]">
                 <p className={`${landTitle} text-land-ink`}>Thanks</p>
                 <p className={`mt-4 max-w-sm text-land-ink/55 ${landCardSub}`}>
                   Got it. You can send another one later.
@@ -195,13 +195,13 @@ export function LeaveReviewBlock() {
                       void addFiles(event.dataTransfer.files);
                     }}
                     className={cn(
-                      "mt-2 flex min-h-[180px] w-full flex-col items-center justify-center gap-3 rounded-[1.5rem] border border-dashed px-4 py-8 text-center transition-colors",
+                      "mt-2 flex min-h-[180px] w-full flex-col items-center justify-center gap-3 rounded-[1.75rem] border border-dashed px-4 py-8 text-center transition-colors sm:rounded-[2rem]",
                       dragging
                         ? "border-land-blue bg-land-blue/10"
-                        : "border-land-ink/15 bg-land-mist/50 hover:border-land-blue/40 hover:bg-land-mist",
+                        : "border-transparent bg-[#F2F2F2] hover:border-land-ink/10 dark:bg-[#2a2b33]",
                     )}
                   >
-                    <span className="grid size-12 place-items-center rounded-full bg-land-card text-land-blue">
+                    <span className="grid size-12 place-items-center rounded-full bg-white text-land-blue dark:bg-[#1c1d26]">
                       <ImagePlus className="size-5" />
                     </span>
                     <span className="text-base font-semibold text-land-ink">
@@ -217,7 +217,7 @@ export function LeaveReviewBlock() {
                       {images.map((src, index) => (
                         <li
                           key={`${index}-${src.slice(0, 24)}`}
-                          className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-xl bg-land-mist"
+                          className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-[1.25rem] bg-[#F2F2F2] dark:bg-[#2a2b33]"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
