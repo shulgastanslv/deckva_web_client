@@ -66,12 +66,14 @@ type Tab = "color" | "gradient" | "image" | "shapes";
 
 const DDDEPTH_QUICK = 9;
 
-const SET_SWATCHES: { key: keyof Pick<SuggestedSet, "background" | "text" | "accent" | "card">; label: string }[] = [
-  { key: "background", label: "Background" },
-  { key: "text", label: "Text" },
-  { key: "accent", label: "Accent" },
-  { key: "card", label: "Card" },
-];
+const SET_SWATCH_KEYS = [
+  "background",
+  "text",
+  "accent",
+  "card",
+] as const satisfies ReadonlyArray<
+  keyof Pick<SuggestedSet, "background" | "text" | "accent" | "card">
+>;
 
 function SuggestedSetRow({
   set,
@@ -82,43 +84,44 @@ function SuggestedSetRow({
   onFillSlide: () => void;
   onApply: () => void;
 }) {
+  const t = useTranslations("editor.background");
   return (
     <div className="flex items-center gap-2 rounded-md py-1 pr-1 pl-1 hover:bg-muted/40">
       <button
         type="button"
-        title={`Fill this slide with ${set.background}`}
+        title={`${t("thisSlide")}: ${set.background}`}
         onClick={onFillSlide}
         className="h-7 w-7 shrink-0 rounded-md border border-border/40 transition-transform hover:scale-105 active:scale-95"
         style={{ backgroundColor: set.background }}
       />
       <div className="flex min-w-0 flex-1 items-center gap-1">
-        {SET_SWATCHES.slice(1).map((swatch) => (
+        {SET_SWATCH_KEYS.slice(1).map((key) => (
           <span
-            key={swatch.key}
-            title={`${swatch.label} ${set[swatch.key]}`}
+            key={key}
+            title={`${t(key)} ${set[key]}`}
             className="h-3.5 w-3.5 rounded-md border border-border/40"
-            style={{ backgroundColor: set[swatch.key] }}
+            style={{ backgroundColor: set[key] }}
           />
         ))}
         <span className="truncate text-foreground">{set.label}</span>
       </div>
       <Button type="button" size="xs" variant="secondary" className="rounded-md" onClick={onApply}>
-        Apply
+        {t("apply")}
       </Button>
     </div>
   );
 }
 
-const FILL_TABS: { id: Tab; label: string }[] = [
-  { id: "color", label: "Color" },
-  { id: "gradient", label: "Gradient" },
-  { id: "shapes", label: "3D" },
-  { id: "image", label: "Image" },
-];
-
 export function SidebarBackground() {
   const t = useTranslations("editor.background");
   const tc = useTranslations("common");
+
+  const fillTabs: { id: Tab; label: string }[] = [
+    { id: "color", label: t("color") },
+    { id: "gradient", label: t("gradient") },
+    { id: "shapes", label: t("threeD") },
+    { id: "image", label: t("image") },
+  ];
 
   const manager = useCanvasManager();
   const [tab, setTab] = useState<Tab>("color");
@@ -248,7 +251,7 @@ export function SidebarBackground() {
       <CollapsibleGroup id="background-fill" title={t("fill")} defaultOpen>
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="gap-3">
         <TabsList className={cn(sidebarTabsList, "grid-cols-4")}>
-          {FILL_TABS.map((item) => (
+          {fillTabs.map((item) => (
             <TabsTrigger
               key={item.id}
               value={item.id}

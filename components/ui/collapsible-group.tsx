@@ -1,6 +1,8 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import {
+  CaretRight as ChevronRight,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 

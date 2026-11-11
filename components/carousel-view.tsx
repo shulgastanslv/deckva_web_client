@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
 import Logo from "@/components/logo/logo";

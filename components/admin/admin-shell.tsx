@@ -4,11 +4,11 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Bell,
-  LayoutTemplate,
-  MessageSquareText,
+  Layout as LayoutTemplate,
+  ChatText as MessageSquareText,
   Newspaper,
   Shield,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import Logo from "@/components/logo/logo";
 import { cn } from "@/lib/utils";

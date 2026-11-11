@@ -3,7 +3,10 @@
 import * as React from "react"
 import { cn } from "cn"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
-import { CheckIcon, ChevronRightIcon } from "lucide-react"
+import {
+  Check as CheckIcon,
+  CaretRight as ChevronRightIcon,
+} from "@phosphor-icons/react"
 
 function DropdownMenu({
   ...props

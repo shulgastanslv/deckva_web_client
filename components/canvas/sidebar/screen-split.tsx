@@ -1,7 +1,10 @@
 "use client";
 
 import { useRef, useState, type CSSProperties } from "react";
-import { ImagePlus, Loader2 } from "lucide-react";
+import {
+  Image as ImagePlus,
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { sidebarActionBtn, sidebarSurfaceIdle } from "@/components/canvas/sidebar/sidebar-ui";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";

@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Check, ChevronRight, Menu, X } from "lucide-react";
+import {
+  Check,
+  CaretRight as ChevronRight,
+  List as Menu,
+  X,
+} from "@phosphor-icons/react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
 import Logo from "@/components/logo/logo";

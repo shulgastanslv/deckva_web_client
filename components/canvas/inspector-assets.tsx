@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { FabricObject, Image as FabricImage } from "fabric";
-import { ImagePlus, Loader2, Replace, Save, Trash2 } from "lucide-react";
+import {
+  Image as ImagePlus,
+  SpinnerGap as Loader2,
+  ArrowsLeftRight as Replace,
+  FloppyDisk as Save,
+  Trash as Trash2,
+} from "@phosphor-icons/react";
 import {
   createMediaAsset,
   deleteMediaAsset,
@@ -38,6 +45,8 @@ async function toDataUrl(src: string): Promise<string> {
 }
 
 export function InspectorAssets({ target, isImage, canFill }: Props) {
+  const t = useTranslations("editor.assets");
+  const tc = useTranslations("common");
   const manager = useCanvasManager();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [assets, setAssets] = useState<MediaAssetDTO[]>([]);
@@ -154,7 +163,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
   };
 
   return (
-    <CollapsibleGroup id="rs-assets" title="Assets" defaultOpen>
+    <CollapsibleGroup id="rs-assets" title={t("title")} defaultOpen>
       <div className="flex flex-col gap-2.5">
         <input
           ref={fileInputRef}
@@ -176,7 +185,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
             onClick={() => fileInputRef.current?.click()}
           >
             <ImagePlus className="size-3.5" />
-            {isImage || canFill ? "Replace" : "Upload"}
+            {isImage || canFill ? t("replace") : t("upload")}
           </Button>
           {isImage && currentSrc ? (
             <Button
@@ -188,14 +197,14 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
               onClick={() => void saveCurrent()}
             >
               {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
-              Save
+              {tc("save")}
             </Button>
           ) : null}
         </div>
 
         {assets.length === 0 ? (
           <p className="px-1 text-[12px] leading-snug text-muted-foreground">
-            Upload images here to reuse them on this object or across slides.
+            {t("uploadHint")}
           </p>
         ) : (
           <div className="grid grid-cols-4 gap-1.5">
@@ -203,7 +212,11 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
               <div key={asset.id} className="group relative">
                 <button
                   type="button"
-                  title={isImage || canFill ? `Apply ${asset.name}` : `Add ${asset.name}`}
+                  title={
+                    isImage || canFill
+                      ? `${t("replace")} ${asset.name}`
+                      : `${t("addToCanvas")} ${asset.name}`
+                  }
                   disabled={busyId !== null}
                   onClick={() => void applyAsset(asset)}
                   className={cn(
@@ -222,7 +235,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
                 </button>
                 <button
                   type="button"
-                  title="Remove"
+                  title={t("remove")}
                   onClick={() => void remove(asset.id)}
                   className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-md bg-background/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
                 >
@@ -236,7 +249,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
         {(isImage || canFill) && assets.length > 0 ? (
           <p className="flex items-center gap-1 px-1 text-[11px] text-muted-foreground">
             <Replace className="size-3" />
-            Tap a tile to {isImage ? "replace this image" : "fill the shape"}
+            {isImage ? t("replaceImage") : t("fillShape")}
           </p>
         ) : null}
       </div>

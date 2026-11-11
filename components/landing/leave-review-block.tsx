@@ -1,7 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Loader2, Star, X } from "lucide-react";
+import {
+  Image as ImagePlus,
+  SpinnerGap as Loader2,
+  Star,
+  X,
+} from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 
 import { submitFeedback } from "@/actions/feedback";

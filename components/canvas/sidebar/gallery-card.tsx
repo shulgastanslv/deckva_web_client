@@ -1,7 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Loader2 } from "lucide-react";
+import {
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
 

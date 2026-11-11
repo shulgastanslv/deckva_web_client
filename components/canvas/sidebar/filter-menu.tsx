@@ -1,7 +1,12 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import { Check, ListFilter } from "lucide-react";
+import {
+  type Icon as LucideIcon,
+} from "@phosphor-icons/react";
+import {
+  Check,
+  Funnel as ListFilter,
+} from "@phosphor-icons/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
