@@ -3,8 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
 
 import {
   acceptOrganizationInvite,
@@ -20,6 +24,8 @@ import { invalidateStudioOrganizations } from "@/lib/studio/queries";
 import { cn } from "@/lib/utils";
 
 export function StudioInvitePage({ token }: { token: string }) {
+  const t = useTranslations("studio.invite.page");
+  const te = useTranslations("errors");
   const router = useRouter();
   const queryClient = useQueryClient();
   const { status } = useSession();
@@ -39,7 +45,7 @@ export function StudioInvitePage({ token }: { token: string }) {
     void getInvitePreview(token).then((res) => {
       if (cancelled) return;
       if (!res.success || !("invite" in res)) {
-        setLoadError("error" in res ? res.error : "Invite not found");
+        setLoadError("error" in res ? res.error : t("notFound"));
         setInvite(null);
       } else {
         setInvite(res.invite);
@@ -69,7 +75,7 @@ export function StudioInvitePage({ token }: { token: string }) {
     try {
       const res = await acceptOrganizationInvite(token);
       if (!res.success) {
-        setActionError("error" in res ? res.error : "Couldn't accept invite");
+        setActionError("error" in res ? res.error : te("inviteAcceptFailed"));
         return;
       }
       await invalidateStudioOrganizations(queryClient);
@@ -92,7 +98,7 @@ export function StudioInvitePage({ token }: { token: string }) {
     try {
       const res = await declineOrganizationInvite(token);
       if (!res.success) {
-        setActionError("error" in res ? res.error : "Couldn't decline invite");
+        setActionError("error" in res ? res.error : te("inviteDeclineFailed"));
         return;
       }
       setDone("declined");
@@ -112,7 +118,7 @@ export function StudioInvitePage({ token }: { token: string }) {
             className="rounded-md"
             onClick={() => setAuthOpen(true)}
           >
-            Sign in
+            {t("signIn")}
           </Button>
         ) : (
           <Button
@@ -121,7 +127,7 @@ export function StudioInvitePage({ token }: { token: string }) {
             className="rounded-md"
             onClick={() => router.push("/studio")}
           >
-            Open studio
+            {t("openStudio")}
           </Button>
         )}
       </header>
@@ -135,17 +141,17 @@ export function StudioInvitePage({ token }: { token: string }) {
           ) : loadError || !invite ? (
             <div className="rounded-3xl bg-background px-6 py-10 text-center">
               <h1 className="text-2xl font-semibold tracking-tight">
-                Invite unavailable
+                {t("unavailable")}
               </h1>
               <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
-                {loadError || "This invite link is invalid or no longer works."}
+                {loadError || t("invalidOrGone")}
               </p>
               <Button
                 type="button"
                 className="mt-6 rounded-md"
                 onClick={() => router.push("/studio")}
               >
-                Go to studio
+                {t("goToStudio")}
               </Button>
             </div>
           ) : (
@@ -157,50 +163,55 @@ export function StudioInvitePage({ token }: { token: string }) {
                   className="size-16 rounded-2xl text-[18px]"
                 />
                 <p className="mt-5 text-[13px] font-medium tracking-wide text-muted-foreground uppercase">
-                  Organization invite
+                  {t("title")}
                 </p>
                 <h1 className="mt-2 text-3xl font-semibold tracking-tight">
                   {invite.organizationName}
                 </h1>
                 <p className="mt-3 max-w-sm text-[14px] leading-relaxed text-muted-foreground">
                   {invite.invitedByName
-                    ? `${invite.invitedByName} invited you to join as ${invite.role.toLowerCase()}.`
-                    : `You've been invited to join as ${invite.role.toLowerCase()}.`}
-                  {invite.email ? ` Sent to ${invite.email}.` : null}
+                    ? t("invitedBy", {
+                        name: invite.invitedByName,
+                        role: invite.role.toLowerCase(),
+                      })
+                    : t("invitedGeneric", {
+                        role: invite.role.toLowerCase(),
+                      })}
+                  {invite.email ? ` ${t("sentTo", { email: invite.email })}` : null}
                 </p>
               </div>
 
               {invite.alreadyMember || done === "accepted" ? (
                 <div className="mt-8 space-y-3">
                   <p className="rounded-2xl bg-muted/40 px-4 py-3 text-center text-[13px] text-muted-foreground">
-                    You&apos;re already in this organization.
+                    {t("alreadyIn")}
                   </p>
                   <Button
                     type="button"
                     className="h-11 w-full rounded-md"
                     onClick={() => router.push("/studio")}
                   >
-                    Open studio
+                    {t("openStudio")}
                     <ArrowRight className="size-3.5 opacity-70" />
                   </Button>
                 </div>
               ) : done === "declined" ? (
                 <p className="mt-8 rounded-2xl bg-muted/40 px-4 py-3 text-center text-[13px] text-muted-foreground">
-                  Invite declined.
+                  {t("declined")}
                 </p>
               ) : blocked ? (
                 <p className="mt-8 rounded-2xl bg-muted/40 px-4 py-3 text-center text-[13px] text-muted-foreground">
                   {invite.expired
-                    ? "This invite has expired."
+                    ? t("expired")
                     : invite.revoked
-                      ? "This invite was revoked."
-                      : "This invite is no longer available."}
+                      ? t("revoked")
+                      : t("noLongerAvailable")}
                 </p>
               ) : (
                 <div className="mt-8 space-y-3">
                   {!signedIn ? (
                     <p className="rounded-2xl bg-muted/35 px-4 py-3 text-center text-[13px] text-muted-foreground">
-                      Sign in to accept or decline this invite.
+                      {t("signInToAccept")}
                     </p>
                   ) : null}
 
@@ -220,7 +231,7 @@ export function StudioInvitePage({ token }: { token: string }) {
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
                       <>
-                        {signedIn ? "Join organization" : "Sign in to join"}
+                        {signedIn ? t("join") : t("signInToJoin")}
                         <ArrowRight className="size-3.5 opacity-70" />
                       </>
                     )}
@@ -236,7 +247,7 @@ export function StudioInvitePage({ token }: { token: string }) {
                         "h-11 w-full rounded-md text-[14px] font-medium text-muted-foreground",
                       )}
                     >
-                      Decline
+                      {t("decline")}
                     </Button>
                   ) : null}
                 </div>

@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Menu } from "lucide-react";
+import {
+  List as Menu,
+} from "@phosphor-icons/react";
 
 import { useActiveOrganization } from "@/lib/studio/queries";
 import Logo from "@/components/logo/logo";
@@ -24,6 +26,7 @@ export function StudioHeader({
   onMenu?: () => void;
 }) {
   const t = useTranslations("common");
+  const tn = useTranslations("studio.nav");
   const router = useRouter();
   const { status } = useSession();
   const signedIn = status === "authenticated";
@@ -54,7 +57,7 @@ export function StudioHeader({
             <button
               type="button"
               onClick={onMenu}
-              aria-label="Open menu"
+              aria-label={tn("openMenu")}
               className="flex size-9 items-center justify-center rounded-md text-foreground md:hidden"
             >
               <Menu className="size-5 stroke-[1.5]" />
@@ -63,7 +66,7 @@ export function StudioHeader({
           <button
             type="button"
             onClick={() => router.push("/")}
-            aria-label="Studio home"
+            aria-label={tn("studioHome")}
             className="flex shrink-0 items-center transition-opacity hover:opacity-80"
           >
             <Logo

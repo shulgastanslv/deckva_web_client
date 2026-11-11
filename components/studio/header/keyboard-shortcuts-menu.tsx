@@ -1,6 +1,9 @@
 "use client";
 
-import { Keyboard } from "lucide-react";
+import {
+  Keyboard,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,13 +32,16 @@ const ShortcutItem = ({ label, keys }: { label: string; keys: React.ReactNode[] 
 );
 
 export function KeyboardShortcutsMenu() {
+  const t = useTranslations("studio.shortcuts");
+  const tc = useTranslations("common");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
           className="flex h-9 w-9 items-center justify-center rounded-md border-none bg-muted/40 text-muted-foreground shadow-none outline-none transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
-          title="Keyboard shortcuts"
+          title={t("keyboard")}
         >
           <Keyboard className="size-5" />
         </button>
@@ -43,32 +49,32 @@ export function KeyboardShortcutsMenu() {
 
       <DropdownMenuContent align="end" className="w-[280px] rounded-2xl p-2">
         <DropdownMenuLabel className="px-3 py-2 text-[15px] font-semibold text-foreground">
-          Shortcuts
+          {t("title")}
         </DropdownMenuLabel>
 
         <div className="mt-2">
           <div className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-            General
+            {t("general")}
           </div>
           <DropdownMenuGroup>
-            <ShortcutItem label="Play / Pause" keys={["space"]} />
-            <ShortcutItem label="Undo" keys={["⌘", "Z"]} />
-            <ShortcutItem label="Redo" keys={["⌘", "⇧", "Z"]} />
-            <ShortcutItem label="Expand" keys={["⌘", "E"]} />
+            <ShortcutItem label={t("playPause")} keys={["space"]} />
+            <ShortcutItem label={tc("undo")} keys={["⌘", "Z"]} />
+            <ShortcutItem label={tc("redo")} keys={["⌘", "⇧", "Z"]} />
+            <ShortcutItem label={tc("expand")} keys={["⌘", "E"]} />
           </DropdownMenuGroup>
         </div>
 
         <div className="mt-4">
           <div className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-            Animation Editing
+            {t("animationEditing")}
           </div>
           <DropdownMenuGroup>
-            <ShortcutItem label="Copy" keys={["⌘", "C"]} />
-            <ShortcutItem label="Cut" keys={["⌘", "X"]} />
-            <ShortcutItem label="Paste" keys={["⌘", "V"]} />
-            <ShortcutItem label="Duplicate" keys={["⌘", "D"]} />
-            <ShortcutItem label="Hide" keys={["⌘", "⇧", "H"]} />
-            <ShortcutItem label="Delete" keys={["delete"]} />
+            <ShortcutItem label={tc("copy")} keys={["⌘", "C"]} />
+            <ShortcutItem label={tc("cut")} keys={["⌘", "X"]} />
+            <ShortcutItem label={tc("paste")} keys={["⌘", "V"]} />
+            <ShortcutItem label={tc("duplicate")} keys={["⌘", "D"]} />
+            <ShortcutItem label={tc("hide")} keys={["⌘", "⇧", "H"]} />
+            <ShortcutItem label={tc("delete")} keys={["delete"]} />
           </DropdownMenuGroup>
         </div>
       </DropdownMenuContent>

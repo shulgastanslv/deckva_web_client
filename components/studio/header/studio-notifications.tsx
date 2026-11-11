@@ -4,16 +4,17 @@ import { useEffect, useState } from "react";
 import {
   Bell,
   Check,
-  ChevronDown,
-  Loader2,
-  Mail,
-  MailOpen,
-  Maximize2,
-  Search,
-  Trash2,
-} from "lucide-react";
+  CaretDown as ChevronDown,
+  SpinnerGap as Loader2,
+  Envelope as Mail,
+  EnvelopeOpen as MailOpen,
+  ArrowsOut as Maximize2,
+  MagnifyingGlass as Search,
+  Trash as Trash2,
+} from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -40,7 +41,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { messages } from "@/lib/messages";
 import {
   fetchMyNotifications,
   invalidateStudioNotifications,
@@ -51,11 +51,6 @@ import {
 import { cn } from "@/lib/utils";
 
 type Filter = "unread" | "all";
-
-const FILTER_LABEL: Record<Filter, string> = {
-  unread: "Unread",
-  all: "All",
-};
 
 function formatWhen(iso: string) {
   try {
@@ -150,6 +145,7 @@ function ReadModal({
   item: NotificationItem | null;
   onClose: () => void;
 }) {
+  const t = useTranslations("studio.notifications");
   return (
     <Dialog open={!!item} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
@@ -175,7 +171,7 @@ function ReadModal({
                   window.location.href = item.href!;
                 }}
               >
-                Open invite
+                {t("openInvite")}
               </Button>
             </div>
           ) : null}
@@ -196,10 +192,17 @@ function NotificationsPanel({
   items: NotificationItem[];
   loading: boolean;
 }) {
+  const t = useTranslations("studio.notifications");
+  const tn = useTranslations("notifications");
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [readingItem, setReadingItem] = useState<NotificationItem | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  const filterLabel: Record<Filter, string> = {
+    unread: t("unread"),
+    all: t("all"),
+  };
 
   const visible = items
     .filter((item) => (filter === "unread" ? !item.read : true))
@@ -259,7 +262,7 @@ function NotificationsPanel({
       <div className="flex h-full flex-col">
         <div className="px-6 pt-5 pb-3">
           <h2 className="text-[17px] font-bold text-foreground">
-            {messages.notifications.title}
+            {tn("title")}
           </h2>
         </div>
 
@@ -268,7 +271,7 @@ function NotificationsPanel({
             <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search…"
+              placeholder={t("search")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-9 w-full rounded-md border-none bg-muted/40 py-2 pr-4 pl-10 text-[13px] focus-visible:ring-2 focus-visible:ring-[#2f5bff]/20"
@@ -281,7 +284,7 @@ function NotificationsPanel({
                 variant="secondary"
                 className="h-9 rounded-md border-none bg-muted/40 px-4 text-[13px] font-medium"
               >
-                {FILTER_LABEL[filter]}
+                {filterLabel[filter]}
                 <ChevronDown className="ml-1 size-3.5 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
@@ -289,7 +292,7 @@ function NotificationsPanel({
               align="end"
               className="min-w-[120px] rounded-2xl p-1.5"
             >
-              {(Object.keys(FILTER_LABEL) as Filter[]).map((key) => (
+              {(Object.keys(filterLabel) as Filter[]).map((key) => (
                 <DropdownMenuItem
                   key={key}
                   onClick={() => setFilter(key)}
@@ -300,7 +303,7 @@ function NotificationsPanel({
                   ) : (
                     <span className="mr-2 size-3.5" />
                   )}
-                  {FILTER_LABEL[key]}
+                  {filterLabel[key]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -315,12 +318,10 @@ function NotificationsPanel({
           ) : visible.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center px-8 text-center">
               <p className="text-[18px] font-medium text-foreground">
-                Nothing here
+                {t("nothingHere")}
               </p>
               <p className="mt-2 text-[13px] text-muted-foreground">
-                {searchQuery
-                  ? "Try another search"
-                  : messages.notifications.emptyBody}
+                {searchQuery ? t("tryAnotherSearch") : tn("emptyBody")}
               </p>
             </div>
           ) : (
@@ -361,7 +362,7 @@ function NotificationsPanel({
                           window.location.href = item.href!;
                         }}
                       >
-                        Open invite
+                        {t("openInvite")}
                       </Button>
                     </div>
                   ) : null}
@@ -371,7 +372,7 @@ function NotificationsPanel({
                       variant="ghost"
                       size="icon"
                       onClick={() => setReadingItem(item)}
-                      title="Read"
+                      title={t("read")}
                       className="size-8 rounded-md"
                     >
                       <Maximize2 className="size-3.5" />
@@ -380,7 +381,7 @@ function NotificationsPanel({
                       variant="ghost"
                       size="icon"
                       onClick={() => void handleToggleRead(item.id, item.read)}
-                      title={item.read ? "Mark unread" : "Mark read"}
+                      title={item.read ? t("markUnread") : t("markRead")}
                       className="size-8 rounded-md"
                     >
                       {item.read ? (
@@ -393,7 +394,7 @@ function NotificationsPanel({
                       variant="ghost"
                       size="icon"
                       onClick={() => void handleDelete(item.id)}
-                      title="Delete"
+                      title={t("delete")}
                       className="size-8 rounded-md text-destructive hover:text-destructive"
                     >
                       <Trash2 className="size-3.5" />
@@ -416,6 +417,7 @@ export function StudioNotifications({
 }: {
   className?: string;
 }) {
+  const t = useTranslations("studio.notifications");
   const queryClient = useQueryClient();
   const { status } = useSession();
   const signedIn = status === "authenticated";
@@ -455,7 +457,7 @@ export function StudioNotifications({
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Notifications"
+          aria-label={t("aria")}
           className={cn(
             "relative flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60",
             open && "bg-muted/60",

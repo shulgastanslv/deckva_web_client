@@ -5,12 +5,13 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   Folder,
-  MoreHorizontal,
-  Pencil,
+  DotsThree as MoreHorizontal,
+  PencilSimple as Pencil,
   Plus,
-  Trash2,
-} from "lucide-react";
+  Trash as Trash2,
+} from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 import { createFolder, deleteFolder, renameFolder } from "@/actions/folders";
 import { useActiveOrganization, useUserFolders } from "@/lib/studio/queries";
@@ -25,6 +26,8 @@ import { isUpgradeRequiredError } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 export function StudioFoldersSection() {
+  const t = useTranslations("studio.folders");
+  const tc = useTranslations("common");
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const pathname = usePathname();
@@ -64,7 +67,7 @@ export function StudioFoldersSection() {
     const name = draftName.trim();
     setBusy(true);
     try {
-      const res = await createFolder(name || "Untitled folder");
+      const res = await createFolder(name || tc("untitledFolder"));
       if (res.success) {
         setCreating(false);
         setDraftName("");
@@ -113,10 +116,12 @@ export function StudioFoldersSection() {
   return (
     <div className="mt-6 px-2.5">
       <div className="mb-1.5 flex items-center justify-between px-1.5">
-        <p className="text-[12px] font-medium text-muted-foreground">Folders</p>
+        <p className="text-[12px] font-medium text-muted-foreground">
+          {t("title")}
+        </p>
         <button
           type="button"
-          aria-label="New folder"
+          aria-label={t("newFolder")}
           disabled={!signedIn || busy}
           onClick={startCreate}
           className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground disabled:opacity-40"
@@ -127,7 +132,7 @@ export function StudioFoldersSection() {
 
       {!signedIn ? (
         <p className="px-1.5 text-[12px] leading-relaxed text-muted-foreground">
-          Sign in to create folders.
+          {t("signInHint")}
         </p>
       ) : (
         <div className="flex flex-col gap-0.5">
@@ -137,7 +142,7 @@ export function StudioFoldersSection() {
                 autoFocus
                 value={draftName}
                 onChange={(e) => setDraftName(e.target.value)}
-                placeholder="Folder name"
+                placeholder={t("folderName")}
                 className="h-8 rounded-md border-0 bg-background px-3 text-[12px] shadow-none dark:bg-muted/40"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -162,9 +167,7 @@ export function StudioFoldersSection() {
 
           {folders.length === 0 && !creating ? (
             <p className="px-1.5 py-1 text-[12px] leading-relaxed text-muted-foreground">
-              {isUpgrade
-                ? "Group carousels by client or campaign."
-                : "Folders are a Pro feature."}
+              {isUpgrade ? t("groupHint") : t("proFeature")}
             </p>
           ) : null}
 
@@ -216,7 +219,7 @@ export function StudioFoldersSection() {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      aria-label="Folder actions"
+                      aria-label={t("folderActions")}
                       className="rounded-md p-1 text-muted-foreground opacity-100 transition-opacity hover:bg-muted hover:text-foreground focus:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                     >
                       <MoreHorizontal className="size-3.5" />
@@ -234,14 +237,14 @@ export function StudioFoldersSection() {
                       }}
                     >
                       <Pencil className="size-3.5" />
-                      Rename
+                      {t("rename")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer gap-2 rounded-xl text-[13px] text-destructive"
                       onClick={() => void removeFolder(folder.id)}
                     >
                       <Trash2 className="size-3.5" />
-                      Delete
+                      {t("delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

@@ -215,7 +215,8 @@
       "sortNewest": "Newest",
       "sortUpdated": "Recently updated",
       "sortOldest": "Oldest",
-      "sortAZ": "A–Z"
+      "sortAZ": "A–Z",
+      "byAuthor": "by {name}"
     },
     "projectMenu": {
       "more": "More",

@@ -1,6 +1,9 @@
 "use client";
 
-import { Star } from "lucide-react";
+import {
+  Star,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import type { ProjectListItem } from "@/actions/projects";
 import { formatBoardDate } from "@/components/studio/lib/format";
@@ -17,6 +20,7 @@ export function StudioProjectCard({
   onOpen: () => void;
   onChanged: () => void;
 }) {
+  const tc = useTranslations("common");
   return (
     <article className="group relative flex cursor-pointer flex-col gap-2.5 select-none">
       <button
@@ -40,7 +44,7 @@ export function StudioProjectCard({
               className="size-12 rounded-2xl"
             />
             <span className="text-[12px] text-muted-foreground/70">
-              {project.title || "Untitled"}
+              {project.title || tc("untitled")}
             </span>
           </span>
         )}
@@ -60,7 +64,7 @@ export function StudioProjectCard({
 
       <button type="button" onClick={onOpen} className="w-full px-0.5 text-left">
         <p className="truncate text-[13px] font-medium text-foreground">
-          {project.title || "Untitled"}
+          {project.title || tc("untitled")}
         </p>
         <div className="mt-1.5 flex items-center justify-between gap-2">
           <StudioProjectOwner

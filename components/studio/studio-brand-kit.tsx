@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, Image as ImageIcon, RotateCcw } from "lucide-react";
+import {
+  Plus,
+  Trash as Trash2,
+  Image as ImageIcon,
+  ArrowCounterClockwise as RotateCcw,
+} from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 import { AuthModal } from "@/components/auth";
 import { FontSelect } from "@/components/canvas/font-select";
@@ -89,6 +95,7 @@ function ItemCard({
 }
 
 export function StudioBrandKit() {
+  const t = useTranslations("studio.brandKit");
   const { status } = useSession();
   const create = useStudioCreate();
   const [authOpen, setAuthOpen] = useState(false);
@@ -173,10 +180,10 @@ export function StudioBrandKit() {
           <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="text-3xl sm:text-4xl font-medium tracking-tight text-neutral-900 dark:text-neutral-100">
-                Brand kit
+                {t("title")}
               </h1>
               <p className="mt-2 text-[14px] text-muted-foreground">
-                Set up your brand kit for your projects. This will be available across all your projects.
+                {t("subtitle")}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -187,7 +194,7 @@ export function StudioBrandKit() {
                 onClick={() => persist(defaultBrandKit())}
               >
                 <RotateCcw className="mr-2 size-3.5 opacity-70" />
-                Reset
+                {t("reset")}
               </Button>
               <StudioCreateMenu
                 onBlank={create.openBlank}
@@ -201,8 +208,8 @@ export function StudioBrandKit() {
             
             {/* Colors Section */}
             <Section 
-              title="Colors" 
-              description="Define your primary and secondary palette. These colors will be available across all your projects."
+              title={t("colors")} 
+              description={t("colorsHint")}
             >
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-5">
                 {PALETTE_SLOTS.map((slot) => (
@@ -235,8 +242,8 @@ export function StudioBrandKit() {
 
             {/* Fonts Section */}
             <Section 
-              title="Typography"
-              description="Choose the default font families for different text styles in your presentations."
+              title={t("typography")}
+              description={t("typographyHint")}
             >
               <div className="flex flex-col gap-2">
                 {TEXT_STYLES.map((style) => (
@@ -271,8 +278,8 @@ export function StudioBrandKit() {
 
             {/* Logos Section */}
             <Section 
-              title="Logos & Assets"
-              description="Upload your company logos, watermarks, or frequently used graphics to access them quickly."
+              title={t("logos")}
+              description={t("logosHint")}
               action={
                 <Button
                   type="button"
@@ -281,7 +288,7 @@ export function StudioBrandKit() {
                   onClick={openLogoPicker}
                 >
                   <Plus className="mr-2 size-3.5" />
-                  Upload logo
+                  {t("uploadLogo")}
                 </Button>
               }
             >
@@ -303,7 +310,7 @@ export function StudioBrandKit() {
                 >
                   <div className="flex flex-col items-center gap-2">
                     <Plus className="size-6 opacity-70" />
-                    <span className="text-[12px] font-medium">Add new</span>
+                    <span className="text-[12px] font-medium">{t("addNew")}</span>
                   </div>
                 </ItemCard>
 
@@ -318,7 +325,7 @@ export function StudioBrandKit() {
                       />
                       <button
                         type="button"
-                        title="Remove logo"
+                        title={t("removeLogo")}
                         onClick={(e) => {
                           e.stopPropagation();
                           removeLogo(logo.id);

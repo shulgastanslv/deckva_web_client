@@ -1,4 +1,10 @@
-import { LayoutGrid, List } from "lucide-react";
+"use client";
+
+import {
+  SquaresFour as LayoutGrid,
+  List,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,13 +16,14 @@ export function StudioViewToggle({
   view: "list" | "grid";
   onChange: (view: "list" | "grid") => void;
 }) {
+  const t = useTranslations("studio.browse");
   return (
     <div className="flex h-9 items-center gap-0.5 rounded-md bg-muted/40 p-0.5">
       <Button
         type="button"
         size="icon"
         variant="ghost"
-        aria-label="Grid view"
+        aria-label={t("gridView")}
         onClick={() => onChange("grid")}
         className={cn(
           "size-8 rounded-md border-none shadow-none",
@@ -31,7 +38,7 @@ export function StudioViewToggle({
         type="button"
         size="icon"
         variant="ghost"
-        aria-label="List view"
+        aria-label={t("listView")}
         onClick={() => onChange("list")}
         className={cn(
           "size-8 rounded-md border-none shadow-none",

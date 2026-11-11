@@ -1,9 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Plus, MoreHorizontal, Palette, Users, Trash2 } from "lucide-react";
+import {
+  CaretDown as ChevronDown,
+  Plus,
+  DotsThree as MoreHorizontal,
+  Palette,
+  Users,
+  Trash as Trash2,
+} from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 import {
   createOrganization,
@@ -21,7 +29,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { planLabel } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 // Импортируйте компоненты диалогов (если они в другом файле)
@@ -38,6 +45,8 @@ export function StudioOrgSwitcher({
   variant?: "sidebar" | "header";
   className?: string;
 }) {
+  const t = useTranslations("studio.org");
+  const tu = useTranslations("studio.upgrade");
   const queryClient = useQueryClient();
   const { status } = useSession();
   const signedIn = status === "authenticated";
@@ -84,7 +93,7 @@ export function StudioOrgSwitcher({
     if (busy) return;
     setBusy(true);
     try {
-      const res = await createOrganization(draft.trim() || "New organization");
+      const res = await createOrganization(draft.trim() || t("newOrg"));
       if (res.success) {
         setCreating(false);
         setDraft("");
@@ -152,7 +161,7 @@ export function StudioOrgSwitcher({
                   isHeader ? "text-[13px]" : "flex-1 text-[13px]",
                 )}
               >
-                {active?.name ?? "Organization"}
+                {active?.name ?? t("organization")}
               </span>
               <ChevronDown
                 className={cn(
@@ -180,8 +189,8 @@ export function StudioOrgSwitcher({
                     {active.name}
                   </p>
                   <p className="text-[12px] text-muted-foreground">
-                    {planLabel(active.isUpgrade)} · {active.memberCount}{" "}
-                    {active.memberCount === 1 ? "member" : "members"}
+                    {active.isUpgrade ? tu("planPro") : tu("planFree")} ·{" "}
+                    {t("members", { count: active.memberCount })}
                   </p>
                 </div>
                 
@@ -190,7 +199,7 @@ export function StudioOrgSwitcher({
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        aria-label="Organization settings"
+                        aria-label={t("settings")}
                         className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       >
                         <MoreHorizontal className="size-5" />
@@ -206,7 +215,7 @@ export function StudioOrgSwitcher({
                           className="cursor-pointer gap-2.5 rounded-xl py-2 text-[13px]"
                         >
                           <Palette className="size-4 text-muted-foreground" />
-                          Edit organization
+                          {t("edit")}
                         </DropdownMenuItem>
                       ) : null}
                       <DropdownMenuItem
@@ -224,7 +233,7 @@ export function StudioOrgSwitcher({
                             className="cursor-pointer gap-2.5 rounded-xl py-2 text-[13px] text-destructive focus:bg-destructive/10 focus:text-destructive"
                           >
                             <Trash2 className="size-5" />
-                            Delete organization
+                            {t("delete")}
                           </DropdownMenuItem>
                         </>
                       ) : null}
@@ -236,7 +245,7 @@ export function StudioOrgSwitcher({
 
             <div className="px-3 pt-1 pb-1">
               <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                Other organizations
+                {t("otherOrgs")}
               </p>
             </div>
 
@@ -259,13 +268,12 @@ export function StudioOrgSwitcher({
                         </span>
                         {isOrgManager(org.role) ? (
                           <StudioBadge className="uppercase">
-                            {isOrgOwner(org.role) ? "Owner" : "Admin"}
+                            {isOrgOwner(org.role) ? t("owner") : t("admin")}
                           </StudioBadge>
                         ) : null}
                       </span>
                       <span className="block text-[12px] text-muted-foreground">
-                        {org.memberCount}{" "}
-                        {org.memberCount === 1 ? "member" : "members"}
+                        {t("members", { count: org.memberCount })}
                       </span>
                     </span>
                   </button>
@@ -277,7 +285,7 @@ export function StudioOrgSwitcher({
                     autoFocus
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
-                    placeholder="Organization name"
+                    placeholder={t("orgName")}
                     className="h-8 rounded-md border-0 bg-muted text-[13px] shadow-none dark:bg-background/40"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -301,7 +309,7 @@ export function StudioOrgSwitcher({
                     <Plus className="size-3.5" />
                   </span>
                   <span className="text-[13px] font-medium text-foreground">
-                    Add organization
+                    {t("addOrg")}
                   </span>
                 </button>
               )}

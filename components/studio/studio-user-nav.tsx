@@ -4,13 +4,14 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   Globe,
-  LogOut,
-  MessageCircle,
-  Settings,
+  SignOut as LogOut,
+  ChatCircle as MessageCircle,
+  Gear as Settings,
   User,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { signOut, useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 import { AuthModal } from "@/components/auth";
 import { FeedbackDialog } from "@/components/feedback-dialog";
@@ -59,6 +60,7 @@ export function StudioUserNav({
   onCommunity?: () => void;
   showFeedback?: boolean;
 }) {
+  const t = useTranslations("studio.userNav");
   const router = useRouter();
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
@@ -85,7 +87,7 @@ export function StudioUserNav({
     profile.data?.name?.trim() ||
     session?.user?.name?.trim() ||
     userEmail ||
-    "Account";
+    t("account");
   const userLetter = (userName[0] || "U").toUpperCase();
   const avatarSrc = profile.data?.image ?? session?.user?.image ?? null;
 
@@ -98,7 +100,7 @@ export function StudioUserNav({
           className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60"
           onClick={() => setAuthOpen(true)}
         >
-          Sign in
+          {t("signIn")}
         </Button>
         <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
       </>
@@ -115,7 +117,7 @@ export function StudioUserNav({
             src={avatarSrc}
             interactive
             className="size-9 text-[13px]"
-            aria-label="Account menu"
+            aria-label={t("accountMenu")}
           />
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -147,20 +149,20 @@ export function StudioUserNav({
 
           <NavItem
             icon={<User className={iconClass} />}
-            label="Profile"
+            label={t("profile")}
             onSelect={() => setAccountOpen(true)}
           />
           {showFeedback ? (
             <NavItem
               icon={<MessageCircle className={iconClass} />}
-              label="Feedback"
+              label={t("feedback")}
               onSelect={() => setFeedbackOpen(true)}
             />
           ) : null}
           {isAdmin ? (
             <NavItem
               icon={<Settings className={iconClass} />}
-              label="Admin Console"
+              label={t("adminConsole")}
               onSelect={() => router.push("/admin")}
             />
           ) : null}
@@ -168,7 +170,7 @@ export function StudioUserNav({
           {onCommunity ? (
             <NavItem
               icon={<Globe className={iconClass} />}
-              label="Publish"
+              label={t("publish")}
               onSelect={onCommunity}
             />
           ) : null}
@@ -177,7 +179,7 @@ export function StudioUserNav({
 
           <NavItem
             icon={<LogOut className={iconClass} />}
-            label="Log out"
+            label={t("logOut")}
             onSelect={() => signOut({ callbackUrl: "/" })}
           />
         </DropdownMenuContent>

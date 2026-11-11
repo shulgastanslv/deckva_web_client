@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import {
+  SpinnerGap as Loader2,
+} from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 
 import {
@@ -38,6 +40,7 @@ type ViewMode = "list" | "grid";
 
 export function StudioHome() {
   const t = useTranslations("studio");
+  const tc = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic")?.trim() ?? "";
@@ -84,7 +87,7 @@ export function StudioHome() {
       projects
         .filter((p) => {
           if (!q) return true;
-          return (p.title || "Untitled").toLowerCase().includes(q);
+          return (p.title || tc("untitled")).toLowerCase().includes(q);
         })
         .sort(
           (a, b) =>
@@ -146,7 +149,7 @@ export function StudioHome() {
                 title:
                   template.title ||
                   file.name.replace(/\.json$/i, "") ||
-                  "Imported",
+                  t("importedTitle"),
                 aspectRatio,
                 width: dims.width,
                 height: dims.height,
@@ -205,11 +208,13 @@ export function StudioHome() {
                       disabled={create.generating}
                       onClick={() => {
                         trackEvent("studio_starter_chip", { id: starter.id });
-                        void create.generateCarousel({ topic: starter.topic });
+                        void create.generateCarousel({
+                          topic: t(`starters.${starter.id}.topic`),
+                        });
                       }}
                       className="inline-flex h-9 items-center rounded-md bg-muted/40 px-3.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60"
                     >
-                      {starter.label}
+                      {t(`starters.${starter.id}.label`)}
                     </button>
                   ))}
                 </div>

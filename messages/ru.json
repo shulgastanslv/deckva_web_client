@@ -215,7 +215,8 @@
       "sortNewest": "Сначала новые",
       "sortUpdated": "Недавно обновлённые",
       "sortOldest": "Сначала старые",
-      "sortAZ": "А–Я"
+      "sortAZ": "А–Я",
+      "byAuthor": "от {name}"
     },
     "projectMenu": {
       "more": "Ещё",

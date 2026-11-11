@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Link2, Loader2, Mail, UserPlus } from "lucide-react";
+import {
+  ArrowRight,
+  Link as Link2,
+  SpinnerGap as Loader2,
+  Envelope as Mail,
+  UserPlus,
+} from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 import {
   getOrCreateInviteLink,
@@ -31,6 +38,8 @@ import {
 import { cn } from "@/lib/utils";
 
 export function InviteMembersDialog() {
+  const t = useTranslations("studio.invite");
+  const tc = useTranslations("common");
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const queryClient = useQueryClient();
@@ -62,14 +71,14 @@ export function InviteMembersDialog() {
     try {
       const res = await getOrCreateInviteLink(org.id);
       if (!res.success || !("url" in res)) {
-        setError("error" in res ? res.error : "Couldn't create invite link");
+        setError("error" in res ? res.error : t("createLinkFailed"));
         return;
       }
       await navigator.clipboard.writeText(res.url);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError("Couldn't copy invite link");
+      setError(t("copyFailed"));
     } finally {
       setBusy(false);
     }
@@ -87,7 +96,7 @@ export function InviteMembersDialog() {
         role,
       });
       if (!res.success || !("results" in res)) {
-        setError("error" in res ? res.error : "Couldn't send invites");
+        setError("error" in res ? res.error : t("sendFailed"));
         return;
       }
 
@@ -98,14 +107,14 @@ export function InviteMembersDialog() {
       ).length;
 
       const parts: string[] = [];
-      if (notified) parts.push(`${notified} notified in-app`);
-      if (invited) parts.push(`${invited} invite link ready`);
-      if (already) parts.push(`${already} already members`);
-      setSummary(parts.join(" · ") || "Done");
+      if (notified) parts.push(t("notifiedInApp", { n: notified }));
+      if (invited) parts.push(t("inviteLinkReady", { n: invited }));
+      if (already) parts.push(t("alreadyMembers", { n: already }));
+      setSummary(parts.join(" · ") || tc("done"));
       setEmails("");
       void invalidateStudioOrganizations(queryClient);
     } catch {
-      setError("Couldn't send invites");
+      setError(t("sendFailed"));
     } finally {
       setBusy(false);
     }
@@ -125,7 +134,7 @@ export function InviteMembersDialog() {
           className="h-9 rounded-md bg-[#4262ff] px-3.5 text-[13px] font-semibold text-white hover:bg-[#4262ff]/90"
         >
           <UserPlus className="mr-2 size-3.5" />
-          Invite Members
+          {t("title")}
         </Button>
       </DialogTrigger>
 
@@ -135,11 +144,10 @@ export function InviteMembersDialog() {
       >
         <DialogHeader className="gap-1 px-5 pt-5 pb-3">
           <DialogTitle className="text-[17px] font-semibold tracking-tight">
-            Invite to {org.name}
+            {t("inviteTo", { name: org.name })}
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-relaxed">
-            Registered accounts get an in-app notification. Others can join
-            via the invite link.
+            {t("description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -151,7 +159,7 @@ export function InviteMembersDialog() {
               onChange={(e) => setEmails(e.target.value)}
               disabled={busy}
               rows={4}
-              placeholder="Enter emails, separated by commas…"
+              placeholder={t("emailsHint")}
               className={cn(
                 "min-h-[110px] w-full resize-none rounded-2xl bg-muted/30 py-3 pr-3.5 pl-10 text-[14px] leading-relaxed text-foreground outline-none",
                 "placeholder:text-muted-foreground/70 focus:bg-muted/40",
@@ -174,7 +182,7 @@ export function InviteMembersDialog() {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {value === OrgMemberRole.MEMBER ? "Member" : "Admin"}
+                {value === OrgMemberRole.MEMBER ? t("member") : t("admin")}
               </button>
             ))}
           </div>
@@ -199,7 +207,7 @@ export function InviteMembersDialog() {
               ) : (
                 <Link2 className="size-3.5" />
               )}
-              {copied ? "Copied" : "Copy invite link"}
+              {copied ? t("copied") : t("copyInviteLink")}
             </Button>
             <Button
               type="button"
@@ -211,7 +219,7 @@ export function InviteMembersDialog() {
                 <Loader2 className="size-4 animate-spin" />
               ) : (
                 <>
-                  Send invites
+                  {t("send")}
                   <ArrowRight className="size-3.5 opacity-70" />
                 </>
               )}

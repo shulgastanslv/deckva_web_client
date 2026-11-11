@@ -2,7 +2,10 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  X,
+} from "@phosphor-icons/react";
 
 import { AuthModal } from "@/components/auth";
 import { StudioHeader } from "@/components/studio/header/studio-header";
@@ -13,6 +16,8 @@ import { StudioUpgradeBanner } from "@/components/studio/ui/studio-upgrade-banne
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function StudioShell({ children }: { children: ReactNode }) {
+  const tn = useTranslations("studio.nav");
+  const tc = useTranslations("common");
   const pathname = usePathname();
   const [authOpen, setAuthOpen] = useState(false);
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
@@ -73,7 +78,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
           <div className="fixed inset-0 z-50 md:hidden">
             <button
               type="button"
-              aria-label="Close menu"
+              aria-label={tn("closeMenu")}
               className="absolute inset-0 bg-black/55"
               onClick={() => setNavOpen(false)}
             />
@@ -81,7 +86,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
               <div className="flex justify-end px-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
                 <button
                   type="button"
-                  aria-label="Close"
+                  aria-label={tc("close")}
                   onClick={() => setNavOpen(false)}
                   className="flex size-9 items-center justify-center rounded-md text-foreground"
                 >

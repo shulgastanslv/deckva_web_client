@@ -5,12 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Check,
-  ChevronDown,
-  LayoutGrid,
+  CaretDown as ChevronDown,
+  SquaresFour as LayoutGrid,
   List,
-  Loader2,
-  Search,
-} from "lucide-react";
+  SpinnerGap as Loader2,
+  MagnifyingGlass as Search,
+} from "@phosphor-icons/react";
 
 import {
   listCommunityProjects,
@@ -46,10 +46,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type MainTab = "all" | "starred" | "community";
 
 export function StudioBrowse() {
+  const t = useTranslations("studio.browse");
+  const ts = useTranslations("studio");
+  const tc = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
@@ -97,7 +101,7 @@ export function StudioBrowse() {
     return projects
       .filter((p) => {
         if (activeTab === "starred" && !p.isSaved) return false;
-        if (q && !(p.title || "Untitled").toLowerCase().includes(q)) return false;
+        if (q && !(p.title || tc("untitled")).toLowerCase().includes(q)) return false;
         return true;
       })
       .sort(
@@ -160,24 +164,31 @@ export function StudioBrowse() {
       window.removeEventListener("studio:sidebar-search", onSidebarSearch);
   }, []);
 
+  const communitySortLabels: Record<CommunitySortId, string> = {
+    newest: t("sortNewest"),
+    updated: t("sortUpdated"),
+    oldest: t("sortOldest"),
+    alphabetical: t("sortAZ"),
+  };
+
   const pageTitle = activeFolder
     ? activeFolder.name
     : activeTab === "starred"
-      ? "Starred"
+      ? t("starred")
       : activeTab === "community"
-        ? "Community"
-        : "Projects";
+        ? t("community")
+        : t("projects");
 
   const pageDescription = activeFolder
-    ? "Manage projects in this folder."
+    ? t("folderSub")
     : activeTab === "starred"
-      ? "Quick access to starred projects."
+      ? t("starredSub")
       : activeTab === "community"
-        ? "Browse and remix carousels from creators."
-        : "All your generated carousels.";
+        ? t("communitySub")
+        : t("projectsSub");
 
   const communitySortLabel =
-    COMMUNITY_SORT_OPTIONS.find((o) => o.id === communitySort)?.label ?? "Sort";
+    communitySortLabels[communitySort] ?? t("sort");
 
   return (
     <StudioContent>
@@ -199,8 +210,8 @@ export function StudioBrowse() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder={
                 activeTab === "community"
-                  ? "Search community"
-                  : "Search projects"
+                  ? t("searchCommunity")
+                  : t("searchProjects")
               }
               className="h-9 w-full rounded-md border-none bg-muted/40 pr-4 pl-9 text-[13px] shadow-none placeholder:text-muted-foreground/70 focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
             />
@@ -239,7 +250,7 @@ export function StudioBrowse() {
                             <Check className="size-5" />
                           ) : null}
                         </div>
-                        {option.label}
+                        {communitySortLabels[option.id]}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -250,7 +261,7 @@ export function StudioBrowse() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setCommunityView("cards")}
-                    aria-label="Cards view"
+                    aria-label={t("cardsView")}
                     className={cn(
                       "size-8 rounded-md shadow-none",
                       communityView === "cards"
@@ -264,7 +275,7 @@ export function StudioBrowse() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setCommunityView("rows")}
-                    aria-label="Rows view"
+                    aria-label={t("rowsView")}
                     className={cn(
                       "size-8 rounded-md shadow-none",
                       communityView === "rows"
@@ -286,7 +297,8 @@ export function StudioBrowse() {
                       variant="ghost"
                       className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
                     >
-                      Sort <ChevronDown className="ml-1 size-3.5 opacity-50" />
+                      {t("sort")}{" "}
+                      <ChevronDown className="ml-1 size-3.5 opacity-50" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -294,10 +306,10 @@ export function StudioBrowse() {
                     className="w-48 rounded-2xl p-1.5"
                   >
                     {[
-                      { id: "last-opened", label: "Last opened" },
-                      { id: "last-modified", label: "Last modified" },
-                      { id: "alphabetical", label: "Alphabetically" },
-                      { id: "last-created", label: "Last created" },
+                      { id: "last-opened", label: t("sortLastOpened") },
+                      { id: "last-modified", label: t("sortLastModified") },
+                      { id: "alphabetical", label: t("sortAlphabetical") },
+                      { id: "last-created", label: t("sortLastCreated") },
                     ].map((option) => (
                       <DropdownMenuItem
                         key={option.id}
@@ -355,11 +367,11 @@ export function StudioBrowse() {
             <div className="py-16 text-center">
               <p className="text-[22px] text-foreground">
                 {search.trim() || communityCategory !== "all"
-                  ? "Nothing matches"
-                  : "Nothing in community yet"}
+                  ? t("nothingMatches")
+                  : t("nothingInCommunity")}
               </p>
               <p className="mt-2 text-[13px] text-muted-foreground">
-                Publish a carousel from the editor to share it here.
+                {t("publishHint")}
               </p>
             </div>
           ) : communityView === "rows" ? (
@@ -409,17 +421,17 @@ export function StudioBrowse() {
           <div className="py-16 text-center">
             <p className="text-[22px] text-foreground">
               {search.trim()
-                ? "Nothing found"
+                ? ts("nothingFound")
                 : folderId
-                  ? "Folder is empty"
+                  ? t("folderEmpty")
                   : activeTab === "starred"
-                    ? "No starred projects"
-                    : "No projects yet"}
+                    ? t("noStarred")
+                    : t("noProjects")}
             </p>
             <p className="mt-2 text-[13px] text-muted-foreground">
               {search.trim()
-                ? "Try another search."
-                : "Generate a carousel from the home prompt."}
+                ? t("tryAnotherSearch")
+                : t("generateHint")}
             </p>
           </div>
         ) : null}
