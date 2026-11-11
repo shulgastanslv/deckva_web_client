@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  Check,
   ChevronDown,
   Copy,
+  Crop,
   Download,
   Grid3X3,
   HelpCircle,
-  Pencil,
   Plus,
   Save,
   Share2,
@@ -27,17 +28,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { GridSettingsPanel, useSyncLayoutGrid } from "@/components/canvas/grid-controls";
 import { duplicateProject } from "@/actions/projects";
+import { useCanvasManager } from "@/context/canvas-manager";
 import { useProject } from "@/hooks/use-project";
+import { fitCanvasJSON } from "@/lib/canvas/fit-frame";
+import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 
 const chipTrigger =
-  "inline-flex h-10 items-center gap-1.5 rounded-full border-none bg-transparent px-3.5 text-[13px] font-medium text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 data-[state=open]:text-foreground";
+  "inline-flex h-9 items-center gap-1.5 rounded-md border-none bg-muted/40 px-3 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60";
 
 const menuItem =
   "gap-2 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50";
+
+const RATIOS = Object.keys(CANVAS_RATIOS) as RatioKey[];
 
 type ProjectFileMenuProps = {
   onExport?: () => void;
@@ -48,11 +54,13 @@ type ProjectFileMenuProps = {
 export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuProps) {
   useSyncLayoutGrid();
   const router = useRouter();
+  const manager = useCanvasManager();
   const { rename, persist } = useProject();
   const projectTitle = useCanvasStore((s) => s.projectTitle);
   const currentProjectId = useCanvasStore((s) => s.currentProjectId);
   const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
   const currentRatio = useCanvasStore((s) => s.currentRatio);
+  const setCurrentRatio = useCanvasStore((s) => s.setCurrentRatio);
   const slides = useCanvasStore((s) => s.slides);
 
   const [open, setOpen] = useState(false);
@@ -69,8 +77,21 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
     if (next !== projectTitle) void rename(next);
   };
 
-  const handleSave = () => {
-    void persist();
+  const handleRatioChange = (ratio: RatioKey) => {
+    const to = CANVAS_RATIOS[ratio];
+    if (!to) return;
+    const state = useCanvasStore.getState();
+    const from = state.canvasDimensions;
+    if (state.currentRatio === ratio) return;
+
+    if (manager && (from.width !== to.width || from.height !== to.height)) {
+      for (const slide of state.slides) {
+        if (slide.id === state.currentSlideId) continue;
+        state.updateSlideJSONById(slide.id, fitCanvasJSON(slide.canvasJSON, from, to));
+      }
+      manager.fitToFrame(from, to);
+    }
+    setCurrentRatio(ratio);
   };
 
   const handleMakeCopy = async () => {
@@ -111,23 +132,82 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
       <DropdownMenuContent
         align="start"
         sideOffset={8}
-        className="w-[22rem] rounded-2xl p-1.5"
+        className="w-[20rem] rounded-2xl p-1.5"
       >
-        <div className="px-3 py-2.5">
-          <p className="truncate text-[13px] font-medium text-foreground">{projectTitle}</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
-            Carousel · {currentRatio} · {canvasDimensions.width}×{canvasDimensions.height}px
-            <span className="mx-1.5 text-border">·</span>
-            {slides.length} slide{slides.length === 1 ? "" : "s"}
+        <div className="space-y-2 px-2 py-2">
+          <label className="px-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            Name
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            onBlur={commitName}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commitName();
+                (event.target as HTMLInputElement).blur();
+              }
+              event.stopPropagation();
+            }}
+            onClick={(event) => event.stopPropagation()}
+            onPointerDown={(event) => event.stopPropagation()}
+            className="h-9 w-full rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none hover:bg-muted/50 focus:bg-muted/50"
+            placeholder="Project name"
+            aria-label="Project name"
+          />
+          <p className="px-1 text-[12px] text-muted-foreground">
+            {slides.length} slide{slides.length === 1 ? "" : "s"} · {canvasDimensions.width}×
+            {canvasDimensions.height}
           </p>
         </div>
+
+        <DropdownMenuSeparator className="bg-border/50" />
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger
+            className={cn(
+              menuItem,
+              "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
+            )}
+          >
+            <Crop className="size-4" />
+            Canvas size
+            <span className="ml-auto tabular-nums text-muted-foreground">{currentRatio}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent sideOffset={8} className="w-56 rounded-2xl p-1.5">
+            {RATIOS.map((ratio) => {
+              const size = CANVAS_RATIOS[ratio];
+              const selected = currentRatio === ratio;
+              return (
+                <DropdownMenuItem
+                  key={ratio}
+                  className={cn(menuItem, selected && "bg-muted/40")}
+                  onSelect={() => handleRatioChange(ratio)}
+                >
+                  <span className="min-w-0 flex-1 tabular-nums">{ratio}</span>
+                  <span className="tabular-nums text-[12px] text-muted-foreground">
+                    {size.width}×{size.height}
+                  </span>
+                  <Check
+                    className={cn(
+                      "size-3.5 shrink-0",
+                      selected ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
 
         <DropdownMenuSeparator className="bg-border/50" />
 
         <DropdownMenuItem asChild className={menuItem}>
           <Link href="/studio">
             <Plus className="size-4" />
-            Create new design
+            New design
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -165,13 +245,12 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
 
         <DropdownMenuSeparator className="bg-border/50" />
 
-
         <DropdownMenuItem
           className={menuItem}
           onSelect={(event) => {
             event.preventDefault();
             commitName();
-            handleSave();
+            void persist();
           }}
         >
           <Save className="size-4" />

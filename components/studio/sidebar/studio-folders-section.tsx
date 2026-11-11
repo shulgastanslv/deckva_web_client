@@ -119,7 +119,7 @@ export function StudioFoldersSection() {
           aria-label="New folder"
           disabled={!signedIn || busy}
           onClick={startCreate}
-          className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground disabled:opacity-40"
+          className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground disabled:opacity-40"
         >
           <Plus className="size-3.5" />
         </button>
@@ -138,7 +138,7 @@ export function StudioFoldersSection() {
                 value={draftName}
                 onChange={(e) => setDraftName(e.target.value)}
                 placeholder="Folder name"
-                className="h-8 rounded-full border-0 bg-background px-3 text-[12px] shadow-none dark:bg-muted/40"
+                className="h-8 rounded-md border-0 bg-background px-3 text-[12px] shadow-none dark:bg-muted/40"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -180,7 +180,7 @@ export function StudioFoldersSection() {
                     autoFocus
                     value={renameValue}
                     onChange={(e) => setRenameValue(e.target.value)}
-                    className="h-8 rounded-full border-0 bg-background px-3 text-[12px] shadow-none dark:bg-muted/40"
+                    className="h-8 rounded-md border-0 bg-background px-3 text-[12px] shadow-none dark:bg-muted/40"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -217,7 +217,7 @@ export function StudioFoldersSection() {
                     <button
                       type="button"
                       aria-label="Folder actions"
-                      className="rounded-full p-1 text-muted-foreground opacity-100 transition-opacity hover:bg-muted hover:text-foreground focus:opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                      className="rounded-md p-1 text-muted-foreground opacity-100 transition-opacity hover:bg-muted hover:text-foreground focus:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                     >
                       <MoreHorizontal className="size-3.5" />
                     </button>

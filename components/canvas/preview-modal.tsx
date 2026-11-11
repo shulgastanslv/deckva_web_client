@@ -252,12 +252,12 @@ export function PreviewModal({
             </span>
           )}
         </div>
-        <div className="flex items-center justify-self-center rounded-full bg-muted p-0.5 text-[13px]">
+        <div className="flex items-center justify-self-center rounded-md bg-muted p-0.5 text-[13px]">
           <button
             type="button"
             onClick={() => setView("slides")}
             className={cn(
-              "h-7 rounded-full px-3 transition-colors",
+              "h-7 rounded-md px-3 transition-colors",
               view === "slides" ? "bg-background text-foreground" : "text-muted-foreground",
             )}
           >
@@ -267,7 +267,7 @@ export function PreviewModal({
             type="button"
             onClick={() => setView("phone")}
             className={cn(
-              "h-7 rounded-full px-3 transition-colors",
+              "h-7 rounded-md px-3 transition-colors",
               view === "phone" ? "bg-background text-foreground" : "text-muted-foreground",
             )}
           >
@@ -282,7 +282,7 @@ export function PreviewModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+            className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
           >
             <X className="size-4" />
           </Button>
@@ -291,14 +291,14 @@ export function PreviewModal({
 
       {view === "phone" ? (
         <div className="flex shrink-0 justify-center px-4 pb-3">
-          <div className="flex max-w-[min(100%,42rem)] gap-0.5 overflow-x-auto rounded-full bg-muted/50 p-1">
+          <div className="flex max-w-[min(100%,42rem)] gap-0.5 overflow-x-auto rounded-md bg-muted/50 p-1">
             {SOCIAL_PREVIEW_NETWORKS.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setNetwork(item.id)}
                 className={cn(
-                  "h-8 shrink-0 rounded-full px-3 text-[12px] font-medium tracking-tight transition-colors",
+                  "h-8 shrink-0 rounded-md px-3 text-[12px] font-medium tracking-tight transition-colors",
                   network === item.id
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
@@ -317,7 +317,7 @@ export function PreviewModal({
           size="icon"
           onClick={goPrev}
           disabled={activeIdx === 0}
-          className="h-10 w-10 shrink-0 rounded-full disabled:opacity-20"
+          className="h-10 w-10 shrink-0 rounded-md disabled:opacity-20"
         >
           <ChevronLeft className="size-5" />
         </Button>
@@ -370,7 +370,7 @@ export function PreviewModal({
           size="icon"
           onClick={goNext}
           disabled={activeIdx === slides.length - 1}
-          className="h-10 w-10 shrink-0 rounded-full disabled:opacity-20"
+          className="h-10 w-10 shrink-0 rounded-md disabled:opacity-20"
         >
           <ChevronRight className="size-5" />
         </Button>

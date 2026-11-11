@@ -140,7 +140,7 @@ export function CodeBlockSettings({
       ).map(([label, key]) => (
         <label
           key={key}
-          className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted/20 px-3.5"
+          className="flex h-10 items-center justify-between gap-2 rounded-md bg-muted/20 px-3.5"
         >
           <span className="text-[13px] font-medium text-foreground/85">{label}</span>
           <Switch

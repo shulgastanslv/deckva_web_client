@@ -55,9 +55,9 @@ export function StudioHeader({
               type="button"
               onClick={onMenu}
               aria-label="Open menu"
-              className="flex size-9 items-center justify-center rounded-full text-foreground md:hidden"
+              className="flex size-9 items-center justify-center rounded-md text-foreground md:hidden"
             >
-              <Menu className="size-5 stroke-[1.75]" />
+              <Menu className="size-4 stroke-[1.75]" />
             </button>
           ) : null}
           <button
@@ -89,7 +89,7 @@ export function StudioHeader({
             <Button
               type="button"
               variant="secondary"
-              className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60"
+              className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60"
               onClick={onSignIn}
             >
               {t("signIn")}

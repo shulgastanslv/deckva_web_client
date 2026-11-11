@@ -101,6 +101,7 @@ import { ColorPicker } from "@/components/ui/color-picker";
 import { InspectorAssets } from "@/components/canvas/inspector-assets";
 import { ObjectTransformPanel } from "@/components/canvas/object-transform-panel";
 import { FiltersControls } from "@/components/canvas/filters-controls";
+import { EditorPanelActions } from "@/components/canvas/editor-panel-actions";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 
 type TextAlign = "left" | "center" | "right" | "justify";
@@ -108,6 +109,8 @@ type TextAlign = "left" | "center" | "right" | "justify";
 interface RightSidebarProps {
   isRightCollapsed: boolean;
   setIsRightCollapsed: (v: boolean) => void;
+  onPreview?: () => void;
+  onPhonePreview?: () => void;
 }
 
 interface InspectedProperties {
@@ -145,9 +148,9 @@ interface InspectedProperties {
 }
 
 /** Shared shell for inspector fields — muted pill, fully rounded. */
-const fieldShell = "flex items-center rounded-full bg-muted/40";
+const fieldShell = "flex items-center rounded-md bg-muted/40";
 
-const btnRound = "rounded-full";
+const btnRound = "rounded-md";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -174,7 +177,7 @@ function ArrangeChip({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className="flex h-9 w-full items-center justify-center gap-1.5 rounded-full bg-muted/40 px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:pointer-events-none disabled:opacity-35"
+      className="flex h-9 w-full items-center justify-center gap-1.5 rounded-md bg-muted/40 px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:pointer-events-none disabled:opacity-35"
     >
       {children}
     </button>
@@ -195,7 +198,7 @@ function ArrangeIconChip({
       type="button"
       title={title}
       onClick={onClick}
-      className="flex h-9 w-full items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+      className="flex h-9 w-full items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
     >
       <Icon className="size-4" />
     </button>
@@ -216,7 +219,7 @@ function Segmented<T extends string>({
   return (
     <div
       className={cn(
-        "flex rounded-full bg-muted/50 p-1 dark:bg-muted/40",
+        "flex rounded-md bg-muted/50 p-1 dark:bg-muted/40",
         className,
       )}
     >
@@ -230,7 +233,7 @@ function Segmented<T extends string>({
             title={opt.title ?? opt.label}
             onClick={() => onChange(opt.id)}
             className={cn(
-              "flex h-7 flex-1 items-center justify-center gap-1 rounded-full text-[13px] transition-colors",
+              "flex h-7 flex-1 items-center justify-center gap-1 rounded-md text-[13px] transition-colors",
               active
                 ? "bg-background text-foreground dark:bg-background/80"
                 : "text-muted-foreground hover:text-foreground",
@@ -255,7 +258,7 @@ function ToolCluster({
   return (
     <div
       className={cn(
-        "flex items-center gap-0.5 rounded-full bg-muted/40 p-1",
+        "flex items-center gap-0.5 rounded-md bg-muted/40 p-1",
         className,
       )}
     >
@@ -360,6 +363,8 @@ function NumberField({
 export function RightSidebar({
   isRightCollapsed,
   setIsRightCollapsed,
+  onPreview,
+  onPhonePreview,
 }: RightSidebarProps) {
   const { selectedObject, updateSelected } = useSelectedObject();
   const manager = useCanvasManager();
@@ -367,6 +372,8 @@ export function RightSidebar({
   const [formValues, setFormValues] = useState<InspectedProperties | null>(
     null,
   );
+  const zoom = useCanvasStore((s) => s.zoom);
+  const setZoom = useCanvasStore((s) => s.setZoom);
 
   const [imageUrlInput, setImageUrlInput] = useState("");
   const {
@@ -386,36 +393,9 @@ export function RightSidebar({
   const [styleOffer, setStyleOffer] = useState<TextStyleId | null>(null);
   const [fontOffer, setFontOffer] = useState<string | null>(null);
 
-  /** User hid the panel while something was selected — don't auto-reopen. */
-  const userCollapsedRef = useRef(false);
-
-  useEffect(() => {
-    if (!selectedObject) {
-      // Hide when empty; clear latch so the next selection can open again.
-      userCollapsedRef.current = false;
-      setIsRightCollapsed(true);
-      return;
-    }
-    if (!userCollapsedRef.current) {
-      setIsRightCollapsed(false);
-    }
-  }, [selectedObject, setIsRightCollapsed]);
-
   const toggleRightCollapsed = () => {
-    if (isRightCollapsed) {
-      userCollapsedRef.current = false;
-      setIsRightCollapsed(false);
-      return;
-    }
-    // Stay closed for this selection until the user expands or clears it.
-    userCollapsedRef.current = true;
-    setIsRightCollapsed(true);
+    setIsRightCollapsed(!isRightCollapsed);
   };
-
-  // Phone dock / external expand should clear the manual-hide latch.
-  useEffect(() => {
-    if (!isRightCollapsed) userCollapsedRef.current = false;
-  }, [isRightCollapsed]);
 
   useEffect(() => {
     setStyleOffer(null);
@@ -940,9 +920,8 @@ export function RightSidebar({
     ]
   );
 
-  const hasSelection = Boolean(selectedObject);
-  const showPanel = hasSelection && !isRightCollapsed;
-  const showCollapsedRail = hasSelection && isRightCollapsed;
+  const showPanel = !isRightCollapsed;
+  const showCollapsedRail = isRightCollapsed;
 
   return (
     <div
@@ -950,13 +929,11 @@ export function RightSidebar({
         "relative flex h-full overflow-hidden bg-background transition-[width,opacity,border-color] duration-300 ease-out max-md:w-full",
         showPanel
           ? "md:w-72 md:opacity-100 border-l border-border/50"
-          : showCollapsedRail
-            ? "md:w-12 md:opacity-100 border-l border-border/50"
-            : "md:w-0 md:opacity-0 md:pointer-events-none md:border-transparent max-md:border-l max-md:border-border/50",
+          : "md:w-12 md:opacity-100 border-l border-border/50",
       )}
     >
       {showCollapsedRail ? (
-        <aside className="hidden h-full w-12 shrink-0 flex-col items-center bg-muted/20 py-3 md:flex">
+        <aside className="hidden h-full w-12 shrink-0 flex-col items-center gap-2 bg-muted/20 py-3 md:flex">
           <Button
             variant="ghost"
             size="icon"
@@ -972,27 +949,58 @@ export function RightSidebar({
       <div
         className={cn(
           "flex min-h-0 min-w-0 flex-col overflow-hidden transition-[width,opacity] duration-300 ease-out max-md:w-full max-md:flex-1",
-          showPanel || !hasSelection
+          showPanel
             ? "md:w-full md:flex-1 md:opacity-100"
             : "pointer-events-none md:w-0 md:flex-none md:opacity-0",
         )}
       >
-        {!selectedObject ? (
-          <>
-            <div className="flex h-11 shrink-0 items-center px-3.5">
-              <span className="text-[13px] font-semibold tracking-tight text-foreground">
-                Properties
+        {/* Figma-style panel chrome */}
+        <div className="flex shrink-0 flex-col gap-2 border-b border-border/40 px-3 pb-2.5 pt-3">
+          <div className="flex items-center justify-between gap-2">
+            <EditorPanelActions
+              onPreview={onPreview}
+              onPhonePreview={onPhonePreview}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={`size-8 shrink-0 text-muted-foreground hover:text-foreground ${btnRound}`}
+              onClick={toggleRightCollapsed}
+              title="Collapse panel"
+            >
+              <PanelRightClose className="size-4" />
+            </Button>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="inline-flex h-8 items-center rounded-md bg-muted/40 p-0.5">
+              <span className="rounded-md bg-background px-2.5 py-1 text-[12px] font-medium text-foreground">
+                Design
+              </span>
+              <span className="px-2.5 py-1 text-[12px] text-muted-foreground">
+                {selectedObject ? panelTitle : "Page"}
               </span>
             </div>
-            <ScrollArea className="min-h-0 flex-1">
-              <p className="px-3.5 py-6 text-[13px] leading-snug text-muted-foreground">
-                Select an object on the slide to edit its style.
-              </p>
-            </ScrollArea>
-          </>
+            <button
+              type="button"
+              onClick={() => setZoom(100)}
+              title="Reset zoom"
+              className="h-8 rounded-md px-2 font-mono text-[12px] tabular-nums text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            >
+              {Math.round(zoom)}%
+            </button>
+          </div>
+        </div>
+
+        {!selectedObject ? (
+          <ScrollArea className="min-h-0 flex-1">
+            <p className="px-3.5 py-6 text-[13px] leading-snug text-muted-foreground">
+              Select an object on the slide to edit its style.
+            </p>
+          </ScrollArea>
         ) : (
           <>
-        <div className="flex h-11 shrink-0 items-center justify-between gap-1.5 px-3">
+        <div className="flex h-10 shrink-0 items-center justify-between gap-1.5 border-b border-border/30 px-3">
           <div className="min-w-0 flex-1">
             <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
               {panelTitle}
@@ -1065,16 +1073,6 @@ export function RightSidebar({
                 )}
               </Button>
             ) : null}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={`size-8 hidden shrink-0 text-muted-foreground hover:text-foreground md:inline-flex ${btnRound}`}
-              onClick={toggleRightCollapsed}
-              title="Collapse panel"
-            >
-              <PanelRightClose className="size-3.5" />
-            </Button>
           </div>
         </div>
 
@@ -1247,7 +1245,7 @@ export function RightSidebar({
                         onChange={(e) =>
                           updateProp("blendMode", e.target.value, "globalCompositeOperation")
                         }
-                        className="h-9 w-full rounded-full bg-muted/40 px-3 text-[13px] text-foreground outline-none"
+                        className="h-9 w-full rounded-md bg-muted/40 px-3 text-[13px] text-foreground outline-none"
                       >
                         {BLEND_MODES.map((mode) => (
                           <option key={mode.id} value={mode.id}>
@@ -1256,7 +1254,7 @@ export function RightSidebar({
                         ))}
                       </select>
                     </div>
-                    <div className="flex items-center justify-between gap-2 rounded-full bg-muted/40 px-3 py-1.5">
+                    <div className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-1.5">
                       <FieldLabel>Shadow</FieldLabel>
                       <Switch
                         size="sm"
@@ -1726,7 +1724,7 @@ export function RightSidebar({
                           )}
                         >
                           <span
-                            className="size-4 rounded-full ring-1 ring-border/50"
+                            className="size-4 rounded-md ring-1 ring-border/50"
                             style={{ backgroundColor: palette[slot.id] }}
                           />
                           {slot.label}
@@ -1865,7 +1863,7 @@ export function RightSidebar({
                     onChange={(e) =>
                       updateProp("blendMode", e.target.value, "globalCompositeOperation")
                     }
-                    className="h-9 w-full rounded-full bg-muted/40 px-3 text-[13px] text-foreground outline-none"
+                    className="h-9 w-full rounded-md bg-muted/40 px-3 text-[13px] text-foreground outline-none"
                   >
                     {BLEND_MODES.map((mode) => (
                       <option key={mode.id} value={mode.id}>

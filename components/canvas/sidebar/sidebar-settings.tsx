@@ -1,6 +1,7 @@
 "use client";
 
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { sidebarPanel } from "@/components/canvas/sidebar/sidebar-ui";
 
 const STORAGE_KEY = "swibp.autosave";
 
@@ -14,9 +15,9 @@ export function SidebarSettings({ showDotGrid, setShowDotGrid }: SidebarSettings
   const setAutoSave = useCanvasStore((state) => state.setAutoSave);
 
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
-      <span className="text-muted-foreground font-medium">Canvas Preferences</span>
-      <label className="flex items-center justify-between bg-muted/30 p-2.5 rounded-xl border border-border/40 cursor-pointer">
+    <div className={sidebarPanel}>
+      <span className="font-medium text-muted-foreground">Canvas Preferences</span>
+      <label className="flex cursor-pointer items-center justify-between rounded-md bg-muted/30 p-2.5">
         <span>Show dot grid background</span>
         <input
           type="checkbox"
@@ -25,7 +26,7 @@ export function SidebarSettings({ showDotGrid, setShowDotGrid }: SidebarSettings
           className="accent-primary rounded"
         />
       </label>
-      <label className="flex items-center justify-between gap-3 bg-muted/30 p-2.5 rounded-xl border border-border/40 cursor-pointer">
+      <label className="flex cursor-pointer items-center justify-between gap-3 rounded-md bg-muted/30 p-2.5">
         <span>
           Autosave
           <span className="mt-0.5 block text-muted-foreground">Saves quietly in the background</span>

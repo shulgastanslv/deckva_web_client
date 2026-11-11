@@ -6,11 +6,14 @@ import {
   LayersIcon,
   PanelLeftClose,
   PanelLeftOpen,
+  Redo2,
   Settings,
   ShapesIcon,
   ToolCase,
   Package,
+  Undo2,
 } from "lucide-react";
+import Logo from "@/components/logo/logo";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarElements } from "@/components/canvas/sidebar/sidebar-elements";
@@ -18,14 +21,19 @@ import { SidebarLayers } from "@/components/canvas/sidebar/sidebar-layers";
 import { SidebarSettings } from "@/components/canvas/sidebar/sidebar-settings";
 import { SidebarBackground } from "@/components/canvas/sidebar/sidebar-background";
 import { LegalDialog, type LegalKind } from "@/components/legal-dialog";
+import { ProjectFileMenu } from "@/components/canvas/project-file-menu";
+import { SaveStatusMenu } from "@/components/canvas/save-status-menu";
 import { SidebarAssets } from "./sidebar/sidebar-assets";
 import { SidebarTools } from "./sidebar/sidebar-tools";
+import { navIconClass } from "@/components/canvas/sidebar/sidebar-ui";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useCanvasManager } from "@/context/canvas-manager";
+import { cn } from "@/lib/utils";
 
 export type NavId =
   | "elements"
@@ -33,7 +41,7 @@ export type NavId =
   | "settings"
   | "assets"
   | "background"
-  | "tools"
+  | "tools";
 
 export const RAIL_SHORTCUTS: NavId[] = [
   "tools",
@@ -70,13 +78,16 @@ function RailTooltip({
 }
 
 const PANEL_TITLES: Record<NavId, string> = {
-  elements: "Canvas Elements",
+  elements: "Elements",
   layers: "Layers",
   settings: "Settings",
   assets: "Assets",
   background: "Background",
   tools: "Tools",
 };
+
+const railBtn =
+  "size-9 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
 
 export function LeftSidebar({
   activeNav,
@@ -87,31 +98,41 @@ export function LeftSidebar({
   setShowDotGrid,
 }: LeftSidebarProps) {
   const [legal, setLegal] = useState<LegalKind | null>(null);
+  const manager = useCanvasManager();
 
   const navItems: { id: NavId; icon: ReactNode; label: string }[] = [
-    { id: "elements", icon: <ShapesIcon className="size-[18px] stroke-[1.5]" />, label: "Elements" },
-    { id: "tools", icon: <ToolCase className="size-[18px] stroke-[1.5]" />, label: "Tools" },
-    { id: "layers", icon: <LayersIcon className="size-[18px] stroke-[1.5]" />, label: "Layers" },
-    { id: "background", icon: <ImageIcon className="size-[18px] stroke-[1.5]" />, label: "Background" },
-    { id: "assets", icon: <Package className="size-[18px] stroke-[1.5]" />, label: "Assets" },
+    { id: "tools", icon: <ToolCase className={navIconClass} />, label: "Tools" },
+    { id: "elements", icon: <ShapesIcon className={navIconClass} />, label: "Elements" },
+    { id: "layers", icon: <LayersIcon className={navIconClass} />, label: "Layers" },
+    { id: "background", icon: <ImageIcon className={navIconClass} />, label: "Background" },
+    { id: "assets", icon: <Package className={navIconClass} />, label: "Assets" },
   ];
 
+  const openNav = (id: NavId) => {
+    setActiveNav(id);
+    if (isLeftCollapsed) setIsLeftCollapsed(false);
+  };
+
   return (
-    <div className="flex h-full min-h-0 w-full overflow-hidden border-border/50 bg-background max-md:border-0 md:w-auto md:border-r">
-      <aside className="flex w-12 shrink-0 flex-col items-center justify-between bg-muted/20 py-3">
+    <div className="flex h-full min-h-0 w-full overflow-hidden bg-background max-md:border-0 md:w-auto">
+      <aside className="flex w-12 shrink-0 flex-col items-center justify-between bg-muted/20 py-4">
         <TooltipProvider delayDuration={300}>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col items-center gap-1.5">
+            <Logo width={32} height={32} href="/studio" className="mb-1.5" />
             {navItems.map(({ id, icon: Icon, label }, index) => (
-              <RailTooltip key={id} label={`Key: ${index + 1} - ${label}`}>
+              <RailTooltip key={id} label={`${label} (${index + 1})`}>
                 <Button
-                  variant={activeNav === id ? "secondary" : "ghost"}
+                  variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full text-[13px] font-medium tracking-tight hover:text-foreground"
+                  className={cn(
+                    railBtn,
+                    activeNav === id &&
+                      !isLeftCollapsed &&
+                      "bg-muted/50 text-foreground hover:bg-muted/60",
+                  )}
                   aria-label={label}
-                  onClick={() => {
-                    setActiveNav(id);
-                    if (isLeftCollapsed) setIsLeftCollapsed(false);
-                  }}
+                  aria-pressed={activeNav === id && !isLeftCollapsed}
+                  onClick={() => openNav(id)}
                 >
                   {Icon}
                 </Button>
@@ -119,35 +140,58 @@ export function LeftSidebar({
             ))}
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col items-center gap-1.5">
+            <RailTooltip label="Undo">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={railBtn}
+                aria-label="Undo"
+                onClick={() => void manager?.undo()}
+              >
+                <Undo2 className={navIconClass} />
+              </Button>
+            </RailTooltip>
+            <RailTooltip label="Redo">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={railBtn}
+                aria-label="Redo"
+                onClick={() => void manager?.redo()}
+              >
+                <Redo2 className={navIconClass} />
+              </Button>
+            </RailTooltip>
             <RailTooltip label={isLeftCollapsed ? "Expand panel" : "Collapse panel"}>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                className={railBtn}
                 aria-label={isLeftCollapsed ? "Expand panel" : "Collapse panel"}
                 onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
               >
                 {isLeftCollapsed ? (
-                  <PanelLeftOpen className="h-4 w-4" />
+                  <PanelLeftOpen className={navIconClass} />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4" />
+                  <PanelLeftClose className={navIconClass} />
                 )}
               </Button>
             </RailTooltip>
-
             <RailTooltip label="Settings">
               <Button
-                variant={activeNav === "settings" ? "secondary" : "ghost"}
+                variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                className={cn(
+                  railBtn,
+                  activeNav === "settings" &&
+                    !isLeftCollapsed &&
+                    "bg-muted/50 text-foreground hover:bg-muted/60",
+                )}
                 aria-label="Settings"
-                onClick={() => {
-                  setActiveNav("settings");
-                  if (isLeftCollapsed) setIsLeftCollapsed(false);
-                }}
+                onClick={() => openNav("settings")}
               >
-                <Settings className="h-4 w-4" />
+                <Settings className={navIconClass} />
               </Button>
             </RailTooltip>
           </div>
@@ -155,12 +199,19 @@ export function LeftSidebar({
       </aside>
 
       <div
-        className={`flex min-h-0 min-w-0 flex-col overflow-hidden transition-all duration-200 ease-in-out max-md:w-auto max-md:flex-1 max-md:opacity-100 ${
-          isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-80 md:flex-none md:opacity-100"
-        }`}
+        className={cn(
+          "flex min-h-0 min-w-0 flex-col overflow-hidden transition-all duration-200 ease-in-out py-2 max-md:w-auto max-md:flex-1 max-md:opacity-100",
+          isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-80 md:flex-none md:opacity-100",
+        )}
       >
-        <div className="flex h-11 shrink-0 items-center border-b border-border/40 px-3.5 text-[13px] font-semibold tracking-tight text-foreground">
-          {PANEL_TITLES[activeNav] ?? activeNav}
+        <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
+          <h2 className="text-[13px] font-semibold tracking-tight text-foreground">
+            {PANEL_TITLES[activeNav] ?? activeNav}
+          </h2>
+          <div className="flex items-center gap-1">
+            <ProjectFileMenu />
+            <SaveStatusMenu />
+          </div>
         </div>
 
         <ScrollArea className="h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:max-w-full [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-viewport]>div]:!max-w-full">
@@ -176,21 +227,22 @@ export function LeftSidebar({
           {activeNav === "background" && <SidebarBackground />}
           {activeNav === "tools" && <SidebarTools />}
         </ScrollArea>
-        <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 px-3.5 py-2.5 text-[13px] text-muted-foreground">
+
+        <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 px-3.5 py-2.5 text-[12px] text-muted-foreground">
           <button
             type="button"
             onClick={() => setLegal("terms")}
             className="transition-colors hover:text-foreground hover:underline underline-offset-4"
           >
-            Terms of Service
+            Terms
           </button>
-          <span className="text-muted-foreground/40">•</span>
+          <span className="text-muted-foreground/40">·</span>
           <button
             type="button"
             onClick={() => setLegal("privacy")}
             className="transition-colors hover:text-foreground hover:underline underline-offset-4"
           >
-            Privacy Policy
+            Privacy
           </button>
         </div>
       </div>

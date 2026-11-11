@@ -33,21 +33,21 @@ function SlideSetRow({
   onApply: () => void;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-full py-1 pr-1 pl-1 hover:bg-muted/40">
+    <div className="flex items-center gap-2 rounded-md py-1 pr-1 pl-1 hover:bg-muted/40">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
         <div className="flex shrink-0 items-center -space-x-1.5">
           {colors.map((color, index) => (
             <span
               key={`${set.id}-${index}`}
               title={`Slide ${index + 1}: ${color}`}
-              className="size-5 rounded-full border border-border/50 shadow-xs"
+              className="size-5 rounded-md border border-border/50 shadow-xs"
               style={{ backgroundColor: color, zIndex: colors.length - index }}
             />
           ))}
         </div>
         <span className="truncate text-foreground">{set.label}</span>
       </div>
-      <Button type="button" size="xs" variant="secondary" className="rounded-full" onClick={onApply}>
+      <Button type="button" size="xs" variant="secondary" className="rounded-md" onClick={onApply}>
         Apply
       </Button>
     </div>
@@ -107,14 +107,14 @@ export function BackgroundSlideSets() {
     <CollapsibleGroup id="background-slide-sets" title="Slide sets">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] text-muted-foreground">Slides</span>
-        <div className="flex items-center gap-1 rounded-full bg-muted/50 p-0.5">
+        <div className="flex items-center gap-1 rounded-md bg-muted/50 p-0.5">
           <button
             type="button"
             aria-label="Fewer slides"
             disabled={count <= SLIDE_SET_COUNT.min}
             onClick={() => bump(-1)}
             className={cn(
-              "flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors",
+              "flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors",
               "hover:bg-background hover:text-foreground disabled:pointer-events-none disabled:opacity-40",
             )}
           >
@@ -129,7 +129,7 @@ export function BackgroundSlideSets() {
             disabled={count >= SLIDE_SET_COUNT.max}
             onClick={() => bump(1)}
             className={cn(
-              "flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors",
+              "flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors",
               "hover:bg-background hover:text-foreground disabled:pointer-events-none disabled:opacity-40",
             )}
           >

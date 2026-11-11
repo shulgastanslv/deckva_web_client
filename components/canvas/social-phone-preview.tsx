@@ -136,7 +136,7 @@ function HomeIndicator({ tone = "dark" }: { tone?: "dark" | "light" }) {
     <div className="flex shrink-0 justify-center pb-[6px] pt-1">
       <span
         className={cn(
-          "h-[5px] w-[108px] rounded-full",
+          "h-[5px] w-[108px] rounded-md",
           tone === "light" ? "bg-white/90" : "bg-neutral-950",
         )}
       />
@@ -160,7 +160,7 @@ function Avatar({
     <div className={cn("relative shrink-0", dim)}>
       <div
         className={cn(
-          "overflow-hidden rounded-full bg-neutral-200",
+          "overflow-hidden rounded-md bg-neutral-200",
           dim,
           ring && "ring-2 ring-pink-500 ring-offset-1 ring-offset-white",
         )}
@@ -169,7 +169,7 @@ function Avatar({
         <img src="/post_logo.jpg" alt="" className="size-full object-cover" />
       </div>
       {follow ? (
-        <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-[#fe2c55] ring-2 ring-black">
+        <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-md bg-[#fe2c55] ring-2 ring-black">
           <Plus className="size-2.5 text-white" strokeWidth={3} />
         </span>
       ) : null}
@@ -219,7 +219,7 @@ function SlideImage({
         </div>
       )}
       {badge ? (
-        <span className="absolute right-2.5 top-2.5 rounded-full bg-black/65 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-white backdrop-blur-sm">
+        <span className="absolute right-2.5 top-2.5 rounded-md bg-black/65 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-white backdrop-blur-sm">
           {badge}
         </span>
       ) : null}
@@ -243,7 +243,7 @@ function CarouselDots({
         <span
           key={i}
           className={cn(
-            "rounded-full transition-all",
+            "rounded-md transition-all",
             i === active ? "h-[6px] w-[6px]" : "h-[5px] w-[5px]",
             i === active
               ? tone === "brand"
@@ -364,8 +364,8 @@ function ThreadsChrome(props: Props) {
       <header className="relative flex h-9 shrink-0 items-center justify-center border-b border-neutral-100 px-3">
         <FaThreads className="size-[22px]" aria-label="Threads" />
         <div className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col gap-[5px]" aria-hidden>
-          <span className="h-[1.5px] w-[15px] rounded-full bg-neutral-950" />
-          <span className="h-[1.5px] w-[15px] rounded-full bg-neutral-950" />
+          <span className="h-[1.5px] w-[15px] rounded-md bg-neutral-950" />
+          <span className="h-[1.5px] w-[15px] rounded-md bg-neutral-950" />
         </div>
       </header>
 
@@ -440,7 +440,7 @@ function TikTokChrome(props: Props) {
           <span className="text-white/55">Following</span>
           <span className="relative font-semibold">
             For You
-            <span className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-white" />
+            <span className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-md bg-white" />
           </span>
         </div>
       </div>
@@ -462,7 +462,7 @@ function TikTokChrome(props: Props) {
                 <span
                   key={i}
                   className={cn(
-                    "h-[2px] flex-1 rounded-full",
+                    "h-[2px] flex-1 rounded-md",
                     i === slideIndex ? "bg-white" : "bg-white/30",
                   )}
                 />
@@ -534,10 +534,10 @@ function StoriesChrome(props: Props) {
         <StatusBar tone="light" />
         <div className="flex gap-1 px-3 pt-1">
           {Array.from({ length: Math.max(slideTotal, 1) }, (_, i) => (
-            <span key={i} className="h-[2px] flex-1 overflow-hidden rounded-full bg-white/35">
+            <span key={i} className="h-[2px] flex-1 overflow-hidden rounded-md bg-white/35">
               <span
                 className={cn(
-                  "block h-full rounded-full bg-white transition-all duration-300",
+                  "block h-full rounded-md bg-white transition-all duration-300",
                   i < slideIndex ? "w-full" : i === slideIndex ? "w-[42%]" : "w-0",
                 )}
               />
@@ -556,7 +556,7 @@ function StoriesChrome(props: Props) {
 
       <div className="relative z-10 mt-auto px-3 pb-2 pt-8">
         <div className="flex items-center gap-2">
-          <div className="flex h-10 min-w-0 flex-1 items-center rounded-full border border-white/35 px-4 text-[13px] text-white/70">
+          <div className="flex h-10 min-w-0 flex-1 items-center rounded-md border border-white/35 px-4 text-[13px] text-white/70">
             Send message
           </div>
           <Heart className="size-6" strokeWidth={1.6} />

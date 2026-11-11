@@ -109,7 +109,7 @@ export function StudioInvitePage({ token }: { token: string }) {
           <Button
             type="button"
             variant="secondary"
-            className="rounded-full"
+            className="rounded-md"
             onClick={() => setAuthOpen(true)}
           >
             Sign in
@@ -118,7 +118,7 @@ export function StudioInvitePage({ token }: { token: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="rounded-full"
+            className="rounded-md"
             onClick={() => router.push("/studio")}
           >
             Open studio
@@ -142,7 +142,7 @@ export function StudioInvitePage({ token }: { token: string }) {
               </p>
               <Button
                 type="button"
-                className="mt-6 rounded-full"
+                className="mt-6 rounded-md"
                 onClick={() => router.push("/studio")}
               >
                 Go to studio
@@ -177,7 +177,7 @@ export function StudioInvitePage({ token }: { token: string }) {
                   </p>
                   <Button
                     type="button"
-                    className="h-11 w-full rounded-full"
+                    className="h-11 w-full rounded-md"
                     onClick={() => router.push("/studio")}
                   >
                     Open studio
@@ -214,7 +214,7 @@ export function StudioInvitePage({ token }: { token: string }) {
                     type="button"
                     disabled={busy}
                     onClick={() => void accept()}
-                    className="h-11 w-full rounded-full text-[14px] font-medium"
+                    className="h-11 w-full rounded-md text-[14px] font-medium"
                   >
                     {busy ? (
                       <Loader2 className="size-4 animate-spin" />
@@ -233,7 +233,7 @@ export function StudioInvitePage({ token }: { token: string }) {
                       disabled={busy}
                       onClick={() => void decline()}
                       className={cn(
-                        "h-11 w-full rounded-full text-[14px] font-medium text-muted-foreground",
+                        "h-11 w-full rounded-md text-[14px] font-medium text-muted-foreground",
                       )}
                     >
                       Decline

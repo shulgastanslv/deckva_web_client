@@ -308,7 +308,7 @@ export function FiltersControls() {
               stepDraft(-1);
             }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="absolute left-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-foreground transition-colors hover:bg-background"
+            className="absolute left-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-md bg-background/90 text-foreground transition-colors hover:bg-background"
           >
             <ChevronLeft className="size-4" />
           </button>
@@ -320,13 +320,13 @@ export function FiltersControls() {
               stepDraft(1);
             }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="absolute right-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-foreground transition-colors hover:bg-background"
+            className="absolute right-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-md bg-background/90 text-foreground transition-colors hover:bg-background"
           >
             <ChevronRight className="size-4" />
           </button>
 
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-            <span className="rounded-full bg-background/90 px-3 py-1 text-[12px] font-medium text-foreground">
+            <span className="rounded-md bg-background/90 px-3 py-1 text-[12px] font-medium text-foreground">
               {draftPreset.label}
             </span>
           </div>
@@ -338,7 +338,7 @@ export function FiltersControls() {
           type="button"
           disabled={!dirty}
           onClick={applyDraft}
-          className="flex h-9 flex-1 items-center justify-center rounded-full bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-35"
+          className="flex h-9 flex-1 items-center justify-center rounded-md bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-35"
         >
           Apply
         </button>
@@ -347,7 +347,7 @@ export function FiltersControls() {
             type="button"
             onClick={handleReset}
             title="Reset"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
           >
             <RotateCcw className="size-3.5" />
           </button>
@@ -395,7 +395,7 @@ export function FiltersControls() {
 
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-medium text-muted-foreground">Intensity</span>
-          <div className="grid grid-cols-3 gap-1 rounded-full bg-muted/40 p-0.5">
+          <div className="grid grid-cols-3 gap-1 rounded-md bg-muted/40 p-0.5">
             {(["low", "medium", "high"] as const).map((id) => {
               const active = intensity === id;
               return (
@@ -408,7 +408,7 @@ export function FiltersControls() {
                     applyImageShadow(shadowType, id, lightSourcePos);
                   }}
                   className={cn(
-                    "h-8 rounded-full text-[12px] font-medium capitalize transition-colors disabled:opacity-40",
+                    "h-8 rounded-md text-[12px] font-medium capitalize transition-colors disabled:opacity-40",
                     active
                       ? "bg-background text-foreground"
                       : "text-muted-foreground hover:text-foreground",
@@ -454,11 +454,11 @@ export function FiltersControls() {
             }}
           >
             <div className="flex h-3/4 w-3/4 flex-col rounded-xl bg-background/80 p-2">
-              <div className="mb-1 h-2 w-full rounded-full bg-muted" />
-              <div className="h-2 w-1/2 rounded-full bg-muted" />
+              <div className="mb-1 h-2 w-full rounded-md bg-muted" />
+              <div className="h-2 w-1/2 rounded-md bg-muted" />
             </div>
             <div
-              className="pointer-events-none absolute -ml-3.5 -mt-3.5 flex size-7 items-center justify-center rounded-full bg-foreground text-background"
+              className="pointer-events-none absolute -ml-3.5 -mt-3.5 flex size-7 items-center justify-center rounded-md bg-foreground text-background"
               style={{ left: `${lightSourcePos.x}%`, top: `${lightSourcePos.y}%` }}
             >
               <SunMedium className="size-3.5" />

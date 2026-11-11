@@ -126,7 +126,7 @@ export function ChipScroll<T extends string>({
                 tabIndex={active ? 0 : -1}
                 onClick={() => onChange(id)}
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full font-medium transition-colors duration-200",
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md font-medium transition-colors duration-200",
                   size === "md"
                     ? "h-9 px-3.5 text-[13px]"
                     : "h-8 px-3 text-[12px]",

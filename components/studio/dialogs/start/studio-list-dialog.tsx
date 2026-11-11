@@ -88,7 +88,7 @@ export function StudioListDialog({
                     onClick={() =>
                       setItems((prev) => prev.filter((_, i) => i !== index))
                     }
-                    className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+                    className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                     aria-label="Remove item"
                   >
                     <X className="size-3.5" />
@@ -105,7 +105,7 @@ export function StudioListDialog({
             variant="ghost"
             disabled={busy}
             onClick={() => setItems((prev) => [...prev, ""])}
-            className="h-9 rounded-full px-3 text-[13px]"
+            className="h-9 rounded-md px-3 text-[13px]"
           >
             <Plus className="size-3.5" />
             Add item
@@ -117,7 +117,7 @@ export function StudioListDialog({
 
           <Button
             type="button"
-            className="h-10 w-full rounded-full text-[13px] font-medium"
+            className="h-10 w-full rounded-md text-[13px] font-medium"
             disabled={!canSubmit}
             onClick={() => void onSubmit(filled)}
           >

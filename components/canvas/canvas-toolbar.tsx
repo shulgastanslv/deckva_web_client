@@ -57,7 +57,7 @@ import { cn } from "@/lib/utils";
 import { useSlides } from "@/hooks/use-slides";
 
 const iconBtn =
-  "size-9 shrink-0 rounded-full border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
+  "size-9 shrink-0 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
 
 const menuItem =
   "gap-2 rounded-xl px-3 py-2 text-[13px] focus:bg-muted/50";
@@ -292,7 +292,7 @@ export function CanvasToolbar({
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5">
-        <div className="flex items-center rounded-full p-0.5">
+        <div className="flex items-center rounded-md p-0.5">
           <PageIcon
             title="Move slide earlier"
             disabled={!canGoPrev}
@@ -432,7 +432,7 @@ export function CanvasToolbar({
                     const n = Number(e.target.value);
                     if (Number.isFinite(n)) setAutoFlowEdgeTolerance(n);
                   }}
-                  className="h-9 w-16 rounded-full border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
+                  className="h-9 w-16 rounded-md border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
                 />
               </div>
               <div className="flex items-center justify-between gap-3">
@@ -446,7 +446,7 @@ export function CanvasToolbar({
                     const n = Number(e.target.value);
                     if (Number.isFinite(n)) setAutoFlowPadding(n);
                   }}
-                  className="h-9 w-16 rounded-full border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
+                  className="h-9 w-16 rounded-md border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
                 />
               </div>
             </div>
@@ -501,7 +501,7 @@ export function CanvasToolbar({
           <DialogFooter className="sm:justify-between">
             <Button
               variant="secondary"
-              className="h-9 rounded-full border-none bg-muted/40 shadow-none hover:bg-muted/60"
+              className="h-9 rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
               disabled={importing}
               onClick={closeImportDialog}
             >
@@ -510,14 +510,14 @@ export function CanvasToolbar({
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button
                 variant="secondary"
-                className="h-9 rounded-full border-none bg-muted/40 shadow-none hover:bg-muted/60"
+                className="h-9 rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
                 disabled={importing}
                 onClick={() => void importFirstOnly()}
               >
                 First slide
               </Button>
               <Button
-                className="h-9 rounded-full"
+                className="h-9 rounded-md"
                 disabled={importing}
                 onClick={() => void importAllSlides()}
               >

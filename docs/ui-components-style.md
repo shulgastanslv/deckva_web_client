@@ -19,7 +19,7 @@
 | Dialogs — **`bg-background` + `border border-border/50` + `shadow-none`** | `bg-white`, `ring-1 ring-foreground/10`, dialog на `bg-popover` / `shadow-sm` |
 | Фон контролов через **`bg-muted/…`** и семантику | Свои hex (`#f4f4f5`, `#4262ff`), `bg-white/70`, `dark:bg-input/30` как стиль по умолчанию |
 | Текст через `text-foreground` / `text-muted-foreground` / `text-primary-foreground` | Куча `dark:`-веток под каждый оттенок |
-| Скругление **`rounded-full`** (чипы, CTA), **`rounded-2xl`** (меню), **`rounded-3xl`** (диалоги) | Случайный микс `rounded-md` + тень |
+| Скругление **`rounded-md`** (кнопки, чипы, инпуты — Miro-like), **`rounded-2xl`** (меню), **`rounded-3xl`** (диалоги) | `rounded-full` на кнопках/CTA; круги только для аватаров/свитчей/точек |
 
 Фокус: достаточно `focus-visible:ring-2 focus-visible:ring-ring/20` (или мягкий `ring-primary/20`). Не строй визуал вокруг `border-ring`.
 
@@ -88,15 +88,15 @@
 
 - Обычная: **`h-9`** + `px-3` / `px-3.5` + `text-[13px] font-medium`
 - Крупнее в диалогах/футерах: **`h-10`**
-- Icon-only: `size-8` или `size-9`, `rounded-full`
+- Icon-only: `size-8` или `size-9`, `rounded-md`
 
 ### Варианты (минимум)
 
 | Роль | Классы |
 |---|---|
-| Primary CTA | `h-9 rounded-full bg-primary text-primary-foreground hover:bg-primary/90` **или** `bg-foreground text-background hover:bg-foreground/90` |
-| Secondary / спокойная | `h-9 rounded-full border-none bg-muted/40 text-foreground shadow-none hover:bg-muted/60` |
-| Ghost / иконка | `rounded-full text-muted-foreground hover:bg-muted/60 hover:text-foreground` |
+| Primary CTA | `h-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90` **или** `bg-foreground text-background hover:bg-foreground/90` |
+| Secondary / спокойная | `h-9 rounded-md border-none bg-muted/40 text-foreground shadow-none hover:bg-muted/60` |
+| Ghost / иконка | `rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground` |
 | Destructive | `text-destructive hover:bg-destructive/10` (без жирной заливки) |
 
 Через `<Button>`:
@@ -104,21 +104,21 @@
 ```tsx
 <Button
   variant="secondary"
-  className="h-9 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
+  className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
 >
   Действие
 </Button>
 
-<Button className="h-10 rounded-full px-5 text-[13px] font-medium">
+<Button className="h-10 rounded-md px-5 text-[13px] font-medium">
   Создать
 </Button>
 ```
 
 ### Не делать для Button
 
+- `rounded-full` на кнопках (это не Miro; круги — только аватары / свитчи / точки)
 - `variant="outline"` как дефолт студии (тянет border + dark-ветки)
 - `shadow-*`
-- Смешение `rounded-lg` + border «как в shadcn demo»
 - Высоты `h-7` / `sm` для основных действий
 
 ---
@@ -147,7 +147,7 @@
 
 Правила:
 
-- Триггер: **`h-9`**, `rounded-full`, `bg-muted/40`, **без border/shadow**
+- Триггер: **`h-9`**, `rounded-md`, `bg-muted/40`, **без border/shadow**
 - Content: наследует примитив `bg-popover border-0 shadow-sm`; на call-site только размер/паддинг (`rounded-2xl p-1.5`)
 - Item: `rounded-xl`, focus/hover через `bg-muted/50` (не обязательно `bg-accent`, если это плодит ещё одну визуальную систему)
 - **Не** перебивай surface классами `border` / `bg-background` / `shadow-none` / `shadow-md` / `ring-*`
@@ -162,7 +162,7 @@
 <DropdownMenuTrigger asChild>
   <button
     type="button"
-    className="inline-flex h-9 items-center gap-1.5 rounded-full border-none bg-muted/40 px-3 text-[13px] font-medium shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
+    className="inline-flex h-9 items-center gap-1.5 rounded-md border-none bg-muted/40 px-3 text-[13px] font-medium shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
   >
     Меню
   </button>
@@ -200,11 +200,11 @@
 
 ```tsx
 <input
-  className="h-9 w-full rounded-full border-none bg-muted/40 px-3.5 text-[13px] outline-none placeholder:text-muted-foreground/70 focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+  className="h-9 w-full rounded-md border-none bg-muted/40 px-3.5 text-[13px] outline-none placeholder:text-muted-foreground/70 focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
 />
 
 <textarea
-  className="min-h-[88px] w-full resize-none rounded-2xl border-none bg-transparent px-4 py-3 text-[15px] outline-none placeholder:text-muted-foreground/70"
+  className="min-h-[88px] w-full resize-none rounded-md border-none bg-transparent px-4 py-3 text-[15px] outline-none placeholder:text-muted-foreground/70"
 />
 ```
 
@@ -221,7 +221,7 @@
 <button
   type="button"
   className={cn(
-    "inline-flex h-8 items-center rounded-full px-2.5 text-[13px] font-medium transition-colors",
+    "inline-flex h-8 items-center rounded-md px-2.5 text-[13px] font-medium transition-colors",
     active
       ? "bg-foreground text-background"
       : "bg-muted/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -245,7 +245,7 @@ Dialog                     → bg-background + border-border/50 + shadow-none
 - Dialog оболочка: `rounded-3xl … p-0` (см. start-dialogs, org-dialogs, upgrade) — **без** `border-0` / `bg-popover` / `shadow-sm`
 - Dropdown / Popover: `rounded-2xl`
 - Внутренние поля: `bg-muted/30` → `focus:bg-muted/40`
-- CTA в футере: `h-10 rounded-full`
+- CTA в футере: `h-10 rounded-md`
 - На меню разрешён только **`shadow-sm`**; на кнопках/диалогах — без shadow
 
 Канон живёт в `components/ui/{dropdown-menu,select,popover,dialog}.tsx`.

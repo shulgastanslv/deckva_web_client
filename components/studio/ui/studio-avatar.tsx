@@ -8,6 +8,7 @@ type StudioAvatarProps = {
   letter?: string;
   src?: string | null;
   name?: string | null;
+  /** @deprecated Prefer Radix `data-state` on the trigger; kept for call-site compat. */
   open?: boolean;
   interactive?: boolean;
   className?: string;
@@ -19,7 +20,7 @@ export const StudioAvatar = forwardRef<HTMLButtonElement, StudioAvatarProps>(
       letter,
       src,
       name,
-      open = false,
+      open: _open = false,
       interactive = false,
       className,
       type = "button",
@@ -60,27 +61,23 @@ export const StudioAvatar = forwardRef<HTMLButtonElement, StudioAvatarProps>(
       <button
         ref={ref}
         type={type}
+        {...props}
         aria-label={props["aria-label"] ?? name ?? "Account"}
-        data-state={open ? "open" : "closed"}
+        // Auth/chrome often disagrees with SSR (extensions, Radix Slot merge).
+        suppressHydrationWarning
         className={cn(
           shellClass,
-          "cursor-pointer outline-none transition-[transform,box-shadow,opacity] duration-150",
+          "group cursor-pointer outline-none transition-[transform,box-shadow,opacity] duration-150",
           "hover:scale-105 hover:opacity-95",
           "focus-visible:ring-2 focus-visible:ring-[#4262ff]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           "active:scale-95",
-          open &&
-            "scale-105 ring-2 ring-[#4262ff]/45 ring-offset-2 ring-offset-background",
+          "data-[state=open]:scale-105 data-[state=open]:ring-2 data-[state=open]:ring-[#4262ff]/45 data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background",
         )}
-        {...props}
       >
         {face}
         <span
           aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-0 rounded-full bg-black/0 transition-colors duration-150",
-            "hover:bg-black/15",
-            open && "bg-black/15",
-          )}
+          className="pointer-events-none absolute inset-0 rounded-full bg-black/0 transition-colors duration-150 hover:bg-black/15 group-data-[state=open]:bg-black/15"
         />
       </button>
     );

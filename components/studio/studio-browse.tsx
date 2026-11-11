@@ -202,7 +202,7 @@ export function StudioBrowse() {
                   ? "Search community"
                   : "Search projects"
               }
-              className="h-9 w-full rounded-full border-none bg-muted/40 pr-4 pl-9 text-[13px] shadow-none placeholder:text-muted-foreground/70 focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+              className="h-9 w-full rounded-md border-none bg-muted/40 pr-4 pl-9 text-[13px] shadow-none placeholder:text-muted-foreground/70 focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
             />
           </div>
 
@@ -218,7 +218,7 @@ export function StudioBrowse() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="h-9 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
+                      className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
                     >
                       {communitySortLabel}{" "}
                       <ChevronDown className="ml-1 size-3.5 opacity-50" />
@@ -245,14 +245,14 @@ export function StudioBrowse() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <div className="flex h-9 items-center gap-0.5 rounded-full bg-muted/40 p-0.5">
+                <div className="flex h-9 items-center gap-0.5 rounded-md bg-muted/40 p-0.5">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setCommunityView("cards")}
                     aria-label="Cards view"
                     className={cn(
-                      "size-8 rounded-full shadow-none",
+                      "size-8 rounded-md shadow-none",
                       communityView === "cards"
                         ? "bg-background text-foreground"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -266,7 +266,7 @@ export function StudioBrowse() {
                     onClick={() => setCommunityView("rows")}
                     aria-label="Rows view"
                     className={cn(
-                      "size-8 rounded-full shadow-none",
+                      "size-8 rounded-md shadow-none",
                       communityView === "rows"
                         ? "bg-background text-foreground"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -284,7 +284,7 @@ export function StudioBrowse() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="h-9 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
+                      className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
                     >
                       Sort <ChevronDown className="ml-1 size-3.5 opacity-50" />
                     </Button>
@@ -313,13 +313,13 @@ export function StudioBrowse() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <div className="flex h-9 items-center gap-0.5 rounded-full bg-muted/40 p-0.5">
+                <div className="flex h-9 items-center gap-0.5 rounded-md bg-muted/40 p-0.5">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setView("grid")}
                     className={cn(
-                      "size-8 rounded-full border-none shadow-none",
+                      "size-8 rounded-md border-none shadow-none",
                       view === "grid"
                         ? "bg-background text-foreground"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -332,7 +332,7 @@ export function StudioBrowse() {
                     size="icon"
                     onClick={() => setView("list")}
                     className={cn(
-                      "size-8 rounded-full border-none shadow-none",
+                      "size-8 rounded-md border-none shadow-none",
                       view === "list"
                         ? "bg-background text-foreground"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",

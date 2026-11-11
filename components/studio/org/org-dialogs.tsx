@@ -155,7 +155,7 @@ export function EditProfileDialog({
                   disabled={busy}
                   onClick={() => setColor(c)}
                   className={cn(
-                    "flex size-8 items-center justify-center rounded-full transition-transform hover:scale-105",
+                    "flex size-8 items-center justify-center rounded-md transition-transform hover:scale-105",
                     color === c && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
                   )}
                   style={{ backgroundColor: c }}
@@ -176,7 +176,7 @@ export function EditProfileDialog({
             <Button
               type="button"
               variant="ghost"
-              className="rounded-full"
+              className="rounded-md"
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
@@ -184,7 +184,7 @@ export function EditProfileDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-full"
+              className="rounded-md"
               disabled={busy || name.trim().length < 2}
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : "Save"}
@@ -301,7 +301,7 @@ export function ManageMembersDialog({
                 className="min-h-[64px] w-full resize-none rounded-2xl bg-muted/30 px-3.5 py-2.5 text-[13px] outline-none placeholder:text-muted-foreground/70 disabled:opacity-60"
               />
               <div className="flex flex-wrap items-center gap-2">
-                <div className="grid grid-cols-2 gap-1 rounded-full bg-muted/50 p-1">
+                <div className="grid grid-cols-2 gap-1 rounded-md bg-muted/50 p-1">
                   {INVITEABLE_ORG_ROLES.map((value) => (
                     <button
                       key={value}
@@ -309,7 +309,7 @@ export function ManageMembersDialog({
                       disabled={busy || (!isOwner && value === OrgMemberRole.ADMIN)}
                       onClick={() => setInviteRole(value)}
                       className={cn(
-                        "h-8 rounded-full px-3 text-[12px] font-medium transition-colors",
+                        "h-8 rounded-md px-3 text-[12px] font-medium transition-colors",
                         inviteRole === value
                           ? "bg-background text-foreground"
                           : "text-muted-foreground",
@@ -322,7 +322,7 @@ export function ManageMembersDialog({
                 <Button
                   type="button"
                   disabled={busy || !inviteEmails.trim()}
-                  className="ml-auto h-9 rounded-full"
+                  className="ml-auto h-9 rounded-md"
                   onClick={() =>
                     void runMemberAction(async () => {
                       if (!organization) return { success: false, error: "Missing org" };
@@ -369,7 +369,7 @@ export function ManageMembersDialog({
                         {member.user.email}
                       </p>
                     </div>
-                    <span className="rounded-full bg-muted/50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                    <span className="rounded-md bg-muted/50 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                       {member.role}
                     </span>
                     {(isOwner || isMe || (isAdmin && member.role === OrgMemberRole.MEMBER)) &&
@@ -379,7 +379,7 @@ export function ManageMembersDialog({
                           <button
                             type="button"
                             disabled={busy}
-                            className="flex size-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                            className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                             aria-label="Member actions"
                           >
                             <MoreHorizontal className="size-4" />
@@ -474,7 +474,7 @@ export function ManageMembersDialog({
                         type="button"
                         variant="ghost"
                         disabled={busy}
-                        className="h-8 rounded-full text-[12px]"
+                        className="h-8 rounded-md text-[12px]"
                         onClick={() =>
                           void runMemberAction(() =>
                             revokeOrganizationInvite(invite.id),
@@ -582,7 +582,7 @@ export function DeleteOrganizationDialog({
             <Button
               type="button"
               variant="ghost"
-              className="rounded-full"
+              className="rounded-md"
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
@@ -591,7 +591,7 @@ export function DeleteOrganizationDialog({
             <Button
               type="button"
               variant="destructive"
-              className="rounded-full"
+              className="rounded-md"
               disabled={!canDelete || !isOwner || busy}
               onClick={() => void handleDelete()}
             >

@@ -238,7 +238,7 @@ export function PublishCommunityDialog({
 
         {done ? (
           <div className="flex flex-col items-center gap-3 py-4 text-center">
-            <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+            <div className="flex size-10 items-center justify-center rounded-md bg-muted">
               <Check className="size-4" />
             </div>
             <p className="text-[13px] font-medium">{doneLabel}</p>
@@ -275,7 +275,7 @@ export function PublishCommunityDialog({
                     type="button"
                     onClick={() => setCategory(item)}
                     className={cn(
-                      "inline-flex h-8 items-center rounded-full px-3 text-[12px] font-medium transition-colors",
+                      "inline-flex h-8 items-center rounded-md px-3 text-[12px] font-medium transition-colors",
                       category === item
                         ? "bg-foreground text-background"
                         : "bg-muted/40 text-foreground hover:bg-muted/60",
@@ -298,7 +298,7 @@ export function PublishCommunityDialog({
             <div className="flex flex-col gap-2">
               <Button
                 type="button"
-                className="h-10 w-full gap-2 rounded-full shadow-none"
+                className="h-10 w-full gap-2 rounded-md shadow-none"
                 disabled={loading || slides.length === 0}
                 onClick={() => void handlePublish()}
               >
@@ -314,7 +314,7 @@ export function PublishCommunityDialog({
                 <Button
                   type="button"
                   variant="secondary"
-                  className="h-10 w-full rounded-full border-none bg-muted/40 shadow-none hover:bg-muted/60"
+                  className="h-10 w-full rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
                   disabled={loading}
                   onClick={() => void handleUnpublish()}
                 >

@@ -90,14 +90,14 @@ export function CodeBlockEditDialog() {
             <Button
               type="button"
               variant="secondary"
-              className="h-9 rounded-full"
+              className="h-9 rounded-md"
               onClick={close}
             >
               Cancel
             </Button>
             <Button
               type="button"
-              className="h-9 rounded-full"
+              className="h-9 rounded-md"
               onClick={save}
             >
               Save

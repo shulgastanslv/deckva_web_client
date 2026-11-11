@@ -8,9 +8,10 @@ alwaysApply: true
 - Do **not** use italic / cursive display greetings like “Hello, Name” or “Epic work, Name” in a script/serif italic voice — that reads as AI slop.
 - Prefer clean sans UI type; expressive serif only when the product already uses it for a specific non-greeting role, and never italicized name greetings.
 
-## Buttons
+## Buttons (Miro-like)
 
-- All buttons are rounded (`rounded-full` or at least `rounded-xl` / `rounded-2xl`). No sharp rectangular CTAs.
+- Buttons, chips, inputs, selects, and segmented controls use **soft rects**: `rounded-md` (not pills).
+- Do **not** use `rounded-full` on buttons/CTAs/triggers. Keep `rounded-full` only for true circles (avatars, switches, color dots, tiny status badges).
 
 ## Surfaces
 
@@ -25,3 +26,20 @@ alwaysApply: true
 
 - Prefer **shadcn** primitives from `@/components/ui/*` (Button, Dialog, DropdownMenu, Input, etc.) before custom one-offs.
 - Extend shadcn with `className` / variants; don’t reinvent the same controls.
+
+## Left sidebar spacing
+
+- Every left-sidebar panel root uses the shared `sidebarPanel` class from `sidebar-ui.ts` (`px-3.5 py-3 gap-3`). Settings included. Don’t invent per-panel padding.
+
+## Icons (studio + editor)
+
+- Nav / rail icons in studio and editor are the same size: `size-4 stroke-[1.75]`.
+
+## Filters over chrome (Figma density)
+
+Maximize canvas/sidebar space. Do **not** park permanent chip rows, category tabs, tag strips, source pills, or variant switchers in the main chrome.
+
+- Lists / categories / tags / sources / scopes / sorts → one compact **filter button** (icon `ListFilter`) opening a menu (`FilterMenu` or equivalent). Search may sit beside it.
+- Default view shows content only. Active filter is indicated on the button (muted fill / check in menu), not by a second always-visible chip bar.
+- Don’t stamp tags/categories on every tile in the grid; keep taxonomy in the filter (and detail/edit when needed).
+- Exception: a control that **is** the primary task (e.g. typing a color, editing SVG) — not browse taxonomy.

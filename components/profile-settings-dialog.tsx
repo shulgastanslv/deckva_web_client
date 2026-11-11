@@ -419,7 +419,7 @@ export function ProfileSettingsDialog({
                       setSaved(false);
                     }}
                     className={cn(
-                      "inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-left text-[12.5px] font-medium transition-colors",
+                      "inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-left text-[12.5px] font-medium transition-colors",
                       active
                         ? "bg-background text-foreground"
                         : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
@@ -457,7 +457,7 @@ export function ProfileSettingsDialog({
                                 {initial}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-full transition-all">
+                            <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
                               <CameraIcon className="size-5 text-white/90" />
                             </div>
                             <input
@@ -533,7 +533,7 @@ export function ProfileSettingsDialog({
                               <Button
                                 type="button"
                                 variant="outline"
-                                className="h-8 rounded-full text-[12px]"
+                                className="h-8 rounded-md text-[12px]"
                                 disabled={billingBusy}
                                 onClick={() =>
                                   void runBilling(() => resumeSubscription())
@@ -545,7 +545,7 @@ export function ProfileSettingsDialog({
                               <Button
                                 type="button"
                                 variant="ghost"
-                                className="h-8 rounded-full text-[12px] text-muted-foreground"
+                                className="h-8 rounded-md text-[12px] text-muted-foreground"
                                 disabled={billingBusy}
                                 onClick={() =>
                                   void runBilling(() => cancelSubscription())
@@ -557,7 +557,7 @@ export function ProfileSettingsDialog({
                           ) : (
                             <Button
                               type="button"
-                              className="h-8 rounded-full bg-[#2f5bff] text-[12px] text-white hover:bg-[#254ae6]"
+                              className="h-8 rounded-md bg-[#2f5bff] text-[12px] text-white hover:bg-[#254ae6]"
                               disabled={billingBusy || !billing?.paymentMethod}
                               onClick={() =>
                                 void runBilling(() => subscribePro())
@@ -609,7 +609,7 @@ export function ProfileSettingsDialog({
                             <Button
                               type="button"
                               variant="ghost"
-                              className="h-8 rounded-full text-[12px] text-muted-foreground"
+                              className="h-8 rounded-md text-[12px] text-muted-foreground"
                               disabled={billingBusy}
                               onClick={() =>
                                 void runBilling(() =>
@@ -670,7 +670,7 @@ export function ProfileSettingsDialog({
                                 <Button
                                   type="button"
                                   variant="ghost"
-                                  className="h-8 rounded-full text-[12px]"
+                                  className="h-8 rounded-md text-[12px]"
                                   onClick={() => setShowCardForm(false)}
                                 >
                                   Cancel
@@ -678,7 +678,7 @@ export function ProfileSettingsDialog({
                               ) : null}
                               <Button
                                 type="button"
-                                className="h-8 rounded-full text-[12px]"
+                                className="h-8 rounded-md text-[12px]"
                                 disabled={billingBusy}
                                 onClick={onSaveCard}
                               >
@@ -866,7 +866,7 @@ export function ProfileSettingsDialog({
                                     });
                                   }}
                                   className={cn(
-                                    "inline-flex h-8 items-center rounded-full px-3 text-[12px] font-medium transition-colors disabled:opacity-60",
+                                    "inline-flex h-8 items-center rounded-md px-3 text-[12px] font-medium transition-colors disabled:opacity-60",
                                     code === locale
                                       ? "bg-foreground text-background"
                                       : "bg-muted/50 text-foreground hover:bg-muted/70",
@@ -892,7 +892,7 @@ export function ProfileSettingsDialog({
                         <Button
                           type="button"
                           variant="outline"
-                          className="mt-3 h-8 rounded-full"
+                          className="mt-3 h-8 rounded-md"
                           onClick={() => {
                             onOpenChange(false);
                             void signOut({ callbackUrl: "/" });
@@ -949,7 +949,7 @@ export function ProfileSettingsDialog({
                         <Button
                           type="button"
                           variant="destructive"
-                          className="mt-3 h-8 rounded-full"
+                          className="mt-3 h-8 rounded-md"
                           disabled={
                             deleting ||
                             deleteConfirm.trim().toUpperCase() !== "DELETE" ||
@@ -991,7 +991,7 @@ export function ProfileSettingsDialog({
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-8 rounded-full"
+                    className="h-8 rounded-md"
                     onClick={() => onOpenChange(false)}
                     disabled={saving}
                   >
@@ -999,7 +999,7 @@ export function ProfileSettingsDialog({
                   </Button>
                   <Button
                     type="button"
-                    className="h-8 rounded-full"
+                    className="h-8 rounded-md"
                     disabled={
                       saving ||
                       (section === "profile"

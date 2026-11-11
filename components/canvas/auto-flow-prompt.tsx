@@ -144,9 +144,9 @@ export function AutoFlowPrompt() {
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-20 z-30 flex justify-center p-2">
-      <div className="pointer-events-auto flex max-w-[min(420px,calc(100vw-24px))] items-center gap-2 rounded-full bg-popover p-2 text-popover-foreground shadow-sm dark:border dark:border-border/50">
+      <div className="pointer-events-auto flex max-w-[min(420px,calc(100vw-24px))] items-center gap-2 rounded-md bg-popover p-2 text-popover-foreground shadow-sm dark:border dark:border-border/50">
         <div className="flex min-w-0 flex-1 items-center gap-2 pl-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground">
             <Layers className="size-3.5" />
           </span>
           <p className="min-w-0 truncate text-[13px] leading-snug text-foreground">
@@ -158,7 +158,7 @@ export function AutoFlowPrompt() {
         <Button
           type="button"
           size="sm"
-          className="h-9 shrink-0 rounded-full px-3.5 text-[13px] font-medium"
+          className="h-9 shrink-0 rounded-md px-3.5 text-[13px] font-medium"
           onClick={() => void accept()}
         >
           {continuing ? "Continue" : "Create"}
@@ -167,7 +167,7 @@ export function AutoFlowPrompt() {
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 shrink-0 rounded-full text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+          className="size-9 shrink-0 rounded-md text-muted-foreground hover:bg-muted/40 hover:text-foreground"
           onClick={dismiss}
           title="Dismiss"
         >

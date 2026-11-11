@@ -1,11 +1,12 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Check } from "lucide-react";
+import { Check, ListFilter } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -21,47 +22,68 @@ export interface FilterGroup {
   options: FilterOption[];
 }
 
+/** Compact Figma-style filter trigger — taxonomy lives in the menu, not a chip strip. */
 export function FilterMenu({
-  icon: Icon,
+  icon: Icon = ListFilter,
   value,
+  defaultValue = "all",
   groups,
   onChange,
+  ariaLabel = "Filter",
+  className,
 }: {
   icon?: LucideIcon;
   value: string;
+  /** When value differs, trigger reads as “active”. */
+  defaultValue?: string;
   groups: FilterGroup[];
   onChange: (id: string) => void;
+  ariaLabel?: string;
+  className?: string;
 }) {
+  const active = value !== defaultValue;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="inline-flex h-10 min-w-0 items-center gap-1.5 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/80 dark:hover:bg-muted/40"
+          aria-label={ariaLabel}
+          title={ariaLabel}
+          className={cn(
+            "inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors",
+            active
+              ? "bg-foreground text-background hover:bg-foreground/90"
+              : "bg-muted/60 text-foreground hover:bg-muted/80 dark:bg-muted/25 dark:hover:bg-muted/40",
+            className,
+          )}
         >
-          {Icon ? <Icon className="size-3.5 shrink-0 text-muted-foreground" /> : null}
+          <Icon className="size-4 shrink-0 stroke-[1.75]" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="start"
+        align="end"
         sideOffset={6}
-        className="w-52! min-w-52! rounded-2xl p-1.5 text-[13px]!"
+        className="w-52 rounded-2xl p-1.5 text-[13px]"
       >
         {groups.map((group, index) => (
           <div key={group.label ?? index}>
-            {index > 0 ? <DropdownMenuSeparator className="my-1 bg-white/10" /> : null}
+            {index > 0 ? <DropdownMenuSeparator className="my-1" /> : null}
+            {group.label ? (
+              <DropdownMenuLabel className="px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
+                {group.label}
+              </DropdownMenuLabel>
+            ) : null}
             {group.options.map((option) => {
-              const active = option.id === value;
+              const selected = option.id === value;
               return (
                 <DropdownMenuItem
                   key={option.id}
                   onSelect={() => onChange(option.id)}
-                  className={cn(
-                    "cursor-pointer gap-2 rounded-md px-2 py-1.5 text-[13px] text-foreground focus:bg-muted/60 dark:bg-muted/25 focus:text-foreground",
-                  )}
+                  className="cursor-pointer gap-2 rounded-xl px-2 py-1.5 text-[13px] text-foreground focus:bg-muted/50 focus:text-foreground"
                 >
-                  <Check className={cn("size-3.5 shrink-0", active ? "opacity-100" : "opacity-0")} />
-                  <span>{option.label}</span>
+                  <Check className={cn("size-3.5 shrink-0", selected ? "opacity-100" : "opacity-0")} />
+                  <span>{option.label ?? option.id}</span>
                 </DropdownMenuItem>
               );
             })}

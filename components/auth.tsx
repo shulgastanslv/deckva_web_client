@@ -310,7 +310,7 @@ export function AuthModal({
               <Button
                 variant="outline"
                 type="button"
-                className="w-full h-10 rounded-full text-[13px] font-medium transition-all mb-6 flex items-center justify-center gap-2 border-input bg-muted/50 hover:bg-accent"
+                className="w-full h-10 rounded-md text-[13px] font-medium transition-all mb-6 flex items-center justify-center gap-2 border-input bg-muted/50 hover:bg-accent"
                 onClick={handleGoogleSignIn}
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -335,7 +335,7 @@ export function AuthModal({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-10 rounded-full bg-muted/50 border-input"
+                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
                 <div>
@@ -357,14 +357,14 @@ export function AuthModal({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-10 rounded-full bg-muted/50 border-input"
+                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
 
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
+                  className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign in"}
                 </Button>
@@ -401,7 +401,7 @@ export function AuthModal({
               <Button
                 variant="outline"
                 type="button"
-                className="w-full h-10 rounded-full text-[13px] font-medium transition-all mb-6 flex items-center justify-center gap-2 border-input bg-muted/50 hover:bg-accent"
+                className="w-full h-10 rounded-md text-[13px] font-medium transition-all mb-6 flex items-center justify-center gap-2 border-input bg-muted/50 hover:bg-accent"
                 onClick={handleGoogleSignIn}
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -426,7 +426,7 @@ export function AuthModal({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="h-10 rounded-full bg-muted/50 border-input"
+                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
                 <div>
@@ -439,7 +439,7 @@ export function AuthModal({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-10 rounded-full bg-muted/50 border-input"
+                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
                 <div>
@@ -452,14 +452,14 @@ export function AuthModal({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-10 rounded-full bg-muted/50 border-input"
+                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
 
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
+                  className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
                 </Button>
@@ -501,14 +501,14 @@ export function AuthModal({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-10 rounded-full bg-muted/50 border-input"
+                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
 
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
+                  className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send reset link"}
                 </Button>
@@ -550,14 +550,14 @@ export function AuthModal({
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={PASSWORD_MIN_LENGTH}
-                    className="h-10 rounded-full bg-muted/50 border-input"
+                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
 
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
+                  className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update password"}
                 </Button>
@@ -581,7 +581,7 @@ export function AuthModal({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-10 rounded-full text-[13px]"
+                className="w-full h-10 rounded-md text-[13px]"
                 onClick={() => handleSwitchView("login")}
               >
                 Back to Sign in

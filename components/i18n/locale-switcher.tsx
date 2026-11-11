@@ -48,7 +48,7 @@ export function LocaleSwitcher({
           size="icon"
           disabled={pending}
           className={cn(
-            "h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/50",
+            "h-9 w-9 rounded-md text-muted-foreground hover:text-foreground hover:bg-background/50",
             className,
           )}
           title={t("language")}

@@ -136,25 +136,25 @@ function ThemeBlockPreview({
               <>
                 <span
                   className={cn(
-                    "rounded-full bg-[#ff5f56]",
+                    "rounded-md bg-[#ff5f56]",
                     compact ? "size-[4px]" : "size-1.5",
                   )}
                 />
                 <span
                   className={cn(
-                    "rounded-full bg-[#ffbd2e]",
+                    "rounded-md bg-[#ffbd2e]",
                     compact ? "size-[4px]" : "size-1.5",
                   )}
                 />
                 <span
                   className={cn(
-                    "rounded-full bg-[#27c93f]",
+                    "rounded-md bg-[#27c93f]",
                     compact ? "size-[4px]" : "size-1.5",
                   )}
                 />
                 {chromeStyle === "safari" ? (
                   <span
-                    className="mx-auto h-1.5 w-[40%] rounded-full"
+                    className="mx-auto h-1.5 w-[40%] rounded-md"
                     style={{
                       background: darkMode
                         ? "rgba(255,255,255,0.12)"
@@ -206,7 +206,7 @@ function ThemeBlockPreview({
 function ChromeGlyph({ style }: { style: CodeChromeStyle }) {
   if (style === "none") {
     return (
-      <span className="relative size-3.5 rounded-full border border-current opacity-70">
+      <span className="relative size-3.5 rounded-md border border-current opacity-70">
         <span className="absolute inset-x-[-1px] top-1/2 h-px -rotate-45 bg-current" />
       </span>
     );
@@ -243,9 +243,9 @@ function ChromeGlyph({ style }: { style: CodeChromeStyle }) {
   }
   return (
     <span className="flex items-center gap-[3px]">
-      <span className="size-1.5 rounded-full bg-[#ff5f56]" />
-      <span className="size-1.5 rounded-full bg-[#ffbd2e]" />
-      <span className="size-1.5 rounded-full bg-[#27c93f]" />
+      <span className="size-1.5 rounded-md bg-[#ff5f56]" />
+      <span className="size-1.5 rounded-md bg-[#ffbd2e]" />
+      <span className="size-1.5 rounded-md bg-[#27c93f]" />
     </span>
   );
 }
@@ -490,7 +490,7 @@ export function CodeAppearanceSelect({
                     aria-pressed={chromeActive}
                     onClick={() => onChromeChange(item.id)}
                     className={cn(
-                      "flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",
+                      "flex size-8 shrink-0 items-center justify-center rounded-md transition-colors",
                       chromeActive
                         ? "bg-muted text-foreground ring-2 ring-ring"
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground dark:bg-muted/30",
@@ -502,7 +502,7 @@ export function CodeAppearanceSelect({
               })}
             </div>
 
-            <div className="flex h-8 shrink-0 items-center rounded-full bg-muted/50 p-0.5 dark:bg-muted/30">
+            <div className="flex h-8 shrink-0 items-center rounded-md bg-muted/50 p-0.5 dark:bg-muted/30">
               <button
                 type="button"
                 title="Themes"
@@ -512,7 +512,7 @@ export function CodeAppearanceSelect({
                   setQuery("");
                 }}
                 className={cn(
-                  "h-7 rounded-full px-2.5 text-[12px] font-medium transition-colors",
+                  "h-7 rounded-md px-2.5 text-[12px] font-medium transition-colors",
                   pane === "themes"
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -529,7 +529,7 @@ export function CodeAppearanceSelect({
                   setQuery("");
                 }}
                 className={cn(
-                  "h-7 rounded-full px-2.5 text-[12px] font-medium transition-colors",
+                  "h-7 rounded-md px-2.5 text-[12px] font-medium transition-colors",
                   pane === "languages"
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",

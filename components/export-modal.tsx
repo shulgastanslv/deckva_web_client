@@ -60,7 +60,7 @@ function Segmented<T extends string | number>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex rounded-full bg-muted/50 p-0.5">
+    <div className="flex rounded-md bg-muted/50 p-0.5">
       {options.map((opt) => (
         <button
           key={String(opt.value)}
@@ -68,7 +68,7 @@ function Segmented<T extends string | number>({
           disabled={disabled}
           onClick={() => onChange(opt.value)}
           className={cn(
-            "h-8 flex-1 rounded-full text-[13px] transition-colors disabled:opacity-50",
+            "h-8 flex-1 rounded-md text-[13px] transition-colors disabled:opacity-50",
             value === opt.value
               ? "bg-background font-medium text-foreground"
               : "text-muted-foreground hover:text-foreground",
@@ -437,7 +437,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
               type="button"
               variant="secondary"
               size="lg"
-              className="w-full rounded-full"
+              className="w-full rounded-md"
               disabled={busy}
               onClick={() => void handleCopyLink()}
             >
@@ -456,7 +456,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
                 type="button"
                 variant="outline"
                 size="lg"
-                className="w-full rounded-full"
+                className="w-full rounded-md"
                 disabled={busy || exportSlides.length === 0}
                 onClick={() => void handleNativeShare()}
               >
@@ -477,9 +477,9 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
               <span>{done ? "Done" : "Rendering…"}</span>
               <span className="tabular-nums">{progress}%</span>
             </div>
-            <div className="h-1 overflow-hidden rounded-full bg-muted">
+            <div className="h-1 overflow-hidden rounded-md bg-muted">
               <div
-                className="h-full rounded-full bg-foreground transition-[width] duration-200"
+                className="h-full rounded-md bg-foreground transition-[width] duration-200"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -495,7 +495,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
             type="button"
             variant="outline"
             size="lg"
-            className="rounded-full"
+            className="rounded-md"
             disabled={busy || exportSlides.length === 0}
             onClick={() => void handleCopyFirst()}
             title="Copy first slide image"
@@ -506,7 +506,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
           <Button
             type="button"
             size="lg"
-            className="flex-1 rounded-full"
+            className="flex-1 rounded-md"
             disabled={busy || exportSlides.length === 0}
             onClick={() => void handleDownload()}
           >

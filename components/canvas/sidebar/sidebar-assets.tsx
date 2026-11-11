@@ -27,10 +27,12 @@ import {
   updateMediaAsset,
   type MediaAssetDTO,
 } from "@/actions/assets";
+import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import {
   sidebarActionBtn,
   sidebarFieldInput,
+  sidebarPanel,
   sidebarSegmented,
   sidebarSegmentedItem,
   sidebarSegmentedItemIdle,
@@ -252,7 +254,7 @@ export function SidebarAssets() {
   };
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 overflow-hidden p-3">
+    <div className={cn(sidebarPanel, "overflow-hidden")}>
       <input
         ref={fileInputRef}
         type="file"
@@ -265,57 +267,44 @@ export function SidebarAssets() {
         }}
       />
 
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search name or tag"
-          className={cn(sidebarFieldInput, "pl-9 pr-9")}
-        />
-        {query ? (
-          <button
-            type="button"
-            title="Clear"
-            onClick={() => setQuery("")}
-            className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-          >
-            <X className="size-3.5" />
-          </button>
+      <div className="flex items-center gap-1.5">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search name or tag"
+            className={cn(sidebarFieldInput, "pl-9 pr-9")}
+          />
+          {query ? (
+            <button
+              type="button"
+              title="Clear"
+              onClick={() => setQuery("")}
+              className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+            >
+              <X className="size-3.5" />
+            </button>
+          ) : null}
+        </div>
+        {allTags.length > 0 ? (
+          <FilterMenu
+            value={activeTag ?? "all"}
+            defaultValue="all"
+            ariaLabel="Filter by tag"
+            onChange={(id) => setActiveTag(id === "all" ? null : id)}
+            groups={[
+              {
+                label: "Tags",
+                options: [
+                  { id: "all", label: "All tags" },
+                  ...allTags.map((tag) => ({ id: tag, label: `#${tag}` })),
+                ],
+              },
+            ]}
+          />
         ) : null}
       </div>
-
-      {allTags.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          <button
-            type="button"
-            onClick={() => setActiveTag(null)}
-            className={cn(
-              "h-8 rounded-full px-3 text-[12px] font-medium transition-colors",
-              activeTag === null
-                ? "bg-background text-foreground"
-                : "bg-muted/60 dark:bg-muted/25 text-muted-foreground hover:text-foreground",
-            )}
-          >
-            All
-          </button>
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-              className={cn(
-                "h-8 rounded-full px-3 text-[12px] font-medium transition-colors",
-                activeTag === tag
-                  ? "bg-background text-foreground"
-                  : "bg-muted/60 dark:bg-muted/25 text-muted-foreground hover:text-foreground",
-              )}
-            >
-              #{tag}
-            </button>
-          ))}
-        </div>
-      ) : null}
 
       <div className="relative">
         <Tag className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -391,7 +380,6 @@ export function SidebarAssets() {
               key={item.id}
               name={item.name}
               dataUrl={item.dataUrl}
-              tags={item.tags}
               busy={loadingId === item.id}
               disabled={loadingId !== null}
               onAdd={() => void addToCanvas(item)}
@@ -425,7 +413,7 @@ export function SidebarAssets() {
                   preview.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="h-7 rounded-full bg-muted/60 px-2.5 text-[12px] leading-7 text-muted-foreground dark:bg-muted/25"
+                      className="h-7 rounded-md bg-muted/60 px-2.5 text-[12px] leading-7 text-muted-foreground dark:bg-muted/25"
                     >
                       #{tag}
                     </span>
@@ -534,7 +522,6 @@ export function SidebarAssets() {
 function AssetTile({
   name,
   dataUrl,
-  tags,
   busy,
   disabled,
   onAdd,
@@ -544,7 +531,6 @@ function AssetTile({
 }: {
   name: string;
   dataUrl: string;
-  tags?: string[];
   busy: boolean;
   disabled: boolean;
   onAdd: () => void;
@@ -576,11 +562,6 @@ function AssetTile({
           />
         )}
       </button>
-      {tags && tags.length > 0 ? (
-        <span className="pointer-events-none absolute bottom-1 left-1 max-w-[calc(100%-0.5rem)] truncate rounded-full bg-background/90 px-1.5 text-[9px] font-medium text-muted-foreground">
-          #{tags[0]}
-        </span>
-      ) : null}
       <div className="absolute right-1 top-1 flex flex-col gap-0.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
         {onPreview ? (
           <button
@@ -590,7 +571,7 @@ function AssetTile({
               e.stopPropagation();
               onPreview();
             }}
-            className="flex size-6 items-center justify-center rounded-full bg-background/90 text-muted-foreground hover:text-foreground"
+            className="flex size-6 items-center justify-center rounded-md bg-background/90 text-muted-foreground hover:text-foreground"
           >
             <Eye className="size-3" />
           </button>
@@ -603,7 +584,7 @@ function AssetTile({
               e.stopPropagation();
               onEdit();
             }}
-            className="flex size-6 items-center justify-center rounded-full bg-background/90 text-muted-foreground hover:text-foreground"
+            className="flex size-6 items-center justify-center rounded-md bg-background/90 text-muted-foreground hover:text-foreground"
           >
             <Pencil className="size-3" />
           </button>
@@ -616,7 +597,7 @@ function AssetTile({
               e.stopPropagation();
               onRemove();
             }}
-            className="flex size-6 items-center justify-center rounded-full bg-background/90 text-muted-foreground hover:text-foreground"
+            className="flex size-6 items-center justify-center rounded-md bg-background/90 text-muted-foreground hover:text-foreground"
           >
             <Trash2 className="size-3" />
           </button>

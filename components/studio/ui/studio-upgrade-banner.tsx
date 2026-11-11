@@ -82,7 +82,7 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
           type="button"
           aria-label="Dismiss"
           onClick={dismiss}
-          className="shrink-0 rounded-full p-1 opacity-80 transition-opacity hover:bg-primary-foreground/15 hover:opacity-100"
+          className="shrink-0 rounded-md p-1 opacity-80 transition-opacity hover:bg-primary-foreground/15 hover:opacity-100"
         >
           <X className="size-4" />
         </button>

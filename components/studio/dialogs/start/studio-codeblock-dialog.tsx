@@ -70,7 +70,7 @@ export function StudioCodeBlockDialog({
 
           <Button
             type="button"
-            className="h-10 w-full rounded-full text-[13px] font-medium"
+            className="h-10 w-full rounded-md text-[13px] font-medium"
             disabled={!canSubmit}
             onClick={() => void onSubmit(code)}
           >

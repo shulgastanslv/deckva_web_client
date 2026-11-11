@@ -123,7 +123,7 @@ export function StudioOrgSwitcher({
                 "flex items-center gap-2 text-left transition-colors",
                 isHeader
                   ? cn(
-                      "max-w-[min(100%,14rem)] rounded-full px-1.5 py-1 hover:bg-muted/80",
+                      "max-w-[min(100%,14rem)] rounded-md px-1.5 py-1 hover:bg-muted/80",
                       open && "bg-muted",
                     )
                   : cn(
@@ -142,7 +142,7 @@ export function StudioOrgSwitcher({
                 <span
                   className={cn(
                     "rounded-md bg-muted",
-                    isHeader ? "size-6" : "size-7 rounded-full",
+                    isHeader ? "size-6" : "size-7 rounded-md",
                   )}
                 />
               )}
@@ -191,7 +191,7 @@ export function StudioOrgSwitcher({
                       <button
                         type="button"
                         aria-label="Organization settings"
-                        className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       >
                         <MoreHorizontal className="size-4" />
                       </button>
@@ -278,7 +278,7 @@ export function StudioOrgSwitcher({
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     placeholder="Organization name"
-                    className="h-8 rounded-full border-0 bg-muted text-[13px] shadow-none dark:bg-background/40"
+                    className="h-8 rounded-md border-0 bg-muted text-[13px] shadow-none dark:bg-background/40"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -297,7 +297,7 @@ export function StudioOrgSwitcher({
                   onClick={() => setCreating(true)}
                   className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted dark:hover:bg-background/40"
                 >
-                  <span className="inline-flex size-7 items-center justify-center rounded-full bg-muted text-muted-foreground dark:bg-background/40">
+                  <span className="inline-flex size-7 items-center justify-center rounded-md bg-muted text-muted-foreground dark:bg-background/40">
                     <Plus className="size-3.5" />
                   </span>
                   <span className="text-[13px] font-medium text-foreground">

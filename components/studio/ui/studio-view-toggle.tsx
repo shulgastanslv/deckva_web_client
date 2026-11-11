@@ -11,7 +11,7 @@ export function StudioViewToggle({
   onChange: (view: "list" | "grid") => void;
 }) {
   return (
-    <div className="flex h-9 items-center gap-0.5 rounded-full bg-muted/40 p-0.5">
+    <div className="flex h-9 items-center gap-0.5 rounded-md bg-muted/40 p-0.5">
       <Button
         type="button"
         size="icon"
@@ -19,7 +19,7 @@ export function StudioViewToggle({
         aria-label="Grid view"
         onClick={() => onChange("grid")}
         className={cn(
-          "size-8 rounded-full border-none shadow-none",
+          "size-8 rounded-md border-none shadow-none",
           view === "grid"
             ? "bg-background text-foreground"
             : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -34,7 +34,7 @@ export function StudioViewToggle({
         aria-label="List view"
         onClick={() => onChange("list")}
         className={cn(
-          "size-8 rounded-full border-none shadow-none",
+          "size-8 rounded-md border-none shadow-none",
           view === "list"
             ? "bg-background text-foreground"
             : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",

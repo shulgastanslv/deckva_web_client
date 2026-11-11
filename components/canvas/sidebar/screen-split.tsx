@@ -42,9 +42,9 @@ function SplitPreview({ split }: { split: CanvasSplit }) {
         className="absolute flex flex-col justify-center gap-[7%] px-[14%]"
         style={contentZoneStyle(split)}
       >
-        <span className="h-[7%] w-[72%] rounded-full bg-foreground/25 dark:bg-foreground/30" />
-        <span className="h-[7%] w-full rounded-full bg-foreground/12 dark:bg-foreground/18" />
-        <span className="h-[7%] w-[58%] rounded-full bg-foreground/12 dark:bg-foreground/18" />
+        <span className="h-[7%] w-[72%] rounded-md bg-foreground/25 dark:bg-foreground/30" />
+        <span className="h-[7%] w-full rounded-md bg-foreground/12 dark:bg-foreground/18" />
+        <span className="h-[7%] w-[58%] rounded-md bg-foreground/12 dark:bg-foreground/18" />
       </span>
 
       <span

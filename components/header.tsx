@@ -38,13 +38,13 @@ import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const centerBtn =
-  "h-9 gap-1.5 rounded-full border-none px-3 text-[13px]";
+  "h-9 gap-1.5 rounded-md border-none px-3 text-[13px]";
 
 const sideBtn =
-  "h-9 gap-1.5 rounded-full border-none px-3.5 text-[13px] font-medium shadow-none";
+  "h-9 gap-1.5 rounded-md border-none px-3.5 text-[13px] font-medium shadow-none";
 
 const chipTrigger =
-  "inline-flex h-10 items-center gap-1.5 rounded-full border-none bg-transparent px-3.5 text-[13px] font-medium text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 data-[state=open]:text-foreground";
+  "inline-flex h-10 items-center gap-1.5 rounded-md border-none bg-transparent px-3.5 text-[13px] font-medium text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 data-[state=open]:text-foreground";
 
 const menuItem =
   "cursor-pointer gap-2 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50";
@@ -140,7 +140,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
             onKeyDown={(e) => {
               if (e.key === "Enter") (e.target as HTMLInputElement).blur();
             }}
-            className="h-10 min-w-0 max-w-[11rem] flex-1 truncate rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none transition-colors hover:bg-muted/60 focus:bg-muted/50 sm:max-w-[15rem]"
+            className="h-10 min-w-0 max-w-[11rem] flex-1 truncate rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none transition-colors hover:bg-muted/60 focus:bg-muted/50 sm:max-w-[15rem]"
             placeholder="Project name"
             aria-label="Project name"
           />
@@ -176,7 +176,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
           {(onPreview || onPhonePreview) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button type="button" variant="default" className="h-9 gap-1.5 rounded-full border-none px-3.5 text-[13px] shadow-none">
+                <Button type="button" variant="default" className="h-9 gap-1.5 rounded-md border-none px-3.5 text-[13px] shadow-none">
                   <Play className="size-3.5 opacity-80" />
                   Preview
                   <ChevronDown className="size-3.5 opacity-70" />

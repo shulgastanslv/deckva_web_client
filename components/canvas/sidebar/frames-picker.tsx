@@ -340,7 +340,7 @@ export function FramesPicker({
                     disabled={disabled}
                     onClick={() => applyColor(swatch.color)}
                     className={cn(
-                      "size-6 shrink-0 rounded-full ring-offset-1 ring-offset-popover disabled:opacity-40",
+                      "size-6 shrink-0 rounded-md ring-offset-1 ring-offset-popover disabled:opacity-40",
                       active && "ring-2 ring-ring",
                     )}
                     style={{ backgroundColor: swatch.color }}
@@ -355,7 +355,7 @@ export function FramesPicker({
                 disabled={disabled}
                 onClick={() => applyColor("transparent")}
                 className={cn(
-                  "size-6 shrink-0 rounded-full ring-offset-1 ring-offset-popover disabled:opacity-40",
+                  "size-6 shrink-0 rounded-md ring-offset-1 ring-offset-popover disabled:opacity-40",
                   bgColor === "transparent" && "ring-2 ring-ring",
                 )}
                 style={CHECKER_STYLE}
@@ -373,7 +373,7 @@ export function FramesPicker({
             <div
               role="group"
               aria-label="Orientation"
-              className="flex h-8 shrink-0 items-center rounded-full bg-muted/50 p-0.5 dark:bg-muted/30"
+              className="flex h-8 shrink-0 items-center rounded-md bg-muted/50 p-0.5 dark:bg-muted/30"
             >
               <button
                 type="button"
@@ -381,7 +381,7 @@ export function FramesPicker({
                 aria-pressed={orientation === "portrait"}
                 onClick={() => setOrientation("portrait")}
                 className={cn(
-                  "flex size-7 items-center justify-center rounded-full transition-colors",
+                  "flex size-7 items-center justify-center rounded-md transition-colors",
                   orientation === "portrait"
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -395,7 +395,7 @@ export function FramesPicker({
                 aria-pressed={orientation === "landscape"}
                 onClick={() => setOrientation("landscape")}
                 className={cn(
-                  "flex size-7 items-center justify-center rounded-full transition-colors",
+                  "flex size-7 items-center justify-center rounded-md transition-colors",
                   orientation === "landscape"
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -409,7 +409,7 @@ export function FramesPicker({
               type="button"
               title="More"
               aria-label="More options"
-              className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Ellipsis className="size-3.5" />
             </button>

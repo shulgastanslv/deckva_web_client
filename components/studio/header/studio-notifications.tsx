@@ -170,7 +170,7 @@ function ReadModal({
             <div className="mt-6">
               <Button
                 type="button"
-                className="h-10 rounded-full px-5 text-[13px] font-medium"
+                className="h-10 rounded-md px-5 text-[13px] font-medium"
                 onClick={() => {
                   window.location.href = item.href!;
                 }}
@@ -271,7 +271,7 @@ function NotificationsPanel({
               placeholder="Search…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-full border-none bg-muted/40 py-2 pr-4 pl-10 text-[13px] focus-visible:ring-2 focus-visible:ring-[#2f5bff]/20"
+              className="h-9 w-full rounded-md border-none bg-muted/40 py-2 pr-4 pl-10 text-[13px] focus-visible:ring-2 focus-visible:ring-[#2f5bff]/20"
             />
           </div>
 
@@ -279,7 +279,7 @@ function NotificationsPanel({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="secondary"
-                className="h-9 rounded-full border-none bg-muted/40 px-4 text-[13px] font-medium"
+                className="h-9 rounded-md border-none bg-muted/40 px-4 text-[13px] font-medium"
               >
                 {FILTER_LABEL[filter]}
                 <ChevronDown className="ml-1 size-3.5 text-muted-foreground" />
@@ -356,7 +356,7 @@ function NotificationsPanel({
                     <div className="mt-3">
                       <Button
                         type="button"
-                        className="h-8 rounded-full px-3 text-[12px] font-medium"
+                        className="h-8 rounded-md px-3 text-[12px] font-medium"
                         onClick={() => {
                           window.location.href = item.href!;
                         }}
@@ -372,7 +372,7 @@ function NotificationsPanel({
                       size="icon"
                       onClick={() => setReadingItem(item)}
                       title="Read"
-                      className="size-8 rounded-full"
+                      className="size-8 rounded-md"
                     >
                       <Maximize2 className="size-3.5" />
                     </Button>
@@ -381,7 +381,7 @@ function NotificationsPanel({
                       size="icon"
                       onClick={() => void handleToggleRead(item.id, item.read)}
                       title={item.read ? "Mark unread" : "Mark read"}
-                      className="size-8 rounded-full"
+                      className="size-8 rounded-md"
                     >
                       {item.read ? (
                         <Mail className="size-3.5" />
@@ -394,7 +394,7 @@ function NotificationsPanel({
                       size="icon"
                       onClick={() => void handleDelete(item.id)}
                       title="Delete"
-                      className="size-8 rounded-full text-destructive hover:text-destructive"
+                      className="size-8 rounded-md text-destructive hover:text-destructive"
                     >
                       <Trash2 className="size-3.5" />
                     </Button>
@@ -457,7 +457,7 @@ export function StudioNotifications({
           size="icon"
           aria-label="Notifications"
           className={cn(
-            "relative flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60",
+            "relative flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60",
             open && "bg-muted/60",
             className,
           )}

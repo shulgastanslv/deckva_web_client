@@ -129,7 +129,7 @@ export function StudioUpgradeDialog({
           type="button"
           aria-label="Close"
           onClick={() => onOpenChange(false)}
-          className="absolute top-2.5 right-2.5 z-10 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="absolute top-2.5 right-2.5 z-10 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="size-3.5" />
         </button>
@@ -182,7 +182,7 @@ export function StudioUpgradeDialog({
                   setStep("payment");
                 }}
                 className={cn(
-                  "mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold shadow-none transition-colors",
+                  "mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-md text-[13px] font-semibold shadow-none transition-colors",
                   alreadyPro
                     ? "cursor-default bg-muted/40 text-muted-foreground"
                     : "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -227,7 +227,7 @@ export function StudioUpgradeDialog({
                     placeholder="Card number"
                     inputMode="numeric"
                     autoComplete="cc-number"
-                    className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+                    className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <Input
@@ -246,7 +246,7 @@ export function StudioUpgradeDialog({
                       placeholder="MM/YY"
                       inputMode="numeric"
                       autoComplete="cc-exp"
-                      className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+                      className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                     />
                     <Input
                       value={cvv}
@@ -257,7 +257,7 @@ export function StudioUpgradeDialog({
                       inputMode="numeric"
                       autoComplete="cc-csc"
                       type="password"
-                      className="h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+                      className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                     />
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export function StudioUpgradeDialog({
                 type="button"
                 disabled={busy}
                 onClick={() => void subscribe()}
-                className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 disabled:opacity-60"
+                className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 disabled:opacity-60"
               >
                 {busy ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -283,7 +283,7 @@ export function StudioUpgradeDialog({
                   setError(null);
                   setStep("plan");
                 }}
-                className="mt-2 flex h-9 w-full items-center justify-center rounded-full border-none bg-transparent text-[12px] font-medium text-muted-foreground shadow-none transition-colors hover:bg-muted/40 hover:text-foreground disabled:opacity-60"
+                className="mt-2 flex h-9 w-full items-center justify-center rounded-md border-none bg-transparent text-[12px] font-medium text-muted-foreground shadow-none transition-colors hover:bg-muted/40 hover:text-foreground disabled:opacity-60"
               >
                 Back
               </button>

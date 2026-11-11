@@ -62,7 +62,7 @@ export function StudioCreateMenu({
           <Button
             variant="secondary"
             className={cn(
-              "h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
+              "h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
               triggerClassName,
               className,
             )}

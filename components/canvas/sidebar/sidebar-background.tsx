@@ -42,6 +42,18 @@ import {
   type BrandKit,
 } from "@/lib/studio/brand-kit";
 import { DDDEPTH_BACKGROUNDS, DDDEPTH_COUNT } from "@/lib/presets/dddepth";
+import {
+  sidebarActionBtn,
+  sidebarFieldInput,
+  sidebarSegmented,
+  sidebarSegmentedItem,
+  sidebarSegmentedItemActive,
+  sidebarSegmentedItemIdle,
+  sidebarSurfaceIdle,
+  sidebarSwatchGrid,
+  sidebarTabsList,
+  sidebarTabsTrigger,
+} from "@/components/canvas/sidebar/sidebar-ui";
 
 type Tab = "color" | "gradient" | "image" | "shapes";
 
@@ -64,12 +76,12 @@ function SuggestedSetRow({
   onApply: () => void;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-full py-1 pr-1 pl-1 hover:bg-muted/40">
+    <div className="flex items-center gap-2 rounded-md py-1 pr-1 pl-1 hover:bg-muted/40">
       <button
         type="button"
         title={`Fill this slide with ${set.background}`}
         onClick={onFillSlide}
-        className="h-7 w-7 shrink-0 rounded-full border border-border/40 transition-transform hover:scale-105 active:scale-95"
+        className="h-7 w-7 shrink-0 rounded-md border border-border/40 transition-transform hover:scale-105 active:scale-95"
         style={{ backgroundColor: set.background }}
       />
       <div className="flex min-w-0 flex-1 items-center gap-1">
@@ -77,13 +89,13 @@ function SuggestedSetRow({
           <span
             key={swatch.key}
             title={`${swatch.label} ${set[swatch.key]}`}
-            className="h-3.5 w-3.5 rounded-full border border-border/40"
+            className="h-3.5 w-3.5 rounded-md border border-border/40"
             style={{ backgroundColor: set[swatch.key] }}
           />
         ))}
         <span className="truncate text-foreground">{set.label}</span>
       </div>
-      <Button type="button" size="xs" variant="secondary" className="rounded-full" onClick={onApply}>
+      <Button type="button" size="xs" variant="secondary" className="rounded-md" onClick={onApply}>
         Apply
       </Button>
     </div>
@@ -100,7 +112,7 @@ const FILL_TABS: { id: Tab; label: string }[] = [
 export function SidebarBackground() {
   const manager = useCanvasManager();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<Tab>("shapes");
+  const [tab, setTab] = useState<Tab>("color");
   const [isDragging, setIsDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [urlLoading, setUrlLoading] = useState(false);
@@ -226,13 +238,13 @@ export function SidebarBackground() {
   return (
     <div className="flex min-w-0 flex-col text-[13px] text-foreground">
       <CollapsibleGroup id="background-fill" title="Fill" defaultOpen>
-        <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="gap-2">
-        <TabsList className="grid h-11 w-full grid-cols-4 rounded-full bg-muted/60 p-1 group-data-horizontal/tabs:h-11 dark:bg-muted/25">
+        <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="gap-3">
+        <TabsList className={cn(sidebarTabsList, "grid-cols-4")}>
           {FILL_TABS.map((item) => (
             <TabsTrigger
               key={item.id}
               value={item.id}
-              className="rounded-full px-1 text-[12px] font-medium shadow-none data-active:border-transparent data-active:bg-background data-active:text-foreground dark:data-active:border-transparent dark:data-active:bg-background"
+              className={cn(sidebarTabsTrigger, "px-1")}
             >
               {item.label}
             </TabsTrigger>
@@ -271,7 +283,7 @@ export function SidebarBackground() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt="" loading="lazy" className="size-full object-cover" />
                     {selected ? (
-                      <span className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-foreground text-background">
+                      <span className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-foreground text-background">
                         <Check className="size-3" strokeWidth={3} />
                       </span>
                     ) : null}
@@ -281,7 +293,7 @@ export function SidebarBackground() {
             </div>
             <Button
               variant="secondary"
-              className="w-full rounded-full h-10"
+              className={cn(sidebarActionBtn, "w-full")}
               onClick={() => setPickerOpen(true)}
             >
               Browse all · {DDDEPTH_COUNT}
@@ -290,7 +302,7 @@ export function SidebarBackground() {
         </TabsContent>
 
         <TabsContent value="color">
-          <div className="grid grid-cols-6 gap-1.5">
+          <div className={cn(sidebarSwatchGrid, "max-h-64 overflow-y-auto overscroll-contain pr-0.5")}>
             {SOLID_PRESETS.map((p) => (
               <button
                 key={p.color}
@@ -303,22 +315,22 @@ export function SidebarBackground() {
             ))}
             <div
               title="Custom color"
-              className="relative flex aspect-square items-center justify-center rounded-full border border-dashed border-border/80 bg-muted/30 transition-transform hover:scale-110"
+              className="relative flex aspect-square items-center justify-center rounded-md border border-dashed border-border/80 bg-muted/30 transition-transform hover:scale-110"
             >
               <ColorPicker
                 compact
-                value="#888888"
+                value="#ffffff"
                 onChange={(hex) => applySolid(hex)}
                 title="Custom color"
-                className="absolute inset-0 flex items-center justify-center [&_button]:size-full [&_button]:rounded-full [&_button]:ring-0 [&_button]:hover:scale-100"
+                className="absolute inset-0 flex items-center justify-center [&_button]:size-full [&_button]:rounded-md [&_button]:ring-0 [&_button]:hover:scale-100"
               />
-              <Plus className="pointer-events-none relative z-10 h-3 w-3 text-muted-foreground" />
+              <Plus className="pointer-events-none relative z-10 h-4 w-4 text-muted-foreground" />
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="gradient">
-          <div className="grid grid-cols-6 gap-1.5">
+          <div className={cn(sidebarSwatchGrid, "max-h-64 overflow-y-auto overscroll-contain pr-0.5")}>
             {GRADIENT_PRESETS.map((g, i) => (
               <button
                 key={`${g.colors[0]}-${g.colors[1]}-${i}`}
@@ -373,7 +385,7 @@ export function SidebarBackground() {
                 "flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-6 text-center transition-colors",
                 isDragging
                   ? "border-foreground/40 bg-muted/40"
-                  : "border-border/80 bg-muted/60 dark:bg-muted/25 hover:bg-muted/80 dark:hover:bg-muted/40",
+                  : cn("border-border/80 hover:bg-muted/80 dark:hover:bg-muted/40", sidebarSurfaceIdle),
               )}
             >
               <UploadCloud className="h-5 w-5 text-muted-foreground" />
@@ -401,14 +413,14 @@ export function SidebarBackground() {
                       void applyImageFromUrl();
                     }
                   }}
-                  className="h-10 rounded-full border-0 bg-muted/60 dark:bg-muted/25 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40"
+                  className={cn(sidebarFieldInput, "border-0 shadow-none")}
                 />
                 <Button
                   type="button"
                   size="sm"
                   disabled={urlLoading || !imageUrl.trim()}
                   onClick={() => void applyImageFromUrl()}
-                  className="h-10 rounded-full px-3.5"
+                  className="h-10 rounded-md px-3.5"
                 >
                   {urlLoading ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -454,7 +466,7 @@ export function SidebarBackground() {
               type="button"
               size="xs"
               variant="secondary"
-              className="rounded-full gap-1"
+              className="rounded-md gap-1"
               onClick={() => {
                 applyBrandKitToStore({
                   kit: brandKit,
@@ -481,7 +493,7 @@ export function SidebarBackground() {
       ) : null}
 
       <CollapsibleGroup id="background-palette" title="Palette" defaultOpen={false}>
-        <div className="flex h-10 rounded-full bg-muted/60 dark:bg-muted/25 p-1">
+        <div className={sidebarSegmented}>
           {(
             [
               ["all", "All"],
@@ -497,10 +509,8 @@ export function SidebarBackground() {
                 setSlidePalette(id === "slide" ? useCanvasStore.getState().palette : null);
               }}
               className={cn(
-                "h-full flex-1 rounded-full text-[13px] font-medium transition-colors",
-                paletteScope === id
-                  ? "bg-background text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
+                sidebarSegmentedItem,
+                paletteScope === id ? sidebarSegmentedItemActive : sidebarSegmentedItemIdle,
               )}
             >
               {label}
@@ -518,7 +528,7 @@ export function SidebarBackground() {
           {PALETTE_SLOTS.map((slot) => (
             <div
               key={slot.id}
-              className="rounded-full px-2 py-1.5 hover:bg-muted/80 dark:hover:bg-muted/40"
+              className="rounded-md px-2 py-1.5 hover:bg-muted/80 dark:hover:bg-muted/40"
             >
               <ColorPicker
                 compact
@@ -584,7 +594,7 @@ export function SidebarBackground() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt="" loading="lazy" className="size-full object-cover" />
                     {selected ? (
-                      <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-foreground text-background">
+                      <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-md bg-foreground text-background">
                         <Check className="size-3" strokeWidth={3} />
                       </span>
                     ) : null}

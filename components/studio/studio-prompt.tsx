@@ -121,7 +121,7 @@ export function StudioPrompt({
                   <button
                     type="button"
                     disabled={disabled || busy}
-                    className="inline-flex h-9 max-w-[200px] items-center rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60"
+                    className="inline-flex h-9 max-w-[200px] items-center rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60"
                   >
                     <span className="truncate">
                       {selected?.displayName ?? "Model"}
@@ -168,7 +168,7 @@ export function StudioPrompt({
             disabled={!canSend}
             onClick={submit}
             className={cn(
-              "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
+              "inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors",
               canSend
                 ? "bg-foreground text-background hover:bg-foreground/90"
                 : "bg-muted text-muted-foreground",

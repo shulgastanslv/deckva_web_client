@@ -45,7 +45,7 @@ export function StudioProjectCard({
           </span>
         )}
         {project.isSaved ? (
-          <span className="absolute top-2 left-2 rounded-full bg-background/90 p-1.5">
+          <span className="absolute top-2 left-2 rounded-md bg-background/90 p-1.5">
             <Star className="size-3 fill-current text-foreground" />
           </span>
         ) : null}

@@ -43,7 +43,7 @@ export function CollapsibleGroup({
           type="button"
           onClick={toggle}
           aria-expanded={isOpen}
-          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-none px-2.5 py-2.5 text-left transition-colors hover:bg-muted/50"
+          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-none px-3.5 py-2.5 text-left transition-colors hover:bg-muted/50"
         >
           <ChevronRight
             className={cn(
@@ -73,7 +73,7 @@ export function CollapsibleGroup({
         )}
       >
         <div className="min-w-0 overflow-hidden">
-          <div className="min-w-0 space-y-3 px-3 pb-4 pt-0.5">{children}</div>
+          <div className="min-w-0 space-y-3 px-3.5 pb-4 pt-0.5">{children}</div>
         </div>
       </div>
     </div>

@@ -89,7 +89,7 @@ export function BackgroundPattern() {
                 paintPattern(pattern.id, patternScale, patternOpacity, patternColor, true)
               }
               className={cn(
-                "relative aspect-square overflow-hidden rounded-full bg-muted/40 transition-transform disabled:pointer-events-none disabled:opacity-40",
+                "relative aspect-square overflow-hidden rounded-md bg-muted/40 transition-transform disabled:pointer-events-none disabled:opacity-40",
                 "hover:scale-105 active:scale-95",
                 selected && "outline outline-2 outline-offset-2 outline-foreground",
               )}

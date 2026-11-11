@@ -66,7 +66,7 @@ export function StudioMobileNav({
             active ? "text-foreground" : "text-muted-foreground",
           )}
         >
-          <Icon className="size-5 stroke-[1.75]" />
+          <Icon className="size-4 stroke-[1.75]" />
           {label}
         </Link>
       ))}
@@ -76,7 +76,7 @@ export function StudioMobileNav({
         aria-label="New project"
         className="flex min-w-0 flex-1 items-center justify-center text-foreground"
       >
-        <span className="flex size-9 items-center justify-center rounded-full bg-foreground text-background">
+        <span className="flex size-9 items-center justify-center rounded-md bg-foreground text-background">
           <Plus className="size-5 stroke-[2]" />
         </span>
       </button>

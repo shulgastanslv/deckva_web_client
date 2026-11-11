@@ -122,7 +122,7 @@ export function InviteMembersDialog() {
       <DialogTrigger asChild>
         <Button
           variant="secondary"
-          className="h-9 rounded-full bg-[#4262ff] px-3.5 text-[13px] font-semibold text-white hover:bg-[#4262ff]/90"
+          className="h-9 rounded-md bg-[#4262ff] px-3.5 text-[13px] font-semibold text-white hover:bg-[#4262ff]/90"
         >
           <UserPlus className="mr-2 size-3.5" />
           Invite Members
@@ -192,7 +192,7 @@ export function InviteMembersDialog() {
               variant="ghost"
               disabled={busy}
               onClick={() => void handleCopyLink()}
-              className="h-10 rounded-full px-4 text-[13px]"
+              className="h-10 rounded-md px-4 text-[13px]"
             >
               {busy ? (
                 <Loader2 className="size-3.5 animate-spin" />
@@ -205,7 +205,7 @@ export function InviteMembersDialog() {
               type="button"
               disabled={busy || !emails.trim()}
               onClick={() => void handleSend()}
-              className="ml-auto h-10 rounded-full px-5 text-[13px] font-medium"
+              className="ml-auto h-10 rounded-md px-5 text-[13px] font-medium"
             >
               {busy ? (
                 <Loader2 className="size-4 animate-spin" />

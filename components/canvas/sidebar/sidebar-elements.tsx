@@ -23,8 +23,9 @@ import type { FrameKind } from "@/lib/canvas/frames";
 import { ImageUploadIcon } from "@/components/canvas/shapes-icons";
 import { FramesPicker } from "@/components/canvas/sidebar/frames-picker";
 import { CodeBlockSettings } from "@/components/canvas/code-block-inspector";
-import { ChipScroll } from "@/components/canvas/sidebar/chip-scroll";
+import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { GalleryCard, GallerySection } from "@/components/canvas/sidebar/gallery-card";
+import { sidebarFieldInput, sidebarPanel } from "@/components/canvas/sidebar/sidebar-ui";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 import { useSelectedObject } from "@/hooks/use-selected-object";
 import {
@@ -138,18 +139,8 @@ export function SidebarElements() {
     return filterItems(section?.items ?? [], search);
   }, [sections, search]);
 
-  const tabItems = useMemo(
-    () =>
-      CATEGORIES.map(({ id, label, icon: Icon }) => ({
-        id,
-        label,
-        icon: <Icon />,
-      })),
-    [],
-  );
-
   return (
-    <div className="flex w-full min-w-0 max-w-full p-2 flex-col overflow-x-hidden text-[14px] text-foreground">
+    <div className={cn(sidebarPanel, "w-full max-w-full overflow-x-hidden")}>
       <input
         type="file"
         ref={fileInputRef}
@@ -167,44 +158,51 @@ export function SidebarElements() {
         disabled={!manager}
       />
 
-      <div className="sticky top-0 z-10 w-full min-w-0 space-y-3 bg-background/95 px-3 pt-3 pb-2 backdrop-blur-sm">
-        <label className="flex h-10 min-w-0 items-center gap-2 rounded-full bg-muted/70 px-3.5 dark:bg-muted/35">
-          <Search className="size-4 shrink-0 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={
-              category === "photos"
-                ? "Search photos..."
-                : category === "text"
-                  ? "Search text..."
-                  : category === "shapes"
-                    ? "Search shapes..."
-                    : category === "frames"
-                      ? "Search devices..."
-                      : category === "code"
-                        ? "Search themes..."
-                        : "Search..."
-            }
-            className="h-full min-w-0 w-full bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
+      <div className="sticky top-0 z-10 w-full min-w-0 bg-background/95 pb-2 backdrop-blur-sm">
+        <div className="flex items-center gap-1.5">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={
+                category === "photos"
+                  ? "Search photos..."
+                  : category === "text"
+                    ? "Search text..."
+                    : category === "shapes"
+                      ? "Search shapes..."
+                      : category === "frames"
+                        ? "Search devices..."
+                        : category === "code"
+                          ? "Search themes..."
+                          : "Search..."
+              }
+              className={cn(sidebarFieldInput, "pl-9")}
+            />
+          </div>
+          <FilterMenu
+            value={category}
+            defaultValue="photos"
+            ariaLabel="Element category"
+            onChange={(id) => {
+              setCategory(id as Category);
+              setSearch("");
+            }}
+            groups={[
+              {
+                label: "Category",
+                options: CATEGORIES.map(({ id, label }) => ({ id, label })),
+              },
+            ]}
           />
-        </label>
-
-        <ChipScroll
-          items={tabItems}
-          value={category}
-          onChange={(id) => {
-            setCategory(id as Category);
-            setSearch("");
-          }}
-          ariaLabel="Element categories"
-        />
+        </div>
       </div>
 
       <div
         role="tabpanel"
         aria-label={CATEGORIES.find((item) => item.id === category)?.label}
-        className="w-full min-w-0 space-y-3 px-3 pt-1 pb-4"
+        className="w-full min-w-0 space-y-3 pt-1 pb-1"
       >
         {category === "photos" ? (
           <div className="space-y-2.5">
@@ -258,7 +256,7 @@ export function SidebarElements() {
                       void addImageFromUrl();
                     }
                   }}
-                  className="h-11 rounded-full border-0 bg-muted/60 pl-10 text-[14px] shadow-none hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/40 dark:bg-muted/25 dark:hover:bg-muted/40"
+                  className="h-11 rounded-md border-0 bg-muted/60 pl-10 text-[14px] shadow-none hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/40 dark:bg-muted/25 dark:hover:bg-muted/40"
                 />
               </div>
               <Button
@@ -267,7 +265,7 @@ export function SidebarElements() {
                 size="sm"
                 disabled={!manager || urlLoading || !imageUrl.trim()}
                 onClick={() => void addImageFromUrl()}
-                className="h-11 shrink-0 rounded-full px-4 text-[14px]"
+                className="h-11 shrink-0 rounded-md px-4 text-[14px]"
               >
                 {urlLoading ? (
                   <Loader2 className="size-3.5 animate-spin" />

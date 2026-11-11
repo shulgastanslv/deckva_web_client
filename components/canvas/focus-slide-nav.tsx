@@ -19,7 +19,7 @@ export function FocusSlideNav() {
           onClick={() => void prev()}
           title="Previous slide"
           aria-label="Previous slide"
-          className="pointer-events-auto size-10 rounded-full bg-background/90 text-foreground hover:bg-background disabled:opacity-30"
+          className="pointer-events-auto size-10 rounded-md bg-background/90 text-foreground hover:bg-background disabled:opacity-30"
         >
           <ChevronLeft className="size-5" />
         </Button>
@@ -34,14 +34,14 @@ export function FocusSlideNav() {
           onClick={() => void next()}
           title="Next slide"
           aria-label="Next slide"
-          className="pointer-events-auto size-10 rounded-full bg-background/90 text-foreground hover:bg-background disabled:opacity-30"
+          className="pointer-events-auto size-10 rounded-md bg-background/90 text-foreground hover:bg-background disabled:opacity-30"
         >
           <ChevronRight className="size-5" />
         </Button>
       </div>
 
       <div className="pointer-events-none absolute top-3 left-1/2 z-20 -translate-x-1/2">
-        <span className="rounded-full bg-background/90 px-2.5 py-1 font-mono text-[11px] tabular-nums text-muted-foreground">
+        <span className="rounded-md bg-background/90 px-2.5 py-1 font-mono text-[11px] tabular-nums text-muted-foreground">
           {currentIndex + 1}/{Math.max(slides.length, 1)}
         </span>
       </div>

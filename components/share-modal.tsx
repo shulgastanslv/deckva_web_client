@@ -169,13 +169,13 @@ export function ShareModal({
                 <Input
                   readOnly
                   value={shareUrl || "Save the project to get a link"}
-                  className="h-8 rounded-full border-border/60 bg-muted/40 font-mono text-[13px]"
+                  className="h-8 rounded-md border-border/60 bg-muted/40 font-mono text-[13px]"
                 />
                 <Button
                   size="sm"
                   onClick={() => void handleCopy()}
                   disabled={busy}
-                  className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-[13px]"
+                  className="h-8 shrink-0 gap-1.5 rounded-md px-3 text-[13px]"
                 >
                   {busy ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -197,7 +197,7 @@ export function ShareModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 gap-1.5 rounded-full text-[13px]"
+                  className="h-8 gap-1.5 rounded-md text-[13px]"
                   disabled={busy}
                   onClick={() => void ensureSavedAndPublic()}
                 >

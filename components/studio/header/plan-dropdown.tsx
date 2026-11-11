@@ -103,7 +103,7 @@ export function PlanDropdown({
         <Button
           variant="secondary"
           className={cn(
-            "h-9 gap-1.5 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
+            "h-9 gap-1.5 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
             plan.isPro &&
               "bg-primary/15 text-primary hover:bg-primary/25 data-[state=open]:bg-primary/25",
           )}
@@ -148,7 +148,7 @@ export function PlanDropdown({
           <ul className="flex flex-col gap-2.5">
             {PRO_FEATURES.map((feature) => (
               <li key={feature} className="flex items-start gap-2.5">
-                <div className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-muted/50 text-foreground">
+                <div className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-md bg-muted/50 text-foreground">
                   <Check className="size-3" strokeWidth={3} />
                 </div>
                 <p className="text-[13px] leading-snug text-muted-foreground">
@@ -161,7 +161,7 @@ export function PlanDropdown({
           {!plan.isPro ? (
             <Button
               onClick={openUpgrade}
-              className="mt-5 h-10 w-full rounded-full font-medium shadow-none"
+              className="mt-5 h-10 w-full rounded-md font-medium shadow-none"
             >
               Upgrade · {STUDIO_PRO_PRICE_LABEL}/mo
             </Button>

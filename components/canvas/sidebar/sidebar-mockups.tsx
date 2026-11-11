@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Loader2, Smartphone, Laptop, Images } from "lucide-react";
+import { Loader2, Smartphone, Images } from "lucide-react";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
-import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { cn } from "@/lib/utils";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { messages } from "@/lib/messages";
@@ -22,9 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const actionButton =
-  "h-10 rounded-full bg-muted/60 dark:bg-muted/25 px-3 text-[13px] font-medium text-foreground/85 transition-colors hover:bg-muted/80 dark:hover:bg-muted/40 disabled:pointer-events-none disabled:opacity-40 flex items-center justify-center gap-1.5";
+import {
+  sidebarActionBtn,
+  sidebarHint,
+  sidebarSegmented,
+  sidebarSegmentedItem,
+  sidebarSegmentedItemActive,
+  sidebarSegmentedItemIdle,
+  sidebarSelectTrigger,
+  sidebarSurfaceIdle,
+  sidebarTextarea,
+} from "@/components/canvas/sidebar/sidebar-ui";
 
 const DEVICE_OPTIONS: { id: FrameKind; label: string }[] = [
   { id: "iphone18pro", label: "iPhone 18 Pro" },
@@ -88,40 +95,37 @@ export function SidebarMockups() {
   };
 
   return (
-    <CollapsibleGroup id="tools-mockups" title="Mockups" defaultOpen>
       <div className="space-y-3">
-        <p className="px-0.5 text-[12px] leading-snug text-muted-foreground">
+        <p className={sidebarHint}>
           Top lists and screenshot carousels. Drop titles, place devices, then fill every screen at once.
         </p>
 
-        <div className="flex gap-1">
-          <Select
-            value={device}
-            onValueChange={(value) => {
-              if (DEVICE_OPTIONS.some((option) => option.id === value)) {
-                setDevice(value as FrameKind);
-              }
-            }}
-          >
-            <SelectTrigger className="h-10 min-w-0 flex-1 rounded-full border-0 bg-muted/60 dark:bg-muted/25 px-3.5 text-[13px] shadow-none hover:bg-muted/80 dark:hover:bg-muted/40 data-[size=default]:h-10" aria-label="Device">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper">
-              {DEVICE_OPTIONS.map((option) => (
-                <SelectItem key={option.id} value={option.id} className="text-[13px]">
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Select
+          value={device}
+          onValueChange={(value) => {
+            if (DEVICE_OPTIONS.some((option) => option.id === value)) {
+              setDevice(value as FrameKind);
+            }
+          }}
+        >
+          <SelectTrigger className={sidebarSelectTrigger} aria-label="Device">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            {DEVICE_OPTIONS.map((option) => (
+              <SelectItem key={option.id} value={option.id} className="text-[13px]">
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <textarea
           value={titles}
           onChange={(event) => setTitles(event.target.value)}
           placeholder={"One title per line\nNext.js\nRemix\n…"}
           rows={4}
-          className="w-full resize-none rounded-[1.25rem] bg-muted/60 dark:bg-muted/25 px-3.5 py-3 text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground focus:bg-muted/80 dark:focus:bg-muted/40"
+          className={sidebarTextarea}
         />
 
         <button
@@ -137,7 +141,7 @@ export function SidebarMockups() {
               });
             })
           }
-          className={cn(actionButton, "w-full")}
+          className={cn(sidebarActionBtn, "w-full")}
         >
           {busy === "ranked" ? (
             <Loader2 className="size-3.5 animate-spin" />
@@ -147,17 +151,17 @@ export function SidebarMockups() {
           {busy === "ranked" ? "Building…" : `List · ${lineCount} slides`}
         </button>
 
-        <div className="flex gap-1">
+        <div className="flex gap-1.5">
           {ROW_COUNTS.map((count) => (
             <button
               key={count}
               type="button"
               onClick={() => setRowCount(count)}
               className={cn(
-                "h-10 flex-1 rounded-full text-[13px] font-medium transition-colors",
+                "h-10 flex-1 rounded-md text-[13px] font-medium transition-colors",
                 rowCount === count
-                  ? "bg-background text-foreground"
-                  : "bg-muted/60 dark:bg-muted/25 text-muted-foreground hover:bg-muted/80 dark:hover:bg-muted/40 hover:text-foreground",
+                  ? sidebarSegmentedItemActive
+                  : cn(sidebarSurfaceIdle, sidebarSegmentedItemIdle, "hover:bg-muted/80 dark:hover:bg-muted/40"),
               )}
             >
               {count}
@@ -177,15 +181,15 @@ export function SidebarMockups() {
               });
             })
           }
-          className={cn(actionButton, "w-full")}
+          className={cn(sidebarActionBtn, "w-full")}
         >
           {busy === "row" ? <Loader2 className="size-3.5 animate-spin" /> : null}
           {busy === "row" ? "Placing…" : `Row of ${rowCount} on this slide`}
         </button>
 
         <div className="space-y-1.5">
-          <p className="px-0.5 text-[12px] font-medium text-muted-foreground">Fill screens</p>
-          <div className="flex h-10 rounded-full bg-muted/60 dark:bg-muted/25 p-1">
+          <p className={cn(sidebarHint, "font-medium")}>Fill screens</p>
+          <div className={sidebarSegmented}>
             {(
               [
                 ["per-slide", "One per slide"],
@@ -197,10 +201,8 @@ export function SidebarMockups() {
                 type="button"
                 onClick={() => setFillMode(id)}
                 className={cn(
-                  "h-full flex-1 rounded-full text-[13px] font-medium transition-colors",
-                  fillMode === id
-                    ? "bg-background text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
+                  sidebarSegmentedItem,
+                  fillMode === id ? sidebarSegmentedItemActive : sidebarSegmentedItemIdle,
                 )}
               >
                 {label}
@@ -222,7 +224,7 @@ export function SidebarMockups() {
             type="button"
             disabled={!ready}
             onClick={() => fillInputRef.current?.click()}
-            className={cn(actionButton, "w-full")}
+            className={cn(sidebarActionBtn, "w-full")}
           >
             {busy === "fill" ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -231,7 +233,7 @@ export function SidebarMockups() {
             )}
             {busy === "fill" ? "Filling…" : "Pick screenshots"}
           </button>
-          <p className="px-0.5 text-[11px] leading-snug text-muted-foreground">
+          <p className="text-[11px] leading-snug text-muted-foreground">
             Multi-select photos in order. One per slide walks the carousel; This slide fills left → right.
           </p>
         </div>
@@ -260,12 +262,11 @@ export function SidebarMockups() {
             };
             input.click();
           }}
-          className={cn(actionButton, "w-full")}
+          className={cn(sidebarActionBtn, "w-full")}
         >
           {busy === "ranked-fill" ? <Loader2 className="size-3.5 animate-spin" /> : null}
           {busy === "ranked-fill" ? "Building…" : "List + screenshots"}
         </button>
       </div>
-    </CollapsibleGroup>
   );
 }

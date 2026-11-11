@@ -83,7 +83,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
                   type="button"
                   aria-label="Close"
                   onClick={() => setNavOpen(false)}
-                  className="flex size-9 items-center justify-center rounded-full text-foreground"
+                  className="flex size-9 items-center justify-center rounded-md text-foreground"
                 >
                   <X className="size-4" />
                 </button>

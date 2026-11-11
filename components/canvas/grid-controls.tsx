@@ -32,7 +32,7 @@ function CountField({
           const n = Number(e.target.value);
           if (Number.isFinite(n)) onChange(n);
         }}
-        className="h-9 w-16 rounded-full border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
+        className="h-9 w-16 rounded-md border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
       />
     </div>
   );

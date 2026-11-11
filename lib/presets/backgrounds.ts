@@ -17,75 +17,205 @@ export interface SuggestedSet {
   card: string;
 }
 
-/** Neutrals plus the warmer and clearer colors showing up in 2026 carousels. */
-export const SOLID_PRESETS: SolidPreset[] = [
-  { type: "solid", color: "#000000" },
-  { type: "solid", color: "#0a0a0a" },
-  { type: "solid", color: "#111111" },
-  { type: "solid", color: "#121212" },
-  { type: "solid", color: "#1a1a1a" },
-  { type: "solid", color: "#252525" },
-  { type: "solid", color: "#303030" },
-  { type: "solid", color: "#3d3d3d" },
-  { type: "solid", color: "#4a4a4a" },
-  { type: "solid", color: "#5a5a5a" },
-  { type: "solid", color: "#6b6b6b" },
-  { type: "solid", color: "#808080" },
-  { type: "solid", color: "#999999" },
-  { type: "solid", color: "#b0b0b0" },
-  { type: "solid", color: "#c4c4c4" },
-  { type: "solid", color: "#d4d4d4" },
-  { type: "solid", color: "#e0e0e0" },
-  { type: "solid", color: "#e8e8e8" },
-  { type: "solid", color: "#f0f0f0" },
-  { type: "solid", color: "#f1f1f1" },
-  { type: "solid", color: "#f5f5f5" },
-  { type: "solid", color: "#f9f9f9" },
-  { type: "solid", color: "#ffffff" },
-  { type: "solid", color: "#F7F1E5" },
-  { type: "solid", color: "#F6E27A" },
-  { type: "solid", color: "#F4A261" },
-  { type: "solid", color: "#E7D3C0" },
-  { type: "solid", color: "#C46B4A" },
-  { type: "solid", color: "#A47864" },
-  { type: "solid", color: "#D7263D" },
-  { type: "solid", color: "#F3D1C8" },
-  { type: "solid", color: "#7D9B76" },
-  { type: "solid", color: "#5C6B3A" },
-  { type: "solid", color: "#1F7A6B" },
-  { type: "solid", color: "#7FDBDA" },
-  { type: "solid", color: "#2F5DFF" },
-  { type: "solid", color: "#1C2B4A" },
-  { type: "solid", color: "#CDB4DB" },
-  { type: "solid", color: "#6C4AB6" },
+function hslToHex(h: number, s: number, l: number): string {
+  const sat = Math.max(0, Math.min(100, s)) / 100;
+  const light = Math.max(0, Math.min(100, l)) / 100;
+  const hue = ((h % 360) + 360) % 360;
+  const a = sat * Math.min(light, 1 - light);
+  const f = (n: number) => {
+    const k = (n + hue / 30) % 12;
+    const color = light - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function uniqColors(colors: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of colors) {
+    const color = raw.toLowerCase();
+    if (seen.has(color)) continue;
+    seen.add(color);
+    out.push(raw.startsWith("#") ? raw.toUpperCase() : raw);
+  }
+  return out;
+}
+
+/** Neutrals first, then a dense HSL grid of carousel-friendly fills. */
+const NEUTRAL_SOLIDS = [
+  "#000000",
+  "#0A0A0A",
+  "#111111",
+  "#121212",
+  "#1A1A1A",
+  "#252525",
+  "#303030",
+  "#3D3D3D",
+  "#4A4A4A",
+  "#5A5A5A",
+  "#6B6B6B",
+  "#808080",
+  "#999999",
+  "#B0B0B0",
+  "#C4C4C4",
+  "#D4D4D4",
+  "#E0E0E0",
+  "#E8E8E8",
+  "#F0F0F0",
+  "#F1F1F1",
+  "#F5F5F5",
+  "#F9F9F9",
+  "#FAFAFA",
+  "#FFFFFF",
+  "#F8F6F1",
+  "#F7F1E5",
+  "#F4F1EA",
+  "#EEF0F2",
+  "#E7E5E4",
+  "#1C1917",
+  "#111827",
+  "#0F172A",
+  "#1E293B",
 ];
 
-export const GRADIENT_PRESETS: GradientPreset[] = [
-  { type: "gradient", colors: ["#000000", "#121212"] },
-  { type: "gradient", colors: ["#0a0a0a", "#1a1a1a"] },
-  { type: "gradient", colors: ["#111111", "#252525"] },
-  { type: "gradient", colors: ["#121212", "#2a2a2a"] },
-  { type: "gradient", colors: ["#1a1a1a", "#333333"] },
-  { type: "gradient", colors: ["#252525", "#3a3a3a"] },
-  { type: "gradient", colors: ["#2a2a2a", "#404040"] },
-  { type: "gradient", colors: ["#333333", "#4a4a4a"] },
-  { type: "gradient", colors: ["#ffffff", "#f1f1f1"] },
-  { type: "gradient", colors: ["#fafafa", "#e8e8e8"] },
-  { type: "gradient", colors: ["#f9f9f9", "#e0e0e0"] },
-  { type: "gradient", colors: ["#f5f5f5", "#d4d4d4"] },
-  { type: "gradient", colors: ["#ffffff", "#d9d9d9"] },
-  { type: "gradient", colors: ["#f1f1f1", "#c8c8c8"] },
-  { type: "gradient", colors: ["#e5e5e5", "#ffffff"] },
-  { type: "gradient", colors: ["#181818", "#303030"] },
-  { type: "gradient", colors: ["#F6E27A", "#F7F1E5"] },
-  { type: "gradient", colors: ["#F4A261", "#F3D1C8"] },
-  { type: "gradient", colors: ["#1F7A6B", "#1C2B4A"] },
-  { type: "gradient", colors: ["#2F5DFF", "#CDB4DB"] },
-  { type: "gradient", colors: ["#7D9B76", "#F7F1E5"] },
-  { type: "gradient", colors: ["#D7263D", "#A47864"] },
-  { type: "gradient", colors: ["#7FDBDA", "#F6E27A"] },
-  { type: "gradient", colors: ["#6C4AB6", "#1C2B4A"] },
+const CURATED_SOLIDS = [
+  "#F6E27A",
+  "#F4A261",
+  "#E7D3C0",
+  "#C46B4A",
+  "#A47864",
+  "#D7263D",
+  "#F3D1C8",
+  "#7D9B76",
+  "#5C6B3A",
+  "#1F7A6B",
+  "#7FDBDA",
+  "#2F5DFF",
+  "#1C2B4A",
+  "#CDB4DB",
+  "#6C4AB6",
+  "#FFE4D6",
+  "#FADDE1",
+  "#EDE4FF",
+  "#DFF5EC",
+  "#DCEFFF",
+  "#FFF6C8",
+  "#F0E2CC",
+  "#FF6B4A",
+  "#3DBE8B",
+  "#4C9BE8",
+  "#8B6CFF",
+  "#E2B84A",
+  "#D65A8A",
+  "#2FB5BD",
+  "#B44DB8",
 ];
+
+const HUES = Array.from({ length: 18 }, (_, i) => i * 20);
+const SATS = [32, 48, 64, 82];
+const LIGHTS = [18, 30, 42, 54, 66, 78, 90];
+
+const GENERATED_SOLIDS = HUES.flatMap((h) =>
+  SATS.flatMap((s) => LIGHTS.map((l) => hslToHex(h, s, l))),
+);
+
+export const SOLID_PRESETS: SolidPreset[] = uniqColors([
+  ...NEUTRAL_SOLIDS,
+  ...CURATED_SOLIDS,
+  ...GENERATED_SOLIDS,
+]).map((color) => ({ type: "solid", color }));
+
+const CURATED_GRADIENTS: [string, string][] = [
+  ["#000000", "#121212"],
+  ["#0A0A0A", "#1A1A1A"],
+  ["#111111", "#252525"],
+  ["#121212", "#2A2A2A"],
+  ["#1A1A1A", "#333333"],
+  ["#252525", "#3A3A3A"],
+  ["#2A2A2A", "#404040"],
+  ["#333333", "#4A4A4A"],
+  ["#FFFFFF", "#F1F1F1"],
+  ["#FAFAFA", "#E8E8E8"],
+  ["#F9F9F9", "#E0E0E0"],
+  ["#F5F5F5", "#D4D4D4"],
+  ["#FFFFFF", "#D9D9D9"],
+  ["#F1F1F1", "#C8C8C8"],
+  ["#E5E5E5", "#FFFFFF"],
+  ["#181818", "#303030"],
+  ["#F6E27A", "#F7F1E5"],
+  ["#F4A261", "#F3D1C8"],
+  ["#1F7A6B", "#1C2B4A"],
+  ["#2F5DFF", "#CDB4DB"],
+  ["#7D9B76", "#F7F1E5"],
+  ["#D7263D", "#A47864"],
+  ["#7FDBDA", "#F6E27A"],
+  ["#6C4AB6", "#1C2B4A"],
+  ["#FFE4D6", "#FADDE1"],
+  ["#EDE4FF", "#DCEFFF"],
+  ["#DFF5EC", "#FFF6C8"],
+  ["#0F172A", "#1E3A5F"],
+  ["#111827", "#4C1D95"],
+  ["#1C1917", "#C46B4A"],
+  ["#F8F6F1", "#E7D3C0"],
+  ["#FF6B4A", "#F6E27A"],
+  ["#3DBE8B", "#2F5DFF"],
+  ["#8B6CFF", "#D65A8A"],
+  ["#4C9BE8", "#7FDBDA"],
+  ["#B44DB8", "#2F5DFF"],
+  ["#E2B84A", "#C46B4A"],
+  ["#0A0A0A", "#2F5DFF"],
+  ["#FFFFFF", "#CDB4DB"],
+  ["#1C2B4A", "#7FDBDA"],
+];
+
+const GRADIENT_LIGHTS: [number, number][] = [
+  [22, 48],
+  [28, 62],
+  [36, 72],
+  [48, 86],
+  [58, 92],
+  [72, 94],
+  [18, 78],
+  [32, 88],
+];
+
+const GENERATED_GRADIENTS: [string, string][] = HUES.flatMap((h) =>
+  [40, 62, 80].flatMap((s) =>
+    GRADIENT_LIGHTS.map(([l1, l2]) => [hslToHex(h, s, l1), hslToHex(h + 28, s, l2)] as [string, string]),
+  ),
+);
+
+const CROSS_HUE_GRADIENTS: [string, string][] = HUES.flatMap((h) =>
+  [44, 70].flatMap((s) =>
+    [34, 52].map(
+      (l) => [hslToHex(h, s, l), hslToHex(h + 140, s - 8, Math.min(94, l + 28))] as [string, string],
+    ),
+  ),
+);
+
+function uniqGradients(pairs: [string, string][]): GradientPreset[] {
+  const seen = new Set<string>();
+  const out: GradientPreset[] = [];
+  for (const colors of pairs) {
+    const key = `${colors[0].toLowerCase()}|${colors[1].toLowerCase()}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      type: "gradient",
+      colors: [colors[0].toUpperCase(), colors[1].toUpperCase()],
+    });
+  }
+  return out;
+}
+
+export const GRADIENT_PRESETS: GradientPreset[] = uniqGradients([
+  ...CURATED_GRADIENTS,
+  ...GENERATED_GRADIENTS,
+  ...CROSS_HUE_GRADIENTS,
+]);
 
 /** Soft pastels, popular colors, plus distinct white/black shades. */
 export const SUGGESTED_SETS: SuggestedSet[] = [
@@ -249,7 +379,6 @@ export const SUGGESTED_SETS: SuggestedSet[] = [
     accent: "#8A8B3D",
     card: "#F5F4E4",
   },
-  // White / light neutrals
   {
     id: "white",
     label: "White",
@@ -290,7 +419,6 @@ export const SUGGESTED_SETS: SuggestedSet[] = [
     accent: "#4B5563",
     card: "#F9FAFB",
   },
-  // Black / dark neutrals
   {
     id: "black",
     label: "Black",

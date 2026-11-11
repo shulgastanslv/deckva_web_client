@@ -12,7 +12,7 @@ export function CanvasChromeRestore({ onShow }: { onShow: () => void }) {
         variant="secondary"
         size="sm"
         onClick={onShow}
-        className="pointer-events-auto h-9 gap-1.5 rounded-full bg-background/90 px-3.5 text-[13px] font-medium text-foreground backdrop-blur-md"
+        className="pointer-events-auto h-9 gap-1.5 rounded-md bg-background/90 px-3.5 text-[13px] font-medium text-foreground backdrop-blur-md"
         title="Show toolbar and slides (\\)"
       >
         <PanelTop className="size-3.5" />

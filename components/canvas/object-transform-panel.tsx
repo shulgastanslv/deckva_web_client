@@ -84,7 +84,7 @@ function DimField({
   }, [value]);
 
   return (
-    <label className="flex h-9 items-center gap-2 rounded-full bg-muted/40 px-3">
+    <label className="flex h-9 items-center gap-2 rounded-md bg-muted/40 px-3">
       <span className="shrink-0 text-[12px] font-medium text-muted-foreground">
         {label}
       </span>
@@ -249,7 +249,7 @@ export function ObjectTransformPanel({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <div className="flex h-9 flex-1 items-center rounded-full bg-muted/40 p-0.5">
+        <div className="flex h-9 flex-1 items-center rounded-md bg-muted/40 p-0.5">
           {(
             [
               { id: "position" as const, label: "Position" },
@@ -264,10 +264,10 @@ export function ObjectTransformPanel({
                 setNudge({ x: 0, y: 0 });
               }}
               className={cn(
-                "flex h-full flex-1 items-center justify-center rounded-full text-[13px] font-medium transition-colors",
+                "flex h-full flex-1 items-center justify-center rounded-md text-[13px] font-medium transition-colors",
                 tab === opt.id
-                  ? "bg-background text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "bg-background text-primary-foreground"
+                  : "text-muted-foreground hover:text-primary-foreground",
               )}
             >
               {opt.label}
@@ -278,14 +278,14 @@ export function ObjectTransformPanel({
           type="button"
           title="Reset transform"
           onClick={resetTransform}
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+          className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
         >
           <RotateCcw className="size-4" />
         </button>
       </div>
 
       <div
-        className="relative aspect-[4/3] w-full cursor-grab overflow-hidden rounded-2xl bg-muted/40 active:cursor-grabbing"
+        className="relative aspect-[4/3] w-full cursor-grab overflow-hidden rounded-2xl bg-muted/20 active:cursor-grabbing"
         onPointerDown={onPreviewPointerDown}
         onPointerMove={onPreviewPointerMove}
         onPointerUp={onPreviewPointerUp}
@@ -311,7 +311,7 @@ export function ObjectTransformPanel({
           </div>
         )}
         {/* Stay centered — only the preview nudges while dragging. */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-foreground text-background">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-md bg-foreground text-background">
           <Move className="size-3.5" />
         </div>
       </div>

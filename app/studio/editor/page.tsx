@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 
-import { Header } from "@/components/header";
 import { LeftSidebar, RAIL_SHORTCUTS } from "@/components/canvas/left-sidebar";
 import { CanvasToolbar } from "@/components/canvas/canvas-toolbar";
 import { CanvasChromeRestore } from "@/components/canvas/canvas-chrome-restore";
@@ -94,7 +93,7 @@ export default function CarouselEditor() {
   const [activeNav, setActiveNav] = useState<NavId>("elements");
   const [showDotGrid, setShowDotGrid] = useState(true);
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
-  const [isRightCollapsed, setIsRightCollapsed] = useState(true);
+  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewSlideId, setPreviewSlideId] = useState<number>(0);
   const [previewView, setPreviewView] = useState<"slides" | "phone">("slides");
@@ -164,29 +163,14 @@ export default function CarouselEditor() {
   const sheetFrame =
     "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:overflow-hidden max-md:rounded-t-3xl max-md:bg-background max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:h-[min(72dvh,calc(100dvh-8.5rem))] md:static md:flex md:h-full md:shrink-0";
 
+  const openPreview = (view: "slides" | "phone") => {
+    setPreviewSlideId(useCanvasStore.getState().currentSlideId);
+    setPreviewView(view);
+    setShowPreviewModal(true);
+  };
+
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-background font-sans text-foreground select-none">
-      {!focusMode && (
-        <Header
-          onPreview={() => {
-            const storeCurrentId = useCanvasStore.getState().currentSlideId;
-            setPreviewSlideId(storeCurrentId);
-            setPreviewView("slides");
-            setShowPreviewModal(true);
-          }}
-          onPhonePreview={() => {
-            const storeCurrentId = useCanvasStore.getState().currentSlideId;
-            setPreviewSlideId(storeCurrentId);
-            setPreviewView("phone");
-            setShowPreviewModal(true);
-          }}
-          onFocus={() => {
-            setPhoneSheet(null);
-            setFocusMode(true);
-          }}
-        />
-      )}
-
       <Suspense fallback={null}>
         <StudioIntentBootstrap />
         <ProjectBootstrap />
@@ -268,13 +252,12 @@ export default function CarouselEditor() {
             )}
           >
             <div className="relative h-full min-h-0 max-md:w-full md:w-auto">
-              <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-[13px] text-muted-foreground md:hidden">
-                Select an object on the slide to change its style.
-              </p>
               <div className="relative z-10 flex h-full min-h-0 max-md:w-full md:w-auto">
                 <RightSidebar
                   isRightCollapsed={isRightCollapsed}
                   setIsRightCollapsed={setIsRightCollapsed}
+                  onPreview={() => openPreview("slides")}
+                  onPhonePreview={() => openPreview("phone")}
                 />
               </div>
             </div>

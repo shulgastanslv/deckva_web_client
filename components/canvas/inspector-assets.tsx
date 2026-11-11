@@ -172,7 +172,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
             type="button"
             variant="secondary"
             size="sm"
-            className="h-10 flex-1 gap-1.5 rounded-full bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
+            className="h-10 flex-1 gap-1.5 rounded-md bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
             onClick={() => fileInputRef.current?.click()}
           >
             <ImagePlus className="size-3.5" />
@@ -183,7 +183,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
               type="button"
               variant="ghost"
               size="sm"
-              className="h-10 flex-1 gap-1.5 rounded-full bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
+              className="h-10 flex-1 gap-1.5 rounded-md bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
               disabled={saving}
               onClick={() => void saveCurrent()}
             >
@@ -224,7 +224,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
                   type="button"
                   title="Remove"
                   onClick={() => void remove(asset.id)}
-                  className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                  className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-md bg-background/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
                 >
                   <Trash2 className="size-2.5" />
                 </button>

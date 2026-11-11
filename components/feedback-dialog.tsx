@@ -94,7 +94,7 @@ export function FeedbackDialog({
           type="button"
           aria-label="Close"
           onClick={() => onOpenChange(false)}
-          className="absolute top-2.5 right-2.5 z-10 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+          className="absolute top-2.5 right-2.5 z-10 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
         >
           <X className="size-3.5" />
         </button>
@@ -118,7 +118,7 @@ export function FeedbackDialog({
             </p>
             <Button
               type="button"
-              className="mt-1 h-10 rounded-full px-5 text-[13px] font-medium shadow-none"
+              className="mt-1 h-10 rounded-md px-5 text-[13px] font-medium shadow-none"
               onClick={() => onOpenChange(false)}
             >
               Close
@@ -153,7 +153,7 @@ export function FeedbackDialog({
                       onClick={() =>
                         setImages((current) => current.filter((_, i) => i !== index))
                       }
-                      className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-background/90 text-foreground"
+                      className="absolute top-1 right-1 grid size-5 place-items-center rounded-md bg-background/90 text-foreground"
                     >
                       <X className="size-3" />
                     </button>
@@ -176,7 +176,7 @@ export function FeedbackDialog({
                   type="button"
                   variant="secondary"
                   className={cn(
-                    "h-9 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60",
+                    "h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60",
                   )}
                   disabled={busy || images.length >= IMAGE_MAX}
                   onClick={() => inputRef.current?.click()}
@@ -188,7 +188,7 @@ export function FeedbackDialog({
               <Button
                 type="submit"
                 disabled={busy}
-                className="h-9 rounded-full px-4 text-[13px] font-medium shadow-none"
+                className="h-9 rounded-md px-4 text-[13px] font-medium shadow-none"
               >
                 {busy ? <Loader2 className="size-3.5 animate-spin" /> : "Send"}
               </Button>

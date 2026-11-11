@@ -14,7 +14,7 @@ export function clampZoom(value: number) {
 }
 
 const cell =
-  "size-8 shrink-0 rounded-full text-muted-foreground hover:bg-muted/60 hover:text-foreground";
+  "size-8 shrink-0 rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground";
 
 export function ZoomControls({
   showTools = true,
@@ -65,7 +65,7 @@ export function ZoomControls({
   const selectActive = !handActive && !eraserActive;
 
   return (
-    <div className="flex h-9 shrink-0 items-center gap-0.5 rounded-full bg-muted/40 p-0.5">
+    <div className="flex h-9 shrink-0 items-center gap-0.5 rounded-md bg-muted/40 p-0.5">
       {showTools ? (
         <>
           <Button
@@ -117,7 +117,7 @@ export function ZoomControls({
       </Button>
       <button
         type="button"
-        className="flex h-8 min-w-12 shrink-0 items-center justify-center rounded-full px-1 font-mono text-[13px] font-medium tabular-nums text-foreground hover:bg-muted/60"
+        className="flex h-8 min-w-12 shrink-0 items-center justify-center rounded-md px-1 font-mono text-[13px] font-medium tabular-nums text-foreground hover:bg-muted/60"
         onClick={() => setZoom(100)}
         title="Reset zoom. Ctrl + scroll also zooms"
       >

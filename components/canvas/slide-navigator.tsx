@@ -205,7 +205,7 @@ export function SlideNavigator() {
                     skipClick.current = false;
                   }, 0);
                 }}
-                className={`absolute left-1 top-1 flex size-3.5 items-center justify-center rounded-full border ${
+                className={`absolute left-1 top-1 flex size-3.5 items-center justify-center rounded-md border ${
                   marked
                     ? "border-foreground bg-foreground text-background"
                     : "border-foreground/30 bg-background/80 text-transparent"

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -207,7 +207,7 @@ export function StudioHome() {
                         trackEvent("studio_starter_chip", { id: starter.id });
                         void create.generateCarousel({ topic: starter.topic });
                       }}
-                      className="inline-flex h-9 items-center rounded-full bg-muted/40 px-3.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60"
+                      className="inline-flex h-9 items-center rounded-md bg-muted/40 px-3.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60"
                     >
                       {starter.label}
                     </button>

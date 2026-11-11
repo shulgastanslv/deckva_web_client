@@ -168,7 +168,7 @@ function ToolBtn({
           disabled={disabled}
           onClick={onClick}
           className={cn(
-            "inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors",
+            "inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors",
             "hover:bg-muted/70 hover:text-foreground disabled:pointer-events-none disabled:opacity-40",
             active && "bg-muted text-foreground",
             className,
@@ -218,11 +218,11 @@ function TextColorButton({
             <button
               type="button"
               aria-label="Text color"
-              className="inline-flex size-9 shrink-0 flex-col items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted/70"
+              className="inline-flex size-9 shrink-0 flex-col items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted/70"
             >
               <span className="text-[13px] font-semibold leading-none">A</span>
               <span
-                className="mt-0.5 h-0.5 w-3.5 rounded-full"
+                className="mt-0.5 h-0.5 w-3.5 rounded-md"
                 style={{
                   background:
                     "linear-gradient(90deg,#ef4444,#eab308,#22c55e,#3b82f6,#a855f7)",
@@ -246,9 +246,9 @@ function TextColorButton({
           onChange={apply}
           className="!h-[140px] !w-full"
         />
-        <div className="flex items-center gap-2 rounded-full bg-muted/40 px-2.5">
+        <div className="flex items-center gap-2 rounded-md bg-muted/40 px-2.5">
           <span
-            className="size-4 shrink-0 rounded-full ring-1 ring-border/50"
+            className="size-4 shrink-0 rounded-md ring-1 ring-border/50"
             style={{ backgroundColor: draft }}
             aria-hidden
           />
@@ -498,7 +498,7 @@ export function SelectionToolbar() {
         }}
       >
         <div
-          className="pointer-events-auto flex h-12 max-w-[min(920px,calc(100vw-24px))] items-center gap-1 rounded-full border border-border/50 bg-background p-1 backdrop-blur-md"
+          className="pointer-events-auto flex h-12 max-w-[min(920px,calc(100vw-24px))] items-center gap-1 rounded-md border border-border/50 bg-background p-1 backdrop-blur-md"
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
         >
@@ -513,7 +513,7 @@ export function SelectionToolbar() {
                 }}
               />
 
-              <div className="flex h-9 items-center rounded-full bg-muted/40 px-0.5">
+              <div className="flex h-9 items-center rounded-md bg-muted/40 px-0.5">
                 <ToolBtn label="Smaller" onClick={() => bumpFontSize(-1)}>
                   <Minus className="size-4" />
                 </ToolBtn>
@@ -588,7 +588,7 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="Alignment"
-                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <AlignIcon className="size-4" />
                         <ChevronDown className="ml-0.5 size-2.5 opacity-60" />
@@ -618,7 +618,7 @@ export function SelectionToolbar() {
                         } as unknown as Partial<FabricObject>)
                       }
                       className={cn(
-                        "inline-flex size-9 items-center justify-center rounded-full transition-colors",
+                        "inline-flex size-9 items-center justify-center rounded-md transition-colors",
                         textState.textAlign === align
                           ? "bg-muted text-foreground"
                           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -637,7 +637,7 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="List"
-                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <List className="size-4" />
                       </button>
@@ -652,7 +652,7 @@ export function SelectionToolbar() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-9 rounded-full gap-1.5 px-2.5 text-[13px]"
+                    className="h-9 rounded-md gap-1.5 px-2.5 text-[13px]"
                     onClick={() => applyTextList("bullet")}
                   >
                     <List className="size-4" />
@@ -662,7 +662,7 @@ export function SelectionToolbar() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-9 rounded-full gap-1.5 px-2.5 text-[13px]"
+                    className="h-9 rounded-md gap-1.5 px-2.5 text-[13px]"
                     onClick={() => applyTextList("number")}
                   >
                     <ListOrdered className="size-4" />
@@ -678,7 +678,7 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="Spacing"
-                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <span className="relative flex h-3.5 w-3.5 flex-col justify-between">
                           <span className="h-px w-full bg-current" />
@@ -729,7 +729,7 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="Transparency"
-                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         <span
                           className="size-4 rounded-[3px] ring-1 ring-current/40"
@@ -777,7 +777,7 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label="Transparency"
-                        className="inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
                       >
                         Opacity
                         <span className="tabular-nums text-foreground">

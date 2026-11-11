@@ -41,7 +41,7 @@ export function ClearCanvasButton() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-9 rounded-full border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
+          className="size-9 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
           title="Clear all slides"
         >
           <BrushCleaning className="size-4" />
@@ -57,14 +57,14 @@ export function ClearCanvasButton() {
         <DialogFooter>
           <Button
             variant="secondary"
-            className="h-9 rounded-full border-none bg-muted/40 shadow-none hover:bg-muted/60"
+            className="h-9 rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
             onClick={() => setOpen(false)}
           >
             Cancel
           </Button>
           <Button
             variant="destructive"
-            className="h-9 rounded-full"
+            className="h-9 rounded-md"
             onClick={handleClear}
           >
             Delete slides

@@ -157,7 +157,7 @@ function RailTool({
           onDragLeave={onDragLeave}
           onDrop={onDrop}
           className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
+            "flex size-9 shrink-0 items-center justify-center rounded-md transition-colors disabled:pointer-events-none disabled:opacity-40",
             active || dragging
               ? "bg-foreground text-background"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -210,7 +210,7 @@ function SplitTool({
     <Popover open={open} onOpenChange={onOpenChange}>
       <div
         className={cn(
-          "flex h-9 shrink-0 items-center rounded-full p-0.5 transition-colors",
+          "flex h-9 shrink-0 items-center rounded-md p-0.5 transition-colors",
           lit ? "bg-foreground text-background" : "bg-muted/50",
         )}
       >
@@ -226,7 +226,7 @@ function SplitTool({
               onDragLeave={onDragLeave}
               onDrop={onDrop}
               className={cn(
-                "flex size-8 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
+                "flex size-8 items-center justify-center rounded-md transition-colors disabled:pointer-events-none disabled:opacity-40",
                 lit
                   ? "text-background hover:bg-background/15"
                   : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
@@ -246,7 +246,7 @@ function SplitTool({
             aria-label={`${label} options`}
             disabled={disabled}
             className={cn(
-              "flex h-8 w-6 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
+              "flex h-8 w-6 items-center justify-center rounded-md transition-colors disabled:pointer-events-none disabled:opacity-40",
               lit
                 ? "text-background/80 hover:bg-background/15 hover:text-background"
                 : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
@@ -314,7 +314,7 @@ function ToolFlyout({
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex h-9 items-center gap-2 rounded-full px-2.5 text-[13px] font-medium transition-colors",
+                  "flex h-9 items-center gap-2 rounded-md px-2.5 text-[13px] font-medium transition-colors",
                   tools.length > 6 && "flex-col justify-center gap-1 px-2 py-2 h-auto min-w-16",
                   selected
                     ? "bg-muted text-foreground"
@@ -462,7 +462,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-4">
-        <div className="pointer-events-auto flex h-12 w-fit max-w-[calc(100vw-24px)] items-center gap-1 overflow-x-auto rounded-full bg-background p-1">
+        <div className="pointer-events-auto flex h-12 w-fit max-w-[calc(100vw-24px)] items-center gap-1 overflow-x-auto rounded-md bg-background p-1">
           <input
             type="file"
             ref={fileInputRef}
@@ -540,7 +540,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                     fileInputRef.current?.click();
                     setImageOpen(false);
                   }}
-                  className="flex h-9 w-full items-center gap-2 rounded-full px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted"
+                  className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted"
                 >
                   <ImagePlus className="size-4" />
                   Upload image
@@ -568,7 +568,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                             void addImageFromUrl().then(() => setImageOpen(false));
                           }
                         }}
-                        className="h-9 rounded-full border-0 bg-muted/40 pl-7 text-[13px] shadow-none"
+                        className="h-9 rounded-md border-0 bg-muted/40 pl-7 text-[13px] shadow-none"
                       />
                     </div>
                     <Button
@@ -579,7 +579,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                       onClick={() =>
                         void addImageFromUrl().then(() => setImageOpen(false))
                       }
-                      className="h-9 shrink-0 rounded-full px-2.5 text-[13px]"
+                      className="h-9 shrink-0 rounded-md px-2.5 text-[13px]"
                     >
                       {urlLoading ? (
                         <Loader2 className="size-3 animate-spin" />
@@ -620,7 +620,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                     void removeBackground();
                     setEnhanceOpen(false);
                   }}
-                  className="flex h-9 w-full items-center gap-2 rounded-full px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+                  className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                 >
                   <WandSparkles className="size-4" />
                   Remove background
@@ -639,7 +639,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                       setEnhanceOpen(false);
                     }}
                     className={cn(
-                      "flex h-9 w-full items-center gap-2 rounded-full px-3 text-[13px] font-medium transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40",
+                      "flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40",
                       enhanceScale === value
                         ? "bg-muted text-foreground"
                         : "text-foreground",
@@ -656,7 +656,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
                     void magicLayer();
                     setEnhanceOpen(false);
                   }}
-                  className="flex h-9 w-full items-center gap-2 rounded-full px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+                  className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                 >
                   <Layers2 className="size-4" />
                   Magic layer

@@ -51,6 +51,7 @@ import {
   setLayerVisible,
   type LayerObject,
 } from "@/lib/canvas/layers";
+import { sidebarPanel } from "@/components/canvas/sidebar/sidebar-ui";
 
 type DropEdge = "before" | "after" | "inside";
 
@@ -226,7 +227,7 @@ export function SidebarLayers() {
   };
 
   return (
-    <div className="flex flex-col gap-0.5 text-[13px] p-3">
+    <div className={cn(sidebarPanel, "gap-0.5")}>
       {rows.length === 0 && (
         <p className="px-2 py-6 text-center text-[13px] text-muted-foreground">
           No objects yet. Add elements from the Elements tab.
@@ -247,8 +248,8 @@ export function SidebarLayers() {
 
         return (
           <div key={uniqueId} className="relative" style={{ paddingLeft: depth * 12 }}>
-            {mark === "before" && <div className="absolute inset-x-1 top-0 z-10 h-0.5 rounded-full bg-foreground" />}
-            {mark === "after" && <div className="absolute inset-x-1 bottom-0 z-10 h-0.5 rounded-full bg-foreground" />}
+            {mark === "before" && <div className="absolute inset-x-1 top-0 z-10 h-0.5 rounded-md bg-foreground" />}
+            {mark === "after" && <div className="absolute inset-x-1 bottom-0 z-10 h-0.5 rounded-md bg-foreground" />}
             <div
               onDragOver={(event) => onDragOver(event, obj)}
               onDrop={(event) => onDrop(event, obj)}

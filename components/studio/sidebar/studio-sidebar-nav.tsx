@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { navIconClass } from "@/components/canvas/sidebar/sidebar-ui";
 import {
   HoverCard,
   HoverCardContent,
@@ -72,13 +73,13 @@ export function StudioSidebarNav() {
           <Link
             href={item.href}
             className={cn(
-              "flex h-9 w-full items-center gap-2.5 rounded-xl px-2.5 text-[13px] font-medium transition-colors",
+              "flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] font-medium transition-colors",
               item.active
                 ? "bg-muted text-foreground"
                 : "text-muted-foreground hover:bg-background/70 hover:text-foreground dark:hover:bg-muted/50",
             )}
           >
-            <item.icon className="size-4 shrink-0 stroke-[1.75]" />
+            <item.icon className={navIconClass} />
             <span className="flex-1 text-left">{item.label}</span>
             {item.subItems ? <ChevronRight className="size-3.5 opacity-50" /> : null}
           </Link>

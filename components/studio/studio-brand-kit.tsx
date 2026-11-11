@@ -153,7 +153,7 @@ export function StudioBrandKit() {
       <StudioContent>
         <StudioContentBody>
           <div className="mx-auto w-full max-w-4xl pt-12">
-            <div className="h-10 w-48 animate-pulse rounded-full bg-muted/40 mb-12" />
+            <div className="h-10 w-48 animate-pulse rounded-md bg-muted/40 mb-12" />
             <div className="space-y-12">
               <div className="h-32 animate-pulse rounded-2xl bg-muted/40" />
               <div className="h-48 animate-pulse rounded-2xl bg-muted/40" />
@@ -183,7 +183,7 @@ export function StudioBrandKit() {
               <Button
                 type="button"
                 variant="ghost"
-                className="h-9 rounded-full bg-muted/40 px-4 text-[13px] shadow-none hover:bg-muted/60"
+                className="h-9 rounded-md bg-muted/40 px-4 text-[13px] shadow-none hover:bg-muted/60"
                 onClick={() => persist(defaultBrandKit())}
               >
                 <RotateCcw className="mr-2 size-3.5 opacity-70" />
@@ -277,7 +277,7 @@ export function StudioBrandKit() {
                 <Button
                   type="button"
                   variant="ghost"
-                  className="h-9 rounded-full bg-muted/40 px-4 text-[13px] shadow-none hover:bg-muted/60"
+                  className="h-9 rounded-md bg-muted/40 px-4 text-[13px] shadow-none hover:bg-muted/60"
                   onClick={openLogoPicker}
                 >
                   <Plus className="mr-2 size-3.5" />
@@ -323,7 +323,7 @@ export function StudioBrandKit() {
                           e.stopPropagation();
                           removeLogo(logo.id);
                         }}
-                        className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-background/80 text-muted-foreground opacity-0 backdrop-blur transition-all hover:text-destructive hover:bg-background shadow-sm group-hover:opacity-100"
+                        className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 backdrop-blur transition-all hover:text-destructive hover:bg-background shadow-sm group-hover:opacity-100"
                       >
                         <Trash2 className="size-3.5" />
                       </button>

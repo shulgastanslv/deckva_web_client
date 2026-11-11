@@ -30,7 +30,7 @@ export function StudioSidebarSearch({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search"
-          className="h-9 rounded-full border-0 bg-background pl-8 text-[13px] shadow-none placeholder:text-muted-foreground focus-visible:ring-1 dark:bg-muted/40"
+          className="h-9 rounded-md border-0 bg-background pl-8 text-[13px] shadow-none placeholder:text-muted-foreground focus-visible:ring-1 dark:bg-muted/40"
         />
       </div>
       <DropdownMenu>
@@ -40,7 +40,7 @@ export function StudioSidebarSearch({
             size="icon"
             variant="secondary"
             aria-label="Create"
-            className="size-9 shrink-0 rounded-full border-0 bg-background text-foreground shadow-none hover:bg-background/80 dark:bg-muted dark:hover:bg-muted/80"
+            className="size-9 shrink-0 rounded-md border-0 bg-background text-foreground shadow-none hover:bg-background/80 dark:bg-muted dark:hover:bg-muted/80"
           >
             <Plus className="size-4 stroke-[2]" />
           </Button>

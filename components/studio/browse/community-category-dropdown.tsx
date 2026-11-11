@@ -49,7 +49,7 @@ export function CommunityCategoryDropdown({
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="h-9 max-w-[200px] rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
+          className="h-9 max-w-[200px] rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
         >
           <span className="truncate">{label}</span>
           <ChevronDown className="ml-1 size-3.5 shrink-0 opacity-50" />
@@ -66,7 +66,7 @@ export function CommunityCategoryDropdown({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter categories"
-            className="h-9 w-full rounded-full bg-muted/40 pr-3 pl-9 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus:bg-muted/50"
+            className="h-9 w-full rounded-md bg-muted/40 pr-3 pl-9 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus:bg-muted/50"
           />
         </div>
 

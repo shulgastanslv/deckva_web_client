@@ -127,7 +127,7 @@ export function FontSelect({
             disabled={disabled || loadingFont}
             title={compact ? current : undefined}
             className={cn(
-              "flex items-center gap-2 rounded-full bg-muted/40 text-left text-[13px] transition-colors",
+              "flex items-center gap-2 rounded-md bg-muted/40 text-left text-[13px] transition-colors",
               "hover:bg-muted/60 disabled:opacity-60",
               compact ? "h-9 w-[7.5rem] px-2.5" : "h-9 w-full px-3",
             )}
@@ -165,7 +165,7 @@ export function FontSelect({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search Google Fonts…"
-              className="h-8 w-full rounded-full bg-muted/40 pl-8 pr-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus:ring-1 focus:ring-ring"
+              className="h-8 w-full rounded-md bg-muted/40 pl-8 pr-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus:ring-1 focus:ring-ring"
             />
           </div>
 

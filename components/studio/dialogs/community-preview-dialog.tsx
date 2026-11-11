@@ -168,7 +168,7 @@ export function CommunityPreviewDialog({
                 aria-label="Previous slide"
                 disabled={count <= 1}
                 onClick={() => go(index - 1)}
-                className="hidden size-10 shrink-0 items-center justify-center rounded-full bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
+                className="hidden size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
               >
                 <ChevronLeft className="size-5" />
               </button>
@@ -201,7 +201,7 @@ export function CommunityPreviewDialog({
                 aria-label="Next slide"
                 disabled={count <= 1}
                 onClick={() => go(index + 1)}
-                className="hidden size-10 shrink-0 items-center justify-center rounded-full bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
+                className="hidden size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
               >
                 <ChevronRight className="size-5" />
               </button>
@@ -302,7 +302,7 @@ export function CommunityPreviewDialog({
                     type="button"
                     disabled={!preview || busy || loading}
                     onClick={editOwn}
-                    className="h-11 w-full gap-2 rounded-full text-[14px] font-medium shadow-none"
+                    className="h-11 w-full gap-2 rounded-md text-[14px] font-medium shadow-none"
                   >
                     <Pencil className="size-4" />
                     Edit my template
@@ -318,7 +318,7 @@ export function CommunityPreviewDialog({
                     type="button"
                     disabled={!preview || busy || loading}
                     onClick={() => void customize()}
-                    className="h-11 w-full gap-2 rounded-full text-[14px] font-medium shadow-none"
+                    className="h-11 w-full gap-2 rounded-md text-[14px] font-medium shadow-none"
                   >
                     {busy ? (
                       <Loader2 className="size-4 animate-spin" />
