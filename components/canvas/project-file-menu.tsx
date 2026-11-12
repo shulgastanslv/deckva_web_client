@@ -9,7 +9,6 @@ import {
   Copy,
   Crop,
   DownloadSimple as Download,
-  GridFour as Grid3X3,
   Question as HelpCircle,
   Plus,
   FloppyDisk as Save,
@@ -26,7 +25,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { GridSettingsPanel, useSyncLayoutGrid } from "@/components/canvas/grid-controls";
+import { useSyncLayoutGrid } from "@/components/canvas/grid-controls";
 import { duplicateProject } from "@/actions/projects";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useProject } from "@/hooks/use-project";
@@ -227,27 +226,6 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
           <Copy className="size-5" />
           {t("makeCopy")}
         </DropdownMenuItem>
-
-        <DropdownMenuSeparator className="bg-border/50" />
-
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger
-            className={cn(
-              menuItem,
-              "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
-            )}
-          >
-            <Grid3X3 className="size-5" />
-            {t("layoutGrid")}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent
-            sideOffset={8}
-            className="w-72 rounded-2xl p-3"
-            onPointerDown={(event) => event.preventDefault()}
-          >
-            <GridSettingsPanel />
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
 
         <DropdownMenuSeparator className="bg-border/50" />
 

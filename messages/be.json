@@ -667,6 +667,7 @@
       "eraser": "Гумка",
       "focusMode": "Рэжым фокусу",
       "autoFlow": "Аўтапаток",
+      "layoutGrid": "Сетка",
       "edge": "Край",
       "padding": "Водступ",
       "importJson": "Імпарт JSON",
@@ -781,6 +782,7 @@
     "autoFlow": {
       "textOverflow": "Тэкст выходзіць за слайд — працягнуць на наступным?",
       "objectOverflow": "Аб’ект за краем — перанесці на новы слайд?",
+      "movedToNeighbor": "Перанесена на суседні слайд",
       "continue": "Працягнуць",
       "create": "Стварыць",
       "dismiss": "Адхіліць"
@@ -843,11 +845,14 @@
       "font": "Шрыфт",
       "loadingFonts": "Загрузка шрыфтоў…",
       "searchGoogleFonts": "Пошук Google Fonts…",
+      "noResults": "Нічога не знойдзена",
       "groups": {
         "brandKit": "Брэнд-кіт",
+        "recent": "Нядаўнія",
         "system": "Сістэмныя",
         "popular": "Папулярныя",
-        "googleFonts": "Google Fonts"
+        "googleFonts": "Усе Google Fonts",
+        "found": "Знойдзена ({count})"
       },
       "styles": {
         "heading": "Загаловак",

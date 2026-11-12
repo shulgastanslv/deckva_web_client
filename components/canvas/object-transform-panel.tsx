@@ -106,10 +106,10 @@ function DimField({
 
   return (
     <label className="flex h-10 min-w-0 items-center overflow-hidden rounded-md bg-muted/40">
-      <span className="shrink-0 px-3 text-[12px] font-medium text-muted-foreground">
+      <span className="shrink-0 px-2.5 text-[13px] font-medium text-muted-foreground">
         {label}
       </span>
-      <span className="h-4 w-px shrink-0 bg-border/50" aria-hidden />
+      <span className="h-4 w-px shrink-0 bg-border/40" aria-hidden />
       <input
         type="number"
         step={decimals > 0 ? 10 ** -decimals : 1}
@@ -119,10 +119,10 @@ function DimField({
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
         }}
-        className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-right text-[13px] tabular-nums outline-none focus-visible:ring-0"
+        className="h-full min-w-0 flex-1 border-0 bg-transparent px-2.5 text-right text-[13px] tabular-nums outline-none focus-visible:ring-0"
       />
       {suffix ? (
-        <span className="pr-3 text-[12px] text-muted-foreground">{suffix}</span>
+        <span className="pr-2.5 text-[12px] text-muted-foreground">{suffix}</span>
       ) : null}
     </label>
   );
@@ -474,7 +474,7 @@ export function ObjectTransformPanel({
           min={10}
           max={300}
           step={1}
-          formatValue={(v) => `${Math.round(v)}%`}
+          suffix="%"
           onValueChange={(v) => setZoom(v, false)}
           onValueCommit={(v) => setZoom(v, true)}
         />
@@ -484,7 +484,7 @@ export function ObjectTransformPanel({
           min={-180}
           max={180}
           step={1}
-          formatValue={(v) => `${Math.round(v)}°`}
+          suffix="°"
           onValueChange={(v) => setAngle(v, false)}
           onValueCommit={(v) => setAngle(v, true)}
         />
@@ -496,7 +496,7 @@ export function ObjectTransformPanel({
               min={-SKEW_MAX}
               max={SKEW_MAX}
               step={1}
-              formatValue={(v) => `${Math.round(v)}°`}
+              suffix="°"
               onValueChange={(v) => setSkew("skewX", v, false)}
               onValueCommit={(v) => setSkew("skewX", v, true)}
             />
@@ -506,7 +506,7 @@ export function ObjectTransformPanel({
               min={-SKEW_MAX}
               max={SKEW_MAX}
               step={1}
-              formatValue={(v) => `${Math.round(v)}°`}
+              suffix="°"
               onValueChange={(v) => setSkew("skewY", v, false)}
               onValueCommit={(v) => setSkew("skewY", v, true)}
             />

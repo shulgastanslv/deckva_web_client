@@ -16,14 +16,19 @@ import {
   placeObjectOnNewSlide,
   resolveAutoFlowTargets,
 } from "@/lib/canvas/auto-flow";
+import {
+  moveSelectionToSlide,
+  neighborSlideId,
+  overflowSide,
+} from "@/lib/canvas/move-to-slide";
 import { continuationForText, writeTextPart } from "@/lib/canvas/text-continue";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 
 /**
- * When Auto Flow is on and an object leaves the slide, offer to create
- * the next slide. Text that runs past the bottom continues there; anything
- * else moves across as a whole object.
+ * When an object leaves the slide:
+ * - left/right into an existing neighbor → move there automatically
+ * - otherwise (Auto Flow on) → offer to create the next slide
  */
 export function AutoFlowPrompt() {
   const manager = useCanvasManager();
@@ -40,7 +45,7 @@ export function AutoFlowPrompt() {
   const busy = useRef(false);
 
   useEffect(() => {
-    if (!manager || !autoFlowEnabled) {
+    if (!manager || !slidesController) {
       setPending(null);
       return;
     }
@@ -50,21 +55,50 @@ export function AutoFlowPrompt() {
       if (!target || busy.current) return;
 
       const { width, height } = canvasDimensions;
-      if (isObjectOutOfBounds(target, width, height, autoFlowEdgeTolerance)) {
-        if (dismissedFor.current.has(target)) return;
-        setPending(target);
-      } else {
-        // Allow prompting again on the next excursion past the edge.
+      if (!isObjectOutOfBounds(target, width, height, autoFlowEdgeTolerance)) {
         dismissedFor.current.delete(target);
         setPending((prev) => (prev === target ? null : prev));
+        return;
       }
+
+      const side = overflowSide(target, width, height, autoFlowEdgeTolerance);
+      if (side === "left" || side === "right") {
+        const targetId = neighborSlideId(side);
+        if (targetId != null) {
+          setPending(null);
+          busy.current = true;
+          void moveSelectionToSlide({
+            manager,
+            slides: slidesController,
+            targetId,
+            fromSide: side,
+            padding: autoFlowPadding,
+          })
+            .catch((err) => reportError(err, messages.errors.autoFlow))
+            .finally(() => {
+              busy.current = false;
+            });
+          return;
+        }
+      }
+
+      if (!autoFlowEnabled) return;
+      if (dismissedFor.current.has(target)) return;
+      setPending(target);
     };
 
     manager.canvas.on("object:modified", onModified);
     return () => {
       manager.canvas.off("object:modified", onModified);
     };
-  }, [manager, autoFlowEnabled, autoFlowEdgeTolerance, canvasDimensions]);
+  }, [
+    manager,
+    slidesController,
+    autoFlowEnabled,
+    autoFlowEdgeTolerance,
+    autoFlowPadding,
+    canvasDimensions,
+  ]);
 
   if (!pending || !autoFlowEnabled || !manager) return null;
 
@@ -93,7 +127,6 @@ export function AutoFlowPrompt() {
       const source = pending;
       setPending(null);
 
-      // Expand multi-select and restore scene coords before cloning.
       const targets = resolveAutoFlowTargets(source);
       if (targets.length === 0) return;
 

@@ -66,8 +66,8 @@ export class SlidesController {
     return this.enqueue(() => this.load(this.store.getState().currentSlideId));
   }
 
-  switchTo(id: number): Promise<void> {
-    return this.enqueue(() => this.saveAndLoad(id));
+  switchTo(id: number, options?: { thumbnail?: boolean }): Promise<void> {
+    return this.enqueue(() => this.saveAndLoad(id, options));
   }
 
   next(): Promise<void> {
@@ -130,12 +130,15 @@ export class SlidesController {
     return slides[index + offset]?.id;
   }
 
-  private async saveAndLoad(id: number | undefined): Promise<void> {
+  private async saveAndLoad(
+    id: number | undefined,
+    options?: { thumbnail?: boolean },
+  ): Promise<void> {
     const { slides, currentSlideId } = this.store.getState();
     if (id === undefined || id === currentSlideId) return;
     if (!slides.some((s) => s.id === id)) return;
 
-    this.saveCurrent();
+    this.saveCurrent(options);
     await this.load(id);
   }
 

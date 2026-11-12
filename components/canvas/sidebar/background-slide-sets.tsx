@@ -10,21 +10,15 @@ import { Button } from "@/components/ui/button";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { paintSlide } from "@/lib/canvas/document";
+import { scheduleSlideThumbnailHydration } from "@/lib/canvas/thumbnail";
 import {
   generateSlideBackgrounds,
   SLIDE_BACKGROUND_SETS,
   SLIDE_SET_COUNT,
   type SlideBackgroundSet,
 } from "@/lib/presets/slide-background-sets";
-import type { FabricCanvasJSON, SlideItem } from "@/lib/types";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
-
-const emptyCanvas = (): FabricCanvasJSON => ({
-  version: "6.0.0",
-  objects: [],
-  background: "#ffffff",
-});
 
 function SlideSetRow({
   set,
@@ -104,6 +98,7 @@ export function BackgroundSlideSets() {
     if (liveColor && manager) {
       void manager.setBackground({ type: "solid", color: liveColor });
     }
+    scheduleSlideThumbnailHydration(slides.map((slide) => slide.id));
   };
 
   return (

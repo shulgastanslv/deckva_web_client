@@ -22,6 +22,7 @@ import {
   type ProjectPalette,
 } from "@/lib/canvas/document";
 import { paintSlotOnCanvas } from "@/lib/canvas/paint-live";
+import { scheduleSlideThumbnailHydration } from "@/lib/canvas/thumbnail";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
@@ -166,11 +167,17 @@ export function SidebarBackground() {
     if (slots.every((slot) => next[slot] === before[slot])) return;
 
     const changed = slots.filter((slot) => next[slot] !== before[slot]);
+    const touched: number[] = [];
     const slides = store.slides.map((slide) => {
       if (ids && !ids.has(slide.id)) return slide;
+      touched.push(slide.id);
       let canvasJSON = slide.canvasJSON;
       for (const slot of changed) canvasJSON = paintSlide(canvasJSON, slot, next[slot]);
-      return { ...slide, canvasJSON };
+      return {
+        ...slide,
+        canvasJSON,
+        thumbnail: slide.id === store.currentSlideId ? slide.thumbnail : null,
+      };
     });
 
     if (paletteScope === "slide") setSlidePalette(next);
@@ -187,6 +194,7 @@ export function SidebarBackground() {
         manager.commit();
       }
     }
+    scheduleSlideThumbnailHydration(touched);
   };
 
   const setProjectSlot = (slot: PaletteSlot, color: string) => {

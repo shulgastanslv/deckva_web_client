@@ -370,7 +370,14 @@ export class GridManager {
         this.drawHorizontalGuide(canvasCY);
       }
 
-      if (!snappedX) {
+      // Don't glue to slide edges once the object is leaving — blocks
+      // smooth hand-off to a neighbor slide.
+      const leavingX =
+        bounds.centerX < -threshold || bounds.centerX > width + threshold;
+      const leavingY =
+        bounds.centerY < -threshold || bounds.centerY > height + threshold;
+
+      if (!snappedX && !leavingX) {
         if (Math.abs(bounds.left) < threshold) {
           nextCX = bounds.width / 2;
           snappedX = true;
@@ -381,7 +388,7 @@ export class GridManager {
           this.drawVerticalGuide(width);
         }
       }
-      if (!snappedY) {
+      if (!snappedY && !leavingY) {
         if (Math.abs(bounds.top) < threshold) {
           nextCY = bounds.height / 2;
           snappedY = true;
@@ -466,7 +473,13 @@ export class GridManager {
       }
     }
 
-    if (gridSnapActive) {
+    const leavingForNeighbor =
+      bounds.centerX < -threshold ||
+      bounds.centerX > width + threshold ||
+      bounds.centerY < -threshold ||
+      bounds.centerY > height + threshold;
+
+    if (gridSnapActive && !leavingForNeighbor) {
       bounds = {
         ...this.getBounds(obj),
         // Use tentative center if we already snapped via guides

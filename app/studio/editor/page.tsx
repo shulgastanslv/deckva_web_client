@@ -43,12 +43,15 @@ function ProjectBootstrap() {
     if (!projectId) return;
 
     const store = useCanvasStore.getState();
-    if (store.currentProjectId || store.isGeneratingCarousel) return;
+    // Already showing this project — don't reload.
+    if (store.currentProjectId === projectId && !store.isLoadingProject) return;
 
     // Generate intent owns the first load — keep the canvas fallback for AI.
-    const intent = peekStudioIntent();
-    if (intent?.type === "generate" && intent.projectId === projectId) {
-      return;
+    if (store.isGeneratingCarousel) {
+      const intent = peekStudioIntent();
+      if (intent?.type === "generate" && intent.projectId === projectId) {
+        return;
+      }
     }
 
     void loadProject(projectId);

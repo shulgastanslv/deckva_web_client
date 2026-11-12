@@ -34,6 +34,7 @@ import { useCanvasObjects } from "@/hooks/use-canvas-objects";
 import { useSlides } from "@/hooks/use-slides";
 import { slidesFromLines, splitSlideLines, TEXT_STYLES, type TextStyleId } from "@/lib/canvas/document";
 import { carouselTextHits, replaceTextInJSON, replaceTextOnNodes } from "@/lib/canvas/find-text";
+import { scheduleSlideThumbnailHydration } from "@/lib/canvas/thumbnail";
 import type { Corner, SlideNumberStyle } from "@/lib/canvas/objects";
 import { formatSlideNumber } from "@/lib/canvas/objects";
 import type { FrameKind } from "@/lib/canvas/frames";
@@ -479,10 +480,17 @@ function FindReplacePanel() {
     slidesController.saveCurrent();
     const store = useCanvasStore.getState();
     let total = 0;
+    const touched: number[] = [];
     const next = store.slides.map((slide) => {
       const replaced = replaceTextInJSON(slide.canvasJSON, query, findReplacement, false);
       total += replaced.count;
-      return replaced.count > 0 ? { ...slide, canvasJSON: replaced.json } : slide;
+      if (replaced.count <= 0) return slide;
+      touched.push(slide.id);
+      return {
+        ...slide,
+        canvasJSON: replaced.json,
+        thumbnail: slide.id === store.currentSlideId ? slide.thumbnail : null,
+      };
     });
     if (total === 0) return;
     store.setSlides(next);
@@ -492,6 +500,7 @@ function FindReplacePanel() {
       manager.commit();
     }
     store.setDirty(true);
+    scheduleSlideThumbnailHydration(touched);
   };
 
   return (

@@ -667,6 +667,7 @@
       "eraser": "Eraser",
       "focusMode": "Focus mode",
       "autoFlow": "Auto Flow",
+      "layoutGrid": "Layout grid",
       "edge": "Edge",
       "padding": "Padding",
       "importJson": "Import JSON",
@@ -781,6 +782,7 @@
     "autoFlow": {
       "textOverflow": "Text runs past the slide — continue on the next one?",
       "objectOverflow": "Object past the edge — move it to a new slide?",
+      "movedToNeighbor": "Moved to the next slide",
       "continue": "Continue",
       "create": "Create",
       "dismiss": "Dismiss"
@@ -843,11 +845,14 @@
       "font": "Font",
       "loadingFonts": "Loading fonts…",
       "searchGoogleFonts": "Search Google Fonts…",
+      "noResults": "No fonts match",
       "groups": {
         "brandKit": "Brand kit",
+        "recent": "Recent",
         "system": "System",
         "popular": "Popular",
-        "googleFonts": "Google Fonts"
+        "googleFonts": "All Google Fonts",
+        "found": "Found ({count})"
       },
       "styles": {
         "heading": "Heading",

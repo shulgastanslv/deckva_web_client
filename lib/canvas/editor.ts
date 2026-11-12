@@ -3,6 +3,7 @@ import { CanvasManager } from "./manager";
 import { SlidesController, type SlidesState } from "./slides";
 import { bindKeyboardShortcuts } from "./shortcuts";
 import { applyChrome, chromeTemplatesFrom, patchLiveSlideNumber, sameChrome } from "./chrome";
+import { scheduleSlideThumbnailHydration } from "./thumbnail";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
 export interface EditorStore {
@@ -41,6 +42,7 @@ export function createEditor(
 
       snap.setChrome(nextChrome);
       const slides = useCanvasStore.getState().slides;
+      const touched: number[] = [];
       for (let index = 0; index < slides.length; index++) {
         const slide = slides[index]!;
         if (slide.id === snap.currentSlideId) continue;
@@ -48,7 +50,9 @@ export function createEditor(
           slide.id,
           applyChrome(slide.canvasJSON, nextChrome, index, slides.length),
         );
+        touched.push(slide.id);
       }
+      if (touched.length > 0) scheduleSlideThumbnailHydration(touched);
     }),
     manager.on("selection", (obj) => store.getState().setSelectedObject(obj)),
     bindKeyboardShortcuts(manager),

@@ -16,6 +16,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -28,6 +31,7 @@ import {
   Eye,
   EyeSlash as EyeOff,
   FilePlus,
+  GridFour as Grid3X3,
   Hand,
   Lock,
   Crosshair as Focus,
@@ -39,6 +43,7 @@ import {
   UploadSimple as Upload,
   FlowArrow as Workflow,
 } from "@phosphor-icons/react";
+import { GridSettingsPanel } from "@/components/canvas/grid-controls";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -404,6 +409,27 @@ export function CanvasToolbar({
                 <span className="flex-1">{t("focusMode")}</span>
               </DropdownMenuItem>
             ) : null}
+
+            <DropdownMenuSeparator className="bg-border/50" />
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                className={cn(
+                  menuItem,
+                  "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
+                )}
+              >
+                <Grid3X3 className="size-5" />
+                {t("layoutGrid")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent
+                sideOffset={8}
+                className="w-72 rounded-2xl p-3"
+                onPointerDown={(event) => event.preventDefault()}
+              >
+                <GridSettingsPanel />
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
 
             <DropdownMenuSeparator className="bg-border/50" />
 

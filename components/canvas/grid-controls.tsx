@@ -51,15 +51,23 @@ export function useSyncLayoutGrid() {
 
   useEffect(() => {
     if (!manager) return;
-    manager.grid.applySettings({
-      columns: gridColumns,
-      rows: gridRows,
-      margin: gridMargin,
-      color: gridColor,
-      opacity: gridOpacity,
-      snapToGrid,
-    });
-    manager.grid.setVisible(isGridVisible);
+
+    const sync = () => {
+      manager.grid.applySettings({
+        columns: gridColumns,
+        rows: gridRows,
+        margin: gridMargin,
+        color: gridColor,
+        opacity: gridOpacity,
+        snapToGrid,
+      });
+      manager.grid.setVisible(isGridVisible);
+    };
+
+    sync();
+    // Re-apply after every slide load — overlay is wiped by loadFromJSON.
+    const off = manager.on("load", sync);
+    return off;
   }, [
     manager,
     isGridVisible,
