@@ -34,7 +34,7 @@ export function StudioStartSection({
     <section>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">
             {t("makeCarousel")}
           </h2>
           <p className="text-sm text-muted-foreground">
