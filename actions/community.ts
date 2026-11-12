@@ -98,6 +98,7 @@ export async function listCommunityProjects(options?: {
 
     const where: Prisma.ProjectWhereInput = {
       isPublic: true,
+      trashedAt: null,
       ...(options?.mine && user
         ? { userId: user.id }
         : status === "all" && admin

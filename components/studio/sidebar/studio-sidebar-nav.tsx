@@ -7,6 +7,7 @@ import {
   House as HomeIcon,
   Palette as PaletteIcon,
   CaretRight as ChevronRight,
+  Trash as TrashIcon,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
@@ -57,6 +58,7 @@ export function StudioSidebarNav() {
           label: t("starred"),
           tabId: "starred",
         },
+       
         {
           href: "/studio/browse?tab=community",
           label: t("community"),
@@ -69,6 +71,12 @@ export function StudioSidebarNav() {
       label: t("brandKit"),
       icon: PaletteIcon,
       active: pathname.startsWith("/studio/brand-kit"),
+    },
+    {
+      href: "/studio/browse?tab=trash",
+      label: t("trash"),
+      icon: TrashIcon,
+      active: pathname.startsWith("/studio/browse?tab=trash"),
     },
   ];
 

@@ -338,6 +338,7 @@ export function FindReplacePanel() {
         <input
           value={findQuery}
           onChange={(event) => setFindQuery(event.target.value)}
+          onKeyDown={(event) => event.stopPropagation()}
           placeholder={t("workspace.textToFind")}
           aria-label={t("workspace.findText")}
           className={sidebarFieldInput}
@@ -348,6 +349,7 @@ export function FindReplacePanel() {
         <input
           value={findReplacement}
           onChange={(event) => setFindReplacement(event.target.value)}
+          onKeyDown={(event) => event.stopPropagation()}
           placeholder={t("workspace.newText")}
           aria-label={t("workspace.replacementText")}
           className={sidebarFieldInput}

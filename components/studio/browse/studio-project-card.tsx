@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  Star,
-} from "@phosphor-icons/react";
+import { Star } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
 import type { ProjectListItem } from "@/actions/projects";
@@ -10,22 +8,41 @@ import { formatBoardDate } from "@/components/studio/lib/format";
 import { StudioProjectMenu } from "@/components/studio/browse/studio-project-menu";
 import { StudioProjectOwner } from "@/components/studio/browse/studio-project-owner";
 import { StudioTypeArt } from "@/components/studio/ui/studio-type-art";
+import { cn } from "@/lib/utils";
 
 export function StudioProjectCard({
   project,
+  selected = false,
+  inTrash = false,
   onOpen,
+  onToggleSelect,
   onChanged,
 }: {
   project: ProjectListItem;
+  selected?: boolean;
+  inTrash?: boolean;
   onOpen: () => void;
+  onToggleSelect?: (opts?: { additive?: boolean }) => void;
   onChanged: () => void;
 }) {
   const tc = useTranslations("common");
   return (
-    <article className="group relative flex cursor-pointer flex-col gap-2.5 select-none">
+    <article
+      className={cn(
+        "group relative flex cursor-pointer flex-col gap-2.5 select-none",
+        selected && "ring-2 ring-foreground/20 rounded-2xl",
+      )}
+    >
       <button
         type="button"
-        onClick={onOpen}
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            onToggleSelect?.({ additive: true });
+            return;
+          }
+          onOpen();
+        }}
         className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted/40 text-left transition-colors group-hover:bg-muted/60"
       >
         {project.previewUrl ? (
@@ -48,8 +65,35 @@ export function StudioProjectCard({
             </span>
           </span>
         )}
+        <span
+          role="button"
+          tabIndex={0}
+          aria-pressed={selected}
+          className={cn(
+            "absolute top-2 left-2 z-[1] flex size-5 items-center justify-center rounded-md border border-border/60 bg-background",
+            selected
+              ? "border-foreground bg-foreground text-background"
+              : "hover:border-foreground/40",
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onToggleSelect?.({ additive: true });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleSelect?.({ additive: true });
+            }
+          }}
+        >
+          {selected ? (
+            <span className="block size-2 rounded-[2px] bg-background" />
+          ) : null}
+        </span>
         {project.isSaved ? (
-          <span className="absolute top-2 left-2 rounded-md bg-background/90 p-1.5">
+          <span className="absolute bottom-2 left-2 rounded-md bg-background/90 p-1.5">
             <Star className="size-3 fill-current text-foreground" />
           </span>
         ) : null}
@@ -59,7 +103,11 @@ export function StudioProjectCard({
         className="absolute top-1.5 right-1.5 z-10 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
         onClick={(e) => e.stopPropagation()}
       >
-        <StudioProjectMenu project={project} onChanged={onChanged} />
+        <StudioProjectMenu
+          project={project}
+          inTrash={inTrash}
+          onChanged={onChanged}
+        />
       </div>
 
       <button type="button" onClick={onOpen} className="w-full px-0.5 text-left">

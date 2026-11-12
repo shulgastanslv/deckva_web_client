@@ -74,6 +74,13 @@ const iconBtn =
 const menuItem =
   "gap-2 rounded-xl px-3 py-2 text-[13px] focus:bg-muted/50";
 
+/** Keep submenu open on chrome clicks, but let inputs receive focus for typing. */
+function keepSubmenuOpen(event: React.PointerEvent) {
+  const target = event.target as HTMLElement | null;
+  if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+  event.preventDefault();
+}
+
 function PageIcon({
   title,
   pressed,
@@ -431,7 +438,8 @@ export function CanvasToolbar({
               <DropdownMenuSubContent
                 sideOffset={8}
                 className="w-72 rounded-2xl p-3"
-                onPointerDown={(event) => event.preventDefault()}
+                onPointerDown={keepSubmenuOpen}
+                onKeyDown={(event) => event.stopPropagation()}
               >
                 <GridSettingsPanel />
               </DropdownMenuSubContent>
@@ -450,7 +458,8 @@ export function CanvasToolbar({
               <DropdownMenuSubContent
                 sideOffset={8}
                 className="w-72 rounded-2xl p-3"
-                onPointerDown={(event) => event.preventDefault()}
+                onPointerDown={keepSubmenuOpen}
+                onKeyDown={(event) => event.stopPropagation()}
               >
                 <SlideNumberPanel />
               </DropdownMenuSubContent>
@@ -469,7 +478,8 @@ export function CanvasToolbar({
               <DropdownMenuSubContent
                 sideOffset={8}
                 className="w-80 rounded-2xl p-3"
-                onPointerDown={(event) => event.preventDefault()}
+                onPointerDown={keepSubmenuOpen}
+                onKeyDown={(event) => event.stopPropagation()}
               >
                 <FindReplacePanel />
               </DropdownMenuSubContent>

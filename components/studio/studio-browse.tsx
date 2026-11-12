@@ -10,12 +10,20 @@ import {
   List,
   SpinnerGap as Loader2,
   MagnifyingGlass as Search,
+  Trash as Trash2,
 } from "@phosphor-icons/react";
 
 import {
   listCommunityProjects,
   type CommunityProjectListItem,
 } from "@/actions/community";
+import {
+  emptyTrash,
+  permanentlyDeleteProjects,
+  restoreProjects,
+  setProjectsStarred,
+  trashProjects,
+} from "@/actions/projects";
 import {
   COMMUNITY_SORT_OPTIONS,
   type CommunitySortId,
@@ -32,6 +40,7 @@ import { CommunityRows } from "@/components/studio/browse/community-rows";
 import { StudioBoardGrid } from "@/components/studio/browse/studio-board-grid";
 import { StudioProjectCard } from "@/components/studio/browse/studio-project-card";
 import { StudioProjectList } from "@/components/studio/browse/studio-project-list";
+import { StudioProjectSelectionBar } from "@/components/studio/browse/studio-project-selection-bar";
 import {
   StudioContent,
   StudioContentBody,
@@ -48,7 +57,15 @@ import {
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-type MainTab = "all" | "starred" | "community";
+type MainTab = "all" | "starred" | "trash" | "community";
+
+function tabFromParam(tabParam: string | null): MainTab {
+  if (tabParam === "starred" || tabParam === "trash" || tabParam === "community") {
+    return tabParam;
+  }
+  if (tabParam === "templates") return "community";
+  return "all";
+}
 
 export function StudioBrowse() {
   const t = useTranslations("studio.browse");
@@ -59,13 +76,8 @@ export function StudioBrowse() {
   const { status } = useSession();
   const signedIn = status !== "unauthenticated";
 
-  const tabParam = searchParams.get("tab");
-  const [activeTab, setActiveTab] = useState<MainTab>(
-    tabParam === "starred" || tabParam === "community" || tabParam === "templates"
-      ? tabParam === "templates"
-        ? "community"
-        : (tabParam as MainTab)
-      : "all",
+  const [activeTab, setActiveTab] = useState<MainTab>(() =>
+    tabFromParam(searchParams.get("tab")),
   );
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"list" | "grid">("list");
@@ -74,9 +86,13 @@ export function StudioBrowse() {
   const [communitySort, setCommunitySort] =
     useState<CommunitySortId>("newest");
   const [communityCategory, setCommunityCategory] = useState<string>("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const folderId = searchParams.get("folder");
-  const projectsQuery = useUserProjects(folderId ?? "", signedIn);
+  const inTrash = activeTab === "trash";
+  const projectsQuery = useUserProjects(folderId ?? "", signedIn, {
+    trashed: inTrash,
+  });
   const foldersQuery = useUserFolders(signedIn);
   const projects = useMemo(
     () => projectsQuery.data?.projects ?? [],
@@ -89,7 +105,8 @@ export function StudioBrowse() {
   const loadingProjects =
     signedIn && !projectsQuery.data && !projectsQuery.isError;
   const refreshProjects = useInvalidateStudioProjects();
-  const showProjects = activeTab === "all" || activeTab === "starred";
+  const showProjects =
+    activeTab === "all" || activeTab === "starred" || activeTab === "trash";
 
   const activeFolder = useMemo(
     () => folders.find((f) => f.id === folderId) ?? null,
@@ -98,17 +115,32 @@ export function StudioBrowse() {
 
   const visibleProjects = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return projects
-      .filter((p) => {
-        if (activeTab === "starred" && !p.isSaved) return false;
-        if (q && !(p.title || tc("untitled")).toLowerCase().includes(q)) return false;
-        return true;
-      })
-      .sort(
+    const filtered = projects.filter((p) => {
+      if (activeTab === "starred" && !p.isSaved) return false;
+      if (q && !(p.title || tc("untitled")).toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    const sorted = [...filtered];
+    if (sort === "alphabetical") {
+      sorted.sort((a, b) =>
+        (a.title || "").localeCompare(b.title || "", undefined, {
+          sensitivity: "base",
+        }),
+      );
+    } else if (sort === "last-created") {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    } else {
+      sorted.sort(
         (a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       );
-  }, [projects, activeTab, search]);
+    }
+    return sorted;
+  }, [projects, activeTab, search, sort, tc]);
 
   const [community, setCommunity] = useState<CommunityProjectListItem[]>([]);
   const [loadingCommunity, setLoadingCommunity] = useState(false);
@@ -131,8 +163,8 @@ export function StudioBrowse() {
 
   useEffect(() => {
     if (activeTab !== "community") return;
-    const t = window.setTimeout(() => void fetchCommunity(), search ? 220 : 0);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => void fetchCommunity(), search ? 220 : 0);
+    return () => window.clearTimeout(timer);
   }, [fetchCommunity, search, activeTab]);
 
   useEffect(() => {
@@ -143,16 +175,15 @@ export function StudioBrowse() {
     return () => window.removeEventListener("core:community-changed", onChanged);
   }, [activeTab, fetchCommunity]);
 
+  const urlTab = searchParams.get("tab");
   useEffect(() => {
-    const urlTab = searchParams.get("tab");
-    setActiveTab(
-      urlTab === "starred"
-        ? "starred"
-        : urlTab === "community" || urlTab === "templates"
-          ? "community"
-          : "all",
-    );
-  }, [searchParams]);
+    setActiveTab(tabFromParam(urlTab));
+  }, [urlTab]);
+
+  // Clear selection only when the browse context changes — not on every render.
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [activeTab, folderId]);
 
   useEffect(() => {
     const onSidebarSearch = (event: Event) => {
@@ -175,31 +206,104 @@ export function StudioBrowse() {
     ? activeFolder.name
     : activeTab === "starred"
       ? t("starred")
-      : activeTab === "community"
-        ? t("community")
-        : t("projects");
+      : activeTab === "trash"
+        ? t("trash")
+        : activeTab === "community"
+          ? t("community")
+          : t("projects");
 
   const pageDescription = activeFolder
     ? t("folderSub")
     : activeTab === "starred"
       ? t("starredSub")
-      : activeTab === "community"
-        ? t("communitySub")
-        : t("projectsSub");
+      : activeTab === "trash"
+        ? t("trashSub")
+        : activeTab === "community"
+          ? t("communitySub")
+          : t("projectsSub");
 
   const communitySortLabel =
     communitySortLabels[communitySort] ?? t("sort");
 
+  const openProject = (id: string) => {
+    if (inTrash) return;
+    router.push(`/studio/editor?project=${id}`);
+  };
+
+  const toggleSelect = (id: string, opts?: { additive?: boolean }) => {
+    setSelectedIds((prev) => {
+      const next = new Set(opts?.additive ? prev : []);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectedList = useMemo(
+    () => visibleProjects.filter((p) => selectedIds.has(p.id)).map((p) => p.id),
+    [visibleProjects, selectedIds],
+  );
+
+  const afterBulk = () => {
+    setSelectedIds(new Set());
+    refreshProjects();
+    window.dispatchEvent(new CustomEvent("studio:folders-changed"));
+  };
+
+  const handleOpenSelected = () => {
+    for (const id of selectedList) {
+      window.open(`/studio/editor?project=${id}`, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleStarSelected = async (starred: boolean) => {
+    await setProjectsStarred(selectedList, starred);
+    afterBulk();
+  };
+
+  const handleTrashSelected = async () => {
+    await trashProjects(selectedList);
+    afterBulk();
+  };
+
+  const handleRestoreSelected = async () => {
+    await restoreProjects(selectedList);
+    afterBulk();
+  };
+
+  const handleDeleteForeverSelected = async () => {
+    await permanentlyDeleteProjects(selectedList);
+    afterBulk();
+  };
+
+  const handleEmptyTrash = async () => {
+    await emptyTrash();
+    afterBulk();
+  };
+
   return (
     <StudioContent>
       <StudioContentBody className="pt-6 sm:pt-10">
-        <div className="mb-6">
-          <h1 className="text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-            {pageTitle}
-          </h1>
-          <p className="mt-2 text-[14px] text-muted-foreground">
-            {pageDescription}
-          </p>
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
+              {pageTitle}
+            </h1>
+            <p className="mt-2 text-[14px] text-muted-foreground">
+              {pageDescription}
+            </p>
+          </div>
+          {inTrash && visibleProjects.length > 0 ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-9 rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
+              onClick={() => void handleEmptyTrash()}
+            >
+              <Trash2 className="size-5" />
+              {t("emptyTrash")}
+            </Button>
+          ) : null}
         </div>
 
         <div className="mb-5 flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
@@ -391,13 +495,14 @@ export function StudioBrowse() {
           </div>
         ) : view === "list" ? (
           visibleProjects.length > 0 ? (
-            <div className="overflow-x-auto">
-              <StudioProjectList
-                projects={visibleProjects}
-                onOpen={(id) => router.push(`/studio/editor?project=${id}`)}
-                onChanged={refreshProjects}
-              />
-            </div>
+            <StudioProjectList
+              projects={visibleProjects}
+              selectedIds={selectedIds}
+              inTrash={inTrash}
+              onOpen={openProject}
+              onToggleSelect={toggleSelect}
+              onChanged={refreshProjects}
+            />
           ) : null
         ) : (
           <StudioBoardGrid>
@@ -405,9 +510,10 @@ export function StudioBrowse() {
               <StudioProjectCard
                 key={project.id}
                 project={project}
-                onOpen={() =>
-                  router.push(`/studio/editor?project=${project.id}`)
-                }
+                selected={selectedIds.has(project.id)}
+                inTrash={inTrash}
+                onOpen={() => openProject(project.id)}
+                onToggleSelect={(opts) => toggleSelect(project.id, opts)}
                 onChanged={refreshProjects}
               />
             ))}
@@ -426,15 +532,32 @@ export function StudioBrowse() {
                   ? t("folderEmpty")
                   : activeTab === "starred"
                     ? t("noStarred")
-                    : t("noProjects")}
+                    : activeTab === "trash"
+                      ? t("noTrash")
+                      : t("noProjects")}
             </p>
             <p className="mt-2 text-[13px] text-muted-foreground">
               {search.trim()
                 ? t("tryAnotherSearch")
-                : t("generateHint")}
+                : activeTab === "trash"
+                  ? t("trashHint")
+                  : t("generateHint")}
             </p>
           </div>
         ) : null}
+
+        <StudioProjectSelectionBar
+          count={selectedList.length}
+          inTrash={inTrash}
+          className="mt-8"
+          onClear={() => setSelectedIds(new Set())}
+          onOpenInNewTab={handleOpenSelected}
+          onStar={() => void handleStarSelected(true)}
+          onUnstar={() => void handleStarSelected(false)}
+          onTrash={() => void handleTrashSelected()}
+          onRestore={() => void handleRestoreSelected()}
+          onDeleteForever={() => void handleDeleteForeverSelected()}
+        />
 
         <CommunityPreviewDialog
           projectId={previewId}

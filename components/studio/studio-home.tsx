@@ -15,6 +15,7 @@ import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { StudioBoardGrid } from "@/components/studio/browse/studio-board-grid";
 import { StudioProjectCard } from "@/components/studio/browse/studio-project-card";
 import { StudioProjectList } from "@/components/studio/browse/studio-project-list";
+import { StudioProjectSelectionBar } from "@/components/studio/browse/studio-project-selection-bar";
 import { StudioStartSection } from "@/components/studio/start/studio-start-section";
 import {
   StudioContent,
@@ -22,7 +23,11 @@ import {
 } from "@/components/studio/ui/studio-content";
 import { StudioSectionHeader } from "@/components/studio/ui/studio-section-header";
 import { StudioViewToggle } from "@/components/studio/ui/studio-view-toggle";
-import { saveAsNewProject } from "@/actions/projects";
+import {
+  saveAsNewProject,
+  setProjectsStarred,
+  trashProjects,
+} from "@/actions/projects";
 import {
   aiPaletteToProjectPalette,
   parseAiPalette,
@@ -62,6 +67,7 @@ export function StudioHome() {
   const refreshProjects = useInvalidateStudioProjects();
   const [view, setView] = useState<ViewMode>("list");
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!topic) return;
@@ -93,8 +99,37 @@ export function StudioHome() {
           (a, b) =>
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
         ),
-    [projects, q],
+    [projects, q, tc],
   );
+
+  const recentProjects = useMemo(
+    () => visibleProjects.slice(0, 12),
+    [visibleProjects],
+  );
+
+  const selectedList = useMemo(
+    () => recentProjects.filter((p) => selectedIds.has(p.id)).map((p) => p.id),
+    [recentProjects, selectedIds],
+  );
+
+  const toggleSelect = (id: string, opts?: { additive?: boolean }) => {
+    setSelectedIds((prev) => {
+      const next = new Set(opts?.additive ? prev : []);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const afterBulk = () => {
+    setSelectedIds(new Set());
+    refreshProjects();
+    window.dispatchEvent(new CustomEvent("studio:folders-changed"));
+  };
+
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [search]);
 
   const focusMode = !loadingProjects && projects.length === 0;
   const empty =
@@ -221,27 +256,56 @@ export function StudioHome() {
               ) : null}
             </div>
           ) : view === "list" ? (
-            <div className="overflow-x-auto">
-              <StudioProjectList
-                projects={visibleProjects.slice(0, 12)}
-                onOpen={(id) => router.push(`/studio/editor?project=${id}`)}
-                onChanged={refreshProjects}
-              />
-            </div>
+            <StudioProjectList
+              projects={recentProjects}
+              selectedIds={selectedIds}
+              onOpen={(id) => router.push(`/studio/editor?project=${id}`)}
+              onToggleSelect={toggleSelect}
+              onChanged={refreshProjects}
+            />
           ) : (
             <StudioBoardGrid>
-              {visibleProjects.slice(0, 12).map((project) => (
+              {recentProjects.map((project) => (
                 <StudioProjectCard
                   key={project.id}
                   project={project}
+                  selected={selectedIds.has(project.id)}
                   onOpen={() =>
                     router.push(`/studio/editor?project=${project.id}`)
                   }
+                  onToggleSelect={(opts) => toggleSelect(project.id, opts)}
                   onChanged={refreshProjects}
                 />
               ))}
             </StudioBoardGrid>
           )}
+
+          <StudioProjectSelectionBar
+            count={selectedList.length}
+            inTrash={false}
+            className="mt-6"
+            onClear={() => setSelectedIds(new Set())}
+            onOpenInNewTab={() => {
+              for (const id of selectedList) {
+                window.open(
+                  `/studio/editor?project=${id}`,
+                  "_blank",
+                  "noopener,noreferrer",
+                );
+              }
+            }}
+            onStar={() => {
+              void setProjectsStarred(selectedList, true).then(afterBulk);
+            }}
+            onUnstar={() => {
+              void setProjectsStarred(selectedList, false).then(afterBulk);
+            }}
+            onTrash={() => {
+              void trashProjects(selectedList).then(afterBulk);
+            }}
+            onRestore={() => undefined}
+            onDeleteForever={() => undefined}
+          />
         </section>
       </StudioContentBody>
     </StudioContent>

@@ -40,7 +40,9 @@ export async function getUserFolders(): Promise<
     const folders = await prisma.folder.findMany({
       where: { organizationId },
       orderBy: { updatedAt: "desc" },
-      include: { _count: { select: { projects: true } } },
+      include: {
+        _count: { select: { projects: { where: { trashedAt: null } } } },
+      },
     });
 
     return {
@@ -81,7 +83,9 @@ export async function createFolder(
 
     const folder = await prisma.folder.create({
       data: { userId, name: trimmed, organizationId },
-      include: { _count: { select: { projects: true } } },
+      include: {
+        _count: { select: { projects: { where: { trashedAt: null } } } },
+      },
     });
 
     revalidatePath("/studio");
@@ -125,7 +129,9 @@ export async function renameFolder(
     const folder = await prisma.folder.update({
       where: { id: folderId },
       data: { name: trimmed },
-      include: { _count: { select: { projects: true } } },
+      include: {
+        _count: { select: { projects: { where: { trashedAt: null } } } },
+      },
     });
 
     revalidatePath("/studio");

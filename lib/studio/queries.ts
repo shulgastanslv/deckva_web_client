@@ -19,7 +19,8 @@ export const studioKeys = {
   organizations: ["studio", "organizations"] as const,
   folders: ["studio", "folders"] as const,
   projectsRoot: ["studio", "projects"] as const,
-  projects: (folderId = "") => ["studio", "projects", folderId] as const,
+  projects: (folderId = "", trashed = false) =>
+    ["studio", "projects", folderId, trashed ? "trash" : "active"] as const,
   notifications: ["studio", "notifications"] as const,
   profile: ["studio", "profile"] as const,
 };
@@ -91,11 +92,24 @@ export function useUserFolders(enabled: boolean) {
   });
 }
 
-export function useUserProjects(folderId: string, enabled: boolean) {
+export function useUserProjects(
+  folderId: string,
+  enabled: boolean,
+  options?: { trashed?: boolean },
+) {
+  const trashed = options?.trashed === true;
   return useQuery({
-    queryKey: studioKeys.projects(folderId),
+    queryKey: studioKeys.projects(folderId, trashed),
     queryFn: () =>
-      readStudioResult(() => getUserProjects(folderId ? { folderId } : undefined)),
+      readStudioResult(() =>
+        getUserProjects(
+          trashed
+            ? { trashed: true }
+            : folderId
+              ? { folderId }
+              : undefined,
+        ),
+      ),
     staleTime: studioStaleTime.projects,
     enabled,
   });
@@ -130,11 +144,24 @@ export function fetchActiveOrganization(client: QueryClient) {
   });
 }
 
-export function fetchUserProjects(client: QueryClient, folderId = "") {
+export function fetchUserProjects(
+  client: QueryClient,
+  folderId = "",
+  options?: { trashed?: boolean },
+) {
+  const trashed = options?.trashed === true;
   return client.fetchQuery({
-    queryKey: studioKeys.projects(folderId),
+    queryKey: studioKeys.projects(folderId, trashed),
     queryFn: () =>
-      readStudioResult(() => getUserProjects(folderId ? { folderId } : undefined)),
+      readStudioResult(() =>
+        getUserProjects(
+          trashed
+            ? { trashed: true }
+            : folderId
+              ? { folderId }
+              : undefined,
+        ),
+      ),
     staleTime: studioStaleTime.projects,
   });
 }

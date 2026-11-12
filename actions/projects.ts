@@ -31,6 +31,7 @@ export interface ProjectListItem {
   authorName: string | null;
   authorImage: string | null;
   folderId: string | null;
+  trashedAt: string | null;
 }
 
 export interface ProjectDetail {
@@ -118,6 +119,8 @@ function projectSnapshot(
 
 export async function getUserProjects(options?: {
   folderId?: string | null;
+  /** When true, only trashed projects; otherwise active (non-trashed). */
+  trashed?: boolean;
 }): Promise<ActionResult<{ projects: ProjectListItem[] }>> {
   try {
     const userId = await requireUserId();
@@ -125,6 +128,7 @@ export async function getUserProjects(options?: {
 
     const org = await ensureUserOrganization();
     const organizationId = org.success ? org.organization.id : null;
+    const inTrash = options?.trashed === true;
 
     // Shared workspace: every org member sees org projects, not only their own.
     const rawProjects = await prisma.project.findMany({
@@ -132,9 +136,14 @@ export async function getUserProjects(options?: {
         ...(organizationId
           ? { organizationId }
           : { userId }),
-        ...(options?.folderId ? { folderId: options.folderId } : {}),
+        ...(inTrash
+          ? { trashedAt: { not: null } }
+          : {
+              trashedAt: null,
+              ...(options?.folderId ? { folderId: options.folderId } : {}),
+            }),
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: inTrash ? { trashedAt: "desc" } : { updatedAt: "desc" },
       include: {
         user: { select: { name: true, email: true, image: true } },
         savedBy: { where: { userId }, select: { id: true } },
@@ -151,7 +160,7 @@ export async function getUserProjects(options?: {
       id: p.id,
       title: p.title,
       aspectRatio: p.aspectRatio,
-      updatedAt: p.updatedAt.toISOString(),
+      updatedAt: (p.trashedAt ?? p.updatedAt).toISOString(),
       isSaved: p.savedBy.length > 0,
       slideCount: p._count.slides,
       createdAt: p.createdAt.toISOString(),
@@ -159,6 +168,7 @@ export async function getUserProjects(options?: {
       authorName: p.user.name || p.user.email,
       authorImage: p.user.image,
       folderId: p.folderId,
+      trashedAt: p.trashedAt?.toISOString() ?? null,
     }));
 
     return { success: true, projects };
@@ -239,7 +249,7 @@ export async function getProjectById(
     if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
 
     const project = await prisma.project.findFirst({
-      where: { id: projectId },
+      where: { id: projectId, trashedAt: null },
       include: {
         slides: { orderBy: { order: "asc" } },
       },
@@ -639,24 +649,166 @@ export async function toggleSaveProject(
   }
 }
 
+async function managedProjectIds(
+  userId: string,
+  projectIds: string[],
+): Promise<string[]> {
+  const unique = [...new Set(projectIds.filter(Boolean))];
+  if (unique.length === 0) return [];
+  const rows = await prisma.project.findMany({
+    where: { id: { in: unique } },
+    select: { id: true, userId: true, organizationId: true },
+  });
+  const allowed: string[] = [];
+  for (const row of rows) {
+    if (await canManageOrgResource(userId, row)) allowed.push(row.id);
+  }
+  return allowed;
+}
+
+/** Move project(s) to Trash (soft-delete). */
 export async function deleteProject(projectId: string): Promise<ActionResult<object>> {
+  return trashProjects([projectId]);
+}
+
+export async function trashProjects(
+  projectIds: string[],
+): Promise<ActionResult<{ count: number }>> {
   try {
     const userId = await requireUserId();
     if (!userId) return { success: false, error: messages.errors.signIn };
-    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
-
-    const existing = await prisma.project.findFirst({
-      where: { id: projectId },
-      select: { id: true, userId: true, organizationId: true },
-    });
-    if (!existing || !(await canManageOrgResource(userId, existing))) {
+    const ids = await managedProjectIds(userId, projectIds);
+    if (ids.length === 0) {
       return { success: false, error: messages.errors.projectNotFound };
     }
 
-    await prisma.project.delete({ where: { id: projectId } });
+    const result = await prisma.project.updateMany({
+      where: { id: { in: ids }, trashedAt: null },
+      data: { trashedAt: new Date() },
+    });
     revalidatePath("/");
-    return { success: true };
+    return { success: true, count: result.count };
   } catch {
     return { success: false, error: messages.errors.deleteProject };
+  }
+}
+
+export async function restoreProjects(
+  projectIds: string[],
+): Promise<ActionResult<{ count: number }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    const ids = await managedProjectIds(userId, projectIds);
+    if (ids.length === 0) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    const result = await prisma.project.updateMany({
+      where: { id: { in: ids }, trashedAt: { not: null } },
+      data: { trashedAt: null },
+    });
+    revalidatePath("/");
+    return { success: true, count: result.count };
+  } catch {
+    return { success: false, error: messages.errors.restoreProject };
+  }
+}
+
+export async function permanentlyDeleteProjects(
+  projectIds: string[],
+): Promise<ActionResult<{ count: number }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    const ids = await managedProjectIds(userId, projectIds);
+    if (ids.length === 0) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    const result = await prisma.project.deleteMany({
+      where: { id: { in: ids }, trashedAt: { not: null } },
+    });
+    revalidatePath("/");
+    return { success: true, count: result.count };
+  } catch {
+    return { success: false, error: messages.errors.deleteProject };
+  }
+}
+
+export async function emptyTrash(): Promise<ActionResult<{ count: number }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    const org = await ensureUserOrganization();
+    const organizationId = org.success ? org.organization.id : null;
+    const trashed = await prisma.project.findMany({
+      where: {
+        trashedAt: { not: null },
+        ...(organizationId ? { organizationId } : { userId }),
+      },
+      select: { id: true, userId: true, organizationId: true },
+    });
+    const ids: string[] = [];
+    for (const row of trashed) {
+      if (await canManageOrgResource(userId, row)) ids.push(row.id);
+    }
+    if (ids.length === 0) return { success: true, count: 0 };
+
+    const result = await prisma.project.deleteMany({
+      where: { id: { in: ids }, trashedAt: { not: null } },
+    });
+    revalidatePath("/");
+    return { success: true, count: result.count };
+  } catch {
+    return { success: false, error: messages.errors.deleteProject };
+  }
+}
+
+/** Star or unstar many projects for the current user. */
+export async function setProjectsStarred(
+  projectIds: string[],
+  starred: boolean,
+): Promise<ActionResult<{ count: number }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    const unique = [...new Set(projectIds.filter(Boolean))];
+    if (unique.length === 0) {
+      return { success: false, error: messages.errors.projectIdRequired };
+    }
+
+    const accessible = await prisma.project.findMany({
+      where: {
+        id: { in: unique },
+        trashedAt: null,
+      },
+      select: { id: true, userId: true, organizationId: true, isPublic: true },
+    });
+    const ids: string[] = [];
+    for (const row of accessible) {
+      if ((await canAccessOrgResource(userId, row)) || row.isPublic) {
+        ids.push(row.id);
+      }
+    }
+    if (ids.length === 0) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    if (starred) {
+      await prisma.savedProject.createMany({
+        data: ids.map((projectId) => ({ userId, projectId })),
+        skipDuplicates: true,
+      });
+    } else {
+      await prisma.savedProject.deleteMany({
+        where: { userId, projectId: { in: ids } },
+      });
+    }
+    revalidatePath("/");
+    return { success: true, count: ids.length };
+  } catch {
+    return { success: false, error: messages.errors.saveFailed };
   }
 }

@@ -60,6 +60,13 @@ import {
   type ListKind,
 } from "@/lib/canvas/text-format";
 import type { TextStyles } from "@/lib/canvas/text-flow";
+import {
+  applyParagraphFit,
+  clampTextContent,
+  refactorText,
+  type TextRefactorKind,
+} from "@/lib/canvas/text-refactor";
+import { TextRefactorMenu } from "@/components/canvas/text-refactor-menu";
 import { refreshMask } from "@/lib/canvas/object-appearance";
 import {
   loadGoogleFont,
@@ -469,6 +476,33 @@ export function SelectionToolbar() {
     update({ text: cycleCase(textState.text) } as unknown as Partial<FabricObject>);
   };
 
+  const applyTextRefactor = (kind: TextRefactorKind) => {
+    if (!manager || !textObj || !textState) return;
+
+    if (kind === "paragraphs") {
+      const { width: slideW } = useCanvasStore.getState().canvasDimensions;
+      const changed = applyParagraphFit(textObj, slideW, { force: true });
+      if (!changed) return;
+      refreshMask(textObj);
+      manager.canvas.requestRenderAll();
+      manager.commit();
+      setTextState(readTextState(textObj));
+      return;
+    }
+
+    const next = refactorText(textState.text, kind);
+    if (next === textState.text) return;
+    writeFormattedText(
+      textObj,
+      clampTextContent(next),
+      (textObj as FabricObject & { styles?: TextStyles }).styles,
+    );
+    refreshMask(textObj);
+    manager.canvas.requestRenderAll();
+    manager.commit();
+    setTextState(readTextState(textObj));
+  };
+
   const copyOrPasteStyle = () => {
     if (!manager) return;
     if (copiedStyle) {
@@ -581,6 +615,11 @@ export function SelectionToolbar() {
               <ToolBtn label="Change case" onClick={applyCase}>
                 <CaseSensitive className="size-5" />
               </ToolBtn>
+              <TextRefactorMenu
+                compact
+                disabled={!textState.text.trim()}
+                onRefactor={applyTextRefactor}
+              />
 
               <BarDivider />
 

@@ -32,6 +32,7 @@ function CountField({
           const n = Number(e.target.value);
           if (Number.isFinite(n)) onChange(n);
         }}
+        onKeyDown={(e) => e.stopPropagation()}
         className="h-9 w-16 rounded-md border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
       />
     </div>
@@ -51,23 +52,15 @@ export function useSyncLayoutGrid() {
 
   useEffect(() => {
     if (!manager) return;
-
-    const sync = () => {
-      manager.grid.applySettings({
-        columns: gridColumns,
-        rows: gridRows,
-        margin: gridMargin,
-        color: gridColor,
-        opacity: gridOpacity,
-        snapToGrid,
-      });
-      manager.grid.setVisible(isGridVisible);
-    };
-
-    sync();
-    // Re-apply after every slide load — overlay is wiped by loadFromJSON.
-    const off = manager.on("load", sync);
-    return off;
+    manager.grid.applySettings({
+      columns: gridColumns,
+      rows: gridRows,
+      margin: gridMargin,
+      color: gridColor,
+      opacity: gridOpacity,
+      snapToGrid,
+    });
+    manager.grid.setVisible(isGridVisible);
   }, [
     manager,
     isGridVisible,
@@ -78,6 +71,16 @@ export function useSyncLayoutGrid() {
     gridOpacity,
     snapToGrid,
   ]);
+
+  // After slide switch, manager.grid.redraw() already ran — only re-stack if needed.
+  useEffect(() => {
+    if (!manager) return;
+    const off = manager.on("load", () => {
+      if (!useCanvasStore.getState().isGridVisible) return;
+      manager.grid.redraw();
+    });
+    return off;
+  }, [manager]);
 }
 
 /** Inline layout-grid settings for embedding in a parent dropdown. */

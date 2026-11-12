@@ -81,7 +81,7 @@ import {
   type TextStyleDef,
   type TextStyleId,
 } from "@/lib/canvas/document";
-import { applyStyleOnCanvas, paintSlotOnCanvas, refreshCanvasFonts } from "@/lib/canvas/paint-live";
+import { applyStyleOnCanvas, paintSlotOnCanvas, refreshCanvasFonts, relayoutText } from "@/lib/canvas/paint-live";
 import { applyCarouselFont } from "@/lib/canvas/apply-carousel-font";
 import { scheduleSlideThumbnailHydration } from "@/lib/canvas/thumbnail";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -103,12 +103,21 @@ import {
 } from "@/lib/canvas/object-appearance";
 import { applyList, applySelectionStyle, writeFormattedText, type ListKind } from "@/lib/canvas/text-format";
 import type { TextStyles } from "@/lib/canvas/text-flow";
-import { textLengthNote, textLengthStatus } from "@/lib/canvas/insights";
+import {
+  applyParagraphFit,
+  clampTextContent,
+  refactorText,
+  TEXT_CONTENT_MAX,
+  type TextRefactorKind,
+} from "@/lib/canvas/text-refactor";
+import { isTextbox, setTextResizeMode } from "@/lib/canvas/text-fit";
+import { isObjectOutOfBounds } from "@/lib/canvas/auto-flow";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { InspectorAssets } from "@/components/canvas/inspector-assets";
 import { ObjectTransformPanel } from "@/components/canvas/object-transform-panel";
 import { FiltersControls } from "@/components/canvas/filters-controls";
 import { EditorPanelActions } from "@/components/canvas/editor-panel-actions";
+import { TextRefactorMenu } from "@/components/canvas/text-refactor-menu";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 
 type TextAlign = "left" | "center" | "right" | "justify";
@@ -399,6 +408,7 @@ export function RightSidebar({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const palette = useCanvasStore((s) => s.palette);
   const markedSlideIds = useCanvasStore((s) => s.markedSlideIds);
+  const canvasDimensions = useCanvasStore((s) => s.canvasDimensions);
   const [styleOffer, setStyleOffer] = useState<TextStyleId | null>(null);
   const [fontOffer, setFontOffer] = useState<string | null>(null);
 
@@ -618,6 +628,38 @@ export function RightSidebar({
     manager.commit();
   };
 
+  const applyTextRefactor = (kind: TextRefactorKind) => {
+    const active = manager?.getActiveObject();
+    if (!active || !manager || formValues?.text == null) return;
+
+    if (kind === "paragraphs") {
+      const changed = applyParagraphFit(active, canvasDimensions.width, { force: true });
+      if (!changed) return;
+      const nextText = (active as FabricObject & { text?: string }).text ?? formValues.text;
+      refreshMask(active);
+      setFormValues((prev) =>
+        prev
+          ? {
+              ...prev,
+              text: nextText,
+              textAlign: "left",
+            }
+          : null,
+      );
+      manager.canvas.requestRenderAll();
+      manager.commit();
+      return;
+    }
+
+    const next = refactorText(formValues.text, kind);
+    if (next === formValues.text) return;
+    writeFormattedText(active, next, (active as FabricObject & { styles?: TextStyles }).styles);
+    refreshMask(active);
+    setFormValues((prev) => (prev ? { ...prev, text: next } : null));
+    manager.canvas.requestRenderAll();
+    manager.commit();
+  };
+
   const updateCornerRadius = (radius: number) => {
     if (!selectedObject || !canvas) return;
 
@@ -790,20 +832,33 @@ export function RightSidebar({
 
   const setWidth = (val: number) => {
     setFormValues((p) => (p ? { ...p, width: val } : null));
-    if (selectedObject && val > 0) {
+    if (!selectedObject || val <= 0) return;
+    // Textbox must change `width` (and rewrap) — scaleToWidth stretches glyphs.
+    if (isTextbox(selectedObject)) {
+      selectedObject.set({ width: val, scaleX: 1, scaleY: 1 });
+      setTextResizeMode(selectedObject, "auto-height");
+      relayoutText(selectedObject);
+    } else {
       selectedObject.scaleToWidth(val);
-      canvas?.requestRenderAll();
-      canvas?.fire("object:modified");
     }
+    canvas?.requestRenderAll();
+    canvas?.fire("object:modified");
   };
 
   const setHeight = (val: number) => {
     setFormValues((p) => (p ? { ...p, height: val } : null));
-    if (selectedObject && val > 0) {
+    if (!selectedObject || val <= 0) return;
+    // Textbox height always hugs wrapped lines — never scaleY-stretch.
+    if (isTextbox(selectedObject)) {
+      relayoutText(selectedObject);
+      setFormValues((p) =>
+        p ? { ...p, height: selectedObject.height ?? val } : null,
+      );
+    } else {
       selectedObject.scaleToHeight(val);
-      canvas?.requestRenderAll();
-      canvas?.fire("object:modified");
     }
+    canvas?.requestRenderAll();
+    canvas?.fire("object:modified");
   };
 
   const boundStyle = textStyleId(
@@ -1505,22 +1560,47 @@ export function RightSidebar({
               {isText && (
                 <CollapsibleGroup id="rs-text" title={t("typography")} defaultOpen>
                   <textarea
-                    rows={3}
+                    rows={6}
+                    maxLength={TEXT_CONTENT_MAX}
                     value={formValues.text ?? ""}
-                    onChange={(e) => updateProp("text", e.target.value)}
+                    onChange={(e) =>
+                      updateProp("text", clampTextContent(e.target.value))
+                    }
                     placeholder={t("textContent")}
-                    className="resize-none rounded-2xl bg-muted/40 p-3 w-full text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+                    className="min-h-[140px] w-full resize-y rounded-2xl bg-muted/40 p-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
                   />
-                  <p
-                    className={cn(
-                      "text-[12px] leading-snug",
-                      textLengthStatus("Instagram", (formValues.text ?? "").trim().length).tooLong
-                        ? "text-destructive"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {textLengthNote("Instagram", (formValues.text ?? "").trim().length)}
-                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p
+                      className={cn(
+                        "text-[12px] leading-snug tabular-nums",
+                        (formValues.text ?? "").length >= TEXT_CONTENT_MAX
+                          ? "text-destructive"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {(formValues.text ?? "").length} / {TEXT_CONTENT_MAX}
+                    </p>
+                    <TextRefactorMenu
+                      disabled={!formValues.text?.trim()}
+                      onRefactor={applyTextRefactor}
+                    />
+                  </div>
+                  {selectedObject &&
+                  isObjectOutOfBounds(
+                    selectedObject,
+                    canvasDimensions.width,
+                    canvasDimensions.height,
+                  ) ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="h-9 w-full gap-1.5 rounded-md border-none bg-muted/40 text-[13px] font-medium shadow-none hover:bg-muted/60"
+                      onClick={() => applyTextRefactor("paragraphs")}
+                    >
+                      <WandSparkles className="size-5 stroke-[1.5]" />
+                      {t("refactorParagraphs")}
+                    </Button>
+                  ) : null}
 
                   <div className="flex items-center gap-1.5">
                     <ToolCluster className="shrink-0">

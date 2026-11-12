@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import {
+  ArrowSquareOut as OpenInNew,
+  ArrowCounterClockwise as Restore,
   Check,
   Copy,
   FolderSimple as FolderInput,
@@ -15,7 +17,9 @@ import { useTranslations } from "next-intl";
 import { moveProjectToFolder } from "@/actions/folders";
 import { useUserFolders } from "@/lib/studio/queries";
 import {
-  deleteProject,
+  permanentlyDeleteProjects,
+  restoreProjects,
+  trashProjects,
   duplicateProject,
   toggleSaveProject,
   updateProjectTitle,
@@ -39,16 +43,18 @@ const itemClass =
 
 export function StudioProjectMenu({
   project,
+  inTrash = false,
   onChanged,
 }: {
   project: ProjectListItem;
+  inTrash?: boolean;
   onChanged: () => void;
 }) {
   const t = useTranslations("studio.projectMenu");
   const [open, setOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState(project.title);
-  const folders = useUserFolders(open).data?.folders ?? [];
+  const folders = useUserFolders(open && !inTrash).data?.folders ?? [];
 
   const commitRename = async () => {
     const next = draft.trim();
@@ -62,6 +68,10 @@ export function StudioProjectMenu({
     await moveProjectToFolder(project.id, folderId);
     onChanged();
     window.dispatchEvent(new CustomEvent("studio:folders-changed"));
+  };
+
+  const openInNewTab = () => {
+    window.open(`/studio/editor?project=${project.id}`, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -90,111 +100,147 @@ export function StudioProjectMenu({
         className="w-56 rounded-2xl p-1.5"
         onClick={(event) => event.stopPropagation()}
       >
-        {renaming ? (
-          <div className="px-1 py-1">
-            <Input
-              autoFocus
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                e.stopPropagation();
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  void commitRename();
-                }
-                if (e.key === "Escape") setRenaming(false);
-              }}
-              className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none focus-visible:ring-2 focus-visible:ring-ring/20"
-            />
-          </div>
-        ) : (
-          <DropdownMenuItem
-            className={itemClass}
-            onSelect={(e) => {
-              e.preventDefault();
-              setRenaming(true);
-            }}
-          >
-            <Pencil className="size-4 text-muted-foreground" />
-            {t("rename")}
-          </DropdownMenuItem>
-        )}
-
-        <DropdownMenuItem
-          className={itemClass}
-          onClick={async () => {
-            await duplicateProject(project.id);
-            onChanged();
-          }}
-        >
-          <Copy className="size-4 text-muted-foreground" />
-          {t("duplicate")}
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          className={itemClass}
-          onClick={async () => {
-            await toggleSaveProject(project.id);
-            onChanged();
-          }}
-        >
-          <Star className="size-4 text-muted-foreground" />
-          {project.isSaved ? t("unstar") : t("star")}
-        </DropdownMenuItem>
-
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className={itemClass}>
-            <FolderInput className="size-4 text-muted-foreground" />
-            {t("moveToFolder")}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="min-w-[180px] rounded-2xl p-1.5">
+        {inTrash ? (
+          <>
             <DropdownMenuItem
               className={itemClass}
-              onClick={() => void moveTo(null)}
+              onClick={async () => {
+                await restoreProjects([project.id]);
+                onChanged();
+                window.dispatchEvent(new CustomEvent("studio:folders-changed"));
+              }}
             >
-              {!project.folderId ? (
-                <Check className="size-3.5" />
-              ) : (
-                <span className="size-3.5" />
-              )}
-              {t("noFolder")}
+              <Restore className="size-4 text-muted-foreground" />
+              {t("restore")}
             </DropdownMenuItem>
-            {folders.map((folder) => (
+            <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+            <DropdownMenuItem
+              variant="destructive"
+              className={itemClass}
+              onClick={async () => {
+                await permanentlyDeleteProjects([project.id]);
+                onChanged();
+                window.dispatchEvent(new CustomEvent("studio:folders-changed"));
+              }}
+            >
+              <Trash2 className="size-5" />
+              {t("deleteForever")}
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            {renaming ? (
+              <div className="px-1 py-1">
+                <Input
+                  autoFocus
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void commitRename();
+                    }
+                    if (e.key === "Escape") setRenaming(false);
+                  }}
+                  className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none focus-visible:ring-2 focus-visible:ring-ring/20"
+                />
+              </div>
+            ) : (
               <DropdownMenuItem
-                key={folder.id}
                 className={itemClass}
-                onClick={() => void moveTo(folder.id)}
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setRenaming(true);
+                }}
               >
-                {project.folderId === folder.id ? (
-                  <Check className="size-3.5" />
-                ) : (
-                  <span className="size-3.5" />
-                )}
-                <span className="truncate">{folder.name}</span>
+                <Pencil className="size-4 text-muted-foreground" />
+                {t("rename")}
               </DropdownMenuItem>
-            ))}
-            {folders.length === 0 ? (
-              <p className="px-3 py-2 text-[12px] text-muted-foreground">
-                {t("createFolderFirst")}
-              </p>
-            ) : null}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+            )}
 
-        <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+            <DropdownMenuItem className={itemClass} onClick={openInNewTab}>
+              <OpenInNew className="size-4 text-muted-foreground" />
+              {t("openInNewTab")}
+            </DropdownMenuItem>
 
-        <DropdownMenuItem
-          variant="destructive"
-          className={itemClass}
-          onClick={async () => {
-            await deleteProject(project.id);
-            onChanged();
-            window.dispatchEvent(new CustomEvent("studio:folders-changed"));
-          }}
-        >
-          <Trash2 className="size-5" />
-          {t("delete")}
-        </DropdownMenuItem>
+            <DropdownMenuItem
+              className={itemClass}
+              onClick={async () => {
+                await duplicateProject(project.id);
+                onChanged();
+              }}
+            >
+              <Copy className="size-4 text-muted-foreground" />
+              {t("duplicate")}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              className={itemClass}
+              onClick={async () => {
+                await toggleSaveProject(project.id);
+                onChanged();
+              }}
+            >
+              <Star className="size-4 text-muted-foreground" />
+              {project.isSaved ? t("unstar") : t("star")}
+            </DropdownMenuItem>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className={itemClass}>
+                <FolderInput className="size-4 text-muted-foreground" />
+                {t("moveToFolder")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="min-w-[180px] rounded-2xl p-1.5">
+                <DropdownMenuItem
+                  className={itemClass}
+                  onClick={() => void moveTo(null)}
+                >
+                  {!project.folderId ? (
+                    <Check className="size-3.5" />
+                  ) : (
+                    <span className="size-3.5" />
+                  )}
+                  {t("noFolder")}
+                </DropdownMenuItem>
+                {folders.map((folder) => (
+                  <DropdownMenuItem
+                    key={folder.id}
+                    className={itemClass}
+                    onClick={() => void moveTo(folder.id)}
+                  >
+                    {project.folderId === folder.id ? (
+                      <Check className="size-3.5" />
+                    ) : (
+                      <span className="size-3.5" />
+                    )}
+                    <span className="truncate">{folder.name}</span>
+                  </DropdownMenuItem>
+                ))}
+                {folders.length === 0 ? (
+                  <p className="px-3 py-2 text-[12px] text-muted-foreground">
+                    {t("createFolderFirst")}
+                  </p>
+                ) : null}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+
+            <DropdownMenuItem
+              variant="destructive"
+              className={itemClass}
+              onClick={async () => {
+                await trashProjects([project.id]);
+                onChanged();
+                window.dispatchEvent(new CustomEvent("studio:folders-changed"));
+              }}
+            >
+              <Trash2 className="size-5" />
+              {t("delete")}
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

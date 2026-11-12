@@ -50,17 +50,28 @@ export class GridManager {
   private snapThreshold = 8;
   private layoutManager: LayoutManager | null = null;
   private disposed = false;
+  /** Cache key for the last layout pattern tile (avoids rebuild on every slide switch). */
+  private patternKey = "";
+  private patternSource: HTMLCanvasElement | null = null;
+  private keepOnTopBound = false;
+  private frontRaf = 0;
 
   constructor(canvas: Canvas) {
     this.canvas = canvas;
     this.setupSmartGuides();
+    this.bindKeepOnTop();
   }
 
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    this.unbindKeepOnTop();
+    if (this.frontRaf) cancelAnimationFrame(this.frontRaf);
+    this.frontRaf = 0;
     this.clearGuides();
     this.hideGrid();
+    this.patternKey = "";
+    this.patternSource = null;
   }
 
   public setLayoutManager(manager: LayoutManager) {
@@ -121,11 +132,20 @@ export class GridManager {
 
   public hideGrid() {
     this.isGridVisible = false;
-    if (this.gridOverlay) {
-      this.canvas.remove(this.gridOverlay);
-      this.gridOverlay = null;
-    }
+    this.detachOverlay();
     this.canvas.requestRenderAll();
+  }
+
+  private overlayOnCanvas() {
+    return (
+      this.gridOverlay != null && this.canvas.getObjects().includes(this.gridOverlay)
+    );
+  }
+
+  private detachOverlay() {
+    if (!this.gridOverlay) return;
+    if (this.overlayOnCanvas()) this.canvas.remove(this.gridOverlay);
+    this.gridOverlay = null;
   }
 
   /** Instantly center the active object on the canvas. */
@@ -285,20 +305,88 @@ export class GridManager {
     return tile;
   }
 
-  private refreshGrid() {
-    if (this.gridOverlay) {
-      this.canvas.remove(this.gridOverlay);
-      this.gridOverlay = null;
-    }
+  private layoutCacheKey(width: number, height: number) {
+    return [
+      width,
+      height,
+      this.gridColumns,
+      this.gridRows,
+      this.gridMargin,
+      this.gridColor,
+      this.gridOpacity,
+    ].join("|");
+  }
 
+  private getOrCreatePatternSource(width: number, height: number) {
+    const key = this.layoutCacheKey(width, height);
+    if (this.patternSource && this.patternKey === key) return this.patternSource;
+    this.patternSource = this.createLayoutSource(width, height);
+    this.patternKey = key;
+    return this.patternSource;
+  }
+
+  private bindKeepOnTop() {
+    if (this.keepOnTopBound) return;
+    this.keepOnTopBound = true;
+    this.canvas.on("object:added", this.onObjectAdded);
+  }
+
+  private unbindKeepOnTop() {
+    if (!this.keepOnTopBound) return;
+    this.keepOnTopBound = false;
+    this.canvas.off("object:added", this.onObjectAdded);
+  }
+
+  private onObjectAdded = (e: { target?: FabricObject }) => {
+    if (!this.isGridVisible || !this.gridOverlay) return;
+    if (e.target === this.gridOverlay) return;
+    // Coalesce during loadFromJSON — one re-stack per frame.
+    if (this.frontRaf) return;
+    this.frontRaf = requestAnimationFrame(() => {
+      this.frontRaf = 0;
+      if (!this.gridOverlay || !this.isGridVisible) return;
+      this.canvas.bringObjectToFront(this.gridOverlay);
+    });
+  };
+
+  /** Keep the overlay above slide content without rebuilding the pattern. */
+  public bringToFront() {
+    if (!this.gridOverlay || !this.isGridVisible) return;
+    this.canvas.bringObjectToFront(this.gridOverlay);
+  }
+
+  private refreshGrid() {
     const { width, height } = this.getLogicalSize();
     if (this.gridColumns <= 0 && this.gridRows <= 0) {
+      this.detachOverlay();
       this.canvas.requestRenderAll();
       return;
     }
 
+    const source = this.getOrCreatePatternSource(width, height);
+    const key = this.layoutCacheKey(width, height);
+
+    // loadFromJSON wipes objects but leaves our ref — drop the stale handle.
+    if (this.gridOverlay && !this.overlayOnCanvas()) {
+      this.gridOverlay = null;
+    }
+
+    // Same slide size + settings: reuse overlay, only re-stack above content.
+    if (
+      this.gridOverlay &&
+      this.patternKey === key &&
+      this.gridOverlay.width === width &&
+      this.gridOverlay.height === height
+    ) {
+      this.canvas.bringObjectToFront(this.gridOverlay);
+      this.canvas.requestRenderAll();
+      return;
+    }
+
+    this.detachOverlay();
+
     const pattern = new Pattern({
-      source: this.createLayoutSource(width, height),
+      source,
       repeat: "no-repeat",
     });
 
@@ -313,9 +401,10 @@ export class GridManager {
       excludeFromExport: true,
       objectCaching: false,
     });
+    (this.gridOverlay as FabricObject & { swibpRole?: string }).swibpRole = "grid";
 
     this.canvas.add(this.gridOverlay);
-    this.canvas.sendObjectToBack(this.gridOverlay);
+    this.canvas.bringObjectToFront(this.gridOverlay);
     this.canvas.requestRenderAll();
   }
 

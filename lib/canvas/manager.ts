@@ -18,7 +18,7 @@ import { refreshMask } from "./object-appearance";
 import { fitCanvasJSON, fitGeometry, type FrameSize } from "./fit-frame";
 import { isAutoFlowSkippable } from "./auto-flow";
 import { stabilizeGroups } from "./group";
-import { refreshCanvasFonts, relayoutText } from "./paint-live";
+import { clearTextFontCache, refreshCanvasFonts, relayoutText } from "./paint-live";
 import {
   bakeTextboxScale,
   configureTextboxControls,
@@ -26,6 +26,7 @@ import {
   isTextbox,
   onTextboxResized,
 } from "./text-fit";
+import { clampTextContent, TEXT_CONTENT_MAX } from "./text-refactor";
 import { HoverManager } from "./hover";
 
 const DEFAULT_BACKGROUND = "#ffffff";
@@ -492,6 +493,14 @@ export class CanvasManager {
       if (this.disposed || abort.signal.aborted || !this.canvas.contextTop) return;
       stabilizeGroups(this.canvas.getObjects());
       configureTextboxesInTree(this.canvas.getObjects());
+      // Rewrap with real font metrics once faces are ready (and if already ready).
+      refreshCanvasFonts(this.canvas);
+      if (typeof document !== "undefined") {
+        void document.fonts.ready.then(() => {
+          if (this.disposed || abort.signal.aborted) return;
+          refreshCanvasFonts(this.canvas);
+        });
+      }
       if (keepEraser) this.eraser.enable();
       if (!this.canvas.backgroundColor) {
         this.canvas.backgroundColor = DEFAULT_BACKGROUND;
@@ -518,7 +527,15 @@ export class CanvasManager {
     const onSelection = () => {
       if (this.silentDepth > 0) return;
       if (this.crop.active && this.getActiveObject() !== this.crop.image) this.crop.apply();
-      this.events.emit("selection", this.getActiveObject());
+      const active = this.getActiveObject();
+      // Heal text that was measured before its font finished loading.
+      if (isTextbox(active)) {
+        const family = (active as FabricObject & { fontFamily?: string }).fontFamily;
+        clearTextFontCache(family);
+        relayoutText(active);
+        this.canvas.requestRenderAll();
+      }
+      this.events.emit("selection", active);
     };
 
     this.canvas.on("mouse:dblclick", (e) => {
@@ -540,12 +557,8 @@ export class CanvasManager {
         return;
       }
 
-      if (!target) {
-        const group = this.objects.addCodeBlock();
-        this.commit();
-        this.events.emit("editCode", group);
-        return;
-      }
+      // Empty-canvas dblclick used to insert a code block — removed.
+      if (!target) return;
 
       if (target.swibpRole === "split") this.objects.pickSplitImage();
       else if (target.swibpRole === "frame") this.objects.pickFrameImage(target);
@@ -559,19 +572,33 @@ export class CanvasManager {
     });
     this.canvas.on("object:removed", onMutation);
     this.canvas.on("object:scaling", (e) => {
-      if (isTextbox(e.target)) bakeTextboxScale(e.target);
+      if (!isTextbox(e.target)) return;
+      // Side handles should use changeWidth; if scale leaks in, bake → rewrap.
+      bakeTextboxScale(e.target);
+      relayoutText(e.target);
+      this.canvas.requestRenderAll();
     });
     this.canvas.on("object:resizing", (e) => {
-      if (isTextbox(e.target)) onTextboxResized(e.target);
+      if (!isTextbox(e.target)) return;
+      onTextboxResized(e.target);
+      this.canvas.requestRenderAll();
     });
     this.canvas.on("object:modified", (e) => {
       // Defensive: never leave textboxes with scale ≠ 1 (stretches glyphs).
-      if (isTextbox(e.target)) bakeTextboxScale(e.target);
+      if (isTextbox(e.target)) {
+        bakeTextboxScale(e.target);
+        relayoutText(e.target);
+      }
       onMutation(e);
     });
     this.canvas.on("text:changed", (e) => {
-      if (!isTextbox(e.target)) return;
-      relayoutText(e.target);
+      const target = e.target as FabricObject & { text?: string } | undefined;
+      if (!target) return;
+      const raw = target.text ?? "";
+      if (raw.length > TEXT_CONTENT_MAX) {
+        target.set({ text: clampTextContent(raw) });
+      }
+      if (isTextbox(target)) relayoutText(target);
       this.canvas.requestRenderAll();
     });
     this.canvas.on("selection:created", onSelection);

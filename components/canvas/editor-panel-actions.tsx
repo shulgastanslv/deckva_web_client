@@ -128,12 +128,12 @@ export function EditorPanelActions({
               <Button
                 type="button"
                 variant="ghost"
-                size="icon"
-                className={iconBtn}
+                className="h-8 gap-0.5 rounded-md border-none px-2 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
                 title={t("header.preview")}
                 aria-label={t("header.preview")}
               >
                 <Play className="size-5" />
+                <ChevronDown className="size-3 opacity-80" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" sideOffset={8} className="w-52 rounded-2xl p-1.5">

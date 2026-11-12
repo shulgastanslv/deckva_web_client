@@ -3,47 +3,71 @@
 import { useTranslations } from "next-intl";
 
 import type { ProjectListItem } from "@/actions/projects";
-import {
-  recentCols,
-  StudioProjectRow,
-} from "@/components/studio/browse/studio-project-row";
-import { cn } from "@/lib/utils";
+import { StudioProjectRow } from "@/components/studio/browse/studio-project-row";
 
 export function StudioProjectList({
   projects,
+  selectedIds,
+  inTrash = false,
   onOpen,
+  onToggleSelect,
   onChanged,
 }: {
   projects: ProjectListItem[];
+  selectedIds?: Set<string>;
+  inTrash?: boolean;
   onOpen: (id: string) => void;
+  onToggleSelect?: (id: string, opts?: { additive?: boolean }) => void;
   onChanged: () => void;
 }) {
   const t = useTranslations("studio.browse");
   return (
-    <div className="min-w-0">
-      <div
-        className={cn(
-          "mb-1 grid gap-3 px-2 pb-2 text-[12px] text-muted-foreground",
-          recentCols,
-        )}
-      >
-        <span>{t("colName")}</span>
-        <span className="hidden md:block">{t("colSlides")}</span>
-        <span className="hidden md:block">{t("colFormat")}</span>
-        <span>{t("colLastOpened")}</span>
-        <span className="hidden md:block">{t("colOwner")}</span>
-        <span />
-      </div>
-      <div>
-        {projects.map((project) => (
-          <StudioProjectRow
-            key={project.id}
-            project={project}
-            onOpen={() => onOpen(project.id)}
-            onChanged={onChanged}
-          />
-        ))}
-      </div>
+    <div className="w-full min-w-0 overflow-x-auto">
+      <table className="w-full table-fixed border-collapse text-left">
+        <colgroup>
+          <col className="w-10" />
+          <col />
+          <col className="w-[12rem]" />
+          <col className="w-[7rem]" />
+          <col className="w-[5.5rem]" />
+          <col className="w-10" />
+        </colgroup>
+        <thead>
+          <tr className="border-b border-border/50 text-[12px] text-muted-foreground">
+            <th className="py-2 pr-1 pl-2 font-normal" scope="col">
+              <span className="sr-only">Select</span>
+            </th>
+            <th className="py-2 pr-3 font-normal" scope="col">
+              {t("colName")}
+            </th>
+            <th className="py-2 pr-3 font-normal" scope="col">
+              {t("colCreatedBy")}
+            </th>
+            <th className="py-2 pr-3 font-normal" scope="col">
+              {t("colSlides")}
+            </th>
+            <th className="py-2 pr-3 font-normal" scope="col">
+              {t("colRatio")}
+            </th>
+            <th className="py-2 pr-2 pl-1 font-normal" scope="col">
+              <span className="sr-only">{t("listView")}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {projects.map((project) => (
+            <StudioProjectRow
+              key={project.id}
+              project={project}
+              selected={selectedIds?.has(project.id)}
+              inTrash={inTrash}
+              onOpen={() => onOpen(project.id)}
+              onToggleSelect={(opts) => onToggleSelect?.(project.id, opts)}
+              onChanged={onChanged}
+            />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
