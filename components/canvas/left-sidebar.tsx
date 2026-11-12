@@ -12,6 +12,7 @@ import {
   Toolbox as ToolCase,
   Package,
   ArrowCounterClockwise as Undo2,
+  PuzzlePiece,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 import Logo from "@/components/logo/logo";
@@ -104,8 +105,8 @@ export function LeftSidebar({
   };
 
   const navItems: { id: NavId; icon: ReactNode; label: string }[] = [
-    { id: "tools", icon: <ToolCase className={navIconClass} />, label: t("tools") },
     { id: "elements", icon: <ShapesIcon className={navIconClass} />, label: t("elements") },
+    { id: "tools", icon: <PuzzlePiece className={navIconClass} />, label: t("tools") },
     { id: "layers", icon: <LayersIcon className={navIconClass} />, label: t("layers") },
     { id: "background", icon: <ImageIcon className={navIconClass} />, label: t("background") },
     { id: "assets", icon: <Package className={navIconClass} />, label: t("assets") },
@@ -230,24 +231,6 @@ export function LeftSidebar({
           {activeNav === "background" && <SidebarBackground />}
           {activeNav === "tools" && <SidebarTools />}
         </ScrollArea>
-
-        <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 px-3.5 py-2.5 text-[12px] text-muted-foreground">
-          <button
-            type="button"
-            onClick={() => setLegal("terms")}
-            className="transition-colors hover:text-foreground hover:underline underline-offset-4"
-          >
-            {tc("terms")}
-          </button>
-          <span className="text-muted-foreground/40">·</span>
-          <button
-            type="button"
-            onClick={() => setLegal("privacy")}
-            className="transition-colors hover:text-foreground hover:underline underline-offset-4"
-          >
-            {tc("privacy")}
-          </button>
-        </div>
       </div>
 
       <LegalDialog

@@ -5,7 +5,7 @@ import {
 } from "@phosphor-icons/react";
 import {
   Check,
-  Funnel as ListFilter,
+  FunnelSimpleIcon as Funnel,
 } from "@phosphor-icons/react";
 import {
   DropdownMenu,
@@ -29,7 +29,7 @@ export interface FilterGroup {
 
 /** Compact Figma-style filter trigger — taxonomy lives in the menu, not a chip strip. */
 export function FilterMenu({
-  icon: Icon = ListFilter,
+  icon: Icon = Funnel,
   value,
   defaultValue = "all",
   groups,
