@@ -166,6 +166,7 @@
       "community": "Супольнасць",
       "brandKit": "Брэнд-кіт",
       "brand": "Брэнд",
+      "connectors": "Канэктары",
       "studio": "Студыя",
       "newProject": "Новы праект",
       "openMenu": "Адкрыць меню",
@@ -351,6 +352,76 @@
       "addNew": "Дадаць",
       "removeLogo": "Выдаліць лагатып"
     },
+    "connectors": {
+      "title": "Канэктары",
+      "subtitle": "Падключыце Google Drive і Threads: імпарт асетаў, публікацыя каруселяў і аналітыка канэктараў.",
+      "available": "Даступныя канэктары",
+      "availableHint": "Падключыце акаўнт адзін раз — токены захоўваюцца зашыфраванымі і іх можна адклікаць.",
+      "connect": "Падключыць",
+      "disconnect": "Адключыць",
+      "refreshInsights": "Абнавіць інсайты",
+      "analyticsTitle": "Аналітыка канэктараў",
+      "analyticsHint": "Падзеі падключэння, імпарту, публікацыі і інсайтаў.",
+      "statConnected": "Падключана",
+      "statEvents7d": "Падзеі · 7 дзён",
+      "statEvents30d": "Падзеі · 30 дзён",
+      "activity7d": "Актыўнасць за 7 дзён",
+      "recentActivity": "Нядаўняя актыўнасць",
+      "emptyActivity": "Пакуль няма падзей. Падключыце акаўнт, каб з’явілася стужка.",
+      "metricPublishes": "Публікацыі",
+      "metricImports": "Імпарт / сінк",
+      "metricInsights": "Інсайты",
+      "metricErrors": "Памылкі",
+      "toastConnected": "{name} падключаны",
+      "toastDisconnected": "{name} адключаны",
+      "toastInsights": "Інсайты Threads абноўлены",
+      "promptHint": "Падключыць можна і з меню + у промпце студыі, або адкрыць <link>галоўную студыі</link>.",
+      "status": {
+        "connected": "Падключаны",
+        "disconnected": "Не падключаны",
+        "error": "Памылка",
+        "expired": "Скончыўся"
+      },
+      "capabilities": {
+        "import": "Імпарт",
+        "sync": "Сінк",
+        "publish": "Публікацыя",
+        "insights": "Інсайты"
+      },
+      "items": {
+        "google-drive": {
+          "label": "Google Drive",
+          "description": "Імпарт выяў і брэнд-асетаў з Drive у студыю."
+        },
+        "threads": {
+          "label": "Threads",
+          "description": "Публікацыя каруселяў і інсайты постаў у Threads."
+        }
+      },
+      "insights": {
+        "views": "Прагляды",
+        "likes": "Лайкі",
+        "replies": "Адказы",
+        "reposts": "Рэпосты",
+        "quotes": "Цытаты"
+      },
+      "events": {
+        "connect": "Падключэнне",
+        "disconnect": "Адключэнне",
+        "refresh": "Абнаўленне токена",
+        "sync": "Сінхранізацыя",
+        "import": "Імпарт",
+        "publish": "Публікацыя",
+        "error": "Памылка",
+        "insights": "Абнаўленне інсайтаў"
+      },
+      "errors": {
+        "google_not_configured": "OAuth Google Drive не наладжаны на серверы.",
+        "threads_not_configured": "OAuth Threads не наладжаны. Задайце THREADS_APP_ID і THREADS_APP_SECRET.",
+        "oauth_failed": "Не ўдалося завершыць падключэнне. Паспрабуйце яшчэ раз.",
+        "unknown_provider": "Невядомы канэктар."
+      }
+    },
     "upgrade": {
       "features": {
         "unlimitedAi": "Неабмежаваныя AI-генерацыі",
@@ -394,15 +465,15 @@
     },
     "starters": {
       "launch": {
-        "label": "Запуск",
+        "label": "Запуск прадукту",
         "topic": "Запуск прадукту ў шасці слайдах: офер, для каго, доказы і наступны крок."
       },
       "howto": {
-        "label": "Як зрабіць",
+        "label": "Як зрабіць інструкцыю",
         "topic": "Карусель-інструкцыя: кожны слайд — адзін крок, апошні — вынік."
       },
       "offer": {
-        "label": "Офер",
+        "label": "Оферы для пакупкі",
         "topic": "Офер у пяці слайдах: праблема, рашэнне, доказы, цана і наступны крок."
       }
     },
@@ -447,6 +518,7 @@
       "comingSoon": "Хутка",
       "connectors": "Канэктары",
       "connect": "Падключыць",
+      "manageConnectors": "Кіраванне канэктарамі",
       "soon": "Хутка",
       "noModelsMatch": "Няма падыходных мадэляў",
       "free": "Бясплатна",
@@ -1044,7 +1116,14 @@
       "allTags": "Усе тэгі",
       "filterByTag": "Фільтр па тэгу",
       "pngJpgSvg": "PNG, JPG, SVG · у бібліятэцы",
-      "asset": "Асет"
+      "asset": "Асет",
+      "source": "Крыніца",
+      "library": "Бібліятэка",
+      "googleDrive": "Google Drive",
+      "driveEmpty": "У Google Drive няма выяў.",
+      "driveLoadMore": "Яшчэ",
+      "driveImporting": "Імпарт з Drive…",
+      "filterSource": "Крыніца"
     },
     "settings": {
       "title": "Налады палатна",

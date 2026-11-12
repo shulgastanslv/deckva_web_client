@@ -230,7 +230,7 @@ export function StudioHome() {
               <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
           ) : empty ? (
-            <div className="py-6">
+            <div>
               <p className="text-[13px] text-muted-foreground">
                 {q ? t("nothingFound") : t("tryStarter")}
               </p>

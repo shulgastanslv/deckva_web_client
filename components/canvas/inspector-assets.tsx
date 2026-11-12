@@ -16,6 +16,12 @@ import {
   listMediaAssets,
   type MediaAssetDTO,
 } from "@/actions/assets";
+import {
+  importGoogleDriveFileAction,
+  listConnectors,
+  listGoogleDriveFilesAction,
+  type GoogleDriveImageFile,
+} from "@/actions/connectors";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { Button } from "@/components/ui/button";
 import { useCanvasManager } from "@/context/canvas-manager";
@@ -24,6 +30,10 @@ import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { canFillShape } from "@/lib/canvas/objects";
 import { cn } from "@/lib/utils";
+
+function driveThumbUrl(fileId: string) {
+  return `/api/connectors/google-drive/files/${encodeURIComponent(fileId)}?thumb=1`;
+}
 
 type Props = {
   target: FabricObject;
@@ -50,6 +60,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
   const manager = useCanvasManager();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [assets, setAssets] = useState<MediaAssetDTO[]>([]);
+  const [driveFiles, setDriveFiles] = useState<GoogleDriveImageFile[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -58,8 +69,23 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
     if (result.success) setAssets(result.assets);
   });
 
+  const refreshDrive = useEffectEvent(async () => {
+    const connectors = await listConnectors();
+    if (!connectors.success) return;
+    const drive = connectors.connectors.find((c) => c.id === "google-drive");
+    if (drive?.status !== "connected") {
+      setDriveFiles([]);
+      return;
+    }
+    const listed = await listGoogleDriveFilesAction();
+    if (listed.success && listed.connected) {
+      setDriveFiles(listed.files.slice(0, 8));
+    }
+  });
+
   useEffect(() => {
     void refresh();
+    void refreshDrive();
   }, []);
 
   const isDeviceFrame =
@@ -92,40 +118,84 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
     }
   };
 
+  const applyDataUrl = async (dataUrl: string) => {
+    if (!manager) return;
+    if (isDeviceFrame) {
+      await manager.objects.fillDeviceFrame(target as FabricImage, dataUrl);
+      manager.commit();
+      return;
+    }
+    if (isImage) {
+      const img = target as FabricImage;
+      const w = Math.max(1, img.getScaledWidth());
+      const h = Math.max(1, img.getScaledHeight());
+      const { left, top, originX, originY, angle } = img;
+      await img.setSrc(dataUrl, { crossOrigin: "anonymous" });
+      img.set({
+        scaleX: w / (img.width || 1),
+        scaleY: h / (img.height || 1),
+        left,
+        top,
+        originX,
+        originY,
+        angle,
+      });
+      img.setCoords();
+      manager.canvas.requestRenderAll();
+      manager.commit();
+      return;
+    }
+    if (canFill && canFillShape(target.type)) {
+      await manager.objects.fillFrameWithImage(target, dataUrl);
+      manager.commit();
+      return;
+    }
+    await manager.objects.addImage(dataUrl, { maxSize: 480 });
+    manager.commit();
+  };
+
   const applyAsset = async (asset: MediaAssetDTO) => {
     if (!manager || busyId) return;
     setBusyId(asset.id);
     try {
-      if (isDeviceFrame) {
-        await manager.objects.fillDeviceFrame(target as FabricImage, asset.dataUrl);
-        manager.commit();
-      } else if (isImage) {
-        const img = target as FabricImage;
-        const w = Math.max(1, img.getScaledWidth());
-        const h = Math.max(1, img.getScaledHeight());
-        const { left, top, originX, originY, angle } = img;
-        await img.setSrc(asset.dataUrl, { crossOrigin: "anonymous" });
-        img.set({
-          scaleX: w / (img.width || 1),
-          scaleY: h / (img.height || 1),
-          left,
-          top,
-          originX,
-          originY,
-          angle,
-        });
-        img.setCoords();
-        manager.canvas.requestRenderAll();
-        manager.commit();
-      } else if (canFill && canFillShape(target.type)) {
-        await manager.objects.fillFrameWithImage(target, asset.dataUrl);
-        manager.commit();
-      } else {
-        await manager.objects.addImage(asset.dataUrl, { maxSize: 480 });
-        manager.commit();
-      }
+      await applyDataUrl(asset.dataUrl);
     } catch (err) {
       reportError(err, messages.errors.addAsset);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const applyDriveFile = async (file: GoogleDriveImageFile) => {
+    if (!manager || busyId) return;
+    setBusyId(file.id);
+    try {
+      const res = await fetch(
+        `/api/connectors/google-drive/files/${encodeURIComponent(file.id)}`,
+      );
+      if (!res.ok) throw new Error(messages.errors.addFile);
+      const blob = await res.blob();
+      const localName = file.name.replace(/\.[^.]+$/, "") || file.name;
+      const localFile = new File([blob], file.name || "drive-image", {
+        type: blob.type || file.mimeType || "image/png",
+      });
+      const dataUrl = await fileToDataUrl(localFile, {
+        maxEdge: 1800,
+        quality: 0.9,
+      });
+      const imported = await importGoogleDriveFileAction({
+        fileId: file.id,
+        dataUrl,
+        name: localName,
+      });
+      if (imported.success === false) {
+        reportError(new Error(imported.error), imported.error);
+        return;
+      }
+      await applyDataUrl(imported.asset.dataUrl);
+      await refresh();
+    } catch (err) {
+      reportError(err, messages.errors.addFile);
     } finally {
       setBusyId(null);
     }
@@ -202,47 +272,87 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
           ) : null}
         </div>
 
-        {assets.length === 0 ? (
+        {assets.length === 0 && driveFiles.length === 0 ? (
           <p className="px-1 text-[12px] leading-snug text-muted-foreground">
             {t("uploadHint")}
           </p>
         ) : (
-          <div className="grid grid-cols-4 gap-1.5">
-            {assets.slice(0, 12).map((asset) => (
-              <div key={asset.id} className="group relative">
-                <button
-                  type="button"
-                  title={
-                    isImage || canFill
-                      ? `${t("replace")} ${asset.name}`
-                      : `${t("addToCanvas")} ${asset.name}`
-                  }
-                  disabled={busyId !== null}
-                  onClick={() => void applyAsset(asset)}
-                  className={cn(
-                    "aspect-square w-full overflow-hidden rounded-xl bg-muted/60 dark:bg-muted/25 transition-colors",
-                    "hover:bg-muted/80 dark:hover:bg-muted/40 disabled:opacity-50",
-                  )}
-                >
-                  {busyId === asset.id ? (
-                    <span className="flex size-full items-center justify-center">
-                      <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
-                    </span>
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={asset.dataUrl} alt="" className="size-full object-cover" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  title={t("remove")}
-                  onClick={() => void remove(asset.id)}
-                  className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-md bg-background/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
-                >
-                  <Trash2 className="size-2.5" />
-                </button>
+          <div className="flex flex-col gap-2.5">
+            {assets.length > 0 ? (
+              <div className="grid grid-cols-4 gap-1.5">
+                {assets.slice(0, 12).map((asset) => (
+                  <div key={asset.id} className="group relative">
+                    <button
+                      type="button"
+                      title={
+                        isImage || canFill
+                          ? `${t("replace")} ${asset.name}`
+                          : `${t("addToCanvas")} ${asset.name}`
+                      }
+                      disabled={busyId !== null}
+                      onClick={() => void applyAsset(asset)}
+                      className={cn(
+                        "aspect-square w-full overflow-hidden rounded-xl bg-muted/60 dark:bg-muted/25 transition-colors",
+                        "hover:bg-muted/80 dark:hover:bg-muted/40 disabled:opacity-50",
+                      )}
+                    >
+                      {busyId === asset.id ? (
+                        <span className="flex size-full items-center justify-center">
+                          <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+                        </span>
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={asset.dataUrl} alt="" className="size-full object-cover" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      title={t("remove")}
+                      onClick={() => void remove(asset.id)}
+                      className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-md bg-background/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                    >
+                      <Trash2 className="size-2.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : null}
+
+            {driveFiles.length > 0 ? (
+              <div className="flex flex-col gap-1.5">
+                <p className="px-0.5 text-[11px] font-medium text-muted-foreground">
+                  {t("googleDrive")}
+                </p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {driveFiles.map((file) => (
+                    <button
+                      key={file.id}
+                      type="button"
+                      title={`${t("googleDrive")}: ${file.name}`}
+                      disabled={busyId !== null}
+                      onClick={() => void applyDriveFile(file)}
+                      className={cn(
+                        "aspect-square w-full overflow-hidden rounded-xl bg-muted/60 dark:bg-muted/25 transition-colors",
+                        "hover:bg-muted/80 dark:hover:bg-muted/40 disabled:opacity-50",
+                      )}
+                    >
+                      {busyId === file.id ? (
+                        <span className="flex size-full items-center justify-center">
+                          <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+                        </span>
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={driveThumbUrl(file.id)}
+                          alt=""
+                          className="size-full object-cover"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 

@@ -166,6 +166,7 @@
       "community": "Community",
       "brandKit": "Brand kit",
       "brand": "Brand",
+      "connectors": "Connectors",
       "studio": "Studio",
       "newProject": "New project",
       "openMenu": "Open menu",
@@ -351,6 +352,76 @@
       "addNew": "Add new",
       "removeLogo": "Remove logo"
     },
+    "connectors": {
+      "title": "Connectors",
+      "subtitle": "Link Google Drive and Threads to import assets, publish carousels, and track connector analytics.",
+      "available": "Available connectors",
+      "availableHint": "Connect an account once — tokens stay encrypted and can be revoked anytime.",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "refreshInsights": "Refresh insights",
+      "analyticsTitle": "Connector analytics",
+      "analyticsHint": "Usage across connect, import, publish, and insights events.",
+      "statConnected": "Connected",
+      "statEvents7d": "Events · 7 days",
+      "statEvents30d": "Events · 30 days",
+      "activity7d": "Activity last 7 days",
+      "recentActivity": "Recent activity",
+      "emptyActivity": "No connector events yet. Connect an account to start the timeline.",
+      "metricPublishes": "Publishes",
+      "metricImports": "Imports / syncs",
+      "metricInsights": "Insights pulls",
+      "metricErrors": "Errors",
+      "toastConnected": "{name} connected",
+      "toastDisconnected": "{name} disconnected",
+      "toastInsights": "Threads insights updated",
+      "promptHint": "You can also connect from the studio prompt + menu, or open <link>studio home</link>.",
+      "status": {
+        "connected": "Connected",
+        "disconnected": "Not connected",
+        "error": "Error",
+        "expired": "Expired"
+      },
+      "capabilities": {
+        "import": "Import",
+        "sync": "Sync",
+        "publish": "Publish",
+        "insights": "Insights"
+      },
+      "items": {
+        "google-drive": {
+          "label": "Google Drive",
+          "description": "Import images and brand assets from Drive into the studio."
+        },
+        "threads": {
+          "label": "Threads",
+          "description": "Publish carousels and pull post insights from Threads."
+        }
+      },
+      "insights": {
+        "views": "Views",
+        "likes": "Likes",
+        "replies": "Replies",
+        "reposts": "Reposts",
+        "quotes": "Quotes"
+      },
+      "events": {
+        "connect": "Connected",
+        "disconnect": "Disconnected",
+        "refresh": "Token refreshed",
+        "sync": "Synced",
+        "import": "Imported",
+        "publish": "Published",
+        "error": "Error",
+        "insights": "Insights refreshed"
+      },
+      "errors": {
+        "google_not_configured": "Google Drive OAuth is not configured on the server.",
+        "threads_not_configured": "Threads OAuth is not configured. Set THREADS_APP_ID and THREADS_APP_SECRET.",
+        "oauth_failed": "Could not complete the connection. Try again.",
+        "unknown_provider": "Unknown connector."
+      }
+    },
     "upgrade": {
       "features": {
         "unlimitedAi": "Unlimited AI generations",
@@ -394,15 +465,15 @@
     },
     "starters": {
       "launch": {
-        "label": "Launch",
+        "label": "Launch a product",
         "topic": "A product launch in six slides: the offer, who it is for, the proof, and what to do next."
       },
       "howto": {
-        "label": "How-to",
+        "label": "How-to guide",
         "topic": "A how-to carousel where each slide is one clear step, and the last slide is the result."
       },
       "offer": {
-        "label": "Offer",
+        "label": "Offer for purchase",
         "topic": "An offer in five slides: the problem, the thing, the proof, the price, and the next step."
       }
     },
@@ -447,6 +518,7 @@
       "comingSoon": "Coming soon",
       "connectors": "Connectors",
       "connect": "Connect",
+      "manageConnectors": "Manage connectors",
       "soon": "Soon",
       "noModelsMatch": "No models match",
       "free": "Free",
@@ -1044,7 +1116,14 @@
       "allTags": "All tags",
       "filterByTag": "Filter by tag",
       "pngJpgSvg": "PNG, JPG, SVG · saved to library",
-      "asset": "Asset"
+      "asset": "Asset",
+      "source": "Source",
+      "library": "Library",
+      "googleDrive": "Google Drive",
+      "driveEmpty": "No images found in Google Drive.",
+      "driveLoadMore": "Load more",
+      "driveImporting": "Importing from Drive…",
+      "filterSource": "Filter source"
     },
     "settings": {
       "title": "Canvas Preferences",

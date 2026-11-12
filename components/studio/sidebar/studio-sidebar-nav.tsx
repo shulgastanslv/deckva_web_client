@@ -6,6 +6,7 @@ import {
   Folder as FolderIcon,
   House as HomeIcon,
   Palette as PaletteIcon,
+  PlugsConnected as PlugsIcon,
   CaretRight as ChevronRight,
   Trash as TrashIcon,
 } from "@phosphor-icons/react";
@@ -73,10 +74,16 @@ export function StudioSidebarNav() {
       active: pathname.startsWith("/studio/brand-kit"),
     },
     {
+      href: "/studio/connectors",
+      label: t("connectors"),
+      icon: PlugsIcon,
+      active: pathname.startsWith("/studio/connectors"),
+    },
+    {
       href: "/studio/browse?tab=trash",
       label: t("trash"),
       icon: TrashIcon,
-      active: pathname.startsWith("/studio/browse?tab=trash"),
+      active: pathname.startsWith("/studio/browse") && currentTab === "trash",
     },
   ];
 

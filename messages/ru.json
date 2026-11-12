@@ -166,6 +166,7 @@
       "community": "Сообщество",
       "brandKit": "Бренд-кит",
       "brand": "Бренд",
+      "connectors": "Коннекторы",
       "studio": "Студия",
       "newProject": "Новый проект",
       "openMenu": "Открыть меню",
@@ -351,6 +352,76 @@
       "addNew": "Добавить",
       "removeLogo": "Удалить логотип"
     },
+    "connectors": {
+      "title": "Коннекторы",
+      "subtitle": "Подключите Google Drive и Threads: импорт ассетов, публикация каруселей и аналитика коннекторов.",
+      "available": "Доступные коннекторы",
+      "availableHint": "Подключите аккаунт один раз — токены хранятся зашифрованными и их можно отозвать.",
+      "connect": "Подключить",
+      "disconnect": "Отключить",
+      "refreshInsights": "Обновить инсайты",
+      "analyticsTitle": "Аналитика коннекторов",
+      "analyticsHint": "События подключения, импорта, публикации и инсайтов.",
+      "statConnected": "Подключено",
+      "statEvents7d": "События · 7 дней",
+      "statEvents30d": "События · 30 дней",
+      "activity7d": "Активность за 7 дней",
+      "recentActivity": "Недавняя активность",
+      "emptyActivity": "Пока нет событий. Подключите аккаунт, чтобы появилась лента.",
+      "metricPublishes": "Публикации",
+      "metricImports": "Импорт / синк",
+      "metricInsights": "Инсайты",
+      "metricErrors": "Ошибки",
+      "toastConnected": "{name} подключён",
+      "toastDisconnected": "{name} отключён",
+      "toastInsights": "Инсайты Threads обновлены",
+      "promptHint": "Подключить можно и из меню + в промпте студии, или открыть <link>главную студии</link>.",
+      "status": {
+        "connected": "Подключён",
+        "disconnected": "Не подключён",
+        "error": "Ошибка",
+        "expired": "Истёк"
+      },
+      "capabilities": {
+        "import": "Импорт",
+        "sync": "Синк",
+        "publish": "Публикация",
+        "insights": "Инсайты"
+      },
+      "items": {
+        "google-drive": {
+          "label": "Google Drive",
+          "description": "Импорт изображений и бренд-ассетов из Drive в студию."
+        },
+        "threads": {
+          "label": "Threads",
+          "description": "Публикация каруселей и инсайты постов в Threads."
+        }
+      },
+      "insights": {
+        "views": "Просмотры",
+        "likes": "Лайки",
+        "replies": "Ответы",
+        "reposts": "Репосты",
+        "quotes": "Цитаты"
+      },
+      "events": {
+        "connect": "Подключение",
+        "disconnect": "Отключение",
+        "refresh": "Обновление токена",
+        "sync": "Синхронизация",
+        "import": "Импорт",
+        "publish": "Публикация",
+        "error": "Ошибка",
+        "insights": "Обновление инсайтов"
+      },
+      "errors": {
+        "google_not_configured": "OAuth Google Drive не настроен на сервере.",
+        "threads_not_configured": "OAuth Threads не настроен. Задайте THREADS_APP_ID и THREADS_APP_SECRET.",
+        "oauth_failed": "Не удалось завершить подключение. Попробуйте ещё раз.",
+        "unknown_provider": "Неизвестный коннектор."
+      }
+    },
     "upgrade": {
       "features": {
         "unlimitedAi": "Безлимитные AI-генерации",
@@ -394,15 +465,15 @@
     },
     "starters": {
       "launch": {
-        "label": "Запуск",
+        "label": "Запуск продукта",
         "topic": "Запуск продукта в шести слайдах: оффер, для кого, доказательства и следующий шаг."
       },
       "howto": {
-        "label": "Как сделать",
+        "label": "Как сделать инструкцию",
         "topic": "Карусель-инструкция: каждый слайд — один шаг, последний — результат."
       },
       "offer": {
-        "label": "Оффер",
+        "label": "Офферы для покупки",
         "topic": "Оффер в пяти слайдах: проблема, решение, доказательства, цена и следующий шаг."
       }
     },
@@ -447,6 +518,7 @@
       "comingSoon": "Скоро",
       "connectors": "Коннекторы",
       "connect": "Подключить",
+      "manageConnectors": "Управление коннекторами",
       "soon": "Скоро",
       "noModelsMatch": "Нет подходящих моделей",
       "free": "Бесплатно",
@@ -1044,7 +1116,14 @@
       "allTags": "Все теги",
       "filterByTag": "Фильтр по тегу",
       "pngJpgSvg": "PNG, JPG, SVG · в библиотеке",
-      "asset": "Ассет"
+      "asset": "Ассет",
+      "source": "Источник",
+      "library": "Библиотека",
+      "googleDrive": "Google Drive",
+      "driveEmpty": "В Google Drive нет изображений.",
+      "driveLoadMore": "Ещё",
+      "driveImporting": "Импорт из Drive…",
+      "filterSource": "Источник"
     },
     "settings": {
       "title": "Настройки холста",

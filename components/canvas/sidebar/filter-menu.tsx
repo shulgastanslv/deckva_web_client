@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   type Icon as LucideIcon,
 } from "@phosphor-icons/react";
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 export interface FilterOption {
   id: string;
   label?: string;
+  icon?: ReactNode;
 }
 
 export interface FilterGroup {
@@ -88,6 +90,11 @@ export function FilterMenu({
                   className="cursor-pointer gap-2 rounded-xl px-2 py-1.5 text-[13px] text-foreground focus:bg-muted/50 focus:text-foreground"
                 >
                   <Check className={cn("size-3.5 shrink-0", selected ? "opacity-100" : "opacity-0")} />
+                  {option.icon ? (
+                    <span className="inline-flex size-5 shrink-0 items-center justify-center text-muted-foreground [&_svg]:size-4">
+                      {option.icon}
+                    </span>
+                  ) : null}
                   <span>{option.label ?? option.id}</span>
                 </DropdownMenuItem>
               );

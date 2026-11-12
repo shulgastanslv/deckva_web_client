@@ -87,9 +87,84 @@ model User {
   billingPayments BillingPayment[]
   mediaAssets     MediaAsset[]
   communityEdits  Project[]            @relation("CommunityEditor")
+  connectors      ConnectorAccount[]
+  connectorEvents ConnectorEvent[]
 
   @@index([activeOrganizationId])
   @@index([subscriptionStatus])
+}
+
+enum ConnectorProvider {
+  GOOGLE_DRIVE
+  THREADS
+}
+
+enum ConnectorStatus {
+  DISCONNECTED
+  CONNECTED
+  ERROR
+  EXPIRED
+}
+
+enum ConnectorEventKind {
+  CONNECT
+  DISCONNECT
+  REFRESH
+  SYNC
+  IMPORT
+  PUBLISH
+  ERROR
+  INSIGHTS
+}
+
+/// Third-party OAuth link (Drive files, Threads publish/insights) — separate from login.
+model ConnectorAccount {
+  id                String            @id @default(cuid())
+  provider          ConnectorProvider
+  status            ConnectorStatus   @default(DISCONNECTED)
+  externalAccountId String?
+  displayName       String?
+  avatarUrl         String?
+  scopes            String[]          @default([])
+  /// AES-GCM payload (iv + ciphertext), never raw OAuth secrets.
+  accessTokenEnc    String?           @db.Text
+  refreshTokenEnc   String?           @db.Text
+  tokenExpiresAt    DateTime?
+  metadata          Json?
+  lastSyncedAt      DateTime?
+  connectedAt       DateTime?
+  errorMessage      String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  events ConnectorEvent[]
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider, status])
+}
+
+/// Product + connector activity for the Connectors analytics panel.
+model ConnectorEvent {
+  id        String             @id @default(cuid())
+  provider  ConnectorProvider
+  kind      ConnectorEventKind
+  label     String?
+  meta      Json?
+  createdAt DateTime           @default(now())
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  connectorId String?
+  connector   ConnectorAccount? @relation(fields: [connectorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([userId, provider, createdAt])
+  @@index([connectorId, createdAt])
 }
 
 /// User image library for the editor Assets panel (logos, screenshots, fills).

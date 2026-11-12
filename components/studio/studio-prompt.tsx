@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ArrowUp,
   Clock as Clock3,
@@ -11,6 +12,7 @@ import {
   Scroll as ScrollText,
   MagnifyingGlass as Search,
   Shapes,
+  PlugsIcon,
 } from "@phosphor-icons/react";
 
 import { listAiModels } from "@/actions/ai";
@@ -33,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { AiModelInfo } from "@/lib/ai/types";
+import { trackEvent } from "@/lib/analytics";
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -44,7 +47,7 @@ const MAX_HISTORY = 6;
 type ModelFilter = "all" | "free" | BrandKey;
 
 const CONNECTORS = [
-  { id: "pinterest" as const, label: "Pinterest", brand: "pinterest" as const },
+  { id: "threads" as const, label: "Threads", brand: "threads" as const },
   { id: "google-drive" as const, label: "Google Drive", brand: "googledrive" as const },
 ];
 
@@ -258,7 +261,7 @@ export function StudioPrompt({
                 </DropdownMenuSub>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
-                    <LayoutTemplate className={menuIconClass} />
+                    <PlugsIcon className={menuIconClass} />
                     <span className="flex-1 text-left">{t("prompt.connectors")}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent sideOffset={8} className="w-64 rounded-2xl p-2">
@@ -273,16 +276,24 @@ export function StudioPrompt({
                         </span>
                         <button
                           type="button"
-                          className="h-7 shrink-0 rounded-md border border-border/60 bg-transparent px-2.5 text-[12px] font-medium text-foreground hover:bg-muted/40"
+                          className="h-7 shrink-0 rounded-md bg-muted/40 px-2.5 text-[12px] font-medium text-foreground hover:bg-muted/60"
                           onClick={(event) => {
                             event.preventDefault();
                             event.stopPropagation();
+                            trackEvent("connector_connect_clicked", {
+                              provider: item.id,
+                              source: "prompt_menu",
+                            });
+                            window.location.href = `/api/connectors/${item.id}/connect`;
                           }}
                         >
                           {t("prompt.connect")}
                         </button>
                       </div>
                     ))}
+                    <DropdownMenuItem asChild className="mt-1 rounded-xl px-2.5 py-2 text-[13px]">
+                      <Link href="/studio/connectors">{t("prompt.manageConnectors")}</Link>
+                    </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
                 <DropdownMenuItem

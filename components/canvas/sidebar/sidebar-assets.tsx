@@ -10,11 +10,11 @@ import {
 } from "react";
 import {
   Eye,
+  Images,
   SpinnerGap as Loader2,
   PencilSimple as Pencil,
   Plus,
   MagnifyingGlass as Search,
-  Tag,
   Trash as Trash2,
   X,
 } from "@phosphor-icons/react";
@@ -27,6 +27,12 @@ import {
   updateMediaAsset,
   type MediaAssetDTO,
 } from "@/actions/assets";
+import {
+  importGoogleDriveFileAction,
+  listConnectors,
+  listGoogleDriveFilesAction,
+  type GoogleDriveImageFile,
+} from "@/actions/connectors";
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import { UploadOrDrop } from "@/components/canvas/sidebar/upload-or-drop";
@@ -38,6 +44,7 @@ import {
   sidebarSegmentedItem,
   sidebarSegmentedItemIdle,
 } from "@/components/canvas/sidebar/sidebar-ui";
+import { BrandIcon } from "@/components/studio/brand-icon";
 import {
   Dialog,
   DialogContent,
@@ -61,6 +68,11 @@ import {
 import { cn } from "@/lib/utils";
 
 const LEGACY_IMPORT_KEY = "deckva.user-assets.imported";
+type AssetSource = "library" | "google-drive";
+
+function driveThumbUrl(fileId: string) {
+  return `/api/connectors/google-drive/files/${encodeURIComponent(fileId)}?thumb=1`;
+}
 
 function formatBytes(bytes: number | null): string {
   if (!bytes || bytes <= 0) return "";
@@ -78,13 +90,17 @@ function parseTagInput(value: string): string[] {
 
 export function SidebarAssets() {
   const t = useTranslations("editor.assets");
-  const tc = useTranslations("common");
   const manager = useCanvasManager();
   const [assets, setAssets] = useState<MediaAssetDTO[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [logos, setLogos] = useState<BrandKitLogo[]>([]);
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [source, setSource] = useState<AssetSource>("library");
+  const [driveConnected, setDriveConnected] = useState(false);
+  const [driveFiles, setDriveFiles] = useState<GoogleDriveImageFile[]>([]);
+  const [driveNextPage, setDriveNextPage] = useState<string | null>(null);
+  const [driveLoading, setDriveLoading] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +108,6 @@ export function SidebarAssets() {
   const [editing, setEditing] = useState<MediaAssetDTO | null>(null);
   const [editName, setEditName] = useState("");
   const [editTags, setEditTags] = useState("");
-  const [uploadTags, setUploadTags] = useState("");
   const [pending, startTransition] = useTransition();
   const skipFilterFetch = useRef(true);
 
@@ -110,6 +125,38 @@ export function SidebarAssets() {
     setError(null);
   });
 
+  const refreshDrive = useEffectEvent(async (opts?: {
+    query?: string;
+    pageToken?: string | null;
+    append?: boolean;
+  }) => {
+    setDriveLoading(true);
+    try {
+      const result = await listGoogleDriveFilesAction({
+        query: opts?.query ?? query,
+        pageToken: opts?.pageToken ?? undefined,
+      });
+      if (result.success === false) {
+        setError(result.error);
+        return;
+      }
+      setDriveConnected(result.connected);
+      if (!result.connected) {
+        setDriveFiles([]);
+        setDriveNextPage(null);
+        if (source === "google-drive") setSource("library");
+        return;
+      }
+      setDriveFiles((prev) =>
+        opts?.append ? [...prev, ...result.files] : result.files,
+      );
+      setDriveNextPage(result.nextPageToken);
+      setError(null);
+    } finally {
+      setDriveLoading(false);
+    }
+  });
+
   useEffect(() => {
     setLogos(loadBrandKit().logos);
     const onBrand = () => setLogos(loadBrandKit().logos);
@@ -120,6 +167,11 @@ export function SidebarAssets() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const connectors = await listConnectors();
+      if (!cancelled && connectors.success) {
+        const drive = connectors.connectors.find((c) => c.id === "google-drive");
+        setDriveConnected(drive?.status === "connected");
+      }
       try {
         if (!window.localStorage.getItem(LEGACY_IMPORT_KEY)) {
           const legacy = readUserAssets(
@@ -166,18 +218,21 @@ export function SidebarAssets() {
     }
     const handle = window.setTimeout(() => {
       startTransition(() => {
-        void refresh({ query, tag: activeTag });
+        if (source === "google-drive") {
+          void refreshDrive({ query, pageToken: null, append: false });
+        } else {
+          void refresh({ query, tag: activeTag });
+        }
       });
     }, 220);
     return () => window.clearTimeout(handle);
-  }, [query, activeTag]);
+  }, [query, activeTag, source]);
 
   const addFiles = async (files: FileList | File[] | null) => {
     if (!files || files.length === 0) return;
     setError(null);
     setUploading(true);
     try {
-      const tags = parseTagInput(uploadTags);
       for (const file of Array.from(files)) {
         if (!file.type.startsWith("image/")) continue;
         const dataUrl = await fileToDataUrl(file, {
@@ -187,7 +242,6 @@ export function SidebarAssets() {
         const result = await createMediaAsset({
           name: file.name.replace(/\.[^.]+$/, "") || "Asset",
           dataUrl,
-          tags,
         });
         if (result.success === false) {
           setError(result.error);
@@ -214,6 +268,47 @@ export function SidebarAssets() {
     } catch (err) {
       reportError(err, messages.errors.addAsset);
       setError(messages.errors.addAsset);
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const importDriveFile = async (file: GoogleDriveImageFile) => {
+    if (!manager || loadingId) return;
+    setLoadingId(file.id);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/connectors/google-drive/files/${encodeURIComponent(file.id)}`,
+      );
+      if (!res.ok) {
+        throw new Error(messages.errors.addFile);
+      }
+      const blob = await res.blob();
+      const localName = file.name.replace(/\.[^.]+$/, "") || file.name;
+      const localFile = new File([blob], file.name || "drive-image", {
+        type: blob.type || file.mimeType || "image/png",
+      });
+      const dataUrl = await fileToDataUrl(localFile, {
+        maxEdge: 1800,
+        quality: 0.9,
+      });
+      const imported = await importGoogleDriveFileAction({
+        fileId: file.id,
+        dataUrl,
+        name: localName,
+      });
+      if (imported.success === false) {
+        setError(imported.error);
+        reportError(new Error(imported.error), imported.error);
+        return;
+      }
+      await manager.objects.addImage(imported.asset.dataUrl, { maxSize: 480 });
+      manager.commit();
+      if (source === "library") await refresh();
+    } catch (err) {
+      reportError(err, messages.errors.addFile);
+      setError(messages.errors.addFile);
     } finally {
       setLoadingId(null);
     }
@@ -254,6 +349,14 @@ export function SidebarAssets() {
     await refresh();
   };
 
+  const showDrive = driveConnected;
+  const filterValue =
+    source === "google-drive"
+      ? "google-drive"
+      : activeTag
+        ? `tag:${activeTag}`
+        : "library";
+
   return (
     <div className={cn(sidebarPanel, "overflow-hidden")}>
       <div className="flex items-center gap-1.5">
@@ -262,7 +365,9 @@ export function SidebarAssets() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("searchNameOrTag")}
+            placeholder={
+              source === "google-drive" ? t("googleDrive") : t("searchNameOrTag")
+            }
             className={cn(sidebarFieldInput, "pl-9 pr-9")}
           />
           {query ? (
@@ -276,86 +381,169 @@ export function SidebarAssets() {
             </button>
           ) : null}
         </div>
-        {allTags.length > 0 ? (
+        {showDrive || allTags.length > 0 ? (
           <FilterMenu
-            value={activeTag ?? "all"}
-            defaultValue="all"
-            ariaLabel="Filter by tag"
-            onChange={(id) => setActiveTag(id === "all" ? null : id)}
+            value={filterValue}
+            defaultValue="library"
+            ariaLabel={t("filterSource")}
+            onChange={(id) => {
+              if (id === "google-drive") {
+                setActiveTag(null);
+                setDriveFiles([]);
+                setDriveNextPage(null);
+                setSource("google-drive");
+                return;
+              }
+              setSource("library");
+              if (id === "library") {
+                setActiveTag(null);
+                return;
+              }
+              if (id.startsWith("tag:")) {
+                setActiveTag(id.slice(4));
+              }
+            }}
             groups={[
-              {
-                label: "Tags",
-                options: [
-                  { id: "all", label: "All tags" },
-                  ...allTags.map((tag) => ({ id: tag, label: `#${tag}` })),
-                ],
-              },
+              ...(showDrive
+                ? [
+                    {
+                      options: [
+                        {
+                          id: "library",
+                          label: t("library"),
+                          icon: <Images className="size-4 stroke-[1.5]" />,
+                        },
+                        {
+                          id: "google-drive",
+                          label: t("googleDrive"),
+                          icon: (
+                            <BrandIcon brand="googledrive" className="size-4" />
+                          ),
+                        },
+                      ],
+                    },
+                  ]
+                : []),
+              ...(source === "library" && allTags.length > 0
+                ? [
+                    {
+                      label: t("tags"),
+                      options: [
+                        { id: "library", label: t("allTags") },
+                        ...allTags.map((tag) => ({
+                          id: `tag:${tag}`,
+                          label: `#${tag}`,
+                        })),
+                      ],
+                    },
+                  ]
+                : []),
             ]}
           />
         ) : null}
       </div>
 
-      <div className="relative">
-        <Tag className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={uploadTags}
-          onChange={(e) => setUploadTags(e.target.value)}
-          placeholder={t("tagsForUploads")}
-          className={cn(sidebarFieldInput, "pl-9")}
+      {source === "library" ? (
+        <UploadOrDrop
+          multiple
+          disabled={!manager}
+          busy={uploading}
+          hint={t("pngJpgSvg")}
+          onFiles={(files) => void addFiles(files)}
         />
-      </div>
-
-      <UploadOrDrop
-        multiple
-        disabled={!manager}
-        busy={uploading}
-        hint={t("pngJpgSvg")}
-        onFiles={(files) => void addFiles(files)}
-      />
+      ) : null}
 
       {error ? <p className="text-[13px] text-destructive">{error}</p> : null}
 
-      {logos.length > 0 ? (
-        <GallerySection title={t("brandLogos")}>
-          {logos.map((item) => (
-            <AssetTile
-              key={item.id}
-              name={item.name}
-              dataUrl={item.dataUrl}
-              busy={loadingId === item.id}
-              disabled={loadingId !== null}
-              onAdd={() => void addToCanvas(item)}
-            />
-          ))}
-        </GallerySection>
-      ) : null}
-
-      {pending && assets.length === 0 ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="size-4 animate-spin text-muted-foreground" />
-        </div>
-      ) : assets.length === 0 ? (
-        logos.length === 0 ? (
+      {source === "google-drive" ? (
+        driveLoading && driveFiles.length === 0 ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : driveFiles.length === 0 ? (
           <p className="py-8 text-center text-[13px] text-muted-foreground">
-            {t("libraryHint")}
+            {t("driveEmpty")}
           </p>
-        ) : null
+        ) : (
+          <>
+            <GallerySection title={`${t("googleDrive")} · ${driveFiles.length}`}>
+              {driveFiles.map((file) => (
+                <AssetTile
+                  key={file.id}
+                  name={file.name}
+                  dataUrl={driveThumbUrl(file.id)}
+                  busy={loadingId === file.id}
+                  disabled={loadingId !== null}
+                  onAdd={() => void importDriveFile(file)}
+                />
+              ))}
+            </GallerySection>
+            {driveNextPage ? (
+              <button
+                type="button"
+                disabled={driveLoading}
+                className={cn(sidebarActionBtn, "h-10 w-full")}
+                onClick={() =>
+                  void refreshDrive({
+                    query,
+                    pageToken: driveNextPage,
+                    append: true,
+                  })
+                }
+              >
+                {driveLoading ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : null}
+                {t("driveLoadMore")}
+              </button>
+            ) : null}
+          </>
+        )
       ) : (
-        <GallerySection title={`Library · ${assets.length}`}>
-          {assets.map((item) => (
-            <AssetTile
-              key={item.id}
-              name={item.name}
-              dataUrl={item.dataUrl}
-              busy={loadingId === item.id}
-              disabled={loadingId !== null}
-              onAdd={() => void addToCanvas(item)}
-              onPreview={() => setPreview(item)}
-              onEdit={() => openEdit(item)}
-              onRemove={() => void removeAsset(item.id)}
-            />
-          ))}
-        </GallerySection>
+        <>
+          {logos.length > 0 ? (
+            <GallerySection title={t("brandLogos")}>
+              {logos.map((item) => (
+                <AssetTile
+                  key={item.id}
+                  name={item.name}
+                  dataUrl={item.dataUrl}
+                  busy={loadingId === item.id}
+                  disabled={loadingId !== null}
+                  onAdd={() => void addToCanvas(item)}
+                />
+              ))}
+            </GallerySection>
+          ) : null}
+
+          {pending && assets.length === 0 ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            </div>
+          ) : assets.length === 0 ? (
+            logos.length === 0 ? (
+              <p className="py-8 text-center text-[13px] text-muted-foreground">
+                {t("libraryHint")}
+              </p>
+            ) : null
+          ) : (
+            <GallerySection title={`${t("library")} · ${assets.length}`}>
+              {assets.map((item) => (
+                <AssetTile
+                  key={item.id}
+                  name={item.name}
+                  dataUrl={item.dataUrl}
+                  busy={loadingId === item.id}
+                  disabled={loadingId !== null}
+                  onAdd={() => void addToCanvas(item)}
+                  onPreview={() => setPreview(item)}
+                  onEdit={() => openEdit(item)}
+                  onRemove={() => void removeAsset(item.id)}
+                />
+              ))}
+            </GallerySection>
+          )}
+        </>
       )}
 
       <Dialog open={!!preview} onOpenChange={(open) => !open && setPreview(null)}>

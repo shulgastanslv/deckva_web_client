@@ -1,6 +1,7 @@
 "use client";
 
 import type { IconType } from "react-icons";
+import { FaThreads } from "react-icons/fa6";
 import {
   SiAnthropic,
   SiClaude,
@@ -12,7 +13,6 @@ import {
   SiMistralai,
   SiOllama,
   SiPerplexity,
-  SiPinterest,
   SiX,
 } from "react-icons/si";
 import { cn } from "@/lib/utils";
@@ -30,7 +30,7 @@ export type BrandKey =
   | "huggingface"
   | "perplexity"
   | "xai"
-  | "pinterest"
+  | "threads"
   | "googledrive"
   | "unknown";
 
@@ -116,11 +116,11 @@ const BRANDS: Record<BrandKey, BrandMeta> = {
     color: "#000000",
     Icon: SiX,
   },
-  pinterest: {
-    key: "pinterest",
-    label: "Pinterest",
-    color: "#E60023",
-    Icon: SiPinterest,
+  threads: {
+    key: "threads",
+    label: "Threads",
+    color: "currentColor",
+    Icon: FaThreads,
   },
   googledrive: {
     key: "googledrive",
