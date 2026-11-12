@@ -747,6 +747,7 @@
   "editor": {
     "shareLink": "Ссылка для шаринга",
     "publishCommunity": "Опубликовать в сообществе",
+    "figmaTransfer": "Импорт / экспорт Figma",
     "palette": {
       "slots": {
         "background": "Фон",
@@ -1575,6 +1576,37 @@
       "shareUnavailable": "Это устройство не умеет делиться файлами изображений. Скачайте вместо этого.",
       "exporting": "Экспорт…",
       "marked": "Отмеченные"
+    },
+    "figma": {
+      "title": "Figma",
+      "subtitle": "Перенесите фреймы на холст или отдайте слайды обратно в Figma.",
+      "importTab": "Импорт",
+      "exportTab": "Экспорт",
+      "fileLink": "Ссылка на Figma",
+      "fileLinkPlaceholder": "https://www.figma.com/design/…",
+      "token": "Personal access token",
+      "tokenPlaceholder": "figd_…",
+      "tokenHelp": "Получить токен",
+      "rememberToken": "Запомнить токен на этом устройстве",
+      "loadFrames": "Загрузить фреймы",
+      "listing": "Загрузка…",
+      "frames": "Фреймы",
+      "selectAll": "Выбрать все",
+      "frameCount": "{count, plural, one {# фрейм} few {# фрейма} many {# фреймов} other {# фрейма}}",
+      "importSelected": "Импортировать {count, plural, one {# фрейм} few {# фрейма} many {# фреймов} other {# фрейма}}",
+      "importing": "Импорт…",
+      "importDone": "Импортировано {count, plural, one {# слайд} few {# слайда} many {# слайдов} other {# слайда}} из Figma",
+      "importFailed": "Не удалось импортировать из Figma",
+      "exportHint": "Скачайте ZIP и перетащите файлы в Figma — по одному на слайд, в том же порядке.",
+      "slides": "Слайды",
+      "allSlides": "Все {count}",
+      "markedSlides": "Отмеченные {count}",
+      "format": "Формат",
+      "slideCount": "{count, plural, one {# слайд} few {# слайда} many {# слайдов} other {# слайда}}",
+      "downloadZip": "Скачать для Figma",
+      "exporting": "Экспорт…",
+      "exportDone": "ZIP для Figma скачан",
+      "exportFailed": "Не удалось экспортировать для Figma"
     },
     "share": {
       "title": "Поделиться проектом",

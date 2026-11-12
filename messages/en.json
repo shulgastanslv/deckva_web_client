@@ -747,6 +747,7 @@
   "editor": {
     "shareLink": "Share link",
     "publishCommunity": "Publish to community",
+    "figmaTransfer": "Figma import / export",
     "palette": {
       "slots": {
         "background": "Background",
@@ -1575,6 +1576,37 @@
       "shareUnavailable": "This device can't share image files. Download instead.",
       "exporting": "Exporting…",
       "marked": "Marked"
+    },
+    "figma": {
+      "title": "Figma",
+      "subtitle": "Bring frames into the canvas, or hand slides back to Figma.",
+      "importTab": "Import",
+      "exportTab": "Export",
+      "fileLink": "Figma link",
+      "fileLinkPlaceholder": "https://www.figma.com/design/…",
+      "token": "Personal access token",
+      "tokenPlaceholder": "figd_…",
+      "tokenHelp": "Get a token",
+      "rememberToken": "Remember token on this device",
+      "loadFrames": "Load frames",
+      "listing": "Loading…",
+      "frames": "Frames",
+      "selectAll": "Select all",
+      "frameCount": "{count, plural, one {# frame} other {# frames}}",
+      "importSelected": "Import {count, plural, one {# frame} other {# frames}}",
+      "importing": "Importing…",
+      "importDone": "Imported {count, plural, one {# slide} other {# slides}} from Figma",
+      "importFailed": "Could not import from Figma",
+      "exportHint": "Download a ZIP you can drop into Figma — one file per slide, same order.",
+      "slides": "Slides",
+      "allSlides": "All {count}",
+      "markedSlides": "Marked {count}",
+      "format": "Format",
+      "slideCount": "{count, plural, one {# slide} other {# slides}}",
+      "downloadZip": "Download for Figma",
+      "exporting": "Exporting…",
+      "exportDone": "Downloaded ZIP for Figma",
+      "exportFailed": "Could not export for Figma"
     },
     "share": {
       "title": "Share Project",

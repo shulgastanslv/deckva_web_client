@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 
 import { AuthModal } from "@/components/auth";
 import { ExportModal } from "@/components/export-modal";
+import { FigmaTransferModal } from "@/components/figma-transfer-modal";
 import { PublishCommunityDialog } from "@/components/publish-community-dialog";
 import { ShareModal } from "@/components/share-modal";
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
@@ -26,6 +27,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
+
+function FigmaMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 36" className={className} aria-hidden>
+      <path fill="#F24E1E" d="M0 6a6 6 0 0 1 6-6h6v12H6A6 6 0 0 1 0 6Z" />
+      <path fill="#FF7262" d="M12 0h6a6 6 0 0 1 0 12h-6V0Z" />
+      <path fill="#A259FF" d="M0 18a6 6 0 0 1 6-6h6v12H6a6 6 0 0 1-6-6Z" />
+      <path fill="#1ABCFE" d="M18 12a6 6 0 1 0 0 12 6 6 0 1 0 0-12Z" />
+      <path fill="#0ACF83" d="M6 36a6 6 0 0 0 6-6v-6H6a6 6 0 0 0 0 12Z" />
+    </svg>
+  );
+}
 
 const iconBtn =
   "size-8 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
@@ -52,6 +65,7 @@ export function EditorPanelActions({
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [figmaOpen, setFigmaOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const t = useTranslations("editor");
   const tc = useTranslations("common");
@@ -119,6 +133,13 @@ export function EditorPanelActions({
                 <ArrowUp className="size-5" />
                 {t("header.exportPngZipShort", { count: slideCount })}
               </DropdownMenuItem>
+              <DropdownMenuItem
+                className={menuItem}
+                onSelect={() => requireAuth(() => setFigmaOpen(true))}
+              >
+                <FigmaMark className="h-5 w-[14px]" />
+                {t("figmaTransfer")}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -178,6 +199,14 @@ export function EditorPanelActions({
         onOpenChange={setExportOpen}
         onNeedAuth={() => {
           setExportOpen(false);
+          setAuthOpen(true);
+        }}
+      />
+      <FigmaTransferModal
+        open={figmaOpen}
+        onOpenChange={setFigmaOpen}
+        onNeedAuth={() => {
+          setFigmaOpen(false);
           setAuthOpen(true);
         }}
       />

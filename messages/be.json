@@ -747,6 +747,7 @@
   "editor": {
     "shareLink": "Спасылка для шарынгу",
     "publishCommunity": "Апублікаваць у супольнасці",
+    "figmaTransfer": "Імпарт / экспарт Figma",
     "palette": {
       "slots": {
         "background": "Фон",
@@ -1575,6 +1576,37 @@
       "shareUnavailable": "Гэтая прылада не ўмее дзяліцца файламі выяў. Спампуйце замест гэтага.",
       "exporting": "Экспарт…",
       "marked": "Адзначаныя"
+    },
+    "figma": {
+      "title": "Figma",
+      "subtitle": "Перанясіце фрэймы на палатнік або аддайце слайды назад у Figma.",
+      "importTab": "Імпарт",
+      "exportTab": "Экспарт",
+      "fileLink": "Спасылка на Figma",
+      "fileLinkPlaceholder": "https://www.figma.com/design/…",
+      "token": "Personal access token",
+      "tokenPlaceholder": "figd_…",
+      "tokenHelp": "Атрымаць токен",
+      "rememberToken": "Запомніць токен на гэтай прыладзе",
+      "loadFrames": "Загрузіць фрэймы",
+      "listing": "Загрузка…",
+      "frames": "Фрэймы",
+      "selectAll": "Выбраць усе",
+      "frameCount": "{count, plural, one {# фрэйм} few {# фрэймы} many {# фрэймаў} other {# фрэйма}}",
+      "importSelected": "Імпартаваць {count, plural, one {# фрэйм} few {# фрэймы} many {# фрэймаў} other {# фрэйма}}",
+      "importing": "Імпарт…",
+      "importDone": "Імпартавана {count, plural, one {# слайд} few {# слайды} many {# слайдаў} other {# слайда}} з Figma",
+      "importFailed": "Не ўдалося імпартаваць з Figma",
+      "exportHint": "Спампуйце ZIP і перацягніце файлы ў Figma — па адным на слайд, у тым жа парадку.",
+      "slides": "Слайды",
+      "allSlides": "Усе {count}",
+      "markedSlides": "Адзначаныя {count}",
+      "format": "Фармат",
+      "slideCount": "{count, plural, one {# слайд} few {# слайды} many {# слайдаў} other {# слайда}}",
+      "downloadZip": "Спампаваць для Figma",
+      "exporting": "Экспарт…",
+      "exportDone": "ZIP для Figma спампаваны",
+      "exportFailed": "Не ўдалося экспартаваць для Figma"
     },
     "share": {
       "title": "Падзяліцца праектам",
