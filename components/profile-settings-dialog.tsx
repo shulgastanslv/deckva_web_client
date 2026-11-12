@@ -26,6 +26,7 @@ import {
   cancelSubscription,
   detachPaymentCard,
   getBilling,
+  purchaseCredits,
   resumeSubscription,
   subscribePro,
 } from "@/actions/billing";
@@ -53,6 +54,8 @@ import { setAppLocale } from "@/lib/i18n/set-locale";
 import { messages } from "@/lib/messages";
 import { isPasswordLongEnough, PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
 import {
+  CREDIT_PACK_CREDITS,
+  CREDIT_PACK_PRICE,
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
@@ -537,6 +540,15 @@ export function ProfileSettingsDialog({
                                     currency: STUDIO_PRO_CURRENCY,
                                   })}
                             </p>
+                            {billing?.isPro ? (
+                              <p className="mt-1.5 text-[12px] text-muted-foreground">
+                                {t("creditsBalance", {
+                                  total: billing.creditsTotal,
+                                  plan: billing.creditsPlan,
+                                  topup: billing.creditsTopup,
+                                })}
+                              </p>
+                            ) : null}
                           </div>
                           {billing?.isPro ? (
                             billing.cancelAtPeriodEnd ? (
@@ -581,6 +593,29 @@ export function ProfileSettingsDialog({
                             </Button>
                           )}
                         </div>
+                        {billing?.isPro ? (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="mt-3 h-8 w-full rounded-md text-[12px] shadow-none"
+                            disabled={billingBusy || !billing.paymentMethod}
+                            onClick={() =>
+                              void runBilling(() => purchaseCredits())
+                            }
+                          >
+                            {billingBusy ? (
+                              <Loader2 className="size-3.5 animate-spin" />
+                            ) : (
+                              t("buyCreditsPack", {
+                                credits:
+                                  billing.creditPackCredits ?? CREDIT_PACK_CREDITS,
+                                price:
+                                  billing.creditPackPrice ?? CREDIT_PACK_PRICE,
+                                currency: STUDIO_PRO_CURRENCY,
+                              })
+                            )}
+                          </Button>
+                        ) : null}
                       </div>
 
                       <div>

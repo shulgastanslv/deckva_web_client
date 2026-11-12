@@ -19,6 +19,7 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
   const { status } = useSession();
   const signedIn = status === "authenticated";
   const [exhausted, setExhausted] = useState(false);
+  const [isPro, setIsPro] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
         const status = await getGenerationStatus();
         if (!cancelled) {
           setExhausted(!status.entitlement.canGenerate);
+          setIsPro(status.entitlement.isPro);
         }
       } catch {
         // ignore
@@ -36,10 +38,15 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
     })();
     const onChanged = (event: Event) => {
       const remaining = (
-        event as CustomEvent<{ entitlement?: { remaining?: number; canGenerate?: boolean } }>
+        event as CustomEvent<{
+          entitlement?: { remaining?: number; canGenerate?: boolean; isPro?: boolean };
+        }>
       ).detail?.entitlement;
       if (remaining && typeof remaining.canGenerate === "boolean") {
         setExhausted(!remaining.canGenerate);
+      }
+      if (typeof remaining?.isPro === "boolean") {
+        setIsPro(remaining.isPro);
       }
     };
     window.addEventListener("studio:generations-changed", onChanged);
@@ -74,13 +81,15 @@ export function StudioUpgradeBanner({ className }: { className?: string }) {
           aria-hidden
         />
         <p className="min-w-0 flex-1 text-[13px] leading-snug sm:text-[14px]">
-          {t("freeLimitReached", { limit: FREE_GENERATION_LIMIT })}{" "}
+          {isPro
+            ? t("creditsExhausted")
+            : t("freeLimitReached", { limit: FREE_GENERATION_LIMIT })}{" "}
           <button
             type="button"
             onClick={openUpgrade}
             className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-90"
           >
-            {t("upgrade")}
+            {isPro ? t("buyCredits") : t("upgrade")}
           </button>
         </p>
         <button

@@ -2,9 +2,10 @@
 
 import { requireUserId } from "@/lib/auth/session";
 import {
-  consumeFreeGeneration,
+  consumeGeneration,
+  generationBlockedMessage,
   getGenerationEntitlement,
-  refundFreeGeneration,
+  refundGeneration,
 } from "@/lib/billing/generations";
 import { userHasPro } from "@/lib/billing/entitlements";
 import {
@@ -15,7 +16,6 @@ import {
 import { listAiModelsUpstream } from "@/lib/ai/models";
 import type { AiPlanId } from "@/lib/ai/types";
 import { messages } from "@/lib/messages";
-import { freeGenerationLimitMessage } from "@/lib/studio/plans";
 
 async function aiPlan(userId: string): Promise<AiPlanId> {
   return (await userHasPro(userId)) ? "pro" : "free";
@@ -28,7 +28,7 @@ export async function listAiModels() {
   return listAiModelsUpstream(plan);
 }
 
-/** Free generations left / Pro flag for UI chips. */
+/** Free generations left / Pro credits for UI chips. */
 export async function getGenerationStatus() {
   const userId = await requireUserId();
   if (!userId) throw new Error(messages.errors.signIn);
@@ -43,8 +43,8 @@ export async function getAiWallet() {
 }
 
 /**
- * Gate on Pro or free quota, then run CORA.
- * Refunds the free-generation consume if CORA fails.
+ * Gate on Pro credits or free quota, then run CORA.
+ * Refunds the consume if CORA fails.
  */
 export async function generateCarousel(
   input: Omit<GenerateCarouselInput, "userId" | "plan"> & {
@@ -57,17 +57,16 @@ export async function generateCarousel(
 
   const before = await getGenerationEntitlement(userId);
   if (!before.canGenerate) {
-    throw new Error(freeGenerationLimitMessage());
-  }
-
-  let consumed = false;
-  if (!before.isPro) {
-    await consumeFreeGeneration(userId);
-    consumed = true;
+    throw new Error(generationBlockedMessage(before));
   }
 
   const modelId = input.modelId?.trim() || "gemini-flash";
   const slidesCount = input.slidesCount ?? 7;
+
+  const consumed = await consumeGeneration(userId, {
+    modelId,
+    projectId: input.projectId,
+  });
 
   try {
     const result = await generateCarouselUpstream({
@@ -83,9 +82,7 @@ export async function generateCarousel(
       entitlement: await getGenerationEntitlement(userId),
     };
   } catch (error) {
-    if (consumed) {
-      await refundFreeGeneration(userId);
-    }
+    await refundGeneration(userId, consumed.creditTakes);
     throw error;
   }
 }

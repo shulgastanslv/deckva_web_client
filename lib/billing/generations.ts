@@ -1,7 +1,17 @@
 import { userHasPro } from "@/lib/billing/entitlements";
+import {
+  getCreditBalance,
+  refundCredits,
+  spendCredits,
+  type CreditBalance,
+} from "@/lib/billing/credits";
+import type { CreditBucket } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import {
   FREE_GENERATION_LIMIT,
+  GENERATION_CREDIT_COST,
+  PRO_MONTHLY_CREDITS,
+  creditsExhaustedMessage,
   freeGenerationLimitMessage,
 } from "@/lib/studio/plans";
 
@@ -11,6 +21,8 @@ export type GenerationEntitlement = {
   limit: number;
   remaining: number;
   canGenerate: boolean;
+  /** Pro wallet breakdown; null on free plan. */
+  credits: CreditBalance | null;
 };
 
 export async function getGenerationEntitlement(
@@ -18,12 +30,14 @@ export async function getGenerationEntitlement(
 ): Promise<GenerationEntitlement> {
   const isPro = await userHasPro(userId);
   if (isPro) {
+    const credits = await getCreditBalance(userId);
     return {
       isPro: true,
-      used: 0,
-      limit: FREE_GENERATION_LIMIT,
-      remaining: Number.POSITIVE_INFINITY,
-      canGenerate: true,
+      used: Math.max(0, PRO_MONTHLY_CREDITS - credits.plan),
+      limit: PRO_MONTHLY_CREDITS,
+      remaining: credits.total,
+      canGenerate: credits.total >= GENERATION_CREDIT_COST,
+      credits,
     };
   }
 
@@ -39,18 +53,42 @@ export async function getGenerationEntitlement(
     limit: FREE_GENERATION_LIMIT,
     remaining,
     canGenerate: remaining > 0,
+    credits: null,
   };
 }
 
+export type ConsumeGenerationResult = {
+  entitlement: GenerationEntitlement;
+  /** Present when Pro credits were debited (for refund). */
+  creditTakes?: Array<{ bucket: CreditBucket; take: number }>;
+};
+
 /**
- * Reserve one free generation. Pro users are no-ops.
- * Throws if the free quota is exhausted.
+ * Reserve one generation: free quota or Pro credits.
+ * Throws when the quota / wallet is exhausted.
  */
-export async function consumeFreeGeneration(
+export async function consumeGeneration(
   userId: string,
-): Promise<GenerationEntitlement> {
+  opts?: { modelId?: string; projectId?: string },
+): Promise<ConsumeGenerationResult> {
   if (await userHasPro(userId)) {
-    return getGenerationEntitlement(userId);
+    const { balance, takes } = await spendCredits({
+      userId,
+      amount: GENERATION_CREDIT_COST,
+      modelId: opts?.modelId,
+      projectId: opts?.projectId,
+    });
+    return {
+      entitlement: {
+        isPro: true,
+        used: Math.max(0, PRO_MONTHLY_CREDITS - balance.plan),
+        limit: PRO_MONTHLY_CREDITS,
+        remaining: balance.total,
+        canGenerate: balance.total >= GENERATION_CREDIT_COST,
+        credits: balance,
+      },
+      creditTakes: takes,
+    };
   }
 
   const updated = await prisma.$transaction(async (tx) => {
@@ -71,18 +109,35 @@ export async function consumeFreeGeneration(
 
   const used = updated.freeGenerationsUsed;
   return {
-    isPro: false,
-    used,
-    limit: FREE_GENERATION_LIMIT,
-    remaining: Math.max(0, FREE_GENERATION_LIMIT - used),
-    canGenerate: used < FREE_GENERATION_LIMIT,
+    entitlement: {
+      isPro: false,
+      used,
+      limit: FREE_GENERATION_LIMIT,
+      remaining: Math.max(0, FREE_GENERATION_LIMIT - used),
+      canGenerate: used < FREE_GENERATION_LIMIT,
+      credits: null,
+    },
   };
 }
 
-/** Undo a free-generation consume when CORA fails. */
-export async function refundFreeGeneration(
+/** @deprecated Use consumeGeneration */
+export async function consumeFreeGeneration(
   userId: string,
 ): Promise<GenerationEntitlement> {
+  const result = await consumeGeneration(userId);
+  return result.entitlement;
+}
+
+/** Undo a consume when CORA fails. */
+export async function refundGeneration(
+  userId: string,
+  creditTakes?: Array<{ bucket: CreditBucket; take: number }>,
+): Promise<GenerationEntitlement> {
+  if (creditTakes && creditTakes.length > 0) {
+    await refundCredits({ userId, takes: creditTakes });
+    return getGenerationEntitlement(userId);
+  }
+
   if (await userHasPro(userId)) {
     return getGenerationEntitlement(userId);
   }
@@ -92,4 +147,17 @@ export async function refundFreeGeneration(
     data: { freeGenerationsUsed: { decrement: 1 } },
   });
   return getGenerationEntitlement(userId);
+}
+
+/** @deprecated Use refundGeneration */
+export async function refundFreeGeneration(
+  userId: string,
+): Promise<GenerationEntitlement> {
+  return refundGeneration(userId);
+}
+
+export function generationBlockedMessage(entitlement: GenerationEntitlement) {
+  return entitlement.isPro
+    ? creditsExhaustedMessage()
+    : freeGenerationLimitMessage();
 }

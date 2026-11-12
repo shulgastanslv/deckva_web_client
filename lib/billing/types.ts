@@ -107,4 +107,11 @@ export interface BillingSnapshot {
   freeGenerationsUsed: number;
   freeGenerationsLimit: number;
   freeGenerationsRemaining: number;
+  /** Pro credit wallet (0 on free). */
+  creditsPlan: number;
+  creditsTopup: number;
+  creditsTotal: number;
+  creditPackPrice: number;
+  creditPackCredits: number;
+  proMonthlyCredits: number;
 }

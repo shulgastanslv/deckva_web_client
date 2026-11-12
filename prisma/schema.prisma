@@ -37,8 +37,21 @@ enum BillingPaymentStatus {
 
 enum BillingPaymentKind {
   SUBSCRIPTION
+  CREDITS
   CARD_VERIFY
   REFUND
+}
+
+enum CreditBucket {
+  PLAN
+  TOPUP
+}
+
+enum CreditLedgerKind {
+  GRANT
+  SPEND
+  REFUND
+  ADJUSTMENT
 }
 
 enum OrganizationInviteStatus {
@@ -71,6 +84,11 @@ model User {
   /// Successful AI generations used on the free plan (Pro ignores this).
   freeGenerationsUsed Int @default(0)
 
+  /// Pro monthly grant balance (refreshed on subscribe / renew).
+  creditPlanBalance  Int @default(0)
+  /// Purchased top-up credits (do not reset on renew).
+  creditTopupBalance Int @default(0)
+
   activeOrganizationId String?
   activeOrganization   Organization? @relation("UserActiveOrganization", fields: [activeOrganizationId], references: [id], onDelete: SetNull)
 
@@ -85,6 +103,7 @@ model User {
   feedbacks       Feedback[]
   paymentMethods  PaymentMethod[]
   billingPayments BillingPayment[]
+  creditLedger    CreditLedgerEntry[]
   mediaAssets     MediaAsset[]
   communityEdits  Project[]            @relation("CommunityEditor")
   connectors      ConnectorAccount[]
@@ -92,6 +111,25 @@ model User {
 
   @@index([activeOrganizationId])
   @@index([subscriptionStatus])
+}
+
+model CreditLedgerEntry {
+  id           String           @id @default(cuid())
+  kind         CreditLedgerKind
+  bucket       CreditBucket
+  amount       Int
+  balanceAfter Int
+  modelId      String?
+  coraRunId    String?
+  projectId    String?
+  meta         Json?
+  createdAt    DateTime         @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([coraRunId])
 }
 
 enum ConnectorProvider {

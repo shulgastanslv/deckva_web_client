@@ -12,11 +12,15 @@ import { useTranslations } from "next-intl";
 import {
   attachPaymentCard,
   getBilling,
+  purchaseCredits,
   subscribePro,
 } from "@/actions/billing";
 import type { BillingSnapshot } from "@/lib/billing/types";
 import { formatCardBrand } from "@/lib/billing/card";
 import {
+  CREDIT_PACK_CREDITS,
+  CREDIT_PACK_PRICE,
+  PRO_MONTHLY_CREDITS,
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
@@ -127,6 +131,60 @@ export function StudioUpgradeDialog({
         /* ignore */
       }
       window.dispatchEvent(new CustomEvent("studio:org-changed"));
+      window.dispatchEvent(
+        new CustomEvent("studio:generations-changed", {
+          detail: {
+            entitlement: {
+              isPro: true,
+              remaining: res.billing.creditsTotal,
+              canGenerate: res.billing.creditsTotal > 0,
+              credits: {
+                plan: res.billing.creditsPlan,
+                topup: res.billing.creditsTopup,
+                total: res.billing.creditsTotal,
+              },
+            },
+          },
+        }),
+      );
+      onOpenChange(false);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const buyCredits = async () => {
+    if (busy || !alreadyPro) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await purchaseCredits();
+      if (res.success === false) {
+        setError(res.error);
+        return;
+      }
+      setBilling(res.billing);
+      try {
+        sessionStorage.removeItem("studio:upgrade-banner-dismissed");
+      } catch {
+        /* ignore */
+      }
+      window.dispatchEvent(
+        new CustomEvent("studio:generations-changed", {
+          detail: {
+            entitlement: {
+              isPro: true,
+              remaining: res.billing.creditsTotal,
+              canGenerate: res.billing.creditsTotal > 0,
+              credits: {
+                plan: res.billing.creditsPlan,
+                topup: res.billing.creditsTopup,
+                total: res.billing.creditsTotal,
+              },
+            },
+          },
+        }),
+      );
       onOpenChange(false);
     } finally {
       setBusy(false);
@@ -182,33 +240,54 @@ export function StudioUpgradeDialog({
                         className="size-3 shrink-0 text-primary"
                         strokeWidth={3}
                       />
-                      {ts(`features.${key}`)}
+                      {key === "unlimitedAi"
+                        ? ts(`features.${key}`, { count: PRO_MONTHLY_CREDITS })
+                        : ts(`features.${key}`)}
                     </li>
                   ))}
                 </ul>
-              ) : null}
+              ) : (
+                <p className="mt-3.5 text-[12px] text-muted-foreground">
+                  {ts("unlimitedOnSub", {
+                    remaining: billing?.creditsTotal ?? 0,
+                    plan: billing?.creditsPlan ?? 0,
+                    topup: billing?.creditsTopup ?? 0,
+                  })}
+                </p>
+              )}
 
-              <button
-                type="button"
-                disabled={alreadyPro}
-                onClick={() => {
-                  setError(null);
-                  setStep("payment");
-                }}
-                className={cn(
-                  "mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-md text-[13px] font-semibold shadow-none transition-colors",
-                  alreadyPro
-                    ? "cursor-default bg-muted/40 text-muted-foreground"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90",
-                )}
-              >
-                {alreadyPro
-                  ? t("currentPlan")
-                  : t("continuePrice", {
-                      price: STUDIO_PRO_PRICE,
+              {alreadyPro ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void buyCredits()}
+                  className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 disabled:opacity-60"
+                >
+                  {busy ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    ts("buyCreditsPack", {
+                      credits: billing?.creditPackCredits ?? CREDIT_PACK_CREDITS,
+                      price: billing?.creditPackPrice ?? CREDIT_PACK_PRICE,
                       currency: STUDIO_PRO_CURRENCY,
-                    })}
-              </button>
+                    })
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    setStep("payment");
+                  }}
+                  className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90"
+                >
+                  {t("continuePrice", {
+                    price: STUDIO_PRO_PRICE,
+                    currency: STUDIO_PRO_CURRENCY,
+                  })}
+                </button>
+              )}
             </>
           ) : (
             <>

@@ -5,6 +5,7 @@ import { messages } from "@/lib/messages";
 import { revalidatePath } from "next/cache";
 
 import { formatCardBrand } from "@/lib/billing/card";
+import { grantPlanCredits, grantTopupCredits } from "@/lib/billing/credits";
 import { userHasPro } from "@/lib/billing/entitlements";
 import { getGenerationEntitlement } from "@/lib/billing/generations";
 import { chargeCard, getPaymentProviderMode, tokenizeCard } from "@/lib/billing/provider";
@@ -17,7 +18,10 @@ import type {
 } from "@/lib/billing/types";
 import { prisma } from "@/lib/prisma";
 import {
+  CREDIT_PACK_CREDITS,
+  CREDIT_PACK_PRICE,
   FREE_GENERATION_LIMIT,
+  PRO_MONTHLY_CREDITS,
   STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE,
   addBillingMonth,
@@ -100,6 +104,7 @@ async function buildSnapshot(userId: string): Promise<BillingSnapshot> {
 
   const isPro = await userHasPro(userId);
   const gens = await getGenerationEntitlement(userId);
+  const credits = gens.credits ?? { plan: 0, topup: 0, total: 0 };
 
   return {
     isPro,
@@ -114,9 +119,13 @@ async function buildSnapshot(userId: string): Promise<BillingSnapshot> {
     payments: user.billingPayments.map(mapPayment),
     freeGenerationsUsed: gens.isPro ? 0 : gens.used,
     freeGenerationsLimit: FREE_GENERATION_LIMIT,
-    freeGenerationsRemaining: gens.isPro
-      ? FREE_GENERATION_LIMIT
-      : gens.remaining,
+    freeGenerationsRemaining: gens.isPro ? 0 : gens.remaining,
+    creditsPlan: credits.plan,
+    creditsTopup: credits.topup,
+    creditsTotal: credits.total,
+    creditPackPrice: CREDIT_PACK_PRICE,
+    creditPackCredits: CREDIT_PACK_CREDITS,
+    proMonthlyCredits: PRO_MONTHLY_CREDITS,
   };
 }
 
@@ -309,12 +318,86 @@ export async function subscribePro(): Promise<
       }),
     ]);
 
+    await grantPlanCredits(userId, undefined, { reason: "pro_subscribe" });
+
     revalidatePath("/studio");
     revalidatePath("/studio/browse");
     return { success: true, billing: await buildSnapshot(userId) };
   } catch (err) {
     console.error("subscribePro error:", err);
     return { success: false, error: messages.errors.startSubscription };
+  }
+}
+
+export async function purchaseCredits(): Promise<
+  ActionResult<{ billing: BillingSnapshot }>
+> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+
+    if (!(await userHasPro(userId))) {
+      return { success: false, error: messages.errors.proRequiredForCredits };
+    }
+
+    const method = await prisma.paymentMethod.findFirst({
+      where: { userId, isDefault: true },
+      orderBy: { createdAt: "desc" },
+    });
+    if (!method) {
+      return { success: false, error: messages.errors.addCardBeforeCredits };
+    }
+
+    const charge = await chargeCard({
+      token: method.providerToken,
+      amount: CREDIT_PACK_PRICE,
+      currency: STUDIO_PRO_CURRENCY,
+      description: `Deckva — ${CREDIT_PACK_CREDITS} generation credits`,
+    });
+
+    if (!charge.ok) {
+      await prisma.billingPayment.create({
+        data: {
+          userId,
+          paymentMethodId: method.id,
+          amount: CREDIT_PACK_PRICE,
+          currency: STUDIO_PRO_CURRENCY,
+          status: "FAILED",
+          kind: "CREDITS",
+          description: `${CREDIT_PACK_CREDITS} credits`,
+          failureReason: charge.error ?? "Payment failed",
+          providerRef: charge.providerRef,
+        },
+      });
+      return {
+        success: false,
+        error: charge.error ?? "Payment declined",
+      };
+    }
+
+    await prisma.billingPayment.create({
+      data: {
+        userId,
+        paymentMethodId: method.id,
+        amount: CREDIT_PACK_PRICE,
+        currency: STUDIO_PRO_CURRENCY,
+        status: "SUCCEEDED",
+        kind: "CREDITS",
+        description: `${CREDIT_PACK_CREDITS} credits`,
+        providerRef: charge.providerRef,
+        paidAt: new Date(),
+      },
+    });
+
+    await grantTopupCredits(userId, CREDIT_PACK_CREDITS, {
+      paymentRef: charge.providerRef,
+    });
+
+    revalidatePath("/studio");
+    return { success: true, billing: await buildSnapshot(userId) };
+  } catch (err) {
+    console.error("purchaseCredits error:", err);
+    return { success: false, error: messages.errors.purchaseCredits };
   }
 }
 

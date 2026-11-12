@@ -51,8 +51,11 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { trackEvent } from "@/lib/analytics";
 import { SOCIAL_LINKS } from "@/lib/social";
 import {
+  CREDIT_PACK_CREDITS,
+  CREDIT_PACK_PRICE,
   FREE_GENERATION_LIMIT,
   PRO_FEATURES,
+  PRO_MONTHLY_CREDITS,
   STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
 import { PromptSection } from "./prompt-section";
@@ -258,7 +261,7 @@ const FAQ = [
   {
     value: "price",
     q: "What does it cost?",
-    a: `The first ${FREE_GENERATION_LIMIT} AI generations are free. After that, Pro is ${STUDIO_PRO_PRICE} Br a month. Cancel any time. Access stays until the end of the paid period.`,
+    a: `The first ${FREE_GENERATION_LIMIT} AI generations are free. Pro is ${STUDIO_PRO_PRICE} Br a month and includes ${PRO_MONTHLY_CREDITS} generations; extra packs are ${CREDIT_PACK_CREDITS} for ${CREDIT_PACK_PRICE} Br. Cancel any time. Access stays until the end of the paid period.`,
   },
   {
     value: "where",
@@ -318,7 +321,7 @@ const FAQ = [
   {
     value: "pro",
     q: "What is on Pro that is not free?",
-    a: `Unlimited AI generations, high-resolution exports, folders and brand kits, and priority support. The first ${FREE_GENERATION_LIMIT} generations stay free.`,
+    a: `${PRO_MONTHLY_CREDITS} AI generations per month, high-resolution exports, folders and brand kits, and priority support. Buy more credits when you need them. The first ${FREE_GENERATION_LIMIT} generations stay free.`,
   },
   {
     value: "cancel",
@@ -1364,7 +1367,9 @@ export function LandingPage() {
           </li>
         </ul>
         <p className={`mt-6 max-w-xl ${landSub}`}>
-          The first {FREE_GENERATION_LIMIT} AI generations are free. Then Pro — {STUDIO_PRO_PRICE} Br a month.
+          The first {FREE_GENERATION_LIMIT} AI generations are free. Then Pro —{" "}
+          {STUDIO_PRO_PRICE} Br a month with {PRO_MONTHLY_CREDITS} generations,
+          plus top-ups ({CREDIT_PACK_CREDITS} for {CREDIT_PACK_PRICE} Br).
         </p>
 
         <h2 id="generate" className={`${sectionTitle} mt-16 scroll-mt-28 sm:mt-20`}>

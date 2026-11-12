@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import {
   Check,
   CaretDown as ChevronDown,
+  Coins,
   Crown,
 } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
+import { purchaseCredits } from "@/actions/billing";
 import { getGenerationStatus } from "@/actions/ai";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +19,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  CREDIT_PACK_CREDITS,
+  CREDIT_PACK_PRICE,
   FREE_GENERATION_LIMIT,
+  PRO_MONTHLY_CREDITS,
+  STUDIO_PRO_CURRENCY,
   STUDIO_PRO_PRICE_LABEL,
 } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
@@ -25,6 +31,8 @@ import { cn } from "@/lib/utils";
 type PlanState = {
   isPro: boolean;
   remaining: number;
+  planCredits: number;
+  topupCredits: number;
 };
 
 const FEATURE_KEYS = [
@@ -51,7 +59,10 @@ export function PlanDropdown({
   const [plan, setPlan] = useState<PlanState>({
     isPro: isUpgrade,
     remaining: FREE_GENERATION_LIMIT,
+    planCredits: 0,
+    topupCredits: 0,
   });
+  const [buying, setBuying] = useState(false);
 
   useEffect(() => {
     setPlan((prev) => ({ ...prev, isPro: isUpgrade }));
@@ -65,14 +76,16 @@ export function PlanDropdown({
       try {
         const row = await getGenerationStatus();
         if (cancelled) return;
-        const remaining = row.entitlement.isPro
-          ? FREE_GENERATION_LIMIT
-          : Number.isFinite(row.entitlement.remaining)
-            ? row.entitlement.remaining
+        const remaining = Number.isFinite(row.entitlement.remaining)
+          ? row.entitlement.remaining
+          : row.entitlement.isPro
+            ? 0
             : FREE_GENERATION_LIMIT;
         setPlan({
           isPro: row.entitlement.isPro,
           remaining,
+          planCredits: row.entitlement.credits?.plan ?? 0,
+          topupCredits: row.entitlement.credits?.topup ?? 0,
         });
       } catch {
         // keep last known / optimistic free limit
@@ -82,7 +95,11 @@ export function PlanDropdown({
     const onChanged = (event: Event) => {
       const entitlement = (
         event as CustomEvent<{
-          entitlement?: { remaining?: number; isPro?: boolean };
+          entitlement?: {
+            remaining?: number;
+            isPro?: boolean;
+            credits?: { plan?: number; topup?: number; total?: number };
+          };
         }>
       ).detail?.entitlement;
       if (!entitlement) return;
@@ -96,6 +113,14 @@ export function PlanDropdown({
           Number.isFinite(entitlement.remaining)
             ? entitlement.remaining
             : prev.remaining,
+        planCredits:
+          typeof entitlement.credits?.plan === "number"
+            ? entitlement.credits.plan
+            : prev.planCredits,
+        topupCredits:
+          typeof entitlement.credits?.topup === "number"
+            ? entitlement.credits.topup
+            : prev.topupCredits,
       }));
     };
     window.addEventListener("studio:generations-changed", onChanged);
@@ -105,9 +130,44 @@ export function PlanDropdown({
     };
   }, [signedIn]);
 
-  const usageLabel = plan.isPro
-    ? t("planPro")
+  const creditsLabel = plan.isPro
+    ? String(plan.remaining)
     : `${plan.remaining}/${FREE_GENERATION_LIMIT}`;
+
+  const buyMore = async () => {
+    if (buying) return;
+    setBuying(true);
+    try {
+      const res = await purchaseCredits();
+      if (res.success) {
+        setPlan((prev) => ({
+          ...prev,
+          isPro: true,
+          remaining: res.billing.creditsTotal,
+          planCredits: res.billing.creditsPlan,
+          topupCredits: res.billing.creditsTopup,
+        }));
+        window.dispatchEvent(
+          new CustomEvent("studio:generations-changed", {
+            detail: {
+              entitlement: {
+                isPro: true,
+                remaining: res.billing.creditsTotal,
+                canGenerate: res.billing.creditsTotal > 0,
+                credits: {
+                  plan: res.billing.creditsPlan,
+                  topup: res.billing.creditsTopup,
+                  total: res.billing.creditsTotal,
+                },
+              },
+            },
+          }),
+        );
+      }
+    } finally {
+      setBuying(false);
+    }
+  };
 
   return (
     <Popover>
@@ -115,9 +175,9 @@ export function PlanDropdown({
         <Button
           variant="secondary"
           className={cn(
-            "h-9 gap-1.5 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
+            "h-9 gap-1.5 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
             plan.isPro &&
-              "bg-primary/15 text-primary hover:bg-primary/25 data-[state=open]:bg-primary/25",
+              "bg-muted/40 text-foreground hover:bg-muted/20",
           )}
         >
           {variant === "upgrade" && !plan.isPro ? (
@@ -125,13 +185,14 @@ export function PlanDropdown({
               <Crown className="size-3.5" />
               <span>{t("upgradeToPro")}</span>
             </>
-          ) : variant === "upgrade" && plan.isPro ? (
-            <>
-              <span>{t("planPro")}</span>
-              <ChevronDown className="size-3.5 opacity-70" />
-            </>
           ) : (
-            usageLabel
+            <>
+              <Coins className="size-5 opacity-80" weight="duotone" />
+              <span className="tabular-nums">{creditsLabel}</span>
+              {variant === "upgrade" && plan.isPro ? (
+                <ChevronDown className="size-3.5 opacity-70" />
+              ) : null}
+            </>
           )}
         </Button>
       </PopoverTrigger>
@@ -142,12 +203,22 @@ export function PlanDropdown({
         className="w-[300px] rounded-2xl p-5"
       >
         <div className="flex flex-col">
-          <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
-            {plan.isPro ? t("planPro") : t("freePlan")}
-          </h3>
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
+              {plan.isPro ? t("planPro") : t("freePlan")}
+            </h3>
+            <p className="flex items-center gap-1 text-[13px] font-medium tabular-nums text-foreground">
+              <Coins className="size-3.5 text-muted-foreground" weight="duotone" />
+              {creditsLabel}
+            </p>
+          </div>
           <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
             {plan.isPro
-              ? t("unlimitedOnSub")
+              ? t("unlimitedOnSub", {
+                  remaining: plan.remaining,
+                  plan: plan.planCredits,
+                  topup: plan.topupCredits,
+                })
               : t("remainingFree", {
                   remaining: plan.remaining,
                   limit: FREE_GENERATION_LIMIT,
@@ -167,7 +238,9 @@ export function PlanDropdown({
                   <Check className="size-3" strokeWidth={3} />
                 </div>
                 <p className="text-[13px] leading-snug text-muted-foreground">
-                  {t(`features.${feature}`)}
+                  {feature === "unlimitedAi"
+                    ? t(`features.${feature}`, { count: PRO_MONTHLY_CREDITS })
+                    : t(`features.${feature}`)}
                 </p>
               </li>
             ))}
@@ -180,7 +253,20 @@ export function PlanDropdown({
             >
               {t("upgrade")} · {STUDIO_PRO_PRICE_LABEL}/mo
             </Button>
-          ) : null}
+          ) : (
+            <Button
+              onClick={() => void buyMore()}
+              disabled={buying}
+              variant="secondary"
+              className="mt-5 h-10 w-full rounded-md font-medium shadow-none"
+            >
+              {t("buyCreditsPack", {
+                credits: CREDIT_PACK_CREDITS,
+                price: CREDIT_PACK_PRICE,
+                currency: STUDIO_PRO_CURRENCY,
+              })}
+            </Button>
+          )}
         </div>
       </PopoverContent>
     </Popover>

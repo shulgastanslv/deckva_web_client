@@ -1,3 +1,4 @@
+import { grantPlanCredits } from "@/lib/billing/credits";
 import { chargeCard } from "@/lib/billing/provider";
 import {
   BillingPaymentKind,
@@ -132,6 +133,7 @@ export async function userHasPro(userId: string): Promise<boolean> {
         },
       }),
     ]);
+    await grantPlanCredits(userId, undefined, { reason: "pro_renewal" });
     return true;
   }
 
