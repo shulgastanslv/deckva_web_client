@@ -10,6 +10,7 @@ import {
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
+import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,28 +24,46 @@ import { cn } from "@/lib/utils";
 const itemClass =
   "cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium focus:bg-muted/50";
 
+function FigmaMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 36" className={className} aria-hidden>
+      <path fill="#F24E1E" d="M0 6a6 6 0 0 1 6-6h6v12H6A6 6 0 0 1 0 6Z" />
+      <path fill="#FF7262" d="M12 0h6a6 6 0 0 1 0 12h-6V0Z" />
+      <path fill="#A259FF" d="M0 18a6 6 0 0 1 6-6h6v12H6a6 6 0 0 1-6-6Z" />
+      <path fill="#1ABCFE" d="M18 12a6 6 0 1 0 0 12 6 6 0 1 0 0-12Z" />
+      <path fill="#0ACF83" d="M6 36a6 6 0 0 0 6-6v-6H6a6 6 0 0 0 0 12Z" />
+    </svg>
+  );
+}
+
 export function StudioCreateMenu({
   onBlank,
   onTemplates,
   onBrandKit,
   onImportJson,
+  onImportFigma,
   className,
   label,
   align = "end",
   triggerClassName,
 }: {
-  onBlank: () => void;
+  onBlank?: () => void;
   onTemplates: () => void;
   onBrandKit?: () => void;
   onImportJson?: (file: File) => void | Promise<void>;
+  onImportFigma?: () => void;
   className?: string;
   label?: string;
   align?: "start" | "center" | "end";
   triggerClassName?: string;
 }) {
   const t = useTranslations("studio.create");
+  const create = useStudioCreate();
   const importRef = useRef<HTMLInputElement>(null);
   const triggerLabel = label ?? t("create");
+
+  const handleBlank = onBlank ?? create.openBlank;
+  const handleFigma = onImportFigma ?? create.openFigmaImport;
 
   return (
     <>
@@ -80,7 +99,7 @@ export function StudioCreateMenu({
           sideOffset={8}
           className="w-56 rounded-2xl p-1.5"
         >
-          <DropdownMenuItem className={itemClass} onClick={onBlank}>
+          <DropdownMenuItem className={itemClass} onClick={handleBlank}>
             <FilePlus className="size-4 text-muted-foreground" />
             {t("blankProject")}
           </DropdownMenuItem>
@@ -92,17 +111,21 @@ export function StudioCreateMenu({
             </DropdownMenuItem>
           ) : null}
 
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+
+          <DropdownMenuItem className={itemClass} onClick={handleFigma}>
+            <FigmaMark className="h-4 w-[11px]" />
+            {t("importFigma")}
+          </DropdownMenuItem>
+
           {onImportJson ? (
-            <>
-              <DropdownMenuSeparator className="my-1.5 bg-border/50" />
-              <DropdownMenuItem
-                className={itemClass}
-                onClick={() => importRef.current?.click()}
-              >
-                <Upload className="size-4 text-muted-foreground" />
-                {t("importJson")}
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem
+              className={itemClass}
+              onClick={() => importRef.current?.click()}
+            >
+              <Upload className="size-4 text-muted-foreground" />
+              {t("importJson")}
+            </DropdownMenuItem>
           ) : null}
 
           <DropdownMenuSeparator className="my-1.5 bg-border/50" />

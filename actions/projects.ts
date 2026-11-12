@@ -181,6 +181,7 @@ export async function getUserProjects(options?: {
 export async function createProject(input?: {
   title?: string;
   aspectRatio?: RatioKey;
+  slidesCount?: number;
 }): Promise<ActionResult<{ projectId: string; project: ProjectDetail }>> {
   try {
     const userId = await requireUserId();
@@ -195,6 +196,13 @@ export async function createProject(input?: {
     const aspectRatio = input?.aspectRatio ?? "4:5";
     const dims = CANVAS_RATIOS[aspectRatio] ?? CANVAS_RATIOS["4:5"];
     const title = input?.title?.trim() || "Untitled Carousel";
+    const slidesCount = Math.min(
+      20,
+      Math.max(1, Math.round(input?.slidesCount ?? 1)),
+    );
+    const blankSlides = Array.from({ length: slidesCount }, () => ({
+      canvasJSON: emptyCanvasJSON(),
+    }));
 
     const project = await prisma.project.create({
       data: {
@@ -204,12 +212,12 @@ export async function createProject(input?: {
         aspectRatio,
         width: dims.width,
         height: dims.height,
-        ...projectSnapshot([{ canvasJSON: emptyCanvasJSON() }], normalizeDocument(null)),
+        ...projectSnapshot(blankSlides, normalizeDocument(null)),
         slides: {
-          create: {
-            order: 0,
-            canvasJSON: emptyCanvasJSON() as unknown as Prisma.InputJsonValue,
-          },
+          create: blankSlides.map((slide, order) => ({
+            order,
+            canvasJSON: slide.canvasJSON as unknown as Prisma.InputJsonValue,
+          })),
         },
       },
       include: {

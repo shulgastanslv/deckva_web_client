@@ -27,6 +27,14 @@ function emptyProviderStats() {
   };
 }
 
+/** Local calendar day — avoids UTC shift from `toISOString().slice(0, 10)`. */
+function localDateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export async function listConnectorPublic(
   userId: string,
 ): Promise<ConnectorPublic[]> {
@@ -235,13 +243,13 @@ export async function getConnectorAnalytics(
   const dayMap = new Map<string, number>();
   for (let i = 6; i >= 0; i -= 1) {
     const d = new Date();
-    d.setHours(0, 0, 0, 0);
+    d.setHours(12, 0, 0, 0);
     d.setDate(d.getDate() - i);
-    dayMap.set(d.toISOString().slice(0, 10), 0);
+    dayMap.set(localDateKey(d), 0);
   }
   for (const event of events30) {
     if (event.createdAt < since7) continue;
-    const key = event.createdAt.toISOString().slice(0, 10);
+    const key = localDateKey(event.createdAt);
     if (dayMap.has(key)) dayMap.set(key, (dayMap.get(key) ?? 0) + 1);
   }
 

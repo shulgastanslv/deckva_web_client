@@ -448,7 +448,17 @@
       "fromTemplate": "From template",
       "brandKit": "Brand kit",
       "importJson": "Import JSON",
-      "exploreCommunity": "Explore community"
+      "importFigma": "Import from Figma",
+      "exploreCommunity": "Explore community",
+      "blankDialogTitle": "New blank project",
+      "blankDialogSubtitle": "Name the carousel, pick a ratio, and choose how many slides to start with.",
+      "projectName": "Name",
+      "untitledCarousel": "Untitled Carousel",
+      "ratio": "Ratio",
+      "slidesCount": "Slides",
+      "cancel": "Cancel",
+      "creating": "Creating…",
+      "createProject": "Create project"
     },
     "notifications": {
       "search": "Search…",
@@ -518,6 +528,15 @@
       "comingSoon": "Coming soon",
       "connectors": "Connectors",
       "connect": "Connect",
+      "disconnect": "Disconnect",
+      "reconnect": "Reconnect",
+      "disconnected": "{name} disconnected",
+      "connectorStatus": {
+        "connected": "Connected",
+        "disconnected": "Not connected",
+        "error": "Needs reconnect",
+        "expired": "Expired"
+      },
       "manageConnectors": "Manage connectors",
       "soon": "Soon",
       "noModelsMatch": "No models match",
@@ -525,7 +544,37 @@
       "recentHistory": "Recent history",
       "recentPrompts": "Recent prompts",
       "searchModels": "Search models",
-      "model": "Model"
+      "model": "Model",
+      "tooManyFiles": "Attach up to {max} files",
+      "unsupportedFile": "Can't attach {name}. Use an image or text file.",
+      "emptyFile": "{name} is empty",
+      "attachFailed": "Couldn't attach that file",
+      "skillItems": {
+        "launch": {
+          "label": "Product launch",
+          "hint": "Offer, audience, proof, CTA"
+        },
+        "howto": {
+          "label": "How-to",
+          "hint": "One step per slide"
+        },
+        "offer": {
+          "label": "Offer",
+          "hint": "Problem → solution → next step"
+        },
+        "tips": {
+          "label": "Tips list",
+          "hint": "Theme + concrete tips"
+        },
+        "story": {
+          "label": "Case story",
+          "hint": "Context → change → result"
+        },
+        "comparison": {
+          "label": "Compare",
+          "hint": "Before/after or A vs B"
+        }
+      }
     }
   },
   "landing": {
@@ -1606,7 +1655,8 @@
       "downloadZip": "Download for Figma",
       "exporting": "Exporting…",
       "exportDone": "Downloaded ZIP for Figma",
-      "exportFailed": "Could not export for Figma"
+      "exportFailed": "Could not export for Figma",
+      "studioImportHint": "Paste a Figma link and token to turn frames into a new carousel project."
     },
     "share": {
       "title": "Share Project",

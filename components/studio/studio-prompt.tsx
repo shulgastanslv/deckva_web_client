@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowUp,
+  Check,
   Clock as Clock3,
-  Layout as LayoutTemplate,
   SpinnerGap as Loader2,
   Paperclip,
   Plus,
@@ -13,9 +13,16 @@ import {
   MagnifyingGlass as Search,
   Shapes,
   PlugsIcon,
+  X,
 } from "@phosphor-icons/react";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { listAiModels } from "@/actions/ai";
+import {
+  disconnectConnectorAction,
+  listConnectors,
+} from "@/actions/connectors";
 import {
   AiModelIcon,
   BrandIcon,
@@ -36,19 +43,39 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { AiModelInfo } from "@/lib/ai/types";
 import { trackEvent } from "@/lib/analytics";
+import type { ConnectorProviderId, ConnectorPublic } from "@/lib/connectors/types";
+import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import {
+  applyPromptSkill,
+  listPromptSkills,
+  type PromptSkillId,
+} from "@/lib/studio/prompt-skills";
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
 
 const MODEL_KEY = "studio_ai_model";
 const HISTORY_KEY = "studio_prompt_recents";
 const MAX_HISTORY = 6;
+const MAX_ATTACHMENTS = 4;
+const MAX_TEXT_CHARS = 4000;
 
 type ModelFilter = "all" | "free" | BrandKey;
 
+type PromptAttachment = {
+  id: string;
+  name: string;
+  kind: "image" | "text";
+  /** Image data URL or extracted text body. */
+  payload: string;
+};
+
 const CONNECTORS = [
   { id: "threads" as const, label: "Threads", brand: "threads" as const },
-  { id: "google-drive" as const, label: "Google Drive", brand: "googledrive" as const },
+  {
+    id: "google-drive" as const,
+    label: "Google Drive",
+    brand: "googledrive" as const,
+  },
 ];
 
 const PROVIDER_FILTERS: { id: ModelFilter; label: string }[] = [
@@ -68,20 +95,30 @@ function loadHistory(): string[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is string => typeof item === "string").slice(0, MAX_HISTORY);
+    return parsed
+      .filter((item): item is string => typeof item === "string")
+      .slice(0, MAX_HISTORY);
   } catch {
     return [];
   }
 }
 
 function pushHistory(topic: string): string[] {
-  const next = [topic, ...loadHistory().filter((item) => item !== topic)].slice(0, MAX_HISTORY);
+  const next = [topic, ...loadHistory().filter((item) => item !== topic)].slice(
+    0,
+    MAX_HISTORY,
+  );
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
   } catch {
     /* ignore */
   }
   return next;
+}
+
+async function readTextFile(file: File): Promise<string> {
+  const text = await file.text();
+  return text.replace(/\s+/g, " ").trim().slice(0, MAX_TEXT_CHARS);
 }
 
 export function StudioPrompt({
@@ -110,6 +147,21 @@ export function StudioPrompt({
   const [modelQuery, setModelQuery] = useState("");
   const [modelFilter, setModelFilter] = useState<ModelFilter>("all");
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const [plusOpen, setPlusOpen] = useState(false);
+  const [attachments, setAttachments] = useState<PromptAttachment[]>([]);
+  const [attaching, setAttaching] = useState(false);
+  const [skillId, setSkillId] = useState<PromptSkillId | null>(null);
+  const [connectors, setConnectors] = useState<ConnectorPublic[]>([]);
+  const [connectorBusy, setConnectorBusy] = useState<ConnectorProviderId | null>(
+    null,
+  );
+
+  const skills = useMemo(() => listPromptSkills(), []);
+
+  const refreshConnectors = async () => {
+    const res = await listConnectors();
+    if (res.success) setConnectors(res.connectors);
+  };
 
   useEffect(() => {
     if (appliedTopic.current || !initialTopic) return;
@@ -140,11 +192,17 @@ export function StudioPrompt({
         // AI server may be offline — generation will surface the error
       }
     })();
+    void refreshConnectors();
 
     return () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!plusOpen) return;
+    void refreshConnectors();
+  }, [plusOpen]);
 
   useEffect(() => {
     if (!modelMenuOpen) return;
@@ -154,10 +212,16 @@ export function StudioPrompt({
 
   const selected = models.find((m) => m.modelId === modelId) ?? models[0];
   const trimmed = value.trim();
-  const canSend = trimmed.length >= 2 && !disabled && !busy;
+  const canSend = trimmed.length >= 2 && !disabled && !busy && !attaching;
+  const connectorById = useMemo(
+    () => new Map(connectors.map((c) => [c.id, c])),
+    [connectors],
+  );
 
   const availableFilters = useMemo(() => {
-    const present = new Set(models.map((m) => resolveBrandFromModelId(m.modelId).key));
+    const present = new Set(
+      models.map((m) => resolveBrandFromModelId(m.modelId).key),
+    );
     return PROVIDER_FILTERS.filter((item) => {
       if (item.id === "all" || item.id === "free") return true;
       return present.has(item.id);
@@ -169,7 +233,8 @@ export function StudioPrompt({
     return models.filter((model) => {
       if (modelFilter === "free" && !model.isFree) return false;
       if (modelFilter !== "all" && modelFilter !== "free") {
-        if (resolveBrandFromModelId(model.modelId).key !== modelFilter) return false;
+        if (resolveBrandFromModelId(model.modelId).key !== modelFilter)
+          return false;
       }
       if (!q) return true;
       return (
@@ -188,15 +253,169 @@ export function StudioPrompt({
     }
   };
 
+  const addFiles = async (files: FileList | File[] | null) => {
+    if (!files || files.length === 0) return;
+    setAttaching(true);
+    try {
+      const next: PromptAttachment[] = [...attachments];
+      for (const file of Array.from(files)) {
+        if (next.length >= MAX_ATTACHMENTS) {
+          toast.error(t("prompt.tooManyFiles", { max: MAX_ATTACHMENTS }));
+          break;
+        }
+        const isImage = file.type.startsWith("image/");
+        const isText =
+          file.type.startsWith("text/") ||
+          /\.(txt|md|markdown|csv)$/i.test(file.name);
+
+        if (!isImage && !isText) {
+          toast.error(t("prompt.unsupportedFile", { name: file.name }));
+          continue;
+        }
+
+        if (isImage) {
+          const dataUrl = await fileToDataUrl(file, { maxEdge: 1600 });
+          next.push({
+            id: `${file.name}-${file.size}-${Date.now()}-${next.length}`,
+            name: file.name,
+            kind: "image",
+            payload: dataUrl,
+          });
+        } else {
+          const body = await readTextFile(file);
+          if (!body) {
+            toast.error(t("prompt.emptyFile", { name: file.name }));
+            continue;
+          }
+          next.push({
+            id: `${file.name}-${file.size}-${Date.now()}-${next.length}`,
+            name: file.name,
+            kind: "text",
+            payload: body,
+          });
+        }
+      }
+      setAttachments(next);
+      trackEvent("prompt_files_attached", { count: next.length });
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : t("prompt.attachFailed"),
+      );
+    } finally {
+      setAttaching(false);
+    }
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const connectProvider = (id: ConnectorProviderId) => {
+    trackEvent("connector_connect_clicked", {
+      provider: id,
+      source: "prompt_menu",
+    });
+    window.location.href = `/api/connectors/${id}/connect`;
+  };
+
+  const disconnectProvider = async (id: ConnectorProviderId) => {
+    setConnectorBusy(id);
+    try {
+      const res = await disconnectConnectorAction(id);
+      if (res.success === false) {
+        toast.error(res.error);
+        return;
+      }
+      setConnectors(res.connectors);
+      trackEvent("connector_disconnected", {
+        provider: id,
+        source: "prompt_menu",
+      });
+      toast.success(t("prompt.disconnected", { name: providerLabel(id) }));
+    } finally {
+      setConnectorBusy(null);
+    }
+  };
+
   const submit = () => {
     if (!canSend) return;
+
+    const textNotes = attachments
+      .filter((a) => a.kind === "text")
+      .map((a) => `Attached “${a.name}”: ${a.payload}`)
+      .join("\n\n");
+    const baseTopic = textNotes
+      ? `${trimmed}\n\n---\n${textNotes}`
+      : trimmed;
+    const shaped = applyPromptSkill(baseTopic, skillId);
+    const cover =
+      attachments.find((a) => a.kind === "image")?.payload ?? undefined;
+
     setHistory(pushHistory(trimmed));
-    void onSubmit({ topic: trimmed, modelId: selected?.modelId });
+    trackEvent("prompt_submitted", {
+      hasCover: Boolean(cover),
+      attachments: attachments.length,
+      skillId: skillId ?? null,
+    });
+    void onSubmit({
+      topic: shaped.topic,
+      modelId: selected?.modelId,
+      cover,
+      skillId: shaped.skillId,
+      slidesCount: shaped.slidesCount,
+    });
   };
 
   return (
     <div className="w-full space-y-3">
       <div className="rounded-2xl bg-muted/25 p-2 transition-colors focus-within:bg-muted/35 dark:bg-muted/20 dark:focus-within:bg-muted/30">
+        {(attachments.length > 0 || skillId) && (
+          <div className="flex flex-wrap gap-1.5 px-2.5 pt-2">
+            {skillId ? (
+              <span className="inline-flex h-7 max-w-full items-center gap-1.5 rounded-md bg-muted/50 px-2 text-[12px] font-medium text-foreground">
+                <ScrollText className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="truncate">
+                  {t(`prompt.skillItems.${skillId}.label`)}
+                </span>
+                <button
+                  type="button"
+                  aria-label={tc("close")}
+                  className="rounded-md p-0.5 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  onClick={() => setSkillId(null)}
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            ) : null}
+            {attachments.map((file) => (
+              <span
+                key={file.id}
+                className="inline-flex h-7 max-w-[180px] items-center gap-1.5 rounded-md bg-muted/50 px-2 text-[12px] text-foreground"
+              >
+                {file.kind === "image" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={file.payload}
+                    alt=""
+                    className="size-4 shrink-0 rounded-sm object-cover"
+                  />
+                ) : (
+                  <Paperclip className="size-3.5 shrink-0 text-muted-foreground" />
+                )}
+                <span className="truncate">{file.name}</span>
+                <button
+                  type="button"
+                  aria-label={tc("close")}
+                  className="rounded-md p-0.5 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  onClick={() => removeAttachment(file.id)}
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
         <textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -222,13 +441,15 @@ export function StudioPrompt({
               type="file"
               className="hidden"
               multiple
-              accept="image/*,.pdf,.txt,.md"
-              onChange={() => {
-                /* placeholder — wiring later */
+              accept="image/*,.txt,.md,.markdown,.csv,text/plain,text/markdown,text/csv"
+              onChange={(event) => {
+                const files = event.target.files;
+                event.target.value = "";
+                void addFiles(files);
               }}
             />
 
-            <DropdownMenu>
+            <DropdownMenu open={plusOpen} onOpenChange={setPlusOpen}>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
@@ -239,9 +460,14 @@ export function StudioPrompt({
                   <Plus className={menuIconClass} />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" sideOffset={8} className="w-56 rounded-2xl p-1.5">
+              <DropdownMenuContent
+                align="start"
+                sideOffset={8}
+                className="w-56 rounded-2xl p-1.5"
+              >
                 <DropdownMenuItem
                   className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50"
+                  disabled={attaching || attachments.length >= MAX_ATTACHMENTS}
                   onSelect={() => fileInputRef.current?.click()}
                 >
                   <Paperclip className={menuIconClass} />
@@ -253,46 +479,125 @@ export function StudioPrompt({
                     <ScrollText className={menuIconClass} />
                     <span className="flex-1 text-left">{t("prompt.skills")}</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent sideOffset={8} className="w-56 rounded-2xl p-1.5">
-                    <DropdownMenuItem disabled className="rounded-xl px-2.5 py-2 text-[13px] text-muted-foreground">
-                      {t("prompt.comingSoon")}
-                    </DropdownMenuItem>
+                  <DropdownMenuSubContent
+                    sideOffset={8}
+                    className="w-64 rounded-2xl p-1.5"
+                  >
+                    {skills.map((skill) => {
+                      const active = skillId === skill.id;
+                      return (
+                        <DropdownMenuItem
+                          key={skill.id}
+                          className={cn(
+                            "cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50",
+                            active && "bg-muted/50",
+                          )}
+                          onSelect={() => {
+                            setSkillId((prev) =>
+                              prev === skill.id ? null : skill.id,
+                            );
+                            trackEvent("prompt_skill_selected", {
+                              skillId: skill.id,
+                            });
+                          }}
+                        >
+                          <span className="min-w-0 flex-1">
+                            <span className="block font-medium text-foreground">
+                              {t(`prompt.skillItems.${skill.id}.label`)}
+                            </span>
+                            <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                              {t(`prompt.skillItems.${skill.id}.hint`)}
+                            </span>
+                          </span>
+                          {active ? (
+                            <Check
+                              className="size-4 shrink-0 text-foreground"
+                              weight="bold"
+                            />
+                          ) : null}
+                        </DropdownMenuItem>
+                      );
+                    })}
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
                     <PlugsIcon className={menuIconClass} />
-                    <span className="flex-1 text-left">{t("prompt.connectors")}</span>
+                    <span className="flex-1 text-left">
+                      {t("prompt.connectors")}
+                    </span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent sideOffset={8} className="w-64 rounded-2xl p-2">
-                    {CONNECTORS.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center gap-2.5 rounded-xl px-2 py-2"
-                      >
-                        <BrandIcon brand={item.brand} />
-                        <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">
-                          {item.label}
-                        </span>
-                        <button
-                          type="button"
-                          className="h-7 shrink-0 rounded-md bg-muted/40 px-2.5 text-[12px] font-medium text-foreground hover:bg-muted/60"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            trackEvent("connector_connect_clicked", {
-                              provider: item.id,
-                              source: "prompt_menu",
-                            });
-                            window.location.href = `/api/connectors/${item.id}/connect`;
-                          }}
+                  <DropdownMenuSubContent
+                    sideOffset={8}
+                    className="w-72 rounded-2xl p-2"
+                  >
+                    {CONNECTORS.map((item) => {
+                      const state = connectorById.get(item.id);
+                      const connected = state?.status === "connected";
+                      const needsReconnect =
+                        state?.status === "error" || state?.status === "expired";
+                      return (
+                        <div
+                          key={item.id}
+                          className="flex items-center gap-2.5 rounded-xl px-2 py-2"
                         >
-                          {t("prompt.connect")}
-                        </button>
-                      </div>
-                    ))}
-                    <DropdownMenuItem asChild className="mt-1 rounded-xl px-2.5 py-2 text-[13px]">
-                      <Link href="/studio/connectors">{t("prompt.manageConnectors")}</Link>
+                          <BrandIcon brand={item.brand} />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-[13px] font-medium text-foreground">
+                              {item.label}
+                            </div>
+                            {connected && state?.displayName ? (
+                              <div className="truncate text-[11px] text-muted-foreground">
+                                {state.displayName}
+                              </div>
+                            ) : needsReconnect ? (
+                              <div className="text-[11px] text-destructive">
+                                {t(`prompt.connectorStatus.${state.status}`)}
+                              </div>
+                            ) : null}
+                          </div>
+                          {connected ? (
+                            <button
+                              type="button"
+                              disabled={connectorBusy === item.id}
+                              className="h-7 shrink-0 rounded-md bg-muted/40 px-2.5 text-[12px] font-medium text-foreground hover:bg-muted/60 disabled:opacity-50"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                void disconnectProvider(item.id);
+                              }}
+                            >
+                              {connectorBusy === item.id ? (
+                                <Loader2 className="size-3.5 animate-spin" />
+                              ) : (
+                                t("prompt.disconnect")
+                              )}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="h-7 shrink-0 rounded-md bg-muted/40 px-2.5 text-[12px] font-medium text-foreground hover:bg-muted/60"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                connectProvider(item.id);
+                              }}
+                            >
+                              {needsReconnect
+                                ? t("prompt.reconnect")
+                                : t("prompt.connect")}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                    <DropdownMenuItem
+                      asChild
+                      className="mt-1 rounded-xl px-2.5 py-2 text-[13px]"
+                    >
+                      <Link href="/studio/connectors">
+                        {t("prompt.manageConnectors")}
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
@@ -324,8 +629,12 @@ export function StudioPrompt({
                     disabled={disabled || busy}
                     className="inline-flex h-9 max-w-[220px] items-center gap-2 rounded-md px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60"
                   >
-                    {selected ? <AiModelIcon modelId={selected.modelId} /> : null}
-                    <span className="truncate">{selected?.displayName ?? t("prompt.model")}</span>
+                    {selected ? (
+                      <AiModelIcon modelId={selected.modelId} />
+                    ) : null}
+                    <span className="truncate">
+                      {selected?.displayName ?? t("prompt.model")}
+                    </span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -366,7 +675,10 @@ export function StudioPrompt({
                           >
                             {item.id !== "all" && item.id !== "free" ? (
                               <span className="mr-1.5 inline-flex">
-                                <BrandIcon brand={item.id} className="size-3.5" />
+                                <BrandIcon
+                                  brand={item.id}
+                                  className="size-3.5"
+                                />
                               </span>
                             ) : null}
                             {item.id === "all"
@@ -398,9 +710,13 @@ export function StudioPrompt({
                           onSelect={() => pickModel(model.modelId)}
                         >
                           <AiModelIcon modelId={model.modelId} />
-                          <span className="min-w-0 flex-1 truncate">{model.displayName}</span>
+                          <span className="min-w-0 flex-1 truncate">
+                            {model.displayName}
+                          </span>
                           {model.isFree ? (
-                            <span className="shrink-0 text-[12px] text-muted-foreground">{t("prompt.free")}</span>
+                            <span className="shrink-0 text-[12px] text-muted-foreground">
+                              {t("prompt.free")}
+                            </span>
                           ) : null}
                         </DropdownMenuItem>
                       ))
@@ -422,7 +738,11 @@ export function StudioPrompt({
                     <Clock3 className={menuIconClass} />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" sideOffset={8} className="w-72 rounded-2xl p-1.5">
+                <DropdownMenuContent
+                  align="start"
+                  sideOffset={8}
+                  className="w-72 rounded-2xl p-1.5"
+                >
                   <DropdownMenuLabel className="px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
                     {t("prompt.recentHistory")}
                   </DropdownMenuLabel>
@@ -447,13 +767,13 @@ export function StudioPrompt({
               disabled={!canSend}
               onClick={submit}
               className={cn(
-                "inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors rounded-full",
+                "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
                 canSend
                   ? "bg-foreground text-background hover:bg-foreground/90"
                   : "bg-muted text-muted-foreground",
               )}
             >
-              {busy ? (
+              {busy || attaching ? (
                 <Loader2 className="size-5 animate-spin" />
               ) : (
                 <ArrowUp className="size-5 stroke-[1.5]" />
@@ -485,4 +805,10 @@ export function StudioPrompt({
       ) : null}
     </div>
   );
+}
+
+function providerLabel(provider: ConnectorProviderId) {
+  if (provider === "threads") return "Threads";
+  if (provider === "google-drive") return "Google Drive";
+  return provider;
 }

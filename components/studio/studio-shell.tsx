@@ -9,22 +9,19 @@ import {
 
 import { AuthModal } from "@/components/auth";
 import { StudioHeader } from "@/components/studio/header/studio-header";
-import { useStudioCreate } from "@/components/studio/lib/use-studio-create";
+import {
+  StudioCreateProvider,
+  useStudioCreate,
+} from "@/components/studio/lib/use-studio-create";
 import { StudioMobileNav } from "@/components/studio/studio-mobile-nav";
 import { StudioSidebar } from "@/components/studio/sidebar/studio-sidebar";
 import { StudioUpgradeBanner } from "@/components/studio/ui/studio-upgrade-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function StudioShell({ children }: { children: ReactNode }) {
-  const tn = useTranslations("studio.nav");
-  const tc = useTranslations("common");
-  const pathname = usePathname();
   const [authOpen, setAuthOpen] = useState(false);
   const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
   const [authResetToken, setAuthResetToken] = useState<string | null>(null);
-  const [sidebarSearch, setSidebarSearch] = useState("");
-  const [navOpen, setNavOpen] = useState(false);
-  const create = useStudioCreate();
 
   useEffect(() => {
     const onAuthLink = (event: Event) => {
@@ -38,6 +35,41 @@ export function StudioShell({ children }: { children: ReactNode }) {
     window.addEventListener("core:auth-link", onAuthLink);
     return () => window.removeEventListener("core:auth-link", onAuthLink);
   }, []);
+
+  return (
+    <StudioCreateProvider onNeedAuth={() => setAuthOpen(true)}>
+      <StudioShellInner onMenuAuth={() => setAuthOpen(true)}>
+        {children}
+      </StudioShellInner>
+      <AuthModal
+        isOpen={authOpen}
+        verifyToken={authVerifyToken}
+        resetToken={authResetToken}
+        onOpenChange={(open) => {
+          setAuthOpen(open);
+          if (!open) {
+            setAuthVerifyToken(null);
+            setAuthResetToken(null);
+          }
+        }}
+      />
+    </StudioCreateProvider>
+  );
+}
+
+function StudioShellInner({
+  children,
+  onMenuAuth,
+}: {
+  children: ReactNode;
+  onMenuAuth: () => void;
+}) {
+  const tn = useTranslations("studio.nav");
+  const tc = useTranslations("common");
+  const pathname = usePathname();
+  const [sidebarSearch, setSidebarSearch] = useState("");
+  const [navOpen, setNavOpen] = useState(false);
+  const create = useStudioCreate();
 
   useEffect(() => {
     setNavOpen(false);
@@ -107,7 +139,7 @@ export function StudioShell({ children }: { children: ReactNode }) {
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background md:m-2 md:ml-0 md:rounded-2xl">
           <StudioUpgradeBanner />
           <StudioHeader
-            onSignIn={() => setAuthOpen(true)}
+            onSignIn={onMenuAuth}
             onMenu={() => setNavOpen(true)}
           />
           <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
@@ -118,19 +150,6 @@ export function StudioShell({ children }: { children: ReactNode }) {
             onCreate={create.openBlank}
           />
         </div>
-
-        <AuthModal
-          isOpen={authOpen}
-          verifyToken={authVerifyToken}
-          resetToken={authResetToken}
-          onOpenChange={(open) => {
-            setAuthOpen(open);
-            if (!open) {
-              setAuthVerifyToken(null);
-              setAuthResetToken(null);
-            }
-          }}
-        />
       </div>
     </TooltipProvider>
   );

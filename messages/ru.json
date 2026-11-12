@@ -448,7 +448,17 @@
       "fromTemplate": "Из шаблона",
       "brandKit": "Бренд-кит",
       "importJson": "Импорт JSON",
-      "exploreCommunity": "Смотреть сообщество"
+      "importFigma": "Импорт из Figma",
+      "exploreCommunity": "Смотреть сообщество",
+      "blankDialogTitle": "Новый пустой проект",
+      "blankDialogSubtitle": "Назовите карусель, выберите ratio и количество слайдов.",
+      "projectName": "Название",
+      "untitledCarousel": "Без названия",
+      "ratio": "Ratio",
+      "slidesCount": "Слайды",
+      "cancel": "Отмена",
+      "creating": "Создание…",
+      "createProject": "Создать проект"
     },
     "notifications": {
       "search": "Поиск…",
@@ -518,6 +528,15 @@
       "comingSoon": "Скоро",
       "connectors": "Коннекторы",
       "connect": "Подключить",
+      "disconnect": "Отключить",
+      "reconnect": "Переподключить",
+      "disconnected": "{name} отключён",
+      "connectorStatus": {
+        "connected": "Подключён",
+        "disconnected": "Не подключён",
+        "error": "Нужно переподключить",
+        "expired": "Истёк"
+      },
       "manageConnectors": "Управление коннекторами",
       "soon": "Скоро",
       "noModelsMatch": "Нет подходящих моделей",
@@ -525,7 +544,37 @@
       "recentHistory": "Недавняя история",
       "recentPrompts": "Недавние промпты",
       "searchModels": "Поиск моделей",
-      "model": "Модель"
+      "model": "Модель",
+      "tooManyFiles": "Можно прикрепить до {max} файлов",
+      "unsupportedFile": "Нельзя прикрепить {name}. Нужно изображение или текст.",
+      "emptyFile": "{name} пустой",
+      "attachFailed": "Не удалось прикрепить файл",
+      "skillItems": {
+        "launch": {
+          "label": "Запуск продукта",
+          "hint": "Оффер, аудитория, доказательства, CTA"
+        },
+        "howto": {
+          "label": "How-to",
+          "hint": "Один шаг на слайд"
+        },
+        "offer": {
+          "label": "Оффер",
+          "hint": "Проблема → решение → следующий шаг"
+        },
+        "tips": {
+          "label": "Советы",
+          "hint": "Тема + конкретные советы"
+        },
+        "story": {
+          "label": "Кейс",
+          "hint": "Контекст → изменение → результат"
+        },
+        "comparison": {
+          "label": "Сравнение",
+          "hint": "До/после или A vs B"
+        }
+      }
     }
   },
   "landing": {
@@ -1606,7 +1655,8 @@
       "downloadZip": "Скачать для Figma",
       "exporting": "Экспорт…",
       "exportDone": "ZIP для Figma скачан",
-      "exportFailed": "Не удалось экспортировать для Figma"
+      "exportFailed": "Не удалось экспортировать для Figma",
+      "studioImportHint": "Вставьте ссылку на Figma и токен, чтобы собрать новый проект из фреймов."
     },
     "share": {
       "title": "Поделиться проектом",

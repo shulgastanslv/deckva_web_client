@@ -448,7 +448,17 @@
       "fromTemplate": "З шаблона",
       "brandKit": "Брэнд-кіт",
       "importJson": "Імпарт JSON",
-      "exploreCommunity": "Глядзець супольнасць"
+      "importFigma": "Імпарт з Figma",
+      "exploreCommunity": "Глядзець супольнасць",
+      "blankDialogTitle": "Новы пусты праект",
+      "blankDialogSubtitle": "Назавіце карусель, абярыце ratio і колькасць слайдаў.",
+      "projectName": "Назва",
+      "untitledCarousel": "Без назвы",
+      "ratio": "Ratio",
+      "slidesCount": "Слайды",
+      "cancel": "Адмена",
+      "creating": "Стварэнне…",
+      "createProject": "Стварыць праект"
     },
     "notifications": {
       "search": "Пошук…",
@@ -518,6 +528,15 @@
       "comingSoon": "Хутка",
       "connectors": "Канэктары",
       "connect": "Падключыць",
+      "disconnect": "Адключыць",
+      "reconnect": "Перападключыць",
+      "disconnected": "{name} адключаны",
+      "connectorStatus": {
+        "connected": "Падключаны",
+        "disconnected": "Не падключаны",
+        "error": "Трэба перападключыць",
+        "expired": "Скончыўся"
+      },
       "manageConnectors": "Кіраванне канэктарамі",
       "soon": "Хутка",
       "noModelsMatch": "Няма падыходных мадэляў",
@@ -525,7 +544,37 @@
       "recentHistory": "Нядаўняя гісторыя",
       "recentPrompts": "Нядаўнія промпты",
       "searchModels": "Пошук мадэляў",
-      "model": "Мадэль"
+      "model": "Мадэль",
+      "tooManyFiles": "Можна прымацаваць да {max} файлаў",
+      "unsupportedFile": "Нельга прымацаваць {name}. Патрэбна выява або тэкст.",
+      "emptyFile": "{name} пусты",
+      "attachFailed": "Не ўдалося прымацаваць файл",
+      "skillItems": {
+        "launch": {
+          "label": "Запуск прадукту",
+          "hint": "Офер, аўдыторыя, доказы, CTA"
+        },
+        "howto": {
+          "label": "How-to",
+          "hint": "Адзін крок на слайд"
+        },
+        "offer": {
+          "label": "Офер",
+          "hint": "Праблема → рашэнне → наступны крок"
+        },
+        "tips": {
+          "label": "Парады",
+          "hint": "Тэма + канкрэтныя парады"
+        },
+        "story": {
+          "label": "Кейс",
+          "hint": "Кантэкст → змена → вынік"
+        },
+        "comparison": {
+          "label": "Параўнанне",
+          "hint": "Да/пасля або A vs B"
+        }
+      }
     }
   },
   "landing": {
@@ -1606,7 +1655,8 @@
       "downloadZip": "Спампаваць для Figma",
       "exporting": "Экспарт…",
       "exportDone": "ZIP для Figma спампаваны",
-      "exportFailed": "Не ўдалося экспартаваць для Figma"
+      "exportFailed": "Не ўдалося экспартаваць для Figma",
+      "studioImportHint": "Устаўце спасылку на Figma і токен, каб сабраць новы праект з фрэймаў."
     },
     "share": {
       "title": "Падзяліцца праектам",

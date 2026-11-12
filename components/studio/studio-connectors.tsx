@@ -164,8 +164,6 @@ export function StudioConnectors() {
     );
   }
 
-  const maxDaily = Math.max(1, ...(analytics?.daily.map((d) => d.count) ?? [1]));
-
   return (
     <StudioContent>
       <StudioContentBody className="pt-6 sm:pt-10">
@@ -295,33 +293,11 @@ export function StudioConnectors() {
             />
           </div>
 
-          <div className="rounded-2xl bg-muted/20 p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <h3 className="text-[13px] font-medium text-foreground">
-                {t("activity7d")}
-              </h3>
-              <Plugs className="size-4 text-muted-foreground" />
-            </div>
-            <div className="flex h-28 items-end gap-2">
-              {(analytics?.daily ?? []).map((day) => (
-                <div
-                  key={day.date}
-                  className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
-                >
-                  <div
-                    className="w-full rounded-md bg-foreground/80"
-                    style={{
-                      height: `${Math.max(6, (day.count / maxDaily) * 100)}%`,
-                    }}
-                    title={`${day.count}`}
-                  />
-                  <span className="text-[10px] text-muted-foreground">
-                    {formatDayLabel(day.date)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ActivityChart
+            title={t("activity7d")}
+            emptyLabel={t("emptyActivity")}
+            daily={analytics?.daily ?? []}
+          />
 
           {threadsInsights ? (
             <div className="grid gap-3 sm:grid-cols-5">
@@ -425,6 +401,69 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <div className="mt-1 text-2xl font-medium tracking-tight text-foreground">
         {value}
       </div>
+    </div>
+  );
+}
+
+function ActivityChart({
+  title,
+  emptyLabel,
+  daily,
+}: {
+  title: string;
+  emptyLabel: string;
+  daily: Array<{ date: string; count: number }>;
+}) {
+  const maxDaily = Math.max(1, ...daily.map((d) => d.count));
+  const total = daily.reduce((sum, d) => sum + d.count, 0);
+
+  return (
+    <div className="rounded-2xl bg-muted/20 p-4">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="text-[13px] font-medium text-foreground">{title}</h3>
+        <Plugs className="size-4 text-muted-foreground" />
+      </div>
+      {total === 0 ? (
+        <p className="py-8 text-center text-[13px] text-muted-foreground">
+          {emptyLabel}
+        </p>
+      ) : (
+        <div className="flex h-40 items-end gap-2">
+          {daily.map((day) => {
+            const barMaxPx = 112;
+            const heightPx =
+              day.count <= 0
+                ? 4
+                : Math.max(8, Math.round((day.count / maxDaily) * barMaxPx));
+            return (
+              <div
+                key={day.date}
+                className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
+                title={`${day.date}: ${day.count}`}
+              >
+                <span
+                  className={cn(
+                    "text-[10px] font-medium tabular-nums",
+                    day.count > 0 ? "text-foreground" : "text-transparent",
+                  )}
+                >
+                  {day.count}
+                </span>
+                <div
+                  className={cn(
+                    "w-full rounded-md",
+                    day.count > 0 ? "bg-foreground/85" : "bg-muted/50",
+                  )}
+                  style={{ height: heightPx }}
+                />
+                <span className="text-[10px] text-muted-foreground">
+                  {formatDayLabel(day.date)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
