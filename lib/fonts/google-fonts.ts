@@ -128,6 +128,8 @@ export async function loadGoogleFont(family: string): Promise<void> {
   await Promise.all([
     document.fonts.load(`400 16px ${quoted}`),
     document.fonts.load(`700 16px ${quoted}`),
+    document.fonts.load(`italic 400 16px ${quoted}`),
+    document.fonts.load(`italic 700 16px ${quoted}`),
   ]).catch(() => undefined);
   await document.fonts.ready;
   if (document.fonts.check(`16px ${quoted}`)) loadedFamilies.add(family);

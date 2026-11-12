@@ -691,6 +691,8 @@
       "addSlide": "Add slide",
       "options": "Options",
       "canvasOptions": "Canvas options",
+      "slideNumber": "Slide number",
+      "findReplace": "Find & replace",
       "selectObjectToHide": "Select an object to hide",
       "selectObjectToLock": "Select an object to lock",
       "importSlidesBody": "This file has {count} slides. Load only the first into the current slide, or replace the whole carousel.",
@@ -844,7 +846,8 @@
     "typography": {
       "font": "Font",
       "loadingFonts": "Loading fonts…",
-      "searchGoogleFonts": "Search Google Fonts…",
+      "searchGoogleFonts": "Search fonts…",
+      "searchHint": "Type a name to find any Google Font",
       "noResults": "No fonts match",
       "groups": {
         "brandKit": "Brand kit",
@@ -1046,16 +1049,15 @@
       "recents": "Recents",
       "suggested": "Suggested",
       "category": "Category",
-      "bannerTitle": "More carousel tools to explore",
-      "bannerBody": "Try Deckva tools for mockups, chrome, and text across slides.",
+      "bannerTitle": "Tools that finish the carousel",
+      "bannerBody": "Drop mockups, chrome, and text helpers onto slides — then ship the set without leaving the editor.",
       "learnMore": "Learn more",
       "gotIt": "Got it",
       "categories": {
         "all": "All",
         "chrome": "Chrome",
         "content": "Content",
-        "devices": "Devices",
-        "edit": "Edit"
+        "devices": "Devices"
       },
       "catalog": {
         "mockups": {
@@ -1070,50 +1072,21 @@
           "long": "Paste a outline — each line becomes a slide with your chosen text style, palette, and chrome.",
           "run": "Make slides"
         },
-        "slideNumber": {
-          "title": "Slide number",
-          "description": "Puts 1, 01, or 1 / 8 in a corner of the current slide.",
-          "long": "Pick a numbering style and corner, then drop a slide number onto the active frame.",
-          "run": "Add number"
-        },
-        "author": {
-          "title": "Author handle",
-          "description": "Handle + optional avatar in the top corner.",
-          "long": "Set @handle and an avatar, then pin an author chip to the top-left or top-right of the slide.",
-          "run": "Add author"
-        },
-        "swipeCue": {
-          "title": "Swipe cue",
-          "description": "Small “next” hint so people keep scrolling.",
-          "long": "Choose a swipe label and corner to nudge viewers to the next slide in the carousel.",
-          "run": "Add swipe"
-        },
         "progressDots": {
           "title": "Progress dots",
           "description": "Bottom dots for carousel position.",
           "long": "Drop a row of progress dots that reflect the current slide index in the carousel.",
           "run": "Add dots"
-        },
-        "findReplace": {
-          "title": "Find & replace",
-          "description": "Updates text across every slide in this project.",
-          "long": "Search the whole carousel and replace matching text on every slide in one action.",
-          "run": "Replace all"
         }
       },
       "workspace": {
         "format": "Format",
         "corner": "Corner",
         "addNumber": "Add number",
-        "handle": "Handle",
-        "position": "Position",
         "topLeft": "Top left",
         "topRight": "Top right",
         "bottomLeft": "Bottom left",
         "bottomRight": "Bottom right",
-        "addAuthor": "Add author",
-        "text": "Text",
-        "addSwipe": "Add swipe",
         "addProgressDots": "Add progress dots",
         "oneLineOneSlide": "One line = one slide",
         "textStyle": "Text style",
@@ -1129,9 +1102,6 @@
         "count": "Count",
         "run": "Run",
         "numberFormat": "Number format",
-        "uploadAvatar": "Upload avatar",
-        "username": "@username",
-        "swipeText": "Swipe text",
         "textToFind": "Text to find",
         "findText": "Find text",
         "newText": "New text",

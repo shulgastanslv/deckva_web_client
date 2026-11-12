@@ -1,13 +1,6 @@
-export type ToolCategory = "chrome" | "content" | "devices" | "edit";
+export type ToolCategory = "chrome" | "content" | "devices";
 
-export type StudioToolId =
-  | "mockups"
-  | "slide-number"
-  | "author"
-  | "swipe-cue"
-  | "progress-dots"
-  | "slides-from-text"
-  | "find-replace";
+export type StudioToolId = "mockups" | "progress-dots" | "slides-from-text";
 
 export interface StudioTool {
   id: StudioToolId;
@@ -19,10 +12,8 @@ export interface StudioTool {
   authorInitial: string;
   usedBy: string;
   likedBy: string;
-  /** Tailwind classes for the tool icon tile */
-  iconClass: string;
-  /** Soft gradient behind the preview art */
-  previewClass: string;
+  /** Path under /public, e.g. `/tools/mockups.jpg` */
+  image: string;
   suggested?: boolean;
   runLabel: string;
 }
@@ -32,7 +23,6 @@ export const TOOL_CATEGORIES: { id: ToolCategory | "all"; label: string }[] = [
   { id: "chrome", label: "Chrome" },
   { id: "content", label: "Content" },
   { id: "devices", label: "Devices" },
-  { id: "edit", label: "Edit" },
 ];
 
 export const STUDIO_TOOLS: StudioTool[] = [
@@ -47,8 +37,7 @@ export const STUDIO_TOOLS: StudioTool[] = [
     authorInitial: "D",
     usedBy: "12.4k",
     likedBy: "840",
-    iconClass: "bg-sky-500 text-white",
-    previewClass: "from-sky-200 via-sky-100 to-indigo-100 dark:from-sky-900/50 dark:via-slate-900 dark:to-indigo-950/60",
+    image: "/tools/mockups.jpg",
     suggested: true,
     runLabel: "Open mockups",
   },
@@ -63,55 +52,9 @@ export const STUDIO_TOOLS: StudioTool[] = [
     authorInitial: "D",
     usedBy: "7.8k",
     likedBy: "512",
-    iconClass: "bg-amber-500 text-white",
-    previewClass: "from-amber-100 via-orange-50 to-yellow-100 dark:from-amber-950/50 dark:via-slate-900 dark:to-yellow-950/40",
+    image: "/tools/slides-from-text.jpg",
     suggested: true,
     runLabel: "Make slides",
-  },
-  {
-    id: "slide-number",
-    title: "Slide number",
-    description: "Puts 1, 01, or 1 / 8 in a corner of the current slide.",
-    longDescription:
-      "Pick a numbering style and corner, then drop a slide number onto the active frame.",
-    category: "chrome",
-    author: "Deckva",
-    authorInitial: "D",
-    usedBy: "5.6k",
-    likedBy: "210",
-    iconClass: "bg-emerald-500 text-white",
-    previewClass: "from-emerald-100 via-teal-50 to-cyan-100 dark:from-emerald-950/50 dark:via-slate-900 dark:to-cyan-950/40",
-    runLabel: "Add number",
-  },
-  {
-    id: "author",
-    title: "Author handle",
-    description: "Handle + optional avatar in the top corner.",
-    longDescription:
-      "Set @handle and an avatar, then pin an author chip to the top-left or top-right of the slide.",
-    category: "chrome",
-    author: "Deckva",
-    authorInitial: "D",
-    usedBy: "4.2k",
-    likedBy: "188",
-    iconClass: "bg-rose-500 text-white",
-    previewClass: "from-rose-100 via-pink-50 to-orange-100 dark:from-rose-950/50 dark:via-slate-900 dark:to-orange-950/40",
-    runLabel: "Add author",
-  },
-  {
-    id: "swipe-cue",
-    title: "Swipe cue",
-    description: "Small “next” hint so people keep scrolling.",
-    longDescription:
-      "Choose a swipe label and corner to nudge viewers to the next slide in the carousel.",
-    category: "chrome",
-    author: "Deckva",
-    authorInitial: "D",
-    usedBy: "3.9k",
-    likedBy: "142",
-    iconClass: "bg-indigo-500 text-white",
-    previewClass: "from-indigo-100 via-blue-50 to-sky-100 dark:from-indigo-950/50 dark:via-slate-900 dark:to-sky-950/40",
-    runLabel: "Add swipe",
   },
   {
     id: "progress-dots",
@@ -124,24 +67,8 @@ export const STUDIO_TOOLS: StudioTool[] = [
     authorInitial: "D",
     usedBy: "3.1k",
     likedBy: "96",
-    iconClass: "bg-zinc-700 text-white dark:bg-zinc-300 dark:text-zinc-900",
-    previewClass: "from-zinc-200 via-slate-100 to-zinc-50 dark:from-zinc-800 dark:via-slate-900 dark:to-zinc-950",
+    image: "/tools/progress-dots.png",
     runLabel: "Add dots",
-  },
-  {
-    id: "find-replace",
-    title: "Find & replace",
-    description: "Updates text across every slide in this project.",
-    longDescription:
-      "Search the whole carousel and replace matching text on every slide in one action.",
-    category: "edit",
-    author: "Deckva",
-    authorInitial: "D",
-    usedBy: "6.5k",
-    likedBy: "301",
-    iconClass: "bg-orange-500 text-white",
-    previewClass: "from-orange-100 via-amber-50 to-yellow-50 dark:from-orange-950/50 dark:via-slate-900 dark:to-amber-950/30",
-    runLabel: "Replace all",
   },
 ];
 

@@ -28,6 +28,8 @@ import {
   rebuildCodeBlock,
   type CodeBlockOptions,
 } from "@/lib/canvas/code-block";
+import { setTextResizeMode } from "@/lib/canvas/text-fit";
+import { remintLayerTreeIds } from "@/lib/canvas/layers";
 
 export type { SlideNumberStyle };
 export { formatSlideNumber };
@@ -98,7 +100,7 @@ export class ObjectFactory {
     return { x: width / 2, y: height / 2 };
   }
 
-  private mark(obj: FabricObject, props: Record<string, string>) {
+  private mark(obj: FabricObject, props: Record<string, string | boolean | number>) {
     obj.set(props);
     return obj;
   }
@@ -980,8 +982,11 @@ export class ObjectFactory {
     const actualWidth = textbox.calcTextWidth();
     if (actualWidth < textbox.width) {
       textbox.set({ width: actualWidth });
-      this.canvas.renderAll();
+      setTextResizeMode(textbox, "auto-width");
+    } else {
+      setTextResizeMode(textbox, "auto-height");
     }
+    this.canvas.renderAll();
     return textbox;
   }
 
@@ -996,6 +1001,7 @@ export class ObjectFactory {
     const active = this.canvas.getActiveObject();
     if (!active) return;
     active.clone().then((cloned: FabricObject) => {
+      remintLayerTreeIds(cloned);
       cloned.set({
         left: (active.left || 0) + 20,
         top: (active.top || 0) + 20,
@@ -1019,13 +1025,15 @@ export class ObjectFactory {
       fill: this.slotColor("text", "#0f172a"),
       lineHeight: style.lineHeight,
     });
-    this.mark(tb, { swibpStyle: "heading", swibpSlot: "text" });
+    this.mark(tb, {
+      swibpStyle: "heading",
+      swibpSlot: "text",
+    });
 
     tb.initDimensions();
-
     const actualWidth = Math.ceil(tb.calcTextWidth()) + 4;
-
     tb.set({ width: actualWidth });
+    setTextResizeMode(tb, "auto-width");
     tb.setCoords();
 
     this.addToCanvas(tb);
@@ -1051,8 +1059,11 @@ export class ObjectFactory {
     const actualWidth = tb.calcTextWidth();
     if (actualWidth < tb.width) {
       tb.set({ width: actualWidth });
-      this.canvas.renderAll();
+      setTextResizeMode(tb, "auto-width");
+    } else {
+      setTextResizeMode(tb, "auto-height");
     }
+    this.canvas.renderAll();
     return tb;
   }
 
@@ -1073,8 +1084,11 @@ export class ObjectFactory {
     const actualWidth = tb.calcTextWidth();
     if (actualWidth < tb.width) {
       tb.set({ width: actualWidth });
-      this.canvas.renderAll();
+      setTextResizeMode(tb, "auto-width");
+    } else {
+      setTextResizeMode(tb, "auto-height");
     }
+    this.canvas.renderAll();
     return tb;
   }
 
@@ -1093,8 +1107,11 @@ export class ObjectFactory {
     const actualWidth = tb.calcTextWidth();
     if (actualWidth < tb.width) {
       tb.set({ width: actualWidth });
-      this.canvas.renderAll();
+      setTextResizeMode(tb, "auto-width");
+    } else {
+      setTextResizeMode(tb, "auto-height");
     }
+    this.canvas.renderAll();
     return tb;
   }
 

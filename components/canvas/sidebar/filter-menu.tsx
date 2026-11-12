@@ -56,10 +56,10 @@ export function FilterMenu({
           aria-label={ariaLabel}
           title={ariaLabel}
           className={cn(
-            "inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors",
+            "inline-flex size-10 shrink-0 items-center justify-center transition-colors rounded-full",
             active
-              ? "bg-foreground text-background hover:bg-foreground/90"
-              : "bg-muted/60 text-foreground hover:bg-muted/80 dark:bg-muted/25 dark:hover:bg-muted/40",
+              ? "text-background hover:bg-foreground/90"
+              : "text-foreground hover:bg-muted/80 dark:hover:bg-muted/40",
             className,
           )}
         >

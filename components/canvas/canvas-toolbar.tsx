@@ -32,8 +32,10 @@ import {
   EyeSlash as EyeOff,
   FilePlus,
   GridFour as Grid3X3,
+  Hash,
   Hand,
   Lock,
+  MagnifyingGlass as Search,
   Crosshair as Focus,
   DotsThree as MoreHorizontal,
   Cursor as MousePointer2,
@@ -44,6 +46,10 @@ import {
   FlowArrow as Workflow,
 } from "@phosphor-icons/react";
 import { GridSettingsPanel } from "@/components/canvas/grid-controls";
+import {
+  FindReplacePanel,
+  SlideNumberPanel,
+} from "@/components/canvas/sidebar/tool-workspace";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -428,6 +434,44 @@ export function CanvasToolbar({
                 onPointerDown={(event) => event.preventDefault()}
               >
                 <GridSettingsPanel />
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                className={cn(
+                  menuItem,
+                  "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
+                )}
+              >
+                <Hash className="size-5" />
+                {t("slideNumber")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent
+                sideOffset={8}
+                className="w-72 rounded-2xl p-3"
+                onPointerDown={(event) => event.preventDefault()}
+              >
+                <SlideNumberPanel />
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                className={cn(
+                  menuItem,
+                  "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
+                )}
+              >
+                <Search className="size-5" />
+                {t("findReplace")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent
+                sideOffset={8}
+                className="w-80 rounded-2xl p-3"
+                onPointerDown={(event) => event.preventDefault()}
+              >
+                <FindReplacePanel />
               </DropdownMenuSubContent>
             </DropdownMenuSub>
 

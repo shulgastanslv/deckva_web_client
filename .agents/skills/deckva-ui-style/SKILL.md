@@ -19,7 +19,7 @@ description: >-
 
 ## Краткие инварианты
 
-1. **Кнопки / чипы / инпуты / сегменты** — **Miro-like**: `rounded-md`, не `rounded-full`. Круги только для аватаров, свитчей, цветовых точек, бейджей.
+1. **Кнопки / чипы / инпуты / сегменты / табы / filter Apply** — **Miro-like**: `rounded-md`, не `rounded-full` и не `rounded-lg` на самом контроле. Круги только для аватаров, свитчей, цветовых точек, бейджей, puck на regulation pad. Табы и intensity: оболочка + триггеры `rounded-md` (`sidebarTabs*` / `sidebarSegmented*` / `components/ui/tabs`).
 2. **Триггеры / инпуты / чипы / кнопки** — **без** `shadow-*` и без видимых `border` (`border-none`).
 3. **Menus / popovers / select** — `bg-popover text-popover-foreground shadow-sm border-0 dark:border dark:border-border/50` (не `shadow-none` / `shadow-md+`).
 4. **Dialogs** — `bg-background text-foreground border border-border/50 shadow-none` (не `bg-popover`, не `shadow-sm`).

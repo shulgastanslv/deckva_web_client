@@ -267,6 +267,8 @@ export function slidesFromLines(input: {
           textAlign: "center",
           swibpStyle: input.styleId,
           swibpSlot: "text",
+          swibpTextResize: "auto-height",
+          swibpFitWidth: false,
         },
       ],
     };

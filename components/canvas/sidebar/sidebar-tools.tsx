@@ -7,13 +7,9 @@ import {
 import { useTranslations } from "next-intl";
 
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
-import { ToolAvatar } from "@/components/canvas/sidebar/tool-avatars";
+import { ToolAvatar, ToolUsageSchema } from "@/components/canvas/sidebar/tool-avatars";
 import { ToolsBanner } from "@/components/canvas/sidebar/tools-banner";
-import {
-  ToolDetailDialog,
-  ToolPreviewArt,
-  ToolRunDialog,
-} from "@/components/canvas/sidebar/tool-workspace";
+import { ToolRunDialog } from "@/components/canvas/sidebar/tool-workspace";
 import { sidebarFieldInput, sidebarHint, sidebarPanel } from "@/components/canvas/sidebar/sidebar-ui";
 import {
   HoverCard,
@@ -36,11 +32,7 @@ type Scope = "all" | "recents" | "suggested";
 const CATALOG_KEY: Record<StudioToolId, string> = {
   mockups: "mockups",
   "slides-from-text": "slidesFromText",
-  "slide-number": "slideNumber",
-  author: "author",
-  "swipe-cue": "swipeCue",
   "progress-dots": "progressDots",
-  "find-replace": "findReplace",
 };
 
 type TranslateFn = (key: string) => string;
@@ -85,13 +77,17 @@ function ToolListRow({
       <HoverCardContent
         side="right"
         align="start"
-        sideOffset={12}
-        className="w-64 overflow-hidden rounded-2xl border-0 bg-popover p-0 shadow-sm dark:border dark:border-border/50"
+        sideOffset={10}
+        className="w-52 overflow-hidden rounded-2xl border-0 bg-popover p-0 shadow-sm dark:border dark:border-border/50"
       >
-        <ToolPreviewArt tool={tool} className="min-h-28 rounded-none" />
-        <div className="space-y-1.5 p-3.5">
-          <p className="text-[14px] font-semibold text-foreground">{tool.title}</p>
-          <p className="text-[12px] leading-snug text-muted-foreground">{tool.description}</p>
+        <ToolUsageSchema tool={tool} className="aspect-[16/10] min-h-0 rounded-none" />
+        <div className="space-y-1 px-3 py-2.5">
+          <p className="text-[13px] font-semibold leading-snug text-foreground">
+            {tool.title}
+          </p>
+          <p className="text-[12px] leading-snug text-muted-foreground">
+            {tool.description}
+          </p>
         </div>
       </HoverCardContent>
     </HoverCard>
@@ -104,7 +100,6 @@ export function SidebarTools() {
   const [category, setCategory] = useState<ToolCategory | "all">("all");
   const [scope, setScope] = useState<Scope>("all");
   const [recents, setRecents] = useState<StudioToolId[]>([]);
-  const [detailId, setDetailId] = useState<StudioToolId | null>(null);
   const [runId, setRunId] = useState<StudioToolId | null>(null);
 
   useEffect(() => {
@@ -158,11 +153,8 @@ export function SidebarTools() {
     }
   };
 
-  const openDetail = (id: StudioToolId) => setDetailId(id);
-
-  const runTool = (id: StudioToolId) => {
+  const openTool = (id: StudioToolId) => {
     setRecents(pushToolRecent(id));
-    setDetailId(null);
     setRunId(id);
   };
 
@@ -222,19 +214,10 @@ export function SidebarTools() {
       ) : (
         <div className="flex flex-col">
           {ordered.map((tool) => (
-            <ToolListRow key={tool.id} tool={tool} onOpen={openDetail} />
+            <ToolListRow key={tool.id} tool={tool} onOpen={openTool} />
           ))}
         </div>
       )}
-
-      <ToolDetailDialog
-        toolId={detailId}
-        open={detailId !== null}
-        onOpenChange={(next) => {
-          if (!next) setDetailId(null);
-        }}
-        onRun={runTool}
-      />
 
       <ToolRunDialog
         toolId={runId}

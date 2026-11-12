@@ -7,7 +7,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 
-import { ToolAvatar, ToolAvatarTile } from "@/components/canvas/sidebar/tool-avatars";
+import { ToolAvatar } from "@/components/canvas/sidebar/tool-avatars";
 import {
   sidebarActionBtn,
   sidebarFieldInput,
@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -70,8 +69,6 @@ const CORNER_MSG: Record<Corner, "workspace.topLeft" | "workspace.topRight" | "w
   "bottom-right": "workspace.bottomRight",
 };
 
-const SWIPE_VARIANTS = ["swipe →", "next →", "→", "more →", "keep going →"] as const;
-
 const DEVICE_OPTIONS: { id: FrameKind; label: string }[] = [
   { id: "iphone18pro", label: "iPhone 18 Pro" },
   { id: "iphone17pro", label: "iPhone 17 Pro" },
@@ -82,14 +79,10 @@ const DEVICE_OPTIONS: { id: FrameKind; label: string }[] = [
 const ROW_COUNTS = [3, 4, 5] as const;
 
 
-const CATALOG_KEY: Record<StudioToolId, "mockups" | "slidesFromText" | "slideNumber" | "author" | "swipeCue" | "progressDots" | "findReplace"> = {
+const CATALOG_KEY: Record<StudioToolId, "mockups" | "slidesFromText" | "progressDots"> = {
   mockups: "mockups",
   "slides-from-text": "slidesFromText",
-  "slide-number": "slideNumber",
-  author: "author",
-  "swipe-cue": "swipeCue",
   "progress-dots": "progressDots",
-  "find-replace": "findReplace",
 };
 
 function localizeCatalogTool(tool: StudioTool, t: (key: string) => string): StudioTool {
@@ -111,22 +104,8 @@ function isCorner(value: string): value is Corner {
   return (CORNER_IDS as readonly string[]).includes(value);
 }
 
-export function ToolPreviewArt({ tool, className }: { tool: StudioTool; className?: string }) {
-  return (
-    <div
-      className={cn(
-        "relative flex min-h-28 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 p-5 dark:bg-muted/25",
-        className,
-      )}
-    >
-      <ToolAvatarTile tool={tool} className="size-20 rounded-2xl" />
-    </div>
-  );
-}
-
-function SlideNumberPanel() {
+export function SlideNumberPanel() {
   const t = useTranslations("editor.tools");
-  const tc = useTranslations("common");
 
   const manager = useCanvasManager();
   const { currentIndex, slides } = useSlides();
@@ -185,155 +164,7 @@ function SlideNumberPanel() {
         }
         className={cn(sidebarActionBtn, "w-full")}
       >
-        Add number
-      </button>
-    </div>
-  );
-}
-
-function AuthorPanel() {
-  const t = useTranslations("editor.tools");
-  const tc = useTranslations("common");
-
-  const manager = useCanvasManager();
-  const [handle, setHandle] = useState("@username");
-  const [corner, setCorner] = useState<"left" | "right">("left");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-
-  return (
-    <div className="space-y-3">
-      <div className="space-y-1.5">
-        <FieldLabel>{t("workspace.handle")}</FieldLabel>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            title={t("workspace.uploadAvatar")}
-            onClick={() => avatarInputRef.current?.click()}
-            className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted/60 text-[12px] font-semibold dark:bg-muted/25"
-          >
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="" className="size-full object-cover" />
-            ) : (
-              (handle.replace(/^@/, "")[0] || "?").toUpperCase()
-            )}
-          </button>
-          <input
-            value={handle}
-            onChange={(event) => setHandle(event.target.value)}
-            placeholder={t("workspace.username")}
-            aria-label={t("workspace.handle")}
-            className={sidebarFieldInput}
-          />
-          <input
-            ref={avatarInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.target.value = "";
-              if (!file || !file.type.startsWith("image/")) return;
-              void fileToDataUrl(file, { maxEdge: 512, quality: 0.86 })
-                .then(setAvatarUrl)
-                .catch((err) => reportError(err, messages.errors.readAvatar));
-            }}
-          />
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <FieldLabel>{t("workspace.position")}</FieldLabel>
-        <Select
-          value={corner}
-          onValueChange={(next) => {
-            if (next === "left" || next === "right") setCorner(next);
-          }}
-        >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.position")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value="left" className="text-[13px]">
-              {t("workspace.topLeft")}
-            </SelectItem>
-            <SelectItem value="right" className="text-[13px]">
-              {t("workspace.topRight")}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <button
-        type="button"
-        disabled={!manager}
-        onClick={() =>
-          void manager?.objects.addCornerHandle(
-            handle.trim() || "@username",
-            corner,
-            undefined,
-            avatarUrl,
-          )
-        }
-        className={cn(sidebarActionBtn, "w-full")}
-      >
-        {t("workspace.addAuthor")}
-      </button>
-    </div>
-  );
-}
-
-function SwipeCuePanel() {
-  const t = useTranslations("editor.tools");
-  const tc = useTranslations("common");
-
-  const manager = useCanvasManager();
-  const [swipeVariant, setSwipeVariant] = useState<string>(SWIPE_VARIANTS[0]);
-  const [swipeCorner, setSwipeCorner] = useState<Corner>("bottom-right");
-
-  return (
-    <div className="space-y-3">
-      <div className="space-y-1.5">
-        <FieldLabel>{t("workspace.text")}</FieldLabel>
-        <Select value={swipeVariant} onValueChange={setSwipeVariant}>
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.swipeText")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            {SWIPE_VARIANTS.map((variant) => (
-              <SelectItem key={variant} value={variant} className="text-[13px]">
-                {variant}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1.5">
-        <FieldLabel>{t("workspace.corner")}</FieldLabel>
-        <Select
-          value={swipeCorner}
-          onValueChange={(next) => {
-            if (isCorner(next)) setSwipeCorner(next);
-          }}
-        >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.corner")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            {CORNER_IDS.map((corner) => (
-              <SelectItem key={corner} value={corner} className="text-[13px]">
-                {t(CORNER_MSG[corner])}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <button
-        type="button"
-        disabled={!manager}
-        onClick={() => manager?.objects.addSwipeCue(swipeVariant, swipeCorner)}
-        className={cn(sidebarActionBtn, "w-full")}
-      >
-        {t("workspace.addSwipe")}
+        {t("workspace.addNumber")}
       </button>
     </div>
   );
@@ -341,7 +172,6 @@ function SwipeCuePanel() {
 
 function ProgressDotsPanel() {
   const t = useTranslations("editor.tools");
-  const tc = useTranslations("common");
 
   const manager = useCanvasManager();
   const { currentIndex, slides } = useSlides();
@@ -367,7 +197,6 @@ function ProgressDotsPanel() {
 
 function SlidesFromTextPanel() {
   const t = useTranslations("editor.tools");
-  const tc = useTranslations("common");
 
   const slidesController = useSlidesController();
   const [prompt, setPrompt] = useState("");
@@ -439,9 +268,8 @@ function SlidesFromTextPanel() {
   );
 }
 
-function FindReplacePanel() {
+export function FindReplacePanel() {
   const t = useTranslations("editor.tools");
-  const tc = useTranslations("common");
 
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
@@ -546,7 +374,6 @@ function FindReplacePanel() {
 
 function MockupsPanel() {
   const t = useTranslations("editor.tools");
-  const tc = useTranslations("common");
 
   const manager = useCanvasManager();
   const slidesController = useSlidesController();
@@ -730,88 +557,16 @@ function MockupsPanel() {
 }
 
 export function ToolPanel({ id }: { id: StudioToolId }) {
-  const t = useTranslations("editor.tools");
-  const tc = useTranslations("common");
-
   switch (id) {
     case "mockups":
       return <MockupsPanel />;
-    case "slide-number":
-      return <SlideNumberPanel />;
-    case "author":
-      return <AuthorPanel />;
-    case "swipe-cue":
-      return <SwipeCuePanel />;
     case "progress-dots":
       return <ProgressDotsPanel />;
     case "slides-from-text":
       return <SlidesFromTextPanel />;
-    case "find-replace":
-      return <FindReplacePanel />;
     default:
       return null;
   }
-}
-
-export function ToolDetailDialog({
-  toolId,
-  open,
-  onOpenChange,
-  onRun,
-}: {
-  toolId: StudioToolId | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onRun: (id: StudioToolId) => void;
-}) {
-  const t = useTranslations("editor.tools");
-  const [cached, setCached] = useState<StudioTool | null>(null);
-  useEffect(() => {
-    if (toolId) setCached(getTool(toolId) ?? null);
-  }, [toolId]);
-  const raw = (toolId ? getTool(toolId) : null) ?? cached;
-  const tool = raw ? localizeCatalogTool(raw, t) : null;
-  if (!tool) return null;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        className="grid max-h-[min(36rem,85dvh)] w-[min(22rem,calc(100vw-2rem))] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-sm"
-      >
-        <div className="flex items-center justify-between gap-2 px-4 py-3">
-          <DialogTitle className="truncate text-[14px] font-semibold">{tool.title}</DialogTitle>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="rounded-md"
-            onClick={() => onOpenChange(false)}
-            aria-label={t("workspace.close")}
-          >
-            <X className="size-5" />
-          </Button>
-        </div>
-
-        <div className="min-h-0 space-y-3 overflow-y-auto px-4 pb-3">
-          <ToolPreviewArt tool={tool} className="min-h-32" />
-          <DialogDescription className="text-[13px] leading-relaxed text-muted-foreground">
-            {tool.description}
-          </DialogDescription>
-        </div>
-
-        <div className="px-4 pb-4 pt-2">
-          <Button
-            type="button"
-            className="h-10 w-full rounded-md bg-foreground text-background hover:bg-foreground/90"
-            onClick={() => onRun(tool.id)}
-          >
-            {tool.runLabel}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 export function ToolRunDialog({

@@ -10,8 +10,9 @@ alwaysApply: true
 
 ## Buttons (Miro-like)
 
-- Buttons, chips, inputs, selects, and segmented controls use **soft rects**: `rounded-md` (not pills).
-- Do **not** use `rounded-full` on buttons/CTAs/triggers. Keep `rounded-full` only for true circles (avatars, switches, color dots, tiny status badges).
+- Buttons, chips, inputs, selects, segmented controls, **tabs**, **filter Apply / preset chrome**, zoom chrome, and slide-nav actions use **soft rects**: `rounded-md` (not pills, not `rounded-lg` / `rounded-2xl` on the control itself).
+- Do **not** use `rounded-full` on buttons/CTAs/triggers/toolbars. Keep `rounded-full` only for true circles (avatars, switches, color dots, tiny status badges, regulation-pad pucks).
+- Editor tabs / intensity segments: `rounded-md` list shell + `rounded-md` triggers (`sidebarTabs*` / `sidebarSegmented*`).
 
 ## Surfaces
 

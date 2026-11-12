@@ -3,11 +3,7 @@
 import { useTranslations } from "next-intl";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  CaretDown as ChevronDown,
   CaretRight as ChevronRight,
-  CaretUp as ChevronUp,
-  CaretDoubleDown as ChevronsDown,
-  CaretDoubleUp as ChevronsUp,
   Copy,
   Eye,
   EyeSlash as EyeOff,
@@ -32,10 +28,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import {
+  BringForwardIcon,
+  BringToFrontIcon,
+  SendBackwardIcon,
+  SendToBackIcon,
+} from "@/components/canvas/layer-order-icons";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useCanvasObjects } from "@/hooks/use-canvas-objects";
 import { ungroupSelection } from "@/lib/canvas/group";
 import {
+  dedupeLayerIds,
   ensureLayerId,
   isInside,
   isLayerGroup,
@@ -46,6 +49,7 @@ import {
   moveLayerStep,
   placeLayer,
   prepareGroups,
+  remintLayerTreeIds,
   removeLayer,
   setLayerLocked,
   setLayerName,
@@ -109,6 +113,8 @@ export function SidebarLayers() {
     prepareGroups(objects);
   }, [objects]);
 
+  // Sync before paint — cloned/template objects often share swibpId.
+  dedupeLayerIds(objects);
   const rows = flatten(objects, collapsed);
 
   const run = (work: () => boolean | void) => {
@@ -160,7 +166,7 @@ export function SidebarLayers() {
   const duplicate = (obj: FabricObject) => {
     if (!manager) return;
     void obj.clone().then((cloned: FabricObject) => {
-      (cloned as LayerObject).swibpId = globalThis.crypto.randomUUID();
+      remintLayerTreeIds(cloned);
       run(() => {
         const parent = layerParent(obj);
         const list = parent ? parent.getObjects() : manager.canvas.getObjects();
@@ -400,28 +406,28 @@ export function SidebarLayers() {
                       className={menuItem}
                       onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "front"))}
                     >
-                      <ChevronsUp className="size-4" />
+                      <BringToFrontIcon className="size-5" />
                       Bring to front
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className={menuItem}
                       onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "forward"))}
                     >
-                      <ChevronUp className="size-4" />
+                      <BringForwardIcon className="size-5" />
                       Bring forward
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className={menuItem}
                       onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "backward"))}
                     >
-                      <ChevronDown className="size-4" />
+                      <SendBackwardIcon className="size-5" />
                       Send backward
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className={menuItem}
                       onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "back"))}
                     >
-                      <ChevronsDown className="size-4" />
+                      <SendToBackIcon className="size-5" />
                       Send to back
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="my-1 bg-border/50" />

@@ -18,7 +18,14 @@ import { refreshMask } from "./object-appearance";
 import { fitCanvasJSON, fitGeometry, type FrameSize } from "./fit-frame";
 import { isAutoFlowSkippable } from "./auto-flow";
 import { stabilizeGroups } from "./group";
-import { refreshCanvasFonts } from "./paint-live";
+import { refreshCanvasFonts, relayoutText } from "./paint-live";
+import {
+  bakeTextboxScale,
+  configureTextboxControls,
+  configureTextboxesInTree,
+  isTextbox,
+  onTextboxResized,
+} from "./text-fit";
 import { HoverManager } from "./hover";
 
 const DEFAULT_BACKGROUND = "#ffffff";
@@ -238,11 +245,6 @@ export class CanvasManager {
       return;
     }
 
-    const textLike = target as FabricObject & {
-      initDimensions?: () => void;
-      dirty?: boolean;
-      _forceClearCache?: boolean;
-    };
     if (
       "fontFamily" in updates ||
       "fontSize" in updates ||
@@ -252,9 +254,7 @@ export class CanvasManager {
       "charSpacing" in updates ||
       "text" in updates
     ) {
-      textLike._forceClearCache = true;
-      textLike.dirty = true;
-      textLike.initDimensions?.();
+      relayoutText(target);
     }
     refreshMask(target);
     target.setCoords();
@@ -491,6 +491,7 @@ export class CanvasManager {
       }
       if (this.disposed || abort.signal.aborted || !this.canvas.contextTop) return;
       stabilizeGroups(this.canvas.getObjects());
+      configureTextboxesInTree(this.canvas.getObjects());
       if (keepEraser) this.eraser.enable();
       if (!this.canvas.backgroundColor) {
         this.canvas.backgroundColor = DEFAULT_BACKGROUND;
@@ -553,10 +554,26 @@ export class CanvasManager {
 
     this.canvas.on("object:added", (e) => {
       if (e.target?.type === "group") stabilizeGroups([e.target]);
+      if (isTextbox(e.target)) configureTextboxControls(e.target);
       onMutation(e);
     });
     this.canvas.on("object:removed", onMutation);
-    this.canvas.on("object:modified", onMutation);
+    this.canvas.on("object:scaling", (e) => {
+      if (isTextbox(e.target)) bakeTextboxScale(e.target);
+    });
+    this.canvas.on("object:resizing", (e) => {
+      if (isTextbox(e.target)) onTextboxResized(e.target);
+    });
+    this.canvas.on("object:modified", (e) => {
+      // Defensive: never leave textboxes with scale ≠ 1 (stretches glyphs).
+      if (isTextbox(e.target)) bakeTextboxScale(e.target);
+      onMutation(e);
+    });
+    this.canvas.on("text:changed", (e) => {
+      if (!isTextbox(e.target)) return;
+      relayoutText(e.target);
+      this.canvas.requestRenderAll();
+    });
     this.canvas.on("selection:created", onSelection);
     this.canvas.on("selection:updated", onSelection);
     this.canvas.on("selection:cleared", onSelection);

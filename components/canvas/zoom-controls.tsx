@@ -21,7 +21,7 @@ export function clampZoom(value: number) {
 }
 
 const cell =
-  "size-9 shrink-0 rounded-full text-muted-foreground hover:bg-muted/60 hover:text-foreground";
+  "size-9 shrink-0 rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground";
 
 export function ZoomControls({
   showTools = true,
@@ -73,7 +73,7 @@ export function ZoomControls({
   const selectActive = !handActive && !eraserActive;
 
   return (
-    <div className="flex w-11 shrink-0 flex-col items-center gap-0.5 rounded-full bg-muted/50 p-1 shadow-sm dark:bg-muted/35">
+    <div className="flex w-11 shrink-0 flex-col items-center gap-0.5 rounded-md bg-muted/50 p-1 dark:bg-muted/35">
       {showTools ? (
         <>
           <Button
@@ -87,7 +87,7 @@ export function ZoomControls({
             title={t("toolSelect")}
             aria-pressed={selectActive}
           >
-            <MousePointer2 className="size-4 stroke-[1.5]" />
+            <MousePointer2 className="size-5 stroke-[1.5]" />
           </Button>
           <Button
             variant="ghost"
@@ -97,7 +97,7 @@ export function ZoomControls({
             title={t("toolHand")}
             aria-pressed={handActive}
           >
-            <Hand className="size-4 stroke-[1.5]" />
+            <Hand className="size-5 stroke-[1.5]" />
           </Button>
           <Button
             variant="ghost"
@@ -107,7 +107,7 @@ export function ZoomControls({
             title={t("toolEraser")}
             aria-pressed={eraserActive}
           >
-            <Eraser className="size-4 stroke-[1.5]" />
+            <Eraser className="size-5 stroke-[1.5]" />
           </Button>
           <div className="my-0.5 h-px w-5 bg-border/60" />
         </>
@@ -119,11 +119,11 @@ export function ZoomControls({
         onClick={() => setZoom(clampZoom(zoom + 10))}
         title={t("in")}
       >
-        <ZoomIn className="size-4 stroke-[1.5]" />
+        <ZoomIn className="size-5 stroke-[1.5]" />
       </Button>
       <button
         type="button"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-medium tabular-nums text-foreground hover:bg-muted/60"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-medium tabular-nums text-foreground hover:bg-muted/60"
         onClick={() => setZoom(100)}
         title={t("reset")}
       >
@@ -136,7 +136,7 @@ export function ZoomControls({
         onClick={() => setZoom(clampZoom(zoom - 10))}
         title={t("out")}
       >
-        <ZoomOut className="size-4 stroke-[1.5]" />
+        <ZoomOut className="size-5 stroke-[1.5]" />
       </Button>
     </div>
   );

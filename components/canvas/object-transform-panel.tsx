@@ -358,7 +358,7 @@ export function ObjectTransformPanel({
           type="button"
           title={t("reset")}
           onClick={resetTransform}
-          className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
         >
           <RotateCcw className="size-5" />
         </button>

@@ -29,6 +29,36 @@ export function ensureLayerId(obj: FabricObject): string {
   return layer.swibpId;
 }
 
+/** Fresh ids for a cloned object tree (clone copies swibpId). */
+export function remintLayerTreeIds(obj: FabricObject): void {
+  const layer = obj as LayerObject;
+  layer.swibpId = globalThis.crypto.randomUUID();
+  if (isLayerGroup(obj)) {
+    for (const child of obj.getObjects()) remintLayerTreeIds(child);
+  }
+}
+
+/**
+ * Guarantee unique swibpId across the visible layer tree.
+ * Clones / templates often share the same serialized id.
+ */
+export function dedupeLayerIds(objects: FabricObject[]): void {
+  const seen = new Set<string>();
+  const walk = (list: FabricObject[]) => {
+    for (const obj of list) {
+      if (isUserLayer(obj)) {
+        const layer = obj as LayerObject;
+        if (!layer.swibpId || seen.has(layer.swibpId)) {
+          layer.swibpId = globalThis.crypto.randomUUID();
+        }
+        seen.add(layer.swibpId);
+      }
+      if (isLayerGroup(obj)) walk(obj.getObjects());
+    }
+  };
+  walk(objects);
+}
+
 export function layerLabel(obj: FabricObject): string {
   const named = (obj as LayerObject).swibpName?.trim();
   if (named) return named;
@@ -174,10 +204,13 @@ export function setLayerName(obj: FabricObject, name: string) {
 }
 
 export function prepareGroups(objects: FabricObject[]) {
-  for (const obj of objects) {
-    ensureLayerId(obj);
-    if (!isLayerGroup(obj)) continue;
-    stabilizeGroup(obj);
-    prepareGroups(obj.getObjects());
-  }
+  dedupeLayerIds(objects);
+  const walk = (list: FabricObject[]) => {
+    for (const obj of list) {
+      if (!isLayerGroup(obj)) continue;
+      stabilizeGroup(obj);
+      walk(obj.getObjects());
+    }
+  };
+  walk(objects);
 }

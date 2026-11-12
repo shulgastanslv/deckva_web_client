@@ -18,8 +18,6 @@ import {
   TextB as Bold,
   TextItalic as Italic,
   TextUnderline as Underline,
-  ArrowFatLinesUp as BringToFront,
-  ArrowFatLinesDown as SendToBack,
   AlignCenterHorizontalSimple as AlignHorizontalDistributeCenter,
   AlignCenterVerticalSimple as AlignVerticalDistributeCenter,
   AlignLeft as AlignHorizontalJustifyStart,
@@ -44,6 +42,9 @@ import {
   MagnifyingGlass as ScanSearch,
   Copy,
   Clipboard as ClipboardPaste,
+  ArrowBendUpLeftIcon,
+  ArrowBendDownLeftIcon,
+  ArrowBendUpRightIcon,
 } from "@phosphor-icons/react";
 import { useSelectedObject } from "@/hooks/use-selected-object";
 import {
@@ -60,6 +61,10 @@ import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { canFillShape } from "@/lib/canvas/objects";
 import { iconFill } from "@/lib/canvas/recolor-icon";
 import { FontSelect } from "@/components/canvas/font-select";
+import {
+  BringForwardIcon,
+  SendBackwardIcon,
+} from "@/components/canvas/layer-order-icons";
 import type { UpscaleScale } from "@/actions/image-tools";
 import { cn } from "@/lib/utils";
 import {
@@ -996,7 +1001,7 @@ export function RightSidebar({
         ) : (
           <>
         <div className="flex h-10 shrink-0 items-center justify-between gap-1.5 border-b border-border/30 px-3">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 p-2">
             <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
               {panelTitle}
             </span>
@@ -1017,7 +1022,7 @@ export function RightSidebar({
                   onClick={handleBringForward}
                   title={t("bringForward")}
                 >
-                  <BringToFront className="size-3.5" />
+                  <ArrowBendUpRightIcon className="size-4" />
                 </Button>
                 <Button
                   type="button"
@@ -1027,7 +1032,7 @@ export function RightSidebar({
                   onClick={handleSendBackwards}
                   title={t("sendBack")}
                 >
-                  <SendToBack className="size-3.5" />
+                  <ArrowBendDownLeftIcon className="size-4" />
                 </Button>
                 <Button
                   type="button"
@@ -1037,7 +1042,7 @@ export function RightSidebar({
                   onClick={copyStyle}
                   title={t("copyStyle")}
                 >
-                  <Copy className="size-3.5" />
+                  <Copy className="size-4" />
                 </Button>
                 <Button
                   type="button"
@@ -1048,7 +1053,7 @@ export function RightSidebar({
                   disabled={!copiedStyle}
                   title={t("pasteStyle")}
                 >
-                  <ClipboardPaste className="size-3.5" />
+                  <ClipboardPaste className="size-4" />
                 </Button>
               </>
             ) : null}
@@ -1073,9 +1078,9 @@ export function RightSidebar({
 
         <ScrollArea className="min-h-0 flex-1">
           {isMulti ? (
-            <div className="flex flex-col gap-1 pb-6 pt-2">
+            <div className="flex flex-col gap-3 pb-6 pt-3">
               {selectedObject && canvas && formValues ? (
-                <div className="px-3 pb-2 pt-1">
+                <div className="px-3.5">
                   <ObjectTransformPanel
                     object={selectedObject}
                     canvas={canvas}
@@ -1096,19 +1101,14 @@ export function RightSidebar({
                   />
                 </div>
               ) : null}
-              <div className="space-y-2 px-3 pb-2">
+              <div className="space-y-2.5 px-3.5">
                 <FieldLabel>{t("arrange")}</FieldLabel>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="flex h-10 gap-1.5">
                   {(
                     [
                       ["left", t("alignLeft"), AlignHorizontalJustifyStart],
                       ["center", t("alignCenter"), AlignHorizontalJustifyCenter],
                       ["right", t("alignRight"), AlignHorizontalJustifyEnd],
-                      ["distribute-x", t("distributeX"), AlignHorizontalSpaceBetween],
-                      ["top", t("alignTop"), AlignVerticalJustifyStart],
-                      ["middle", t("alignMiddle"), AlignVerticalJustifyCenter],
-                      ["bottom", t("alignBottom"), AlignVerticalJustifyEnd],
-                      ["distribute-y", t("distributeY"), AlignVerticalSpaceBetween],
                     ] as const
                   ).map(([mode, label, Icon]) => (
                     <ArrangeIconChip
@@ -1118,6 +1118,32 @@ export function RightSidebar({
                       onClick={() => alignSelection(mode)}
                     />
                   ))}
+                  <ArrangeIconChip
+                    icon={AlignHorizontalSpaceBetween}
+                    title={t("distributeX")}
+                    onClick={() => alignSelection("distribute-x")}
+                  />
+                </div>
+                <div className="flex h-10 gap-1.5">
+                  {(
+                    [
+                      ["top", t("alignTop"), AlignVerticalJustifyStart],
+                      ["middle", t("alignMiddle"), AlignVerticalJustifyCenter],
+                      ["bottom", t("alignBottom"), AlignVerticalJustifyEnd],
+                    ] as const
+                  ).map(([mode, label, Icon]) => (
+                    <ArrangeIconChip
+                      key={mode}
+                      icon={Icon}
+                      title={label}
+                      onClick={() => alignSelection(mode)}
+                    />
+                  ))}
+                  <ArrangeIconChip
+                    icon={AlignVerticalSpaceBetween}
+                    title={t("distributeY")}
+                    onClick={() => alignSelection("distribute-y")}
+                  />
                 </div>
                 <div className="grid grid-cols-3 gap-1.5">
                   <ArrangeChip onClick={groupSelected}>{tc("group")}</ArrangeChip>

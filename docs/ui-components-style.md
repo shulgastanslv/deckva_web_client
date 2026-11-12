@@ -19,7 +19,7 @@
 | Dialogs — **`bg-background` + `border border-border/50` + `shadow-none`** | `bg-white`, `ring-1 ring-foreground/10`, dialog на `bg-popover` / `shadow-sm` |
 | Фон контролов через **`bg-muted/…`** и семантику | Свои hex (`#f4f4f5`, `#4262ff`), `bg-white/70`, `dark:bg-input/30` как стиль по умолчанию |
 | Текст через `text-foreground` / `text-muted-foreground` / `text-primary-foreground` | Куча `dark:`-веток под каждый оттенок |
-| Скругление **`rounded-md`** (кнопки, чипы, инпуты — Miro-like), **`rounded-2xl`** (меню), **`rounded-3xl`** (диалоги) | `rounded-full` на кнопках/CTA; круги только для аватаров/свитчей/точек |
+| Скругление **`rounded-md`** (кнопки, чипы, инпуты, табы, filter Apply — Miro-like), **`rounded-2xl`** (меню), **`rounded-3xl`** (диалоги) | `rounded-full` / `rounded-lg` на кнопках/CTA/табах; круги только для аватаров/свитчей/точек/pad-puck |
 
 Фокус: достаточно `focus-visible:ring-2 focus-visible:ring-ring/20` (или мягкий `ring-primary/20`). Не строй визуал вокруг `border-ring`.
 

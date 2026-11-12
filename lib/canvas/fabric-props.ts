@@ -26,6 +26,10 @@ const EXTRA = [
   "swibpCodeTransparent",
   "swibpBaseScaleX",
   "swibpBaseScaleY",
+  /** Figma-like text resize: auto-width | auto-height | fixed */
+  "swibpTextResize",
+  /** Legacy: true ≈ auto-width. Prefer swibpTextResize. */
+  "swibpFitWidth",
   /** Stable CORA object binding id from deckva_ai assemble. */
   "coraObjectId",
 ];

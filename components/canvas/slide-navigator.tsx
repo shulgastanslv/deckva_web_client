@@ -118,7 +118,7 @@ export function SlideNavigator() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 shrink-0 rounded-lg text-muted-foreground"
+        className="h-8 w-8 shrink-0 rounded-md text-muted-foreground"
         onClick={prev}
         disabled={!canGoPrev}
         title={t("prev")}
@@ -229,7 +229,7 @@ export function SlideNavigator() {
           onClick={add}
           title={t("add")}
           aria-label={t("add")}
-          className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground dark:bg-muted/35 dark:hover:bg-muted/50"
+          className="flex size-14 shrink-0 items-center justify-center rounded-md bg-muted/60 text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground dark:bg-muted/35 dark:hover:bg-muted/50"
         >
           <Plus className="size-6 stroke-[1.5]" />
         </button>
@@ -238,7 +238,7 @@ export function SlideNavigator() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 shrink-0 rounded-lg text-muted-foreground"
+        className="h-8 w-8 shrink-0 rounded-md text-muted-foreground"
         onClick={next}
         disabled={!canGoNext}
         title={t("next")}

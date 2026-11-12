@@ -13,7 +13,6 @@ import {
   CaretLeft as ChevronLeft,
   CaretRight as ChevronRight,
   ArrowCounterClockwise as RotateCcw,
-  Sun as SunMedium,
 } from "@phosphor-icons/react";
 import { Image as FabricImage, Shadow as FabricShadow, filters as fabricFilters } from "fabric";
 import { PillSlider } from "@/components/ui/pill-slider";
@@ -40,6 +39,9 @@ const EMPTY: ImageAdjustments = {
 };
 
 type Preset = { id: string; label: string; values: Partial<ImageAdjustments>; css: string };
+
+const LIGHT_COLS = 5;
+const LIGHT_ROWS = 3;
 
 const PRESETS: Preset[] = [
   { id: "none", label: "none", values: {}, css: "none" },
@@ -285,59 +287,54 @@ export function FiltersControls() {
 
   return (
     <div className="flex min-w-0 flex-col gap-3 text-[13px]">
-      <div
-        className="relative touch-pan-y overflow-hidden rounded-2xl bg-muted/40 select-none"
-        onPointerDown={onPadPointerDown}
-        onPointerMove={onPadPointerMove}
-        onPointerUp={onPadPointerUp}
-        onPointerCancel={onPadPointerUp}
-      >
-        <div className="relative mx-auto aspect-[3/4] w-full max-w-[220px] cursor-grab active:cursor-grabbing">
-          {previewSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={previewSrc}
-              alt=""
-              draggable={false}
-              className="pointer-events-none absolute inset-0 size-full object-cover"
-              style={{ filter: draftPreset.css }}
-            />
-          ) : (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-muted-foreground">
-              {t("image")}
-            </div>
-          )}
+      <div className="flex min-w-0 flex-col gap-2">
+        <div
+          className="relative touch-pan-y overflow-hidden rounded-md bg-muted/40 select-none"
+          onPointerDown={onPadPointerDown}
+          onPointerMove={onPadPointerMove}
+          onPointerUp={onPadPointerUp}
+          onPointerCancel={onPadPointerUp}
+        >
+          <div className="flex h-36 w-full cursor-grab items-center justify-center px-3 py-3 active:cursor-grabbing">
+            {previewSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={previewSrc}
+                alt=""
+                draggable={false}
+                className="pointer-events-none max-h-full max-w-full rounded-md object-contain"
+                style={{ filter: draftPreset.css }}
+              />
+            ) : (
+              <div className="pointer-events-none flex items-center justify-center text-muted-foreground">
+                {t("image")}
+              </div>
+            )}
+          </div>
+        </div>
 
+        <div className="flex h-10 items-center gap-1.5">
           <button
             type="button"
             aria-label={t("previous")}
-            onClick={(e) => {
-              e.stopPropagation();
-              stepDraft(-1);
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-            className="absolute left-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-md bg-background/90 text-foreground transition-colors hover:bg-background"
+            onClick={() => stepDraft(-1)}
+            className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60"
           >
             <ChevronLeft className="size-5" />
           </button>
-          <button
-            type="button"
-            aria-label={t("next")}
-            onClick={(e) => {
-              e.stopPropagation();
-              stepDraft(1);
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-            className="absolute right-2 top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-md bg-background/90 text-foreground transition-colors hover:bg-background"
-          >
-            <ChevronRight className="size-5" />
-          </button>
-
-          <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-            <span className="rounded-md bg-background/90 px-3 py-1 text-[12px] font-medium text-foreground">
+          <div className="flex h-10 min-w-0 flex-1 items-center justify-center rounded-md bg-muted/40 px-3 text-[13px] font-medium text-foreground">
+            <span className="truncate">
               {t(`presets.${draftPreset.id}` as "presets.none")}
             </span>
           </div>
+          <button
+            type="button"
+            aria-label={t("next")}
+            onClick={() => stepDraft(1)}
+            className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60"
+          >
+            <ChevronRight className="size-5" />
+          </button>
         </div>
       </div>
 
@@ -346,7 +343,7 @@ export function FiltersControls() {
           type="button"
           disabled={!dirty}
           onClick={applyDraft}
-          className="flex h-9 flex-1 items-center justify-center rounded-md bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-35"
+          className="flex h-10 flex-1 items-center justify-center rounded-md bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-35"
         >
           {t("apply")}
         </button>
@@ -355,9 +352,9 @@ export function FiltersControls() {
             type="button"
             onClick={handleReset}
             title={tc("reset")}
-            className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
           >
-            <RotateCcw className="size-3.5" />
+            <RotateCcw className="size-5" />
           </button>
         )}
       </div>
@@ -381,7 +378,7 @@ export function FiltersControls() {
                   applyImageShadow(item.id, intensity, lightSourcePos);
                 }}
                 className={cn(
-                  "flex flex-col items-center justify-center rounded-2xl bg-muted/40 px-2 py-2.5 transition-colors",
+                  "flex flex-col items-center justify-center rounded-md bg-muted/40 px-2 py-2.5 transition-colors",
                   shadowType === item.id
                     ? "bg-muted text-foreground"
                     : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -393,7 +390,7 @@ export function FiltersControls() {
                     item.preview,
                   )}
                 >
-                  <div className="size-4 rounded-sm bg-foreground/20" />
+                  <div className="size-4 rounded-md bg-foreground/20" />
                 </div>
                 <span className="text-[11px] font-medium">{item.label}</span>
               </button>
@@ -432,28 +429,48 @@ export function FiltersControls() {
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-medium text-muted-foreground">{t("lightSource")}</span>
           <div
-            role="slider"
+            role="application"
             aria-label={t("lightSourcePosition")}
-            className="relative flex h-32 w-full cursor-crosshair select-none items-center justify-center overflow-hidden rounded-2xl bg-muted/40"
+            aria-disabled={shadowType === "none"}
+            className={cn(
+              "relative h-40 touch-none select-none overflow-hidden rounded-md bg-muted/40 p-5 dark:bg-muted/25",
+              shadowType === "none"
+                ? "cursor-not-allowed opacity-45"
+                : "cursor-grab active:cursor-grabbing",
+            )}
             onPointerDown={(e) => {
               if (shadowType === "none") return;
-              const rect = e.currentTarget.getBoundingClientRect();
-              const move = (clientX: number, clientY: number) => {
-                const x = Math.max(
-                  0,
-                  Math.min(100, Math.round(((clientX - rect.left) / rect.width) * 100)),
-                );
-                const y = Math.max(
-                  0,
-                  Math.min(100, Math.round(((clientY - rect.top) / rect.height) * 100)),
-                );
-                const next = { x, y };
+              e.preventDefault();
+              e.currentTarget.setPointerCapture(e.pointerId);
+              const pad = e.currentTarget;
+              const grid = pad.firstElementChild as HTMLElement | null;
+              const box = (grid ?? pad).getBoundingClientRect();
+              const cellW = box.width / LIGHT_COLS;
+              const cellH = box.height / LIGHT_ROWS;
+              const move = (clientX: number, clientY: number, snap: boolean) => {
+                let nx =
+                  (clientX - box.left - cellW / 2) /
+                  Math.max(1, box.width - cellW);
+                let ny =
+                  (clientY - box.top - cellH / 2) /
+                  Math.max(1, box.height - cellH);
+                nx = Math.max(0, Math.min(1, nx));
+                ny = Math.max(0, Math.min(1, ny));
+                if (snap) {
+                  nx = Math.round(nx * (LIGHT_COLS - 1)) / (LIGHT_COLS - 1);
+                  ny = Math.round(ny * (LIGHT_ROWS - 1)) / (LIGHT_ROWS - 1);
+                }
+                const next = {
+                  x: Math.round(nx * 100),
+                  y: Math.round(ny * 100),
+                };
                 setLightSourcePos(next);
                 applyImageShadow(shadowType, intensity, next);
               };
-              move(e.clientX, e.clientY);
-              const onMove = (ev: PointerEvent) => move(ev.clientX, ev.clientY);
-              const onUp = () => {
+              move(e.clientX, e.clientY, false);
+              const onMove = (ev: PointerEvent) => move(ev.clientX, ev.clientY, false);
+              const onUp = (ev: PointerEvent) => {
+                move(ev.clientX, ev.clientY, true);
                 window.removeEventListener("pointermove", onMove);
                 window.removeEventListener("pointerup", onUp);
               };
@@ -461,15 +478,42 @@ export function FiltersControls() {
               window.addEventListener("pointerup", onUp);
             }}
           >
-            <div className="flex h-3/4 w-3/4 flex-col rounded-xl bg-background/80 p-2">
-              <div className="mb-1 h-2 w-full rounded-md bg-muted" />
-              <div className="h-2 w-1/2 rounded-md bg-muted" />
-            </div>
             <div
-              className="pointer-events-none absolute -ml-3.5 -mt-3.5 flex size-7 items-center justify-center rounded-md bg-foreground text-background"
-              style={{ left: `${lightSourcePos.x}%`, top: `${lightSourcePos.y}%` }}
+              className="pointer-events-none relative grid h-full w-full"
+              style={{
+                gridTemplateColumns: `repeat(${LIGHT_COLS}, minmax(0, 1fr))`,
+                gridTemplateRows: `repeat(${LIGHT_ROWS}, minmax(0, 1fr))`,
+              }}
             >
-              <SunMedium className="size-3.5" />
+              {Array.from({ length: LIGHT_ROWS * LIGHT_COLS }, (_, i) => {
+                const col = i % LIGHT_COLS;
+                const row = Math.floor(i / LIGHT_COLS);
+                const activeCol = Math.round((lightSourcePos.x / 100) * (LIGHT_COLS - 1));
+                const activeRow = Math.round((lightSourcePos.y / 100) * (LIGHT_ROWS - 1));
+                const active = activeCol === col && activeRow === row;
+                return (
+                  <div key={`${col}-${row}`} className="flex items-center justify-center">
+                    <span
+                      className={cn(
+                        "size-1.5 rounded-full bg-muted-foreground/40 transition-opacity",
+                        active && "opacity-0",
+                      )}
+                    />
+                  </div>
+                );
+              })}
+              <div className="absolute inset-0 z-10" aria-hidden>
+                <div
+                  className="absolute size-7 -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    left: `${((lightSourcePos.x / 100) * (LIGHT_COLS - 1) + 0.5) / LIGHT_COLS * 100}%`,
+                    top: `${((lightSourcePos.y / 100) * (LIGHT_ROWS - 1) + 0.5) / LIGHT_ROWS * 100}%`,
+                  }}
+                >
+                  <span className="absolute inset-0 rounded-full bg-background shadow-[0_1px_4px_rgba(0,0,0,0.12)] ring-1 ring-black/5 dark:shadow-[0_1px_4px_rgba(0,0,0,0.45)] dark:ring-white/10" />
+                  <span className="absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_color-mix(in_oklab,var(--primary)_45%,transparent)]" />
+                </div>
+              </div>
             </div>
           </div>
         </div>

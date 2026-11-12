@@ -1,12 +1,12 @@
 import type { Canvas, FabricObject } from "fabric";
 import type { PaletteSlot, TextStyleDef, TextStyleId } from "@/lib/canvas/document";
+import { relayoutText } from "@/lib/canvas/text-fit";
+
+export { relayoutText } from "@/lib/canvas/text-fit";
 
 type Tagged = FabricObject & {
   swibpSlot?: string;
   swibpStyle?: string;
-  initDimensions?: () => void;
-  dirty?: boolean;
-  _forceClearCache?: boolean;
 };
 
 function visit(obj: FabricObject, fn: (node: Tagged) => void): void {
@@ -27,13 +27,6 @@ export function paintSlotOnCanvas(canvas: Canvas, slot: PaletteSlot, color: stri
 }
 
 const TEXT_TYPES = new Set(["text", "i-text", "textbox"]);
-
-function relayoutText(node: Tagged) {
-  node._forceClearCache = true;
-  node.dirty = true;
-  node.initDimensions?.();
-  node.setCoords();
-}
 
 /** Drops Fabric's measured text cache and paints with the faces that are loaded now. */
 export function refreshCanvasFonts(canvas: Canvas): void {
