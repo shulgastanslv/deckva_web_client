@@ -1000,7 +1000,7 @@ export function RightSidebar({
           </ScrollArea>
         ) : (
           <>
-        <div className="flex h-10 shrink-0 items-center justify-between gap-1.5 border-b border-border/30 px-3">
+        <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border/40 px-3.5">
           <div className="min-w-0 flex-1 p-2">
             <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
               {panelTitle}

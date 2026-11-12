@@ -194,7 +194,7 @@ export function SidebarElements() {
       <div
         role="tabpanel"
         aria-label={CATEGORIES.find((item) => item.id === category)?.label}
-        className="w-full min-w-0 space-y-3 pt-1 pb-1"
+        className="w-full min-w-0 space-y-3"
       >
         {category === "photos" ? (
           <div className="space-y-2.5">

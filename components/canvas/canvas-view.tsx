@@ -124,6 +124,8 @@ export function CanvasView({
   panningRef.current = panning;
   const managerRef = useRef(manager);
   managerRef.current = manager;
+  const slidesControllerRef = useRef(slidesController);
+  slidesControllerRef.current = slidesController;
   const zoomingRef = useRef(false);
   const settledScaleRef = useRef(0);
   const settledNativeRef = useRef("");
@@ -402,6 +404,9 @@ export function CanvasView({
     let settle = 0;
     let gesture = 0;
     let pending: number | null = null;
+    let stepLock = false;
+    let stepAcc = 0;
+    let stepReset = 0;
 
     const commit = () => {
       zoomingRef.current = false;
@@ -413,57 +418,134 @@ export function CanvasView({
       settledNativeRef.current = `${next.nativeW}x${next.nativeH}`;
     };
 
-    const wheelPixels = (event: WheelEvent, fallback: number) => {
-      if (event.deltaMode === 1) return event.deltaY * 16;
-      if (event.deltaMode === 2) return event.deltaY * fallback;
-      return event.deltaY;
+    const wheelPixels = (event: WheelEvent, axis: "x" | "y", fallback: number) => {
+      const delta = axis === "x" ? event.deltaX : event.deltaY;
+      if (event.deltaMode === 1) return delta * 16;
+      if (event.deltaMode === 2) return delta * fallback;
+      return delta;
+    };
+
+    // Physical Ctrl/Cmd — not trackpad pinch (browsers also set ctrlKey on pinch).
+    let modHeld = false;
+    const onModDown = (event: KeyboardEvent) => {
+      if (event.key === "Control" || event.key === "Meta") modHeld = true;
+    };
+    const onModUp = (event: KeyboardEvent) => {
+      if (event.key === "Control" || event.key === "Meta") modHeld = false;
+    };
+    const onModBlur = () => {
+      modHeld = false;
+    };
+
+    const canBrowseStrip = () => container.scrollWidth > container.clientWidth + 1;
+
+    const zoomAroundCursor = (event: WheelEvent) => {
+      if (managerRef.current?.crop.active) return;
+      event.preventDefault();
+      const stage = stageRef.current;
+      if (stage && stage.offsetWidth > 0 && stage.offsetHeight > 0) {
+        const rect = stage.getBoundingClientRect();
+        anchorRef.current = {
+          clientX: event.clientX,
+          clientY: event.clientY,
+          relX: (event.clientX - rect.left) / rect.width,
+          relY: (event.clientY - rect.top) / rect.height,
+        };
+      }
+      const pixels = wheelPixels(event, "y", container.clientHeight);
+      const base = pending ?? useCanvasStore.getState().zoom;
+      pending = clampZoom(base * Math.exp(-pixels * 0.0016));
+      zoomingRef.current = true;
+      const id = ++gesture;
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        if (gesture !== id) return;
+        commit();
+      }, ZOOM_SETTLE_MS);
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const next = pending;
+        pending = null;
+        if (next == null) return;
+        if (next !== useCanvasStore.getState().zoom) useCanvasStore.getState().setZoom(next);
+        else anchorRef.current = null;
+      });
+    };
+
+    const browseStrip = (delta: number) => {
+      if (!canBrowseStrip() || delta === 0) return false;
+      container.scrollLeft += delta;
+      return true;
+    };
+
+    const stepSlide = (dir: 1 | -1) => {
+      const { slides: list, currentSlideId: id } = useCanvasStore.getState();
+      const index = list.findIndex((slide) => slide.id === id);
+      const next = list[index + dir];
+      if (!next) return;
+      const live = frameRef.current;
+      if (live) {
+        const left = slideLeft(live, index + dir);
+        const maxX = Math.max(0, container.scrollWidth - container.clientWidth);
+        const maxY = Math.max(0, container.scrollHeight - container.clientHeight);
+        container.scrollTo({
+          left: Math.max(0, Math.min(maxX, left + live.width / 2 - container.clientWidth / 2)),
+          top: Math.max(0, Math.min(maxY, live.top + live.height / 2 - container.clientHeight / 2)),
+          behavior: "smooth",
+        });
+      }
+      lastFocusedIdRef.current = next.id;
+      void slidesControllerRef.current?.switchTo(next.id);
+    };
+
+    const stepSlideFromWheel = (event: WheelEvent) => {
+      // Consume Ctrl/Cmd + wheel so the browser does not page-zoom.
+      event.preventDefault();
+      const dy = wheelPixels(event, "y", container.clientWidth);
+      const dx = wheelPixels(event, "x", container.clientWidth);
+      const delta = Math.abs(dy) >= Math.abs(dx) ? dy : dx;
+      if (delta === 0) return;
+
+      stepAcc += delta;
+      window.clearTimeout(stepReset);
+      stepReset = window.setTimeout(() => {
+        stepAcc = 0;
+      }, 180);
+      if (Math.abs(stepAcc) < 48 || stepLock) return;
+
+      const dir: 1 | -1 = stepAcc > 0 ? 1 : -1;
+      stepAcc = 0;
+      stepLock = true;
+      stepSlide(dir);
+      window.setTimeout(() => {
+        stepLock = false;
+      }, 260);
     };
 
     const onWheel = (event: WheelEvent) => {
-      // Ctrl/Cmd + wheel zooms around the cursor.
-      if (event.ctrlKey || event.metaKey) {
-        if (managerRef.current?.crop.active) return;
-        event.preventDefault();
-        const stage = stageRef.current;
-        if (stage && stage.offsetWidth > 0 && stage.offsetHeight > 0) {
-          const rect = stage.getBoundingClientRect();
-          anchorRef.current = {
-            clientX: event.clientX,
-            clientY: event.clientY,
-            relX: (event.clientX - rect.left) / rect.width,
-            relY: (event.clientY - rect.top) / rect.height,
-          };
-        }
-        const pixels = wheelPixels(event, container.clientHeight);
-        const base = pending ?? useCanvasStore.getState().zoom;
-        pending = clampZoom(base * Math.exp(-pixels * 0.0016));
-        zoomingRef.current = true;
-        const id = ++gesture;
-        window.clearTimeout(settle);
-        settle = window.setTimeout(() => {
-          if (gesture !== id) return;
-          commit();
-        }, ZOOM_SETTLE_MS);
-        if (raf) return;
-        raf = requestAnimationFrame(() => {
-          raf = 0;
-          const next = pending;
-          pending = null;
-          if (next == null) return;
-          if (next !== useCanvasStore.getState().zoom) useCanvasStore.getState().setZoom(next);
-          else anchorRef.current = null;
-        });
+      // Ctrl/Cmd held → next / previous slide (discrete).
+      if (modHeld) {
+        stepSlideFromWheel(event);
         return;
       }
 
-      // Zoomed into the focused slide → native pan (both axes).
-      // Zoomed out strip → map vertical wheel to horizontal browse (focus stays locked).
-      const live = frameRef.current;
-      const zoomedIn = live ? live.width > container.clientWidth * 0.9 : false;
-      if (zoomedIn || container.scrollWidth <= container.clientWidth + 1) return;
-      if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
-      event.preventDefault();
-      container.scrollLeft += wheelPixels(event, container.clientWidth);
+      const dy = wheelPixels(event, "y", container.clientWidth);
+      const dx = wheelPixels(event, "x", container.clientWidth);
+
+      // Horizontal trackpad swipe browses the strip (or native-pans when zoomed in).
+      // Do this before the pinch/ctrlKey zoom branch so two-finger pan stays browse.
+      if (Math.abs(dx) > Math.abs(dy) && !(event.ctrlKey || event.metaKey)) {
+        if (browseStrip(dx)) {
+          event.preventDefault();
+          return;
+        }
+        return;
+      }
+
+      // Vertical wheel + trackpad pinch → zoom around the cursor.
+      // (Pinch arrives with ctrlKey set; physical Ctrl is handled above via modHeld.)
+      zoomAroundCursor(event);
     };
 
     const onPointerDown = () => {
@@ -472,13 +554,20 @@ export function CanvasView({
       commit();
     };
 
+    window.addEventListener("keydown", onModDown);
+    window.addEventListener("keyup", onModUp);
+    window.addEventListener("blur", onModBlur);
     container.addEventListener("wheel", onWheel, { passive: false });
     container.addEventListener("pointerdown", onPointerDown, true);
     return () => {
+      window.removeEventListener("keydown", onModDown);
+      window.removeEventListener("keyup", onModUp);
+      window.removeEventListener("blur", onModBlur);
       container.removeEventListener("wheel", onWheel);
       container.removeEventListener("pointerdown", onPointerDown, true);
       cancelAnimationFrame(raf);
       window.clearTimeout(settle);
+      window.clearTimeout(stepReset);
     };
   }, []);
 
@@ -505,7 +594,7 @@ export function CanvasView({
       <div
         ref={containerRef}
         className={cn(
-          "absolute inset-0 overflow-auto bg-muted/20",
+          "absolute inset-0 overflow-auto bg-background/20",
           panning && (grabbing ? "cursor-grabbing" : "cursor-grab"),
         )}
         style={{ scrollbarGutter: "stable", overflowAnchor: "none" }}

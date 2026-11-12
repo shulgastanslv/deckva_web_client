@@ -23,6 +23,7 @@ import { SidebarLayers } from "@/components/canvas/sidebar/sidebar-layers";
 import { SidebarSettings } from "@/components/canvas/sidebar/sidebar-settings";
 import { SidebarBackground } from "@/components/canvas/sidebar/sidebar-background";
 import { LegalDialog, type LegalKind } from "@/components/legal-dialog";
+import { CanvasNavHint } from "@/components/canvas/canvas-nav-hint";
 import { ProjectFileMenu } from "@/components/canvas/project-file-menu";
 import { SaveStatusMenu } from "@/components/canvas/save-status-menu";
 import { SidebarAssets } from "./sidebar/sidebar-assets";
@@ -208,12 +209,13 @@ export function LeftSidebar({
           isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-80 md:flex-none md:opacity-100",
         )}
       >
-        <div className="flex h-11 shrink-0 items-center justify-between gap-2 px-3.5">
+        <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border/40 px-3.5">
           <h2 className="text-[14px] font-semibold tracking-tight text-foreground">
             {panelTitles[activeNav] ?? activeNav}
           </h2>
           <div className="flex items-center gap-1">
             <ProjectFileMenu />
+            <CanvasNavHint />
             <SaveStatusMenu />
           </div>
         </div>
