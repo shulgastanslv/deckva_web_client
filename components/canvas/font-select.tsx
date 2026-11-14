@@ -9,7 +9,7 @@ import {
   MagnifyingGlass as Search,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { controlH } from "@/components/ui/control";
+import { controlField, controlH } from "@/components/ui/control";
 import {
   fetchGoogleFontFamilies,
   getPopularGoogleFonts,
@@ -185,11 +185,10 @@ export function FontSelect({
             disabled={disabled || loadingFont}
             title={compact ? current : undefined}
             className={cn(
-              "flex items-center gap-2 rounded-md border-none bg-muted/40 text-left text-[13px] text-foreground shadow-none transition-colors",
+              controlField,
+              "flex items-center gap-2 py-0 text-left text-foreground transition-colors",
               "hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60",
-              compact
-                ? cn(controlH, "w-[9.5rem] px-3.5 font-normal")
-                : cn(controlH, "w-full px-3.5 font-normal"),
+              compact ? "w-[9.5rem]" : "w-full",
             )}
           >
             <span

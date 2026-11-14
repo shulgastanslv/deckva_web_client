@@ -83,7 +83,7 @@ export function StudioListDialog({
                   }}
                   placeholder={t("itemPlaceholder")}
                   className={cn(
-                    "h-10 flex-1 rounded-2xl bg-muted/30 px-3.5 text-[14px] text-foreground outline-none",
+                    "h-9 flex-1 rounded-md bg-muted/30 px-3.5 text-[13px] text-foreground outline-none",
                     "placeholder:text-muted-foreground/70 focus:bg-muted/40",
                     "disabled:cursor-not-allowed disabled:opacity-60",
                   )}

@@ -87,7 +87,7 @@ export function StudioProjectMenu({
         <Button
           variant="ghost"
           size="icon"
- className="size-8 rounded-md border-none bg-muted/40 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
+ className="size-8 rounded-full border-none bg-muted text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
           onClick={(event) => event.stopPropagation()}
         >
           <MoreHorizontal className="size-5" />

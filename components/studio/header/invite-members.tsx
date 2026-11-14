@@ -130,11 +130,11 @@ export function InviteMembersDialog() {
     >
       <DialogTrigger asChild>
         <Button
-          variant="secondary"
+          variant="default"
           size="sm"
- className="rounded-md bg-[#4262ff] px-3.5 text-[13px] font-semibold text-white hover:bg-[#4262ff]/90"
+          className="rounded-md px-3.5 text-[13px] font-medium"
         >
-          <UserPlus className="mr-2 size-4" />
+          <UserPlus className="size-5 stroke-[1.5]" />
           {t("title")}
         </Button>
       </DialogTrigger>
@@ -177,7 +177,7 @@ export function InviteMembersDialog() {
                 disabled={busy}
                 onClick={() => setRole(value)}
                 className={cn(
-                  "inline-flex h-9 items-center justify-center rounded-xl text-[13px] font-medium transition-colors",
+                  "inline-flex h-9 items-center justify-center rounded-md text-[13px] font-normal transition-colors",
                   role === value
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -214,7 +214,7 @@ export function InviteMembersDialog() {
               type="button"
               disabled={busy || !emails.trim()}
               onClick={() => void handleSend()}
-              className="ml-auto h-10 rounded-md px-5 text-[13px] font-medium"
+              className="ml-auto rounded-md px-5 text-[13px] font-medium"
             >
               {busy ? (
                 <Loader2 className="size-4 animate-spin" />

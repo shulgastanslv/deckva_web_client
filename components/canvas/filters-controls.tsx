@@ -319,14 +319,14 @@ export function FiltersControls() {
             type="button"
             aria-label={t("previous")}
             onClick={() => stepDraft(-1)}
-            className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60"
+            className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60"
           >
             <ChevronLeft className="size-5" />
           </button>
           <div
             className={cn(
-              "flex min-w-0 flex-1 items-center justify-center rounded-md bg-muted/40 px-3.5 text-[13px] font-normal text-foreground",
               controlH,
+              "flex min-w-0 flex-1 items-center justify-center rounded-md bg-muted/40 px-3.5 text-[13px] font-normal text-foreground",
             )}
           >
             <span className="truncate">
@@ -337,7 +337,7 @@ export function FiltersControls() {
             type="button"
             aria-label={t("next")}
             onClick={() => stepDraft(1)}
-            className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60"
+            className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60"
           >
             <ChevronRight className="size-5" />
           </button>

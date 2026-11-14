@@ -402,7 +402,7 @@ export function PublishCommunityDialog({
                           prev.filter((_, i) => i !== index),
                         )
                       }
-                      className="inline-flex size-11 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-40"
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-40"
                     >
                       <X className="size-3.5" />
                     </button>

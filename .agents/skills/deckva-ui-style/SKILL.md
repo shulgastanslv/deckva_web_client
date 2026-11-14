@@ -6,11 +6,11 @@ description: >-
   rounded-md, font-normal, generous padding; prefer shadcn Select over native.
   Triggers without borders/shadows; menus/popovers/select use bg-popover +
   shadow-sm (light: border-0; dark: border-border/50); dialogs use
-  bg-background + border-border/50. h-9/h-10, bg-muted opacity ladder, semantic
-  tokens only; control height via `controlH` in `components/ui/control.ts`
-  (currently h-11). Use when building or restyling studio controls, shadcn
-  overrides, or when the user mentions кнопки, select, tabs, dropdown, dialog,
-  UI стиль, дизайн-система студии, Miro.
+  bg-background + border-border/50. Button default = sm (h-9); control height
+  via `controlH` / `controlSize` in `components/ui/control.ts` (currently h-9 /
+  size-9). Use when building or restyling studio controls, shadcn overrides, or
+  when the user mentions кнопки, select, tabs, dropdown, dialog, UI стиль,
+  дизайн-система студии, Miro, button sm.
 ---
 
 # Deckva UI style (studio)
@@ -25,14 +25,35 @@ description: >-
 2. **Триггеры / инпуты / чипы / кнопки** — **без** `shadow-*` и без видимых `border` (`border-none`).
 3. **Menus / popovers / select content** — `bg-popover text-popover-foreground shadow-sm border-0 dark:border dark:border-border/50` (не `shadow-none` / `shadow-md+`).
 4. **Dialogs** — `bg-background text-foreground border border-border/50 shadow-none` (не `bg-popover`, не `shadow-sm`).
-5. Высота контролов: **`controlH`** из `components/ui/control.ts` (сейчас **`h-11`**). Не дублируй `h-*` на `Button` / `Input` / `SelectTrigger`; для сырых `<button>` / shell — `cn(..., controlH)`.
-6. Поверхности контролов: `bg-muted/20` → `/30` → `/40` → `/50` → `/60`.
-7. Только шаблонные токены: `bg-primary`, `bg-foreground`, `bg-muted`, `bg-background`, `bg-popover`, `text-foreground`, `text-muted-foreground`, `text-primary-foreground`, `border-border` — без кучи dark-вариаций и hex (исключение: `dark:border-border/50` на меню).
-8. Триггеры и чипы: `rounded-md` + `bg-muted/40` + `hover:bg-muted/60`.
-9. Меню: `rounded-2xl`, пункты `rounded-md` + `focus:bg-muted/50`. Диалоги: `rounded-3xl`.
-10. Left sidebar panels: общий `sidebarPanel` (`px-3.5 py-3 gap-3`).
-11. Иконки как в Miro: **`size-5 stroke-[1.5]`** (`navIconClass` / `menuIconClass`). Мелкие шевроны — `size-3`–`size-3.5`.
-12. Типографика контролов: **`font-normal`** на Select / Tabs / пунктах меню (не `font-medium` / `font-semibold` на лейблах триггера и item).
+5. **Высота = Button `sm`**: **`controlH` / `controlSize` / `controlField`** из `components/ui/control.ts` (сейчас **`h-9` / `size-9`**). `<Button>` по умолчанию `size="sm"`. Input и SelectTrigger делят **`controlField`** (одинаковые h/px/text). Не дублируй `h-*` / `size-*` на Button / Input / SelectTrigger; для сырых `<button>` / shell — `cn(..., controlH)` / `controlField` / `controlSize`.
+6. **Один размер везде в продуктовом chrome**: settings / profile, все диалоги, хедер студии, dropdown / popover триггеры, search + соседний icon button, Input рядом с Select. Соседи в одном ряду — одна высота.
+7. Поверхности контролов: `bg-muted/20` → `/30` → `/40` → `/50` → `/60`.
+8. Только шаблонные токены: `bg-primary`, `bg-foreground`, `bg-muted`, `bg-background`, `bg-popover`, `text-foreground`, `text-muted-foreground`, `text-primary-foreground`, `border-border` — без кучи dark-вариаций и hex (исключение: `dark:border-border/50` на меню).
+9. Триггеры и чипы: `rounded-md` + `bg-muted/40` + `hover:bg-muted/60`.
+10. Меню: `rounded-2xl`, пункты `rounded-md` + `focus:bg-muted/50`. Диалоги: `rounded-3xl`.
+11. Left sidebar panels: общий `sidebarPanel` (`px-3.5 py-3 gap-3`).
+12. Иконки как в Miro: **`size-5 stroke-[1.5]`** (`navIconClass` / `menuIconClass`). Мелкие шевроны — `size-3`–`size-3.5`.
+13. Типографика контролов: **`font-normal`** на Select / Tabs / пунктах меню (не `font-medium` / `font-semibold` на лейблах триггера и item).
+
+## Button sm (обязательно)
+
+```tsx
+// текст / CTA — дефолт уже sm
+<Button variant="secondary">Invite</Button>
+<Button>Save</Button>
+
+// icon-only — size-9
+<Button size="icon" variant="secondary" aria-label="Add">
+  <Plus className="size-5 stroke-[1.5]" />
+</Button>
+```
+
+| | |
+|---|---|
+| Дефолт | `size="sm"` → `controlH` (`h-9`) |
+| Icon | `size="icon"` → `controlSize` (`size-9`) |
+| Где | header, settings/profile, все Dialog, dropdown/popover triggers, toolbar chips |
+| Нельзя | локальные `h-10` / `h-11` / `size-10` / `size-11`; разный размер у Search и «+»; Save выше Input |
 
 ## Select (обязательно)
 
@@ -84,7 +105,7 @@ description: >-
 
 | | |
 |---|---|
-| List | `rounded-md`, `h-10`, `p-1`, `bg-muted/40` или `sidebarSurfaceIdle` |
+| List | `rounded-md`, высота из `controlH` (`h-9`), `p-1`, `bg-muted/40` или `sidebarSurfaceIdle` |
 | Trigger | `rounded-md`, `px-3`, `text-[13px] font-normal` |
 | Active | `bg-background text-foreground` — **без** `ring-*` |
 | Нельзя | `rounded-full` / pills; `font-medium` на лейбле; icon-only ряд, если нужен текст |
@@ -108,7 +129,7 @@ description: >-
 ## Когда применять
 
 - Новые или правка Button / Select / Tabs / Dropdown / Dialog / Popover / Input в `components/studio/**`, `components/header.tsx`, canvas chrome
-- Пользователь просит «в нашем стиле», «без теней на кнопках», «как Miro», «muted», `shadow-sm` на меню
+- Пользователь просит «в нашем стиле», «без теней на кнопках», «как Miro», «muted», `shadow-sm` на меню, **button sm**
 - Расхождение с `components/ui/*` — **перекрывай `className`**, не плоди темы; для surface цвета/тени правь примитив
 
 ## Не применять

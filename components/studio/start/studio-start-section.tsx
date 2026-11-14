@@ -52,7 +52,7 @@ export function StudioStartSection({
           onBrandKit={onBrandKit}
           onImportJson={onImportJson}
           label={t("otherWays")}
-          leading={<Plus className="size-3.5 stroke-[1.5]" />}
+          leading={<Plus className="size-5 stroke-[1.5]" />}
           align="end"
           triggerClassName="shrink-0 gap-1.5 bg-muted/40 px-3.5 text-[13px] font-normal text-foreground hover:bg-muted/60 data-[state=open]:bg-muted/60"
         />

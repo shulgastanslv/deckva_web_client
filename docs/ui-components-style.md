@@ -5,7 +5,7 @@
 
 Источник токенов: `app/globals.css` (`--primary`, `--muted`, `--foreground`, …).  
 Базовые примитивы: `components/ui/{button,select,dropdown-menu,input,dialog}.tsx` — при расхождении **переопределяй через `className`**, не плоди новые темы.  
-Высота контролов: **один раз** в `components/ui/control.ts` (`controlH` / `controlSize`, сейчас `h-11`).
+Высота контролов: **один раз** в `components/ui/control.ts` (`controlH` / `controlSize`, сейчас **`h-9` / `size-9` = Button `sm`**).
 
 ---
 
@@ -13,7 +13,7 @@
 
 | Делай | Не делай |
 |---|---|
-| Высота контрола из **`controlH`** (`components/ui/control.ts`) | Локальные `h-9` / `h-10` / `h-11` на Button/Input/SelectTrigger |
+| Высота контрола из **`controlH`** (`h-9`, Button `sm`) | Локальные `h-8` / `h-10` / `h-11` на Button/Input/SelectTrigger |
 | Триггеры / инпуты / чипы / кнопки — **без shadow** (`shadow-none`) | `shadow-md`, `shadow-lg` на кнопках |
 | Триггеры / инпуты / чипы — **без borders** (`border-none`) | `border-input`, outline-карточки ради «рамки» у кнопок |
 | Menus / popover / select — **`bg-popover` + `shadow-sm` + `border-0`**, в dark ещё **`dark:border-border/50`** | `shadow-none` / `shadow-md+` на меню; border меню в light |
@@ -87,31 +87,35 @@
 
 ### Размеры
 
-- Обычная: **`h-9`** + `px-3` / `px-3.5` + `text-[13px] font-medium`
-- Крупнее в диалогах/футерах: **`h-10`**
-- Icon-only: `size-8` или `size-9`, `rounded-md`
+Канон студии = **`size="sm"`** → высота из **`controlH` (`h-9`)**.  
+Один размер для хедера, settings/profile, всех диалогов, dropdown-триггеров и соседних инпутов.
+
+- Обычная / CTA / dialog footer: **`size="sm"`** (дефолт у `<Button>`) — не пиши `h-*`
+- Icon-only: **`size="icon"`** → `controlSize` (`size-9`), `rounded-md`
+- Редко плотнее: `size="xs"` (`h-8`) — только в сверхплотных рядах, не в хедере/диалогах
 
 ### Варианты (минимум)
 
 | Роль | Классы |
 |---|---|
-| Primary CTA | `h-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90` **или** `bg-foreground text-background hover:bg-foreground/90` |
-| Secondary / спокойная | `h-9 rounded-md border-none bg-muted/40 text-foreground shadow-none hover:bg-muted/60` |
+| Primary CTA | `rounded-md bg-primary text-primary-foreground hover:bg-primary/90` **или** `bg-foreground text-background hover:bg-foreground/90` |
+| Secondary / спокойная | `rounded-md border-none bg-muted/40 text-foreground shadow-none hover:bg-muted/60` |
 | Ghost / иконка | `rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground` |
 | Destructive | `text-destructive hover:bg-destructive/10` (без жирной заливки) |
 
 Через `<Button>`:
 
 ```tsx
-<Button
-  variant="secondary"
-  className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
->
+<Button variant="secondary">
   Действие
 </Button>
 
-<Button className="h-10 rounded-md px-5 text-[13px] font-medium">
+<Button>
   Создать
+</Button>
+
+<Button size="icon" variant="secondary" aria-label="Add">
+  <Plus className="size-5 stroke-[1.5]" />
 </Button>
 ```
 
@@ -120,7 +124,8 @@
 - `rounded-full` на кнопках (это не Miro; круги — только аватары / свитчи / точки)
 - `variant="outline"` как дефолт студии (тянет border + dark-ветки)
 - `shadow-*`
-- Высоты `h-7` / `sm` для основных действий
+- Локальные `h-10` / `h-11` / `size-10` / `size-11` в хедере, диалогах, settings, dropdown
+- Разный размер у соседних Search + icon button / Cancel + Save
 
 ---
 

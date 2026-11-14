@@ -38,6 +38,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { controlSize } from "@/components/ui/control";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -458,13 +459,14 @@ export function StudioNotifications({
           variant="ghost"
           size="icon"
           aria-label={t("aria")}
- className={cn(
-            "relative flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60",
+          className={cn(
+            controlSize,
+            "relative flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60",
             open && "bg-muted/60",
             className,
           )}
         >
-          <Bell className="size-5 stroke-[2]" />
+          <Bell className="size-5 stroke-[1.5]" />
           {unread > 0 ? (
             <span className="absolute top-2 right-2.5 size-2.5 rounded-full border-2 border-background bg-[#2f5bff]" />
           ) : null}

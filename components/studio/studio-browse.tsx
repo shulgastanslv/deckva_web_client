@@ -48,12 +48,14 @@ import {
 import { AuthModal } from "@/components/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { controlH } from "@/components/ui/control";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { StudioViewToggle } from "@/components/studio/ui/studio-view-toggle";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
@@ -360,35 +362,38 @@ export function StudioBrowse() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <div className="flex h-9 items-center gap-0.5 rounded-md bg-muted/40 p-0.5">
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                <div
+                  className={cn(
+                    "flex items-center gap-0.5 rounded-md bg-muted/40 p-1",
+                    controlH,
+                  )}
+                >
+                  <button
+                    type="button"
                     onClick={() => setCommunityView("cards")}
                     aria-label={t("cardsView")}
                     className={cn(
-                      "size-8 rounded-md shadow-none",
+                      "flex h-full aspect-square items-center justify-center rounded-md transition-colors",
                       communityView === "cards"
                         ? "bg-background text-foreground"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}
                   >
-                    <LayoutGrid className="size-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                    <LayoutGrid className="size-5 stroke-[1.5]" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setCommunityView("rows")}
                     aria-label={t("rowsView")}
                     className={cn(
-                      "size-8 rounded-md shadow-none",
+                      "flex h-full aspect-square items-center justify-center rounded-md transition-colors",
                       communityView === "rows"
                         ? "bg-background text-foreground"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                     )}
                   >
-                    <List className="size-5" />
-                  </Button>
+                    <List className="size-5 stroke-[1.5]" />
+                  </button>
                 </div>
               </>
             ) : null}
@@ -429,34 +434,7 @@ export function StudioBrowse() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <div className="flex h-9 items-center gap-0.5 rounded-md bg-muted/40 p-0.5">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setView("grid")}
-                    className={cn(
-                      "size-8 rounded-md border-none shadow-none",
-                      view === "grid"
-                        ? "bg-background text-foreground"
-                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-                    )}
-                  >
-                    <LayoutGrid className="size-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setView("list")}
-                    className={cn(
-                      "size-8 rounded-md border-none shadow-none",
-                      view === "list"
-                        ? "bg-background text-foreground"
-                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-                    )}
-                  >
-                    <List className="size-5" />
-                  </Button>
-                </div>
+                <StudioViewToggle view={view} onChange={setView} />
               </>
             ) : null}
           </div>

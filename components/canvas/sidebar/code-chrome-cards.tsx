@@ -319,17 +319,16 @@ export function CodeAppearanceSelect({
             disabled={disabled}
             aria-label={t("codeThemeAria")}
             className={cn(
-              "flex w-full min-w-0 items-center gap-2 rounded-md border-none bg-muted/40 px-3.5 text-left shadow-none transition-colors hover:bg-muted/60 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45",
               controlH,
+              "box-border flex w-full min-w-0 items-center gap-2 rounded-md border-none bg-muted/40 px-3.5 py-0 text-left shadow-none transition-colors hover:bg-muted/60 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45",
             )}
           >
-            <span className="min-w-0 flex-1 py-2.5">
-              <span className="block truncate text-[13px] font-normal text-foreground">
-                {selectedTheme.label}
-              </span>
-              <span className="block truncate text-[12px] font-normal text-muted-foreground">
-                {selectedChrome.label} · {selectedLang.label}
-              </span>
+            <span className="min-w-0 flex-1 truncate text-[13px] font-normal leading-none text-foreground">
+              {selectedTheme.label}
+              <span className="text-muted-foreground"> / </span>
+              {selectedChrome.label}
+              <span className="text-muted-foreground"> / </span>
+              {selectedLang.label}
             </span>
             <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
           </button>
@@ -351,7 +350,7 @@ export function CodeAppearanceSelect({
                 pane === "themes" ? "Search themes…" : "Search languages…"
               }
               aria-label={pane === "themes" ? "Search themes" : "Search languages"}
-              className="h-9 w-full bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted-foreground"
+              className="h-9 w-full bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
             />
           </div>
 

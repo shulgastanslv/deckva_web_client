@@ -13,6 +13,8 @@ import { StudioUpgradeDialog } from "@/components/studio/dialogs/studio-upgrade-
 import { StudioNotifications } from "@/components/studio/header/studio-notifications";
 import { StudioUserNav } from "@/components/studio/studio-user-nav";
 import { Button } from "@/components/ui/button";
+import { controlSize } from "@/components/ui/control";
+import { cn } from "@/lib/utils";
 import { KeyboardShortcutsMenu } from "./keyboard-shortcuts-menu";
 import { PlanDropdown } from "./plan-dropdown";
 import { InviteMembersDialog } from "./invite-members";
@@ -58,7 +60,10 @@ export function StudioHeader({
               type="button"
               onClick={onMenu}
               aria-label={tn("openMenu")}
-              className="flex size-9 items-center justify-center rounded-md text-foreground md:hidden"
+              className={cn(
+                controlSize,
+                "flex items-center justify-center rounded-md text-foreground md:hidden",
+              )}
             >
               <Menu className="size-5 stroke-[1.5]" />
             </button>
@@ -67,11 +72,14 @@ export function StudioHeader({
             type="button"
             onClick={() => router.push("/")}
             aria-label={tn("studioHome")}
-            className="flex shrink-0 items-center transition-opacity hover:opacity-80"
+            className={cn(
+              controlSize,
+              "flex shrink-0 items-center justify-center transition-opacity hover:opacity-80",
+            )}
           >
             <Logo
-              width={32}
-              height={32}
+              width={28}
+              height={28}
               href="/studio"
               className="shrink-0 hover:rotate-0"
             />

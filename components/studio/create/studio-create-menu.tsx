@@ -85,7 +85,8 @@ export function StudioCreateMenu({
         <DropdownMenuTrigger asChild>
           <Button
             variant="secondary"
- className={cn(
+            size="sm"
+            className={cn(
               "rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
               triggerClassName,
               className,

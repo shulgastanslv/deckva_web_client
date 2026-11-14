@@ -250,23 +250,22 @@ export function FramesPicker({
             type="button"
             disabled={disabled || devices.length === 0}
             className={cn(
-              "flex w-full min-w-0 items-center gap-2.5 rounded-md border-none bg-muted/40 px-3.5 text-left shadow-none transition-colors hover:bg-muted/60 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45",
               controlH,
+              "box-border flex w-full min-w-0 items-center gap-2.5 rounded-md border-none bg-muted/40 px-3.5 py-0 text-left shadow-none transition-colors hover:bg-muted/60 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45",
             )}
           >
-            <span className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background/80 dark:bg-background/35">
+            <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background/80 dark:bg-background/35">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={selectedFrame.src}
                 alt=""
-                className="max-h-6 max-w-6 object-contain"
+                className="max-h-5 max-w-5 object-contain"
               />
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] font-normal text-foreground">
-                {selectedFrame.label}
-              </span>
-              <span className="block text-[11px] font-normal tabular-nums text-muted-foreground">
+            <span className="min-w-0 flex-1 truncate text-[13px] font-normal leading-none text-foreground">
+              {selectedFrame.label}
+              <span className="text-muted-foreground"> / </span>
+              <span className="tabular-nums text-muted-foreground">
                 {selectedSize.width} × {selectedSize.height}
               </span>
             </span>
@@ -380,8 +379,8 @@ export function FramesPicker({
               role="group"
               aria-label={t("orientation")}
               className={cn(
-                "flex shrink-0 items-center rounded-md bg-muted/40 p-0.5 dark:bg-muted/30",
                 controlH,
+                "flex shrink-0 items-center rounded-md bg-muted/40 p-1 dark:bg-muted/30",
               )}
             >
               <button
@@ -390,7 +389,7 @@ export function FramesPicker({
                 aria-pressed={orientation === "portrait"}
                 onClick={() => setOrientation("portrait")}
                 className={cn(
-                  "flex size-7 items-center justify-center rounded-md transition-colors",
+                  "flex h-full aspect-square items-center justify-center rounded-md transition-colors",
                   orientation === "portrait"
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -404,7 +403,7 @@ export function FramesPicker({
                 aria-pressed={orientation === "landscape"}
                 onClick={() => setOrientation("landscape")}
                 className={cn(
-                  "flex size-7 items-center justify-center rounded-md transition-colors",
+                  "flex h-full aspect-square items-center justify-center rounded-md transition-colors",
                   orientation === "landscape"
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -418,7 +417,7 @@ export function FramesPicker({
               type="button"
               title={t("more")}
               aria-label={t("moreOptions")}
-              className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Ellipsis className="size-3.5" />
             </button>

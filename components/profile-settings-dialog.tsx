@@ -493,7 +493,6 @@ export function ProfileSettingsDialog({
                           <Input
                             id="profile-name"
                             value={name}
-                            className="h-9 rounded-xl bg-muted/40 px-3"
                             onChange={(event) => {
                               setName(event.target.value);
                               setSaved(false);
@@ -511,8 +510,8 @@ export function ProfileSettingsDialog({
                             id="profile-email"
                             value={email}
                             readOnly
-                            disabled
-                            className="h-9 rounded-xl bg-muted/30 px-3"
+                            tabIndex={-1}
+                            className="bg-muted/30 text-muted-foreground hover:bg-muted/30"
                           />
                         </div>
                     </div>
@@ -553,7 +552,7 @@ export function ProfileSettingsDialog({
                               <Button
                                 type="button"
                                 variant="outline"
-                                className="h-8 rounded-md text-[12px]"
+                                className="rounded-md text-[13px]"
                                 disabled={billingBusy}
                                 onClick={() =>
                                   void runBilling(() => resumeSubscription())
@@ -565,7 +564,7 @@ export function ProfileSettingsDialog({
                               <Button
                                 type="button"
                                 variant="ghost"
-                                className="h-8 rounded-md text-[12px] text-muted-foreground"
+                                className="rounded-md text-[13px] text-muted-foreground"
                                 disabled={billingBusy}
                                 onClick={() =>
                                   void runBilling(() => cancelSubscription())
@@ -577,14 +576,14 @@ export function ProfileSettingsDialog({
                           ) : (
                             <Button
                               type="button"
-                              className="h-8 rounded-md bg-[#2f5bff] text-[12px] text-white hover:bg-[#254ae6]"
+                              className="rounded-md text-[13px]"
                               disabled={billingBusy || !billing?.paymentMethod}
                               onClick={() =>
                                 void runBilling(() => subscribePro())
                               }
                             >
                               {billingBusy ? (
-                                <Loader2 className="size-3.5 animate-spin" />
+                                <Loader2 className="size-5 animate-spin" />
                               ) : (
                                 t("subscribe")
                               )}
@@ -595,7 +594,7 @@ export function ProfileSettingsDialog({
                           <Button
                             type="button"
                             variant="secondary"
-                            className="mt-3 h-8 w-full rounded-md text-[12px] shadow-none"
+                            className="mt-3 w-full rounded-md text-[13px] shadow-none"
                             disabled={billingBusy || !billing.paymentMethod}
                             onClick={() =>
                               void runBilling(() => purchaseCredits())
@@ -649,7 +648,7 @@ export function ProfileSettingsDialog({
                             <Button
                               type="button"
                               variant="ghost"
-                              className="h-8 rounded-md text-[12px] text-muted-foreground"
+                              className="rounded-md text-[13px] text-muted-foreground"
                               disabled={billingBusy}
                               onClick={() =>
                                 void runBilling(() =>
@@ -670,7 +669,6 @@ export function ProfileSettingsDialog({
                               placeholder={t("cardNumber")}
                               inputMode="numeric"
                               autoComplete="cc-number"
-                              className="h-9 rounded-xl bg-muted/40 px-3 text-[13px]"
                             />
                             <div className="grid grid-cols-2 gap-2">
                               <Input
@@ -689,7 +687,6 @@ export function ProfileSettingsDialog({
                                 placeholder={t("exp")}
                                 inputMode="numeric"
                                 autoComplete="cc-exp"
-                                className="h-9 rounded-xl bg-muted/40 px-3 text-[13px]"
                               />
                               <Input
                                 value={cvv}
@@ -702,7 +699,6 @@ export function ProfileSettingsDialog({
                                 inputMode="numeric"
                                 autoComplete="cc-csc"
                                 type="password"
-                                className="h-9 rounded-xl bg-muted/40 px-3 text-[13px]"
                               />
                             </div>
                             <div className="flex gap-2 pt-1">
@@ -710,7 +706,7 @@ export function ProfileSettingsDialog({
                                 <Button
                                   type="button"
                                   variant="ghost"
-                                  className="h-8 rounded-md text-[12px]"
+                                  className="rounded-md text-[13px]"
                                   onClick={() => setShowCardForm(false)}
                                 >
                                   {t("cancel")}
@@ -718,7 +714,7 @@ export function ProfileSettingsDialog({
                               ) : null}
                               <Button
                                 type="button"
-                                className="h-8 rounded-md text-[12px]"
+                                className="rounded-md text-[13px]"
                                 disabled={billingBusy}
                                 onClick={onSaveCard}
                               >
@@ -811,7 +807,6 @@ export function ProfileSettingsDialog({
                               setSaved(false);
                             }}
                             autoComplete="current-password"
-                            className="h-9 rounded-xl bg-muted/40 px-3"
                           />
                         </div>
                       ) : null}
@@ -832,7 +827,6 @@ export function ProfileSettingsDialog({
                             setSaved(false);
                           }}
                           autoComplete="new-password"
-                          className="h-9 rounded-xl bg-muted/40 px-3"
                           placeholder={t("passwordMin")}
                         />
                       </div>
@@ -853,7 +847,6 @@ export function ProfileSettingsDialog({
                             setSaved(false);
                           }}
                           autoComplete="new-password"
-                          className="h-9 rounded-xl bg-muted/40 px-3"
                         />
                       </div>
                     </div>
@@ -906,7 +899,7 @@ export function ProfileSettingsDialog({
                                     });
                                   }}
                                   className={cn(
-                                    "inline-flex h-8 items-center rounded-md px-3 text-[12px] font-medium transition-colors disabled:opacity-60",
+                                    "inline-flex h-9 items-center rounded-md px-3.5 text-[13px] font-normal transition-colors disabled:opacity-60",
                                     code === locale
                                       ? "bg-foreground text-background"
                                       : "bg-muted/50 text-foreground hover:bg-muted/70",
@@ -933,7 +926,7 @@ export function ProfileSettingsDialog({
                                 type="button"
                                 onClick={() => setCurrency(code)}
                                 className={cn(
-                                  "inline-flex h-8 items-center rounded-md px-3 text-[12px] font-medium transition-colors",
+                                  "inline-flex h-9 items-center rounded-md px-3.5 text-[13px] font-normal transition-colors",
                                   code === currency
                                     ? "bg-foreground text-background"
                                     : "bg-muted/50 text-foreground hover:bg-muted/70",
@@ -958,13 +951,13 @@ export function ProfileSettingsDialog({
                         <Button
                           type="button"
                           variant="outline"
-                          className="mt-3 h-8 rounded-md"
+                          className="mt-3 rounded-md"
                           onClick={() => {
                             onOpenChange(false);
                             void signOut({ callbackUrl: "/" });
                           }}
                         >
-                          <LogOut className="size-3.5" />
+                          <LogOut className="size-5 stroke-[1.5]" />
                           {t("signOut")}
                         </Button>
                       </div>
@@ -990,7 +983,7 @@ export function ProfileSettingsDialog({
                                 setDeletePassword(event.target.value)
                               }
                               autoComplete="current-password"
-                              className="h-9 rounded-xl bg-background/80 px-3"
+                              className="bg-background/80"
                             />
                           </div>
                         ) : null}
@@ -1006,7 +999,7 @@ export function ProfileSettingsDialog({
                               setDeleteConfirm(event.target.value)
                             }
                             placeholder={t("deletePlaceholder")}
-                            className="h-9 rounded-xl bg-background/80 px-3"
+                            className="bg-background/80"
                             autoComplete="off"
                           />
                         </div>
@@ -1014,7 +1007,7 @@ export function ProfileSettingsDialog({
                         <Button
                           type="button"
                           variant="destructive"
-                          className="mt-3 h-8 rounded-md"
+                          className="mt-3 rounded-md"
                           disabled={
                             deleting ||
                             deleteConfirm.trim().toUpperCase() !== "DELETE" ||
@@ -1056,7 +1049,7 @@ export function ProfileSettingsDialog({
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-8 rounded-md"
+                    className="rounded-md"
                     onClick={() => onOpenChange(false)}
                     disabled={saving}
                   >
@@ -1064,7 +1057,7 @@ export function ProfileSettingsDialog({
                   </Button>
                   <Button
                     type="button"
-                    className="h-8 rounded-md"
+                    className="rounded-md"
                     disabled={
                       saving ||
                       (section === "profile"
@@ -1078,7 +1071,7 @@ export function ProfileSettingsDialog({
                     }
                   >
                     {saving ? (
-                      <Loader2 className="size-3.5 animate-spin" />
+                      <Loader2 className="size-5 animate-spin" />
                     ) : (
                       t("save")
                     )}

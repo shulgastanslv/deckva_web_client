@@ -17,7 +17,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 
 const IMAGE_MAX = 4;
 
@@ -127,7 +126,7 @@ export function FeedbackDialog({
             </p>
             <Button
               type="button"
-              className="mt-1 h-10 rounded-md px-5 text-[13px] font-medium shadow-none"
+              className="mt-1 rounded-md px-5 text-[13px] font-medium shadow-none"
               onClick={() => onOpenChange(false)}
             >
               {t("close")}
@@ -186,22 +185,24 @@ export function FeedbackDialog({
                 <Button
                   type="button"
                   variant="secondary"
-                  className={cn(
-                    "h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60",
-                  )}
+                  className="rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60"
                   disabled={busy || images.length >= IMAGE_MAX}
                   onClick={() => inputRef.current?.click()}
                 >
-                  <ImagePlus className="size-3.5" />
+                  <ImagePlus className="size-5 stroke-[1.5]" />
                   {t("addImages")}
                 </Button>
               </div>
               <Button
                 type="submit"
                 disabled={busy}
-                className="h-9 rounded-md px-4 text-[13px] font-medium shadow-none"
+                className="rounded-md px-4 text-[13px] font-medium shadow-none"
               >
-                {busy ? <Loader2 className="size-3.5 animate-spin" /> : t("send")}
+                {busy ? (
+                  <Loader2 className="size-5 animate-spin" />
+                ) : (
+                  t("send")
+                )}
               </Button>
             </div>
 

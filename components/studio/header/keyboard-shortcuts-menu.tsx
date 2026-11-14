@@ -12,6 +12,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { controlSize } from "@/components/ui/control";
+import { cn } from "@/lib/utils";
 
 const Kbd = ({ children }: { children: React.ReactNode }) => (
   <kbd className="ml-1 inline-flex h-5 items-center justify-center rounded-[4px] border border-border/50 bg-muted/40 px-1.5 text-[11px] font-medium text-muted-foreground first:ml-0">
@@ -40,7 +42,10 @@ export function KeyboardShortcutsMenu() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-md border-none bg-muted/40 text-muted-foreground shadow-none outline-none transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
+          className={cn(
+            controlSize,
+            "flex items-center justify-center rounded-md border-none bg-muted/40 text-muted-foreground shadow-none outline-none transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/20",
+          )}
           title={t("keyboard")}
         >
           <Keyboard className="size-5" />

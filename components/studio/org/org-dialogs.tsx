@@ -143,7 +143,7 @@ export function EditProfileDialog({
               onChange={(e) => setName(e.target.value)}
               disabled={busy}
               placeholder={t("orgName")}
-              className="h-10 w-full rounded-2xl bg-muted/30 px-3.5 text-[14px] outline-none focus:bg-muted/40 disabled:opacity-60"
+              className="h-9 w-full rounded-md bg-muted/30 px-3.5 text-[13px] outline-none focus:bg-muted/40 disabled:opacity-60"
             />
           </label>
 
@@ -580,7 +580,7 @@ export function DeleteOrganizationDialog({
                 value={confirmName}
                 onChange={(e) => setConfirmName(e.target.value)}
                 disabled={busy}
-                className="h-10 w-full rounded-2xl bg-muted/30 px-3.5 text-[14px] outline-none focus:bg-muted/40 disabled:opacity-60"
+                className="h-9 w-full rounded-md bg-muted/30 px-3.5 text-[13px] outline-none focus:bg-muted/40 disabled:opacity-60"
               />
             </>
           )}

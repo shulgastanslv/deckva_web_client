@@ -177,7 +177,7 @@ export function CommunityPreviewDialog({
                 aria-label={t("prevSlide")}
                 disabled={count <= 1}
                 onClick={() => go(index - 1)}
-                className="hidden size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
+                className="hidden size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
               >
                 <ChevronLeft className="size-5" />
               </button>
@@ -210,7 +210,7 @@ export function CommunityPreviewDialog({
                 aria-label={t("nextSlide")}
                 disabled={count <= 1}
                 onClick={() => go(index + 1)}
-                className="hidden size-10 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
+                className="hidden size-9 shrink-0 items-center justify-center rounded-md bg-muted/40 text-foreground transition-colors hover:bg-muted/60 disabled:opacity-30 sm:inline-flex"
               >
                 <ChevronRight className="size-5" />
               </button>

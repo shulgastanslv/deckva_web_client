@@ -7,6 +7,7 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import { controlSize } from "@/components/ui/control";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export function StudioSidebarSearch({
   search,
@@ -33,12 +35,12 @@ export function StudioSidebarSearch({
   return (
     <div className="flex items-center gap-1.5 px-3 pb-3">
       <div className="relative min-w-0 flex-1">
-        <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={tc("search")}
-          className="rounded-md border-0 bg-background pl-8 text-[13px] shadow-none placeholder:text-muted-foreground focus-visible:ring-1 dark:bg-muted/40"
+          className="rounded-md border-none bg-muted/40 pl-9 text-[13px] shadow-none placeholder:text-muted-foreground hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/20"
         />
       </div>
       <DropdownMenu>
@@ -48,9 +50,12 @@ export function StudioSidebarSearch({
             size="icon"
             variant="secondary"
             aria-label={tCreate("create")}
- className="size-9 shrink-0 rounded-md border-0 bg-background text-foreground shadow-none hover:bg-background/80 dark:bg-muted dark:hover:bg-muted/80"
+            className={cn(
+              controlSize,
+              "shrink-0 rounded-md border-none bg-muted/40 text-foreground shadow-none hover:bg-muted/60",
+            )}
           >
-            <Plus className="size-4 stroke-[2]" />
+            <Plus className="size-5 stroke-[1.5]" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent

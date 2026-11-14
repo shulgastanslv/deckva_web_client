@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 
 import { COMMUNITY_CATEGORIES } from "@/lib/community/categories";
 import { Button } from "@/components/ui/button";
+import { controlH } from "@/components/ui/control";
 import {
   Popover,
   PopoverContent,
@@ -92,7 +93,10 @@ export function CommunityCategoryDropdown({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("filterCategories")}
-            className="w-full rounded-md bg-muted/40 pr-3 pl-9 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus:bg-muted/50"
+            className={cn(
+              controlH,
+              "w-full rounded-md bg-muted/40 pr-3 pl-9 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus:bg-muted/50",
+            )}
           />
         </div>
 

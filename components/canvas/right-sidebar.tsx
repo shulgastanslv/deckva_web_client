@@ -198,7 +198,7 @@ function BlendSelect({
 
   return (
     <Select value={resolved} onValueChange={onChange}>
- <SelectTrigger className={sidebarSelectTrigger} aria-label="Blend">
+      <SelectTrigger className={sidebarSelectTrigger} aria-label="Blend">
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="rounded-2xl p-1.5">
@@ -1057,7 +1057,7 @@ export function RightSidebar({
           <Button
             variant="ghost"
             size="icon"
- className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
+            className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
             onClick={toggleRightCollapsed}
             title={t("expandPanel")}
           >
@@ -1084,7 +1084,7 @@ export function RightSidebar({
             type="button"
             variant="ghost"
             size="icon"
- className={`size-9 shrink-0 text-muted-foreground hover:text-foreground ${btnRound}`}
+            className={`size-9 shrink-0 text-muted-foreground hover:text-foreground ${btnRound}`}
             onClick={toggleRightCollapsed}
             title={t("collapsePanel")}
           >
@@ -1121,7 +1121,7 @@ export function RightSidebar({
                   type="button"
                   variant="ghost"
                   size="icon"
- className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
+                  className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
                   onClick={handleBringForward}
                   title={t("bringForward")}
                 >
@@ -1131,7 +1131,7 @@ export function RightSidebar({
                   type="button"
                   variant="ghost"
                   size="icon"
- className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
+                  className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
                   onClick={handleSendBackwards}
                   title={t("sendBack")}
                 >
@@ -1141,7 +1141,7 @@ export function RightSidebar({
                   type="button"
                   variant="ghost"
                   size="icon"
- className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
+                  className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
                   onClick={copyStyle}
                   title={t("copyStyle")}
                 >
@@ -1151,7 +1151,7 @@ export function RightSidebar({
                   type="button"
                   variant="ghost"
                   size="icon"
- className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
+                  className={`size-9 text-muted-foreground hover:text-foreground ${btnRound}`}
                   onClick={pasteStyle}
                   disabled={!copiedStyle}
                   title={t("pasteStyle")}
@@ -1165,7 +1165,7 @@ export function RightSidebar({
                 type="button"
                 variant={formValues.isLocked ? "secondary" : "ghost"}
                 size="icon"
- className={`size-9 shrink-0 ${btnRound}`}
+                className={`size-9 shrink-0 ${btnRound}`}
                 onClick={handleToggleLock}
                 title={formValues.isLocked ? t("unlock") : t("lock")}
               >
@@ -1265,7 +1265,7 @@ export function RightSidebar({
                           type="button"
                           variant={formValues.isBold ? "secondary" : "ghost"}
                           size="icon"
- className={`size-9 ${btnRound}`}
+                          className={`size-9 ${btnRound}`}
                           onClick={() => toggleTextStyle("bold")}
                         >
                           <Bold className="size-5" />
@@ -1274,7 +1274,7 @@ export function RightSidebar({
                           type="button"
                           variant={formValues.isItalic ? "secondary" : "ghost"}
                           size="icon"
- className={`size-9 ${btnRound}`}
+                          className={`size-9 ${btnRound}`}
                           onClick={() => toggleTextStyle("italic")}
                         >
                           <Italic className="size-5" />
@@ -1283,7 +1283,7 @@ export function RightSidebar({
                           type="button"
                           variant={formValues.isUnderline ? "secondary" : "ghost"}
                           size="icon"
- className={`size-9 ${btnRound}`}
+                          className={`size-9 ${btnRound}`}
                           onClick={() => toggleTextStyle("underline")}
                         >
                           <Underline className="size-5" />
@@ -1435,7 +1435,7 @@ export function RightSidebar({
                         type="button"
                         variant="secondary"
                         size="sm"
- className={`w-full justify-center gap-2 text-[13px] ${btnRound}`}
+                        className={`w-full justify-center gap-2 text-[13px] ${btnRound}`}
                         onClick={() => fileInputRef.current?.click()}
                       >
                         <Upload className="size-5" />
@@ -1476,7 +1476,7 @@ export function RightSidebar({
                           type="button"
                           variant="ghost"
                           size="sm"
- className={`flex-1 bg-background/70 ${btnRound}`}
+                          className={`flex-1 bg-background/70 ${btnRound}`}
                           onClick={() => manager?.crop.cancel()}
                         >
                           Cancel
@@ -1484,7 +1484,7 @@ export function RightSidebar({
                         <Button
                           type="button"
                           size="sm"
- className={`flex-1 ${btnRound}`}
+                          className={`flex-1 ${btnRound}`}
                           onClick={() => manager?.crop.apply()}
                         >
                           Done
@@ -1497,7 +1497,7 @@ export function RightSidebar({
                         type="button"
                         variant="secondary"
                         size="sm"
- className={`flex-1 justify-center gap-2 text-[13px] ${btnRound}`}
+                        className={`flex-1 justify-center gap-2 text-[13px] ${btnRound}`}
                         onClick={() => selectedObject && manager?.crop.start(selectedObject)}
                         disabled={imageToolBusy}
                       >
@@ -1515,7 +1515,7 @@ export function RightSidebar({
                         type="button"
                         variant="ghost"
                         size="sm"
- className={`flex-1 justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
+                        className={`flex-1 justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
                         onClick={() => fileInputRef.current?.click()}
                         disabled={imageToolBusy}
                       >
@@ -1531,7 +1531,7 @@ export function RightSidebar({
                       type="button"
                       variant="default"
                       size="sm"
- className={`w-full justify-center gap-2 text-[13px] ${btnRound}`}
+                      className={`w-full justify-center gap-2 text-[13px] ${btnRound}`}
                       onClick={() => void removeBackground()}
                       disabled={!canEnhance}
                     >
@@ -1556,7 +1556,7 @@ export function RightSidebar({
                         type="button"
                         variant="ghost"
                         size="sm"
- className={`shrink-0 gap-1.5 bg-muted/40 px-3 text-[13px] ${btnRound}`}
+                        className={`shrink-0 gap-1.5 bg-muted/40 px-3 text-[13px] ${btnRound}`}
                         onClick={() => void upscale()}
                         disabled={!canEnhance}
                         title={`Upscale ${enhanceScale}×`}
@@ -1573,7 +1573,7 @@ export function RightSidebar({
                       type="button"
                       variant="ghost"
                       size="sm"
- className={`w-full justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
+                      className={`w-full justify-center gap-2 bg-muted/40 text-[13px] ${btnRound}`}
                       onClick={() => void magicLayer()}
                       disabled={!canEnhance}
                     >
@@ -1632,7 +1632,7 @@ export function RightSidebar({
                     <Button
                       type="button"
                       variant="secondary"
- className="w-full gap-1.5 rounded-md border-none bg-muted/40 text-[13px] font-medium shadow-none hover:bg-muted/60"
+                      className="w-full gap-1.5 rounded-md border-none bg-muted/40 text-[13px] font-medium shadow-none hover:bg-muted/60"
                       onClick={() => applyTextRefactor("paragraphs")}
                     >
                       <WandSparkles className="size-5 stroke-[1.5]" />
@@ -1646,7 +1646,7 @@ export function RightSidebar({
                         type="button"
                         variant={formValues.isBold ? "secondary" : "ghost"}
                         size="icon"
- className={`size-9 w-auto ${btnRound}`}
+                        className={`size-9 w-auto ${btnRound}`}
                         onClick={() => toggleTextStyle("bold")}
                         title={t("bold")}
                       >
@@ -1656,7 +1656,7 @@ export function RightSidebar({
                         type="button"
                         variant={formValues.isItalic ? "secondary" : "ghost"}
                         size="icon"
- className={`size-9 w-auto ${btnRound}`}
+                        className={`size-9 w-auto ${btnRound}`}
                         onClick={() => toggleTextStyle("italic")}
                         title={t("italic")}
                       >
@@ -1666,7 +1666,7 @@ export function RightSidebar({
                         type="button"
                         variant={formValues.isUnderline ? "secondary" : "ghost"}
                         size="icon"
- className={`size-9 w-auto ${btnRound}`}
+                        className={`size-9 w-auto ${btnRound}`}
                         onClick={() => toggleTextStyle("underline")}
                         title={t("underline")}
                       >
@@ -1691,7 +1691,7 @@ export function RightSidebar({
                       type="button"
                       variant="ghost"
                       size="sm"
- className={`w-full justify-center gap-1.5 bg-muted/40 text-[13px] font-normal ${btnRound}`}
+                      className={`w-full justify-center gap-1.5 bg-muted/40 text-[13px] font-normal ${btnRound}`}
                       onClick={() => applyTextList("bullet")}
                     >
                       <List className="size-5" />
@@ -1701,7 +1701,7 @@ export function RightSidebar({
                       type="button"
                       variant="ghost"
                       size="sm"
- className={`w-full justify-center gap-1.5 bg-muted/40 text-[13px] font-normal ${btnRound}`}
+                      className={`w-full justify-center gap-1.5 bg-muted/40 text-[13px] font-normal ${btnRound}`}
                       onClick={() => applyTextList("number")}
                     >
                       <ListOrdered className="size-5" />
@@ -1732,7 +1732,7 @@ export function RightSidebar({
                         <Button
                           type="button"
                           size="sm"
- className={`flex-1 text-[13px] ${btnRound}`}
+                          className={`flex-1 text-[13px] ${btnRound}`}
                           onClick={() => {
                             applyCarouselFont(fontOffer, manager);
                             setFontOffer(null);
@@ -1744,7 +1744,7 @@ export function RightSidebar({
                           type="button"
                           variant="ghost"
                           size="sm"
- className={`flex-1 bg-background/60 text-[13px] ${btnRound}`}
+                          className={`flex-1 bg-background/60 text-[13px] ${btnRound}`}
                           disabled={markedSlideIds.length === 0}
                           title={
                             markedSlideIds.length === 0
@@ -1762,7 +1762,7 @@ export function RightSidebar({
                           type="button"
                           variant="ghost"
                           size="sm"
- className={`flex-1 text-[13px] ${btnRound}`}
+                          className={`flex-1 text-[13px] ${btnRound}`}
                           onClick={() => setFontOffer(null)}
                         >
                           This
@@ -1811,7 +1811,7 @@ export function RightSidebar({
                         <Button
                           type="button"
                           size="sm"
- className={`flex-1 text-[13px] ${btnRound}`}
+                          className={`flex-1 text-[13px] ${btnRound}`}
                           onClick={applyStyleToCarousel}
                         >
                           All
@@ -1820,7 +1820,7 @@ export function RightSidebar({
                           type="button"
                           variant="ghost"
                           size="sm"
- className={`flex-1 bg-background/60 text-[13px] ${btnRound}`}
+                          className={`flex-1 bg-background/60 text-[13px] ${btnRound}`}
                           disabled={markedSlideIds.length === 0}
                           title={
                             markedSlideIds.length === 0
@@ -1835,7 +1835,7 @@ export function RightSidebar({
                           type="button"
                           variant="ghost"
                           size="sm"
- className={`flex-1 text-[13px] ${btnRound}`}
+                          className={`flex-1 text-[13px] ${btnRound}`}
                           onClick={() => setStyleOffer(null)}
                         >
                           This
@@ -1934,7 +1934,7 @@ export function RightSidebar({
                         type="button"
                         variant="ghost"
                         size="sm"
- className={`px-2 text-[13px] ${btnRound}`}
+                        className={`px-2 text-[13px] ${btnRound}`}
                         onClick={() => updateProp("backgroundColor", "transparent")}
                       >
                         Clear

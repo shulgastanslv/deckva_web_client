@@ -41,6 +41,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { controlH, controlSize } from "@/components/ui/control";
 import { GenerateOptionsDialog } from "@/components/studio/create/generate-options-dialog";
 import { creditCostForModel } from "@/lib/ai/model-pricing";
 import type { AiModelInfo } from "@/lib/ai/types";
@@ -529,7 +530,10 @@ export function StudioPrompt({
                   type="button"
                   disabled={disabled || busy}
                   aria-label={t("prompt.add")}
-                  className="inline-flex size-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted/60 disabled:opacity-50"
+                  className={cn(
+                    controlSize,
+                    "inline-flex items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted/60 disabled:opacity-50",
+                  )}
                 >
                   <Plus className={menuIconClass} />
                 </button>
@@ -706,7 +710,10 @@ export function StudioPrompt({
                         ? `${selectedPriceLabel} · ${selectedMoneyHint}`
                         : selectedPriceLabel
                     }
-                    className="inline-flex h-9 max-w-[260px] items-center gap-2 rounded-md px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60"
+                    className={cn(
+                      controlH,
+                      "inline-flex max-w-[260px] items-center gap-2 rounded-md px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60",
+                    )}
                   >
                     {selected ? (
                       <AiModelIcon modelId={selected.modelId} />
@@ -737,7 +744,10 @@ export function StudioPrompt({
                         value={modelQuery}
                         onChange={(event) => setModelQuery(event.target.value)}
                         placeholder={t("prompt.searchModels")}
-                        className="w-full rounded-md bg-muted/40 h-11 pr-3 pl-8 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/60"
+                        className={cn(
+                          controlH,
+                          "w-full rounded-md bg-muted/40 pr-3 pl-8 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/60",
+                        )}
                       />
                     </div>
                     <div className="flex flex-wrap gap-1">
@@ -815,7 +825,10 @@ export function StudioPrompt({
                     type="button"
                     disabled={disabled || busy}
                     aria-label={t("prompt.recentPrompts")}
-                    className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50"
+                    className={cn(
+                      controlSize,
+                      "inline-flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50",
+                    )}
                   >
                     <Clock3 className={menuIconClass} />
                   </button>
@@ -854,7 +867,8 @@ export function StudioPrompt({
                   : t("generate")
               }
               className={cn(
-                "inline-flex size-9 shrink-0 items-center justify-center rounded-md border-none shadow-none transition-colors",
+                controlSize,
+                "inline-flex shrink-0 items-center justify-center rounded-md border-none shadow-none transition-colors",
                 canSend
                   ? "bg-foreground text-background hover:bg-foreground/90"
                   : "bg-muted text-muted-foreground",

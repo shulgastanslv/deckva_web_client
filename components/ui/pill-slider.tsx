@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Slider as SliderPrimitive } from "radix-ui";
+import { controlH } from "@/components/ui/control";
 import { cn } from "@/lib/utils";
 
 type PillSliderProps = {
@@ -74,7 +75,8 @@ function PillSlider({
   return (
     <div
       className={cn(
-        "relative flex h-10 w-full items-center overflow-hidden rounded-md bg-muted/40 dark:bg-muted/25",
+        "relative flex w-full items-center overflow-hidden rounded-md bg-muted/40 dark:bg-muted/25",
+        controlH,
         disabled && "opacity-50",
         className,
       )}

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { normalizeHex, toPickerHex } from "@/lib/color/hex";
 import { cn } from "@/lib/utils";
-import { controlH } from "@/components/ui/control";
+import { controlField } from "@/components/ui/control";
 
 const PRESETS = [
   "#000000",
@@ -225,7 +225,7 @@ export function ColorPicker({
           {label}
         </label>
       ) : null}
-      <div className={cn("flex items-center gap-2 rounded-md border-none bg-muted/40 px-3.5 shadow-none", controlH)}>
+      <div className={cn(controlField, "flex items-center gap-2 py-0")}>
         <ColorPickerPopover
           value={value}
           onChange={(hex) => {
