@@ -356,14 +356,13 @@
     },
     "connectors": {
       "title": "Коннекторы",
-      "subtitle": "Подключите Google Drive и Threads: импорт ассетов, публикация каруселей и аналитика коннекторов.",
+      "subtitle": "Подключите Google Drive для импорта ассетов в студию и аналитики коннекторов.",
       "available": "Доступные коннекторы",
       "availableHint": "Подключите аккаунт один раз — токены хранятся зашифрованными и их можно отозвать.",
       "connect": "Подключить",
       "disconnect": "Отключить",
-      "refreshInsights": "Обновить инсайты",
       "analyticsTitle": "Аналитика коннекторов",
-      "analyticsHint": "События подключения, импорта, публикации и инсайтов.",
+      "analyticsHint": "События подключения, импорта и синка.",
       "statConnected": "Подключено",
       "statEvents7d": "События · 7 дней",
       "statEvents30d": "События · 30 дней",
@@ -376,7 +375,6 @@
       "metricErrors": "Ошибки",
       "toastConnected": "{name} подключён",
       "toastDisconnected": "{name} отключён",
-      "toastInsights": "Инсайты Threads обновлены",
       "promptHint": "Подключить можно и из меню + в промпте студии, или открыть <link>главную студии</link>.",
       "status": {
         "connected": "Подключён",
@@ -386,26 +384,13 @@
       },
       "capabilities": {
         "import": "Импорт",
-        "sync": "Синк",
-        "publish": "Публикация",
-        "insights": "Инсайты"
+        "sync": "Синк"
       },
       "items": {
         "google-drive": {
           "label": "Google Drive",
           "description": "Импорт изображений и бренд-ассетов из Drive в студию."
-        },
-        "threads": {
-          "label": "Threads",
-          "description": "Публикация каруселей и инсайты постов в Threads."
         }
-      },
-      "insights": {
-        "views": "Просмотры",
-        "likes": "Лайки",
-        "replies": "Ответы",
-        "reposts": "Репосты",
-        "quotes": "Цитаты"
       },
       "events": {
         "connect": "Подключение",
@@ -419,7 +404,6 @@
       },
       "errors": {
         "google_not_configured": "OAuth Google Drive не настроен на сервере.",
-        "threads_not_configured": "OAuth Threads не настроен. Задайте THREADS_APP_ID и THREADS_APP_SECRET.",
         "oauth_failed": "Не удалось завершить подключение. Попробуйте ещё раз.",
         "unknown_provider": "Неизвестный коннектор."
       }
@@ -547,6 +531,8 @@
       "soon": "Скоро",
       "noModelsMatch": "Нет подходящих моделей",
       "free": "Бесплатно",
+      "creditsPerRun": "{count, plural, one {# кредит} few {# кредита} many {# кредитов} other {# кредита}}",
+      "approxPrice": "~{price} {currency}",
       "recentHistory": "Недавняя история",
       "recentPrompts": "Недавние промпты",
       "searchModels": "Поиск моделей",
@@ -1596,6 +1582,8 @@
       "darkThemeAria": "Тёмная тема",
       "language": "Язык",
       "languageHint": "Язык интерфейса",
+      "currency": "Валюта",
+      "currencyHint": "Цены в апгрейде, на лендинге и в промпте",
       "signOut": "Выйти",
       "signOutHint": "Завершить сессию на этом устройстве.",
       "deleteAccount": "Удалить аккаунт",

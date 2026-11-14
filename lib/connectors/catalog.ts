@@ -2,13 +2,12 @@ import type { ConnectorProviderId } from "@/lib/connectors/types";
 
 export type ConnectorCatalogItem = {
   id: ConnectorProviderId;
-  brand: "threads" | "googledrive";
+  brand: "googledrive";
   label: string;
   description: string;
   capabilities: string[];
 };
 
-/** Product catalog — Threads replaces Pinterest; Drive for file import. */
 export const CONNECTOR_CATALOG: ConnectorCatalogItem[] = [
   {
     id: "google-drive",
@@ -16,13 +15,6 @@ export const CONNECTOR_CATALOG: ConnectorCatalogItem[] = [
     label: "Google Drive",
     description: "Import images and brand assets from Drive into the studio.",
     capabilities: ["import", "sync"],
-  },
-  {
-    id: "threads",
-    brand: "threads",
-    label: "Threads",
-    description: "Publish carousels and pull post insights from Threads.",
-    capabilities: ["publish", "insights"],
   },
 ];
 

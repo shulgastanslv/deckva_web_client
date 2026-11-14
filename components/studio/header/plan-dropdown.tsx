@@ -18,13 +18,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
 import {
   CREDIT_PACK_CREDITS,
-  CREDIT_PACK_PRICE,
   FREE_GENERATION_LIMIT,
   PRO_MONTHLY_CREDITS,
-  STUDIO_PRO_CURRENCY,
-  STUDIO_PRO_PRICE_LABEL,
 } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +54,7 @@ export function PlanDropdown({
   const t = useTranslations("studio.upgrade");
   const { status } = useSession();
   const signedIn = status === "authenticated";
+  const { pro, pack } = useDisplayCurrency();
   const [plan, setPlan] = useState<PlanState>({
     isPro: isUpgrade,
     remaining: FREE_GENERATION_LIMIT,
@@ -251,7 +250,7 @@ export function PlanDropdown({
               onClick={openUpgrade}
  className="mt-5 w-full rounded-md font-medium shadow-none"
             >
-              {t("upgrade")} · {STUDIO_PRO_PRICE_LABEL}/mo
+              {t("upgrade")} · {pro.label}/mo
             </Button>
           ) : (
             <Button
@@ -262,8 +261,8 @@ export function PlanDropdown({
             >
               {t("buyCreditsPack", {
                 credits: CREDIT_PACK_CREDITS,
-                price: CREDIT_PACK_PRICE,
-                currency: STUDIO_PRO_CURRENCY,
+                price: pack.amount,
+                currency: pack.currency,
               })}
             </Button>
           )}

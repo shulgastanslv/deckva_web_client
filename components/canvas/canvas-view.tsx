@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useLayoutEffect, useMemo, useState } from "re
 import {
   Plus,
 } from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useAttachCanvas, useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { CodeBlockEditDialog } from "@/components/canvas/code-block-edit-dialog";
@@ -11,6 +12,25 @@ import { CanvasRulers, RULER_SIZE } from "@/components/canvas/canvas-rulers";
 import { clampZoom } from "@/components/canvas/zoom-controls";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+
+function SlideSkeleton({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "pointer-events-none absolute inset-0 flex flex-col gap-3 bg-muted/30 p-[8%] dark:bg-muted/20",
+        className,
+      )}
+    >
+      <Skeleton className="h-[8%] w-[42%] rounded-md bg-muted/70" />
+      <Skeleton className="mt-1 h-[4%] w-[68%] rounded-md bg-muted/55" />
+      <Skeleton className="h-[4%] w-[58%] rounded-md bg-muted/45" />
+      <div className="mt-auto flex flex-1 flex-col justify-end gap-2.5">
+        <Skeleton className="h-[38%] w-full rounded-md bg-muted/50" />
+        <Skeleton className="h-[6%] w-[36%] rounded-md bg-muted/40" />
+      </div>
+    </div>
+  );
+}
 
 const PADDING = 56;
 /** Space between slides in the horizontal strip. */
@@ -110,8 +130,8 @@ export function CanvasView({
   const zoom = useCanvasStore((s) => s.zoom);
   const slides = useCanvasStore((s) => s.slides);
   const currentSlideId = useCanvasStore((s) => s.currentSlideId);
-  const isLoadingProject = useCanvasStore((s) => s.isLoadingProject);
   const isGeneratingCarousel = useCanvasStore((s) => s.isGeneratingCarousel);
+  const tCommon = useTranslations("common");
   const handActive = useCanvasStore((s) => s.handActive);
   const eraserActive = useCanvasStore((s) => s.eraserActive);
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
@@ -653,7 +673,9 @@ export function CanvasView({
                       zIndex: hovered ? 2 : 0,
                     }}
                   >
-                    {slide.thumbnail ? (
+                    {isGeneratingCarousel && !slide.thumbnail ? (
+                      <SlideSkeleton />
+                    ) : slide.thumbnail ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={slide.thumbnail}
@@ -701,9 +723,19 @@ export function CanvasView({
             }}
           >
             <canvas ref={canvasElementRef} />
+            {isGeneratingCarousel ? (
+              <div className="pointer-events-none absolute inset-0 z-[2]">
+                <SlideSkeleton />
+                <div className="absolute inset-x-0 bottom-[10%] flex justify-center px-4">
+                  <span className="rounded-md bg-background/80 px-3 py-1.5 text-[13px] font-normal text-muted-foreground shadow-sm backdrop-blur-sm">
+                    {tCommon("generating")}
+                  </span>
+                </div>
+              </div>
+            ) : null}
           </div>
 
-          {frame ? (
+          {frame && !isGeneratingCarousel ? (
             <button
               type="button"
               title="Add slide"

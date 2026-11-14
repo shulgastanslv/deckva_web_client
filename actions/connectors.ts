@@ -1,7 +1,6 @@
 "use server";
 
 import { createMediaAsset, type MediaAssetDTO } from "@/actions/assets";
-import { decryptSecret } from "@/lib/connectors/crypto";
 import { resolveGoogleDriveAccess } from "@/lib/connectors/google-drive-account";
 import {
   downloadGoogleDriveFile,
@@ -14,15 +13,13 @@ import {
   listConnectorPublic,
   recordConnectorEvent,
 } from "@/lib/connectors/store";
-import { fetchThreadsInsightsSummary } from "@/lib/connectors/threads";
 import type {
   ConnectorAnalytics,
   ConnectorProviderId,
   ConnectorPublic,
 } from "@/lib/connectors/types";
-import { isConnectorProviderId, toPrismaProvider } from "@/lib/connectors/map";
+import { isConnectorProviderId } from "@/lib/connectors/map";
 import { requireUserId } from "@/lib/auth/session";
-import type { Prisma } from "@/lib/generated/prisma/client";
 import { messages } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 
@@ -72,68 +69,6 @@ export async function disconnectConnectorAction(
     return { success: true, connectors };
   } catch (err) {
     console.error("disconnectConnectorAction error:", err);
-    return { success: false, error: messages.errors.generic };
-  }
-}
-
-export async function refreshThreadsInsightsAction(): Promise<
-  ActionResult<{
-    insights: {
-      views?: number;
-      likes?: number;
-      replies?: number;
-      reposts?: number;
-      quotes?: number;
-    };
-  }>
-> {
-  try {
-    const userId = await requireUserId();
-    if (!userId) return { success: false, error: messages.errors.signIn };
-
-    const account = await prisma.connectorAccount.findUnique({
-      where: {
-        userId_provider: {
-          userId,
-          provider: toPrismaProvider("threads"),
-        },
-      },
-    });
-    if (!account?.accessTokenEnc || account.status !== "CONNECTED") {
-      return { success: false, error: "Threads is not connected" };
-    }
-
-    const accessToken = decryptSecret(account.accessTokenEnc);
-    const insights = await fetchThreadsInsightsSummary(accessToken);
-
-    const nextMeta = {
-      ...(typeof account.metadata === "object" && account.metadata
-        ? (account.metadata as Record<string, unknown>)
-        : {}),
-      insights,
-      insightsAt: new Date().toISOString(),
-    } as Prisma.InputJsonValue;
-
-    await prisma.connectorAccount.update({
-      where: { id: account.id },
-      data: {
-        lastSyncedAt: new Date(),
-        metadata: nextMeta,
-      },
-    });
-
-    await recordConnectorEvent({
-      userId,
-      provider: "threads",
-      kind: "INSIGHTS",
-      label: "Threads insights refresh",
-      connectorId: account.id,
-      meta: insights,
-    });
-
-    return { success: true, insights };
-  } catch (err) {
-    console.error("refreshThreadsInsightsAction error:", err);
     return { success: false, error: messages.errors.generic };
   }
 }

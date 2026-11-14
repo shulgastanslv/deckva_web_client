@@ -27,6 +27,18 @@ export async function generateCarouselUpstream(
   const language = input.language?.trim() || inferPromptLanguage(topic);
   const handle = normalizeHandle(input.handle);
 
+  const attachments =
+    input.attachments
+      ?.map((a) => ({
+        name: a.name,
+        kind: a.kind,
+        ...(a.dataUrl ? { dataUrl: a.dataUrl } : {}),
+        ...(a.text ? { text: a.text } : {}),
+        ...(a.role ? { role: a.role } : {}),
+      }))
+      .filter((a) => a.kind === "image" ? Boolean(a.dataUrl) : Boolean(a.text)) ??
+    [];
+
   const payload = await fetchAiJson(
     "/cora/run",
     {
@@ -41,6 +53,8 @@ export async function generateCarouselUpstream(
       plan: input.plan ?? "free",
       ...(input.modelId ? { modelId: input.modelId } : {}),
       ...(input.seedText?.trim() ? { seedText: input.seedText.trim() } : {}),
+      ...(input.skillId?.trim() ? { skillId: input.skillId.trim() } : {}),
+      ...(attachments.length > 0 ? { attachments } : {}),
       save: false,
     },
     { timeoutMs: TIMEOUT_MS, label: "Carousel generation" },

@@ -69,12 +69,22 @@ export type ConsumeGenerationResult = {
  */
 export async function consumeGeneration(
   userId: string,
-  opts?: { modelId?: string; projectId?: string },
+  opts?: { modelId?: string; projectId?: string; creditCost?: number },
 ): Promise<ConsumeGenerationResult> {
   if (await userHasPro(userId)) {
+    const amount = Math.max(
+      0,
+      Math.round(opts?.creditCost ?? GENERATION_CREDIT_COST),
+    );
+    // Zero-cost free models still “consume” a generation slot for analytics,
+    // but do not debit the wallet.
+    if (amount <= 0) {
+      const entitlement = await getGenerationEntitlement(userId);
+      return { entitlement };
+    }
     const { balance, takes } = await spendCredits({
       userId,
-      amount: GENERATION_CREDIT_COST,
+      amount,
       modelId: opts?.modelId,
       projectId: opts?.projectId,
     });

@@ -356,14 +356,13 @@
     },
     "connectors": {
       "title": "Connectors",
-      "subtitle": "Link Google Drive and Threads to import assets, publish carousels, and track connector analytics.",
+      "subtitle": "Link Google Drive to import assets into the studio and track connector analytics.",
       "available": "Available connectors",
       "availableHint": "Connect an account once — tokens stay encrypted and can be revoked anytime.",
       "connect": "Connect",
       "disconnect": "Disconnect",
-      "refreshInsights": "Refresh insights",
       "analyticsTitle": "Connector analytics",
-      "analyticsHint": "Usage across connect, import, publish, and insights events.",
+      "analyticsHint": "Usage across connect, import, and sync events.",
       "statConnected": "Connected",
       "statEvents7d": "Events · 7 days",
       "statEvents30d": "Events · 30 days",
@@ -376,7 +375,6 @@
       "metricErrors": "Errors",
       "toastConnected": "{name} connected",
       "toastDisconnected": "{name} disconnected",
-      "toastInsights": "Threads insights updated",
       "promptHint": "You can also connect from the studio prompt + menu, or open <link>studio home</link>.",
       "status": {
         "connected": "Connected",
@@ -386,26 +384,13 @@
       },
       "capabilities": {
         "import": "Import",
-        "sync": "Sync",
-        "publish": "Publish",
-        "insights": "Insights"
+        "sync": "Sync"
       },
       "items": {
         "google-drive": {
           "label": "Google Drive",
           "description": "Import images and brand assets from Drive into the studio."
-        },
-        "threads": {
-          "label": "Threads",
-          "description": "Publish carousels and pull post insights from Threads."
         }
-      },
-      "insights": {
-        "views": "Views",
-        "likes": "Likes",
-        "replies": "Replies",
-        "reposts": "Reposts",
-        "quotes": "Quotes"
       },
       "events": {
         "connect": "Connected",
@@ -419,7 +404,6 @@
       },
       "errors": {
         "google_not_configured": "Google Drive OAuth is not configured on the server.",
-        "threads_not_configured": "Threads OAuth is not configured. Set THREADS_APP_ID and THREADS_APP_SECRET.",
         "oauth_failed": "Could not complete the connection. Try again.",
         "unknown_provider": "Unknown connector."
       }
@@ -547,6 +531,8 @@
       "soon": "Soon",
       "noModelsMatch": "No models match",
       "free": "Free",
+      "creditsPerRun": "{count, plural, one {# credit} other {# credits}}",
+      "approxPrice": "~{price} {currency}",
       "recentHistory": "Recent history",
       "recentPrompts": "Recent prompts",
       "searchModels": "Search models",
@@ -1596,6 +1582,8 @@
       "darkThemeAria": "Dark theme",
       "language": "Language",
       "languageHint": "Interface language",
+      "currency": "Currency",
+      "currencyHint": "Prices in upgrade, landing, and the prompt",
       "signOut": "Sign out",
       "signOutHint": "End this session on this device.",
       "deleteAccount": "Delete account",

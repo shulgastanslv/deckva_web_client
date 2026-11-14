@@ -50,13 +50,12 @@ import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { trackEvent } from "@/lib/analytics";
 import { SOCIAL_LINKS } from "@/lib/social";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
 import {
   CREDIT_PACK_CREDITS,
-  CREDIT_PACK_PRICE,
   FREE_GENERATION_LIMIT,
   PRO_FEATURES,
   PRO_MONTHLY_CREDITS,
-  STUDIO_PRO_PRICE,
 } from "@/lib/studio/plans";
 import { PromptSection } from "./prompt-section";
 import { cn } from "@/lib/utils";
@@ -261,7 +260,7 @@ const FAQ = [
   {
     value: "price",
     q: "What does it cost?",
-    a: `The first ${FREE_GENERATION_LIMIT} AI generations are free. Pro is ${STUDIO_PRO_PRICE} Br a month and includes ${PRO_MONTHLY_CREDITS} generations; extra packs are ${CREDIT_PACK_CREDITS} for ${CREDIT_PACK_PRICE} Br. Cancel any time. Access stays until the end of the paid period.`,
+    a: "", // filled in LandingPage from display currency
   },
   {
     value: "where",
@@ -670,6 +669,7 @@ export function ProjectContainerIllustration({ className = "" }: { className?: s
 export function LandingPage() {
   const t = useTranslations("landing");
   const tc = useTranslations("common");
+  const { pro, pack } = useDisplayCurrency();
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -678,6 +678,18 @@ export function LandingPage() {
   const signedIn = status === "authenticated";
   const activePrompt = PROMPTS[prompt];
   const reduceMotion = useReducedMotion();
+  const faqItems = useMemo(
+    () =>
+      FAQ.map((item) =>
+        item.value === "price"
+          ? {
+              ...item,
+              a: `The first ${FREE_GENERATION_LIMIT} AI generations are free. Pro is ${pro.label} a month and includes ${PRO_MONTHLY_CREDITS} generations; extra packs are ${CREDIT_PACK_CREDITS} for ${pack.label}. Cancel any time. Access stays until the end of the paid period.`,
+            }
+          : item,
+      ),
+    [pro.label, pack.label],
+  );
   const rise = {
     hidden: { opacity: 0, y: 22 },
     show: {
@@ -1342,9 +1354,9 @@ export function LandingPage() {
             <p className="text-sm font-medium text-land-mist/60">Pro</p>
             <p className="mt-3 flex items-baseline gap-2">
               <span className="text-5xl font-medium tracking-tight">
-                {STUDIO_PRO_PRICE}
+                {pro.amount}
               </span>
-              <span className="text-lg">Br / month</span>
+              <span className="text-lg">{pro.currency} / month</span>
             </p>
             <ul className="mt-6 flex-1 space-y-3 text-base text-land-mist/80">
               {PRO_FEATURES.map((feature) => (
@@ -1368,8 +1380,8 @@ export function LandingPage() {
         </ul>
         <p className={`mt-6 max-w-xl ${landSub}`}>
           The first {FREE_GENERATION_LIMIT} AI generations are free. Then Pro —{" "}
-          {STUDIO_PRO_PRICE} Br a month with {PRO_MONTHLY_CREDITS} generations,
-          plus top-ups ({CREDIT_PACK_CREDITS} for {CREDIT_PACK_PRICE} Br).
+          {pro.label} a month with {PRO_MONTHLY_CREDITS} generations, plus
+          top-ups ({CREDIT_PACK_CREDITS} for {pack.label}).
         </p>
 
         <h2 id="generate" className={`${sectionTitle} mt-16 scroll-mt-28 sm:mt-20`}>
@@ -1412,7 +1424,7 @@ export function LandingPage() {
               </p>
             </div>
             <Accordion type="single" collapsible defaultValue="project">
-              {FAQ.map((item) => (
+              {faqItems.map((item) => (
                 <AccordionItem
                   key={item.value}
                   value={item.value}

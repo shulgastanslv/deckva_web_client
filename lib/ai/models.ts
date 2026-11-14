@@ -1,4 +1,5 @@
 import { fetchAiGet } from "@/lib/ai/client";
+import { creditCostForModel } from "@/lib/ai/model-pricing";
 import type { AiModelInfo, AiPlanId } from "@/lib/ai/types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -26,16 +27,23 @@ export async function listAiModelsUpstream(
         : "economy";
     const slug =
       typeof row.openRouterSlug === "string" ? row.openRouterSlug : "";
+    const isFree =
+      row.isFree === true ||
+      slug.endsWith(":free") ||
+      slug === "openrouter/free";
+    const base = { tier, isFree } as const;
+    const creditCost =
+      typeof row.creditCost === "number" && Number.isFinite(row.creditCost)
+        ? Math.max(0, Math.round(row.creditCost))
+        : creditCostForModel(base);
     models.push({
       modelId: row.modelId,
       displayName: row.displayName,
       tier,
       openRouterSlug: slug,
       enabled: row.enabled !== false,
-      isFree:
-        row.isFree === true ||
-        slug.endsWith(":free") ||
-        slug === "openrouter/free",
+      isFree,
+      creditCost,
     });
   }
 

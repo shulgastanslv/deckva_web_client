@@ -10,8 +10,11 @@ export type StudioGenerateIntent = {
   language: string;
   aspectRatio: RatioKey;
   slidesCount: number;
+  /** Non–data-URL cover only (data URLs live in pending-media). */
   cover: string;
   modelId?: string;
+  skillId?: string;
+  seedText?: string;
 };
 
 export type StudioIntent =
@@ -46,6 +49,14 @@ function parseIntent(raw: string): StudioIntent | null {
       modelId:
         typeof parsed.modelId === "string" && parsed.modelId.trim()
           ? parsed.modelId.trim()
+          : undefined,
+      skillId:
+        typeof parsed.skillId === "string" && parsed.skillId.trim()
+          ? parsed.skillId.trim()
+          : undefined,
+      seedText:
+        typeof parsed.seedText === "string" && parsed.seedText.trim()
+          ? parsed.seedText.trim().slice(0, 8000)
           : undefined,
     };
   } catch {

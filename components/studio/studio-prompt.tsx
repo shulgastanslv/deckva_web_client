@@ -41,8 +41,10 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { creditCostForModel } from "@/lib/ai/model-pricing";
 import type { AiModelInfo } from "@/lib/ai/types";
 import { trackEvent } from "@/lib/analytics";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
 import type { ConnectorProviderId, ConnectorPublic } from "@/lib/connectors/types";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import {
@@ -70,7 +72,6 @@ type PromptAttachment = {
 };
 
 const CONNECTORS = [
-  { id: "threads" as const, label: "Threads", brand: "threads" as const },
   {
     id: "google-drive" as const,
     label: "Google Drive",
@@ -155,6 +156,7 @@ export function StudioPrompt({
   const [connectorBusy, setConnectorBusy] = useState<ConnectorProviderId | null>(
     null,
   );
+  const { moneyForCredits } = useDisplayCurrency();
 
   const skills = useMemo(() => listPromptSkills(), []);
 
@@ -211,6 +213,19 @@ export function StudioPrompt({
   }, [modelMenuOpen]);
 
   const selected = models.find((m) => m.modelId === modelId) ?? models[0];
+  const selectedCost = creditCostForModel(selected);
+  const selectedPriceLabel =
+    selectedCost <= 0
+      ? t("prompt.free")
+      : t("prompt.creditsPerRun", { count: selectedCost });
+  const selectedMoney =
+    selectedCost > 0 ? moneyForCredits(selectedCost) : null;
+  const selectedMoneyHint = selectedMoney
+    ? t("prompt.approxPrice", {
+        price: selectedMoney.amount,
+        currency: selectedMoney.currency,
+      })
+    : null;
   const trimmed = value.trim();
   const canSend = trimmed.length >= 2 && !disabled && !busy && !attaching;
   const connectorById = useMemo(
@@ -340,29 +355,40 @@ export function StudioPrompt({
   const submit = () => {
     if (!canSend) return;
 
-    const textNotes = attachments
+    const seedText = attachments
       .filter((a) => a.kind === "text")
       .map((a) => `Attached “${a.name}”: ${a.payload}`)
-      .join("\n\n");
-    const baseTopic = textNotes
-      ? `${trimmed}\n\n---\n${textNotes}`
-      : trimmed;
-    const shaped = applyPromptSkill(baseTopic, skillId);
-    const cover =
-      attachments.find((a) => a.kind === "image")?.payload ?? undefined;
+      .join("\n\n")
+      .slice(0, 8000);
+    const images = attachments
+      .filter((a) => a.kind === "image")
+      .map((a) => a.payload)
+      .filter(Boolean);
+    // Skill structure is applied on the AI server via skillId; client only
+    // picks the default slidesCount from the skill catalog.
+    const shaped = applyPromptSkill(trimmed, skillId);
+    const cover = images[0];
 
     setHistory(pushHistory(trimmed));
     trackEvent("prompt_submitted", {
       hasCover: Boolean(cover),
       attachments: attachments.length,
-      skillId: skillId ?? null,
+      images: images.length,
+      skillId: skillId ?? shaped.skillId ?? null,
     });
     void onSubmit({
-      topic: shaped.topic,
+      topic: trimmed,
       modelId: selected?.modelId,
       cover,
-      skillId: shaped.skillId,
+      skillId: shaped.skillId ?? skillId ?? undefined,
       slidesCount: shaped.slidesCount,
+      seedText: seedText || undefined,
+      images,
+      attachments: attachments.map((a) => ({
+        name: a.name,
+        kind: a.kind,
+        payload: a.payload,
+      })),
     });
   };
 
@@ -627,13 +653,21 @@ export function StudioPrompt({
                   <button
                     type="button"
                     disabled={disabled || busy}
-                    className="inline-flex h-9 max-w-[220px] items-center gap-2 rounded-md px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60"
+                    title={
+                      selectedMoneyHint
+                        ? `${selectedPriceLabel} · ${selectedMoneyHint}`
+                        : selectedPriceLabel
+                    }
+                    className="inline-flex h-9 max-w-[260px] items-center gap-2 rounded-md px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60"
                   >
                     {selected ? (
                       <AiModelIcon modelId={selected.modelId} />
                     ) : null}
                     <span className="truncate">
                       {selected?.displayName ?? t("prompt.model")}
+                    </span>
+                    <span className="shrink-0 text-[12px] font-normal text-muted-foreground">
+                      {selectedPriceLabel}
                     </span>
                   </button>
                 </DropdownMenuTrigger>
@@ -700,26 +734,31 @@ export function StudioPrompt({
                         {t("prompt.noModelsMatch")}
                       </p>
                     ) : (
-                      filteredModels.map((model) => (
-                        <DropdownMenuItem
-                          key={model.modelId}
-                          className={cn(
-                            "flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] focus:bg-muted/50",
-                            model.modelId === selected?.modelId && "bg-muted/50",
-                          )}
-                          onSelect={() => pickModel(model.modelId)}
-                        >
-                          <AiModelIcon modelId={model.modelId} />
-                          <span className="min-w-0 flex-1 truncate">
-                            {model.displayName}
-                          </span>
-                          {model.isFree ? (
-                            <span className="shrink-0 text-[12px] text-muted-foreground">
-                              {t("prompt.free")}
+                      filteredModels.map((model) => {
+                        const cost = creditCostForModel(model);
+                        const price =
+                          cost <= 0
+                            ? t("prompt.free")
+                            : t("prompt.creditsPerRun", { count: cost });
+                        return (
+                          <DropdownMenuItem
+                            key={model.modelId}
+                            className={cn(
+                              "flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] focus:bg-muted/50",
+                              model.modelId === selected?.modelId && "bg-muted/50",
+                            )}
+                            onSelect={() => pickModel(model.modelId)}
+                          >
+                            <AiModelIcon modelId={model.modelId} />
+                            <span className="min-w-0 flex-1 truncate">
+                              {model.displayName}
                             </span>
-                          ) : null}
-                        </DropdownMenuItem>
-                      ))
+                            <span className="shrink-0 text-[12px] font-normal text-muted-foreground tabular-nums">
+                              {price}
+                            </span>
+                          </DropdownMenuItem>
+                        );
+                      })
                     )}
                   </div>
                 </DropdownMenuContent>
@@ -766,6 +805,11 @@ export function StudioPrompt({
               type="button"
               disabled={!canSend}
               onClick={submit}
+              aria-label={
+                selected
+                  ? `${t("generate")} · ${selectedPriceLabel}`
+                  : t("generate")
+              }
               className={cn(
                 "inline-flex size-9 shrink-0 items-center justify-center rounded-md border-none shadow-none transition-colors",
                 canSend
@@ -808,7 +852,6 @@ export function StudioPrompt({
 }
 
 function providerLabel(provider: ConnectorProviderId) {
-  if (provider === "threads") return "Threads";
   if (provider === "google-drive") return "Google Drive";
   return provider;
 }

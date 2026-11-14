@@ -14,6 +14,7 @@ import {
   type GenerateCarouselResult,
 } from "@/lib/ai/generate";
 import { listAiModelsUpstream } from "@/lib/ai/models";
+import { creditCostForModelId } from "@/lib/ai/model-pricing";
 import type { AiPlanId } from "@/lib/ai/types";
 import { messages } from "@/lib/messages";
 
@@ -62,10 +63,12 @@ export async function generateCarousel(
 
   const modelId = input.modelId?.trim() || "gemini-flash";
   const slidesCount = input.slidesCount ?? 7;
+  const creditCost = creditCostForModelId(modelId);
 
   const consumed = await consumeGeneration(userId, {
     modelId,
     projectId: input.projectId,
+    creditCost,
   });
 
   try {

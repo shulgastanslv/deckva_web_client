@@ -53,12 +53,9 @@ import {
 import { setAppLocale } from "@/lib/i18n/set-locale";
 import { messages } from "@/lib/messages";
 import { isPasswordLongEnough, PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
-import {
-  CREDIT_PACK_CREDITS,
-  CREDIT_PACK_PRICE,
-  STUDIO_PRO_CURRENCY,
-  STUDIO_PRO_PRICE,
-} from "@/lib/studio/plans";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
+import { CURRENCY_LABELS } from "@/lib/studio/currency";
+import { CREDIT_PACK_CREDITS } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 type Section = "profile" | "billing" | "security" | "preferences" | "account";
@@ -126,6 +123,7 @@ export function ProfileSettingsDialog({
   const locale = useLocale() as AppLocale;
   const t = useTranslations("dialogs.settings");
   const [localePending, startLocaleTransition] = useTransition();
+  const { currency, setCurrency, currencies, pro, pack } = useDisplayCurrency();
   const nav = NAV_IDS.map((item) => ({
     ...item,
     label: t(`nav.${item.id}`),
@@ -536,8 +534,8 @@ export function ProfileSettingsDialog({
                                 : t("generationsLeft", {
                                     remaining: billing?.freeGenerationsRemaining ?? 0,
                                     limit: billing?.freeGenerationsLimit ?? 3,
-                                    price: STUDIO_PRO_PRICE,
-                                    currency: STUDIO_PRO_CURRENCY,
+                                    price: pro.amount,
+                                    currency: pro.currency,
                                   })}
                             </p>
                             {billing?.isPro ? (
@@ -609,9 +607,8 @@ export function ProfileSettingsDialog({
                               t("buyCreditsPack", {
                                 credits:
                                   billing.creditPackCredits ?? CREDIT_PACK_CREDITS,
-                                price:
-                                  billing.creditPackPrice ?? CREDIT_PACK_PRICE,
-                                currency: STUDIO_PRO_CURRENCY,
+                                price: pack.amount,
+                                currency: pack.currency,
                               })
                             )}
                           </Button>
@@ -739,7 +736,7 @@ export function ProfileSettingsDialog({
                       <div>
                         <p className="mb-2 text-[12px] font-medium">{t("history")}</p>
                         {billing?.payments.length ? (
-                          <ul className="space-y-1">
+                          <ul className="max-h-48 space-y-1 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
                             {billing.payments.map((p) => (
                               <li
                                 key={p.id}
@@ -919,6 +916,32 @@ export function ProfileSettingsDialog({
                                 </button>
                               ))}
                             </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium">{t("currency")}</p>
+                          <p className="mt-0.5 text-[12px] text-muted-foreground">
+                            {t("currencyHint")}
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {currencies.map((code) => (
+                              <button
+                                key={code}
+                                type="button"
+                                onClick={() => setCurrency(code)}
+                                className={cn(
+                                  "inline-flex h-8 items-center rounded-md px-3 text-[12px] font-medium transition-colors",
+                                  code === currency
+                                    ? "bg-foreground text-background"
+                                    : "bg-muted/50 text-foreground hover:bg-muted/70",
+                                )}
+                              >
+                                {CURRENCY_LABELS[code]}
+                              </button>
+                            ))}
                           </div>
                         </div>
                       </div>

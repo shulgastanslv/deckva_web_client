@@ -27,7 +27,9 @@ import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { stashPendingCover } from "@/lib/studio/pending-cover";
+import { stashPendingMedia } from "@/lib/studio/pending-attachments";
 import { stashStudioIntent } from "@/lib/studio/pending-intent";
+import { seedGeneratingDeck } from "@/lib/studio/generating-deck";
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -66,6 +68,10 @@ type StudioCreateValue = {
     slidesCount?: number;
     language?: string;
     handle?: string;
+    skillId?: string;
+    seedText?: string;
+    images?: string[];
+    attachments?: StudioPromptSubmit["attachments"];
   }) => Promise<void>;
 };
 
@@ -170,6 +176,10 @@ export function StudioCreateProvider({
       slidesCount?: number;
       language?: string;
       handle?: string;
+      skillId?: string;
+      seedText?: string;
+      images?: string[];
+      attachments?: StudioPromptSubmit["attachments"];
     }) => {
       setGenerateError(null);
       if (!(await canGenerate())) return;
@@ -185,11 +195,18 @@ export function StudioCreateProvider({
             session?.user?.name ||
             session?.user?.email?.split("@")[0],
         );
-        const cover = input.cover?.trim() ?? "";
+        const images = (input.images ?? [])
+          .map((u) => u.trim())
+          .filter(Boolean);
+        const cover = (input.cover?.trim() || images[0] || "").trim();
+        const seedText = (input.seedText ?? "").trim().slice(0, 8000);
+        const skillId = input.skillId?.trim() || undefined;
 
+        const title = draftTitle(topic);
         const created = await createProject({
-          title: draftTitle(topic),
+          title,
           aspectRatio,
+          slidesCount,
         });
         if (!created.success) {
           setGenerateError(messages.errors.createCarousel);
@@ -197,6 +214,11 @@ export function StudioCreateProvider({
         }
 
         stashPendingCover(created.projectId, cover);
+        stashPendingMedia(created.projectId, {
+          cover,
+          images: images.length > 0 ? images : cover ? [cover] : [],
+          seedText,
+        });
         stashStudioIntent({
           type: "generate",
           projectId: created.projectId,
@@ -207,12 +229,16 @@ export function StudioCreateProvider({
           slidesCount,
           cover: cover.startsWith("data:") ? "" : cover,
           modelId: input.modelId,
+          skillId,
+          seedText: seedText || undefined,
         });
 
-        const store = useCanvasStore.getState();
-        store.setCurrentProjectId(created.projectId);
-        store.setProjectTitle(draftTitle(topic));
-        store.setGeneratingCarousel(true);
+        seedGeneratingDeck({
+          projectId: created.projectId,
+          title,
+          aspectRatio,
+          slidesCount,
+        });
 
         trackEvent("carousel_created", {
           projectId: created.projectId,
@@ -220,6 +246,9 @@ export function StudioCreateProvider({
           aspectRatio,
           language,
           modelId: input.modelId ?? null,
+          skillId: skillId ?? null,
+          images: images.length,
+          hasSeedText: Boolean(seedText),
         });
         router.push(`/studio/editor?project=${created.projectId}`);
       } catch (err) {
@@ -241,6 +270,10 @@ export function StudioCreateProvider({
         modelId: input.modelId,
         cover: input.cover,
         slidesCount: input.slidesCount,
+        skillId: input.skillId,
+        seedText: input.seedText,
+        images: input.images,
+        attachments: input.attachments,
       });
     },
     [generateCarousel],

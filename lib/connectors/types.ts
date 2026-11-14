@@ -1,4 +1,4 @@
-export const CONNECTOR_PROVIDERS = ["google-drive", "threads"] as const;
+export const CONNECTOR_PROVIDERS = ["google-drive"] as const;
 
 export type ConnectorProviderId = (typeof CONNECTOR_PROVIDERS)[number];
 

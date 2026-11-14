@@ -17,13 +17,8 @@ import {
 } from "@/actions/billing";
 import type { BillingSnapshot } from "@/lib/billing/types";
 import { formatCardBrand } from "@/lib/billing/card";
-import {
-  CREDIT_PACK_CREDITS,
-  CREDIT_PACK_PRICE,
-  PRO_MONTHLY_CREDITS,
-  STUDIO_PRO_CURRENCY,
-  STUDIO_PRO_PRICE,
-} from "@/lib/studio/plans";
+import { CREDIT_PACK_CREDITS, PRO_MONTHLY_CREDITS } from "@/lib/studio/plans";
+import { useDisplayCurrency } from "@/hooks/use-display-currency";
 import {
   Dialog,
   DialogContent,
@@ -56,6 +51,7 @@ export function StudioUpgradeDialog({
   const t = useTranslations("dialogs.upgrade");
   const ts = useTranslations("studio.upgrade");
   const tv = useTranslations("dialogs.settings.validation");
+  const { pro, pack } = useDisplayCurrency();
   const [billing, setBilling] = useState<BillingSnapshot | null>(null);
   const [step, setStep] = useState<Step>("plan");
   const [busy, setBusy] = useState(false);
@@ -223,10 +219,10 @@ export function StudioUpgradeDialog({
 
               <div className="mt-4 flex items-baseline gap-1">
                 <span className="text-[28px] font-semibold tracking-tight text-foreground">
-                  {STUDIO_PRO_PRICE}
+                  {pro.amount}
                 </span>
                 <span className="text-[13px] text-muted-foreground">
-                  {STUDIO_PRO_CURRENCY}/mo
+                  {pro.currency}/mo
                 </span>
               </div>
 
@@ -272,8 +268,8 @@ export function StudioUpgradeDialog({
                   ) : (
                     ts("buyCreditsPack", {
                       credits: billing?.creditPackCredits ?? CREDIT_PACK_CREDITS,
-                      price: billing?.creditPackPrice ?? CREDIT_PACK_PRICE,
-                      currency: STUDIO_PRO_CURRENCY,
+                      price: pack.amount,
+                      currency: pack.currency,
                     })
                   )}
                 </button>
@@ -290,8 +286,8 @@ export function StudioUpgradeDialog({
                   )}
                 >
                   {t("continuePrice", {
-                    price: STUDIO_PRO_PRICE,
-                    currency: STUDIO_PRO_CURRENCY,
+                    price: pro.amount,
+                    currency: pro.currency,
                   })}
                 </button>
               )}
@@ -379,8 +375,8 @@ export function StudioUpgradeDialog({
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
                   t("subscribePrice", {
-                    price: STUDIO_PRO_PRICE,
-                    currency: STUDIO_PRO_CURRENCY,
+                    price: pro.amount,
+                    currency: pro.currency,
                   })
                 )}
               </button>

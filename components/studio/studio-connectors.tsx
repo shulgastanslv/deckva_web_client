@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ArrowClockwise as RefreshCw,
   LinkSimple as LinkIcon,
   PlugsConnected as Plugs,
 } from "@phosphor-icons/react";
@@ -15,7 +14,6 @@ import {
   disconnectConnectorAction,
   getConnectorsAnalytics,
   listConnectors,
-  refreshThreadsInsightsAction,
 } from "@/actions/connectors";
 import { BrandIcon } from "@/components/studio/brand-icon";
 import { CONNECTOR_CATALOG } from "@/lib/connectors/catalog";
@@ -54,18 +52,9 @@ export function StudioConnectors() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [ready, setReady] = useState(false);
-  const [busy, setBusy] = useState<ConnectorProviderId | "insights" | null>(
-    null,
-  );
+  const [busy, setBusy] = useState<ConnectorProviderId | null>(null);
   const [connectors, setConnectors] = useState<ConnectorPublic[]>([]);
   const [analytics, setAnalytics] = useState<ConnectorAnalytics | null>(null);
-  const [threadsInsights, setThreadsInsights] = useState<{
-    views?: number;
-    likes?: number;
-    replies?: number;
-    reposts?: number;
-    quotes?: number;
-  } | null>(null);
 
   const byId = useMemo(() => {
     return new Map(connectors.map((c) => [c.id, c]));
@@ -122,24 +111,6 @@ export function StudioConnectors() {
       setConnectors(res.connectors);
       trackEvent("connector_disconnected", { provider: id });
       toast.success(t("toastDisconnected", { name: providerLabel(id) }));
-      const analyticsRes = await getConnectorsAnalytics();
-      if (analyticsRes.success) setAnalytics(analyticsRes.analytics);
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const refreshInsights = async () => {
-    setBusy("insights");
-    try {
-      const res = await refreshThreadsInsightsAction();
-      if (res.success === false) {
-        toast.error(res.error);
-        return;
-      }
-      setThreadsInsights(res.insights);
-      trackEvent("connector_insights_refresh", { provider: "threads" });
-      toast.success(t("toastInsights"));
       const analyticsRes = await getConnectorsAnalytics();
       if (analyticsRes.success) setAnalytics(analyticsRes.analytics);
     } finally {
@@ -226,29 +197,15 @@ export function StudioConnectors() {
 
                   <div className="flex flex-wrap items-center gap-2">
                     {connected ? (
-                      <>
-                        <Button
-                          type="button"
-                          variant="ghost"
- className="rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
-                          disabled={busy === item.id}
-                          onClick={() => void disconnect(item.id)}
-                        >
-                          {t("disconnect")}
-                        </Button>
-                        {item.id === "threads" ? (
-                          <Button
-                            type="button"
-                            variant="ghost"
- className="rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
-                            disabled={busy === "insights"}
-                            onClick={() => void refreshInsights()}
-                          >
-                            <RefreshCw className="mr-1.5 size-3.5 opacity-70" />
-                            {t("refreshInsights")}
-                          </Button>
-                        ) : null}
-                      </>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
+                        disabled={busy === item.id}
+                        onClick={() => void disconnect(item.id)}
+                      >
+                        {t("disconnect")}
+                      </Button>
                     ) : (
                       <Button
                         type="button"
@@ -299,26 +256,6 @@ export function StudioConnectors() {
             daily={analytics?.daily ?? []}
           />
 
-          {threadsInsights ? (
-            <div className="grid gap-3 sm:grid-cols-5">
-              {(
-                [
-                  ["views", threadsInsights.views],
-                  ["likes", threadsInsights.likes],
-                  ["replies", threadsInsights.replies],
-                  ["reposts", threadsInsights.reposts],
-                  ["quotes", threadsInsights.quotes],
-                ] as const
-              ).map(([key, value]) => (
-                <StatCard
-                  key={key}
-                  label={t(`insights.${key}`)}
-                  value={value == null ? "—" : String(value)}
-                />
-              ))}
-            </div>
-          ) : null}
-
           <div className="grid gap-3 sm:grid-cols-2">
             {CONNECTOR_CATALOG.map((item) => {
               const stats = analytics?.byProvider[item.id];
@@ -357,12 +294,7 @@ export function StudioConnectors() {
                     key={event.id}
                     className="flex items-center gap-2.5 text-[13px]"
                   >
-                    <BrandIcon
-                      brand={
-                        event.provider === "threads" ? "threads" : "googledrive"
-                      }
-                      className="size-4"
-                    />
+                    <BrandIcon brand="googledrive" className="size-4" />
                     <span className="min-w-0 flex-1 truncate text-foreground">
                       {t(`events.${event.kind}`)}
                       {event.label ? ` · ${event.label}` : ""}
@@ -478,7 +410,6 @@ function Metric({ label, value }: { label: string; value: number }) {
 }
 
 function providerLabel(provider: string) {
-  if (provider === "threads") return "Threads";
   if (provider === "google-drive") return "Google Drive";
   return provider;
 }
@@ -487,8 +418,6 @@ function mapErrorKey(error: string | null) {
   switch (error) {
     case "google_not_configured":
       return "google_not_configured";
-    case "threads_not_configured":
-      return "threads_not_configured";
     case "invalid_state":
     case "missing_code":
       return "oauth_failed";

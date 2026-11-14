@@ -356,14 +356,13 @@
     },
     "connectors": {
       "title": "Канэктары",
-      "subtitle": "Падключыце Google Drive і Threads: імпарт асетаў, публікацыя каруселяў і аналітыка канэктараў.",
+      "subtitle": "Падключыце Google Drive для імпарту асетаў у студыю і аналітыкі канэктараў.",
       "available": "Даступныя канэктары",
       "availableHint": "Падключыце акаўнт адзін раз — токены захоўваюцца зашыфраванымі і іх можна адклікаць.",
       "connect": "Падключыць",
       "disconnect": "Адключыць",
-      "refreshInsights": "Абнавіць інсайты",
       "analyticsTitle": "Аналітыка канэктараў",
-      "analyticsHint": "Падзеі падключэння, імпарту, публікацыі і інсайтаў.",
+      "analyticsHint": "Падзеі падключэння, імпарту і сінку.",
       "statConnected": "Падключана",
       "statEvents7d": "Падзеі · 7 дзён",
       "statEvents30d": "Падзеі · 30 дзён",
@@ -376,7 +375,6 @@
       "metricErrors": "Памылкі",
       "toastConnected": "{name} падключаны",
       "toastDisconnected": "{name} адключаны",
-      "toastInsights": "Інсайты Threads абноўлены",
       "promptHint": "Падключыць можна і з меню + у промпце студыі, або адкрыць <link>галоўную студыі</link>.",
       "status": {
         "connected": "Падключаны",
@@ -386,26 +384,13 @@
       },
       "capabilities": {
         "import": "Імпарт",
-        "sync": "Сінк",
-        "publish": "Публікацыя",
-        "insights": "Інсайты"
+        "sync": "Сінк"
       },
       "items": {
         "google-drive": {
           "label": "Google Drive",
           "description": "Імпарт выяў і брэнд-асетаў з Drive у студыю."
-        },
-        "threads": {
-          "label": "Threads",
-          "description": "Публікацыя каруселяў і інсайты постаў у Threads."
         }
-      },
-      "insights": {
-        "views": "Прагляды",
-        "likes": "Лайкі",
-        "replies": "Адказы",
-        "reposts": "Рэпосты",
-        "quotes": "Цытаты"
       },
       "events": {
         "connect": "Падключэнне",
@@ -419,7 +404,6 @@
       },
       "errors": {
         "google_not_configured": "OAuth Google Drive не наладжаны на серверы.",
-        "threads_not_configured": "OAuth Threads не наладжаны. Задайце THREADS_APP_ID і THREADS_APP_SECRET.",
         "oauth_failed": "Не ўдалося завершыць падключэнне. Паспрабуйце яшчэ раз.",
         "unknown_provider": "Невядомы канэктар."
       }
@@ -547,6 +531,8 @@
       "soon": "Хутка",
       "noModelsMatch": "Няма падыходных мадэляў",
       "free": "Бясплатна",
+      "creditsPerRun": "{count, plural, one {# крэдыт} few {# крэдыты} many {# крэдытаў} other {# крэдыта}}",
+      "approxPrice": "~{price} {currency}",
       "recentHistory": "Нядаўняя гісторыя",
       "recentPrompts": "Нядаўнія промпты",
       "searchModels": "Пошук мадэляў",
@@ -1596,6 +1582,8 @@
       "darkThemeAria": "Цёмная тэма",
       "language": "Мова",
       "languageHint": "Мова інтэрфейсу",
+      "currency": "Валюта",
+      "currencyHint": "Цэны ў апгрэйдзе, на лендынгу і ў промпце",
       "signOut": "Выйсці",
       "signOutHint": "Завяршыць сесію на гэтай прыладзе.",
       "deleteAccount": "Выдаліць акаўнт",

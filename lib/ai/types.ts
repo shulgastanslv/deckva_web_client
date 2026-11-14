@@ -13,6 +13,16 @@ export type AiModelInfo = {
   enabled: boolean;
   /** OpenRouter $0 model (`:free`). */
   isFree: boolean;
+  /** Credits charged per generation (Pro). Free models = 0. */
+  creditCost: number;
+};
+
+export type GenerateCarouselAttachment = {
+  name: string;
+  kind: "image" | "text";
+  dataUrl?: string;
+  text?: string;
+  role?: "cover" | "slide";
 };
 
 export type GenerateCarouselInput = {
@@ -25,6 +35,10 @@ export type GenerateCarouselInput = {
   language?: string;
   handle?: string;
   cover?: string;
+  /** Prompt skill → server carousel structure. */
+  skillId?: string;
+  /** Extra images / notes for CORA (cover still via `cover`). */
+  attachments?: GenerateCarouselAttachment[];
   modelId?: string;
   plan?: AiPlanId;
   mode?: AiCoraMode;

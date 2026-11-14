@@ -12,13 +12,15 @@ import type {
 export function toPrismaProvider(
   id: ConnectorProviderId,
 ): ConnectorProvider {
-  return id === "threads" ? "THREADS" : "GOOGLE_DRIVE";
+  void id;
+  return "GOOGLE_DRIVE";
 }
 
 export function fromPrismaProvider(
   provider: ConnectorProvider,
 ): ConnectorProviderId {
-  return provider === "THREADS" ? "threads" : "google-drive";
+  void provider;
+  return "google-drive";
 }
 
 export function fromPrismaStatus(status: ConnectorStatus): ConnectorStatusId {
@@ -58,5 +60,5 @@ export function fromPrismaEventKind(
 }
 
 export function isConnectorProviderId(value: string): value is ConnectorProviderId {
-  return value === "google-drive" || value === "threads";
+  return value === "google-drive";
 }
