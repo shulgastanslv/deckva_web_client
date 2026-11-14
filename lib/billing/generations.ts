@@ -76,8 +76,6 @@ export async function consumeGeneration(
       0,
       Math.round(opts?.creditCost ?? GENERATION_CREDIT_COST),
     );
-    // Zero-cost free models still “consume” a generation slot for analytics,
-    // but do not debit the wallet.
     if (amount <= 0) {
       const entitlement = await getGenerationEntitlement(userId);
       return { entitlement };

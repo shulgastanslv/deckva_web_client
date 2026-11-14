@@ -410,20 +410,20 @@ export function CodeBlockEditDialog() {
           />
         </div>
 
-        <DialogFooter className="gap-2 border-t border-border/40 px-5 py-3.5 sm:justify-between">
-          <p className="hidden text-[12px] text-muted-foreground sm:block">
+        <DialogFooter className="gap-3 border-t border-border/40 px-5 pt-4 pb-5 sm:justify-between sm:gap-4">
+          <p className="hidden min-w-0 flex-1 pr-3 text-[12px] leading-snug text-muted-foreground sm:block">
             {t("editShortcuts")}
           </p>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <Button
               type="button"
               variant="secondary"
- className="rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
+              className="rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
               onClick={close}
             >
               {tc("cancel")}
             </Button>
- <Button type="button" className="rounded-md" onClick={save}>
+            <Button type="button" className="rounded-md" onClick={save}>
               {tc("save")}
             </Button>
           </div>

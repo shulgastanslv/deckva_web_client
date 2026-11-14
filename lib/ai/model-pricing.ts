@@ -7,17 +7,15 @@ import {
 
 /** Credits charged per successful generation by model tier (Pro wallet). */
 export const MODEL_CREDIT_COST = {
-  free: 0,
   economy: 1,
   standard: 2,
   premium: 3,
 } as const;
 
 export function creditCostForModel(
-  model: Pick<AiModelInfo, "tier" | "isFree"> | null | undefined,
+  model: Pick<AiModelInfo, "tier"> | null | undefined,
 ): number {
   if (!model) return GENERATION_CREDIT_COST;
-  if (model.isFree) return MODEL_CREDIT_COST.free;
   if (model.tier === "premium") return MODEL_CREDIT_COST.premium;
   if (model.tier === "standard") return MODEL_CREDIT_COST.standard;
   return MODEL_CREDIT_COST.economy;
@@ -40,7 +38,6 @@ export function creditCostFromCatalog(
 export function creditCostForModelId(modelId: string | null | undefined): number {
   const id = (modelId || "").toLowerCase();
   if (!id) return GENERATION_CREDIT_COST;
-  if (id.includes("free") || id.endsWith("-free")) return MODEL_CREDIT_COST.free;
   if (id.includes("opus")) return MODEL_CREDIT_COST.premium;
   if (
     id.includes("sonnet") ||
@@ -60,11 +57,10 @@ export function approxBynForCredits(credits: number): number {
 }
 
 export function formatModelPriceLabel(
-  model: Pick<AiModelInfo, "tier" | "isFree"> | null | undefined,
-  opts?: { freeLabel?: string; creditsLabel?: (n: number) => string },
+  model: Pick<AiModelInfo, "tier"> | null | undefined,
+  opts?: { creditsLabel?: (n: number) => string },
 ): string {
   const cost = creditCostForModel(model);
-  if (cost <= 0) return opts?.freeLabel ?? "Free";
   if (opts?.creditsLabel) return opts.creditsLabel(cost);
   return `${cost} cr`;
 }

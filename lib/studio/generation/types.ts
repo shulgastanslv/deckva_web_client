@@ -13,6 +13,9 @@ export type StudioPromptSubmit = {
   /** Active prompt skill id (launch, howto, …). */
   skillId?: string;
   slidesCount?: number;
+  language?: string;
+  handle?: string;
+  aspectRatio?: string;
   /** Text attachments for CORA seedText (not stuffed into topic). */
   seedText?: string;
   /** All image attachments in order (first → cover). */

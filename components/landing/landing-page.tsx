@@ -348,13 +348,13 @@ export function SequenceIllustration({ className = "" }: { className?: string })
         <defs>
           {/* Мягкие нейтральные тени */}
           <filter id="shadow-card" x="-10%" y="-10%" width="125%" height="130%" filterUnits="userSpaceOnUse">
-            <feDropShadow dx="0" dy="10" stdDeviation="16" floodColor="#000000" flood-opacity="0.06" />
-            <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" flood-opacity="0.04" />
+            <feDropShadow dx="0" dy="10" stdDeviation="16" floodColor="#000000" floodOpacity="0.06" />
+            <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" floodOpacity="0.04" />
           </filter>
           
           <filter id="shadow-float" x="-20%" y="-20%" width="140%" height="150%" filterUnits="userSpaceOnUse">
-            <feDropShadow dx="0" dy="12" stdDeviation="18" floodColor="#000000" flood-opacity="0.09" />
-            <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#000000" flood-opacity="0.05" />
+            <feDropShadow dx="0" dy="12" stdDeviation="18" floodColor="#000000" floodOpacity="0.09" />
+            <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#000000" floodOpacity="0.05" />
           </filter>
 
           {/* Минималистичные фоновые градиенты слайдов */}

@@ -27,22 +27,19 @@ export async function listAiModelsUpstream(
         : "economy";
     const slug =
       typeof row.openRouterSlug === "string" ? row.openRouterSlug : "";
-    const isFree =
-      row.isFree === true ||
-      slug.endsWith(":free") ||
-      slug === "openrouter/free";
-    const base = { tier, isFree } as const;
     const creditCost =
-      typeof row.creditCost === "number" && Number.isFinite(row.creditCost)
-        ? Math.max(0, Math.round(row.creditCost))
-        : creditCostForModel(base);
+      typeof row.creditCost === "number" &&
+      Number.isFinite(row.creditCost) &&
+      row.creditCost > 0
+        ? Math.round(row.creditCost)
+        : creditCostForModel({ tier });
     models.push({
       modelId: row.modelId,
       displayName: row.displayName,
       tier,
       openRouterSlug: slug,
       enabled: row.enabled !== false,
-      isFree,
+      isFree: false,
       creditCost,
     });
   }

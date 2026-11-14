@@ -27,8 +27,15 @@ import {
   StudioContentBody,
 } from "@/components/studio/ui/studio-content";
 import { Button } from "@/components/ui/button";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 function statusTone(status: ConnectorPublic["status"]) {
   switch (status) {
@@ -337,6 +344,13 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+const activityChartConfig = {
+  count: {
+    label: "Events",
+    color: "var(--foreground)",
+  },
+} satisfies ChartConfig;
+
 function ActivityChart({
   title,
   emptyLabel,
@@ -346,8 +360,12 @@ function ActivityChart({
   emptyLabel: string;
   daily: Array<{ date: string; count: number }>;
 }) {
-  const maxDaily = Math.max(1, ...daily.map((d) => d.count));
   const total = daily.reduce((sum, d) => sum + d.count, 0);
+  const data = daily.map((day) => ({
+    date: day.date,
+    label: formatDayLabel(day.date),
+    count: day.count,
+  }));
 
   return (
     <div className="rounded-2xl bg-muted/20 p-4">
@@ -360,41 +378,34 @@ function ActivityChart({
           {emptyLabel}
         </p>
       ) : (
-        <div className="flex h-40 items-end gap-2">
-          {daily.map((day) => {
-            const barMaxPx = 112;
-            const heightPx =
-              day.count <= 0
-                ? 4
-                : Math.max(8, Math.round((day.count / maxDaily) * barMaxPx));
-            return (
-              <div
-                key={day.date}
-                className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
-                title={`${day.date}: ${day.count}`}
-              >
-                <span
-                  className={cn(
-                    "text-[10px] font-medium tabular-nums",
-                    day.count > 0 ? "text-foreground" : "text-transparent",
-                  )}
-                >
-                  {day.count}
-                </span>
-                <div
-                  className={cn(
-                    "w-full rounded-md",
-                    day.count > 0 ? "bg-foreground/85" : "bg-muted/50",
-                  )}
-                  style={{ height: heightPx }}
-                />
-                <span className="text-[10px] text-muted-foreground">
-                  {formatDayLabel(day.date)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        <ChartContainer
+          config={activityChartConfig}
+          className="aspect-auto h-44 w-full"
+          initialDimension={{ width: 480, height: 176 }}
+        >
+          <BarChart
+            accessibilityLayer
+            data={data}
+            margin={{ top: 8, right: 4, left: 4, bottom: 0 }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="label"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Bar
+              dataKey="count"
+              fill="var(--color-count)"
+              radius={[6, 6, 0, 0]}
+            />
+          </BarChart>
+        </ChartContainer>
       )}
     </div>
   );

@@ -2,10 +2,10 @@
 
 ## Product rules
 
-- **Free** → `FREE_GENERATION_LIMIT` (3) successful generations, then upgrade dialog.
+- **Free** → `FREE_GENERATION_LIMIT` (3) successful generations on **any** model (platform-funded), then upgrade dialog.
 - **Pro subscription** (`STUDIO_PRO_PRICE` BYN / month) → Pro features + `PRO_MONTHLY_CREDITS` generation credits each billing period.
 - **Credit pack** → `CREDIT_PACK_CREDITS` for `CREDIT_PACK_PRICE` BYN (Pro only). Adds to top-up balance.
-- Each successful AI generation costs `GENERATION_CREDIT_COST` (1) from plan → top-up.
+- Pro generations cost credits by model tier (economy 1 / standard 2 / premium 3).
 - Folders stay Pro-only.
 - Plan balance is reset to the monthly allotment on subscribe / renew; top-up credits roll over.
 

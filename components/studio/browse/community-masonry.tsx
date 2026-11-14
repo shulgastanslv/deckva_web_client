@@ -1,28 +1,79 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslations } from "next-intl";
+
 import type { CommunityProjectListItem } from "@/actions/community";
+import { formatBoardDate } from "@/components/studio/lib/format";
+import { StudioProjectOwner } from "@/components/studio/browse/studio-project-owner";
 import { cn } from "@/lib/utils";
 
-const ASPECT: Record<string, string> = {
-  "4:5": "4 / 5",
-  "1:1": "1 / 1",
-  "9:16": "9 / 16",
-  "16:9": "16 / 9",
-  "4:3": "4 / 3",
-  "3:2": "3 / 2",
-};
+function CommunityStackPreview({
+  item,
+  untitled,
+}: {
+  item: CommunityProjectListItem;
+  untitled: string;
+}) {
+  const urls = item.thumbnail ? [item.thumbnail] : [];
+  const layers = Math.min(3, Math.max(1, item.slideCount));
+  const stacked = layers > 1;
 
-function formatShortDate(iso: string | null) {
-  if (!iso) return null;
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      month: "short",
-      day: "numeric",
-    }).format(new Date(iso));
-  } catch {
-    return null;
-  }
+  return (
+    <span className="relative block aspect-4/5 w-full">
+      {stacked
+        ? Array.from({ length: layers - 1 }, (_, i) => {
+            const depth = layers - 1 - i;
+            return (
+              <span
+                key={`peek-${depth}`}
+                aria-hidden
+                className={cn(
+                  "absolute overflow-hidden rounded-2xl bg-muted/50",
+                  depth === 2 && "inset-0 left-3 top-2.5",
+                  depth === 1 && "inset-0 left-1.5 top-1",
+                )}
+                style={{ zIndex: depth }}
+              >
+                {urls[0] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={urls[0]}
+                    alt=""
+                    className="size-full object-cover opacity-55"
+                    draggable={false}
+                  />
+                ) : (
+                  <span className="block size-full bg-muted/70" />
+                )}
+              </span>
+            );
+          })
+        : null}
+
+      <span
+        className={cn(
+          "absolute z-[3] overflow-hidden rounded-2xl bg-muted/40 transition-colors group-hover:bg-muted/60",
+          stacked ? "inset-0 right-2.5 bottom-2.5" : "inset-0",
+        )}
+      >
+        {urls[0] ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={urls[0]}
+            alt=""
+            className="size-full object-cover"
+            draggable={false}
+          />
+        ) : (
+          <span className="flex h-full items-center justify-center px-4 text-center">
+            <span className="line-clamp-4 text-[13px] font-medium leading-snug text-muted-foreground">
+              {item.title || untitled}
+            </span>
+          </span>
+        )}
+      </span>
+    </span>
+  );
 }
 
 export function CommunityMasonry({
@@ -32,73 +83,52 @@ export function CommunityMasonry({
   items: CommunityProjectListItem[];
   onOpen: (id: string) => void;
 }) {
+  const tc = useTranslations("common");
+
   return (
-    <div className="columns-2 gap-4 sm:columns-3 md:columns-4 xl:columns-5">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
       {items.map((item) => {
-        const aspect = ASPECT[item.aspectRatio] ?? "4 / 5";
-        const when = formatShortDate(
-          item.communityUpdatedAt ?? item.publishedAt,
-        );
-        const editor = item.updatedByName ?? item.authorName ?? "Creator";
-
+        const when = item.communityUpdatedAt ?? item.publishedAt;
         return (
-          <button
+          <article
             key={item.id}
-            type="button"
-            onClick={() => onOpen(item.id)}
-            className="group mb-4 block w-full break-inside-avoid text-left"
+            className="group relative flex cursor-pointer flex-col gap-2.5 select-none"
           >
-            <div
-              className={cn(
-                "relative overflow-hidden rounded-2xl bg-muted/40 transition-colors",
-                "group-hover:bg-muted/55",
-              )}
-              style={{ aspectRatio: aspect }}
+            <button
+              type="button"
+              onClick={() => onOpen(item.id)}
+              className="relative w-full text-left"
             >
-              {item.thumbnail ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.thumbnail}
-                  alt=""
-                  className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                  draggable={false}
-                />
-              ) : (
-                <span className="flex h-full items-center justify-center px-3 text-center text-[12px] text-muted-foreground/70">
-                  {item.title}
+              <CommunityStackPreview item={item} untitled={tc("untitled")} />
+
+              {item.slideCount > 1 ? (
+                <span className="absolute right-3.5 bottom-3.5 z-[4] rounded-md bg-background/90 px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-foreground">
+                  {item.slideCount}
                 </span>
-              )}
+              ) : null}
+            </button>
 
-              <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/55 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-
-              <div className="absolute inset-x-0 bottom-0 translate-y-1 p-3 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
-                <p className="line-clamp-2 text-[13px] font-medium text-white">
-                  {item.title}
-                </p>
-                {item.category ? (
-                  <p className="mt-1 text-[11px] text-white/75">{item.category}</p>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="mt-2.5 flex items-center gap-2 px-0.5">
-              <Avatar className="size-6">
-                <AvatarImage src={item.authorImage ?? undefined} alt="" />
-                <AvatarFallback className="text-[9px]">
-                  {(item.authorName ?? "?").slice(0, 1).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[12px] font-medium text-foreground">
-                  {item.authorName ?? "Creator"}
-                </p>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  {when ? `Updated ${when}` : `${item.slideCount} slides`}
-                  {item.communityUpdatedAt ? ` · ${editor}` : ""}
+            <button
+              type="button"
+              onClick={() => onOpen(item.id)}
+              className="w-full px-0.5 text-left"
+            >
+              <p className="truncate text-[13px] font-medium text-foreground">
+                {item.title || tc("untitled")}
+              </p>
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                <StudioProjectOwner
+                  name={item.authorName}
+                  image={item.authorImage}
+                  className="min-w-0"
+                />
+                <p className="shrink-0 text-[11px] text-muted-foreground">
+                  {item.slideCount}
+                  {when ? ` · ${formatBoardDate(when)}` : ""}
                 </p>
               </div>
-            </div>
-          </button>
+            </button>
+          </article>
         );
       })}
     </div>

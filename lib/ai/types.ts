@@ -11,9 +11,9 @@ export type AiModelInfo = {
   tier: "economy" | "standard" | "premium";
   openRouterSlug: string;
   enabled: boolean;
-  /** OpenRouter $0 model (`:free`). */
+  /** @deprecated Always false — free quota is generations, not models. */
   isFree: boolean;
-  /** Credits charged per generation (Pro). Free models = 0. */
+  /** Credits charged per generation on Pro. */
   creditCost: number;
 };
 

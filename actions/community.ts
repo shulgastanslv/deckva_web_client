@@ -11,6 +11,7 @@ import {
   type CommunityCategory,
   type CommunitySortId,
 } from "@/lib/community/categories";
+import { normalizeKeyMoments } from "@/lib/community/listing-copy";
 import { messages } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { isPlatformAdmin } from "@/lib/roles";
@@ -43,6 +44,8 @@ export type CommunityProjectMeta = {
   title: string;
   communityStatus: CommunityReviewStatus;
   category: string | null;
+  description: string | null;
+  keyMoments: string[];
   publishedAt: string | null;
   communityUpdatedAt: string | null;
   isPublished: boolean;
@@ -177,6 +180,8 @@ export async function getProjectCommunityMeta(
         organizationId: true,
         communityStatus: true,
         communityCategory: true,
+        communityDescription: true,
+        communityKeyMoments: true,
         publishedAt: true,
         communityUpdatedAt: true,
         isPublic: true,
@@ -198,6 +203,8 @@ export async function getProjectCommunityMeta(
         title: project.title,
         communityStatus: project.communityStatus as CommunityReviewStatus,
         category: project.communityCategory,
+        description: project.communityDescription,
+        keyMoments: normalizeKeyMoments(project.communityKeyMoments),
         publishedAt: project.publishedAt?.toISOString() ?? null,
         communityUpdatedAt: project.communityUpdatedAt?.toISOString() ?? null,
         isPublished,
@@ -212,6 +219,9 @@ export async function getProjectCommunityMeta(
 export async function publishProjectToCommunity(input: {
   projectId: string;
   category: string;
+  title?: string;
+  description?: string;
+  keyMoments?: string[];
 }): Promise<
   ActionResult<{ communityStatus: CommunityReviewStatus; republished: boolean }>
 > {
@@ -224,6 +234,23 @@ export async function publishProjectToCommunity(input: {
     }
     if (!isCommunityCategory(input.category)) {
       return { success: false, error: "Pick a category" };
+    }
+
+    const title = input.title?.trim().slice(0, 120) || "";
+    const description =
+      input.description?.replace(/\s+/g, " ").trim().slice(0, 600) || "";
+    const keyMoments = normalizeKeyMoments(input.keyMoments);
+    if (!title) {
+      return { success: false, error: "Add a title before publishing" };
+    }
+    if (!description) {
+      return { success: false, error: "Add a description before publishing" };
+    }
+    if (keyMoments.length === 0) {
+      return {
+        success: false,
+        error: "Add at least one key moment before publishing",
+      };
     }
 
     const project = await prisma.project.findFirst({
@@ -258,8 +285,11 @@ export async function publishProjectToCommunity(input: {
     await prisma.project.update({
       where: { id: projectId },
       data: {
+        title,
         isPublic: true,
         communityCategory: input.category as CommunityCategory,
+        communityDescription: description,
+        communityKeyMoments: keyMoments,
         communityStatus,
         publishedAt: project.publishedAt ?? now,
         communityUpdatedAt: now,
@@ -344,6 +374,8 @@ export type CommunityPreview = {
   title: string;
   aspectRatio: string;
   category: string | null;
+  description: string | null;
+  keyMoments: string[];
   slideCount: number;
   authorName: string | null;
   authorImage: string | null;
@@ -377,6 +409,8 @@ export async function getCommunityPreview(
         aspectRatio: true,
         thumbnail: true,
         communityCategory: true,
+        communityDescription: true,
+        communityKeyMoments: true,
         publishedAt: true,
         communityUpdatedAt: true,
         userId: true,
@@ -405,6 +439,8 @@ export async function getCommunityPreview(
         title: project.title,
         aspectRatio: project.aspectRatio,
         category: project.communityCategory,
+        description: project.communityDescription,
+        keyMoments: normalizeKeyMoments(project.communityKeyMoments),
         slideCount: slides.length,
         authorName: project.user.name,
         authorImage: project.user.image,
@@ -457,6 +493,8 @@ export async function cloneCommunityProject(
         isPublic: false,
         communityStatus: "DRAFT",
         communityCategory: project.communityCategory,
+        communityDescription: project.communityDescription,
+        communityKeyMoments: project.communityKeyMoments,
         userId,
         organizationId,
         slides: {

@@ -16,7 +16,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { listAiModels } from "@/actions/ai";
 import {
@@ -41,6 +41,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { GenerateOptionsDialog } from "@/components/studio/create/generate-options-dialog";
 import { creditCostForModel } from "@/lib/ai/model-pricing";
 import type { AiModelInfo } from "@/lib/ai/types";
 import { trackEvent } from "@/lib/analytics";
@@ -49,11 +50,15 @@ import type { ConnectorProviderId, ConnectorPublic } from "@/lib/connectors/type
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import {
   applyPromptSkill,
+  getPromptSkill,
   listPromptSkills,
   type PromptSkillId,
 } from "@/lib/studio/prompt-skills";
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
+import { type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+const PROMPT_LANGUAGES = ["ru", "en", "be"] as const;
 
 const MODEL_KEY = "studio_ai_model";
 const HISTORY_KEY = "studio_prompt_recents";
@@ -61,7 +66,7 @@ const MAX_HISTORY = 6;
 const MAX_ATTACHMENTS = 4;
 const MAX_TEXT_CHARS = 4000;
 
-type ModelFilter = "all" | "free" | BrandKey;
+type ModelFilter = "all" | BrandKey;
 
 type PromptAttachment = {
   id: string;
@@ -81,7 +86,6 @@ const CONNECTORS = [
 
 const PROVIDER_FILTERS: { id: ModelFilter; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "free", label: "Free" },
   { id: "openai", label: "OpenAI" },
   { id: "claude", label: "Claude" },
   { id: "gemini", label: "Gemini" },
@@ -137,6 +141,7 @@ export function StudioPrompt({
 }) {
   const t = useTranslations("studio");
   const tc = useTranslations("common");
+  const locale = useLocale();
   const appliedTopic = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const modelSearchRef = useRef<HTMLInputElement>(null);
@@ -149,9 +154,19 @@ export function StudioPrompt({
   const [modelFilter, setModelFilter] = useState<ModelFilter>("all");
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const [attachments, setAttachments] = useState<PromptAttachment[]>([]);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [attaching, setAttaching] = useState(false);
   const [skillId, setSkillId] = useState<PromptSkillId | null>(null);
+  const [language, setLanguage] = useState(() =>
+    PROMPT_LANGUAGES.includes(locale as (typeof PROMPT_LANGUAGES)[number])
+      ? locale
+      : "ru",
+  );
+  const [aspectRatio, setAspectRatio] = useState<RatioKey>("4:5");
+  const [slidesCount, setSlidesCount] = useState(7);
+  const [handle, setHandle] = useState("@coach");
   const [connectors, setConnectors] = useState<ConnectorPublic[]>([]);
   const [connectorBusy, setConnectorBusy] = useState<ConnectorProviderId | null>(
     null,
@@ -214,12 +229,10 @@ export function StudioPrompt({
 
   const selected = models.find((m) => m.modelId === modelId) ?? models[0];
   const selectedCost = creditCostForModel(selected);
-  const selectedPriceLabel =
-    selectedCost <= 0
-      ? t("prompt.free")
-      : t("prompt.creditsPerRun", { count: selectedCost });
-  const selectedMoney =
-    selectedCost > 0 ? moneyForCredits(selectedCost) : null;
+  const selectedPriceLabel = t("prompt.creditsPerRun", {
+    count: selectedCost,
+  });
+  const selectedMoney = moneyForCredits(selectedCost);
   const selectedMoneyHint = selectedMoney
     ? t("prompt.approxPrice", {
         price: selectedMoney.amount,
@@ -238,7 +251,7 @@ export function StudioPrompt({
       models.map((m) => resolveBrandFromModelId(m.modelId).key),
     );
     return PROVIDER_FILTERS.filter((item) => {
-      if (item.id === "all" || item.id === "free") return true;
+      if (item.id === "all") return true;
       return present.has(item.id);
     });
   }, [models]);
@@ -246,10 +259,11 @@ export function StudioPrompt({
   const filteredModels = useMemo(() => {
     const q = modelQuery.trim().toLowerCase();
     return models.filter((model) => {
-      if (modelFilter === "free" && !model.isFree) return false;
-      if (modelFilter !== "all" && modelFilter !== "free") {
-        if (resolveBrandFromModelId(model.modelId).key !== modelFilter)
-          return false;
+      if (
+        modelFilter !== "all" &&
+        resolveBrandFromModelId(model.modelId).key !== modelFilter
+      ) {
+        return false;
       }
       if (!q) return true;
       return (
@@ -273,6 +287,7 @@ export function StudioPrompt({
     setAttaching(true);
     try {
       const next: PromptAttachment[] = [...attachments];
+      let seededCover: string | null = null;
       for (const file of Array.from(files)) {
         if (next.length >= MAX_ATTACHMENTS) {
           toast.error(t("prompt.tooManyFiles", { max: MAX_ATTACHMENTS }));
@@ -296,6 +311,7 @@ export function StudioPrompt({
             kind: "image",
             payload: dataUrl,
           });
+          if (!seededCover) seededCover = dataUrl;
         } else {
           const body = await readTextFile(file);
           if (!body) {
@@ -311,6 +327,7 @@ export function StudioPrompt({
         }
       }
       setAttachments(next);
+      if (seededCover && !coverUrl) setCoverUrl(seededCover);
       trackEvent("prompt_files_attached", { count: next.length });
     } catch (err) {
       toast.error(
@@ -322,7 +339,22 @@ export function StudioPrompt({
   };
 
   const removeAttachment = (id: string) => {
-    setAttachments((prev) => prev.filter((item) => item.id !== id));
+    setAttachments((prev) => {
+      const removed = prev.find((item) => item.id === id);
+      if (removed?.kind === "image" && removed.payload === coverUrl) {
+        const nextImage = prev.find(
+          (item) => item.id !== id && item.kind === "image",
+        );
+        setCoverUrl(nextImage?.payload ?? null);
+      }
+      return prev.filter((item) => item.id !== id);
+    });
+  };
+
+  const pickSkill = (id: PromptSkillId | null) => {
+    setSkillId(id);
+    const skill = getPromptSkill(id);
+    if (skill) setSlidesCount(skill.slidesCount);
   };
 
   const connectProvider = (id: ConnectorProviderId) => {
@@ -352,7 +384,12 @@ export function StudioPrompt({
     }
   };
 
-  const submit = () => {
+  const openOptions = () => {
+    if (!canSend) return;
+    setOptionsOpen(true);
+  };
+
+  const confirmGenerate = () => {
     if (!canSend) return;
 
     const seedText = attachments
@@ -360,20 +397,28 @@ export function StudioPrompt({
       .map((a) => `Attached “${a.name}”: ${a.payload}`)
       .join("\n\n")
       .slice(0, 8000);
-    const images = attachments
+    const attachedImages = attachments
       .filter((a) => a.kind === "image")
       .map((a) => a.payload)
       .filter(Boolean);
-    // Skill structure is applied on the AI server via skillId; client only
-    // picks the default slidesCount from the skill catalog.
+    const cover = coverUrl?.trim() || attachedImages[0] || undefined;
+    const images = [
+      ...(cover ? [cover] : []),
+      ...attachedImages.filter((url) => url !== cover),
+    ];
+    // Skill structure is applied on the AI server via skillId; slidesCount
+    // comes from the dialog control (skill pick seeds the default).
     const shaped = applyPromptSkill(trimmed, skillId);
-    const cover = images[0];
 
     setHistory(pushHistory(trimmed));
+    setOptionsOpen(false);
     trackEvent("prompt_submitted", {
       hasCover: Boolean(cover),
       attachments: attachments.length,
       images: images.length,
+      language,
+      aspectRatio,
+      slidesCount,
       skillId: skillId ?? shaped.skillId ?? null,
     });
     void onSubmit({
@@ -381,7 +426,10 @@ export function StudioPrompt({
       modelId: selected?.modelId,
       cover,
       skillId: shaped.skillId ?? skillId ?? undefined,
-      slidesCount: shaped.slidesCount,
+      slidesCount,
+      language,
+      handle,
+      aspectRatio,
       seedText: seedText || undefined,
       images,
       attachments: attachments.map((a) => ({
@@ -407,7 +455,7 @@ export function StudioPrompt({
                   type="button"
                   aria-label={tc("close")}
                   className="rounded-md p-0.5 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                  onClick={() => setSkillId(null)}
+                  onClick={() => pickSkill(null)}
                 >
                   <X className="size-3" />
                 </button>
@@ -448,7 +496,7 @@ export function StudioPrompt({
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              submit();
+              openOptions();
             }
           }}
           rows={2}
@@ -519,11 +567,11 @@ export function StudioPrompt({
                             active && "bg-muted/50",
                           )}
                           onSelect={() => {
-                            setSkillId((prev) =>
-                              prev === skill.id ? null : skill.id,
-                            );
+                            const next =
+                              skillId === skill.id ? null : skill.id;
+                            pickSkill(next);
                             trackEvent("prompt_skill_selected", {
-                              skillId: skill.id,
+                              skillId: next,
                             });
                           }}
                         >
@@ -707,7 +755,7 @@ export function StudioPrompt({
                                 : "bg-muted/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                             )}
                           >
-                            {item.id !== "all" && item.id !== "free" ? (
+                            {item.id !== "all" ? (
                               <span className="mr-1.5 inline-flex">
                                 <BrandIcon
                                   brand={item.id}
@@ -715,11 +763,7 @@ export function StudioPrompt({
                                 />
                               </span>
                             ) : null}
-                            {item.id === "all"
-                              ? tc("all")
-                              : item.id === "free"
-                                ? t("prompt.free")
-                                : item.label}
+                            {item.id === "all" ? tc("all") : item.label}
                           </button>
                         );
                       })}
@@ -736,10 +780,9 @@ export function StudioPrompt({
                     ) : (
                       filteredModels.map((model) => {
                         const cost = creditCostForModel(model);
-                        const price =
-                          cost <= 0
-                            ? t("prompt.free")
-                            : t("prompt.creditsPerRun", { count: cost });
+                        const price = t("prompt.creditsPerRun", {
+                          count: cost,
+                        });
                         return (
                           <DropdownMenuItem
                             key={model.modelId}
@@ -804,7 +847,7 @@ export function StudioPrompt({
             <button
               type="button"
               disabled={!canSend}
-              onClick={submit}
+              onClick={openOptions}
               aria-label={
                 selected
                   ? `${t("generate")} · ${selectedPriceLabel}`
@@ -847,6 +890,26 @@ export function StudioPrompt({
       {error ? (
         <p className="px-1 text-[13px] text-destructive">{error}</p>
       ) : null}
+
+      <GenerateOptionsDialog
+        open={optionsOpen}
+        onOpenChange={setOptionsOpen}
+        busy={busy}
+        attaching={attaching}
+        topic={value}
+        onTopicChange={setValue}
+        language={language}
+        onLanguageChange={setLanguage}
+        aspectRatio={aspectRatio}
+        onAspectRatioChange={setAspectRatio}
+        slidesCount={slidesCount}
+        onSlidesCountChange={setSlidesCount}
+        handle={handle}
+        onHandleChange={setHandle}
+        coverUrl={coverUrl}
+        onCoverUrlChange={setCoverUrl}
+        onConfirm={confirmGenerate}
+      />
     </div>
   );
 }

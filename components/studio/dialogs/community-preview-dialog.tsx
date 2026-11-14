@@ -251,13 +251,13 @@ export function CommunityPreviewDialog({
             ) : null}
           </div>
 
-          <aside className="flex w-full shrink-0 flex-col justify-between gap-6 bg-background px-5 py-6 sm:px-6 lg:w-[320px] lg:bg-muted/10">
-            <div className="space-y-4">
-              <div>
+          <aside className="flex w-full shrink-0 flex-col justify-between gap-6 overflow-x-hidden bg-background px-5 py-6 sm:px-6 lg:w-[320px] lg:bg-muted/10">
+            <div className="min-w-0 space-y-4">
+              <div className="min-w-0">
                 <p className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">
                   {preview?.category ?? tb("community")}
                 </p>
-                <h2 className="mt-1.5 text-[22px] leading-tight font-semibold tracking-tight text-foreground">
+                <h2 className="mt-1.5 break-words text-[22px] leading-tight font-semibold tracking-tight wrap-anywhere text-foreground">
                   {preview?.title ?? (loading ? t("loading") : t("template"))}
                 </h2>
                 {preview ? (
@@ -269,6 +269,33 @@ export function CommunityPreviewDialog({
                   </p>
                 ) : null}
               </div>
+
+              {preview?.description ? (
+                <p className="max-w-full break-words text-[14px] leading-relaxed wrap-anywhere text-foreground/90">
+                  {preview.description}
+                </p>
+              ) : null}
+
+              {preview && preview.keyMoments.length > 0 ? (
+                <div className="min-w-0 space-y-2">
+                  <p className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">
+                    {t("keyMoments")}
+                  </p>
+                  <ul className="space-y-1.5">
+                    {preview.keyMoments.map((moment) => (
+                      <li
+                        key={moment}
+                        className="flex min-w-0 gap-2 text-[13px] leading-snug text-foreground"
+                      >
+                        <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-foreground/50" />
+                        <span className="min-w-0 break-words wrap-anywhere">
+                          {moment}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
               {preview ? (
                 <div className="space-y-3 rounded-2xl bg-muted/30 p-3.5">

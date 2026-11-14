@@ -378,6 +378,10 @@ model Project {
   communityStatus CommunityStatus @default(DRAFT)
   /// Browse filter (Business, Lifestyle, …).
   communityCategory String?
+  /// Public listing blurb for community / template view.
+  communityDescription String? @db.Text
+  /// Short highlight bullets shown on the template page.
+  communityKeyMoments String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   /// Soft-delete: set when moved to Trash; null while active.

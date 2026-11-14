@@ -160,15 +160,17 @@ export function StudioIntentBootstrap() {
             next.setPalette(aiPaletteToProjectPalette(result.palette));
           }
 
+          // applyPayload already rendered JPEG thumbs into the store — persist them
+          // so Recent cards / community preview aren't empty placeholders.
           const snap = useCanvasStore.getState();
           const saved = await saveProject(intent.projectId, {
             title: result.title,
             aspectRatio: result.aspectRatio,
             width: result.width,
             height: result.height,
-            slides: result.slides.map((canvasJSON) => ({
-              canvasJSON,
-              thumbnail: null,
+            slides: snap.slides.map((slide) => ({
+              canvasJSON: slide.canvasJSON,
+              thumbnail: slide.thumbnail ?? null,
             })),
             document: {
               palette: snap.palette,

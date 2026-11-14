@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import {
   Check,
+  Plus,
   SpinnerGap as Loader2,
+  X,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
@@ -19,6 +21,7 @@ import {
   isCommunityCategory,
   type CommunityCategory,
 } from "@/lib/community/categories";
+import { suggestListingCopy } from "@/lib/community/listing-copy";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +29,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { CommunityCategoryDropdown } from "@/components/studio/browse/community-category-dropdown";
+import {
+  sidebarFieldInput,
+  sidebarTextarea,
+} from "@/components/canvas/sidebar/sidebar-ui";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { useSlidesController } from "@/context/canvas-manager";
@@ -34,7 +42,7 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
 import { THUMB_TARGET_WIDTH } from "@/lib/canvas/thumbnail";
 import { renderSlidesToImages } from "@/lib/export/carousel";
-
+import { cn } from "@/lib/utils";
 
 interface PublishCommunityDialogProps {
   open: boolean;
@@ -96,6 +104,9 @@ export function PublishCommunityDialog({
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<CommunityProjectMeta | null>(null);
   const [category, setCategory] = useState<CommunityCategory>("Other");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [keyMoments, setKeyMoments] = useState<string[]>([""]);
 
   useEffect(() => {
     if (!open) return;
@@ -105,8 +116,20 @@ export function PublishCommunityDialog({
     setLoading(false);
     setMeta(null);
 
+    const live = useCanvasStore.getState();
+    const suggested = suggestListingCopy({
+      title: live.projectTitle,
+      slides: live.slides,
+    });
+    setTitle(live.projectTitle.trim() || "");
+    setDescription(suggested.description);
+    setKeyMoments(
+      suggested.keyMoments.length > 0 ? suggested.keyMoments : [""],
+    );
+    setCategory("Other");
+
     let cancelled = false;
-    const fallbackThumb = useCanvasStore.getState().slides[0]?.thumbnail ?? null;
+    const fallbackThumb = live.slides[0]?.thumbnail ?? null;
     setPreviewLoading(true);
     setPreviewUrl(fallbackThumb);
     slidesController?.saveCurrent();
@@ -135,6 +158,13 @@ export function PublishCommunityDialog({
         if (res.meta.category && isCommunityCategory(res.meta.category)) {
           setCategory(res.meta.category);
         }
+        if (res.meta.title.trim()) setTitle(res.meta.title);
+        if (res.meta.description?.trim()) {
+          setDescription(res.meta.description);
+        }
+        if (res.meta.keyMoments.length > 0) {
+          setKeyMoments(res.meta.keyMoments);
+        }
       });
     }
 
@@ -149,6 +179,22 @@ export function PublishCommunityDialog({
   const handlePublish = async () => {
     if (status !== "authenticated") {
       onAuthRequired?.();
+      return;
+    }
+
+    const nextTitle = title.trim();
+    const nextDescription = description.trim();
+    const nextMoments = keyMoments.map((item) => item.trim()).filter(Boolean);
+    if (!nextTitle) {
+      setError(t("titleRequired"));
+      return;
+    }
+    if (!nextDescription) {
+      setError(t("descriptionRequired"));
+      return;
+    }
+    if (nextMoments.length === 0) {
+      setError(t("keyMomentsRequired"));
       return;
     }
 
@@ -180,15 +226,23 @@ export function PublishCommunityDialog({
       const res = await publishProjectToCommunity({
         projectId,
         category,
+        title: nextTitle,
+        description: nextDescription,
+        keyMoments: nextMoments,
       });
       if (!res.success) {
         setError("error" in res ? res.error : messages.errors.publishCommunity);
         return;
       }
 
+      if (nextTitle !== live.projectTitle) {
+        useCanvasStore.getState().setProjectTitle(nextTitle);
+      }
+
       setDoneLabel(res.republished ? t("republished") : t("submitted"));
       setDone(true);
       window.dispatchEvent(new CustomEvent("core:community-changed"));
+      window.dispatchEvent(new CustomEvent("core:projects-changed"));
       setTimeout(() => onOpenChange(false), 700);
     } catch (err) {
       reportError(err, messages.errors.publishCommunity);
@@ -224,14 +278,14 @@ export function PublishCommunityDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-5 rounded-3xl p-5 sm:max-w-[400px]">
-        <DialogHeader className="space-y-1 text-left">
+      <DialogContent className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[440px]">
+        <DialogHeader className="space-y-1 px-5 pt-5 text-left">
           <DialogTitle className="text-base font-semibold tracking-tight">
             {isRepublish ? t("updateTitle") : t("title")}
           </DialogTitle>
           <p className="text-[13px] text-muted-foreground">
             {t("metaLine", {
-              title: projectTitle.trim() || tc("untitled"),
+              title: title.trim() || projectTitle.trim() || tc("untitled"),
               count: slides.length,
             })}{" "}
             · {currentRatio}
@@ -247,14 +301,14 @@ export function PublishCommunityDialog({
         </DialogHeader>
 
         {done ? (
-          <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <div className="flex flex-col items-center gap-3 px-5 py-8 text-center">
             <div className="flex size-10 items-center justify-center rounded-md bg-muted">
               <Check className="size-4" />
             </div>
             <p className="text-[13px] font-medium">{doneLabel}</p>
           </div>
         ) : (
-          <>
+          <div className="max-h-[min(72vh,640px)] space-y-3.5 overflow-y-auto px-5 py-4">
             <div className="overflow-hidden rounded-xl bg-muted/40">
               <div className="flex h-36 w-full items-center justify-center">
                 {previewLoading && !previewUrl ? (
@@ -274,10 +328,23 @@ export function PublishCommunityDialog({
               </div>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-[12px] font-medium text-muted-foreground">
+            <label className="block space-y-1.5">
+              <span className="text-[12px] font-medium text-muted-foreground">
+                {t("listingTitle")}
+              </span>
+              <Input
+                value={title}
+                disabled={loading}
+                placeholder={tc("untitledCarousel")}
+                onChange={(e) => setTitle(e.target.value)}
+                className={sidebarFieldInput}
+              />
+            </label>
+
+            <div className="space-y-1.5">
+              <span className="text-[12px] font-medium text-muted-foreground">
                 {t("category")}
-              </p>
+              </span>
               <CommunityCategoryDropdown
                 value={category}
                 onChange={(next) => {
@@ -289,16 +356,84 @@ export function PublishCommunityDialog({
               />
             </div>
 
+            <label className="block space-y-1.5">
+              <span className="text-[12px] font-medium text-muted-foreground">
+                {t("listingDescription")}
+              </span>
+              <textarea
+                value={description}
+                disabled={loading}
+                rows={3}
+                placeholder={t("listingDescriptionPlaceholder")}
+                className={cn(sidebarTextarea, "min-h-[88px]")}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </label>
+
+            <div className="space-y-1.5">
+              <span className="text-[12px] font-medium text-muted-foreground">
+                {t("keyMoments")}
+              </span>
+              <p className="text-[11px] text-muted-foreground">
+                {t("keyMomentsHint")}
+              </p>
+              <div className="space-y-1.5">
+                {keyMoments.map((moment, index) => (
+                  <div key={`moment-${index}`} className="flex gap-1.5">
+                    <Input
+                      value={moment}
+                      disabled={loading}
+                      placeholder={t("keyMomentPlaceholder", {
+                        n: index + 1,
+                      })}
+                      onChange={(e) => {
+                        const next = [...keyMoments];
+                        next[index] = e.target.value;
+                        setKeyMoments(next);
+                      }}
+                      className={sidebarFieldInput}
+                    />
+                    <button
+                      type="button"
+                      disabled={loading || keyMoments.length <= 1}
+                      aria-label={tc("remove")}
+                      onClick={() =>
+                        setKeyMoments((prev) =>
+                          prev.filter((_, i) => i !== index),
+                        )
+                      }
+                      className="inline-flex size-11 shrink-0 items-center justify-center rounded-md bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-40"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {keyMoments.length < 8 ? (
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => setKeyMoments((prev) => [...prev, ""])}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-md px-2 text-[12px] font-normal text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+                >
+                  <Plus className="size-3.5" />
+                  {t("addKeyMoment")}
+                </button>
+              ) : null}
+            </div>
+
             <p className="text-[13px] leading-snug text-muted-foreground">
               {isRepublish ? t("republishHint") : t("description")}
             </p>
 
-            {error ? <p className="text-[13px] text-destructive">{error}</p> : null}
+            {error ? (
+              <p className="text-[13px] text-destructive">{error}</p>
+            ) : null}
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 pt-1">
               <Button
                 type="button"
-                className="h-10 w-full gap-2 rounded-md shadow-none"
+                className="w-full gap-2 rounded-md shadow-none"
                 disabled={loading || slides.length === 0}
                 onClick={() => void handlePublish()}
               >
@@ -314,7 +449,7 @@ export function PublishCommunityDialog({
                 <Button
                   type="button"
                   variant="secondary"
-                  className="h-10 w-full rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
+                  className="w-full rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
                   disabled={loading}
                   onClick={() => void handleUnpublish()}
                 >
@@ -322,7 +457,7 @@ export function PublishCommunityDialog({
                 </Button>
               ) : null}
             </div>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>
