@@ -45,6 +45,39 @@ export function LandingSection({
   );
 }
 
+/** Miro homepage island: white board on soft outer canvas */
+export function MiroBoard({
+  id,
+  className,
+  children,
+}: {
+  id?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const motionProps = useSectionReveal();
+  return (
+    <motion.section
+      id={id}
+      {...motionProps}
+      className={cn(
+        "scroll-mt-28 overflow-hidden rounded-[2rem]",
+        "bg-white dark:bg-[#14151c]",
+        "px-6 py-14 sm:rounded-[2.5rem] sm:px-10 sm:py-16 lg:px-14 lg:py-20",
+        className,
+      )}
+    >
+      {children}
+    </motion.section>
+  );
+}
+
+export const landSerif =
+  "font-[family-name:var(--font-landing-serif)] font-medium tracking-tight text-[#050038] dark:text-land-ink";
+
+export const landMuted =
+  "text-base leading-relaxed text-[#050038]/55 dark:text-land-ink/55 sm:text-lg";
+
 export function LandingHead({
   eyebrow,
   title,
