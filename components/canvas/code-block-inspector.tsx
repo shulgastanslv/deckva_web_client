@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Group } from "fabric";
+import { useTranslations } from "next-intl";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { PillSlider } from "@/components/ui/pill-slider";
 import { Switch } from "@/components/ui/switch";
 import { CodeAppearanceSelect } from "@/components/canvas/sidebar/code-chrome-cards";
+import { controlField } from "@/components/ui/control";
 import {
   DEFAULT_CODE_OPTIONS,
   fontSizeFromUiScale,
@@ -18,6 +20,7 @@ import {
   type CodeLang,
   type CodeThemeId,
 } from "@/lib/canvas/code-block";
+import { cn } from "@/lib/utils";
 
 function useCodeDraft(group: Group | null) {
   const manager = useCanvasManager();
@@ -88,12 +91,29 @@ export function CodeBlockSettings({
   search?: string;
   onAdd?: (options: CodeBlockOptions) => void;
 }) {
+  const t = useTranslations("editor.code");
   const { draft, patch, hasTarget } = useCodeDraft(group);
   const chromeStyle = resolveChromeStyle(draft.chromeStyle, draft.showChrome);
   const uiScale = uiScaleFromFontSize(draft.fontSize);
 
   return (
     <div className="flex flex-col gap-3 text-[14px]">
+      <label className="block space-y-1.5">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          {t("title")}
+        </span>
+        <input
+          value={draft.filename}
+          onChange={(e) => patch({ filename: e.target.value })}
+          placeholder={t("filename")}
+          aria-label={t("title")}
+          className={cn(
+            controlField,
+            "w-full outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/20",
+          )}
+        />
+      </label>
+
       <CodeAppearanceSelect
         chromeStyle={chromeStyle}
         theme={draft.theme}

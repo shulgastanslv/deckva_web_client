@@ -476,6 +476,54 @@
       "offer": {
         "label": "Offer for purchase",
         "topic": "An offer in five slides: the problem, the thing, the proof, the price, and the next step."
+      },
+      "tips": {
+        "label": "Practical tips",
+        "topic": "A tips carousel with one practical tip per slide and a short takeaway at the end."
+      },
+      "myths": {
+        "label": "Myth vs truth",
+        "topic": "A myth-busting carousel: one common myth per slide, then the truth, ending with a clear takeaway."
+      },
+      "checklist": {
+        "label": "Launch checklist",
+        "topic": "A checklist carousel where each slide is one item to complete before a launch or deadline."
+      },
+      "story": {
+        "label": "Founder story",
+        "topic": "A founder story in six slides: the spark, the struggle, the turn, the proof, and the ask."
+      },
+      "comparison": {
+        "label": "A vs B",
+        "topic": "A comparison carousel: option A vs option B, who each is for, and a simple recommendation."
+      },
+      "mistakes": {
+        "label": "Common mistakes",
+        "topic": "Common mistakes carousel: one mistake per slide with a fix, ending with a better default habit."
+      },
+      "framework": {
+        "label": "Simple framework",
+        "topic": "A simple framework carousel: name the model, walk through 3–4 steps, then show how to apply it."
+      },
+      "case": {
+        "label": "Case study",
+        "topic": "A case-study carousel: context, goal, what changed, the numbers, and what to copy."
+      },
+      "thread": {
+        "label": "Thread-style post",
+        "topic": "A thread-style carousel that opens with a hook, builds one idea per slide, and closes with a CTA."
+      },
+      "brand": {
+        "label": "Personal brand",
+        "topic": "A personal brand carousel: who you help, how you help, proof, and how to work with you."
+      },
+      "pricing": {
+        "label": "Pricing tiers",
+        "topic": "A pricing carousel: the offer tiers, who each is for, what’s included, and how to choose."
+      },
+      "onboarding": {
+        "label": "Customer onboarding",
+        "topic": "A customer onboarding carousel: day-one setup, first win, common blockers, and the next milestone."
       }
     },
     "userNav": {
@@ -1314,6 +1362,7 @@
       "pasteCode": "Paste your code…",
       "code": "Code",
       "filename": "Filename",
+      "title": "Title",
       "paste": "Paste",
       "indent": "Indent",
       "outdent": "Outdent",
@@ -1806,6 +1855,7 @@
       "keyMomentPlaceholder": "Moment {n}",
       "addKeyMoment": "Add moment",
       "titleRequired": "Add a title before publishing",
+      "categoryRequired": "Pick a category before publishing",
       "descriptionRequired": "Add a description before publishing",
       "keyMomentsRequired": "Add at least one key moment before publishing",
       "firstSlidePreview": "First slide preview",

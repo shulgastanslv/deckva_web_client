@@ -2,14 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import {
-  CaretUpDown as ChevronsUpDown,
-  DotsThree as Ellipsis,
-  Rectangle as RectangleHorizontal,
-  Rectangle as RectangleVertical,
-} from "@phosphor-icons/react";
+import { CaretUpDown as ChevronsUpDown } from "@phosphor-icons/react";
 
-import { ColorPicker } from "@/components/ui/color-picker";
 import {
   Popover,
   PopoverContent,
@@ -22,12 +16,6 @@ import {
   type FrameLayoutPreset,
 } from "@/lib/canvas/frame-layouts";
 import { getDeviceScreenSize } from "@/lib/canvas/device-mockup";
-import {
-  BRAND_KIT_CHANGED,
-  defaultBrandKit,
-  loadBrandKit,
-} from "@/lib/studio/brand-kit";
-import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
 import { controlH } from "@/components/ui/control";
 import { FRAME_ITEMS } from "@/components/canvas/use-element-library";
@@ -35,12 +23,9 @@ import { FRAME_ITEMS } from "@/components/canvas/use-element-library";
 type FrameItem = (typeof FRAME_ITEMS)[number];
 type FrameFamily = FrameLayoutPreset["family"];
 
-export type FrameOrientation = "portrait" | "landscape";
 export type FrameFitMode = "max" | "fit";
 
 export type FramePlaceOptions = {
-  orientation: FrameOrientation;
-  color: string;
   fit: FrameFitMode;
 };
 
@@ -69,33 +54,20 @@ function previewSize(family: FrameFamily) {
   }
 }
 
-function isLightHex(hex: string) {
-  const raw = hex.replace("#", "");
-  if (raw.length !== 6) return true;
-  const r = parseInt(raw.slice(0, 2), 16);
-  const g = parseInt(raw.slice(2, 4), 16);
-  const b = parseInt(raw.slice(4, 6), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 160;
-}
-
 function LayoutCard({
   layout,
   frame,
   family,
-  background,
   active,
   onSelect,
 }: {
   layout: FrameLayoutPreset;
   frame: FrameItem;
   family: FrameFamily;
-  background: string;
   active: boolean;
   onSelect: () => void;
 }) {
   const size = previewSize(family);
-  const clear = background === "transparent";
-  const light = !clear && isLightHex(background);
 
   return (
     <button
@@ -108,15 +80,8 @@ function LayoutCard({
           ? "bg-muted/60 ring-1 ring-ring/40"
           : "hover:bg-muted/40",
       )}
-      style={clear ? CHECKER_STYLE : { backgroundColor: background }}
+      style={CHECKER_STYLE}
     >
-      {!clear && light ? (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(0,0,0,0.04)_0%,transparent_45%),radial-gradient(circle_at_85%_80%,rgba(0,0,0,0.035)_0%,transparent_40%)]" />
-      ) : null}
-      {!clear && !light ? (
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.08)_0%,transparent_45%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.05)_0%,transparent_40%)]" />
-      ) : null}
-
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={frame.src}
@@ -143,7 +108,6 @@ export function FramesPicker({
   disabled,
   search: externalSearch = "",
   onPlace,
-  onBackground,
 }: {
   disabled?: boolean;
   search?: string;
@@ -152,46 +116,12 @@ export function FramesPicker({
     layout: FrameLayoutPreset,
     options: FramePlaceOptions,
   ) => void;
-  onBackground?: (color: string) => void;
 }) {
   const t = useTranslations("editor.frames");
-  const projectPalette = useCanvasStore((s) => s.palette);
-  const [brandKit, setBrandKit] = useState(defaultBrandKit);
   const [selectedKind, setSelectedKind] = useState<FrameKind>("iphone18pro");
   const [layoutId, setLayoutId] = useState(FRAME_LAYOUT_PRESETS[0]!.id);
-  const [bgColor, setBgColor] = useState("#ffffff");
-  const [orientation, setOrientation] = useState<FrameOrientation>("portrait");
   const [deviceOpen, setDeviceOpen] = useState(false);
   const fit: FrameFitMode = "max";
-
-  useEffect(() => {
-    setBrandKit(loadBrandKit());
-    const refresh = () => setBrandKit(loadBrandKit());
-    window.addEventListener(BRAND_KIT_CHANGED, refresh);
-    window.addEventListener("storage", refresh);
-    return () => {
-      window.removeEventListener(BRAND_KIT_CHANGED, refresh);
-      window.removeEventListener("storage", refresh);
-    };
-  }, []);
-
-  const footerSwatches = useMemo(() => {
-    const list = [
-      { id: "white", color: "#ffffff", label: "White" },
-      {
-        id: "accent",
-        color: brandKit.palette.accent || projectPalette.accent || "#1e3a5f",
-        label: "Accent",
-      },
-    ];
-    const seen = new Set<string>();
-    return list.filter((item) => {
-      const key = item.color.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [brandKit, projectPalette]);
 
   const devices = useMemo(() => {
     const q = externalSearch.trim().toLowerCase();
@@ -224,22 +154,9 @@ export function FramesPicker({
       : FRAME_LAYOUT_PRESETS.filter((p) => p.family === "phone");
   }, [family]);
 
-  const applyColor = (color: string) => {
-    setBgColor(color);
-    onBackground?.(color);
-  };
-
   const place = (layout: FrameLayoutPreset) => {
     setLayoutId(layout.id);
-    onBackground?.(bgColor);
-    onPlace(
-      selectedKind,
-      {
-        ...layout,
-        angle: orientation === "landscape" ? layout.angle + 90 : layout.angle,
-      },
-      { orientation, color: bgColor, fit },
-    );
+    onPlace(selectedKind, layout, { fit });
   };
 
   return (
@@ -325,103 +242,6 @@ export function FramesPicker({
               </p>
             ) : null}
           </div>
-
-          <div className="flex items-center gap-2 border-t border-border/40 px-3 py-2.5">
-            <div
-              role="group"
-              aria-label={t("backgroundColor")}
-              className="flex min-w-0 flex-1 items-center gap-1.5"
-            >
-              {footerSwatches.map((swatch) => {
-                const active =
-                  bgColor.toLowerCase() === swatch.color.toLowerCase();
-                return (
-                  <button
-                    key={swatch.id}
-                    type="button"
-                    title={swatch.label}
-                    aria-label={swatch.label}
-                    aria-pressed={active}
-                    disabled={disabled}
-                    onClick={() => applyColor(swatch.color)}
-                    className={cn(
-                      "size-6 shrink-0 rounded-md ring-offset-1 ring-offset-popover disabled:opacity-40",
-                      active && "ring-2 ring-ring",
-                    )}
-                    style={{ backgroundColor: swatch.color }}
-                  />
-                );
-              })}
-              <button
-                type="button"
-                title={t("transparent")}
-                aria-label={t("transparentBackground")}
-                aria-pressed={bgColor === "transparent"}
-                disabled={disabled}
-                onClick={() => applyColor("transparent")}
-                className={cn(
-                  "size-6 shrink-0 rounded-md ring-offset-1 ring-offset-popover disabled:opacity-40",
-                  bgColor === "transparent" && "ring-2 ring-ring",
-                )}
-                style={CHECKER_STYLE}
-              />
-              <ColorPicker
-                compact
-                disabled={disabled}
-                value={bgColor === "transparent" ? "#ffffff" : bgColor}
-                onChange={applyColor}
-                title={t("customColor")}
-                className="[&_button]:size-6"
-              />
-            </div>
-
-            <div
-              role="group"
-              aria-label={t("orientation")}
-              className={cn(
-                controlH,
-                "flex shrink-0 items-center rounded-md bg-muted/40 p-1 dark:bg-muted/30",
-              )}
-            >
-              <button
-                type="button"
-                title={t("portrait")}
-                aria-pressed={orientation === "portrait"}
-                onClick={() => setOrientation("portrait")}
-                className={cn(
-                  "flex h-full aspect-square items-center justify-center rounded-md transition-colors",
-                  orientation === "portrait"
-                    ? "bg-background text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <RectangleVertical className="size-3.5" />
-              </button>
-              <button
-                type="button"
-                title={t("landscape")}
-                aria-pressed={orientation === "landscape"}
-                onClick={() => setOrientation("landscape")}
-                className={cn(
-                  "flex h-full aspect-square items-center justify-center rounded-md transition-colors",
-                  orientation === "landscape"
-                    ? "bg-background text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <RectangleHorizontal className="size-3.5" />
-              </button>
-            </div>
-
-            <button
-              type="button"
-              title={t("more")}
-              aria-label={t("moreOptions")}
-              className="flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Ellipsis className="size-3.5" />
-            </button>
-          </div>
         </PopoverContent>
       </Popover>
 
@@ -432,7 +252,6 @@ export function FramesPicker({
             layout={layout}
             frame={selectedFrame}
             family={family}
-            background={bgColor}
             active={layout.id === layoutId}
             onSelect={() => {
               if (disabled) return;

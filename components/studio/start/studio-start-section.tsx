@@ -1,10 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Plus } from "@phosphor-icons/react";
 
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import { StudioPrompt } from "@/components/studio/studio-prompt";
-import { STARTER_CAROUSEL_PROMPTS } from "@/lib/studio/onboarding";
+import {
+  pickStarterPrompts,
+  type StarterCarouselId,
+} from "@/lib/studio/onboarding";
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import { trackEvent } from "@/lib/analytics";
 import { useTranslations } from "next-intl";
@@ -34,6 +38,14 @@ export function StudioStartSection({
   focusMode?: boolean;
 }) {
   const t = useTranslations("studio");
+  const [starters, setStarters] = useState<
+    Array<{ id: StarterCarouselId }>
+  >([]);
+
+  useEffect(() => {
+    const count = 3 + Math.floor(Math.random() * 2);
+    setStarters(pickStarterPrompts(count).map((item) => ({ id: item.id })));
+  }, []);
 
   return (
     <section>
@@ -65,12 +77,12 @@ export function StudioStartSection({
         error={generateError}
       />
 
-      {onStarter ? (
+      {onStarter && starters.length > 0 ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-[12px] text-muted-foreground">
             {t("tryStarter")}
           </span>
-          {STARTER_CAROUSEL_PROMPTS.map((starter) => (
+          {starters.map((starter) => (
             <button
               key={starter.id}
               type="button"

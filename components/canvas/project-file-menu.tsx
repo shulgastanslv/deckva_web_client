@@ -30,7 +30,7 @@ import { duplicateProject } from "@/actions/projects";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useProject } from "@/hooks/use-project";
 import { fitCanvasJSON } from "@/lib/canvas/fit-frame";
-import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
+import { CANVAS_RATIOS, STUDIO_RATIO_KEYS, type RatioKey } from "@/lib/types";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -46,7 +46,7 @@ const ghostTrigger = cn(
 const menuItem =
   "gap-2 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50";
 
-const RATIOS = Object.keys(CANVAS_RATIOS) as RatioKey[];
+const RATIOS = STUDIO_RATIO_KEYS;
 
 type ProjectFileMenuProps = {
   onExport?: () => void;
@@ -158,7 +158,10 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
             }}
             onClick={(event) => event.stopPropagation()}
             onPointerDown={(event) => event.stopPropagation()}
-            className="w-full rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none hover:bg-muted/50 focus:bg-muted/50"
+            className={cn(
+              controlH,
+              "box-border w-full rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal text-foreground shadow-none outline-none hover:bg-muted/50 focus:bg-muted/50",
+            )}
             placeholder={t("projectName")}
             aria-label={t("projectName")}
           />

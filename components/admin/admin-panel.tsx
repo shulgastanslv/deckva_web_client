@@ -39,7 +39,7 @@ function DeskForm({
 
   return (
     <form
-      className="mx-auto flex w-full max-w-[560px] flex-col gap-4"
+      className="flex w-full max-w-[560px] flex-col gap-4"
       onSubmit={(event) => {
         event.preventDefault();
         setBusy(true);
@@ -106,7 +106,7 @@ function FeedList({
       </p>
     );
   }
-  return <ul className="mx-auto flex w-full max-w-[720px] flex-col gap-2">{children}</ul>;
+  return <ul className="flex w-full max-w-[720px] flex-col gap-2">{children}</ul>;
 }
 
 export function AdminPanel({ email }: { email: string }) {

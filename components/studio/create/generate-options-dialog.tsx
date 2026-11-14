@@ -19,16 +19,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  sidebarFieldInput,
   sidebarSelectTrigger,
   sidebarTextarea,
 } from "@/components/canvas/sidebar/sidebar-ui";
-import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
+import { CANVAS_RATIOS, STUDIO_RATIO_KEYS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const PROMPT_LANGUAGES = ["ru", "en", "be"] as const;
-const RATIO_OPTIONS = Object.keys(CANVAS_RATIOS) as RatioKey[];
+const RATIO_OPTIONS = STUDIO_RATIO_KEYS;
 const SLIDE_OPTIONS = [4, 5, 6, 7, 8, 9, 10] as const;
+const HANDLE_OPTIONS = [
+  "@coach",
+  "@founder",
+  "@creator",
+  "@studio",
+  "@brand",
+  "@design",
+  "@product",
+  "@growth",
+  "@agency",
+  "@maker",
+  "@writer",
+  "@mentor",
+] as const;
+
+export function pickRandomHandle(): string {
+  return HANDLE_OPTIONS[Math.floor(Math.random() * HANDLE_OPTIONS.length)]!;
+}
 
 type Props = {
   open: boolean;
@@ -134,13 +151,26 @@ export function GenerateOptionsDialog({
               <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 {t("handle")}
               </span>
-              <input
-                className={sidebarFieldInput}
+              <Select
                 value={handle}
                 disabled={locked}
-                placeholder={t("handlePlaceholder")}
-                onChange={(e) => onHandleChange(e.target.value)}
-              />
+                onValueChange={onHandleChange}
+              >
+                <SelectTrigger className={sidebarSelectTrigger}>
+                  <SelectValue placeholder={t("handlePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl p-1.5">
+                  {HANDLE_OPTIONS.map((item) => (
+                    <SelectItem
+                      key={item}
+                      value={item}
+                      className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50"
+                    >
+                      {item}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -232,7 +262,7 @@ export function GenerateOptionsDialog({
             <Button
               type="button"
               disabled={!canConfirm}
-              className="flex-1 rounded-md border-none bg-foreground text-[13px] text-background shadow-none hover:bg-foreground/90"
+              className="flex-1 rounded-md text-[13px] shadow-none"
               onClick={onConfirm}
             >
               {locked ? (

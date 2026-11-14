@@ -590,7 +590,7 @@ export function SidebarAssets() {
               </p>
             </div>
           ) : null}
-          <DialogFooter className="mx-0 mb-0 gap-2 border-0 bg-transparent p-0 sm:flex-row sm:items-center sm:justify-between">
+          <DialogFooter className="mx-0 mb-0 gap-2 border-0 bg-transparent px-0 pt-2 pb-0 sm:flex-row sm:items-center sm:justify-between">
             <div className={cn(sidebarSegmented, "w-auto shrink-0")}>
               <button
                 type="button"
@@ -649,7 +649,7 @@ export function SidebarAssets() {
               className={sidebarFieldInput}
             />
           </div>
-          <DialogFooter className="mx-0 mb-0 gap-2 border-0 bg-transparent p-0 sm:flex-row">
+          <DialogFooter className="mx-0 mb-0 gap-2 border-0 bg-transparent px-0 pt-2 pb-0 sm:flex-row">
             <button
               type="button"
               className={cn(sidebarActionBtn, "flex-1")}

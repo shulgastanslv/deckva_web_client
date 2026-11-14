@@ -589,7 +589,7 @@ export function DeleteOrganizationDialog({
             <p className="text-[13px] text-destructive">{error}</p>
           ) : null}
 
-          <DialogFooter className="flex justify-end gap-2 bg-transparent p-0">
+          <DialogFooter className="flex justify-end gap-2 bg-transparent px-0 pt-2 pb-0">
             <Button
               type="button"
               variant="ghost"

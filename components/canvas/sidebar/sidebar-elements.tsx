@@ -351,9 +351,6 @@ export function SidebarElements() {
           <FramesPicker
             disabled={!manager}
             search={search}
-            onBackground={(color) => {
-              void manager?.setBackground({ type: "solid", color });
-            }}
             onPlace={(kind, layout, options) => {
               if (!manager) return;
               void (async () => {

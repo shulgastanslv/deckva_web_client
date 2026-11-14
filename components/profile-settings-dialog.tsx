@@ -320,11 +320,8 @@ export function ProfileSettingsDialog({
         setError((res as { error: string }).error);
         return;
       }
-      setHasPassword(true);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setSaved(true);
+      onOpenChange(false);
+      await signOut({ callbackUrl: "/" });
     } finally {
       setSaving(false);
     }

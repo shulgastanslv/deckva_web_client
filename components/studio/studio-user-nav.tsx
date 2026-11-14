@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Globe,
   SignOut as LogOut,
-  ChatCircle as MessageCircle,
+  ChatTeardropText as FeedbackIcon,
   Gear as Settings,
   User,
 } from "@phosphor-icons/react";
@@ -154,7 +154,7 @@ export function StudioUserNav({
           />
           {showFeedback ? (
             <NavItem
-              icon={<MessageCircle className={iconClass} />}
+              icon={<FeedbackIcon className={iconClass} />}
               label={t("feedback")}
               onSelect={() => setFeedbackOpen(true)}
             />

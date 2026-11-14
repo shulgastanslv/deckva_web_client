@@ -12,10 +12,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
+import { CANVAS_RATIOS, STUDIO_RATIO_KEYS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const RATIOS = Object.keys(CANVAS_RATIOS) as RatioKey[];
+const RATIOS = STUDIO_RATIO_KEYS;
 
 type RatioSelectProps = {
   currentRatio: string;

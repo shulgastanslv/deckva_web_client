@@ -5,9 +5,8 @@ import {
   ArrowLeft,
   Bell,
   Layout as LayoutTemplate,
-  ChatText as MessageSquareText,
+  ChatTeardropText as MessageSquareText,
   Newspaper,
-  Shield,
 } from "@phosphor-icons/react";
 
 import Logo from "@/components/logo/logo";
@@ -41,6 +40,7 @@ export function AdminShell({
   onSectionChange: (section: AdminSection) => void;
   children: React.ReactNode;
 }) {
+  void email;
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-muted/70 text-foreground dark:bg-background">
       <aside className="flex w-[220px] shrink-0 flex-col bg-muted/70 pt-3 dark:bg-background">
@@ -57,13 +57,16 @@ export function AdminShell({
                 type="button"
                 onClick={() => onSectionChange(id)}
                 className={cn(
-                  "flex h-9 items-center gap-2.5 rounded-xl px-2.5 text-left text-[13px] font-medium transition-colors",
+                  "flex h-10 items-center gap-2.5 rounded-xl px-2.5 text-left text-[13px] font-medium transition-colors",
                   active
                     ? "bg-background text-foreground dark:bg-muted"
                     : "text-muted-foreground hover:bg-background/70 hover:text-foreground dark:hover:bg-muted/50",
                 )}
               >
-                <Icon className="size-4 shrink-0 stroke-[1.75]" />
+                <Icon
+                  className="size-5 shrink-0 text-current"
+                  weight="regular"
+                />
                 {label}
               </button>
             );
@@ -73,15 +76,15 @@ export function AdminShell({
         <div className="mt-auto px-2.5 pb-3">
           <Link
             href="/studio"
-            className="flex h-9 items-center gap-2.5 rounded-xl px-2.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground dark:hover:bg-muted/50"
+            className="flex h-10 items-center gap-2.5 rounded-xl px-2.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground dark:hover:bg-muted/50"
           >
-            <ArrowLeft className="size-4 stroke-[1.75]" />
+            <ArrowLeft className="size-5 shrink-0 text-current" weight="regular" />
             Back to studio
           </Link>
         </div>
       </aside>
 
-      <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background">
+      <div className="relative m-2 ml-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-background dark:bg-muted/20">
         {children}
       </div>
     </div>

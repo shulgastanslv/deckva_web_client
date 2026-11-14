@@ -63,6 +63,7 @@ export type CodeChromeStyle =
   | "arc"
   | "windows";
 
+/** Picker list — keep legacy ids on `CodeChromeStyle` for older blocks. */
 export const CODE_CHROME_STYLES: {
   id: CodeChromeStyle;
   label: string;
@@ -70,11 +71,18 @@ export const CODE_CHROME_STYLES: {
   { id: "none", label: "None" },
   { id: "macos", label: "MacOS" },
   { id: "safari", label: "Safari" },
-  { id: "card", label: "Card" },
-  { id: "stack", label: "Stack" },
-  { id: "stack-2", label: "Stack 2" },
   { id: "arc", label: "Arc" },
-  { id: "windows", label: "Windows" },
+];
+
+const ALL_CODE_CHROME_STYLES: CodeChromeStyle[] = [
+  "none",
+  "macos",
+  "safari",
+  "card",
+  "stack",
+  "stack-2",
+  "arc",
+  "windows",
 ];
 
 export type CodeTokenKind =
@@ -110,7 +118,7 @@ export function resolveChromeStyle(
   style: CodeChromeStyle | undefined,
   showChrome?: boolean,
 ): CodeChromeStyle {
-  if (style && CODE_CHROME_STYLES.some((item) => item.id === style)) return style;
+  if (style && ALL_CODE_CHROME_STYLES.includes(style)) return style;
   return showChrome === false ? "none" : "macos";
 }
 

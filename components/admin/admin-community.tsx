@@ -80,7 +80,7 @@ export function AdminCommunity() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-4 px-6 py-8">
+    <div className="flex w-full max-w-[720px] flex-col gap-4 px-0 py-8">
       <div>
         <h2 className="text-[18px] font-semibold tracking-tight text-foreground">
           Community moderation

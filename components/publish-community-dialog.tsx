@@ -21,7 +21,6 @@ import {
   isCommunityCategory,
   type CommunityCategory,
 } from "@/lib/community/categories";
-import { suggestListingCopy } from "@/lib/community/listing-copy";
 import {
   Dialog,
   DialogContent,
@@ -103,7 +102,7 @@ export function PublishCommunityDialog({
   const [doneLabel, setDoneLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<CommunityProjectMeta | null>(null);
-  const [category, setCategory] = useState<CommunityCategory>("Other");
+  const [category, setCategory] = useState<CommunityCategory | "">("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [keyMoments, setKeyMoments] = useState<string[]>([""]);
@@ -117,16 +116,10 @@ export function PublishCommunityDialog({
     setMeta(null);
 
     const live = useCanvasStore.getState();
-    const suggested = suggestListingCopy({
-      title: live.projectTitle,
-      slides: live.slides,
-    });
     setTitle(live.projectTitle.trim() || "");
-    setDescription(suggested.description);
-    setKeyMoments(
-      suggested.keyMoments.length > 0 ? suggested.keyMoments : [""],
-    );
-    setCategory("Other");
+    setDescription("");
+    setKeyMoments([""]);
+    setCategory("");
 
     let cancelled = false;
     const fallbackThumb = live.slides[0]?.thumbnail ?? null;
@@ -187,6 +180,10 @@ export function PublishCommunityDialog({
     const nextMoments = keyMoments.map((item) => item.trim()).filter(Boolean);
     if (!nextTitle) {
       setError(t("titleRequired"));
+      return;
+    }
+    if (!category || !isCommunityCategory(category)) {
+      setError(t("categoryRequired"));
       return;
     }
     if (!nextDescription) {

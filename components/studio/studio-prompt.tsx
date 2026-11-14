@@ -42,7 +42,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { controlH, controlSize } from "@/components/ui/control";
-import { GenerateOptionsDialog } from "@/components/studio/create/generate-options-dialog";
+import {
+  GenerateOptionsDialog,
+  pickRandomHandle,
+} from "@/components/studio/create/generate-options-dialog";
 import { creditCostForModel } from "@/lib/ai/model-pricing";
 import type { AiModelInfo } from "@/lib/ai/types";
 import { trackEvent } from "@/lib/analytics";
@@ -167,7 +170,7 @@ export function StudioPrompt({
   );
   const [aspectRatio, setAspectRatio] = useState<RatioKey>("4:5");
   const [slidesCount, setSlidesCount] = useState(7);
-  const [handle, setHandle] = useState("@coach");
+  const [handle, setHandle] = useState<string>(() => pickRandomHandle());
   const [connectors, setConnectors] = useState<ConnectorPublic[]>([]);
   const [connectorBusy, setConnectorBusy] = useState<ConnectorProviderId | null>(
     null,
@@ -387,6 +390,7 @@ export function StudioPrompt({
 
   const openOptions = () => {
     if (!canSend) return;
+    setHandle(pickRandomHandle());
     setOptionsOpen(true);
   };
 

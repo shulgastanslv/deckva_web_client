@@ -21,14 +21,14 @@ interface DeviceSpec {
 /**
  * Screen hole measured from each mockup PNG (alpha hole vs full image).
  * Insets are fractions of the authored box (object-fit: fill).
- * `pad` pulls content slightly inside the bezel so nothing bleeds over chrome.
+ * `pad` is kept for rare per-device overrides; default is flush to the screen hole.
  */
 function screenBox(
   width: number,
   height: number,
   insets: { left: number; top: number; right: number; bottom: number },
   radius: number,
-  pad = 0.006,
+  pad = 0,
 ) {
   const left = Math.round(width * (insets.left + pad));
   const top = Math.round(height * (insets.top + pad));
