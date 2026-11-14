@@ -14,6 +14,15 @@ alwaysApply: true
 - Do **not** use `rounded-full` on buttons/CTAs/triggers/toolbars. Keep `rounded-full` only for true circles (avatars, switches, color dots, tiny status badges, regulation-pad pucks).
 - Editor tabs / intensity segments: `rounded-md` list shell + `rounded-md` triggers (`sidebarTabs*` / `sidebarSegmented*`).
 
+## Select + Tabs
+
+- Prefer **shadcn** `Select` over native `<select>`. Sidebar: `sidebarSelectTrigger`.
+- Control height: change once in `components/ui/control.ts` (`controlH`, currently `h-11`). Do not restate `h-*` on Button/Input/SelectTrigger; raw shells use `cn(..., controlH)`.
+- Select trigger: `rounded-md`, height from `controlH`, `bg-muted/40`, `px-3.5`, `text-[13px] font-normal`, no border/shadow.
+- Select item: `rounded-md`, `py-2.5`, generous horizontal padding, `font-normal`, `focus:bg-muted/50`.
+- Tabs list + trigger: both `rounded-md`; trigger `px-3`, `font-normal`; active = `bg-background` (no `ring-*`).
+- Do **not** use `rounded-full` or heavy `font-medium` on Select/Tabs labels.
+
 ## Surfaces
 
 - Use borders sparingly. Prefer spacing, typography, and background contrast over `border` outlines.

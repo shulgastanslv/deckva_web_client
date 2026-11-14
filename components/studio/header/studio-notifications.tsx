@@ -166,7 +166,7 @@ function ReadModal({
             <div className="mt-6">
               <Button
                 type="button"
-                className="h-10 rounded-md px-5 text-[13px] font-medium"
+ className="rounded-md px-5 text-[13px] font-medium"
                 onClick={() => {
                   window.location.href = item.href!;
                 }}
@@ -274,7 +274,7 @@ function NotificationsPanel({
               placeholder={t("search")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-md border-none bg-muted/40 py-2 pr-4 pl-10 text-[13px] focus-visible:ring-2 focus-visible:ring-[#2f5bff]/20"
+              className="w-full rounded-md border-none bg-muted/40 py-2 pr-4 pl-10 text-[13px] focus-visible:ring-2 focus-visible:ring-[#2f5bff]/20"
             />
           </div>
 
@@ -282,7 +282,7 @@ function NotificationsPanel({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="secondary"
-                className="h-9 rounded-md border-none bg-muted/40 px-4 text-[13px] font-medium"
+ className="rounded-md border-none bg-muted/40 px-4 text-[13px] font-medium"
               >
                 {filterLabel[filter]}
                 <ChevronDown className="ml-1 size-3.5 text-muted-foreground" />
@@ -357,7 +357,7 @@ function NotificationsPanel({
                     <div className="mt-3">
                       <Button
                         type="button"
-                        className="h-8 rounded-md px-3 text-[12px] font-medium"
+ className="h-8 rounded-md px-3 text-[12px] font-medium"
                         onClick={() => {
                           window.location.href = item.href!;
                         }}
@@ -458,7 +458,7 @@ export function StudioNotifications({
           variant="ghost"
           size="icon"
           aria-label={t("aria")}
-          className={cn(
+ className={cn(
             "relative flex size-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60",
             open && "bg-muted/60",
             className,

@@ -24,7 +24,7 @@ export function StudioContent({
 export function StudioContentBody({
   children,
   className,
-  /** Center content like Miro home (default true). */
+  /** Center the home/content column (default true). */
   centered = true,
 }: {
   children: ReactNode;

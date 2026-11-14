@@ -251,7 +251,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
             type="button"
             variant="secondary"
             size="sm"
-            className="h-10 flex-1 gap-1.5 rounded-md bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
+ className="flex-1 gap-1.5 rounded-md bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
             onClick={() => fileInputRef.current?.click()}
           >
             <ImagePlus className="size-3.5" />
@@ -262,7 +262,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
               type="button"
               variant="ghost"
               size="sm"
-              className="h-10 flex-1 gap-1.5 rounded-md bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
+ className="flex-1 gap-1.5 rounded-md bg-muted/60 dark:bg-muted/25 text-[13px] hover:bg-muted/80 dark:hover:bg-muted/40"
               disabled={saving}
               onClick={() => void saveCurrent()}
             >

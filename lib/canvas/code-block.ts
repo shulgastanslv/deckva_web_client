@@ -159,15 +159,17 @@ export const CODE_LANGS: { id: CodeLang; label: string }[] = [
   { id: "plaintext", label: "Plaintext" },
 ];
 
-export const DEFAULT_CODE = `import { Detail } from "@raycast/api";
+export const DEFAULT_CODE = `package main
 
-export default function Command() {
-  return <Detail markdown="Hello from Deckva" />;
+import "fmt"
+
+func main() {
+	fmt.Println("Hello from Deckva")
 }`;
 
 export const DEFAULT_CODE_OPTIONS: CodeBlockOptions = {
   code: DEFAULT_CODE,
-  lang: "tsx",
+  lang: "go",
   theme: "breeze",
   darkMode: true,
   showBackground: true,
@@ -178,7 +180,7 @@ export const DEFAULT_CODE_OPTIONS: CodeBlockOptions = {
   showChrome: true,
   chromeStyle: "macos",
   showLineNumbers: false,
-  filename: "Untitled",
+  filename: "main.go",
 };
 
 export const CODE_UI_SCALE_BASE = DEFAULT_CODE_OPTIONS.fontSize;

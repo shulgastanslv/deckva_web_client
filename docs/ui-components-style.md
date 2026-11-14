@@ -4,7 +4,8 @@
 Лендинг (`land-*`) — отдельная поверхность; этот документ про **студию**.
 
 Источник токенов: `app/globals.css` (`--primary`, `--muted`, `--foreground`, …).  
-Базовые примитивы: `components/ui/{button,select,dropdown-menu,input,dialog}.tsx` — при расхождении **переопределяй через `className`**, не плоди новые темы.
+Базовые примитивы: `components/ui/{button,select,dropdown-menu,input,dialog}.tsx` — при расхождении **переопределяй через `className`**, не плоди новые темы.  
+Высота контролов: **один раз** в `components/ui/control.ts` (`controlH` / `controlSize`, сейчас `h-11`).
 
 ---
 
@@ -12,7 +13,7 @@
 
 | Делай | Не делай |
 |---|---|
-| Высота контрола **`h-9`** или **`h-10`** | `h-7` / `h-8` / `h-11` без причины (кроме icon-only `size-8`/`size-9`) |
+| Высота контрола из **`controlH`** (`components/ui/control.ts`) | Локальные `h-9` / `h-10` / `h-11` на Button/Input/SelectTrigger |
 | Триггеры / инпуты / чипы / кнопки — **без shadow** (`shadow-none`) | `shadow-md`, `shadow-lg` на кнопках |
 | Триггеры / инпуты / чипы — **без borders** (`border-none`) | `border-input`, outline-карточки ради «рамки» у кнопок |
 | Menus / popover / select — **`bg-popover` + `shadow-sm` + `border-0`**, в dark ещё **`dark:border-border/50`** | `shadow-none` / `shadow-md+` на меню; border меню в light |
@@ -125,21 +126,23 @@
 
 ## 5. Select
 
-Триггер должен выглядеть как **мягкий чип**, не как outlined input.
+Только **shadcn** `Select` (`@/components/ui/select`). Нативный `<select>` в студии / canvas chrome — нет.
+
+Триггер = мягкий muted-чип, не outlined input. В left sidebar — токен `sidebarSelectTrigger`.
 
 ```tsx
 <SelectTrigger
   className={cn(
-    "h-9 w-auto gap-1.5 rounded-full border-none bg-muted/40 px-3 text-[13px] shadow-none",
+    "h-10 w-full gap-1.5 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal shadow-none",
     "hover:bg-muted/60 focus:ring-0 focus-visible:ring-2 focus-visible:ring-ring/20",
-    "data-[state=open]:bg-muted/60",
+    "data-[size=default]:h-10",
   )}
 >
   <SelectValue placeholder="Выберите…" />
 </SelectTrigger>
 
 <SelectContent className="rounded-2xl p-1.5">
-  <SelectItem className="rounded-xl text-[13px] focus:bg-muted/50">
+  <SelectItem className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50">
     …
   </SelectItem>
 </SelectContent>
@@ -147,10 +150,41 @@
 
 Правила:
 
-- Триггер: **`h-9`**, `rounded-md`, `bg-muted/40`, **без border/shadow**
-- Content: наследует примитив `bg-popover border-0 shadow-sm`; на call-site только размер/паддинг (`rounded-2xl p-1.5`)
-- Item: `rounded-xl`, focus/hover через `bg-muted/50` (не обязательно `bg-accent`, если это плодит ещё одну визуальную систему)
-- **Не** перебивай surface классами `border` / `bg-background` / `shadow-none` / `shadow-md` / `ring-*`
+| | |
+|---|---|
+| Триггер | **`h-9` / `h-10`**, `rounded-md`, `bg-muted/40`, `px-3.5`, `text-[13px] font-normal`, **без** border/shadow |
+| Content | примитив: `bg-popover border-0 shadow-sm`; call-site: `rounded-2xl p-1.5` (или `p-2`) |
+| Item | `rounded-md`, `py-2.5`, щедрый горизонтальный padding, `font-normal`, `focus:bg-muted/50` |
+| Позиция | при необходимости `position="popper"` + `side` / `sideOffset` / `align` / `alignOffset` |
+| Нельзя | `rounded-full` на триггере/item; `font-medium` на лейбле; нативный `<select>`; перебивать surface (`border` / чужой `bg-*` / `shadow-md` / `ring-*`) |
+
+Ориентиры: `sidebar-elements.tsx` (категория), `right-sidebar.tsx` (`BlendSelect`), `sidebarSelectTrigger` в `sidebar-ui.ts`.
+
+---
+
+## 5b. Tabs / сегменты
+
+Оболочка + триггеры — оба **`rounded-md`**. Shared: `sidebarTabsList` / `sidebarTabsTrigger` / `sidebarSegmented*`.
+
+```tsx
+<TabsList className={cn(sidebarTabsList, "grid-cols-4")}>
+  <TabsTrigger value="fill" className={sidebarTabsTrigger}>
+    Fill
+  </TabsTrigger>
+</TabsList>
+```
+
+Правила:
+
+| | |
+|---|---|
+| List | `rounded-md`, `h-10`, `p-1`, muted surface |
+| Trigger | `rounded-md`, `px-3`, `text-[13px] font-normal` |
+| Active | `bg-background text-foreground` — **без** `ring-*` |
+| Скролл | много пунктов → `overflow-x-auto` + `flex-none` / `shrink-0` + `whitespace-nowrap`; не `flex-1` (иначе нечего скроллить) |
+| Нельзя | `rounded-full` / pills; жирный `font-medium` на лейбле |
+
+Taxonomy / категории в сайдбаре: предпочитай **Select** или **FilterMenu** рядом с поиском, а не постоянную полосу табов (Filters over chrome).
 
 ---
 
@@ -172,13 +206,13 @@
   align="end"
   className="min-w-[12rem] rounded-2xl p-1.5"
 >
-  <DropdownMenuItem className="rounded-xl px-3 py-2 text-[13px] focus:bg-muted/50">
+  <DropdownMenuItem className="rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50">
     Пункт
   </DropdownMenuItem>
   <DropdownMenuSeparator className="bg-border/50" />
   <DropdownMenuItem
     variant="destructive"
-    className="rounded-xl px-3 py-2 text-[13px]"
+    className="rounded-md px-3 py-2.5 text-[13px] font-normal"
   >
     Удалить
   </DropdownMenuItem>
@@ -188,7 +222,7 @@
 Правила:
 
 - Content = floating menu surface: `bg-popover` + `shadow-sm` + `border-0` (уже в примитиве; то же у Select/Popover)
-- Скругление панели `rounded-2xl`, пунктов `rounded-xl`
+- Скругление панели `rounded-2xl`, пунктов `rounded-md` + `font-normal` + щедрый padding
 - Open-state триггера: `data-[state=open]:bg-muted/60`
 - На call-site не ставь `border` / другой `bg-*` / `shadow-none` / `shadow-md+` / `ring-*`
 
@@ -261,6 +295,7 @@ Dialog                     → bg-background + border-border/50 + shadow-none
 5. Нет ли третьей палитры (`#hex`, `land-*`, `input/30` dark-stack) рядом с `muted`?
 6. Open/hover продолжают ту же лестницу `/40` → `/60`?
 7. Call-site не перебивает surface (чужой `border` / `bg-*` / `shadow-md` / `ring-*`)?
+8. Select / Tabs — `rounded-md` (не pills), `font-normal`, щедрый padding; нет нативного `<select>`?
 
 ---
 

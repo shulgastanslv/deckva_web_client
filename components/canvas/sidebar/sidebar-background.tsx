@@ -106,7 +106,7 @@ function SuggestedSetRow({
         ))}
         <span className="truncate text-foreground">{set.label}</span>
       </div>
-      <Button type="button" size="xs" variant="secondary" className="rounded-md" onClick={onApply}>
+ <Button type="button" size="xs" variant="secondary" className="rounded-md" onClick={onApply}>
         {t("apply")}
       </Button>
     </div>
@@ -263,7 +263,7 @@ export function SidebarBackground() {
             <TabsTrigger
               key={item.id}
               value={item.id}
-              className={cn(sidebarTabsTrigger, "px-1")}
+              className={sidebarTabsTrigger}
             >
               {item.label}
             </TabsTrigger>
@@ -312,7 +312,7 @@ export function SidebarBackground() {
             </div>
             <Button
               variant="secondary"
-              className={cn(sidebarActionBtn, "w-full")}
+ className={cn(sidebarActionBtn, "w-full")}
               onClick={() => setPickerOpen(true)}
             >
               Browse all · {DDDEPTH_COUNT}
@@ -402,7 +402,7 @@ export function SidebarBackground() {
                   size="sm"
                   disabled={urlLoading || !imageUrl.trim()}
                   onClick={() => void applyImageFromUrl()}
-                  className="h-10 rounded-md px-3.5"
+                  className="rounded-md px-3.5"
                 >
                   {urlLoading ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -448,7 +448,7 @@ export function SidebarBackground() {
               type="button"
               size="xs"
               variant="secondary"
-              className="rounded-md gap-1"
+ className="rounded-md gap-1"
               onClick={() => {
                 applyBrandKitToStore({
                   kit: brandKit,

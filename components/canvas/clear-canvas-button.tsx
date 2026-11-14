@@ -46,7 +46,7 @@ export function ClearCanvasButton() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-9 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
+ className="size-9 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
           title={t("aria")}
         >
           <BrushCleaning className="size-5" />
@@ -62,14 +62,14 @@ export function ClearCanvasButton() {
         <DialogFooter>
           <Button
             variant="secondary"
-            className="h-9 rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
+ className="rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
             onClick={() => setOpen(false)}
           >
             {tc("cancel")}
           </Button>
           <Button
             variant="destructive"
-            className="h-9 rounded-md"
+ className="rounded-md"
             onClick={handleClear}
           >
             {t("confirm")}

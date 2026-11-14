@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 
 export function AdminCommunity() {
   const [projects, setProjects] = useState<CommunityProjectListItem[]>([]);
@@ -96,14 +97,14 @@ export function AdminCommunity() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search community"
-            className="h-9 rounded-full bg-muted/50 pl-9"
+            className="rounded-md border-none bg-muted/40 pl-9 shadow-none"
           />
         </div>
         <Select
           value={status}
           onValueChange={(v) => setStatus(v as CommunityReviewStatus | "all")}
         >
-          <SelectTrigger className="h-9 w-[140px] rounded-full border-0 bg-muted/50">
+ <SelectTrigger className="w-[140px] rounded-md border-none bg-muted/40 font-normal shadow-none hover:bg-muted/60">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -145,7 +146,10 @@ export function AdminCommunity() {
               <Link
                 href={`/view/${item.id}`}
                 target="_blank"
-                className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-3.5 text-[13px] font-normal text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                  controlH,
+                )}
               >
                 <ExternalLink className="size-3.5" />
                 View
@@ -154,8 +158,8 @@ export function AdminCommunity() {
                 <Button
                   type="button"
                   size="sm"
-                  className={cn(
-                    "h-9 rounded-full",
+ className={cn(
+                    "rounded-full",
                     item.communityStatus === "APPROVED" && "opacity-50",
                   )}
                   disabled={busyId === item.id}
@@ -167,7 +171,7 @@ export function AdminCommunity() {
                   type="button"
                   variant="secondary"
                   size="sm"
-                  className="h-9 rounded-full"
+ className="rounded-full"
                   disabled={busyId === item.id}
                   onClick={() => void review(item.id, "REJECTED")}
                 >

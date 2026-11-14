@@ -112,7 +112,7 @@ export function StudioListDialog({
             variant="ghost"
             disabled={busy}
             onClick={() => setItems((prev) => [...prev, ""])}
-            className="h-9 rounded-md px-3 text-[13px]"
+            className="rounded-md px-3 text-[13px]"
           >
             <Plus className="size-3.5" />
             {t("addItem")}
@@ -124,7 +124,7 @@ export function StudioListDialog({
 
           <Button
             type="button"
-            className="h-10 w-full rounded-md text-[13px] font-medium"
+ className="w-full rounded-md text-[13px] font-medium"
             disabled={!canSubmit}
             onClick={() => void onSubmit(filled)}
           >

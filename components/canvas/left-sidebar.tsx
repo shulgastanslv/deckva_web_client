@@ -129,11 +129,11 @@ export function LeftSidebar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={cn(
+ className={cn(
                     railBtn,
                     activeNav === id &&
                       !isLeftCollapsed &&
-                      "bg-muted/50 text-foreground hover:bg-muted/60",
+                      "bg-muted/60 text-foreground hover:bg-muted/60",
                   )}
                   aria-label={label}
                   aria-pressed={activeNav === id && !isLeftCollapsed}
@@ -150,7 +150,7 @@ export function LeftSidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className={railBtn}
+ className={railBtn}
                 aria-label={tc("undo")}
                 onClick={() => void manager?.undo()}
               >
@@ -161,7 +161,7 @@ export function LeftSidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className={railBtn}
+ className={railBtn}
                 aria-label={tc("redo")}
                 onClick={() => void manager?.redo()}
               >
@@ -172,7 +172,7 @@ export function LeftSidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className={railBtn}
+ className={railBtn}
                 aria-label={isLeftCollapsed ? t("expandPanel") : t("collapsePanel")}
                 onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
               >
@@ -187,11 +187,11 @@ export function LeftSidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn(
+ className={cn(
                   railBtn,
                   activeNav === "settings" &&
                     !isLeftCollapsed &&
-                    "bg-muted/50 text-foreground hover:bg-muted/60",
+                    "bg-muted/60 text-foreground hover:bg-muted/60",
                 )}
                 aria-label={t("settings")}
                 onClick={() => openNav("settings")}

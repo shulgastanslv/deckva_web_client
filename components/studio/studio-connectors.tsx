@@ -230,7 +230,7 @@ export function StudioConnectors() {
                         <Button
                           type="button"
                           variant="ghost"
-                          className="h-9 rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
+ className="rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
                           disabled={busy === item.id}
                           onClick={() => void disconnect(item.id)}
                         >
@@ -240,7 +240,7 @@ export function StudioConnectors() {
                           <Button
                             type="button"
                             variant="ghost"
-                            className="h-9 rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
+ className="rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
                             disabled={busy === "insights"}
                             onClick={() => void refreshInsights()}
                           >
@@ -252,7 +252,7 @@ export function StudioConnectors() {
                     ) : (
                       <Button
                         type="button"
-                        className="h-9 rounded-md bg-foreground px-3 text-[13px] text-background shadow-none hover:bg-foreground/90"
+ className="rounded-md bg-foreground px-3 text-[13px] text-background shadow-none hover:bg-foreground/90"
                         onClick={() => connect(item.id)}
                       >
                         <LinkIcon className="mr-1.5 size-3.5" />

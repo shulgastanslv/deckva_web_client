@@ -2,22 +2,15 @@
 
 import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
-  TextAlignLeft as AlignLeft,
-  Circle,
+  Circle ,
   Diamond,
-  Circle as Ellipse,
   Hexagon,
-  Laptop,
+  LineSegment,
   Minus,
-  PencilSimple as Pencil,
-  Quotes as Quote,
-  DeviceMobile as Smartphone,
   Square,
   Star,
-  DeviceTablet as Tablet,
   Triangle,
-  Television as Tv,
-  TextT as Type,
+  type IconProps as PhosphorIconProps,
 } from "@phosphor-icons/react";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { rememberRecentPhoto } from "@/lib/canvas/recent-photos";
@@ -28,21 +21,13 @@ import { HeadingIcon } from "@/components/canvas/text-icons";
 import { SubtitleIcon } from "@/components/canvas/text-icons";
 import { ParagraphIcon } from "@/components/canvas/text-icons";
 import { QuoteIcon } from "@/components/canvas/text-icons";
-import { IconProps } from "@/components/canvas/text-icons";
-import { RectangleShapeIcon } from "@/components/canvas/shapes-icons";
-import { CircleShapeIcon } from "@/components/canvas/shapes-icons";
-import { TriangleShapeIcon } from "@/components/canvas/shapes-icons";
-import { DiamondShapeIcon } from "@/components/canvas/shapes-icons";
-import { StarShapeIcon } from "@/components/canvas/shapes-icons";
-import { HexagonShapeIcon } from "@/components/canvas/shapes-icons";
-import { EllipseShapeIcon } from "@/components/canvas/shapes-icons";
-import { LineShapeIcon } from "@/components/canvas/shapes-icons";
-import { DividerShapeIcon } from "@/components/canvas/shapes-icons";
+import type { IconProps } from "@/components/canvas/text-icons";
+
 
 
 export interface ElementItem {
   label: string;
-  icon: React.FC<IconProps> ;
+  icon: React.FC<IconProps> | React.FC<PhosphorIconProps>;
   action: () => void;
   title?: string;
 }
@@ -189,15 +174,15 @@ export function useElementLibrary() {
         id: "elements-shapes",
         title: "Shapes",
         items: [
-          { label: "Rectangle", icon: RectangleShapeIcon , action: () => manager?.objects.addRectangle() },
-          { label: "Circle", icon: CircleShapeIcon , action: () => manager?.objects.addCircle() },
-          { label: "Triangle", icon: TriangleShapeIcon , action: () => manager?.objects.addTriangle() },
-          { label: "Diamond", icon: DiamondShapeIcon , action: () => manager?.objects.addDiamond() },
-          { label: "Star", icon: StarShapeIcon , action: () => manager?.objects.addStar() },
-          { label: "Hexagon", icon: HexagonShapeIcon , action: () => manager?.objects.addHexagon() },
-          { label: "Ellipse", icon: EllipseShapeIcon , action: () => manager?.objects.addEllipse() },
-          { label: "Line", icon: LineShapeIcon , action: () => manager?.objects.addLine() },
-          { label: "Divider", icon: DividerShapeIcon , action: () => manager?.objects.addDividerLine() },
+          { label: "Rectangle", icon: Square, action: () => manager?.objects.addRectangle() },
+          { label: "Circle", icon: Circle, action: () => manager?.objects.addCircle() },
+          { label: "Triangle", icon: Triangle, action: () => manager?.objects.addTriangle() },
+          { label: "Diamond", icon: Diamond, action: () => manager?.objects.addDiamond() },
+          { label: "Star", icon: Star, action: () => manager?.objects.addStar() },
+          { label: "Hexagon", icon: Hexagon, action: () => manager?.objects.addHexagon() },
+          { label: "Ellipse", icon: Circle, action: () => manager?.objects.addEllipse() },
+          { label: "Line", icon: LineSegment, action: () => manager?.objects.addLine() },
+          { label: "Divider", icon: Minus, action: () => manager?.objects.addDividerLine() },
         ],
       },
     ],

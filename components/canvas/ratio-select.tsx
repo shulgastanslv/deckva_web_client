@@ -54,7 +54,7 @@ export function RatioSelect({
           variant="ghost"
           title={label}
           aria-label={`${label}: ${currentRatio}`}
-          className="h-9 gap-1.5 rounded-md border-none bg-muted/40 px-2.5 text-[13px] font-medium tabular-nums text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
+ className="gap-1.5 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal tabular-nums text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
         >
           <Crop className="size-3.5 text-muted-foreground" />
           <span>{currentRatio}</span>
@@ -73,7 +73,7 @@ export function RatioSelect({
             <DropdownMenuItem
               key={ratio}
               className={cn(
-                "cursor-pointer gap-2.5 rounded-xl px-2.5 py-2 text-[13px] focus:bg-muted/50",
+                "cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] font-normal focus:bg-muted/50",
                 selected && "bg-muted/40",
               )}
               onSelect={() => onRatioChange(ratio)}

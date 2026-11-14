@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 
 type Step = "plan" | "payment";
 
@@ -261,7 +262,10 @@ export function StudioUpgradeDialog({
                   type="button"
                   disabled={busy}
                   onClick={() => void buyCredits()}
-                  className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 disabled:opacity-60"
+                  className={cn(
+                    "mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 disabled:opacity-60",
+                    controlH,
+                  )}
                 >
                   {busy ? (
                     <Loader2 className="size-3.5 animate-spin" />
@@ -280,7 +284,10 @@ export function StudioUpgradeDialog({
                     setError(null);
                     setStep("payment");
                   }}
-                  className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90"
+                  className={cn(
+                    "mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90",
+                    controlH,
+                  )}
                 >
                   {t("continuePrice", {
                     price: STUDIO_PRO_PRICE,
@@ -323,7 +330,7 @@ export function StudioUpgradeDialog({
                     placeholder={t("cardNumber")}
                     inputMode="numeric"
                     autoComplete="cc-number"
-                    className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+                    className="rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <Input
@@ -342,7 +349,7 @@ export function StudioUpgradeDialog({
                       placeholder={t("exp")}
                       inputMode="numeric"
                       autoComplete="cc-exp"
-                      className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+                      className="rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                     />
                     <Input
                       value={cvv}
@@ -353,7 +360,7 @@ export function StudioUpgradeDialog({
                       inputMode="numeric"
                       autoComplete="cc-csc"
                       type="password"
-                      className="h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+                      className="rounded-md border-none bg-muted/40 px-3.5 text-[13px] shadow-none focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
                     />
                   </div>
                 </div>
@@ -363,7 +370,10 @@ export function StudioUpgradeDialog({
                 type="button"
                 disabled={busy}
                 onClick={() => void subscribe()}
-                className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 disabled:opacity-60"
+                className={cn(
+                  "mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 disabled:opacity-60",
+                  controlH,
+                )}
               >
                 {busy ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -382,7 +392,10 @@ export function StudioUpgradeDialog({
                   setError(null);
                   setStep("plan");
                 }}
-                className="mt-2 flex h-9 w-full items-center justify-center rounded-md border-none bg-transparent text-[12px] font-medium text-muted-foreground shadow-none transition-colors hover:bg-muted/40 hover:text-foreground disabled:opacity-60"
+                className={cn(
+                  "mt-2 flex w-full items-center justify-center rounded-md border-none bg-transparent text-[12px] font-medium text-muted-foreground shadow-none transition-colors hover:bg-muted/40 hover:text-foreground disabled:opacity-60",
+                  controlH,
+                )}
               >
                 {t("back")}
               </button>

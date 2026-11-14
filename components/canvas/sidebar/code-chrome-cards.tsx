@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   CaretUpDown as ChevronsUpDown,
@@ -22,6 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 
 type Pane = "themes" | "languages";
 
@@ -81,28 +82,25 @@ function ThemeBlockPreview({
   return (
     <span
       className={cn(
-        "relative flex w-full overflow-hidden",
-        compact ? "aspect-square rounded-xl" : "aspect-[5/4] rounded-[1.15rem]",
+        "relative flex w-full items-center justify-center overflow-hidden bg-muted/30",
+        compact ? "aspect-[5/4] rounded-xl" : "aspect-[5/4] rounded-[1.15rem]",
       )}
-      style={{
-        background: `linear-gradient(140deg, ${theme.background.from}, ${theme.background.to})`,
-      }}
     >
       {chromeStyle === "stack" || chromeStyle === "stack-2" ? (
         <span
-          className="absolute rounded-lg bg-black/20"
+          className="absolute rounded-lg bg-muted/60"
           style={{
-            inset: compact ? "18%" : "14%",
-            transform: "translate(4px, 4px)",
+            inset: compact ? "14%" : "12%",
+            transform: "translate(3px, 3px)",
           }}
         />
       ) : null}
       {chromeStyle === "stack-2" ? (
         <span
-          className="absolute rounded-lg bg-black/15"
+          className="absolute rounded-lg bg-muted/40"
           style={{
-            inset: compact ? "18%" : "14%",
-            transform: "translate(7px, 7px)",
+            inset: compact ? "14%" : "12%",
+            transform: "translate(6px, 6px)",
           }}
         />
       ) : null}
@@ -111,12 +109,12 @@ function ThemeBlockPreview({
         className={cn(
           "absolute flex flex-col overflow-hidden",
           radius,
-          chromeStyle === "arc" && "border border-white/30",
-          chromeStyle === "card" && "border border-white/20",
+          chromeStyle === "arc" && "border border-border/50",
+          chromeStyle === "card" && "border border-border/40",
           chromeStyle === "none" && "rounded-md",
         )}
         style={{
-          inset: compact ? "16%" : "13%",
+          inset: compact ? "12%" : "10%",
           background: chromeStyle === "none" ? "transparent" : paneBg,
           boxShadow:
             chromeStyle === "none" ? undefined : "0 4px 14px rgba(0,0,0,0.18)",
@@ -208,53 +206,6 @@ function ThemeBlockPreview({
   );
 }
 
-function ChromeGlyph({ style }: { style: CodeChromeStyle }) {
-  if (style === "none") {
-    return (
-      <span className="relative size-3.5 rounded-md border border-current opacity-70">
-        <span className="absolute inset-x-[-1px] top-1/2 h-px -rotate-45 bg-current" />
-      </span>
-    );
-  }
-  if (style === "windows") {
-    return (
-      <span className="flex items-center gap-0.5 text-[9px] leading-none opacity-70">
-        <span className="block h-px w-2 bg-current" />
-        <span className="size-1.5 border border-current" />
-      </span>
-    );
-  }
-  if (style === "arc") {
-    return <span className="size-3.5 rounded-md border border-current opacity-70" />;
-  }
-  if (style === "card") {
-    return (
-      <span className="relative size-3.5">
-        <span className="absolute inset-0 translate-x-px translate-y-px rounded-[3px] bg-current opacity-25" />
-        <span className="absolute inset-0 rounded-[3px] border border-current opacity-70" />
-      </span>
-    );
-  }
-  if (style === "stack" || style === "stack-2") {
-    return (
-      <span className="relative size-3.5">
-        <span className="absolute inset-[2px] translate-x-[2px] translate-y-[2px] rounded-[2px] bg-current opacity-25" />
-        {style === "stack-2" ? (
-          <span className="absolute inset-[2px] translate-x-px translate-y-px rounded-[2px] bg-current opacity-40" />
-        ) : null}
-        <span className="absolute inset-[2px] rounded-[2px] border border-current opacity-70" />
-      </span>
-    );
-  }
-  return (
-    <span className="flex items-center gap-[3px]">
-      <span className="size-1.5 rounded-md bg-[#ff5f56]" />
-      <span className="size-1.5 rounded-md bg-[#ffbd2e]" />
-      <span className="size-1.5 rounded-md bg-[#27c93f]" />
-    </span>
-  );
-}
-
 /** Frames-like picker: theme dropdown + one preview card to place the block. */
 export function CodeAppearanceSelect({
   chromeStyle,
@@ -288,6 +239,7 @@ export function CodeAppearanceSelect({
   const [open, setOpen] = useState(false);
   const [pane, setPane] = useState<Pane>("themes");
   const [query, setQuery] = useState("");
+  const chromeScrollRef = useRef<HTMLDivElement>(null);
 
   const selectedTheme =
     CODE_THEMES.find((item) => item.id === theme) ?? CODE_THEMES[0]!;
@@ -296,6 +248,20 @@ export function CodeAppearanceSelect({
   const selectedChrome =
     CODE_CHROME_STYLES.find((item) => item.id === chromeStyle) ??
     CODE_CHROME_STYLES[0]!;
+
+  useEffect(() => {
+    if (!open) return;
+    const el = chromeScrollRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (el.scrollWidth <= el.clientWidth) return;
+      if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      el.scrollLeft += e.deltaY;
+      e.preventDefault();
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [open]);
 
   const themesFromSidebar = useMemo(() => {
     const q = externalSearch.trim().toLowerCase();
@@ -352,21 +318,16 @@ export function CodeAppearanceSelect({
             type="button"
             disabled={disabled}
             aria-label={t("codeThemeAria")}
-            className="flex h-12 w-full min-w-0 items-center gap-2.5 rounded-2xl bg-muted/60 px-2.5 text-left transition-colors hover:bg-muted disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45"
+            className={cn(
+              "flex w-full min-w-0 items-center gap-2 rounded-md border-none bg-muted/40 px-3.5 text-left shadow-none transition-colors hover:bg-muted/60 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45",
+              controlH,
+            )}
           >
-            <span className="size-7 shrink-0 overflow-hidden rounded-xl">
-              <ThemeBlockPreview
-                theme={selectedTheme}
-                chromeStyle={chromeStyle}
-                darkMode={darkMode}
-                compact
-              />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] font-medium text-foreground">
+            <span className="min-w-0 flex-1 py-2.5">
+              <span className="block truncate text-[13px] font-normal text-foreground">
                 {selectedTheme.label}
               </span>
-              <span className="block truncate text-[11px] text-muted-foreground">
+              <span className="block truncate text-[12px] font-normal text-muted-foreground">
                 {selectedChrome.label} · {selectedLang.label}
               </span>
             </span>
@@ -396,7 +357,7 @@ export function CodeAppearanceSelect({
 
           <div className="max-h-[min(22rem,50vh)] overflow-y-auto overscroll-contain px-2.5 pt-2.5 pb-2 [scrollbar-width:thin]">
             {pane === "themes" ? (
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 gap-2">
                 {filteredThemes.map((item) => {
                   const active = item.id === theme;
                   return (
@@ -409,9 +370,9 @@ export function CodeAppearanceSelect({
                         setOpen(false);
                       }}
                       className={cn(
-                        "flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1.5 py-2.5 text-center transition-colors",
+                        "flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1.5 py-2 text-center transition-colors",
                         active
-                          ? "bg-muted ring-2 ring-ring"
+                          ? "bg-muted/70 dark:bg-muted/45"
                           : "hover:bg-muted/60 dark:hover:bg-muted/35",
                       )}
                     >
@@ -430,7 +391,7 @@ export function CodeAppearanceSelect({
                   );
                 })}
                 {filteredThemes.length === 0 ? (
-                  <p className="col-span-3 px-2 py-10 text-center text-[13px] text-muted-foreground">
+                  <p className="col-span-2 px-2 py-10 text-center text-[13px] text-muted-foreground">
                     {t("noThemes")}
                   </p>
                 ) : null}
@@ -452,7 +413,7 @@ export function CodeAppearanceSelect({
                         setOpen(false);
                       }}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
+                        "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left font-normal transition-colors",
                         active
                           ? "bg-muted text-foreground"
                           : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
@@ -479,36 +440,45 @@ export function CodeAppearanceSelect({
             )}
           </div>
 
-          <div className="flex items-center gap-2 border-t border-border/40 px-3 py-2.5">
+          <div className="space-y-2.5 border-t border-border/40 px-3 py-3">
             <div
+              ref={chromeScrollRef}
               role="group"
               aria-label={t("windowStyle")}
-              className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto [scrollbar-width:none]"
+              className={cn(
+                "w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-md bg-muted/40 p-1 [scrollbar-width:thin]",
+                controlH,
+              )}
             >
-              {CODE_CHROME_STYLES.map((item) => {
-                const chromeActive = item.id === chromeStyle;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    title={item.label}
-                    aria-label={item.label}
-                    aria-pressed={chromeActive}
-                    onClick={() => onChromeChange(item.id)}
-                    className={cn(
-                      "flex size-8 shrink-0 items-center justify-center rounded-md transition-colors",
-                      chromeActive
-                        ? "bg-muted text-foreground ring-2 ring-ring"
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground dark:bg-muted/30",
-                    )}
-                  >
-                    <ChromeGlyph style={item.id} />
-                  </button>
-                );
-              })}
+              <div className="inline-flex h-full w-max min-w-full items-stretch gap-0.5">
+                {CODE_CHROME_STYLES.map((item) => {
+                  const chromeActive = item.id === chromeStyle;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-pressed={chromeActive}
+                      onClick={() => onChromeChange(item.id)}
+                      className={cn(
+                        "h-full shrink-0 rounded-md px-3 text-[13px] font-normal whitespace-nowrap transition-colors",
+                        chromeActive
+                          ? "bg-background text-foreground"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                      )}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="flex h-8 shrink-0 items-center rounded-md bg-muted/50 p-0.5 dark:bg-muted/30">
+            <div
+              className={cn(
+                "flex w-full items-center rounded-md bg-muted/40 p-1",
+                controlH,
+              )}
+            >
               <button
                 type="button"
                 title={t("themes")}
@@ -518,13 +488,13 @@ export function CodeAppearanceSelect({
                   setQuery("");
                 }}
                 className={cn(
-                  "h-7 rounded-md px-2.5 text-[12px] font-medium transition-colors",
+                  "h-full flex-1 rounded-md px-3 text-[13px] font-normal transition-colors",
                   pane === "themes"
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                Theme
+                {t("themes")}
               </button>
               <button
                 type="button"
@@ -535,13 +505,13 @@ export function CodeAppearanceSelect({
                   setQuery("");
                 }}
                 className={cn(
-                  "h-7 rounded-md px-2.5 text-[12px] font-medium transition-colors",
+                  "h-full flex-1 rounded-md px-3 text-[13px] font-normal transition-colors",
                   pane === "languages"
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {langShort(selectedLang.id, selectedLang.label)}
+                {t("language")}
               </button>
             </div>
           </div>
@@ -554,9 +524,9 @@ export function CodeAppearanceSelect({
         onClick={() => onPlace?.()}
         title="Add code block"
         className={cn(
-          "group relative mx-1 block w-[calc(100%-0.5rem)] min-w-0 overflow-hidden rounded-[1.35rem] text-left transition-[box-shadow,opacity]",
+          "group relative mx-1 block w-[calc(100%-0.5rem)] min-w-0 overflow-hidden rounded-[1.35rem] text-left transition-[opacity,filter]",
           active
-            ? "ring-2 ring-ring ring-offset-2 ring-offset-background"
+            ? "bg-muted/40"
             : "hover:brightness-[0.98] dark:hover:brightness-110",
           (disabled || !onPlace) && "opacity-40",
         )}

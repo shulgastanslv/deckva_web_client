@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { normalizeHex, toPickerHex } from "@/lib/color/hex";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 
 const PRESETS = [
   "#000000",
@@ -108,7 +109,7 @@ function ColorPickerPopover({
           onChange={apply}
           className="!h-[140px] !w-full"
         />
-        <div className="flex items-center gap-2 rounded-full bg-muted/40 px-2.5">
+        <div className="flex items-center gap-2 rounded-md bg-muted/40 px-2.5">
           <span
             className="size-4 shrink-0 rounded-full"
             style={{ backgroundColor: draft }}
@@ -224,7 +225,7 @@ export function ColorPicker({
           {label}
         </label>
       ) : null}
-      <div className="flex h-9 items-center gap-2 rounded-full bg-muted/40 px-2">
+      <div className={cn("flex items-center gap-2 rounded-md border-none bg-muted/40 px-3.5 shadow-none", controlH)}>
         <ColorPickerPopover
           value={value}
           onChange={(hex) => {
@@ -246,7 +247,7 @@ export function ColorPicker({
           }}
           placeholder="#000000"
           spellCheck={false}
-          className="h-7 flex-1 border-0 bg-transparent px-1 font-mono text-[13px] uppercase shadow-none focus-visible:ring-0 dark:bg-transparent"
+          className="h-full flex-1 border-0 bg-transparent px-1 font-mono text-[13px] uppercase shadow-none focus-visible:ring-0 dark:bg-transparent"
         />
         {trailing}
       </div>

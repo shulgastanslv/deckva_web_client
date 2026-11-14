@@ -466,7 +466,7 @@ export function StudioPrompt({
                 className="w-56 rounded-2xl p-1.5"
               >
                 <DropdownMenuItem
-                  className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50"
+                  className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] focus:bg-muted/50"
                   disabled={attaching || attachments.length >= MAX_ATTACHMENTS}
                   onSelect={() => fileInputRef.current?.click()}
                 >
@@ -475,7 +475,7 @@ export function StudioPrompt({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-1 bg-border/50" />
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
+                  <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
                     <ScrollText className={menuIconClass} />
                     <span className="flex-1 text-left">{t("prompt.skills")}</span>
                   </DropdownMenuSubTrigger>
@@ -489,7 +489,7 @@ export function StudioPrompt({
                         <DropdownMenuItem
                           key={skill.id}
                           className={cn(
-                            "cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50",
+                            "cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] focus:bg-muted/50",
                             active && "bg-muted/50",
                           )}
                           onSelect={() => {
@@ -521,7 +521,7 @@ export function StudioPrompt({
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
+                  <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
                     <PlugsIcon className={menuIconClass} />
                     <span className="flex-1 text-left">
                       {t("prompt.connectors")}
@@ -539,7 +539,7 @@ export function StudioPrompt({
                       return (
                         <div
                           key={item.id}
-                          className="flex items-center gap-2.5 rounded-xl px-2 py-2"
+                          className="flex items-center gap-2.5 rounded-md px-2 py-2"
                         >
                           <BrandIcon brand={item.brand} />
                           <div className="min-w-0 flex-1">
@@ -593,7 +593,7 @@ export function StudioPrompt({
                     })}
                     <DropdownMenuItem
                       asChild
-                      className="mt-1 rounded-xl px-2.5 py-2 text-[13px]"
+                      className="mt-1 rounded-md px-2.5 py-2 text-[13px]"
                     >
                       <Link href="/studio/connectors">
                         {t("prompt.manageConnectors")}
@@ -603,7 +603,7 @@ export function StudioPrompt({
                 </DropdownMenuSub>
                 <DropdownMenuItem
                   disabled
-                  className="cursor-default gap-2.5 rounded-xl px-2.5 py-2.5 text-[13px] text-muted-foreground"
+                  className="cursor-default gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] text-muted-foreground"
                 >
                   <Shapes className={menuIconClass} />
                   {t("prompt.addAssets")}
@@ -655,7 +655,7 @@ export function StudioPrompt({
                         value={modelQuery}
                         onChange={(event) => setModelQuery(event.target.value)}
                         placeholder={t("prompt.searchModels")}
-                        className="h-9 w-full rounded-md bg-muted/40 pr-3 pl-8 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/60"
+                        className="w-full rounded-md bg-muted/40 h-11 pr-3 pl-8 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/60"
                       />
                     </div>
                     <div className="flex flex-wrap gap-1">
@@ -704,7 +704,7 @@ export function StudioPrompt({
                         <DropdownMenuItem
                           key={model.modelId}
                           className={cn(
-                            "flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50",
+                            "flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] focus:bg-muted/50",
                             model.modelId === selected?.modelId && "bg-muted/50",
                           )}
                           onSelect={() => pickModel(model.modelId)}
@@ -750,7 +750,7 @@ export function StudioPrompt({
                   {history.map((item) => (
                     <DropdownMenuItem
                       key={item}
-                      className="cursor-pointer rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50"
+                      className="cursor-pointer rounded-md px-3 py-2.5 text-[13px] focus:bg-muted/50"
                       onSelect={() => setValue(item)}
                     >
                       <span className="line-clamp-2">{item}</span>
@@ -767,7 +767,7 @@ export function StudioPrompt({
               disabled={!canSend}
               onClick={submit}
               className={cn(
-                "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                "inline-flex size-9 shrink-0 items-center justify-center rounded-md border-none shadow-none transition-colors",
                 canSend
                   ? "bg-foreground text-background hover:bg-foreground/90"
                   : "bg-muted text-muted-foreground",

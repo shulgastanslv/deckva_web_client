@@ -179,7 +179,7 @@ export function ScreenSplit() {
         }}
         className={cn(
           sidebarActionBtn,
-          "h-11 w-full gap-2",
+          "w-full gap-2",
           dragging && "bg-muted/80 dark:bg-muted/40",
         )}
       >

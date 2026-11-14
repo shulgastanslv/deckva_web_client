@@ -9,6 +9,7 @@ import {
 } from "@phosphor-icons/react";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -114,7 +115,7 @@ export function SidebarMockups() {
             }
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("device")}>
+ <SelectTrigger className={sidebarSelectTrigger} aria-label={t("device")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -164,7 +165,8 @@ export function SidebarMockups() {
               type="button"
               onClick={() => setRowCount(count)}
               className={cn(
-                "h-10 flex-1 rounded-md text-[13px] font-medium transition-colors",
+                "flex-1 rounded-md text-[13px] font-normal transition-colors",
+                controlH,
                 rowCount === count
                   ? sidebarSegmentedItemActive
                   : cn(sidebarSurfaceIdle, sidebarSegmentedItemIdle, "hover:bg-muted/80 dark:hover:bg-muted/40"),

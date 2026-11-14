@@ -29,6 +29,7 @@ import {
 } from "@/lib/studio/brand-kit";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 import { FRAME_ITEMS } from "@/components/canvas/use-element-library";
 
 type FrameItem = (typeof FRAME_ITEMS)[number];
@@ -102,10 +103,10 @@ function LayoutCard({
       onClick={onSelect}
       title={layout.label}
       className={cn(
-        "group relative mx-1 block aspect-[5/4] w-[calc(100%-0.5rem)] min-w-0 overflow-hidden rounded-[1.35rem] text-left transition-[box-shadow,background-color]",
+        "group relative mx-1 block aspect-[5/4] w-[calc(100%-0.5rem)] min-w-0 overflow-hidden rounded-md text-left transition-colors",
         active
-          ? "ring-2 ring-ring ring-offset-2 ring-offset-background"
-          : "hover:brightness-[0.98] dark:hover:brightness-110",
+          ? "bg-muted/60 ring-1 ring-ring/40"
+          : "hover:bg-muted/40",
       )}
       style={clear ? CHECKER_STYLE : { backgroundColor: background }}
     >
@@ -248,9 +249,12 @@ export function FramesPicker({
           <button
             type="button"
             disabled={disabled || devices.length === 0}
-            className="flex h-12 w-full min-w-0 items-center gap-2.5 rounded-2xl bg-muted/60 px-2.5 text-left transition-colors hover:bg-muted disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45"
+            className={cn(
+              "flex w-full min-w-0 items-center gap-2.5 rounded-md border-none bg-muted/40 px-3.5 text-left shadow-none transition-colors hover:bg-muted/60 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45",
+              controlH,
+            )}
           >
-            <span className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-background/80 dark:bg-background/35">
+            <span className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background/80 dark:bg-background/35">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={selectedFrame.src}
@@ -259,10 +263,10 @@ export function FramesPicker({
               />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] font-medium text-foreground">
+              <span className="block truncate text-[13px] font-normal text-foreground">
                 {selectedFrame.label}
               </span>
-              <span className="block text-[11px] tabular-nums text-muted-foreground">
+              <span className="block text-[11px] font-normal tabular-nums text-muted-foreground">
                 {selectedSize.width} × {selectedSize.height}
               </span>
             </span>
@@ -274,7 +278,7 @@ export function FramesPicker({
           align="start"
           sideOffset={8}
           collisionPadding={12}
-          className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] p-0"
+          className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border-0 p-0 shadow-sm dark:border dark:border-border/50"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <div className="max-h-[min(22rem,50vh)] overflow-y-auto overscroll-contain px-2.5 pt-2.5 pb-2 [scrollbar-width:thin]">
@@ -292,10 +296,10 @@ export function FramesPicker({
                       setDeviceOpen(false);
                     }}
                     className={cn(
-                      "flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1.5 py-2.5 text-center transition-colors",
+                      "flex min-w-0 flex-col items-center gap-1.5 rounded-md px-1.5 py-2.5 text-center transition-colors",
                       active
-                        ? "bg-muted ring-2 ring-ring"
-                        : "hover:bg-muted/60 dark:hover:bg-muted/35",
+                        ? "bg-muted/60 text-foreground"
+                        : "hover:bg-muted/40 dark:hover:bg-muted/35",
                     )}
                   >
                     <span className="flex h-16 w-full items-center justify-center">
@@ -306,7 +310,7 @@ export function FramesPicker({
                         className="max-h-full max-w-full object-contain"
                       />
                     </span>
-                    <span className="w-full truncate text-[11px] font-medium leading-tight text-foreground">
+                    <span className="w-full truncate text-[11px] font-normal leading-tight text-foreground">
                       {item.label}
                     </span>
                     <span className="w-full truncate text-[10px] tabular-nums text-muted-foreground">
@@ -375,7 +379,10 @@ export function FramesPicker({
             <div
               role="group"
               aria-label={t("orientation")}
-              className="flex h-8 shrink-0 items-center rounded-md bg-muted/50 p-0.5 dark:bg-muted/30"
+              className={cn(
+                "flex shrink-0 items-center rounded-md bg-muted/40 p-0.5 dark:bg-muted/30",
+                controlH,
+              )}
             >
               <button
                 type="button"

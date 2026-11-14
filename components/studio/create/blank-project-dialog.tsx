@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/select";
 import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import {
+  sidebarFieldInput,
+  sidebarSelectTrigger,
+} from "@/components/canvas/sidebar/sidebar-ui";
 
 const RATIOS = Object.keys(CANVAS_RATIOS) as RatioKey[];
 const SLIDE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -30,8 +34,7 @@ export type BlankProjectInput = {
   slidesCount: number;
 };
 
-const fieldClass =
-  "h-9 w-full rounded-md border-none bg-muted/40 px-3 text-[13px] text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:bg-muted/50";
+const fieldClass = sidebarFieldInput;
 
 type Props = {
   open: boolean;
@@ -117,11 +120,7 @@ export function BlankProjectDialog({
               disabled={locked}
               onValueChange={(v) => setAspectRatio(v as RatioKey)}
             >
-              <SelectTrigger
-                className={cn(
-                  "h-9 w-full rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60",
-                )}
-              >
+              <SelectTrigger className={sidebarSelectTrigger}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="rounded-2xl p-1.5">
@@ -131,7 +130,7 @@ export function BlankProjectDialog({
                     <SelectItem
                       key={ratio}
                       value={ratio}
-                      className="rounded-xl text-[13px]"
+                      className="text-[13px]"
                     >
                       {ratio}
                       <span className="ml-2 text-muted-foreground">
@@ -176,7 +175,7 @@ export function BlankProjectDialog({
               type="button"
               variant="ghost"
               disabled={locked}
-              className="h-9 flex-1 rounded-md border-none bg-muted/40 text-[13px] shadow-none hover:bg-muted/60"
+ className="flex-1 rounded-md border-none bg-muted/40 text-[13px] shadow-none hover:bg-muted/60"
               onClick={() => onOpenChange(false)}
             >
               {t("cancel")}
@@ -184,7 +183,7 @@ export function BlankProjectDialog({
             <Button
               type="button"
               disabled={locked}
-              className="h-9 flex-1 rounded-md border-none bg-primary text-[13px] text-primary-foreground shadow-none hover:bg-primary/90"
+ className="flex-1 rounded-md border-none bg-primary text-[13px] text-primary-foreground shadow-none hover:bg-primary/90"
               onClick={() => void handleSubmit()}
             >
               {locked ? (

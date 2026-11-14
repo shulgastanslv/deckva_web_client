@@ -118,7 +118,7 @@ export function SlideNavigator() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 shrink-0 rounded-md text-muted-foreground"
+ className="h-8 w-8 shrink-0 rounded-md text-muted-foreground"
         onClick={prev}
         disabled={!canGoPrev}
         title={t("prev")}
@@ -238,7 +238,7 @@ export function SlideNavigator() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 shrink-0 rounded-md text-muted-foreground"
+ className="h-8 w-8 shrink-0 rounded-md text-muted-foreground"
         onClick={next}
         disabled={!canGoNext}
         title={t("next")}

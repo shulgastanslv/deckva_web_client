@@ -44,7 +44,7 @@ const iconBtn =
   "size-8 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
 
 const menuItem =
-  "cursor-pointer gap-2 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50";
+  "cursor-pointer gap-2 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50";
 
 type EditorPanelActionsProps = {
   onPreview?: () => void;
@@ -105,7 +105,8 @@ export function EditorPanelActions({
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
-                className="h-9 gap-1 rounded-md border-none bg-primary px-3 text-[12px] font-medium text-primary-foreground shadow-none hover:bg-primary/90"
+                size="sm"
+                className="gap-1 rounded-md border-none bg-primary px-3 text-[12px] font-medium text-primary-foreground shadow-none hover:bg-primary/90"
               >
                 {tc("share")}
                 <ChevronDown className="size-3 opacity-80" />
@@ -148,8 +149,9 @@ export function EditorPanelActions({
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
+                size="sm" 
                 variant="ghost"
-                className="h-8 gap-0.5 rounded-md border-none px-2 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
+                className="gap-0.5 rounded-md border-none px-2 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground"
                 title={t("header.preview")}
                 aria-label={t("header.preview")}
               >

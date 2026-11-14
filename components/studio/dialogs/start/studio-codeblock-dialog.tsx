@@ -61,7 +61,7 @@ export function StudioCodeBlockDialog({
             rows={10}
             disabled={busy}
             spellCheck={false}
-            placeholder={`function hello() {\n  return "world";\n}`}
+            placeholder={`package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("Hello from Deckva")\n}`}
             className={cn(
               "min-h-[180px] w-full resize-none rounded-2xl bg-muted/30 px-3.5 py-3 font-mono text-[13px] leading-relaxed text-foreground outline-none",
               "placeholder:text-muted-foreground/70 focus:bg-muted/40",
@@ -75,7 +75,7 @@ export function StudioCodeBlockDialog({
 
           <Button
             type="button"
-            className="h-10 w-full rounded-md text-[13px] font-medium"
+ className="w-full rounded-md text-[13px] font-medium"
             disabled={!canSubmit}
             onClick={() => void onSubmit(code)}
           >

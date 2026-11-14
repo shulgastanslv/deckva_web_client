@@ -198,7 +198,7 @@ function SplitTool({
       <div
         className={cn(
           "flex h-9 shrink-0 items-center rounded-md p-0.5 transition-colors",
-          lit ? "bg-foreground text-background" : "bg-muted/50",
+          lit ? "bg-foreground text-background" : "bg-transparent",
         )}
       >
         <Tooltip>
@@ -479,7 +479,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-4">
-        <div className="pointer-events-auto flex h-12 w-fit max-w-[calc(100vw-24px)] items-center gap-1 overflow-x-auto rounded-md bg-background p-1">
+        <div className="pointer-events-auto flex h-12 w-fit max-w-[calc(100vw-24px)] items-center border border-border/40 gap-1 overflow-x-auto rounded-md bg-background p-1">
           <input
             type="file"
             ref={fileInputRef}

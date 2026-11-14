@@ -18,6 +18,7 @@ import { Image as FabricImage, Shadow as FabricShadow, filters as fabricFilters 
 import { PillSlider } from "@/components/ui/pill-slider";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 
 type ShadowKind = "none" | "spread" | "hug";
 type ShadowIntensity = "low" | "medium" | "high";
@@ -313,7 +314,7 @@ export function FiltersControls() {
           </div>
         </div>
 
-        <div className="flex h-10 items-center gap-1.5">
+        <div className={cn("flex items-center gap-1.5", controlH)}>
           <button
             type="button"
             aria-label={t("previous")}
@@ -322,7 +323,12 @@ export function FiltersControls() {
           >
             <ChevronLeft className="size-5" />
           </button>
-          <div className="flex h-10 min-w-0 flex-1 items-center justify-center rounded-md bg-muted/40 px-3 text-[13px] font-medium text-foreground">
+          <div
+            className={cn(
+              "flex min-w-0 flex-1 items-center justify-center rounded-md bg-muted/40 px-3.5 text-[13px] font-normal text-foreground",
+              controlH,
+            )}
+          >
             <span className="truncate">
               {t(`presets.${draftPreset.id}` as "presets.none")}
             </span>
@@ -343,7 +349,10 @@ export function FiltersControls() {
           type="button"
           disabled={!dirty}
           onClick={applyDraft}
-          className="flex h-10 flex-1 items-center justify-center rounded-md bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-35"
+          className={cn(
+            "flex flex-1 items-center justify-center rounded-md bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-35",
+            controlH,
+          )}
         >
           {t("apply")}
         </button>

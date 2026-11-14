@@ -10,6 +10,7 @@ import {
   moveObjectBoundingRectTo,
 } from "@/lib/canvas/auto-flow";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 
 function normalizeAngle(deg: number): number {
   let n = ((deg % 360) + 360) % 360;
@@ -105,8 +106,13 @@ function DimField({
   };
 
   return (
-    <label className="flex h-10 min-w-0 items-center overflow-hidden rounded-md bg-muted/40">
-      <span className="shrink-0 px-2.5 text-[13px] font-medium text-muted-foreground">
+    <label
+      className={cn(
+        "flex min-w-0 items-center overflow-hidden rounded-md border-none bg-muted/40 shadow-none",
+        controlH,
+      )}
+    >
+      <span className="shrink-0 px-3 text-[13px] font-normal text-muted-foreground">
         {label}
       </span>
       <span className="h-4 w-px shrink-0 bg-border/40" aria-hidden />
@@ -119,10 +125,10 @@ function DimField({
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
         }}
-        className="h-full min-w-0 flex-1 border-0 bg-transparent px-2.5 text-right text-[13px] tabular-nums outline-none focus-visible:ring-0"
+        className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-right text-[13px] font-normal tabular-nums outline-none focus-visible:ring-0"
       />
       {suffix ? (
-        <span className="pr-2.5 text-[12px] text-muted-foreground">{suffix}</span>
+        <span className="pr-3 text-[12px] text-muted-foreground">{suffix}</span>
       ) : null}
     </label>
   );
@@ -332,7 +338,12 @@ export function ObjectTransformPanel({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <div className="flex h-9 flex-1 items-center rounded-md bg-muted/40 p-0.5">
+        <div
+          className={cn(
+            "flex flex-1 items-center rounded-md bg-muted/40 p-0.5",
+            controlH,
+          )}
+        >
           {(
             [
               { id: "position" as const, label: t("position") },
@@ -344,7 +355,7 @@ export function ObjectTransformPanel({
               type="button"
               onClick={() => setTab(opt.id)}
               className={cn(
-                "flex h-full flex-1 items-center justify-center rounded-md text-[13px] font-medium transition-colors",
+                "flex h-full flex-1 items-center justify-center rounded-md text-[13px] font-normal transition-colors",
                 tab === opt.id
                   ? "bg-background text-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -358,7 +369,7 @@ export function ObjectTransformPanel({
           type="button"
           title={t("reset")}
           onClick={resetTransform}
-          className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+          className="flex size-9 shrink-0 items-center justify-center rounded-md border-none text-muted-foreground shadow-none transition-colors hover:bg-muted/60 hover:text-foreground"
         >
           <RotateCcw className="size-5" />
         </button>

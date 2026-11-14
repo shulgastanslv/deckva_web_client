@@ -197,7 +197,7 @@ export function AutoFlowPrompt() {
         <Button
           type="button"
           size="sm"
-          className="h-9 shrink-0 rounded-md px-3.5 text-[13px] font-medium"
+ className="shrink-0 rounded-md px-3.5 text-[13px] font-medium"
           onClick={() => void accept()}
         >
           {continuing ? t("continue") : t("create")}
@@ -206,7 +206,7 @@ export function AutoFlowPrompt() {
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 shrink-0 rounded-md text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+ className="size-9 shrink-0 rounded-md text-muted-foreground hover:bg-muted/40 hover:text-foreground"
           onClick={dismiss}
           title={tc("dismiss")}
         >

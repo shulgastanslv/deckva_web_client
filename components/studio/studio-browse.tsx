@@ -297,7 +297,7 @@ export function StudioBrowse() {
             <Button
               type="button"
               variant="ghost"
-              className="h-9 rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
+ className="rounded-md bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60"
               onClick={() => void handleEmptyTrash()}
             >
               <Trash2 className="size-5" />
@@ -317,7 +317,7 @@ export function StudioBrowse() {
                   ? t("searchCommunity")
                   : t("searchProjects")
               }
-              className="h-9 w-full rounded-md border-none bg-muted/40 pr-4 pl-9 text-[13px] shadow-none placeholder:text-muted-foreground/70 focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
+              className="w-full rounded-md border-none bg-muted/40 pr-4 pl-9 text-[13px] shadow-none placeholder:text-muted-foreground/70 focus:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/20"
             />
           </div>
 
@@ -333,7 +333,7 @@ export function StudioBrowse() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
+ className="rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
                     >
                       {communitySortLabel}{" "}
                       <ChevronDown className="ml-1 size-3.5 opacity-50" />
@@ -399,7 +399,7 @@ export function StudioBrowse() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="h-9 rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
+ className="rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60"
                     >
                       {t("sort")}{" "}
                       <ChevronDown className="ml-1 size-3.5 opacity-50" />

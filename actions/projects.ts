@@ -27,7 +27,10 @@ export interface ProjectListItem {
   isSaved: boolean;
   slideCount: number;
   createdAt: string;
+  /** First slide thumb — same as previewUrls[0] when present. */
   previewUrl: string | null;
+  /** First 2–3 slide thumbnails for carousel stack peeks. */
+  previewUrls: string[];
   authorName: string | null;
   authorImage: string | null;
   folderId: string | null;
@@ -150,26 +153,38 @@ export async function getUserProjects(options?: {
         _count: { select: { slides: true } },
         slides: {
           orderBy: { order: "asc" },
-          take: 1,
+          take: 3,
           select: { thumbnail: true },
         },
       },
     });
 
-    const projects: ProjectListItem[] = rawProjects.map((p) => ({
-      id: p.id,
-      title: p.title,
-      aspectRatio: p.aspectRatio,
-      updatedAt: (p.trashedAt ?? p.updatedAt).toISOString(),
-      isSaved: p.savedBy.length > 0,
-      slideCount: p._count.slides,
-      createdAt: p.createdAt.toISOString(),
-      previewUrl: p.slides[0]?.thumbnail || p.thumbnail || null,
-      authorName: p.user.name || p.user.email,
-      authorImage: p.user.image,
-      folderId: p.folderId,
-      trashedAt: p.trashedAt?.toISOString() ?? null,
-    }));
+    const projects: ProjectListItem[] = rawProjects.map((p) => {
+      const fromSlides = p.slides
+        .map((s) => s.thumbnail)
+        .filter((url): url is string => Boolean(url));
+      const previewUrls =
+        fromSlides.length > 0
+          ? fromSlides
+          : p.thumbnail
+            ? [p.thumbnail]
+            : [];
+      return {
+        id: p.id,
+        title: p.title,
+        aspectRatio: p.aspectRatio,
+        updatedAt: (p.trashedAt ?? p.updatedAt).toISOString(),
+        isSaved: p.savedBy.length > 0,
+        slideCount: p._count.slides,
+        createdAt: p.createdAt.toISOString(),
+        previewUrl: previewUrls[0] ?? null,
+        previewUrls,
+        authorName: p.user.name || p.user.email,
+        authorImage: p.user.image,
+        folderId: p.folderId,
+        trashedAt: p.trashedAt?.toISOString() ?? null,
+      };
+    });
 
     return { success: true, projects };
   } catch (err) {

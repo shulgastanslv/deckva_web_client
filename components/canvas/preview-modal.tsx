@@ -291,7 +291,7 @@ export function PreviewModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
+ className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
           >
             <X className="size-5" />
           </Button>
@@ -326,7 +326,7 @@ export function PreviewModal({
           size="icon"
           onClick={goPrev}
           disabled={activeIdx === 0}
-          className="h-10 w-10 shrink-0 rounded-md disabled:opacity-20"
+ className="w-10 shrink-0 rounded-md disabled:opacity-20"
         >
           <ChevronLeft className="size-5" />
         </Button>
@@ -379,7 +379,7 @@ export function PreviewModal({
           size="icon"
           onClick={goNext}
           disabled={activeIdx === slides.length - 1}
-          className="h-10 w-10 shrink-0 rounded-md disabled:opacity-20"
+ className="w-10 shrink-0 rounded-md disabled:opacity-20"
         >
           <ChevronRight className="size-5" />
         </Button>

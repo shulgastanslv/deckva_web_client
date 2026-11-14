@@ -17,10 +17,10 @@ import {
 } from "@/components/canvas/sidebar/sidebar-ui";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -114,6 +114,18 @@ export function SlideNumberPanel() {
   const slideIndex = Math.max(currentIndex, 0);
   const slideTotal = Math.max(slides.length, 1);
 
+  const addToAllSlides = () => {
+    if (!manager) return;
+    // Place on the open slide; editor chrome sync stamps the same counter onto every slide.
+    manager.objects.addSlideNumber(
+      numberStyle,
+      slideIndex,
+      slideTotal,
+      numberCorner,
+    );
+    manager.commit();
+  };
+
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
@@ -124,10 +136,13 @@ export function SlideNumberPanel() {
             if (next === "1" || next === "01" || next === "1 / 8") setNumberStyle(next);
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.numberFormat")}>
+ <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.numberFormat")}>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent position="popper">
+          <SelectContent position="popper" className="rounded-2xl p-1.5">
+            <p className="px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground">
+              {t("workspace.format")}
+            </p>
             {NUMBER_STYLES.map((style) => (
               <SelectItem key={style} value={style} className="text-[13px]">
                 {formatSlideNumber(style, slideIndex, slideTotal)}
@@ -144,10 +159,13 @@ export function SlideNumberPanel() {
             if (isCorner(next)) setNumberCorner(next);
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.corner")}>
+ <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.corner")}>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent position="popper">
+          <SelectContent position="popper" className="rounded-2xl p-1.5">
+            <p className="px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground">
+              {t("workspace.corner")}
+            </p>
             {CORNER_IDS.map((corner) => (
               <SelectItem key={corner} value={corner} className="text-[13px]">
                 {t(CORNER_MSG[corner])}
@@ -159,12 +177,10 @@ export function SlideNumberPanel() {
       <button
         type="button"
         disabled={!manager}
-        onClick={() =>
-          manager?.objects.addSlideNumber(numberStyle, slideIndex, slideTotal, numberCorner)
-        }
+        onClick={addToAllSlides}
         className={cn(sidebarActionBtn, "w-full")}
       >
-        {t("workspace.addNumber")}
+        {t("workspace.addNumberAll")}
       </button>
     </div>
   );
@@ -244,7 +260,7 @@ function SlidesFromTextPanel() {
             }
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.textStyle")}>
+ <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.textStyle")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -413,7 +429,7 @@ function MockupsPanel() {
             }
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.device")}>
+ <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.device")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -434,7 +450,7 @@ function MockupsPanel() {
             if (value === "list" || value === "row" || value === "fill") setAction(value);
           }}
         >
-          <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.action")}>
+ <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.action")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -476,7 +492,7 @@ function MockupsPanel() {
               }
             }}
           >
-            <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.rowCount")}>
+ <SelectTrigger className={sidebarSelectTrigger} aria-label={t("workspace.rowCount")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent position="popper">
@@ -571,14 +587,17 @@ export function ToolPanel({ id }: { id: StudioToolId }) {
   }
 }
 
+/** Figma-style floating tool panel (popover), not a modal dialog. */
 export function ToolRunDialog({
   toolId,
   open,
   onOpenChange,
+  anchor,
 }: {
   toolId: StudioToolId | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  anchor?: ReactNode;
 }) {
   const t = useTranslations("editor.tools");
   const [cached, setCached] = useState<StudioTool | null>(null);
@@ -587,36 +606,45 @@ export function ToolRunDialog({
   }, [toolId]);
   const raw = (toolId ? getTool(toolId) : null) ?? cached;
   const tool = raw ? localizeCatalogTool(raw, t) : null;
-  if (!tool) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        className="grid max-h-[min(44rem,90dvh)] w-[min(24rem,calc(100vw-2rem))] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-md"
+    <Popover open={open} onOpenChange={onOpenChange}>
+      {anchor ? <PopoverTrigger asChild>{anchor}</PopoverTrigger> : null}
+      <PopoverContent
+        align="start"
+        side="right"
+        sideOffset={10}
+        collisionPadding={12}
+        className="w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border-0 bg-popover p-0 shadow-sm dark:border dark:border-border/50"
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <div className="flex items-center gap-2 px-4 py-3">
-          <ToolAvatar tool={tool} size="sm" />
-          <DialogTitle className="min-w-0 flex-1 truncate text-[13px] font-semibold">
-            {tool.title}
-          </DialogTitle>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="rounded-md"
-            onClick={() => onOpenChange(false)}
-            aria-label={t("workspace.close")}
-          >
-            <X className="size-5" />
-          </Button>
-        </div>
-
-        <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-4 pb-5 pt-1">
-          <p className="text-[12px] leading-snug text-muted-foreground">{tool.description}</p>
-          <ToolPanel id={tool.id} />
-        </div>
-      </DialogContent>
-    </Dialog>
+        {tool ? (
+          <>
+            <div className="flex items-center gap-2 border-b border-border/40 px-3.5 py-2.5">
+              <ToolAvatar tool={tool} size="sm" />
+              <p className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+                {tool.title}
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+ className="rounded-md"
+                onClick={() => onOpenChange(false)}
+                aria-label={t("workspace.close")}
+              >
+                <X className="size-5" />
+              </Button>
+            </div>
+            <div className="max-h-[min(28rem,70vh)] space-y-4 overflow-y-auto overscroll-contain px-3.5 py-3 [scrollbar-width:thin]">
+              <p className="text-[12px] leading-snug text-muted-foreground">
+                {tool.description}
+              </p>
+              <ToolPanel id={tool.id} />
+            </div>
+          </>
+        ) : null}
+      </PopoverContent>
+    </Popover>
   );
 }

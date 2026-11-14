@@ -21,13 +21,15 @@ import {
   type ElementItem,
 } from "@/components/canvas/use-element-library";
 import type { FrameKind } from "@/lib/canvas/frames";
-import { ImageUploadIcon } from "@/components/canvas/shapes-icons";
 import { FramesPicker } from "@/components/canvas/sidebar/frames-picker";
 import { CodeBlockSettings } from "@/components/canvas/code-block-inspector";
-import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
 import { GalleryCard, GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import { UploadOrDrop } from "@/components/canvas/sidebar/upload-or-drop";
-import { sidebarFieldInput, sidebarPanel } from "@/components/canvas/sidebar/sidebar-ui";
+import {
+  navIconClass,
+  sidebarFieldInput,
+  sidebarPanel,
+} from "@/components/canvas/sidebar/sidebar-ui";
 import { isCodeBlock } from "@/lib/canvas/code-block";
 import { useSelectedObject } from "@/hooks/use-selected-object";
 import {
@@ -42,15 +44,26 @@ type Category = "photos" | "text" | "shapes" | "frames" | "code";
 
 const CATEGORIES: {
   id: Category;
-  label: string;
+  labelKey: Category;
   icon: ComponentType<{ className?: string }>;
 }[] = [
-  { id: "photos", label: "Photos", icon: ImageIcon },
-  { id: "text", label: "Text", icon: Type },
-  { id: "shapes", label: "Shapes", icon: Shapes },
-  { id: "frames", label: "Frames", icon: Smartphone },
-  { id: "code", label: "Code", icon: Code2 },
+  { id: "photos", labelKey: "photos", icon: ImageIcon },
+  { id: "text", labelKey: "text", icon: Type },
+  { id: "shapes", labelKey: "shapes", icon: Shapes },
+  { id: "frames", labelKey: "frames", icon: Smartphone },
+  { id: "code", labelKey: "code", icon: Code2 },
 ];
+
+const SEARCH_PLACEHOLDER: Record<
+  Category,
+  "searchPhotos" | "searchText" | "searchShapes" | "searchDevices" | "searchThemes"
+> = {
+  photos: "searchPhotos",
+  text: "searchText",
+  shapes: "searchShapes",
+  frames: "searchDevices",
+  code: "searchThemes",
+};
 
 const TEXT_PREVIEW: Record<
   string,
@@ -150,51 +163,53 @@ export function SidebarElements() {
         disabled={!manager}
       />
 
-      <div className="sticky top-0 z-10 w-full min-w-0 bg-background/95 pb-2 backdrop-blur-sm">
-        <div className="flex items-center gap-1.5">
-          <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={
-                category === "photos"
-                  ? "Search photos..."
-                  : category === "text"
-                    ? "Search text..."
-                    : category === "shapes"
-                      ? "Search shapes..."
-                      : category === "frames"
-                        ? "Search devices..."
-                        : category === "code"
-                          ? "Search themes..."
-                          : "Search..."
-              }
-              className={cn(sidebarFieldInput, "pl-9")}
-            />
-          </div>
-          <FilterMenu
-            value={category}
-            defaultValue="photos"
-            ariaLabel="Element category"
-            onChange={(id) => {
-              setCategory(id as Category);
-              setSearch("");
-            }}
-            groups={[
-              {
-                label: "Category",
-                options: CATEGORIES.map(({ id, label }) => ({ id, label })),
-              },
-            ]}
+      <div className="sticky top-0 z-10 w-full min-w-0 space-y-2 bg-background/95 pb-0.5 backdrop-blur-sm">
+        <div
+          role="tablist"
+          aria-label={t("elementCategory")}
+          className="grid grid-cols-5 gap-1"
+        >
+          {CATEGORIES.map(({ id, labelKey, icon: Icon }) => {
+            const active = category === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                title={t(labelKey)}
+                onClick={() => {
+                  setCategory(id);
+                  setSearch("");
+                }}
+                className={cn(
+                  "flex min-w-0 flex-col items-center gap-1 rounded-md px-0.5 py-2 transition-colors",
+                  active
+                    ? "bg-muted/60 text-foreground"
+                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                )}
+              >
+                <Icon className={navIconClass} />
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="relative min-w-0">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t(SEARCH_PLACEHOLDER[category])}
+            className={cn(sidebarFieldInput, "pl-9")}
           />
         </div>
       </div>
 
       <div
         role="tabpanel"
-        aria-label={CATEGORIES.find((item) => item.id === category)?.label}
-        className="w-full min-w-0 space-y-3"
+        aria-label={t(category)}
+        className="w-full min-w-0"
       >
         {category === "photos" ? (
           <div className="space-y-2.5">
@@ -227,7 +242,7 @@ export function SidebarElements() {
                       void addImageFromUrl();
                     }
                   }}
-                  className="h-11 rounded-md border-0 bg-muted/60 pl-10 text-[14px] shadow-none hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/40 dark:bg-muted/25 dark:hover:bg-muted/40"
+                  className="rounded-md border-0 bg-muted/60 pl-10 text-[13px] shadow-none hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring/40 dark:bg-muted/25 dark:hover:bg-muted/40"
                 />
               </div>
               <Button
@@ -236,23 +251,23 @@ export function SidebarElements() {
                 size="sm"
                 disabled={!manager || urlLoading || !imageUrl.trim()}
                 onClick={() => void addImageFromUrl()}
-                className="h-11 shrink-0 rounded-md px-4 text-[14px]"
+                className="shrink-0 rounded-md px-3.5 text-[13px]"
               >
                 {urlLoading ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
-                  "Add"
+                  tc("add")
                 )}
               </Button>
             </div>
             {urlError ? (
-              <p className="text-[14px] text-destructive">{urlError}</p>
+              <p className="text-[13px] text-destructive">{urlError}</p>
             ) : null}
 
             {filteredRecent.length > 0 ? (
               <GallerySection
                 title={t("recentlyUsed")}
-                action="Clear"
+                action={tc("clear")}
                 onAction={() => clearRecentPhotos()}
               >
                 {filteredRecent.map((item, index) => (
@@ -295,7 +310,7 @@ export function SidebarElements() {
               );
             })}
             {textItems.length === 0 ? (
-              <p className="py-10 text-center text-[14px] text-muted-foreground">
+              <p className="py-10 text-center text-[13px] text-muted-foreground">
                 {t("noTextStyles")}
               </p>
             ) : null}
@@ -316,7 +331,7 @@ export function SidebarElements() {
                   className="flex min-w-0 flex-col items-center gap-2 overflow-hidden rounded-2xl bg-muted/50 px-1.5 py-3 text-center transition-colors hover:bg-muted/70 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45"
                 >
                   <span className="flex h-14 w-full items-center justify-center text-foreground">
-                    <Icon size={44} />
+                    <Icon size={24} />
                   </span>
                   <span className="w-full truncate text-[12px] font-medium text-foreground">
                     {item.label}
@@ -325,7 +340,7 @@ export function SidebarElements() {
               );
             })}
             {shapeItems.length === 0 ? (
-              <p className="col-span-3 py-10 text-center text-[14px] text-muted-foreground">
+              <p className="col-span-3 py-10 text-center text-[13px] text-muted-foreground">
                 {t("noShapes")}
               </p>
             ) : null}

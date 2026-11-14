@@ -3,19 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   MagnifyingGlass as Search,
+  X,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
 import { FilterMenu } from "@/components/canvas/sidebar/filter-menu";
-import { ToolAvatar, ToolUsageSchema } from "@/components/canvas/sidebar/tool-avatars";
+import { ToolAvatar } from "@/components/canvas/sidebar/tool-avatars";
 import { ToolsBanner } from "@/components/canvas/sidebar/tools-banner";
-import { ToolRunDialog } from "@/components/canvas/sidebar/tool-workspace";
+import { ToolPanel } from "@/components/canvas/sidebar/tool-workspace";
 import { sidebarFieldInput, sidebarHint, sidebarPanel } from "@/components/canvas/sidebar/sidebar-ui";
+import { Button } from "@/components/ui/button";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   loadToolRecents,
   pushToolRecent,
@@ -50,18 +52,21 @@ function localizedTool(tool: StudioTool, t: TranslateFn): StudioTool {
 
 function ToolListRow({
   tool,
-  onOpen,
+  open,
+  onOpenChange,
 }: {
   tool: StudioTool;
-  onOpen: (id: StudioToolId) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("editor.tools");
+
   return (
-    <HoverCard openDelay={180} closeDelay={80}>
-      <HoverCardTrigger asChild>
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
         <button
           type="button"
-          onClick={() => onOpen(tool.id)}
-          className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-muted/50 dark:hover:bg-muted/30"
+          className="flex w-full items-center gap-3 rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-muted/50 data-[state=open]:bg-muted/50 dark:hover:bg-muted/30"
         >
           <ToolAvatar tool={tool} />
           <span className="min-w-0 flex-1">
@@ -73,24 +78,40 @@ function ToolListRow({
             </span>
           </span>
         </button>
-      </HoverCardTrigger>
-      <HoverCardContent
-        side="right"
+      </PopoverTrigger>
+
+      <PopoverContent
         align="start"
+        side="right"
         sideOffset={10}
-        className="w-52 overflow-hidden rounded-2xl border-0 bg-popover p-0 shadow-sm dark:border dark:border-border/50"
+        collisionPadding={12}
+        className="w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border-0 bg-popover p-0 shadow-sm dark:border dark:border-border/50"
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <ToolUsageSchema tool={tool} className="aspect-[16/10] min-h-0 rounded-none" />
-        <div className="space-y-1 px-3 py-2.5">
-          <p className="text-[13px] font-semibold leading-snug text-foreground">
+        <div className="flex items-center gap-2 border-b border-border/40 px-3.5 py-2.5">
+          <ToolAvatar tool={tool} size="sm" />
+          <p className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
             {tool.title}
           </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+ className="rounded-md"
+            onClick={() => onOpenChange(false)}
+            aria-label={t("workspace.close")}
+          >
+            <X className="size-5" />
+          </Button>
+        </div>
+        <div className="max-h-[min(28rem,70vh)] space-y-4 overflow-y-auto overscroll-contain px-3.5 py-3 [scrollbar-width:thin]">
           <p className="text-[12px] leading-snug text-muted-foreground">
             {tool.description}
           </p>
+          <ToolPanel id={tool.id} />
         </div>
-      </HoverCardContent>
-    </HoverCard>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -153,11 +174,6 @@ export function SidebarTools() {
     }
   };
 
-  const openTool = (id: StudioToolId) => {
-    setRecents(pushToolRecent(id));
-    setRunId(id);
-  };
-
   const categoryLabel = (id: ToolCategory | "all") => t(`categories.${id}`);
 
   return (
@@ -214,18 +230,22 @@ export function SidebarTools() {
       ) : (
         <div className="flex flex-col">
           {ordered.map((tool) => (
-            <ToolListRow key={tool.id} tool={tool} onOpen={openTool} />
+            <ToolListRow
+              key={tool.id}
+              tool={tool}
+              open={runId === tool.id}
+              onOpenChange={(next) => {
+                if (next) {
+                  setRecents(pushToolRecent(tool.id));
+                  setRunId(tool.id);
+                } else if (runId === tool.id) {
+                  setRunId(null);
+                }
+              }}
+            />
           ))}
         </div>
       )}
-
-      <ToolRunDialog
-        toolId={runId}
-        open={runId !== null}
-        onOpenChange={(next) => {
-          if (!next) setRunId(null);
-        }}
-      />
     </div>
   );
 }

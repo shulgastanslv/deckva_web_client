@@ -117,7 +117,7 @@ export function SaveStatusMenu() {
           size="icon"
           title={title}
           aria-label={title}
-          className={cn(
+ className={cn(
             "size-9 shrink-0 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/40 hover:text-foreground",
             "data-[state=open]:bg-muted/40 data-[state=open]:text-foreground",
             isSaving && "animate-pulse text-primary",
@@ -157,7 +157,7 @@ export function SaveStatusMenu() {
             onClick={() => {
               void persist().then(() => setTick(Date.now()));
             }}
-            className="h-10 w-full gap-2 rounded-md border-none bg-foreground text-[13px] font-medium text-background shadow-none hover:bg-foreground/90 disabled:opacity-40"
+            className="w-full gap-2 rounded-md border-none bg-foreground text-[13px] font-medium text-background shadow-none hover:bg-foreground/90 disabled:opacity-40"
           >
             <Save className={menuIconClass} />
             {isSaving ? tc("saving") : isDirty ? t("saveNow") : t("allSaved")}

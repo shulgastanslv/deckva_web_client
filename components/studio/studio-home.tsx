@@ -37,8 +37,6 @@ import { reportError } from "@/lib/report-error";
 import { messages } from "@/lib/messages";
 import { parseImportedTemplate } from "@/lib/templates/parse";
 import { CANVAS_RATIOS, type RatioKey } from "@/lib/types";
-import { trackEvent } from "@/lib/analytics";
-import { STARTER_CAROUSEL_PROMPTS } from "@/lib/studio/onboarding";
 import { useTranslations } from "next-intl";
 
 type ViewMode = "list" | "grid";
@@ -65,7 +63,7 @@ export function StudioHome() {
   const loadingProjects =
     signedIn && !projectsQuery.data && !projectsQuery.isError;
   const refreshProjects = useInvalidateStudioProjects();
-  const [view, setView] = useState<ViewMode>("list");
+  const [view, setView] = useState<ViewMode>("grid");
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -211,15 +209,18 @@ export function StudioHome() {
             }
           }}
           onGenerate={create.generateFromPrompt}
+          onStarter={(starterTopic) =>
+            create.generateCarousel({ topic: starterTopic })
+          }
           generating={create.generating}
           generateError={create.generateError}
         />
 
-        <section className="mt-8">
+        <section className="mt-10">
           <StudioSectionHeader
             title={t("recent")}
             trailing={
-              signedIn ? (
+              signedIn && !empty ? (
                 <StudioViewToggle view={view} onChange={setView} />
               ) : null
             }
@@ -230,31 +231,9 @@ export function StudioHome() {
               <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
           ) : empty ? (
-            <div>
-              <p className="text-[13px] text-muted-foreground">
-                {q ? t("nothingFound") : t("tryStarter")}
-              </p>
-              {!q ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {STARTER_CAROUSEL_PROMPTS.map((starter) => (
-                    <button
-                      key={starter.id}
-                      type="button"
-                      disabled={create.generating}
-                      onClick={() => {
-                        trackEvent("studio_starter_chip", { id: starter.id });
-                        void create.generateCarousel({
-                          topic: t(`starters.${starter.id}.topic`),
-                        });
-                      }}
-                      className="inline-flex h-9 items-center rounded-md bg-muted/40 px-3.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60"
-                    >
-                      {t(`starters.${starter.id}.label`)}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+            <p className="text-[13px] text-muted-foreground">
+              {q ? t("nothingFound") : t("noCarousels")}
+            </p>
           ) : view === "list" ? (
             <StudioProjectList
               projects={recentProjects}

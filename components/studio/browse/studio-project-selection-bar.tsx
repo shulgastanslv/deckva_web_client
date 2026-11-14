@@ -54,7 +54,7 @@ export function StudioProjectSelectionBar({
           <Button
             type="button"
             variant="ghost"
-            className="h-9 rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
+ className="rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
             onClick={onRestore}
           >
             <Restore className="size-5" />
@@ -63,7 +63,7 @@ export function StudioProjectSelectionBar({
           <Button
             type="button"
             variant="ghost"
-            className="h-9 rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
+ className="rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
             onClick={onDeleteForever}
           >
             <Trash2 className="size-5" />
@@ -75,7 +75,7 @@ export function StudioProjectSelectionBar({
           <Button
             type="button"
             variant="ghost"
-            className="h-9 rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
+ className="rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
             onClick={onOpenInNewTab}
           >
             <OpenInNew className="size-5" />
@@ -84,7 +84,7 @@ export function StudioProjectSelectionBar({
           <Button
             type="button"
             variant="ghost"
-            className="h-9 rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
+ className="rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
             onClick={onStar}
           >
             <Star className="size-5" />
@@ -93,7 +93,7 @@ export function StudioProjectSelectionBar({
           <Button
             type="button"
             variant="ghost"
-            className="h-9 rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
+ className="rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
             onClick={onUnstar}
           >
             <Star className="size-5" />
@@ -102,7 +102,7 @@ export function StudioProjectSelectionBar({
           <Button
             type="button"
             variant="ghost"
-            className="h-9 rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
+ className="rounded-md px-3 text-[13px] text-background hover:bg-background/15 hover:text-background"
             onClick={onTrash}
           >
             <Trash2 className="size-5" />
@@ -115,7 +115,7 @@ export function StudioProjectSelectionBar({
         type="button"
         variant="ghost"
         size="icon"
-        className="size-8 rounded-md text-background hover:bg-background/15 hover:text-background"
+ className="size-8 rounded-md text-background hover:bg-background/15 hover:text-background"
         onClick={onClear}
         aria-label={t("clearSelection")}
       >

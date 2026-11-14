@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import {
-  AlignCenterHorizontal as AlignCenter,
+  TextAlignCenter as AlignCenter,
   TextAlignJustify as AlignJustify,
   TextAlignLeft as AlignLeft,
   TextAlignRight as AlignRight,
@@ -605,6 +605,11 @@ export function SelectionToolbar() {
               >
                 <Underline className="size-5" />
               </ToolBtn>
+              <TextRefactorMenu
+                compact
+                disabled={!textState.text.trim()}
+                onRefactor={applyTextRefactor}
+              />
               <ToolBtn
                 label="Strikethrough"
                 active={textState.isStrike}
@@ -615,11 +620,6 @@ export function SelectionToolbar() {
               <ToolBtn label="Change case" onClick={applyCase}>
                 <CaseSensitive className="size-5" />
               </ToolBtn>
-              <TextRefactorMenu
-                compact
-                disabled={!textState.text.trim()}
-                onRefactor={applyTextRefactor}
-              />
 
               <BarDivider />
 
@@ -694,7 +694,7 @@ export function SelectionToolbar() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-9 rounded-md gap-1.5 px-2.5 text-[13px]"
+                    className="h-9 rounded-md gap-1.5 px-3 text-[13px] font-normal"
                     onClick={() => applyTextList("bullet")}
                   >
                     <List className="size-5" />
@@ -704,7 +704,7 @@ export function SelectionToolbar() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-9 rounded-md gap-1.5 px-2.5 text-[13px]"
+                    className="h-9 rounded-md gap-1.5 px-3 text-[13px] font-normal"
                     onClick={() => applyTextList("number")}
                   >
                     <ListOrdered className="size-5" />
@@ -819,7 +819,7 @@ export function SelectionToolbar() {
                       <button
                         type="button"
                         aria-label={t("transparency")}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-[13px] font-normal text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
                       >
                         Opacity
                         <span className="tabular-nums text-foreground">

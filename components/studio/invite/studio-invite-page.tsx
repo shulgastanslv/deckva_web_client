@@ -115,7 +115,7 @@ export function StudioInvitePage({ token }: { token: string }) {
           <Button
             type="button"
             variant="secondary"
-            className="rounded-md"
+ className="rounded-md"
             onClick={() => setAuthOpen(true)}
           >
             {t("signIn")}
@@ -124,7 +124,7 @@ export function StudioInvitePage({ token }: { token: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="rounded-md"
+ className="rounded-md"
             onClick={() => router.push("/studio")}
           >
             {t("openStudio")}
@@ -148,7 +148,7 @@ export function StudioInvitePage({ token }: { token: string }) {
               </p>
               <Button
                 type="button"
-                className="mt-6 rounded-md"
+ className="mt-6 rounded-md"
                 onClick={() => router.push("/studio")}
               >
                 {t("goToStudio")}
@@ -188,7 +188,7 @@ export function StudioInvitePage({ token }: { token: string }) {
                   </p>
                   <Button
                     type="button"
-                    className="h-11 w-full rounded-md"
+ className="w-full rounded-md"
                     onClick={() => router.push("/studio")}
                   >
                     {t("openStudio")}
@@ -225,7 +225,7 @@ export function StudioInvitePage({ token }: { token: string }) {
                     type="button"
                     disabled={busy}
                     onClick={() => void accept()}
-                    className="h-11 w-full rounded-md text-[14px] font-medium"
+                    className="w-full rounded-md text-[14px] font-medium"
                   >
                     {busy ? (
                       <Loader2 className="size-4 animate-spin" />
@@ -244,7 +244,7 @@ export function StudioInvitePage({ token }: { token: string }) {
                       disabled={busy}
                       onClick={() => void decline()}
                       className={cn(
-                        "h-11 w-full rounded-md text-[14px] font-medium text-muted-foreground",
+                        "w-full rounded-md text-[14px] font-medium text-muted-foreground",
                       )}
                     >
                       {t("decline")}

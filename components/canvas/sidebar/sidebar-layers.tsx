@@ -253,7 +253,7 @@ export function SidebarLayers() {
         const Icon = layerGlyph(obj);
         const mark = drop?.id === id ? drop.edge : null;
         const menuItem =
-          "cursor-pointer gap-2 rounded-xl px-2 py-1.5 text-[13px] text-foreground focus:bg-muted/50 focus:text-foreground";
+          "cursor-pointer gap-2 rounded-md px-2.5 py-2.5 text-[13px] font-normal text-foreground focus:bg-muted/50 focus:text-foreground";
 
         return (
           <div key={id} className="relative" style={{ paddingLeft: depth * 12 }}>

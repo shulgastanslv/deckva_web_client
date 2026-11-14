@@ -28,11 +28,11 @@ import {
 } from "@/lib/figma/slides";
 import { CANVAS_RATIOS, type FabricCanvasJSON, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { sidebarFieldInput } from "@/components/canvas/sidebar/sidebar-ui";
 
 const TOKEN_KEY = "deckva.figma.pat";
 
-const fieldClass =
-  "h-9 w-full rounded-md border-none bg-muted/40 px-3 text-[13px] text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:bg-muted/50";
+const fieldClass = sidebarFieldInput;
 
 export type StudioFigmaImportResult = {
   title: string;
@@ -259,7 +259,7 @@ export function StudioFigmaImportDialog({
             type="button"
             disabled={busy || !url.trim() || !token.trim()}
             onClick={() => void handleList()}
-            className="h-9 w-full rounded-md border-none bg-muted/50 text-[13px] shadow-none hover:bg-muted/60"
+            className="w-full rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60"
           >
             {listing ? (
               <>
@@ -345,7 +345,7 @@ export function StudioFigmaImportDialog({
             type="button"
             disabled={busy || !fileKey || selected.size === 0}
             onClick={() => void handleImport()}
-            className="h-9 w-full rounded-md border-none bg-primary text-[13px] text-primary-foreground shadow-none hover:bg-primary/90"
+            className="w-full rounded-md border-none bg-primary text-[13px] text-primary-foreground shadow-none hover:bg-primary/90"
           >
             {importing ? (
               <>

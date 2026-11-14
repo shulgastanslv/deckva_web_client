@@ -180,7 +180,7 @@ export function EditProfileDialog({
             <Button
               type="button"
               variant="ghost"
-              className="rounded-md"
+ className="rounded-md"
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
@@ -188,7 +188,7 @@ export function EditProfileDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-md"
+ className="rounded-md"
               disabled={busy || name.trim().length < 2}
             >
               {busy ? <Loader2 className="size-4 animate-spin" /> : tc("save")}
@@ -330,7 +330,7 @@ export function ManageMembersDialog({
                 <Button
                   type="button"
                   disabled={busy || !inviteEmails.trim()}
-                  className="ml-auto h-9 rounded-md"
+ className="ml-auto rounded-md"
                   onClick={() =>
                     void runMemberAction(async () => {
                       if (!organization) return { success: false, error: "Missing org" };
@@ -484,7 +484,7 @@ export function ManageMembersDialog({
                         type="button"
                         variant="ghost"
                         disabled={busy}
-                        className="h-8 rounded-md text-[12px]"
+ className="h-8 rounded-md text-[12px]"
                         onClick={() =>
                           void runMemberAction(() =>
                             revokeOrganizationInvite(invite.id),
@@ -593,7 +593,7 @@ export function DeleteOrganizationDialog({
             <Button
               type="button"
               variant="ghost"
-              className="rounded-md"
+ className="rounded-md"
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
@@ -602,7 +602,7 @@ export function DeleteOrganizationDialog({
             <Button
               type="button"
               variant="destructive"
-              className="rounded-md"
+ className="rounded-md"
               disabled={!canDelete || !isOwner || busy}
               onClick={() => void handleDelete()}
             >

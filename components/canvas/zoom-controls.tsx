@@ -79,7 +79,7 @@ export function ZoomControls({
           <Button
             variant="ghost"
             size="icon"
-            className={cn(cell, selectActive && "bg-background text-foreground")}
+ className={cn(cell, selectActive && "bg-background text-foreground")}
             onClick={() => {
               setHandActive(false);
               setEraserActive(false);
@@ -92,7 +92,7 @@ export function ZoomControls({
           <Button
             variant="ghost"
             size="icon"
-            className={cn(cell, handActive && "bg-background text-foreground")}
+ className={cn(cell, handActive && "bg-background text-foreground")}
             onClick={() => setHandActive(true)}
             title={t("toolHand")}
             aria-pressed={handActive}
@@ -102,7 +102,7 @@ export function ZoomControls({
           <Button
             variant="ghost"
             size="icon"
-            className={cn(cell, eraserActive && "bg-background text-foreground")}
+ className={cn(cell, eraserActive && "bg-background text-foreground")}
             onClick={() => setEraserActive(!eraserActive)}
             title={t("toolEraser")}
             aria-pressed={eraserActive}
@@ -115,7 +115,7 @@ export function ZoomControls({
       <Button
         variant="ghost"
         size="icon"
-        className={cell}
+ className={cell}
         onClick={() => setZoom(clampZoom(zoom + 10))}
         title={t("in")}
       >
@@ -132,7 +132,7 @@ export function ZoomControls({
       <Button
         variant="ghost"
         size="icon"
-        className={cell}
+ className={cell}
         onClick={() => setZoom(clampZoom(zoom - 10))}
         title={t("out")}
       >

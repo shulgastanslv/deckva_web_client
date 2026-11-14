@@ -174,8 +174,8 @@ export function PlanDropdown({
       <PopoverTrigger asChild>
         <Button
           variant="secondary"
-          className={cn(
-            "h-9 gap-1.5 rounded-full border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
+ className={cn(
+            "gap-1.5 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
             plan.isPro &&
               "bg-muted/40 text-foreground hover:bg-muted/20",
           )}
@@ -249,7 +249,7 @@ export function PlanDropdown({
           {!plan.isPro ? (
             <Button
               onClick={openUpgrade}
-              className="mt-5 h-10 w-full rounded-md font-medium shadow-none"
+ className="mt-5 w-full rounded-md font-medium shadow-none"
             >
               {t("upgrade")} · {STUDIO_PRO_PRICE_LABEL}/mo
             </Button>
@@ -258,7 +258,7 @@ export function PlanDropdown({
               onClick={() => void buyMore()}
               disabled={buying}
               variant="secondary"
-              className="mt-5 h-10 w-full rounded-md font-medium shadow-none"
+              className="mt-5 w-full rounded-md font-medium shadow-none"
             >
               {t("buyCreditsPack", {
                 credits: CREDIT_PACK_CREDITS,

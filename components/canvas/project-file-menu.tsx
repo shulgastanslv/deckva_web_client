@@ -35,13 +35,16 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 import { useTranslations } from "next-intl";
 
-const ghostTrigger =
-  "inline-flex h-9 items-center gap-1.5 rounded-md border-none bg-transparent px-2.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/40 data-[state=open]:bg-muted/40";
+const ghostTrigger = cn(
+  "inline-flex items-center gap-1.5 rounded-md border-none bg-transparent px-2.5 text-[13px] font-medium text-foreground shadow-none hover:bg-muted/40 data-[state=open]:bg-muted/40",
+  controlH,
+);
 
 const menuItem =
-  "gap-2 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50";
+  "gap-2 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50";
 
 const RATIOS = Object.keys(CANVAS_RATIOS) as RatioKey[];
 
@@ -125,9 +128,9 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="ghost" className={ghostTrigger}>
+ <Button type="button" variant="ghost" className={ghostTrigger}>
           {t("file")}
-          <ChevronDown className="size-3.5 opacity-70" />
+ <ChevronDown className="size-3.5 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
 
@@ -155,7 +158,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
             }}
             onClick={(event) => event.stopPropagation()}
             onPointerDown={(event) => event.stopPropagation()}
-            className="h-9 w-full rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none hover:bg-muted/50 focus:bg-muted/50"
+            className="w-full rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium text-foreground shadow-none outline-none hover:bg-muted/50 focus:bg-muted/50"
             placeholder={t("projectName")}
             aria-label={t("projectName")}
           />

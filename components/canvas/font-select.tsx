@@ -9,6 +9,7 @@ import {
   MagnifyingGlass as Search,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { controlH } from "@/components/ui/control";
 import {
   fetchGoogleFontFamilies,
   getPopularGoogleFonts,
@@ -186,7 +187,9 @@ export function FontSelect({
             className={cn(
               "flex items-center gap-2 rounded-md border-none bg-muted/40 text-left text-[13px] text-foreground shadow-none transition-colors",
               "hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60",
-              compact ? "h-9 w-[9.5rem] px-2.5" : "h-10 w-full px-3",
+              compact
+                ? cn(controlH, "w-[9.5rem] px-3.5 font-normal")
+                : cn(controlH, "w-full px-3.5 font-normal"),
             )}
           >
             <span
@@ -226,7 +229,10 @@ export function FontSelect({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("searchGoogleFonts")}
-              className="h-10 w-full rounded-md border-none bg-muted/40 pl-9 pr-3 text-[13px] text-foreground shadow-none outline-none placeholder:text-muted-foreground/70 focus:bg-muted/50"
+              className={cn(
+                controlH,
+                "w-full rounded-md border-none bg-muted/40 pl-9 pr-3 text-[13px] text-foreground shadow-none outline-none placeholder:text-muted-foreground/70 focus:bg-muted/60",
+              )}
             />
           </div>
 
@@ -262,7 +268,7 @@ export function FontSelect({
                           }}
                           onClick={() => void applyFont(family)}
                           className={cn(
-                            "flex w-full cursor-pointer items-center gap-2 rounded-xl px-2.5 py-2.5 text-left text-[13px] transition-colors",
+                            "flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2.5 text-left text-[13px] font-normal transition-colors",
                             selected
                               ? "bg-muted/50 text-foreground"
                               : "text-foreground hover:bg-muted/40",

@@ -482,7 +482,7 @@ export function SidebarAssets() {
               <button
                 type="button"
                 disabled={driveLoading}
-                className={cn(sidebarActionBtn, "h-10 w-full")}
+                className={cn(sidebarActionBtn, "w-full")}
                 onClick={() =>
                   void refreshDrive({
                     query,
@@ -591,7 +591,7 @@ export function SidebarAssets() {
             </div>
           ) : null}
           <DialogFooter className="mx-0 mb-0 gap-2 border-0 bg-transparent p-0 sm:flex-row sm:items-center sm:justify-between">
-            <div className={cn(sidebarSegmented, "h-10 w-auto shrink-0")}>
+            <div className={cn(sidebarSegmented, "w-auto shrink-0")}>
               <button
                 type="button"
                 className={cn(
@@ -620,7 +620,7 @@ export function SidebarAssets() {
             <button
               type="button"
               disabled={!manager || !preview}
-              className={cn(sidebarActionBtn, "h-10 px-4")}
+              className={cn(sidebarActionBtn, "px-4")}
               onClick={() => preview && void addToCanvas(preview)}
             >
               <Plus className="size-3.5" />
@@ -652,7 +652,7 @@ export function SidebarAssets() {
           <DialogFooter className="mx-0 mb-0 gap-2 border-0 bg-transparent p-0 sm:flex-row">
             <button
               type="button"
-              className={cn(sidebarActionBtn, "h-10 flex-1")}
+              className={cn(sidebarActionBtn, "flex-1")}
               onClick={() => setEditing(null)}
             >
               Cancel
@@ -661,7 +661,7 @@ export function SidebarAssets() {
               type="button"
               className={cn(
                 sidebarActionBtn,
-                "h-10 flex-1 bg-foreground text-background hover:bg-foreground/90 dark:hover:bg-foreground/90",
+                "flex-1 bg-foreground text-background hover:bg-foreground/90 dark:hover:bg-foreground/90",
               )}
               onClick={() => void saveEdit()}
             >

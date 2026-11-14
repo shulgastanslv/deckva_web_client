@@ -65,7 +65,7 @@ function DeskForm({
         value={heading}
         onChange={(event) => setHeading(event.target.value)}
         placeholder="Title"
-        className="h-10 rounded-full bg-muted/50 px-4"
+        className="rounded-md border-none bg-muted/40 px-3.5 shadow-none"
         required
       />
       <textarea
@@ -74,13 +74,13 @@ function DeskForm({
         placeholder="Message"
         required
         rows={5}
-        className="w-full resize-y rounded-2xl bg-muted/50 px-4 py-3 text-[14px] outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-[#2f5bff]/30"
+        className="w-full resize-y rounded-md bg-muted/40 px-3.5 py-3 text-[13px] outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/20"
       />
       <div className="flex items-center gap-3">
         <Button
           type="submit"
           disabled={busy}
-          className="h-9 rounded-full bg-[#2f5bff] px-5 text-[13px] font-semibold text-white hover:bg-[#254ae6]"
+ className="rounded-md px-3.5 text-[13px] font-medium"
         >
           {busy ? <Loader2 className="size-3.5 animate-spin" /> : submitLabel}
         </Button>
@@ -165,7 +165,7 @@ export function AdminPanel({ email }: { email: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="h-8 rounded-full px-3 text-[12px]"
+ className="rounded-md px-3.5 text-[13px]"
             onClick={() => void reload()}
           >
             {loading ? (

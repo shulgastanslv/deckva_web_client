@@ -72,7 +72,7 @@ const iconBtn =
   "size-9 shrink-0 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
 
 const menuItem =
-  "gap-2 rounded-xl px-3 py-2 text-[13px] focus:bg-muted/50";
+  "gap-2 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50";
 
 /** Keep submenu open on chrome clicks, but let inputs receive focus for typing. */
 function keepSubmenuOpen(event: React.PointerEvent) {
@@ -105,7 +105,7 @@ function PageIcon({
       onClick={onClick}
       title={title}
       aria-pressed={pressed}
-      className={cn(
+ className={cn(
         iconBtn,
         pressed && "bg-muted/50 text-foreground",
         destructive && "hover:bg-destructive/10 hover:text-destructive",
@@ -377,7 +377,7 @@ export function CanvasToolbar({
             <Button
               variant="ghost"
               size="icon"
-              className={iconBtn}
+ className={iconBtn}
               title={t("options")}
               aria-label={t("canvasOptions")}
             >
@@ -584,7 +584,7 @@ export function CanvasToolbar({
           <DialogFooter className="sm:justify-between">
             <Button
               variant="secondary"
-              className="h-9 rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
+ className="rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
               disabled={importing}
               onClick={closeImportDialog}
             >
@@ -593,14 +593,14 @@ export function CanvasToolbar({
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button
                 variant="secondary"
-                className="h-9 rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
+ className="rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
                 disabled={importing}
                 onClick={() => void importFirstOnly()}
               >
                 {t("firstSlide")}
               </Button>
               <Button
-                className="h-9 rounded-md"
+ className="rounded-md"
                 disabled={importing}
                 onClick={() => void importAllSlides()}
               >

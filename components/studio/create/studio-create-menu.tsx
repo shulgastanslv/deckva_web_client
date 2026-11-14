@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import {
   CaretDown as ChevronDown,
   Compass,
@@ -22,7 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const itemClass =
-  "cursor-pointer gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium focus:bg-muted/50";
+  "cursor-pointer gap-3 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50";
 
 function FigmaMark({ className }: { className?: string }) {
   return (
@@ -44,6 +44,7 @@ export function StudioCreateMenu({
   onImportFigma,
   className,
   label,
+  leading,
   align = "end",
   triggerClassName,
 }: {
@@ -54,6 +55,7 @@ export function StudioCreateMenu({
   onImportFigma?: () => void;
   className?: string;
   label?: string;
+  leading?: ReactNode;
   align?: "start" | "center" | "end";
   triggerClassName?: string;
 }) {
@@ -83,12 +85,13 @@ export function StudioCreateMenu({
         <DropdownMenuTrigger asChild>
           <Button
             variant="secondary"
-            className={cn(
-              "h-9 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
+ className={cn(
+              "rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
               triggerClassName,
               className,
             )}
           >
+            {leading}
             {triggerLabel}
             <ChevronDown className="size-3.5 opacity-50" />
           </Button>

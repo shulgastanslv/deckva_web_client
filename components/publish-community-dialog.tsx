@@ -16,7 +16,7 @@ import {
 } from "@/actions/community";
 import { saveProjectThumbnails } from "@/actions/projects";
 import {
-  COMMUNITY_CATEGORIES,
+  isCommunityCategory,
   type CommunityCategory,
 } from "@/lib/community/categories";
 import {
@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { CommunityCategoryDropdown } from "@/components/studio/browse/community-category-dropdown";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { useSlidesController } from "@/context/canvas-manager";
@@ -33,7 +34,7 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 import { useProject } from "@/hooks/use-project";
 import { THUMB_TARGET_WIDTH } from "@/lib/canvas/thumbnail";
 import { renderSlidesToImages } from "@/lib/export/carousel";
-import { cn } from "@/lib/utils";
+
 
 interface PublishCommunityDialogProps {
   open: boolean;
@@ -131,11 +132,8 @@ export function PublishCommunityDialog({
       void getProjectCommunityMeta(currentProjectId).then((res) => {
         if (cancelled || !res.success) return;
         setMeta(res.meta);
-        if (
-          res.meta.category &&
-          COMMUNITY_CATEGORIES.includes(res.meta.category as CommunityCategory)
-        ) {
-          setCategory(res.meta.category as CommunityCategory);
+        if (res.meta.category && isCommunityCategory(res.meta.category)) {
+          setCategory(res.meta.category);
         }
       });
     }
@@ -280,23 +278,15 @@ export function PublishCommunityDialog({
               <p className="text-[12px] font-medium text-muted-foreground">
                 {t("category")}
               </p>
-              <div className="flex flex-wrap gap-1.5">
-                {COMMUNITY_CATEGORIES.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setCategory(item)}
-                    className={cn(
-                      "inline-flex h-8 items-center rounded-md px-3 text-[12px] font-medium transition-colors",
-                      category === item
-                        ? "bg-foreground text-background"
-                        : "bg-muted/40 text-foreground hover:bg-muted/60",
-                    )}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              <CommunityCategoryDropdown
+                value={category}
+                onChange={(next) => {
+                  if (next !== "all") setCategory(next as CommunityCategory);
+                }}
+                includeAll={false}
+                fullWidth
+                placeholder={t("category")}
+              />
             </div>
 
             <p className="text-[13px] leading-snug text-muted-foreground">

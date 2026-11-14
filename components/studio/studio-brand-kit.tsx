@@ -190,7 +190,7 @@ export function StudioBrandKit() {
               <Button
                 type="button"
                 variant="ghost"
-                className="h-9 rounded-md bg-muted/40 px-4 text-[13px] shadow-none hover:bg-muted/60"
+ className="rounded-md bg-muted/40 px-4 text-[13px] shadow-none hover:bg-muted/60"
                 onClick={() => persist(defaultBrandKit())}
               >
                 <RotateCcw className="mr-2 size-3.5 opacity-70" />
@@ -284,7 +284,7 @@ export function StudioBrandKit() {
                 <Button
                   type="button"
                   variant="ghost"
-                  className="h-9 rounded-md bg-muted/40 px-4 text-[13px] shadow-none hover:bg-muted/60"
+ className="rounded-md bg-muted/40 px-4 text-[13px] shadow-none hover:bg-muted/60"
                   onClick={openLogoPicker}
                 >
                   <Plus className="mr-2 size-3.5" />

@@ -316,7 +316,7 @@ export function CommunityPreviewDialog({
                     type="button"
                     disabled={!preview || busy || loading}
                     onClick={editOwn}
-                    className="h-11 w-full gap-2 rounded-md text-[14px] font-medium shadow-none"
+ className="w-full gap-2 rounded-md text-[14px] font-medium shadow-none"
                   >
                     <Pencil className="size-5" />
                     {t("editMyTemplate")}
@@ -331,7 +331,7 @@ export function CommunityPreviewDialog({
                     type="button"
                     disabled={!preview || busy || loading}
                     onClick={() => void customize()}
-                    className="h-11 w-full gap-2 rounded-md text-[14px] font-medium shadow-none"
+                    className="w-full gap-2 rounded-md text-[14px] font-medium shadow-none"
                   >
                     {busy ? (
                       <Loader2 className="size-4 animate-spin" />

@@ -44,7 +44,7 @@ function SlideSetRow({
         </div>
         <span className="truncate text-foreground">{set.label}</span>
       </div>
-      <Button type="button" size="xs" variant="secondary" className="rounded-md" onClick={onApply}>
+ <Button type="button" size="xs" variant="secondary" className="rounded-md" onClick={onApply}>
         Apply
       </Button>
     </div>

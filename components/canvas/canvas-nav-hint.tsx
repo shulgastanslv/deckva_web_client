@@ -82,7 +82,7 @@ export function CanvasNavHint() {
           size="icon"
           title={t("navTitle")}
           aria-label={t("navTitle")}
-          className={cn(
+ className={cn(
             "size-9 shrink-0 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/40 hover:text-foreground",
             "data-[state=open]:bg-muted/40 data-[state=open]:text-foreground",
           )}
