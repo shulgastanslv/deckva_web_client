@@ -39,38 +39,71 @@ function formatLastSaved(
 }
 
 function SaveStatusArt({ dirty, saving }: { dirty: boolean; saving: boolean }) {
-  const tone = saving ? "#2F5BFF" : dirty ? "#F59E0B" : "#22C55E";
+  const arrow = saving ? "#6366F1" : dirty ? "#F59E0B" : "#64748B";
   return (
-    <div className="relative overflow-hidden rounded-xl bg-[#F4F1EA] dark:bg-muted/30">
-      <svg viewBox="0 0 320 120" className="h-[104px] w-full" aria-hidden>
-        <rect width="320" height="120" fill="transparent" />
-        <rect x="28" y="22" width="120" height="76" rx="10" fill="#FFFFFF" className="dark:fill-background" />
-        <rect x="40" y="36" width="72" height="6" rx="3" fill="#D6D3D1" />
-        <rect x="40" y="50" width="96" height="6" rx="3" fill="#E7E5E4" />
-        <rect x="40" y="64" width="58" height="6" rx="3" fill="#E7E5E4" />
-        <rect x="40" y="78" width="80" height="6" rx="3" fill="#E7E5E4" />
+    <div className="relative overflow-hidden rounded-xl bg-[#EEF2F7] dark:bg-muted/35">
+      <svg
+        viewBox="0 0 320 128"
+        className="h-[112px] w-full"
+        aria-hidden
+        fill="none"
+      >
+        <defs>
+          <linearGradient id="saveWin" x1="70" y1="18" x2="250" y2="110" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#DCEAF8" />
+            <stop offset="1" stopColor="#C5D9F0" />
+          </linearGradient>
+          <linearGradient id="saveChrome" x1="70" y1="18" x2="250" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#B7CFE8" />
+            <stop offset="1" stopColor="#9CBADA" />
+          </linearGradient>
+          <filter id="saveSoft" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#8BA3C0" floodOpacity="0.28" />
+          </filter>
+        </defs>
 
-        <rect x="168" y="30" width="124" height="60" rx="10" fill="#FFFFFF" className="dark:fill-background" />
-        <rect x="182" y="44" width="64" height="6" rx="3" fill="#D6D3D1" />
-        <rect x="182" y="58" width="88" height="6" rx="3" fill="#E7E5E4" />
-        <rect x="182" y="72" width="48" height="6" rx="3" fill="#E7E5E4" />
+        {/* Window */}
+        <g filter="url(#saveSoft)">
+          <rect x="78" y="22" width="164" height="84" rx="14" fill="url(#saveWin)" />
+          <rect x="78" y="22" width="164" height="22" rx="14" fill="url(#saveChrome)" />
+          <rect x="78" y="34" width="164" height="10" fill="url(#saveChrome)" />
+          <circle cx="94" cy="33" r="4" fill="#FFFFFF" opacity="0.85" />
+        </g>
 
-        <path
-          d="M132 58h40"
-          stroke={tone}
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeDasharray={saving ? "4 6" : undefined}
+        {/* Dashed download target */}
+        <circle
+          cx="160"
+          cy="72"
+          r="22"
+          stroke={arrow}
+          strokeWidth="2.2"
+          strokeDasharray="3.5 3.5"
+          opacity="0.85"
         />
-        <circle cx="172" cy="58" r="10" fill={tone} />
         <path
-          d="M168 58l3 3 5-6"
-          fill="none"
-          stroke="white"
-          strokeWidth="1.8"
+          d="M160 60v18"
+          stroke={arrow}
+          strokeWidth="2.4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M152 72l8 8 8-8"
+          stroke={arrow}
+          strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
+
+        {/* Primary cursor (upright) */}
+        <g transform="translate(186 76)">
+          <path
+            d="M1 1v16l4.2-4.2 3.4 8.2 2.8-1.2-3.4-8.1H14z"
+            fill="var(--primary)"
+            stroke="var(--primary)"
+            strokeWidth="0.6"
+            strokeLinejoin="round"
+          />
+        </g>
       </svg>
     </div>
   );

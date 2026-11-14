@@ -116,7 +116,7 @@
   "meta": {
     "titleDefault": "Deckva — студия каруселей",
     "titleTemplate": "%s · Deckva",
-    "description": "Deckva — студия каруселей для соцсетей. Соберите слайды на холсте, отредактируйте и экспортируйте в PNG или ZIP.",
+    "description": "Deckva — студия каруселей для соцсетей. Соберите слайды на холсте, отредактируйте и экспортируйте в PNG, ZIP или PDF.",
     "keywords": "Deckva,карусель,карусели,Instagram,студия,редактор слайдов,соцсети",
     "ogTitle": "Deckva — студия каруселей",
     "ogDescription": "Шаблоны, холст и экспорт. Карусели для Instagram и других соцсетей."
@@ -124,8 +124,8 @@
   "studio": {
     "makeCarousel": "Создать карусель",
     "makeCarouselSub": "Опишите тему. При желании сначала набросайте текст или цвета — затем соберите слайды.",
-    "activationSub": "Тема → слайды → правка → экспорт PNG или ZIP.",
-    "activationHint": "Enter → карусель · затем экспорт PNG/ZIP",
+    "activationSub": "Тема → слайды → правка → экспорт PNG, ZIP или PDF.",
+    "activationHint": "Enter → карусель · затем экспорт PNG/ZIP/PDF",
     "tryStarter": "Или возьмите готовую тему",
     "makeLikeThis": "Сделать такую же",
     "recent": "Недавнее",
@@ -855,7 +855,7 @@
   },
   "editor": {
     "shareLink": "Ссылка для шаринга",
-    "publishCommunity": "Опубликовать в сообществе",
+    "publishCommunity": "Опубликовать",
     "figmaTransfer": "Импорт / экспорт Figma",
     "palette": {
       "slots": {
@@ -965,7 +965,7 @@
       "previewCarousel": "Превью карусели",
       "previewPhone": "Превью на телефоне",
       "community": "Сообщество",
-      "publishCommunity": "Опубликовать в сообществе",
+      "publishCommunity": "Опубликовать",
       "exportPngZip": "Экспорт • {count}x PNG / ZIP",
       "exportPngZipShort": "Экспорт · {count} PNG / ZIP"
     },
@@ -1682,6 +1682,8 @@
       "markedN": "Отмеченные {n}",
       "png": "PNG",
       "jpeg": "JPEG",
+      "pdf": "PDF",
+      "pdfHint": "Один слайд на страницу в одном PDF.",
       "zip": "ZIP",
       "files": "Файлы",
       "markHint": "Отмечайте слайды галочкой в углу на ленте.",
@@ -1842,8 +1844,8 @@
       }
     },
     "publish": {
-      "title": "Опубликовать в сообществе",
-      "updateTitle": "Обновить пост в сообществе",
+      "title": "Опубликовать",
+      "updateTitle": "Обновить пост",
       "description": "У карусели появится публичная ссылка — другие смогут сделать ремикс.",
       "republishHint": "Повторная публикация обновляет превью и карточку.",
       "category": "Категория",

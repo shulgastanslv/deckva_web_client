@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { useRef, type ReactNode } from "react";
 import {
   Bookmark,
-  ChartBar as ChartNoAxesColumn,
   Heart,
   House as Home,
   ChatCircle as MessageCircle,
@@ -13,8 +12,6 @@ import {
   ArrowsClockwise as Repeat2,
   MagnifyingGlass as Search,
   PaperPlaneTilt as Send,
-  ShareNetwork as Share,
-  ThumbsUp,
   User,
   X as XIcon,
 } from "@phosphor-icons/react";
@@ -24,11 +21,8 @@ import { PhoneFrame } from "@/components/canvas/phone-frame";
 
 export type SocialPreviewNetwork =
   | "instagram"
-  | "threads"
-  | "tiktok"
   | "stories"
-  | "x"
-  | "linkedin"
+  | "threads"
   | "clean";
 
 export const SOCIAL_PREVIEW_NETWORKS: {
@@ -36,11 +30,8 @@ export const SOCIAL_PREVIEW_NETWORKS: {
   label: string;
 }[] = [
   { id: "instagram", label: "Instagram" },
-  { id: "threads", label: "Threads" },
-  { id: "tiktok", label: "TikTok" },
   { id: "stories", label: "Stories" },
-  { id: "x", label: "X" },
-  { id: "linkedin", label: "LinkedIn" },
+  { id: "threads", label: "Threads" },
   { id: "clean", label: "Clean" },
 ];
 
@@ -423,104 +414,6 @@ function ThreadsChrome(props: Props) {
   );
 }
 
-function TikTokChrome(props: Props) {
-  const t = useTranslations("editor.phonePreview");
-  const tc = useTranslations("common");
-
-  const { author = "deckva", slideIndex, slideTotal, image, loading } = props;
-
-  return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden bg-black text-white">
-      <div className="absolute inset-0">
-        {loading && !image ? (
-          <div className="h-full w-full animate-pulse bg-neutral-800" />
-        ) : image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={image} alt="" className="h-full w-full object-cover" draggable={false} />
-        ) : (
-          <div className="flex h-full items-center justify-center text-[12px] text-white/40">
-            {t("emptySlide")}
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/65" />
-      </div>
-
-      <div className="relative z-10">
-        <StatusBar tone="light" />
-        <div className="flex items-center justify-center gap-5 pt-1 text-[14px]">
-          <span className="text-white/55">{t("following")}</span>
-          <span className="relative font-semibold">
-            For You
-            <span className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-md bg-white" />
-          </span>
-        </div>
-      </div>
-
-      <div className="relative z-10 mt-auto flex items-end gap-3 px-3 pb-2 pt-16">
-        <div className="min-w-0 flex-1 space-y-2.5 pb-1">
-          <p className="text-[15px] font-semibold tracking-tight">@{author}</p>
-          <p className="line-clamp-2 text-[13px] leading-snug text-white/95">
-            {slideTotal > 1
-              ? `Slide ${slideIndex + 1} of ${slideTotal} · swipe to preview`
-              : t("previewingTikTok")}
-          </p>
-          <div className="flex items-center gap-2 text-[12px] text-white/80">
-            <span className="truncate rounded bg-white/10 px-1.5 py-0.5">♪ Original sound - {author}</span>
-          </div>
-          {slideTotal > 1 ? (
-            <div className="flex gap-1 pt-1">
-              {Array.from({ length: Math.min(slideTotal, 8) }, (_, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    "h-[2px] flex-1 rounded-md",
-                    i === slideIndex ? "bg-white" : "bg-white/30",
-                  )}
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
-
-        <div className="flex flex-col items-center gap-4 pb-1">
-          <Avatar name={author} size="lg" follow />
-          <div className="flex flex-col items-center gap-0.5">
-            <Heart className="size-8 fill-white" strokeWidth={1.5} />
-            <span className="text-[11px] font-semibold">24.1K</span>
-          </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <MessageCircle className="size-8" strokeWidth={1.5} />
-            <span className="text-[11px] font-semibold">842</span>
-          </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <Bookmark className="size-8" strokeWidth={1.5} />
-            <span className="text-[11px] font-semibold">1,204</span>
-          </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <Share className="size-8" strokeWidth={1.5} />
-            <span className="text-[11px] font-semibold">{t("share")}</span>
-          </div>
-        </div>
-      </div>
-
-      <nav className="relative z-10 flex h-12 shrink-0 items-center justify-around border-t border-white/10 bg-black/40 px-1 backdrop-blur-sm">
-        <Home className="size-6" strokeWidth={1.6} />
-        <Search className="size-6 text-white/55" strokeWidth={1.6} />
-        <div className="flex h-7 w-11 items-center justify-center rounded-lg bg-gradient-to-r from-[#25f4ee] via-white to-[#fe2c55] p-[1.5px]">
-          <span className="flex h-full w-full items-center justify-center rounded-[7px] bg-black">
-            <Plus className="size-5" strokeWidth={2.25} />
-          </span>
-        </div>
-        <MessageCircle className="size-6 text-white/55" strokeWidth={1.6} />
-        <User className="size-6 text-white/55" strokeWidth={1.6} />
-      </nav>
-      <div className="relative z-10">
-        <HomeIndicator tone="light" />
-      </div>
-    </div>
-  );
-}
-
 function StoriesChrome(props: Props) {
   const t = useTranslations("editor.phonePreview");
   const tc = useTranslations("common");
@@ -582,171 +475,6 @@ function StoriesChrome(props: Props) {
   );
 }
 
-function XChrome(props: Props) {
-  const t = useTranslations("editor.phonePreview");
-  const tc = useTranslations("common");
-
-  const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
-  const ar = clampFeedAspect(props.aspectRatio);
-  const body = captionOrFallback(
-    caption,
-    slideTotal > 1
-      ? `Previewing slide ${slideIndex + 1} of ${slideTotal}`
-      : t("previewingX"),
-  );
-
-  return (
-    <div className="flex h-full w-full flex-col bg-black text-white">
-      <StatusBar tone="light" />
-      <header className="flex h-11 shrink-0 items-center gap-6 px-3">
-        <XIcon className="size-5" strokeWidth={2} />
-        <span className="text-[17px] font-bold tracking-tight">{t("post")}</span>
-      </header>
-
-      <div className="min-h-0 flex-1 overflow-hidden px-3 pt-1">
-        <div className="flex gap-2.5">
-          <Avatar name={author} size="md" />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline gap-x-1 leading-tight">
-              <span className="text-[14px] font-bold">{author}</span>
-              <span className="text-[14px] text-white/45">@{author}</span>
-              <span className="text-[14px] text-white/45">· 2h</span>
-            </div>
-            <p className="mt-1 line-clamp-5 text-[15px] leading-snug whitespace-pre-wrap text-white">
-              {body}
-            </p>
-            <div className="mt-3 overflow-hidden rounded-2xl border border-white/15">
-              <SlideImage image={image} loading={loading} aspectRatio={ar} />
-            </div>
-            <div className="mt-3 flex max-w-[95%] items-center justify-between text-white/45">
-              <span className="inline-flex items-center gap-1.5">
-                <MessageCircle className="size-[17px]" strokeWidth={1.6} />
-                <span className="text-[12px]">24</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Repeat2 className="size-[17px]" strokeWidth={1.6} />
-                <span className="text-[12px]">11</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Heart className="size-[17px]" strokeWidth={1.6} />
-                <span className="text-[12px]">186</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <ChartNoAxesColumn className="size-[17px]" strokeWidth={1.6} />
-                <span className="text-[12px]">12K</span>
-              </span>
-              <Share className="size-[17px]" strokeWidth={1.6} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <nav className="flex h-12 shrink-0 items-center justify-around border-t border-white/10 px-2">
-        <Home className="size-6" strokeWidth={1.6} />
-        <Search className="size-6 text-white/45" strokeWidth={1.6} />
-        <Repeat2 className="size-6 text-white/45" strokeWidth={1.6} />
-        <BellDot />
-        <MessageCircle className="size-6 text-white/45" strokeWidth={1.6} />
-      </nav>
-      <HomeIndicator tone="light" />
-    </div>
-  );
-}
-
-function BellDot() {
-  return (
-    <span className="relative">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-white/45" aria-hidden>
-        <path
-          d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 7H3s3 0 3-7Z"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinejoin="round"
-        />
-        <path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      </svg>
-    </span>
-  );
-}
-
-function LinkedInChrome(props: Props) {
-  const t = useTranslations("editor.phonePreview");
-  const tc = useTranslations("common");
-
-  const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
-  const ar = clampFeedAspect(props.aspectRatio);
-  const body = captionOrFallback(
-    caption,
-    slideTotal > 1
-      ? `Slide ${slideIndex + 1} of ${slideTotal} — carousel preview`
-      : t("previewingLinkedIn"),
-  );
-
-  return (
-    <div className="flex h-full w-full flex-col bg-[#f4f2ee] text-neutral-900">
-      <StatusBar />
-      <header className="flex h-11 shrink-0 items-center gap-3 bg-white px-3 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-[#0a66c2] text-[13px] font-bold text-white">
-          in
-        </div>
-        <div className="flex h-8 min-w-0 flex-1 items-center rounded-md bg-[#edf3f8] px-3 text-[12px] text-neutral-500">
-          Search
-        </div>
-        <MessageCircle className="size-5 text-neutral-600" strokeWidth={1.6} />
-      </header>
-
-      <div className="min-h-0 flex-1 overflow-hidden p-2.5">
-        <article className="overflow-hidden rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.06)]">
-          <div className="flex items-start gap-2.5 px-3 pt-3">
-            <Avatar name={author} size="md" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold leading-tight">{author}</p>
-              <p className="truncate text-[11px] text-neutral-500">{t("demoBio")}</p>
-              <p className="text-[11px] text-neutral-500">2h · 🌐</p>
-            </div>
-            <MoreHorizontal className="size-5 text-neutral-500" strokeWidth={1.75} />
-          </div>
-          <p className="line-clamp-4 px-3 pb-2.5 pt-2 text-[13px] leading-snug whitespace-pre-wrap text-neutral-900">
-            {body}
-          </p>
-          <SlideImage image={image} loading={loading} aspectRatio={ar} fit="contain" />
-          <div className="flex items-center justify-between px-3 py-2 text-[11px] text-neutral-500">
-            <span>👍 48</span>
-            <span>6 comments · 2 reposts</span>
-          </div>
-          <div className="grid grid-cols-4 border-t border-neutral-200/80 px-1 py-1.5">
-            {[
-              { icon: ThumbsUp, label: "Like" },
-              { icon: MessageCircle, label: "Comment" },
-              { icon: Repeat2, label: "Repost" },
-              { icon: Send, label: "Send" },
-            ].map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="flex flex-col items-center gap-0.5 rounded-lg py-1.5 text-neutral-600"
-              >
-                <Icon className="size-5" strokeWidth={1.7} />
-                <span className="text-[10px] font-semibold">{label}</span>
-              </div>
-            ))}
-          </div>
-        </article>
-      </div>
-
-      <nav className="flex h-12 shrink-0 items-center justify-around border-t border-neutral-200 bg-white px-1">
-        <Home className="size-5 text-[#191919]" strokeWidth={1.7} />
-        <User className="size-5 text-neutral-400" strokeWidth={1.7} />
-        <Plus className="size-5 text-neutral-400" strokeWidth={1.7} />
-        <BellDot />
-        <div className="flex size-5 items-center justify-center rounded-sm bg-[#0a66c2] text-[8px] font-bold text-white">
-          in
-        </div>
-      </nav>
-      <HomeIndicator />
-    </div>
-  );
-}
-
 function CleanChrome(props: Props) {
   const t = useTranslations("editor.phonePreview");
   const tc = useTranslations("common");
@@ -778,11 +506,8 @@ function CleanChrome(props: Props) {
 
 const CHROME: Record<SocialPreviewNetwork, (props: Props) => ReactNode> = {
   instagram: (p) => <InstagramChrome {...p} />,
-  threads: (p) => <ThreadsChrome {...p} />,
-  tiktok: (p) => <TikTokChrome {...p} />,
   stories: (p) => <StoriesChrome {...p} />,
-  x: (p) => <XChrome {...p} />,
-  linkedin: (p) => <LinkedInChrome {...p} />,
+  threads: (p) => <ThreadsChrome {...p} />,
   clean: (p) => <CleanChrome {...p} />,
 };
 

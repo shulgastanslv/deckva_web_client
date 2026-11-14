@@ -15,6 +15,7 @@ import {
 } from "@/components/studio/lib/use-studio-create";
 import { StudioMobileNav } from "@/components/studio/studio-mobile-nav";
 import { StudioSidebar } from "@/components/studio/sidebar/studio-sidebar";
+import { StudioPageMotion } from "@/components/studio/ui/studio-page-motion";
 import { StudioUpgradeBanner } from "@/components/studio/ui/studio-upgrade-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -143,7 +144,7 @@ function StudioShellInner({
             onMenu={() => setNavOpen(true)}
           />
           <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-            {children}
+            <StudioPageMotion>{children}</StudioPageMotion>
           </div>
           <StudioMobileNav
             drawerOpen={navOpen}

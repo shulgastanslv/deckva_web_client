@@ -98,21 +98,16 @@ export function CodeBlockSettings({
 
   return (
     <div className="flex flex-col gap-3 text-[14px]">
-      <label className="block space-y-1.5">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          {t("title")}
-        </span>
-        <input
-          value={draft.filename}
-          onChange={(e) => patch({ filename: e.target.value })}
-          placeholder={t("filename")}
-          aria-label={t("title")}
-          className={cn(
-            controlField,
-            "w-full outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/20",
-          )}
-        />
-      </label>
+      <input
+        value={draft.filename}
+        onChange={(e) => patch({ filename: e.target.value })}
+        placeholder={t("filename")}
+        aria-label={t("title")}
+        className={cn(
+          controlField,
+          "w-full outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/20",
+        )}
+      />
 
       <CodeAppearanceSelect
         chromeStyle={chromeStyle}

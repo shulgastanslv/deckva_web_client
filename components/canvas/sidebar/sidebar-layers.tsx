@@ -265,7 +265,7 @@ export function SidebarLayers() {
               onDragEnd={endDrag}
               onClick={(event) => select(obj, event.shiftKey)}
               className={cn(
-                "group/row flex h-9 cursor-pointer items-center gap-1 rounded-md px-1 pr-1 transition-colors",
+                "group/row flex h-9 cursor-pointer items-center gap-1 rounded-md px-2 transition-colors",
                 active
                   ? "bg-muted/80 text-foreground dark:bg-muted/50"
                   : "hover:bg-muted/60 dark:hover:bg-muted/30",
@@ -273,29 +273,25 @@ export function SidebarLayers() {
                 mark === "inside" && "ring-1 ring-foreground",
               )}
             >
-              <button
-                type="button"
-                aria-label={open ? "Collapse" : "Expand"}
-                disabled={!children}
-                onDoubleClick={(event) => event.stopPropagation()}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (!children) return;
-                  setCollapsed((current) => {
-                    const next = new Set(current);
-                    if (next.has(id)) next.delete(id);
-                    else next.add(id);
-                    return next;
-                  });
-                }}
-                className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground",
-                  children && "hover:bg-background/80 hover:text-foreground",
-                  !children && "invisible",
-                )}
-              >
-                <ChevronRight className={cn("size-3.5 transition-transform", open && "rotate-90")} />
-              </button>
+              {children ? (
+                <button
+                  type="button"
+                  aria-label={open ? "Collapse" : "Expand"}
+                  onDoubleClick={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setCollapsed((current) => {
+                      const next = new Set(current);
+                      if (next.has(id)) next.delete(id);
+                      else next.add(id);
+                      return next;
+                    });
+                  }}
+                  className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-background/80 hover:text-foreground"
+                >
+                  <ChevronRight className={cn("size-3.5 transition-transform", open && "rotate-90")} />
+                </button>
+              ) : null}
 
               <div
                 draggable={!renaming}
@@ -305,7 +301,7 @@ export function SidebarLayers() {
                   event.stopPropagation();
                   startRename(obj);
                 }}
-                className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                className="flex min-w-0 flex-1 items-center gap-2 pl-0.5 text-left"
               >
                 <Icon className="size-5 shrink-0 stroke-[1.5] text-muted-foreground" />
 
@@ -328,10 +324,10 @@ export function SidebarLayers() {
                       }
                     }}
                     placeholder={layerLabel(obj)}
-                    className="h-7 min-w-0 flex-1 rounded-md bg-background px-1.5 text-left text-[13px] text-foreground outline-none ring-1 ring-border/50"
+                    className="h-7 min-w-0 flex-1 rounded-md bg-background px-2 text-left text-[13px] text-foreground outline-none ring-1 ring-border/50"
                   />
                 ) : (
-                  <span className="min-w-0 flex-1 truncate text-left text-[13px] font-medium text-foreground">
+                  <span className="min-w-0 flex-1 truncate px-0.5 text-left text-[13px] font-medium text-foreground">
                     {layerLabel(obj)}
                   </span>
                 )}

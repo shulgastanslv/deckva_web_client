@@ -7,6 +7,7 @@ import {
   Layout as LayoutTemplate,
   ChatTeardropText as MessageSquareText,
   Newspaper,
+  Users,
 } from "@phosphor-icons/react";
 
 import Logo from "@/components/logo/logo";
@@ -23,7 +24,7 @@ const NAV: Array<{
   label: string;
   icon: typeof LayoutTemplate;
 }> = [
-  { id: "community", label: "Community", icon: LayoutTemplate },
+  { id: "community", label: "Community", icon: Users },
   { id: "notify", label: "Notify", icon: Bell },
   { id: "news", label: "News", icon: Newspaper },
   { id: "feedback", label: "Feedback", icon: MessageSquareText },

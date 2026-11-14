@@ -133,12 +133,6 @@ export function AdminPanel({ email }: { email: string }) {
     void reload();
   }, []);
 
-  const titles: Record<AdminSection, string> = {
-    community: "Community",
-    notify: "Notify everyone",
-    news: "News desk",
-    feedback: "Feedback",
-  };
 
   return (
     <AdminShell
@@ -146,37 +140,7 @@ export function AdminPanel({ email }: { email: string }) {
       section={section}
       onSectionChange={setSection}
     >
-      <header className="flex shrink-0 items-center justify-between gap-3 px-6 pt-4 pb-2 sm:px-8">
-        <div>
-          <h1 className="text-[17px] font-semibold tracking-tight text-foreground">
-            {titles[section]}
-          </h1>
-          <p className="text-[12px] text-muted-foreground">
-            {section === "community"
-              ? "Approve or reject community carousel submissions"
-              : section === "notify"
-                ? "Push a short note to every inbox"
-                : section === "news"
-                  ? "Publish and review studio news"
-                  : "Notes from creators"}
-          </p>
-        </div>
-        {(section === "news" || section === "feedback") && (
-          <Button
-            type="button"
-            variant="ghost"
- className="rounded-md px-3.5 text-[13px]"
-            onClick={() => void reload()}
-          >
-            {loading ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              "Refresh"
-            )}
-          </Button>
-        )}
-      </header>
-
+    
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-16 sm:px-8">
         {section === "community" ? <AdminCommunity /> : null}
 

@@ -27,10 +27,12 @@ import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 import {
   copyImageToClipboard,
+  downloadSlidesAsPdf,
   downloadSlidesAsZip,
   downloadSlidesSeparately,
   renderSlidesToImages,
   type ExportFormat,
+  type ImageExportFormat,
   type RenderedSlide,
 } from "@/lib/export/carousel";
 import {
@@ -207,6 +209,8 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
     }
   };
 
+  const imageFormat: ImageExportFormat = format === "pdf" ? "png" : format;
+
   const renderExport = async (): Promise<RenderedSlide[] | null> => {
     if (exportSlides.length === 0) return null;
     slidesController?.saveCurrent();
@@ -225,8 +229,8 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
           .map((s) => ({ id: s.id, canvasJSON: s.canvasJSON })),
         state.canvasDimensions,
         {
-          format,
-          quality: format === "jpeg" ? 0.92 : 1,
+          format: imageFormat,
+          quality: imageFormat === "jpeg" ? 0.92 : 1,
           multiplier: scale,
           signal: controller.signal,
           onProgress: (doneCount, total) => {
@@ -253,14 +257,20 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
     if (exporting || exportSlides.length === 0) return;
     const rendered = await renderExport();
     if (!rendered || rendered.length === 0) return;
-    const title = useCanvasStore.getState().projectTitle;
-    if (pack === "zip") {
-      await downloadSlidesAsZip(rendered, title, format);
+    const state = useCanvasStore.getState();
+    const title = state.projectTitle;
+    if (format === "pdf") {
+      await downloadSlidesAsPdf(rendered, title, {
+        width: state.canvasDimensions.width * scale,
+        height: state.canvasDimensions.height * scale,
+      });
+    } else if (pack === "zip") {
+      await downloadSlidesAsZip(rendered, title, imageFormat);
     } else {
-      downloadSlidesSeparately(rendered, title, format);
+      downloadSlidesSeparately(rendered, title, imageFormat);
     }
     trackEvent("carousel_exported", {
-      pack,
+      pack: format === "pdf" ? "pdf" : pack,
       format,
       slides: rendered.length,
     });
@@ -289,7 +299,7 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
     try {
       const rendered = renderedRef.current ?? (await renderExport());
       if (!rendered || rendered.length === 0) return;
-      const ext = format === "jpeg" ? "jpg" : "png";
+      const ext = imageFormat === "jpeg" ? "jpg" : "png";
       const base = projectTitle.trim() || "carousel";
       const files = rendered.map((slide) =>
         blobToShareFile(
@@ -384,44 +394,47 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
                 ]}
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <FieldLabel>{t("format")}</FieldLabel>
-                <Segmented
-                  value={format}
-                  disabled={busy}
-                  onChange={(v) => setFormat(v as ExportFormat)}
-                  options={[
-                    { value: "png", label: t("png") },
-                    { value: "jpeg", label: t("jpeg") },
-                  ]}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <FieldLabel>{t("scale")}</FieldLabel>
-                <Segmented
-                  value={scale}
-                  disabled={busy}
-                  onChange={(v) => setScale(v as ScaleOption)}
-                  options={[
-                    { value: 1, label: "1×" },
-                    { value: 2, label: "2×" },
-                  ]}
-                />
-              </div>
-            </div>
             <div className="space-y-1.5">
-              <FieldLabel>{t("pack")}</FieldLabel>
+              <FieldLabel>{t("format")}</FieldLabel>
               <Segmented
-                value={pack}
+                value={format}
                 disabled={busy}
-                onChange={(v) => setPack(v as PackMode)}
+                onChange={(v) => setFormat(v as ExportFormat)}
                 options={[
-                  { value: "zip", label: t("zip") },
-                  { value: "files", label: t("files") },
+                  { value: "png", label: t("png") },
+                  { value: "jpeg", label: t("jpeg") },
+                  { value: "pdf", label: t("pdf") },
                 ]}
               />
             </div>
+            <div className="space-y-1.5">
+              <FieldLabel>{t("scale")}</FieldLabel>
+              <Segmented
+                value={scale}
+                disabled={busy}
+                onChange={(v) => setScale(v as ScaleOption)}
+                options={[
+                  { value: 1, label: "1×" },
+                  { value: 2, label: "2×" },
+                ]}
+              />
+            </div>
+            {format !== "pdf" ? (
+              <div className="space-y-1.5">
+                <FieldLabel>{t("pack")}</FieldLabel>
+                <Segmented
+                  value={pack}
+                  disabled={busy}
+                  onChange={(v) => setPack(v as PackMode)}
+                  options={[
+                    { value: "zip", label: t("zip") },
+                    { value: "files", label: t("files") },
+                  ]}
+                />
+              </div>
+            ) : (
+              <p className="text-[13px] text-muted-foreground">{t("pdfHint")}</p>
+            )}
             {scope === "marked" && exportSlides.length === 0 && (
               <p className="text-[13px] text-muted-foreground">
                 {t("markHint")}

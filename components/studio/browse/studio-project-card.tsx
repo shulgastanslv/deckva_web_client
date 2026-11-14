@@ -155,8 +155,11 @@ export function StudioProjectCard({
         ) : null}
 
         {project.isSaved ? (
-          <span className="absolute bottom-3.5 left-2 z-[4] rounded-md bg-background/90 p-1.5">
-            <Star className="size-3 fill-current text-foreground" />
+          <span className="absolute bottom-3 left-2 z-[4]">
+            <Star
+              weight="fill"
+              className="size-5 text-amber-400 drop-shadow-sm dark:text-amber-300"
+            />
           </span>
         ) : null}
       </button>

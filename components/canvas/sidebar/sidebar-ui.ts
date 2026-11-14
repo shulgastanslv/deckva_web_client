@@ -61,7 +61,7 @@ export const sidebarHint = "text-[12px] leading-snug text-muted-foreground";
 export const sidebarSwatchGrid = "grid grid-cols-6 gap-1.5";
 
 /** Miro-like icons — same size in studio and editor (20px, light stroke). */
-export const navIconClass = "size-5 shrink-0 stroke-[1.5]";
+export const navIconClass = "size-5 shrink-0 stroke-1 opacity-90";
 
 /** Dense menu-row icons (also Miro). */
-export const menuIconClass = "size-5 shrink-0 stroke-[1.5]";
+export const menuIconClass = "size-5 shrink-0 stroke-1";

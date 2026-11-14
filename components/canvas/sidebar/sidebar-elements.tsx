@@ -1,16 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState, type ComponentType } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Code as Code2,
-  Image as ImageIcon,
   Link as Link2,
   SpinnerGap as Loader2,
   MagnifyingGlass as Search,
-  Shapes,
-  DeviceMobile as Smartphone,
-  TextT as Type,
 } from "@phosphor-icons/react";
 import type { Group } from "fabric";
 import { Button } from "@/components/ui/button";
@@ -23,10 +18,10 @@ import {
 import type { FrameKind } from "@/lib/canvas/frames";
 import { FramesPicker } from "@/components/canvas/sidebar/frames-picker";
 import { CodeBlockSettings } from "@/components/canvas/code-block-inspector";
+import { ElementsMenu } from "@/components/canvas/sidebar/elements-menu";
 import { GalleryCard, GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import { UploadOrDrop } from "@/components/canvas/sidebar/upload-or-drop";
 import {
-  navIconClass,
   sidebarFieldInput,
   sidebarPanel,
 } from "@/components/canvas/sidebar/sidebar-ui";
@@ -42,17 +37,7 @@ import {
 
 type Category = "photos" | "text" | "shapes" | "frames" | "code";
 
-const CATEGORIES: {
-  id: Category;
-  labelKey: Category;
-  icon: ComponentType<{ className?: string }>;
-}[] = [
-  { id: "photos", labelKey: "photos", icon: ImageIcon },
-  { id: "text", labelKey: "text", icon: Type },
-  { id: "shapes", labelKey: "shapes", icon: Shapes },
-  { id: "frames", labelKey: "frames", icon: Smartphone },
-  { id: "code", labelKey: "code", icon: Code2 },
-];
+const CATEGORIES: Category[] = ["photos", "text", "shapes", "frames", "code"];
 
 const SEARCH_PLACEHOLDER: Record<
   Category,
@@ -163,54 +148,32 @@ export function SidebarElements() {
         disabled={!manager}
       />
 
-      <div className="sticky top-0 z-10 w-full min-w-0 space-y-2 bg-background/95 pb-0.5 backdrop-blur-sm">
-        <div
-          role="tablist"
-          aria-label={t("elementCategory")}
-          className="grid grid-cols-5 gap-1"
-        >
-          {CATEGORIES.map(({ id, labelKey, icon: Icon }) => {
-            const active = category === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                title={t(labelKey)}
-                onClick={() => {
-                  setCategory(id);
-                  setSearch("");
-                }}
-                className={cn(
-                  "flex min-w-0 flex-col items-center gap-1 rounded-md px-0.5 py-2 transition-colors",
-                  active
-                    ? "bg-muted/60 text-foreground"
-                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
-                )}
-              >
-                <Icon className={navIconClass} />
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="relative min-w-0">
+      <div className="sticky top-0 z-10 flex w-full min-w-0 items-center gap-1.5 bg-background/95 pb-0.5 backdrop-blur-sm">
+        <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t(SEARCH_PLACEHOLDER[category])}
+            aria-label={t(SEARCH_PLACEHOLDER[category])}
             className={cn(sidebarFieldInput, "pl-9")}
           />
         </div>
+        <ElementsMenu
+          value={category}
+          ariaLabel={t("elementCategory")}
+          onChange={(id) => {
+            setCategory(id as Category);
+            setSearch("");
+          }}
+          items={CATEGORIES.map((id) => ({
+            id,
+            label: t(id),
+          }))}
+        />
       </div>
 
-      <div
-        role="tabpanel"
-        aria-label={t(category)}
-        className="w-full min-w-0"
-      >
+      <div aria-label={t(category)} className="w-full min-w-0">
         {category === "photos" ? (
           <div className="space-y-2.5">
             <UploadOrDrop
@@ -331,7 +294,7 @@ export function SidebarElements() {
                   className="flex min-w-0 flex-col items-center gap-2 overflow-hidden rounded-2xl bg-muted/50 px-1.5 py-3 text-center transition-colors hover:bg-muted/70 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45"
                 >
                   <span className="flex h-14 w-full items-center justify-center text-foreground">
-                    <Icon size={24} />
+                    <Icon size={24} weight="thin" className="stroke-[1]" />
                   </span>
                   <span className="w-full truncate text-[12px] font-medium text-foreground">
                     {item.label}

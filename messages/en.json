@@ -116,7 +116,7 @@
   "meta": {
     "titleDefault": "Deckva — carousel studio",
     "titleTemplate": "%s · Deckva",
-    "description": "Deckva is a carousel studio for social media. Build slides on a canvas, edit, and export to PNG or ZIP.",
+    "description": "Deckva is a carousel studio for social media. Build slides on a canvas, edit, and export to PNG, ZIP, or PDF.",
     "keywords": "Deckva,carousel,Instagram,studio,slide editor,social media",
     "ogTitle": "Deckva — carousel studio",
     "ogDescription": "Community, canvas, and export. Carousels for Instagram and other networks."
@@ -124,8 +124,8 @@
   "studio": {
     "makeCarousel": "Make a carousel",
     "makeCarouselSub": "Describe the topic. Optionally draft caption or colors first — then generate the slides.",
-    "activationSub": "One topic → slides → edit → export PNG or ZIP.",
-    "activationHint": "Enter → carousel · then export PNG/ZIP",
+    "activationSub": "One topic → slides → edit → export PNG, ZIP, or PDF.",
+    "activationHint": "Enter → carousel · then export PNG/ZIP/PDF",
     "tryStarter": "Or start from a ready topic",
     "makeLikeThis": "Make one like this",
     "recent": "Recent",
@@ -1682,6 +1682,8 @@
       "markedN": "Marked {n}",
       "png": "PNG",
       "jpeg": "JPEG",
+      "pdf": "PDF",
+      "pdfHint": "One slide per page in a single PDF.",
       "zip": "ZIP",
       "files": "Files",
       "markHint": "Mark slides with the corner check on the strip.",

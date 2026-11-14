@@ -1,8 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
-import { CaretUpDown as ChevronsUpDown } from "@phosphor-icons/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CaretUpDown as ChevronsUpDown,
+  MagnifyingGlass as Search,
+} from "@phosphor-icons/react";
 
 import {
   Popover,
@@ -118,13 +121,16 @@ export function FramesPicker({
   ) => void;
 }) {
   const t = useTranslations("editor.frames");
+  const te = useTranslations("editor.elements");
   const [selectedKind, setSelectedKind] = useState<FrameKind>("iphone18pro");
   const [layoutId, setLayoutId] = useState(FRAME_LAYOUT_PRESETS[0]!.id);
   const [deviceOpen, setDeviceOpen] = useState(false);
+  const [deviceQuery, setDeviceQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const fit: FrameFitMode = "max";
 
   const devices = useMemo(() => {
-    const q = externalSearch.trim().toLowerCase();
+    const q = (deviceOpen ? deviceQuery : externalSearch).trim().toLowerCase();
     return FRAME_ITEMS.filter((item) => {
       if (!q) return true;
       const family = frameFamilyForKind(item.kind);
@@ -134,7 +140,7 @@ export function FramesPicker({
         family.includes(q)
       );
     });
-  }, [externalSearch]);
+  }, [deviceOpen, deviceQuery, externalSearch]);
 
   useEffect(() => {
     if (devices.some((item) => item.kind === selectedKind)) return;
@@ -161,7 +167,13 @@ export function FramesPicker({
 
   return (
     <div className="flex w-full min-w-0 max-w-full flex-col gap-3 overflow-x-hidden">
-      <Popover open={deviceOpen} onOpenChange={setDeviceOpen}>
+      <Popover
+        open={deviceOpen}
+        onOpenChange={(open) => {
+          setDeviceOpen(open);
+          if (!open) setDeviceQuery("");
+        }}
+      >
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -195,52 +207,75 @@ export function FramesPicker({
           sideOffset={8}
           collisionPadding={12}
           className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border-0 p-0 shadow-sm dark:border dark:border-border/50"
-          onOpenAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            requestAnimationFrame(() => searchRef.current?.focus());
+          }}
+          onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <div className="max-h-[min(22rem,50vh)] overflow-y-auto overscroll-contain px-2.5 pt-2.5 pb-2 [scrollbar-width:thin]">
-            <div className="grid grid-cols-3 gap-1.5">
-              {devices.map((item) => {
-                const active = item.kind === selectedKind;
-                const size = getDeviceScreenSize(item.kind as FrameKind);
-                return (
-                  <button
-                    key={item.kind}
-                    type="button"
-                    title={item.label}
-                    onClick={() => {
-                      setSelectedKind(item.kind as FrameKind);
-                      setDeviceOpen(false);
-                    }}
-                    className={cn(
-                      "flex min-w-0 flex-col items-center gap-1.5 rounded-md px-1.5 py-2.5 text-center transition-colors",
-                      active
-                        ? "bg-muted/60 text-foreground"
-                        : "hover:bg-muted/40 dark:hover:bg-muted/35",
-                    )}
-                  >
-                    <span className="flex h-16 w-full items-center justify-center">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.src}
-                        alt=""
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </span>
-                    <span className="w-full truncate text-[11px] font-normal leading-tight text-foreground">
-                      {item.label}
-                    </span>
-                    <span className="w-full truncate text-[10px] tabular-nums text-muted-foreground">
-                      {size.width} × {size.height}
-                    </span>
-                  </button>
-                );
-              })}
+          <div className="flex flex-col">
+            <div className="shrink-0 px-2.5 pt-2.5">
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  ref={searchRef}
+                  value={deviceQuery}
+                  onChange={(e) => setDeviceQuery(e.target.value)}
+                  placeholder={te("searchDevices")}
+                  aria-label={te("searchDevices")}
+                  className={cn(
+                    controlH,
+                    "w-full rounded-md border-none bg-muted/40 pl-9 pr-3 text-[13px] font-normal text-foreground shadow-none outline-none placeholder:text-muted-foreground/70 focus:bg-muted/60",
+                  )}
+                />
+              </div>
             </div>
-            {devices.length === 0 ? (
-              <p className="px-2 py-10 text-center text-[13px] text-muted-foreground">
-                {t("noDevices")}
-              </p>
-            ) : null}
+            <div className="max-h-[min(20rem,45vh)] overflow-y-auto overscroll-contain px-2.5 pt-1.5 pb-2 [scrollbar-width:thin]">
+              <div className="grid grid-cols-3 gap-1.5">
+                {devices.map((item) => {
+                  const active = item.kind === selectedKind;
+                  const size = getDeviceScreenSize(item.kind as FrameKind);
+                  return (
+                    <button
+                      key={item.kind}
+                      type="button"
+                      title={item.label}
+                      onClick={() => {
+                        setSelectedKind(item.kind as FrameKind);
+                        setDeviceOpen(false);
+                        setDeviceQuery("");
+                      }}
+                      className={cn(
+                        "flex min-w-0 flex-col items-center gap-1.5 rounded-md px-1.5 py-2.5 text-center transition-colors",
+                        active
+                          ? "bg-muted/60 text-foreground"
+                          : "hover:bg-muted/40 dark:hover:bg-muted/35",
+                      )}
+                    >
+                      <span className="flex h-16 w-full items-center justify-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.src}
+                          alt=""
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      </span>
+                      <span className="w-full truncate text-[11px] font-normal leading-tight text-foreground">
+                        {item.label}
+                      </span>
+                      <span className="w-full truncate text-[10px] tabular-nums text-muted-foreground">
+                        {size.width} × {size.height}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {devices.length === 0 ? (
+                <p className="px-2 py-10 text-center text-[13px] text-muted-foreground">
+                  {t("noDevices")}
+                </p>
+              ) : null}
+            </div>
           </div>
         </PopoverContent>
       </Popover>

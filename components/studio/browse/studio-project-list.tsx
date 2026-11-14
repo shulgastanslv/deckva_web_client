@@ -55,12 +55,13 @@ export function StudioProjectList({
           </tr>
         </thead>
         <tbody>
-          {projects.map((project) => (
+          {projects.map((project, index) => (
             <StudioProjectRow
               key={project.id}
               project={project}
               selected={selectedIds?.has(project.id)}
               inTrash={inTrash}
+              appearIndex={index}
               onOpen={() => onOpen(project.id)}
               onToggleSelect={(opts) => onToggleSelect?.(project.id, opts)}
               onChanged={onChanged}

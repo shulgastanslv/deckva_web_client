@@ -872,9 +872,9 @@ export function StudioPrompt({
               }
               className={cn(
                 controlSize,
-                "inline-flex shrink-0 items-center justify-center rounded-md border-none shadow-none transition-colors",
+                "inline-flex shrink-0 items-center justify-center rounded-full border-none shadow-none transition-colors",
                 canSend
-                  ? "bg-foreground text-background hover:bg-foreground/90"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/50 hover:text-primary-foreground/50"
                   : "bg-muted text-muted-foreground",
               )}
             >

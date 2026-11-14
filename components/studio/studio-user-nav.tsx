@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Globe,
   SignOut as LogOut,
-  ChatTeardropText as FeedbackIcon,
+  PaperPlaneTilt as FeedbackIcon,
   Gear as Settings,
   User,
 } from "@phosphor-icons/react";

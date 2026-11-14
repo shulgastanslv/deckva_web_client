@@ -28,6 +28,7 @@
     "iconoir": "^7.12.1",
     "iconoir-react": "^7.12.1",
     "imagetracerjs": "^1.2.6",
+    "jspdf": "^4.2.1",
     "jszip": "^3.10.2",
     "konva": "^10.3.3",
     "mini-svg-data-uri": "^1.4.4",

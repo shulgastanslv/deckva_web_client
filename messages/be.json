@@ -116,7 +116,7 @@
   "meta": {
     "titleDefault": "Deckva — студыя каруселяў",
     "titleTemplate": "%s · Deckva",
-    "description": "Deckva — студыя каруселяў для сацсетак. Збярыце слайды на палатне, адрэдагуйце і экспартуйце ў PNG або ZIP.",
+    "description": "Deckva — студыя каруселяў для сацсетак. Збярыце слайды на палатне, адрэдагуйце і экспартуйце ў PNG, ZIP або PDF.",
     "keywords": "Deckva,карусель,каруселі,Instagram,студыя,рэдактар слайдаў,сацсеткі",
     "ogTitle": "Deckva — студыя каруселяў",
     "ogDescription": "Шаблоны, палатно і экспарт. Каруселі для Instagram і іншых сетак."
@@ -124,8 +124,8 @@
   "studio": {
     "makeCarousel": "Зрабіце карусель",
     "makeCarouselSub": "Апішыце тэму. Па жаданні спачатку накідайце тэкст ці колеры — потым сабярыце слайды.",
-    "activationSub": "Тэма → слайды → праўка → экспарт PNG або ZIP.",
-    "activationHint": "Enter → карусель · потым экспарт PNG/ZIP",
+    "activationSub": "Тэма → слайды → праўка → экспарт PNG, ZIP або PDF.",
+    "activationHint": "Enter → карусель · потым экспарт PNG/ZIP/PDF",
     "tryStarter": "Або вазьміце гатовую тэму",
     "makeLikeThis": "Зрабіць такую ж",
     "recent": "Нядаўняе",
@@ -1682,6 +1682,8 @@
       "markedN": "Адзначаныя {n}",
       "png": "PNG",
       "jpeg": "JPEG",
+      "pdf": "PDF",
+      "pdfHint": "Адзін слайд на старонку ў адным PDF-файле.",
       "zip": "ZIP",
       "files": "Файлы",
       "markHint": "Адзначайце слайды галачкай у куце на стужцы.",

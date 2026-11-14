@@ -2,7 +2,8 @@ import { Canvas as FabricCanvas } from "fabric";
 import type { FabricCanvasJSON } from "@/lib/types";
 import { withRemoteImageCors } from "@/lib/canvas/image-cors";
 
-export type ExportFormat = "png" | "jpeg";
+export type ExportFormat = "png" | "jpeg" | "pdf";
+export type ImageExportFormat = Exclude<ExportFormat, "pdf">;
 
 export interface RenderedSlide {
   index: number;
@@ -35,7 +36,7 @@ export async function renderSlidesToImages(
   slides: Array<{ id: number; canvasJSON: FabricCanvasJSON }>,
   size: { width: number; height: number },
   options: {
-    format?: ExportFormat;
+    format?: ImageExportFormat;
     quality?: number;
     multiplier?: number;
     onProgress?: (done: number, total: number) => void;
@@ -112,7 +113,7 @@ export function downloadBlob(blob: Blob, filename: string) {
 export async function downloadSlidesAsZip(
   slides: RenderedSlide[],
   projectTitle: string,
-  format: ExportFormat,
+  format: ImageExportFormat,
 ): Promise<void> {
   const JSZip = (await import("jszip")).default;
   const zip = new JSZip();
@@ -131,7 +132,7 @@ export async function downloadSlidesAsZip(
 export function downloadSlidesSeparately(
   slides: RenderedSlide[],
   projectTitle: string,
-  format: ExportFormat,
+  format: ImageExportFormat,
 ) {
   const base = slugify(projectTitle);
   const ext = format === "jpeg" ? "jpg" : "png";
@@ -141,6 +142,37 @@ export function downloadSlidesSeparately(
       `${base}-${String(slide.index + 1).padStart(2, "0")}.${ext}`,
     );
   });
+}
+
+/** One slide per page; page size matches rendered pixel size. */
+export async function downloadSlidesAsPdf(
+  slides: RenderedSlide[],
+  projectTitle: string,
+  pageSize: { width: number; height: number },
+): Promise<void> {
+  if (slides.length === 0) return;
+
+  const { jsPDF } = await import("jspdf");
+  const base = slugify(projectTitle);
+  const { width, height } = pageSize;
+  const orientation = width >= height ? "landscape" : "portrait";
+
+  const pdf = new jsPDF({
+    orientation,
+    unit: "px",
+    format: [width, height],
+    hotfixes: ["px_scaling"],
+    compress: true,
+  });
+
+  for (let i = 0; i < slides.length; i++) {
+    if (i > 0) pdf.addPage([width, height], orientation);
+    const slide = slides[i];
+    const imageFormat = slide.blob.type.includes("jpeg") ? "JPEG" : "PNG";
+    pdf.addImage(slide.dataUrl, imageFormat, 0, 0, width, height, undefined, "FAST");
+  }
+
+  downloadBlob(pdf.output("blob"), `${base}-carousel.pdf`);
 }
 
 export async function copyImageToClipboard(blob: Blob): Promise<void> {

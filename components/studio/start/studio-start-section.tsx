@@ -13,7 +13,8 @@ import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import { trackEvent } from "@/lib/analytics";
 import { useTranslations } from "next-intl";
 
-/** Home create strip: title + prompt, then starters. */
+const STARTER_COUNT = 5;
+
 export function StudioStartSection({
   topic,
   onBlank,
@@ -43,7 +44,7 @@ export function StudioStartSection({
   >([]);
 
   useEffect(() => {
-    const count = 3 + Math.floor(Math.random() * 2);
+    const count = STARTER_COUNT + Math.floor(Math.random() * 2);
     setStarters(pickStarterPrompts(count).map((item) => ({ id: item.id })));
   }, []);
 

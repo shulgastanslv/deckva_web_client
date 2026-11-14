@@ -2,6 +2,7 @@
 
 import type { MouseEvent } from "react";
 import { useTranslations } from "next-intl";
+import { motion, useReducedMotion } from "motion/react";
 
 import type { ProjectListItem } from "@/actions/projects";
 import { StudioProjectMenu } from "@/components/studio/browse/studio-project-menu";
@@ -10,10 +11,13 @@ import { StudioProjectThumb } from "@/components/studio/browse/studio-project-th
 import { StudioBadge } from "@/components/studio/ui/studio-badge";
 import { cn } from "@/lib/utils";
 
+const ease = [0.22, 1, 0.36, 1] as const;
+
 export function StudioProjectRow({
   project,
   selected = false,
   inTrash = false,
+  appearIndex = 0,
   onOpen,
   onToggleSelect,
   onChanged,
@@ -21,12 +25,14 @@ export function StudioProjectRow({
   project: ProjectListItem;
   selected?: boolean;
   inTrash?: boolean;
+  appearIndex?: number;
   onOpen: () => void;
   onToggleSelect?: (opts?: { additive?: boolean }) => void;
   onChanged: () => void;
 }) {
   const t = useTranslations("studio.browse");
   const tc = useTranslations("common");
+  const reduce = useReducedMotion();
 
   const toggle = (e: MouseEvent) => {
     e.preventDefault();
@@ -44,7 +50,14 @@ export function StudioProjectRow({
   };
 
   return (
-    <tr
+    <motion.tr
+      initial={reduce ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.28,
+        delay: reduce ? 0 : Math.min(appearIndex * 0.035, 0.35),
+        ease,
+      }}
       className={cn(
         "group cursor-pointer border-b border-border/40 transition-colors last:border-b-0 hover:bg-muted/40",
         selected && "bg-muted/45",
@@ -125,6 +138,6 @@ export function StudioProjectRow({
           />
         </div>
       </td>
-    </tr>
+    </motion.tr>
   );
 }
