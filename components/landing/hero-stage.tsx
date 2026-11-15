@@ -91,6 +91,7 @@ function useHeroPosts() {
   );
 }
 
+/** Two full phones — no mid-frame clipping. */
 function HeroPhones({
   progress,
   reduceMotion,
@@ -106,9 +107,9 @@ function HeroPhones({
   const frontRotate = useTransform(progress, [0, 1], [0, 3]);
 
   return (
-    <div className="pointer-events-none relative mx-auto w-full max-w-[24rem] sm:max-w-[28rem] lg:max-w-[32rem]">
+    <div className="pointer-events-none relative mx-auto w-full max-w-[16.5rem] sm:max-w-[20rem] lg:max-w-[26rem]">
       <motion.div
-        className="absolute top-5 left-[2%] z-[1] w-[70%] origin-top sm:top-7 sm:left-[3%] sm:w-[64%]"
+        className="absolute top-4 left-[2%] z-[1] w-[70%] origin-bottom sm:top-5 sm:left-[3%] sm:w-[64%]"
         style={
           reduceMotion ? undefined : { x: backX, rotate: backRotate }
         }
@@ -120,7 +121,7 @@ function HeroPhones({
       </motion.div>
 
       <motion.div
-        className="relative z-10 ml-auto w-[88%] origin-top sm:w-[80%]"
+        className="relative z-10 ml-auto w-[88%] origin-bottom sm:w-[80%]"
         style={
           reduceMotion ? undefined : { x: frontX, rotate: frontRotate }
         }
@@ -131,10 +132,7 @@ function HeroPhones({
   );
 }
 
-/**
- * Text on top; phones fill the rest of the viewport and are clipped by
- * the bottom edge of the hero (~half device visible).
- */
+/** Text above; full phones visible (sized to fit, no overflow crop). */
 export function HeroSection() {
   const t = useTranslations("landing");
   const reduceMotion = useReducedMotion();
@@ -146,9 +144,9 @@ export function HeroSection() {
   });
 
   const inner = (
-    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] sm:px-6 lg:flex-row lg:items-stretch lg:gap-12 lg:px-16 lg:pt-[calc(6.5rem+env(safe-area-inset-top))]">
+    <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] pb-8 sm:px-6 sm:pb-10 lg:flex-row lg:items-center lg:gap-12 lg:px-16 lg:pb-12 lg:pt-[calc(6.5rem+env(safe-area-inset-top))]">
       <motion.div
-        className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem] lg:self-center lg:pb-8"
+        className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem]"
         initial={reduceMotion ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={
@@ -187,9 +185,8 @@ export function HeroSection() {
         </p>
       </motion.div>
 
-      {/* Fills remaining height; bottom edge = crop line through phones */}
       <motion.div
-        className="relative mt-8 min-h-0 w-full flex-1 overflow-hidden sm:mt-10 lg:mt-0 lg:max-w-[32rem]"
+        className="mt-8 flex w-full flex-1 items-end justify-center sm:mt-10 lg:mt-0 lg:max-w-[26rem] lg:items-center"
         initial={reduceMotion ? false : { opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={
@@ -198,20 +195,18 @@ export function HeroSection() {
             : { duration: 0.8, delay: 0.1, ease: easeOut }
         }
       >
-        <div className="absolute inset-x-0 top-0">
-          <HeroPhones
-            progress={scrollYProgress}
-            reduceMotion={Boolean(reduceMotion)}
-          />
-        </div>
+        <HeroPhones
+          progress={scrollYProgress}
+          reduceMotion={Boolean(reduceMotion)}
+        />
       </motion.div>
     </div>
   );
 
   if (reduceMotion) {
     return (
-      <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="h-svh">{inner}</div>
+      <section className="relative overflow-x-clip bg-land-blue text-white">
+        {inner}
       </section>
     );
   }
@@ -219,10 +214,10 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-land-blue text-white"
+      className="relative overflow-x-clip bg-land-blue text-white"
       style={{ height: "140vh" }}
     >
-      <div className="sticky top-0 h-svh overflow-hidden">{inner}</div>
+      <div className="sticky top-0 overflow-x-clip">{inner}</div>
     </section>
   );
 }
