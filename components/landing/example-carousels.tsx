@@ -1,51 +1,49 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   motion,
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
 } from "motion/react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { landSerif } from "@/components/landing/landing-shell";
 import { cn } from "@/lib/utils";
 
-const EXAMPLES = [
-  {
-    title: "Launch in six slides",
-    text: "Offer, audience, proof, and what to do next — one ordered set.",
-    src: "/reviews/1.jpg",
-    href: `/studio?topic=${encodeURIComponent(
-      "A launch in six slides: the offer, who it is for, the proof, and what to do next.",
-    )}`,
-  },
-  {
-    title: "How-to, one step each",
-    text: "Ship a carousel without starting from a blank frame.",
-    src: "/reviews/2.jpg",
-    href: `/studio?topic=${encodeURIComponent(
-      "Five steps to ship a carousel without starting from a blank frame.",
-    )}`,
-  },
-  {
-    title: "Checklist before you post",
-    text: "Cover, order, CTA, and the download — checked once.",
-    src: "/reviews/3.jpg",
-    href: `/studio?topic=${encodeURIComponent(
-      "What to check before you post: cover, order, CTA, and the download.",
-    )}`,
-  },
-  {
-    title: "Offer, proof, next step",
-    text: "The problem, the thing, the proof, and where to go next.",
-    src: "/reviews/4.jpg",
-    href: `/studio?topic=${encodeURIComponent(
-      "The problem, the thing, the proof, and where to go next.",
-    )}`,
-  },
+const EXAMPLE_IDS = [
+  "launch",
+  "howto",
+  "checklist",
+  "offer",
+  "tips",
+  "myths",
+  "story",
+  "compare",
+  "mistakes",
 ] as const;
+
+const EXAMPLE_IMAGES = [
+  "/reviews/1.jpg",
+  "/reviews/2.jpg",
+  "/reviews/3.jpg",
+  "/reviews/4.jpg",
+  "/reviews/5.jpg",
+  "/reviews/6.jpg",
+  "/reviews/7.jpg",
+  "/reviews/8.jpg",
+  "/reviews/9.jpg",
+] as const;
+
+type ExampleItem = {
+  id: (typeof EXAMPLE_IDS)[number];
+  title: string;
+  text: string;
+  src: string;
+  href: string;
+};
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -53,10 +51,12 @@ function ExampleBlock({
   item,
   active,
   index,
+  cta,
 }: {
-  item: (typeof EXAMPLES)[number];
+  item: ExampleItem;
   active: boolean;
   index: number;
+  cta: string;
 }) {
   return (
     <motion.article
@@ -99,7 +99,7 @@ function ExampleBlock({
           className="mt-8 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-[#050038] hover:bg-white/90"
         >
           <a href={item.href} tabIndex={active ? 0 : -1}>
-            Open in studio
+            {cta}
           </a>
         </Button>
       </div>
@@ -107,13 +107,19 @@ function ExampleBlock({
   );
 }
 
-function StaticExamples() {
+function StaticExamples({
+  items,
+  cta,
+}: {
+  items: ExampleItem[];
+  cta: string;
+}) {
   return (
     <section id="examples" className="scroll-mt-28 px-3 py-3 sm:px-5 sm:py-5">
       <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-4">
-        {EXAMPLES.map((item) => (
+        {items.map((item) => (
           <article
-            key={item.title}
+            key={item.id}
             className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] sm:rounded-[2rem]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -140,7 +146,7 @@ function StaticExamples() {
                 asChild
                 className="mt-6 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-[#050038] hover:bg-white/90"
               >
-                <a href={item.href}>Open in studio</a>
+                <a href={item.href}>{cta}</a>
               </Button>
             </div>
           </article>
@@ -151,10 +157,25 @@ function StaticExamples() {
 }
 
 export function ExampleCarousels() {
+  const t = useTranslations("landing.examples");
   const reduce = useReducedMotion();
   const containerRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
-  const count = EXAMPLES.length;
+
+  const items = useMemo<ExampleItem[]>(
+    () =>
+      EXAMPLE_IDS.map((id, index) => ({
+        id,
+        title: t(`items.${id}.title`),
+        text: t(`items.${id}.text`),
+        src: EXAMPLE_IMAGES[index],
+        href: `/studio?topic=${encodeURIComponent(t(`items.${id}.topic`))}`,
+      })),
+    [t],
+  );
+
+  const count = items.length;
+  const cta = t("openInStudio");
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -169,7 +190,7 @@ export function ExampleCarousels() {
     setActive((prev) => (prev === next ? prev : next));
   });
 
-  if (reduce) return <StaticExamples />;
+  if (reduce) return <StaticExamples items={items} cta={cta} />;
 
   return (
     <section
@@ -177,23 +198,24 @@ export function ExampleCarousels() {
       ref={containerRef}
       className="relative"
       style={{ height: `${count * 100}vh` }}
-      aria-label="Example carousels"
+      aria-label={t("aria")}
     >
       <div className="sticky top-0 flex h-svh items-center justify-center px-3 py-3 sm:px-5 sm:py-5">
         <div className="relative h-full w-full max-w-[1200px] overflow-hidden rounded-[1.75rem] bg-[#14151c] sm:rounded-[2rem]">
-          {EXAMPLES.map((item, index) => (
+          {items.map((item, index) => (
             <ExampleBlock
-              key={item.title}
+              key={item.id}
               item={item}
               index={index}
               active={active === index}
+              cta={cta}
             />
           ))}
 
           <div className="pointer-events-none absolute inset-x-0 bottom-5 z-10 flex justify-center gap-2 sm:bottom-7">
-            {EXAMPLES.map((item, index) => (
+            {items.map((item, index) => (
               <span
-                key={item.title}
+                key={item.id}
                 aria-hidden
                 className={cn(
                   "size-2 rounded-full transition-colors duration-300",

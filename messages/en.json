@@ -636,6 +636,7 @@
   },
   "landing": {
     "nav": {
+      "how": "How it works",
       "seeIt": "See it",
       "thePost": "The post",
       "examples": "Examples",
@@ -651,7 +652,14 @@
       "ratios": "Ratios",
       "figma": "Figma",
       "thePicture": "The picture",
-      "aiGeneration": "AI generation"
+      "aiGeneration": "AI generation",
+      "findUs": "Find us",
+      "details": "Details"
+    },
+    "chrome": {
+      "menu": "Menu",
+      "openMenu": "Menu",
+      "closeMenu": "Close menu"
     },
     "ctaStudio": "Open studio",
     "ctaSignIn": "Sign in",
@@ -661,7 +669,157 @@
     "freeLine": "First {count} carousels free",
     "whereDesktop": "In the browser, on a computer. The studio canvas is desktop-only.",
     "legalStatus": "Professional income tax payer",
-    "legalCountry": "Republic of Belarus"
+    "legalCountry": "Republic of Belarus",
+    "hero": {
+      "title": "Your post, from one line",
+      "sub": "Name what it is about. The slides arrive in order, ready to edit and download.",
+      "howLink": "How it works"
+    },
+    "features": {
+      "generate": {
+        "title": "Turn a topic into ordered slides",
+        "points": [
+          "Name what the post is about — one sentence is enough",
+          "Deckva lays the slides out in feed order",
+          "Open the project and keep editing from there"
+        ],
+        "cta": "Try a topic",
+        "alt": "Editor after generating slides from a topic"
+      },
+      "edit": {
+        "title": "Shape every slide on the canvas",
+        "points": [
+          "Rewrite a line, swap the cover, move a frame",
+          "Nothing is locked after generation",
+          "Desktop canvas built for carousel work"
+        ],
+        "cta": "Open the studio",
+        "alt": "Editor canvas with panels while editing a slide"
+      },
+      "export": {
+        "title": "Download a post ready to publish",
+        "points": [
+          "PNG of one slide, or a ZIP of the whole set",
+          "No watermark on the way out",
+          "Same project from topic to file"
+        ],
+        "cta": "See pricing",
+        "alt": "Editor export controls for PNG and ZIP"
+      }
+    },
+    "examples": {
+      "aria": "Example carousels",
+      "openInStudio": "Open in studio",
+      "items": {
+        "launch": {
+          "title": "Launch in six slides",
+          "text": "Offer, audience, proof, and what to do next — one ordered set.",
+          "topic": "A launch in six slides: the offer, who it is for, the proof, and what to do next."
+        },
+        "howto": {
+          "title": "How-to, one step each",
+          "text": "Ship a carousel without starting from a blank frame.",
+          "topic": "Five steps to ship a carousel without starting from a blank frame."
+        },
+        "checklist": {
+          "title": "Checklist before you post",
+          "text": "Cover, order, CTA, and the download — checked once.",
+          "topic": "What to check before you post: cover, order, CTA, and the download."
+        },
+        "offer": {
+          "title": "Offer, proof, next step",
+          "text": "The problem, the thing, the proof, and where to go next.",
+          "topic": "The problem, the thing, the proof, and where to go next."
+        },
+        "tips": {
+          "title": "Practical tips list",
+          "text": "One tip per slide, then a short takeaway at the end.",
+          "topic": "A tips carousel with one practical tip per slide and a short takeaway at the end."
+        },
+        "myths": {
+          "title": "Myth vs truth",
+          "text": "One myth, then the truth — ending with a clear takeaway.",
+          "topic": "A myth-busting carousel: one common myth per slide, then the truth, ending with a clear takeaway."
+        },
+        "story": {
+          "title": "Founder story",
+          "text": "Spark, struggle, turn, proof, and the ask — in six slides.",
+          "topic": "A founder story in six slides: the spark, the struggle, the turn, the proof, and the ask."
+        },
+        "compare": {
+          "title": "A vs B comparison",
+          "text": "Two options, who each is for, and a simple recommendation.",
+          "topic": "A comparison carousel: option A vs option B, who each is for, and a simple recommendation."
+        },
+        "mistakes": {
+          "title": "Common mistakes",
+          "text": "One mistake per slide with a fix, then a better default habit.",
+          "topic": "Common mistakes carousel: one mistake per slide with a fix, ending with a better default habit."
+        }
+      }
+    },
+    "showcase": {
+      "title": "The studio for carousel posts",
+      "sub": "Rewrite a line, move a frame, swap the cover — then download a PNG or a ZIP of the whole set.",
+      "cta": "Explore the studio",
+      "play": "Play studio preview",
+      "pause": "Pause studio preview",
+      "brandNew": "NEW",
+      "label": "Carousel studio",
+      "flow": "Topic → slides → file",
+      "brandBefore": "The",
+      "brandAfter": "Deckva"
+    },
+    "pricing": {
+      "title": "Simple pricing",
+      "sub": "Start free. Move to Pro when you need more generations.",
+      "free": "Free",
+      "pro": "Pro",
+      "perMonth": "/ month",
+      "startFree": "Start free",
+      "freeGenerations": "{count} free AI generations",
+      "fromTopic": "Generation from a topic",
+      "editDownload": "Edit and download",
+      "proGenerations": "{count} AI generations / month",
+      "hiRes": "High-resolution exports",
+      "folders": "Folders & brand kits",
+      "support": "Priority support"
+    },
+    "faq": {
+      "title": "Questions",
+      "sub": "Before you open the studio.",
+      "project": {
+        "q": "What is a project?",
+        "a": "One carousel. The slides, their order, and the file you download all live in that project."
+      },
+      "output": {
+        "q": "What do I download?",
+        "a": "A PNG of one slide, or a ZIP of the whole carousel. No watermark."
+      },
+      "price": {
+        "q": "What does it cost?",
+        "a": "The first {free} AI generations are free. Pro is {price} a month with {credits} generations; packs are {packCredits} for {packPrice}."
+      },
+      "where": {
+        "q": "Where do I use it?",
+        "a": "In the browser, on a computer. The studio canvas is desktop-only."
+      },
+      "cancel": {
+        "q": "What happens if I cancel Pro?",
+        "a": "Pro stops renewing. Access stays until the end of the paid period. Projects stay in your account."
+      }
+    },
+    "heroPosts": {
+      "postA": {
+        "topic": "Examples",
+        "text": "Carousels made in Deckva.",
+        "time": "1h"
+      },
+      "postB": {
+        "text": "One idea, already in order.",
+        "time": "3h"
+      }
+    }
   },
   "share": {
     "makeLikeThis": "Make one like this",
