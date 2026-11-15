@@ -10,7 +10,6 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
-import { landSerif } from "@/components/landing/landing-shell";
 import { cn } from "@/lib/utils";
 
 const EXAMPLE_IDS = [
@@ -26,15 +25,15 @@ const EXAMPLE_IDS = [
 ] as const;
 
 const EXAMPLE_IMAGES = [
-  "/reviews/1.jpg",
-  "/reviews/2.jpg",
-  "/reviews/3.jpg",
-  "/reviews/4.jpg",
-  "/reviews/5.jpg",
-  "/reviews/6.jpg",
-  "/reviews/7.jpg",
-  "/reviews/8.jpg",
-  "/reviews/9.jpg",
+  "/landing/examples/1.jpg",
+  "/landing/examples/2.jpg",
+  "/landing/examples/3.jpg",
+  "/landing/examples/4.jpg",
+  "/landing/examples/5.jpg",
+  "/landing/examples/6.jpg",
+  "/landing/examples/7.jpg",
+  "/landing/examples/8.jpg",
+  "/landing/examples/9.jpg",
 ] as const;
 
 type ExampleItem = {
@@ -76,32 +75,25 @@ function ExampleBlock({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={item.src}
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
+        alt={item.title}
+        className="absolute inset-0 h-full w-full object-cover object-center"
         loading={index === 0 ? "eager" : "lazy"}
         draggable={false}
       />
-      <div className="absolute inset-0 bg-black/45" />
-      <div className="relative flex h-full flex-col items-center justify-center px-6 text-center text-white">
-        <h3
-          className={cn(
-            landSerif,
-            "max-w-[14ch] text-[2.5rem] leading-[1.05] font-medium tracking-tight text-white sm:text-5xl lg:text-[3.5rem]",
-          )}
-        >
-          {item.title}
-        </h3>
-        <p className="mt-4 max-w-md text-base leading-relaxed text-white/75 sm:text-lg">
-          {item.text}
-        </p>
-        <Button
-          asChild
-          className="mt-8 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-[#050038] hover:bg-white/90"
-        >
-          <a href={item.href} tabIndex={active ? 0 : -1}>
-            {cta}
-          </a>
-        </Button>
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent pt-28 pb-8">
+        <div className="relative mx-auto flex max-w-lg flex-col items-center px-6 text-center text-white">
+          <p className="text-sm font-medium text-white/80 sm:text-[15px]">
+            {item.text}
+          </p>
+          <Button
+            asChild
+            className="mt-5 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-[#050038] hover:bg-white/90"
+          >
+            <a href={item.href} tabIndex={active ? 0 : -1}>
+              {cta}
+            </a>
+          </Button>
+        </div>
       </div>
     </motion.article>
   );
@@ -125,29 +117,20 @@ function StaticExamples({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={item.src}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              alt={item.title}
+              className="absolute inset-0 h-full w-full object-cover object-center"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-black/45" />
-            <div className="relative flex h-full flex-col items-center justify-center px-6 text-center text-white">
-              <h3
-                className={cn(
-                  landSerif,
-                  "max-w-[14ch] text-[2.25rem] leading-[1.05] font-medium text-white sm:text-4xl",
-                )}
-              >
-                {item.title}
-              </h3>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-white/75 sm:text-base">
-                {item.text}
-              </p>
-              <Button
-                asChild
-                className="mt-6 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-[#050038] hover:bg-white/90"
-              >
-                <a href={item.href}>{cta}</a>
-              </Button>
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent pt-24 pb-6">
+              <div className="relative mx-auto flex max-w-lg flex-col items-center px-6 text-center text-white">
+                <p className="text-sm font-medium text-white/80">{item.text}</p>
+                <Button
+                  asChild
+                  className="mt-4 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-[#050038] hover:bg-white/90"
+                >
+                  <a href={item.href}>{cta}</a>
+                </Button>
+              </div>
             </div>
           </article>
         ))}

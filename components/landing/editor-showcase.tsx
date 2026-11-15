@@ -59,11 +59,6 @@ export function EditorShowcase() {
     [0, 0.18, 0.4],
     reduceMotion ? [1, 1, 1] : [1, 1, 0.35],
   );
-  const glowOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.2, 0.55, 0.85],
-    reduceMotion ? [0.2, 0.2, 0.2, 0.2] : [0.15, 0.45, 0.55, 0.2],
-  );
 
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     if (reduceMotion) return;
@@ -102,18 +97,11 @@ export function EditorShowcase() {
       </motion.div>
 
       <motion.div
-        aria-hidden
-        style={{ opacity: glowOpacity }}
-        className="pointer-events-none absolute inset-x-[10%] top-[42%] h-[40%] rounded-full bg-[#2f5bff]/35 blur-[80px] dark:bg-[#2f5bff]/25"
-      />
-
-      <motion.div
         style={{ scale: frameScale, y: frameY }}
         className={cn(
           "relative z-10 w-full max-w-[880px] origin-center overflow-hidden",
           "aspect-video rounded-[1.25rem] bg-black sm:rounded-[1.5rem]",
           "ring-1 ring-white/10",
-          "shadow-[0_28px_90px_rgba(0,0,0,0.55)]",
         )}
       >
         {embedSrc ? (

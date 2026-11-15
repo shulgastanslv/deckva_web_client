@@ -13,6 +13,7 @@ import {
   SiMistralai,
   SiOllama,
   SiPerplexity,
+  SiQwen,
   SiX,
 } from "react-icons/si";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ export type BrandKey =
   | "ollama"
   | "huggingface"
   | "perplexity"
+  | "qwen"
   | "xai"
   | "threads"
   | "googledrive"
@@ -110,6 +112,12 @@ const BRANDS: Record<BrandKey, BrandMeta> = {
     color: "#1FB8CD",
     Icon: SiPerplexity,
   },
+  qwen: {
+    key: "qwen",
+    label: "Qwen",
+    color: "#615CED",
+    Icon: SiQwen,
+  },
   xai: {
     key: "xai",
     label: "xAI",
@@ -146,6 +154,7 @@ export function resolveBrandFromModelId(modelId: string): BrandMeta {
   if (id.includes("ollama")) return BRANDS.ollama;
   if (id.includes("hugging") || id.includes("hf")) return BRANDS.huggingface;
   if (id.includes("perplexity") || id.includes("sonar")) return BRANDS.perplexity;
+  if (id.includes("qwen") || id.includes("qwq")) return BRANDS.qwen;
   if (id.includes("grok") || id.includes("xai")) return BRANDS.xai;
   return BRANDS.unknown;
 }
