@@ -91,7 +91,6 @@ function useHeroPosts() {
   );
 }
 
-/** Full-size pair — cropped by the phone stage below, not mid-air. */
 function HeroPhones({
   progress,
   reduceMotion,
@@ -107,9 +106,9 @@ function HeroPhones({
   const frontRotate = useTransform(progress, [0, 1], [0, 3]);
 
   return (
-    <div className="pointer-events-none relative mx-auto w-full max-w-[26rem] sm:max-w-[30rem] lg:max-w-[34rem]">
+    <div className="pointer-events-none relative mx-auto w-full max-w-[24rem] sm:max-w-[28rem] lg:max-w-[32rem]">
       <motion.div
-        className="absolute top-6 left-[2%] z-[1] w-[70%] origin-top sm:top-8 sm:left-[3%] sm:w-[64%]"
+        className="absolute top-5 left-[2%] z-[1] w-[70%] origin-top sm:top-7 sm:left-[3%] sm:w-[64%]"
         style={
           reduceMotion ? undefined : { x: backX, rotate: backRotate }
         }
@@ -133,9 +132,8 @@ function HeroPhones({
 }
 
 /**
- * Hero layout:
- * - copy above with clear spacing to phones
- * - full-size phones sit in a bottom stage whose overflow clips ~half
+ * Text on top; phones fill the rest of the viewport and are clipped by
+ * the bottom edge of the hero (~half device visible).
  */
 export function HeroSection() {
   const t = useTranslations("landing");
@@ -147,96 +145,73 @@ export function HeroSection() {
     offset: ["start start", "end end"],
   });
 
-  const copy = (
-    <motion.div
-      className="flex w-full max-w-xl flex-col items-start text-left lg:w-[28rem] lg:shrink-0"
-      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={
-        reduceMotion ? { duration: 0 } : { duration: 0.65, ease: easeOut }
-      }
-    >
-      <h1 className="max-w-[14ch] text-4xl font-semibold tracking-tight leading-[0.96] sm:text-5xl lg:text-7xl">
-        {t("hero.title")}
-      </h1>
-      <p className="mt-4 max-w-md text-base leading-snug text-white/80 sm:mt-5 sm:text-xl">
-        {t("hero.sub")}
-      </p>
-      <div className="mt-5 flex flex-wrap items-center justify-start gap-x-5 gap-y-3 sm:mt-7">
-        <Button
-          asChild
-          className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
-        >
-          <a
-            href="/studio"
-            onClick={() => trackEvent("landing_cta_click", { place: "hero" })}
-          >
-            {t("ctaStudio")}
-          </a>
-        </Button>
-        <a
-          href="#features"
-          className="text-sm font-medium text-white/75 hover:text-white"
-        >
-          {t("hero.howLink")}
-        </a>
-      </div>
-      <p className="mt-3 text-sm text-white/65 sm:mt-4">
-        {t("freeLine", { count: FREE_GENERATION_LIMIT })}
-      </p>
-    </motion.div>
-  );
-
-  const phones = (
-    <motion.div
-      className="w-full"
-      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={
-        reduceMotion
-          ? { duration: 0 }
-          : { duration: 0.8, delay: 0.1, ease: easeOut }
-      }
-    >
-      <HeroPhones
-        progress={scrollYProgress}
-        reduceMotion={Boolean(reduceMotion)}
-      />
-    </motion.div>
-  );
-
-  /**
-   * Phone stage height ≈ half a device — overflow clips the rest.
-   * Spacing from copy: mobile mt-8 / desktop via row gap.
-   */
-  const phoneStage = (
-    <div
-      className={cn(
-        "relative w-full overflow-hidden",
-        // mobile: room under copy, crop window ~half phone
-        "mt-8 h-[min(48vw,17.5rem)] min-h-[14rem]",
-        "sm:mt-10 sm:h-[19rem]",
-        // desktop: sit beside copy, taller crop, flush toward bottom
-        "lg:mt-0 lg:h-[min(58vh,28rem)] lg:min-h-[22rem]",
-      )}
-    >
-      <div className="absolute inset-x-0 top-0 flex justify-center lg:justify-end">
-        {phones}
-      </div>
-    </div>
-  );
-
   const inner = (
-    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] sm:px-6 lg:flex-row lg:items-end lg:justify-center lg:gap-14 lg:px-16 lg:pb-0 lg:pt-[calc(6.5rem+env(safe-area-inset-top))]">
-      <div className="w-full shrink-0 lg:pb-16">{copy}</div>
-      <div className="w-full min-w-0 lg:max-w-[34rem]">{phoneStage}</div>
+    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] sm:px-6 lg:flex-row lg:items-stretch lg:gap-12 lg:px-16 lg:pt-[calc(6.5rem+env(safe-area-inset-top))]">
+      <motion.div
+        className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem] lg:self-center lg:pb-8"
+        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={
+          reduceMotion ? { duration: 0 } : { duration: 0.65, ease: easeOut }
+        }
+      >
+        <h1 className="max-w-[14ch] text-4xl font-semibold tracking-tight leading-[0.96] sm:text-5xl lg:text-7xl">
+          {t("hero.title")}
+        </h1>
+        <p className="mt-4 max-w-md text-base leading-snug text-white/80 sm:mt-5 sm:text-xl">
+          {t("hero.sub")}
+        </p>
+        <div className="mt-5 flex flex-wrap items-center justify-start gap-x-5 gap-y-3 sm:mt-7">
+          <Button
+            asChild
+            className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
+          >
+            <a
+              href="/studio"
+              onClick={() =>
+                trackEvent("landing_cta_click", { place: "hero" })
+              }
+            >
+              {t("ctaStudio")}
+            </a>
+          </Button>
+          <a
+            href="#features"
+            className="text-sm font-medium text-white/75 hover:text-white"
+          >
+            {t("hero.howLink")}
+          </a>
+        </div>
+        <p className="mt-3 text-sm text-white/65 sm:mt-4">
+          {t("freeLine", { count: FREE_GENERATION_LIMIT })}
+        </p>
+      </motion.div>
+
+      {/* Fills remaining height; bottom edge = crop line through phones */}
+      <motion.div
+        className="relative mt-8 min-h-0 w-full flex-1 overflow-hidden sm:mt-10 lg:mt-0 lg:max-w-[32rem]"
+        initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : { duration: 0.8, delay: 0.1, ease: easeOut }
+        }
+      >
+        <div className="absolute inset-x-0 top-0">
+          <HeroPhones
+            progress={scrollYProgress}
+            reduceMotion={Boolean(reduceMotion)}
+          />
+        </div>
+      </motion.div>
     </div>
   );
 
   if (reduceMotion) {
     return (
       <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="min-h-svh pb-0">{inner}</div>
+        <div className="h-svh">{inner}</div>
       </section>
     );
   }
@@ -247,9 +222,7 @@ export function HeroSection() {
       className="relative overflow-hidden bg-land-blue text-white"
       style={{ height: "140vh" }}
     >
-      <div className="sticky top-0 flex h-svh flex-col overflow-hidden">
-        {inner}
-      </div>
+      <div className="sticky top-0 h-svh overflow-hidden">{inner}</div>
     </section>
   );
 }
