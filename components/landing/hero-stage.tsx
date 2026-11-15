@@ -6,7 +6,6 @@ import {
   useReducedMotion,
   useScroll,
   useTransform,
-  type MotionValue,
 } from "motion/react";
 import { useTranslations } from "next-intl";
 
@@ -91,133 +90,109 @@ function useHeroPosts() {
   );
 }
 
-/** Two full phones — no mid-frame clipping. */
-function HeroPhones({
-  progress,
-  reduceMotion,
-}: {
-  progress: MotionValue<number>;
-  reduceMotion: boolean;
-}) {
-  const posts = useHeroPosts();
-
-  const backX = useTransform(progress, [0, 1], ["0%", "-3%"]);
-  const backRotate = useTransform(progress, [0, 1], [-6, -9]);
-  const frontX = useTransform(progress, [0, 1], ["0%", "2%"]);
-  const frontRotate = useTransform(progress, [0, 1], [0, 3]);
-
-  return (
-    <div className="pointer-events-none relative mx-auto w-full max-w-[16.5rem] sm:max-w-[20rem] lg:max-w-[26rem]">
-      <motion.div
-        className="absolute top-4 left-[2%] z-[1] w-[70%] origin-bottom sm:top-5 sm:left-[3%] sm:w-[64%]"
-        style={
-          reduceMotion ? undefined : { x: backX, rotate: backRotate }
-        }
-      >
-        <ThreadsPhone
-          posts={posts.back}
-          className={cn("w-full", reduceMotion && "-rotate-6")}
-        />
-      </motion.div>
-
-      <motion.div
-        className="relative z-10 ml-auto w-[88%] origin-bottom sm:w-[80%]"
-        style={
-          reduceMotion ? undefined : { x: frontX, rotate: frontRotate }
-        }
-      >
-        <ThreadsPhone posts={posts.front} size="hero" className="w-full" />
-      </motion.div>
-    </div>
-  );
-}
-
-/** Text above; full phones visible (sized to fit, no overflow crop). */
+/** Natural-height hero: text, then two complete phones. No overflow crop. */
 export function HeroSection() {
   const t = useTranslations("landing");
   const reduceMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
+  const posts = useHeroPosts();
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start start", "end end"],
+    offset: ["start start", "end start"],
   });
 
-  const inner = (
-    <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] pb-8 sm:px-6 sm:pb-10 lg:flex-row lg:items-center lg:gap-12 lg:px-16 lg:pb-12 lg:pt-[calc(6.5rem+env(safe-area-inset-top))]">
-      <motion.div
-        className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem]"
-        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={
-          reduceMotion ? { duration: 0 } : { duration: 0.65, ease: easeOut }
-        }
-      >
-        <h1 className="max-w-[14ch] text-4xl font-semibold tracking-tight leading-[0.96] sm:text-5xl lg:text-7xl">
-          {t("hero.title")}
-        </h1>
-        <p className="mt-4 max-w-md text-base leading-snug text-white/80 sm:mt-5 sm:text-xl">
-          {t("hero.sub")}
-        </p>
-        <div className="mt-5 flex flex-wrap items-center justify-start gap-x-5 gap-y-3 sm:mt-7">
-          <Button
-            asChild
-            className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
-          >
-            <a
-              href="/studio"
-              onClick={() =>
-                trackEvent("landing_cta_click", { place: "hero" })
-              }
-            >
-              {t("ctaStudio")}
-            </a>
-          </Button>
-          <a
-            href="#features"
-            className="text-sm font-medium text-white/75 hover:text-white"
-          >
-            {t("hero.howLink")}
-          </a>
-        </div>
-        <p className="mt-3 text-sm text-white/65 sm:mt-4">
-          {t("freeLine", { count: FREE_GENERATION_LIMIT })}
-        </p>
-      </motion.div>
-
-      <motion.div
-        className="mt-8 flex w-full flex-1 items-end justify-center sm:mt-10 lg:mt-0 lg:max-w-[26rem] lg:items-center"
-        initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={
-          reduceMotion
-            ? { duration: 0 }
-            : { duration: 0.8, delay: 0.1, ease: easeOut }
-        }
-      >
-        <HeroPhones
-          progress={scrollYProgress}
-          reduceMotion={Boolean(reduceMotion)}
-        />
-      </motion.div>
-    </div>
-  );
-
-  if (reduceMotion) {
-    return (
-      <section className="relative overflow-x-clip bg-land-blue text-white">
-        {inner}
-      </section>
-    );
-  }
+  const backX = useTransform(scrollYProgress, [0, 1], ["0%", "-4%"]);
+  const backRotate = useTransform(scrollYProgress, [0, 1], [-6, -10]);
+  const frontX = useTransform(scrollYProgress, [0, 1], ["0%", "3%"]);
+  const frontRotate = useTransform(scrollYProgress, [0, 1], [0, 4]);
 
   return (
     <section
       ref={sectionRef}
       className="relative overflow-x-clip bg-land-blue text-white"
-      style={{ height: "140vh" }}
     >
-      <div className="sticky top-0 overflow-x-clip">{inner}</div>
+      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col px-4 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:px-6 sm:pb-16 lg:flex-row lg:items-center lg:gap-12 lg:px-16 lg:pb-20 lg:pt-[calc(7rem+env(safe-area-inset-top))]">
+        <motion.div
+          className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem]"
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            reduceMotion ? { duration: 0 } : { duration: 0.65, ease: easeOut }
+          }
+        >
+          <h1 className="max-w-[14ch] text-4xl font-semibold tracking-tight leading-[0.96] sm:text-5xl lg:text-7xl">
+            {t("hero.title")}
+          </h1>
+          <p className="mt-4 max-w-md text-base leading-snug text-white/80 sm:mt-5 sm:text-xl">
+            {t("hero.sub")}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center justify-start gap-x-5 gap-y-3 sm:mt-7">
+            <Button
+              asChild
+              className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
+            >
+              <a
+                href="/studio"
+                onClick={() =>
+                  trackEvent("landing_cta_click", { place: "hero" })
+                }
+              >
+                {t("ctaStudio")}
+              </a>
+            </Button>
+            <a
+              href="#features"
+              className="text-sm font-medium text-white/75 hover:text-white"
+            >
+              {t("hero.howLink")}
+            </a>
+          </div>
+          <p className="mt-3 text-sm text-white/65 sm:mt-4">
+            {t("freeLine", { count: FREE_GENERATION_LIMIT })}
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="pointer-events-none relative mx-auto mt-10 w-full max-w-[20rem] sm:mt-12 sm:max-w-[24rem] lg:mx-0 lg:mt-0 lg:max-w-[30rem]"
+          initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : { duration: 0.8, delay: 0.1, ease: easeOut }
+          }
+        >
+          <motion.div
+            className="absolute top-5 left-[2%] z-[1] w-[68%] sm:top-6 sm:left-[3%] sm:w-[62%]"
+            style={
+              reduceMotion
+                ? undefined
+                : { x: backX, rotate: backRotate }
+            }
+          >
+            <ThreadsPhone
+              posts={posts.back}
+              className={cn("w-full", reduceMotion && "-rotate-6")}
+            />
+          </motion.div>
+
+          <motion.div
+            className="relative z-10 ml-auto w-[90%] sm:w-[82%]"
+            style={
+              reduceMotion
+                ? undefined
+                : { x: frontX, rotate: frontRotate }
+            }
+          >
+            <ThreadsPhone
+              posts={posts.front}
+              size="hero"
+              className="w-full"
+            />
+          </motion.div>
+        </motion.div>
+      </div>
     </section>
   );
 }
