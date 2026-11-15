@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { List as Menu, X } from "@phosphor-icons/react";
@@ -46,6 +46,8 @@ export function LandingPage() {
   const { pro, pack } = useDisplayCurrency();
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [footerH, setFooterH] = useState(0);
+  const footerRef = useRef<HTMLElement>(null);
   const { status } = useSession();
   const signedIn = status === "authenticated";
 
@@ -140,6 +142,16 @@ export function LandingPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
+
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const sync = () => setFooterH(el.getBoundingClientRect().height);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
     <div className="relative bg-[#ebeae6] dark:bg-[#0e0f12]">
@@ -254,29 +266,42 @@ export function LandingPage() {
         </div>
       ) : null}
 
-      <HeroSection />
+      {/* Content sits above a fixed footer and lifts to reveal it */}
+      <div
+        className="relative z-10 bg-[#ebeae6] dark:bg-[#0e0f12]"
+        style={{
+          // Match fixed footer height + bottom inset so the reveal scroll feels natural
+          marginBottom:
+            footerH > 0 ? `calc(${footerH}px + 1.25rem)` : "min(32rem, 75vh)",
+        }}
+      >
+        <HeroSection />
 
-      <main>
-        <div className="py-3 sm:py-5">
-          <FeatureBlocks />
-        </div>
+        <main>
+          <div className="py-3 sm:py-5">
+            <FeatureBlocks />
+          </div>
 
-        <ExampleCarousels />
+          <ExampleCarousels />
 
-        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-5">
-          <EditorShowcase />
+          <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-5">
+            <EditorShowcase />
 
-          <MiroBoard id="pricing">
-            <PricingSection />
-          </MiroBoard>
+            <MiroBoard id="pricing">
+              <PricingSection />
+            </MiroBoard>
 
-          <MiroBoard id="faq">
-            <FaqSection items={faqItems} />
-          </MiroBoard>
-        </div>
-      </main>
+            <MiroBoard id="faq">
+              <FaqSection items={faqItems} />
+            </MiroBoard>
+          </div>
+        </main>
+      </div>
 
-      <footer className="mx-3 mb-3 rounded-2xl bg-black text-white sm:mx-5">
+      <footer
+        ref={footerRef}
+        className="pointer-events-none fixed inset-x-3 bottom-3 z-0 rounded-2xl bg-black text-white sm:inset-x-5 sm:bottom-5 [&_a]:pointer-events-auto"
+      >
         <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
             {footerColumns.map((column) => (
