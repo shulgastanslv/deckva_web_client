@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { List as Menu, X } from "@phosphor-icons/react";
@@ -10,7 +9,7 @@ import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 import Logo from "@/components/logo/logo";
 import { AuthModal } from "@/components/auth";
 import { Button } from "@/components/ui/button";
-import { HeroStage } from "@/components/landing/hero-stage";
+import { HeroSection } from "@/components/landing/hero-stage";
 import { MiroBoard } from "@/components/landing/landing-shell";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -49,7 +48,6 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { status } = useSession();
   const signedIn = status === "authenticated";
-  const reduceMotion = useReducedMotion();
 
   const faqItems = useMemo(
     () =>
@@ -256,67 +254,7 @@ export function LandingPage() {
         </div>
       ) : null}
 
-      <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-10 px-4 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pt-[calc(7rem+env(safe-area-inset-top))] sm:pb-20 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-24">
-          <motion.div
-            className="flex w-full max-w-xl flex-col items-start text-left lg:w-[28rem] lg:shrink-0"
-            initial={reduceMotion ? false : "hidden"}
-            animate="show"
-            variants={{
-              hidden: {},
-              show: {
-                transition: {
-                  staggerChildren: reduceMotion ? 0 : 0.12,
-                  delayChildren: reduceMotion ? 0 : 0.05,
-                },
-              },
-            }}
-          >
-            <motion.h1 className="max-w-[14ch] text-5xl font-semibold tracking-tight leading-[0.96] sm:text-6xl lg:text-7xl">
-              {t("hero.title")}
-            </motion.h1>
-            <motion.p className="mt-6 max-w-md text-xl leading-snug text-white/80">
-              {t("hero.sub")}
-            </motion.p>
-            <motion.div className="mt-8 flex flex-wrap items-center justify-start gap-x-5 gap-y-3">
-              <Button
-                asChild
-                className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
-              >
-                <a
-                  href="/studio"
-                  onClick={() =>
-                    trackEvent("landing_cta_click", { place: "hero" })
-                  }
-                >
-                  {t("ctaStudio")}
-                </a>
-              </Button>
-              <a
-                href="#features"
-                className="text-sm font-medium text-white/75 hover:text-white"
-              >
-                {t("hero.howLink")}
-              </a>
-            </motion.div>
-            <p className="mt-4 text-sm text-white/65">
-              {t("freeLine", { count: FREE_GENERATION_LIMIT })}
-            </p>
-          </motion.div>
-          <motion.div
-            className="w-full max-w-[28rem] sm:max-w-[36rem]"
-            initial={reduceMotion ? false : { opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={
-              reduceMotion
-                ? { duration: 0 }
-                : { duration: 0.85, delay: 0.18, ease: [0.22, 1, 0.36, 1] }
-            }
-          >
-            <HeroStage />
-          </motion.div>
-        </div>
-      </section>
+      <HeroSection />
 
       <main>
         <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-5">
