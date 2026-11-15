@@ -276,8 +276,8 @@ export function LandingPage() {
         </div>
       </main>
 
-      {/* Sticky footer climbs over the last card while scrolling */}
-      <footer className="sticky bottom-0 z-20 mx-3 -mt-10 mb-3 rounded-2xl bg-black text-white sm:mx-5 sm:-mt-14 sm:mb-5">
+      {/* Overlaps the last card slightly without covering the page */}
+      <footer className="relative z-20 mx-3 -mt-8 mb-3 rounded-2xl bg-black text-white sm:mx-5 sm:-mt-12 sm:mb-5">
         <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
             {footerColumns.map((column) => (
