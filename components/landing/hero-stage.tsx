@@ -91,7 +91,7 @@ function useHeroPosts() {
   );
 }
 
-/** Two phones — stacked at rest, subtle fan on scroll. Clipped by parent. */
+/** Two full phones scaled to fit the stage — no mid-frame clipping. */
 function HeroPhones({
   progress,
   reduceMotion,
@@ -102,28 +102,18 @@ function HeroPhones({
   const posts = useHeroPosts();
 
   const backX = useTransform(progress, [0, 1], ["0%", "-3%"]);
-  const backY = useTransform(progress, [0, 1], ["0%", "-1%"]);
   const backRotate = useTransform(progress, [0, 1], [-6, -9]);
-  const backScale = useTransform(progress, [0, 1], [1, 1.015]);
-
   const frontX = useTransform(progress, [0, 1], ["0%", "2%"]);
-  const frontY = useTransform(progress, [0, 1], ["0%", "1%"]);
   const frontRotate = useTransform(progress, [0, 1], [0, 3]);
-  const frontScale = useTransform(progress, [0, 1], [1, 1.02]);
 
   return (
-    <div className="pointer-events-none relative mx-auto h-full w-full max-w-[18rem] sm:max-w-[24rem] lg:max-w-[30rem]">
+    <div className="pointer-events-none relative mx-auto aspect-[10/16] h-full max-h-full w-auto max-w-full">
       <motion.div
-        className="absolute bottom-[6%] left-[2%] z-[1] w-[68%] origin-bottom sm:left-[3%] sm:w-[62%]"
+        className="absolute bottom-[4%] left-0 z-[1] w-[70%] origin-bottom"
         style={
           reduceMotion
             ? undefined
-            : {
-                x: backX,
-                y: backY,
-                rotate: backRotate,
-                scale: backScale,
-              }
+            : { x: backX, rotate: backRotate }
         }
       >
         <ThreadsPhone
@@ -133,16 +123,11 @@ function HeroPhones({
       </motion.div>
 
       <motion.div
-        className="absolute bottom-0 right-0 z-10 w-[84%] origin-bottom sm:w-[78%]"
+        className="absolute bottom-0 right-0 z-10 w-[86%] origin-bottom"
         style={
           reduceMotion
             ? undefined
-            : {
-                x: frontX,
-                y: frontY,
-                rotate: frontRotate,
-                scale: frontScale,
-              }
+            : { x: frontX, rotate: frontRotate }
         }
       >
         <ThreadsPhone posts={posts.front} size="hero" className="w-full" />
@@ -151,7 +136,7 @@ function HeroPhones({
   );
 }
 
-/** Scroll-driven hero: text above phones; phones stay inside the blue stage. */
+/** Scroll-driven hero: text above; phones fully visible inside the blue stage. */
 export function HeroSection() {
   const t = useTranslations("landing");
   const reduceMotion = useReducedMotion();
@@ -162,10 +147,8 @@ export function HeroSection() {
     offset: ["start start", "end end"],
   });
 
-  const phonesLift = useTransform(scrollYProgress, [0, 1], [0, -6]);
-
   const inner = (
-    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] pb-6 sm:px-6 sm:pb-8 lg:flex-row lg:items-center lg:gap-10 lg:px-16 lg:pb-12">
+    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] pb-5 sm:px-6 sm:pb-8 lg:flex-row lg:items-center lg:gap-10 lg:px-16 lg:pb-10">
       <motion.div
         className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem]"
         initial={reduceMotion ? false : { opacity: 0, y: 16 }}
@@ -207,9 +190,8 @@ export function HeroSection() {
       </motion.div>
 
       <motion.div
-        className="mt-5 min-h-0 w-full flex-1 overflow-hidden lg:mt-0 lg:max-w-[30rem]"
-        style={reduceMotion ? undefined : { y: phonesLift }}
-        initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+        className="mt-4 flex min-h-0 w-full flex-1 items-end justify-center lg:mt-0 lg:max-w-[28rem]"
+        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={
           reduceMotion
@@ -217,18 +199,20 @@ export function HeroSection() {
             : { duration: 0.8, delay: 0.1, ease: easeOut }
         }
       >
-        <HeroPhones
-          progress={scrollYProgress}
-          reduceMotion={Boolean(reduceMotion)}
-        />
+        <div className="flex h-[min(46vh,26rem)] w-full max-w-[17rem] items-end justify-center sm:h-[min(52vh,30rem)] sm:max-w-[22rem] lg:h-[min(70vh,36rem)] lg:max-w-[28rem]">
+          <HeroPhones
+            progress={scrollYProgress}
+            reduceMotion={Boolean(reduceMotion)}
+          />
+        </div>
       </motion.div>
     </div>
   );
 
   if (reduceMotion) {
     return (
-      <section className="relative overflow-hidden bg-land-blue text-white">
-        <div className="min-h-[min(100svh,52rem)]">{inner}</div>
+      <section className="relative overflow-x-clip bg-land-blue text-white">
+        <div className="min-h-svh">{inner}</div>
       </section>
     );
   }
@@ -236,10 +220,10 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-clip bg-land-blue text-white"
+      className="relative overflow-x-clip bg-land-blue text-white"
       style={{ height: "140vh" }}
     >
-      <div className="sticky top-0 h-svh overflow-hidden">{inner}</div>
+      <div className="sticky top-0 h-svh overflow-x-clip">{inner}</div>
     </section>
   );
 }
