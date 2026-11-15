@@ -846,40 +846,23 @@
       }
     },
     "models": {
-      "title": "Models for generation",
-      "sub": "Pick a model for the job — from fast drafts to careful final copy.",
+      "title": "Models",
+      "sub": "Generate with the models already in the studio.",
       "items": {
-        "openai": {
-          "name": "OpenAI",
-          "blurb": "Strong writing and slide structure."
-        },
         "claude": {
-          "name": "Claude",
-          "blurb": "Precise tone and long idea chains."
-        },
-        "gemini": {
-          "name": "Gemini",
-          "blurb": "Quick options and multimodal context."
+          "name": "Claude"
         },
         "deepseek": {
-          "name": "DeepSeek",
-          "blurb": "Economical runs without the noise."
+          "name": "DeepSeek"
         },
-        "mistral": {
-          "name": "Mistral",
-          "blurb": "A light, fast carousel draft."
+        "openai": {
+          "name": "GPT"
         },
-        "meta": {
-          "name": "Meta Llama",
-          "blurb": "Open models for flexible workflows."
+        "gemini": {
+          "name": "Gemini"
         },
-        "xai": {
-          "name": "xAI Grok",
-          "blurb": "Bolder tone and fresh phrasing."
-        },
-        "perplexity": {
-          "name": "Perplexity",
-          "blurb": "Answers grounded in current context."
+        "qwen": {
+          "name": "Qwen"
         }
       }
     }

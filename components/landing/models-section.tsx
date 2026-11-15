@@ -15,34 +15,29 @@ import { landMuted, landSerif } from "@/components/landing/landing-shell";
 import { cn } from "@/lib/utils";
 
 const MODELS = [
-  { brand: "openai" as const, id: "openai" },
   { brand: "claude" as const, id: "claude" },
-  { brand: "gemini" as const, id: "gemini" },
   { brand: "deepseek" as const, id: "deepseek" },
-  { brand: "mistral" as const, id: "mistral" },
-  { brand: "meta" as const, id: "meta" },
-  { brand: "xai" as const, id: "xai" },
-  { brand: "perplexity" as const, id: "perplexity" },
+  { brand: "openai" as const, id: "openai" },
+  { brand: "gemini" as const, id: "gemini" },
+  { brand: "qwen" as const, id: "qwen" },
 ] satisfies { brand: BrandKey; id: string }[];
 
 function ModelCard({
   brand,
   name,
-  blurb,
   index,
   progress,
   reduceMotion,
 }: {
   brand: BrandKey;
   name: string;
-  blurb: string;
   index: number;
   progress: MotionValue<number>;
   reduceMotion: boolean;
 }) {
-  const start = 0.08 + index * 0.06;
-  const mid = start + 0.18;
-  const end = Math.min(0.92, mid + 0.2);
+  const start = 0.1 + index * 0.08;
+  const mid = start + 0.16;
+  const end = Math.min(0.92, mid + 0.18);
 
   const opacity = useTransform(
     progress,
@@ -52,43 +47,38 @@ function ModelCard({
   const y = useTransform(
     progress,
     [start, mid, end],
-    reduceMotion ? [0, 0, 0] : [48, 0, -6],
+    reduceMotion ? [0, 0, 0] : [40, 0, -4],
   );
   const scale = useTransform(
     progress,
     [start, mid, end],
-    reduceMotion ? [1, 1, 1] : [0.86, 1.02, 1],
+    reduceMotion ? [1, 1, 1] : [0.88, 1.04, 1],
   );
   const rotate = useTransform(
     progress,
     [start, mid],
-    reduceMotion ? [0, 0] : [index % 2 === 0 ? -4 : 4, 0],
+    reduceMotion ? [0, 0] : [index % 2 === 0 ? -3 : 3, 0],
   );
 
   return (
     <motion.article
       style={{ opacity, y, scale, rotate }}
       className={cn(
-        "flex flex-col items-start gap-4 rounded-[1.25rem] p-5 sm:rounded-[1.5rem] sm:p-6",
+        "flex flex-col items-center gap-4 rounded-[1.25rem] px-4 py-7 sm:rounded-[1.5rem] sm:px-5 sm:py-8",
         "bg-[#F5F4F0] dark:bg-[#1c1d24]",
       )}
     >
       <span
         className={cn(
-          "inline-flex size-12 items-center justify-center rounded-md",
+          "inline-flex size-16 items-center justify-center rounded-md sm:size-[4.5rem]",
           "bg-white dark:bg-white/10",
         )}
       >
-        <BrandIcon brand={brand} className="size-7" />
+        <BrandIcon brand={brand} className="size-9 sm:size-11" />
       </span>
-      <div>
-        <h3 className="text-[15px] font-medium text-[#050038] dark:text-land-ink">
-          {name}
-        </h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-[#050038]/55 dark:text-land-ink/55">
-          {blurb}
-        </p>
-      </div>
+      <h3 className="text-center text-sm font-medium text-[#050038] sm:text-[15px] dark:text-land-ink">
+        {name}
+      </h3>
     </motion.article>
   );
 }
@@ -129,16 +119,15 @@ export function ModelsSection() {
         >
           {t("title")}
         </h2>
-        <p className={cn(landMuted, "mt-4 max-w-md")}>{t("sub")}</p>
+        <p className={cn(landMuted, "mt-3 max-w-sm text-[15px]")}>{t("sub")}</p>
       </motion.div>
 
-      <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-12 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+      <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-12 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
         {MODELS.map((model, index) => (
           <ModelCard
             key={model.id}
             brand={model.brand}
             name={t(`items.${model.id}.name`)}
-            blurb={t(`items.${model.id}.blurb`)}
             index={index}
             progress={scrollYProgress}
             reduceMotion={Boolean(reduceMotion)}
@@ -166,7 +155,7 @@ export function ModelsSection() {
       id="models"
       ref={sectionRef}
       className="relative scroll-mt-28"
-      style={{ height: "170vh" }}
+      style={{ height: "150vh" }}
     >
       <div className="sticky top-0 flex min-h-svh items-center px-3 py-8 sm:px-5 sm:py-10">
         <div className="mx-auto w-full max-w-[1200px] overflow-visible rounded-[2rem] bg-white px-6 py-12 sm:rounded-[2.5rem] sm:px-10 sm:py-14 dark:bg-[#14151c]">
