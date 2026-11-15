@@ -24,6 +24,7 @@ import {
 import { FeatureBlocks } from "./feature-blocks";
 import { ExampleCarousels } from "./example-carousels";
 import { EditorShowcase } from "./editor-showcase";
+import { ModelsSection } from "./models-section";
 import { PricingSection } from "./pricing-section";
 import { FaqSection } from "./faq-section";
 
@@ -94,6 +95,7 @@ export function LandingPage() {
     () => [
       { name: t("nav.how"), link: "#features" },
       { name: t("nav.examples"), link: "#examples" },
+      { name: t("nav.models"), link: "#models" },
       { name: t("nav.seeIt"), link: "#studio" },
       { name: t("nav.price"), link: "#pricing" },
       { name: t("nav.questions"), link: "#faq" },
@@ -274,6 +276,8 @@ export function LandingPage() {
         </div>
 
         <ExampleCarousels />
+
+        <ModelsSection />
 
         <EditorShowcase />
 

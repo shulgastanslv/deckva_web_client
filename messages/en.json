@@ -641,7 +641,8 @@
       "thePost": "The post",
       "examples": "Examples",
       "price": "Pricing",
-      "questions": "FAQ"
+      "questions": "FAQ",
+      "models": "Models"
     },
     "menu": {
       "product": "Product",
@@ -842,6 +843,44 @@
       "postB": {
         "text": "One idea — already in order.",
         "time": "3h"
+      }
+    },
+    "models": {
+      "title": "Models for generation",
+      "sub": "Pick a model for the job — from fast drafts to careful final copy.",
+      "items": {
+        "openai": {
+          "name": "OpenAI",
+          "blurb": "Strong writing and slide structure."
+        },
+        "claude": {
+          "name": "Claude",
+          "blurb": "Precise tone and long idea chains."
+        },
+        "gemini": {
+          "name": "Gemini",
+          "blurb": "Quick options and multimodal context."
+        },
+        "deepseek": {
+          "name": "DeepSeek",
+          "blurb": "Economical runs without the noise."
+        },
+        "mistral": {
+          "name": "Mistral",
+          "blurb": "A light, fast carousel draft."
+        },
+        "meta": {
+          "name": "Meta Llama",
+          "blurb": "Open models for flexible workflows."
+        },
+        "xai": {
+          "name": "xAI Grok",
+          "blurb": "Bolder tone and fresh phrasing."
+        },
+        "perplexity": {
+          "name": "Perplexity",
+          "blurb": "Answers grounded in current context."
+        }
       }
     }
   },
