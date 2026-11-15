@@ -91,7 +91,10 @@ function useHeroPosts() {
   );
 }
 
-/** Two full phones scaled to fit the stage — no mid-frame clipping. */
+/**
+ * Full-size phones. Parent clips at ~50% height so the hero edge
+ * cuts through the middle of the devices.
+ */
 function HeroPhones({
   progress,
   reduceMotion,
@@ -107,9 +110,9 @@ function HeroPhones({
   const frontRotate = useTransform(progress, [0, 1], [0, 3]);
 
   return (
-    <div className="pointer-events-none relative mx-auto aspect-[10/16] h-full max-h-full w-auto max-w-full">
+    <div className="pointer-events-none relative mx-auto w-full max-w-[26rem] sm:max-w-[32rem] lg:max-w-[38rem]">
       <motion.div
-        className="absolute bottom-[4%] left-0 z-[1] w-[70%] origin-bottom"
+        className="absolute top-5 left-[2%] z-[1] w-[72%] origin-top sm:top-7 sm:left-[3%] sm:w-[66%]"
         style={
           reduceMotion
             ? undefined
@@ -123,7 +126,7 @@ function HeroPhones({
       </motion.div>
 
       <motion.div
-        className="absolute bottom-0 right-0 z-10 w-[86%] origin-bottom"
+        className="relative z-10 ml-auto w-[90%] origin-top sm:w-[82%]"
         style={
           reduceMotion
             ? undefined
@@ -136,7 +139,7 @@ function HeroPhones({
   );
 }
 
-/** Scroll-driven hero: text above; phones fully visible inside the blue stage. */
+/** Hero: large phones, bottom of the blue stage crops them in half. */
 export function HeroSection() {
   const t = useTranslations("landing");
   const reduceMotion = useReducedMotion();
@@ -147,8 +150,10 @@ export function HeroSection() {
     offset: ["start start", "end end"],
   });
 
+  const phonesY = useTransform(scrollYProgress, [0, 1], ["0%", "4%"]);
+
   const inner = (
-    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] pb-5 sm:px-6 sm:pb-8 lg:flex-row lg:items-center lg:gap-10 lg:px-16 lg:pb-10">
+    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] sm:px-6 lg:flex-row lg:items-start lg:gap-10 lg:px-16 lg:pt-[calc(7rem+env(safe-area-inset-top))]">
       <motion.div
         className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem]"
         initial={reduceMotion ? false : { opacity: 0, y: 16 }}
@@ -190,8 +195,9 @@ export function HeroSection() {
       </motion.div>
 
       <motion.div
-        className="mt-4 flex min-h-0 w-full flex-1 items-end justify-center lg:mt-0 lg:max-w-[28rem]"
-        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+        className="mt-5 w-full flex-1 translate-y-[18%] lg:mt-4 lg:max-w-[38rem] lg:translate-y-[12%]"
+        style={reduceMotion ? undefined : { y: phonesY }}
+        initial={reduceMotion ? false : { opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
         transition={
           reduceMotion
@@ -199,20 +205,18 @@ export function HeroSection() {
             : { duration: 0.8, delay: 0.1, ease: easeOut }
         }
       >
-        <div className="flex h-[min(46vh,26rem)] w-full max-w-[17rem] items-end justify-center sm:h-[min(52vh,30rem)] sm:max-w-[22rem] lg:h-[min(70vh,36rem)] lg:max-w-[28rem]">
-          <HeroPhones
-            progress={scrollYProgress}
-            reduceMotion={Boolean(reduceMotion)}
-          />
-        </div>
+        <HeroPhones
+          progress={scrollYProgress}
+          reduceMotion={Boolean(reduceMotion)}
+        />
       </motion.div>
     </div>
   );
 
   if (reduceMotion) {
     return (
-      <section className="relative overflow-x-clip bg-land-blue text-white">
-        <div className="min-h-svh">{inner}</div>
+      <section className="relative overflow-hidden bg-land-blue text-white">
+        <div className="h-svh">{inner}</div>
       </section>
     );
   }
@@ -220,10 +224,11 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-x-clip bg-land-blue text-white"
+      className="relative overflow-hidden bg-land-blue text-white"
       style={{ height: "140vh" }}
     >
-      <div className="sticky top-0 h-svh overflow-x-clip">{inner}</div>
+      {/* overflow-hidden crops phones at the blue edge (~halfway down devices) */}
+      <div className="sticky top-0 h-svh overflow-hidden">{inner}</div>
     </section>
   );
 }
