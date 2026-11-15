@@ -2,10 +2,9 @@
 
 import { useRef, useState } from "react";
 import { motion } from "motion/react";
-import { Play } from "@phosphor-icons/react";
+import { Pause, Play } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
-import Logo from "@/components/logo/logo";
 import { Button } from "@/components/ui/button";
 import {
   RevealItem,
@@ -39,18 +38,13 @@ export function EditorShowcase() {
       {...motionProps}
       className={cn(
         "relative scroll-mt-28 overflow-hidden rounded-[2rem] sm:rounded-[2.5rem]",
-        "bg-[#0e0f12] text-white",
+        "bg-[#14151c] text-white dark:bg-[#0a0a0c]",
         "px-6 py-16 sm:px-10 sm:py-20 lg:px-14 lg:py-24",
       )}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px)",
-          backgroundSize: "22px 22px",
-        }}
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(47,91,255,0.18),transparent_55%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(26,37,72,0.55),transparent_60%)]"
       />
 
       <div className="relative mx-auto flex w-full max-w-[920px] flex-col items-center text-center">
@@ -86,71 +80,86 @@ export function EditorShowcase() {
         </RevealItem>
 
         <RevealItem className="mt-12 w-full max-w-[780px]">
-          <button
-            type="button"
-            onClick={togglePlay}
-            aria-label={playing ? t("pause") : t("play")}
+          <div
             className={cn(
-              "group relative w-full overflow-hidden",
-              "rounded-[1.5rem] bg-white text-left sm:rounded-[1.75rem]",
-              "shadow-[0_24px_80px_rgba(0,0,0,0.45)]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD02F]/70",
+              "overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem]",
+              "bg-[#0a0b0f] ring-1 ring-white/10",
             )}
           >
-            <div className="relative aspect-[16/10] w-full bg-[#f3f2ee]">
-              <video
-                ref={videoRef}
-                className="absolute inset-0 h-full w-full object-cover"
-                src="/export-1793298925294.mp4"
-                poster="/reviews/6.jpg"
-                playsInline
-                muted
-                loop
-                preload="metadata"
-                onPlay={() => setPlaying(true)}
-                onPause={() => setPlaying(false)}
-              />
+            <button
+              type="button"
+              onClick={togglePlay}
+              aria-label={playing ? t("pause") : t("play")}
+              className={cn(
+                "group relative block w-full overflow-hidden text-left",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#14151c]",
+              )}
+            >
+              <div className="relative aspect-[16/10] w-full bg-black">
+                <video
+                  ref={videoRef}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  src="/export-1793298925294.mp4"
+                  poster="/reviews/6.jpg"
+                  playsInline
+                  muted
+                  loop
+                  preload="metadata"
+                  onPlay={() => setPlaying(true)}
+                  onPause={() => setPlaying(false)}
+                />
 
-              {!playing ? (
-                <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/35 via-transparent to-black/10 p-5 sm:p-7">
-                  <div className="flex items-start justify-between gap-4">
-                    <p className="font-[family-name:var(--font-landing-serif)] text-2xl leading-tight text-white sm:text-3xl">
-                      {t("brandBefore") ? `${t("brandBefore")} ` : null}
-                      <span className="rounded-md bg-[#FFD02F] px-1.5 text-[#050038]">
-                        {t("brandNew")}
-                      </span>{" "}
-                      {t("brandAfter")}
-                    </p>
-                    <Logo
-                      width={28}
-                      height={28}
-                      className="pointer-events-none text-white"
-                    />
-                  </div>
-
-                  <div className="flex items-end justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-white/90">
-                        {t("label")}
-                      </p>
-                      <p className="mt-0.5 text-[13px] text-white/65">
-                        {t("flow")}
-                      </p>
-                    </div>
+                {!playing ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition-colors group-hover:bg-black/35">
                     <span
                       className={cn(
-                        "inline-flex size-12 items-center justify-center rounded-full",
-                        "bg-white text-[#050038] shadow-sm",
-                        "transition-transform group-hover:scale-105",
+                        "inline-flex size-14 items-center justify-center rounded-md",
+                        "bg-white text-[#14151c]",
+                        "transition-transform group-hover:scale-[1.03]",
                       )}
                     >
-                      <Play className="size-5 translate-x-px" weight="fill" />
+                      <Play className="size-6 translate-x-px" weight="fill" />
                     </span>
                   </div>
-                </div>
-              ) : null}
+                ) : null}
+              </div>
+            </button>
+
+            <div className="flex items-center gap-3 border-t border-white/10 px-4 py-3 sm:px-5">
+              <button
+                type="button"
+                onClick={togglePlay}
+                aria-label={playing ? t("pause") : t("play")}
+                className={cn(
+                  "inline-flex size-9 shrink-0 items-center justify-center rounded-md",
+                  "bg-white/10 text-white hover:bg-white/15",
+                )}
+              >
+                {playing ? (
+                  <Pause className="size-4" weight="fill" />
+                ) : (
+                  <Play className="size-4 translate-x-px" weight="fill" />
+                )}
+              </button>
+              <div className="min-w-0 flex-1 text-left">
+                <p className="truncate text-sm font-medium text-white/90">
+                  {t("label")}
+                </p>
+                <p className="truncate text-[12px] text-white/50">{t("flow")}</p>
+              </div>
+              <div
+                aria-hidden
+                className="hidden h-1.5 w-24 overflow-hidden rounded-md bg-white/10 sm:block"
+              >
+                <div
+                  className={cn(
+                    "h-full rounded-md bg-white/45 transition-all duration-500",
+                    playing ? "w-[66%]" : "w-0",
+                  )}
+                />
+              </div>
             </div>
-          </button>
+          </div>
         </RevealItem>
       </div>
     </motion.section>
