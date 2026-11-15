@@ -256,16 +256,16 @@ export function LandingPage() {
 
       <HeroSection />
 
-      <main className="relative z-0">
+      <main>
         <div className="py-3 sm:py-5">
           <FeatureBlocks />
         </div>
 
         <ExampleCarousels />
 
-        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-5">
-          <EditorShowcase />
+        <EditorShowcase />
 
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-5">
           <MiroBoard id="pricing">
             <PricingSection />
           </MiroBoard>
@@ -276,8 +276,7 @@ export function LandingPage() {
         </div>
       </main>
 
-      {/* Overlaps the last card slightly without covering the page */}
-      <footer className="relative z-20 mx-3 -mt-8 mb-3 rounded-2xl bg-black text-white sm:mx-5 sm:-mt-12 sm:mb-5">
+      <footer className="mx-3 mb-3 rounded-2xl bg-black text-white sm:mx-5">
         <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
             {footerColumns.map((column) => (
