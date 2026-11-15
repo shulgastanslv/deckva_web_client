@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { landSerif } from "@/components/landing/landing-shell";
-import { RevealItem, RevealStagger } from "@/components/landing/reveal";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
@@ -49,67 +48,76 @@ export function FeatureBlocks() {
   const t = useTranslations("landing.features");
 
   return (
-    <div
+    <section
       id="features"
-      className="mx-auto flex w-full max-w-[1040px] flex-col gap-16 sm:gap-20"
+      className="relative mx-auto w-full max-w-[1200px] px-3 sm:px-5"
     >
-      {FEATURE_IDS.map((id) => {
+      {FEATURE_IDS.map((id, index) => {
         const meta = FEATURE_META[id];
         const points = t.raw(`${id}.points`) as string[];
+        const top = `calc(${4.75 + index * 0.85}rem + env(safe-area-inset-top))`;
 
         return (
-          <RevealStagger
+          <article
             key={id}
-            stagger={0.12}
             className={cn(
-              "grid items-center gap-8 lg:grid-cols-2 lg:gap-12",
-              meta.reverse && "lg:[&>*:first-child]:order-2",
+              "sticky mb-4 rounded-[1.75rem] sm:mb-5 sm:rounded-[2rem]",
+              "bg-white px-6 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-14",
+              "dark:bg-[#14151c]",
             )}
+            style={{ top, zIndex: index + 1 }}
           >
-            <RevealItem>
-              <h3
-                className={cn(
-                  landSerif,
-                  "max-w-[16ch] text-[2rem] leading-[1.1] sm:text-[2.35rem]",
-                )}
-              >
-                {t(`${id}.title`)}
-              </h3>
-              <ul className="mt-6 space-y-3">
-                {points.map((point) => (
-                  <li
-                    key={point}
-                    className="flex gap-3 text-[15px] leading-relaxed text-[#050038]/65 dark:text-land-ink/65"
-                  >
-                    <span
-                      aria-hidden
-                      className="mt-2 size-1.5 shrink-0 rounded-full bg-[#050038]/35 dark:bg-land-ink/40"
-                    />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                asChild
-                className="mt-8 h-11 rounded-full bg-[#050038] px-5 text-[15px] font-medium text-white hover:bg-[#050038]/90 dark:bg-land-ink dark:text-land-mist"
-              >
-                <a
-                  href={meta.href}
-                  onClick={() =>
-                    trackEvent("landing_cta_click", { place: meta.place })
-                  }
+            <div
+              className={cn(
+                "grid items-center gap-8 lg:grid-cols-2 lg:gap-12",
+                meta.reverse && "lg:[&>*:first-child]:order-2",
+              )}
+            >
+              <div>
+                <h3
+                  className={cn(
+                    landSerif,
+                    "max-w-[16ch] text-[2rem] leading-[1.1] sm:text-[2.35rem]",
+                  )}
                 >
-                  {t(`${id}.cta`)}
-                </a>
-              </Button>
-            </RevealItem>
+                  {t(`${id}.title`)}
+                </h3>
+                <ul className="mt-6 space-y-3">
+                  {points.map((point) => (
+                    <li
+                      key={point}
+                      className="flex gap-3 text-[15px] leading-relaxed text-[#050038]/65 dark:text-land-ink/65"
+                    >
+                      <span
+                        aria-hidden
+                        className="mt-2 size-1.5 shrink-0 rounded-full bg-[#050038]/35 dark:bg-land-ink/40"
+                      />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  asChild
+                  className="mt-8 h-11 rounded-full bg-[#050038] px-5 text-[15px] font-medium text-white hover:bg-[#050038]/90 dark:bg-land-ink dark:text-land-mist"
+                >
+                  <a
+                    href={meta.href}
+                    onClick={() =>
+                      trackEvent("landing_cta_click", { place: meta.place })
+                    }
+                  >
+                    {t(`${id}.cta`)}
+                  </a>
+                </Button>
+              </div>
 
-            <RevealItem>
               <FeatureVisual />
-            </RevealItem>
-          </RevealStagger>
+            </div>
+          </article>
         );
       })}
-    </div>
+      {/* Lets the last card linger before the next section. */}
+      <div className="h-[30vh]" aria-hidden />
+    </section>
   );
 }

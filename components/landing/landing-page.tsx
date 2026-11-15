@@ -257,10 +257,8 @@ export function LandingPage() {
       <HeroSection />
 
       <main>
-        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-5">
-          <MiroBoard>
-            <FeatureBlocks />
-          </MiroBoard>
+        <div className="py-3 sm:py-5">
+          <FeatureBlocks />
         </div>
 
         <ExampleCarousels />
@@ -278,7 +276,7 @@ export function LandingPage() {
         </div>
       </main>
 
-      <footer className="mx-3 mb-3 rounded-2xl bg-[#0e0f12] text-white sm:mx-5 dark:bg-[#1c1d26] dark:ring-1 dark:ring-white/10">
+      <footer className="mx-3 mb-3 rounded-2xl bg-black text-white sm:mx-5">
         <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
             {footerColumns.map((column) => (

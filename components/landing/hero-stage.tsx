@@ -101,15 +101,15 @@ function HeroPhones({
 }) {
   const posts = useHeroPosts();
 
-  const backX = useTransform(progress, [0, 1], ["0%", "-10%"]);
-  const backY = useTransform(progress, [0, 1], ["0%", "-2%"]);
-  const backRotate = useTransform(progress, [0, 1], [-6, -18]);
-  const backScale = useTransform(progress, [0, 1], [1, 1.04]);
+  const backX = useTransform(progress, [0, 1], ["0%", "-3%"]);
+  const backY = useTransform(progress, [0, 1], ["0%", "-1%"]);
+  const backRotate = useTransform(progress, [0, 1], [-6, -9]);
+  const backScale = useTransform(progress, [0, 1], [1, 1.015]);
 
-  const frontX = useTransform(progress, [0, 1], ["0%", "6%"]);
-  const frontY = useTransform(progress, [0, 1], ["0%", "2%"]);
-  const frontRotate = useTransform(progress, [0, 1], [0, 10]);
-  const frontScale = useTransform(progress, [0, 1], [1, 1.06]);
+  const frontX = useTransform(progress, [0, 1], ["0%", "2%"]);
+  const frontY = useTransform(progress, [0, 1], ["0%", "1%"]);
+  const frontRotate = useTransform(progress, [0, 1], [0, 3]);
+  const frontScale = useTransform(progress, [0, 1], [1, 1.02]);
 
   return (
     <div className="pointer-events-none relative mx-auto w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-[36rem]">
@@ -162,7 +162,7 @@ export function HeroSection() {
     offset: ["start start", "end end"],
   });
 
-  const phonesLift = useTransform(scrollYProgress, [0, 1], [0, -20]);
+  const phonesLift = useTransform(scrollYProgress, [0, 1], [0, -8]);
 
   const inner = (
     <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-stretch gap-8 px-4 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:gap-10 sm:px-6 sm:pb-16 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-20">
@@ -237,7 +237,7 @@ export function HeroSection() {
     <section
       ref={sectionRef}
       className="relative bg-land-blue text-white"
-      style={{ height: "180vh" }}
+      style={{ height: "140vh" }}
     >
       <div className="sticky top-0 overflow-x-clip">{inner}</div>
     </section>
