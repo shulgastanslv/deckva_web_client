@@ -142,7 +142,8 @@
     --land-ink: #eef0f6;
     --land-mist: #12131a;
     --land-card: #1c1d26;
-    --land-blue: #1a2548;
+    /* Deep ink navy — distinct from bright light-theme blue */
+    --land-blue: #0b1224;
 
     --background: #111111;
     --foreground: #ffffff;

@@ -712,49 +712,49 @@
       "openInStudio": "Open in studio",
       "items": {
         "launch": {
-          "title": "Product launch",
-          "text": "What you offer, who it’s for, why trust you, and what to do next.",
-          "topic": "A product launch in six slides: the offer, who it is for, the proof, and what to do next."
+          "title": "Fall frames for your blog",
+          "text": "Photo ideas and short captions that feel polished.",
+          "topic": "A carousel of fall photo ideas for a blog: angles, light, and captions."
         },
         "howto": {
-          "title": "Step-by-step guide",
-          "text": "One clear step per slide — no blank canvas.",
-          "topic": "Five steps to ship a carousel without starting from a blank frame."
+          "title": "What to learn this summer",
+          "text": "A seasonal theme with accents and inset frames.",
+          "topic": "A carousel: what I want to study this summer — a list with short notes."
         },
         "checklist": {
-          "title": "Pre-publish checklist",
-          "text": "Cover, slide order, call to action, and download.",
-          "topic": "What to check before you post: cover, order, call to action, and the download."
+          "title": "What to post in January",
+          "text": "Ideas for the start of the year to grow your audience.",
+          "topic": "A carousel: what to post from Jan 1–11 to grow your audience."
         },
         "offer": {
-          "title": "Offer and next step",
-          "text": "Problem, solution, proof, and where to go next.",
-          "topic": "The problem, the solution, the proof, and where to go next."
+          "title": "A carousel trick",
+          "text": "A move that boosts saves and taps.",
+          "topic": "A carousel: steal this carousel trick before everyone finds it."
         },
         "tips": {
-          "title": "Useful tips",
-          "text": "One tip per slide, then a short takeaway.",
-          "topic": "A tips carousel with one practical tip per slide and a short takeaway at the end."
+          "title": "What to hand off to AI",
+          "text": "Routine to AI — energy for what matters.",
+          "topic": "A carousel: what I delegated to AI so I don’t waste energy on busywork."
         },
         "myths": {
-          "title": "Myth vs truth",
-          "text": "Clear up a misconception and leave a simple takeaway.",
-          "topic": "A myth-busting carousel: one common myth per slide, then the truth, ending with a clear takeaway."
+          "title": "Posts people save",
+          "text": "Carousel formats with a high save rate.",
+          "topic": "A carousel: carousel posts people save — 6 ideas from creators abroad."
         },
         "story": {
-          "title": "Founder story",
-          "text": "How it started, what got in the way, what changed, and the ask.",
-          "topic": "A founder story in six slides: the start, the struggle, the turn, the proof, and the ask."
+          "title": "Skip the usual goals",
+          "text": "Another way to plan the year.",
+          "topic": "A carousel: this year I don’t want to set goals the usual way."
         },
         "compare": {
-          "title": "Compare two options",
-          "text": "Who each option is for, and which to pick.",
-          "topic": "A comparison carousel: option A vs option B, who each is for, and a simple recommendation."
+          "title": "Font pairings",
+          "text": "How to make content layout look intentional.",
+          "topic": "A carousel: want aesthetic content design — pick the right font pairings."
         },
         "mistakes": {
-          "title": "Common mistakes",
-          "text": "The mistake, the fix, and a better habit.",
-          "topic": "Common mistakes carousel: one mistake per slide with a fix, ending with a better default habit."
+          "title": "Ideas for experts",
+          "text": "Content for niches — from beauty to styling.",
+          "topic": "A carousel: content ideas to sell expert services across niches."
         }
       }
     },
@@ -807,6 +807,30 @@
       "cancel": {
         "q": "What if I cancel Pro?",
         "a": "It won’t renew. Access stays until the end of the paid period, and your projects stay in your account."
+      },
+      "watermark": {
+        "q": "Are there watermarks?",
+        "a": "No. PNG and ZIP exports have no watermarks on Free or Pro."
+      },
+      "edit": {
+        "q": "Can I edit after generation?",
+        "a": "Yes. Text, cover, slide order, and frames stay editable on the canvas — nothing is locked."
+      },
+      "formats": {
+        "q": "What export formats do I get?",
+        "a": "A single slide as PNG, or the full carousel as a ZIP — sized for social posts."
+      },
+      "credits": {
+        "q": "How do generations work?",
+        "a": "One topic-to-carousel run uses one credit. Editing and downloading don’t spend credits."
+      },
+      "mobile": {
+        "q": "Can I use it on my phone?",
+        "a": "Viewing and downloading work. Building and editing are better on a computer — the studio is made for a larger screen."
+      },
+      "commercial": {
+        "q": "Can I use this commercially?",
+        "a": "Yes. Carousels from your projects can go on your accounts and for client work."
       }
     },
     "heroPosts": {

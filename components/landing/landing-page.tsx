@@ -32,7 +32,19 @@ const LEGAL_STATIC = {
   email: "hello@deckva.by",
 } as const;
 
-const FAQ_IDS = ["project", "output", "price", "where", "cancel"] as const;
+const FAQ_IDS = [
+  "project",
+  "output",
+  "edit",
+  "credits",
+  "formats",
+  "watermark",
+  "price",
+  "where",
+  "mobile",
+  "commercial",
+  "cancel",
+] as const;
 
 const SOCIAL = [
   { key: "threads", name: "Threads", href: SOCIAL_LINKS.threads, Icon: FaThreads },
