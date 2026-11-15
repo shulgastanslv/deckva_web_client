@@ -60,7 +60,7 @@ function useHeroPosts() {
       back: [
         {
           id: "hero-b",
-          author: "deckva",
+          author: "alex",
           avatar: "/post_logo.jpg",
           time: t("postB.time"),
           text: t("postB.text"),
@@ -73,7 +73,7 @@ function useHeroPosts() {
       front: [
         {
           id: "hero-a",
-          author: "deckva",
+          author: "mira",
           avatar: "/post_logo.jpg",
           verified: true,
           time: t("postA.time"),
@@ -91,7 +91,7 @@ function useHeroPosts() {
   );
 }
 
-/** Two large phones — stacked at rest, fan open on scroll. */
+/** Two phones — stacked at rest, subtle fan on scroll. Clipped by parent. */
 function HeroPhones({
   progress,
   reduceMotion,
@@ -112,9 +112,9 @@ function HeroPhones({
   const frontScale = useTransform(progress, [0, 1], [1, 1.02]);
 
   return (
-    <div className="pointer-events-none relative mx-auto w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-[36rem]">
+    <div className="pointer-events-none relative mx-auto h-full w-full max-w-[18rem] sm:max-w-[24rem] lg:max-w-[30rem]">
       <motion.div
-        className="absolute top-5 left-[2%] z-[1] w-[72%] origin-bottom sm:top-7 sm:left-[3%] sm:w-[66%]"
+        className="absolute bottom-[6%] left-[2%] z-[1] w-[68%] origin-bottom sm:left-[3%] sm:w-[62%]"
         style={
           reduceMotion
             ? undefined
@@ -133,7 +133,7 @@ function HeroPhones({
       </motion.div>
 
       <motion.div
-        className="relative z-10 ml-auto w-[90%] origin-bottom sm:w-[82%]"
+        className="absolute bottom-0 right-0 z-10 w-[84%] origin-bottom sm:w-[78%]"
         style={
           reduceMotion
             ? undefined
@@ -151,7 +151,7 @@ function HeroPhones({
   );
 }
 
-/** Scroll-driven hero: text above phones; phones fan open while scrolling. */
+/** Scroll-driven hero: text above phones; phones stay inside the blue stage. */
 export function HeroSection() {
   const t = useTranslations("landing");
   const reduceMotion = useReducedMotion();
@@ -162,25 +162,25 @@ export function HeroSection() {
     offset: ["start start", "end end"],
   });
 
-  const phonesLift = useTransform(scrollYProgress, [0, 1], [0, -8]);
+  const phonesLift = useTransform(scrollYProgress, [0, 1], [0, -6]);
 
   const inner = (
-    <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col items-stretch gap-8 px-4 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:gap-10 sm:px-6 sm:pb-16 lg:flex-row lg:items-center lg:justify-center lg:gap-10 lg:px-16 lg:pb-20">
+    <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 pt-[calc(5.75rem+env(safe-area-inset-top))] pb-6 sm:px-6 sm:pb-8 lg:flex-row lg:items-center lg:gap-10 lg:px-16 lg:pb-12">
       <motion.div
-        className="flex w-full max-w-xl flex-col items-start text-left lg:w-[28rem] lg:shrink-0"
+        className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem]"
         initial={reduceMotion ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={
           reduceMotion ? { duration: 0 } : { duration: 0.65, ease: easeOut }
         }
       >
-        <h1 className="max-w-[14ch] text-5xl font-semibold tracking-tight leading-[0.96] sm:text-6xl lg:text-7xl">
+        <h1 className="max-w-[14ch] text-4xl font-semibold tracking-tight leading-[0.96] sm:text-5xl lg:text-7xl">
           {t("hero.title")}
         </h1>
-        <p className="mt-5 max-w-md text-lg leading-snug text-white/80 sm:mt-6 sm:text-xl">
+        <p className="mt-4 max-w-md text-base leading-snug text-white/80 sm:mt-5 sm:text-xl">
           {t("hero.sub")}
         </p>
-        <div className="mt-7 flex flex-wrap items-center justify-start gap-x-5 gap-y-3 sm:mt-8">
+        <div className="mt-5 flex flex-wrap items-center justify-start gap-x-5 gap-y-3 sm:mt-7">
           <Button
             asChild
             className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
@@ -201,13 +201,13 @@ export function HeroSection() {
             {t("hero.howLink")}
           </a>
         </div>
-        <p className="mt-4 text-sm text-white/65">
+        <p className="mt-3 text-sm text-white/65 sm:mt-4">
           {t("freeLine", { count: FREE_GENERATION_LIMIT })}
         </p>
       </motion.div>
 
       <motion.div
-        className="w-full lg:max-w-[36rem]"
+        className="mt-5 min-h-0 w-full flex-1 overflow-hidden lg:mt-0 lg:max-w-[30rem]"
         style={reduceMotion ? undefined : { y: phonesLift }}
         initial={reduceMotion ? false : { opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -228,7 +228,7 @@ export function HeroSection() {
   if (reduceMotion) {
     return (
       <section className="relative overflow-hidden bg-land-blue text-white">
-        {inner}
+        <div className="min-h-[min(100svh,52rem)]">{inner}</div>
       </section>
     );
   }
@@ -236,10 +236,10 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-land-blue text-white"
+      className="relative overflow-clip bg-land-blue text-white"
       style={{ height: "140vh" }}
     >
-      <div className="sticky top-0 overflow-x-clip">{inner}</div>
+      <div className="sticky top-0 h-svh overflow-hidden">{inner}</div>
     </section>
   );
 }
