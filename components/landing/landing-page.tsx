@@ -277,9 +277,11 @@ export function LandingPage() {
 
         <EditorShowcase />
 
-        <PricingSection />
-
         <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-5">
+          <MiroBoard id="pricing">
+            <PricingSection />
+          </MiroBoard>
+
           <MiroBoard id="faq">
             <FaqSection items={faqItems} />
           </MiroBoard>
