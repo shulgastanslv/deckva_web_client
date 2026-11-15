@@ -102,7 +102,7 @@ export function EditorShowcase() {
                 ref={videoRef}
                 className="absolute inset-0 h-full w-full object-cover"
                 src="/export-1793298925294.mp4"
-                poster="/landing/editor-edit.jpg"
+                poster="/reviews/6.jpg"
                 playsInline
                 muted
                 loop

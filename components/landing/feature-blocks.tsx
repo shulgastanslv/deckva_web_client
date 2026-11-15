@@ -16,46 +16,32 @@ const FEATURE_META: Record<
     href: string;
     place: string;
     reverse?: boolean;
-    src: string;
   }
 > = {
   generate: {
     href: "/studio",
     place: "feature_generate",
-    src: "/landing/editor-generate.jpg",
   },
   edit: {
     href: "/studio",
     place: "feature_edit",
     reverse: true,
-    src: "/landing/editor-edit.jpg",
   },
   export: {
     href: "#pricing",
     place: "feature_export",
-    src: "/landing/editor-export.jpg",
   },
 };
 
-function EditorScreenshot({ src, alt }: { src: string; alt: string }) {
+function FeatureVisual() {
   return (
-    <div className="relative overflow-hidden rounded-[1.25rem] bg-[#111218] shadow-sm sm:rounded-[1.5rem]">
-      <div className="flex items-center gap-1.5 border-b border-white/10 bg-[#1a1b22] px-3 py-2.5">
-        <span className="size-2 rounded-full bg-[#FF5F57]" />
-        <span className="size-2 rounded-full bg-[#FEBC2E]" />
-        <span className="size-2 rounded-full bg-[#28C840]" />
-        <span className="ml-3 truncate text-[11px] text-white/35">
-          deckva.studio
-        </span>
-      </div>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={alt}
-        className="aspect-[16/10] w-full object-cover object-top"
-        loading="lazy"
-      />
-    </div>
+    <div
+      aria-hidden
+      className={cn(
+        "aspect-[16/10] w-full rounded-[1.25rem] sm:rounded-[1.5rem]",
+        "bg-[#E4E4E0] dark:bg-[#2a2b33]",
+      )}
+    />
   );
 }
 
@@ -119,7 +105,7 @@ export function FeatureBlocks() {
             </RevealItem>
 
             <RevealItem>
-              <EditorScreenshot src={meta.src} alt={t(`${id}.alt`)} />
+              <FeatureVisual />
             </RevealItem>
           </RevealStagger>
         );

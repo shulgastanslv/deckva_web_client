@@ -340,18 +340,18 @@ export function LandingPage() {
         </div>
       </main>
 
-      <footer className="rounded-2xl bg-[#0e0f12] text-white">
+      <footer className="mx-3 mb-3 rounded-2xl bg-[#0e0f12] text-white sm:mx-5 dark:bg-[#1c1d26] dark:ring-1 dark:ring-white/10">
         <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
             {footerColumns.map((column) => (
               <div key={column.title}>
-                <p className="text-sm font-semibold">{column.title}</p>
+                <p className="text-sm font-semibold text-white">{column.title}</p>
                 <ul className="mt-4 space-y-3">
                   {column.links.map((item) => (
                     <li key={item.name}>
                       <a
                         href={item.href}
-                        className="text-sm text-white/65 hover:text-white"
+                        className="text-sm text-white/70 hover:text-white"
                         {...(item.href.startsWith("http")
                           ? { target: "_blank", rel: "noopener noreferrer" }
                           : {})}
@@ -364,15 +364,15 @@ export function LandingPage() {
               </div>
             ))}
             <div>
-              <p className="text-sm font-semibold">{t("menu.details")}</p>
-              <ul className="mt-4 space-y-3 text-sm text-white/65">
+              <p className="text-sm font-semibold text-white">{t("menu.details")}</p>
+              <ul className="mt-4 space-y-3 text-sm text-white/70">
                 <li>{legal.status}</li>
                 <li>{legal.country}</li>
-                <li className="text-white/90">{legal.fullName}</li>
+                <li className="text-white">{legal.fullName}</li>
                 <li>
                   <a
                     href={`mailto:${legal.email}`}
-                    className="hover:text-white"
+                    className="text-white/70 hover:text-white"
                   >
                     {legal.email}
                   </a>
@@ -381,7 +381,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-14 flex flex-wrap items-center gap-5 border-t border-white/15 pt-6">
+          <div className="mt-14 flex flex-wrap items-center gap-5 border-t border-white/20 pt-6">
             {SOCIAL.map(({ key, name, href, Icon }) => (
               <a
                 key={key}
@@ -389,19 +389,24 @@ export function LandingPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={name}
-                className="text-white/75 hover:text-white"
+                className="text-white/80 hover:text-white"
               >
                 <Icon className="size-4" />
               </a>
             ))}
           </div>
 
-          <div className="mt-6 flex flex-col gap-4 border-t border-white/15 pt-6 text-sm text-white/65 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-6 flex flex-col gap-4 border-t border-white/20 pt-6 text-sm text-white/70 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <Logo width={22} height={22} className="text-white" />
-              <span>Deckva © {new Date().getFullYear()}</span>
+              <span className="text-white/80">
+                Deckva © {new Date().getFullYear()}
+              </span>
             </div>
-            <a href={`mailto:${legal.email}`} className="hover:text-white">
+            <a
+              href={`mailto:${legal.email}`}
+              className="text-white/70 hover:text-white"
+            >
               {legal.email}
             </a>
           </div>
