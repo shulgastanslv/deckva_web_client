@@ -636,32 +636,190 @@
   },
   "landing": {
     "nav": {
-      "seeIt": "See it",
+      "how": "How it works",
+      "seeIt": "Studio",
       "thePost": "The post",
       "examples": "Examples",
-      "price": "Price",
-      "questions": "Questions"
+      "price": "Pricing",
+      "questions": "FAQ"
     },
     "menu": {
       "product": "Product",
-      "make": "Make",
-      "startingLines": "Starting lines",
-      "theExample": "The example",
+      "make": "Create",
+      "startingLines": "Where to start",
+      "theExample": "Example",
       "shapes": "Shapes",
-      "ratios": "Ratios",
+      "ratios": "Formats",
       "figma": "Figma",
-      "thePicture": "The picture",
-      "aiGeneration": "AI generation"
+      "thePicture": "Image",
+      "aiGeneration": "AI generation",
+      "findUs": "Find us",
+      "details": "Details"
+    },
+    "chrome": {
+      "menu": "Menu",
+      "openMenu": "Menu",
+      "closeMenu": "Close menu"
     },
     "ctaStudio": "Open studio",
     "ctaSignIn": "Sign in",
     "heroEyebrow": "Carousel studio",
     "desktopBanner": "Best on desktop",
     "telegramSupport": "Support in Telegram",
-    "freeLine": "First {count} carousels free",
-    "whereDesktop": "In the browser, on a computer. The studio canvas is desktop-only.",
+    "freeLine": "First {count} carousels are free",
+    "whereDesktop": "Works in the browser on a computer. The studio is built for a larger screen.",
     "legalStatus": "Professional income tax payer",
-    "legalCountry": "Republic of Belarus"
+    "legalCountry": "Republic of Belarus",
+    "hero": {
+      "title": "A carousel from one line",
+      "sub": "Write the topic — slides arrive in order. Edit them, then download.",
+      "howLink": "How it works"
+    },
+    "features": {
+      "generate": {
+        "title": "Write a topic, get slides",
+        "points": [
+          "One short sentence is enough to start",
+          "Slides arrive already in the right order",
+          "Open the project and keep editing"
+        ],
+        "cta": "Try it",
+        "alt": "Generate step preview"
+      },
+      "edit": {
+        "title": "Edit any slide freely",
+        "points": [
+          "Change text, cover, and layout",
+          "Nothing is locked after generation",
+          "A canvas built for carousel work"
+        ],
+        "cta": "Open studio",
+        "alt": "Edit step preview"
+      },
+      "export": {
+        "title": "Download a ready post",
+        "points": [
+          "One slide as PNG, or the full set as ZIP",
+          "No watermarks",
+          "One project from idea to file"
+        ],
+        "cta": "See pricing",
+        "alt": "Download step preview"
+      }
+    },
+    "examples": {
+      "aria": "Example carousels",
+      "openInStudio": "Open in studio",
+      "items": {
+        "launch": {
+          "title": "Product launch",
+          "text": "What you offer, who it’s for, why trust you, and what to do next.",
+          "topic": "A product launch in six slides: the offer, who it is for, the proof, and what to do next."
+        },
+        "howto": {
+          "title": "Step-by-step guide",
+          "text": "One clear step per slide — no blank canvas.",
+          "topic": "Five steps to ship a carousel without starting from a blank frame."
+        },
+        "checklist": {
+          "title": "Pre-publish checklist",
+          "text": "Cover, slide order, call to action, and download.",
+          "topic": "What to check before you post: cover, order, call to action, and the download."
+        },
+        "offer": {
+          "title": "Offer and next step",
+          "text": "Problem, solution, proof, and where to go next.",
+          "topic": "The problem, the solution, the proof, and where to go next."
+        },
+        "tips": {
+          "title": "Useful tips",
+          "text": "One tip per slide, then a short takeaway.",
+          "topic": "A tips carousel with one practical tip per slide and a short takeaway at the end."
+        },
+        "myths": {
+          "title": "Myth vs truth",
+          "text": "Clear up a misconception and leave a simple takeaway.",
+          "topic": "A myth-busting carousel: one common myth per slide, then the truth, ending with a clear takeaway."
+        },
+        "story": {
+          "title": "Founder story",
+          "text": "How it started, what got in the way, what changed, and the ask.",
+          "topic": "A founder story in six slides: the start, the struggle, the turn, the proof, and the ask."
+        },
+        "compare": {
+          "title": "Compare two options",
+          "text": "Who each option is for, and which to pick.",
+          "topic": "A comparison carousel: option A vs option B, who each is for, and a simple recommendation."
+        },
+        "mistakes": {
+          "title": "Common mistakes",
+          "text": "The mistake, the fix, and a better habit.",
+          "topic": "Common mistakes carousel: one mistake per slide with a fix, ending with a better default habit."
+        }
+      }
+    },
+    "showcase": {
+      "title": "A studio for carousels",
+      "sub": "Change the text, move a frame, swap the cover — then download PNG or ZIP.",
+      "cta": "See the studio",
+      "play": "Play studio preview",
+      "pause": "Pause studio preview",
+      "brandBefore": "The",
+      "brandNew": "NEW",
+      "brandAfter": "Deckva",
+      "label": "Carousel studio",
+      "flow": "Topic → slides → file"
+    },
+    "pricing": {
+      "title": "Simple pricing",
+      "sub": "Start free. Upgrade to Pro when you need more generations.",
+      "free": "Free",
+      "pro": "Pro",
+      "perMonth": "/ month",
+      "startFree": "Start free",
+      "freeGenerations": "{count} free generations",
+      "fromTopic": "Generate from a topic",
+      "editDownload": "Edit and download",
+      "proGenerations": "{count} generations / month",
+      "hiRes": "High-quality exports",
+      "folders": "Folders & brand kit",
+      "support": "Priority support"
+    },
+    "faq": {
+      "title": "FAQ",
+      "sub": "A few quick answers before you start.",
+      "project": {
+        "q": "What is a project?",
+        "a": "One carousel: the slides, their order, and the file you download."
+      },
+      "output": {
+        "q": "What do I download?",
+        "a": "A PNG of one slide, or a ZIP of the whole carousel. No watermarks."
+      },
+      "price": {
+        "q": "How much does it cost?",
+        "a": "The first {free} generations are free. Pro is {price} a month with {credits} generations. You can also buy a pack: {packCredits} for {packPrice}."
+      },
+      "where": {
+        "q": "Where do I use it?",
+        "a": "In the browser on a computer. The studio is built for a larger screen."
+      },
+      "cancel": {
+        "q": "What if I cancel Pro?",
+        "a": "It won’t renew. Access stays until the end of the paid period, and your projects stay in your account."
+      }
+    },
+    "heroPosts": {
+      "postA": {
+        "topic": "Examples",
+        "text": "Carousels ready to publish.",
+        "time": "1h"
+      },
+      "postB": {
+        "text": "One idea — already in order.",
+        "time": "3h"
+      }
+    }
   },
   "share": {
     "makeLikeThis": "Make one like this",

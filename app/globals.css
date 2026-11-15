@@ -52,7 +52,7 @@
 
     /* Landing — theme-aware surfaces */
     --color-land-ink: var(--land-ink);
-    --color-land-blue: #2f5bff;
+    --color-land-blue: var(--land-blue);
     --color-land-mist: var(--land-mist);
     --color-land-card: var(--land-card);
     --color-land-panel: #14151c;
@@ -91,6 +91,7 @@
     --land-ink: #14151c;
     --land-mist: #e8ecf7;
     --land-card: #ffffff;
+    --land-blue: #2f5bff;
 
     --background: #fff;
     --foreground: oklch(0.145 0.005 270); /* Легкий синий подтон в черном */
@@ -141,6 +142,7 @@
     --land-ink: #eef0f6;
     --land-mist: #12131a;
     --land-card: #1c1d26;
+    --land-blue: #1a2548;
 
     --background: #111111;
     --foreground: #ffffff;

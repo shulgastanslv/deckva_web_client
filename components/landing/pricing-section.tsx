@@ -9,13 +9,27 @@ import { RevealItem, RevealStagger } from "@/components/landing/reveal";
 import { useDisplayCurrency } from "@/hooks/use-display-currency";
 import {
   FREE_GENERATION_LIMIT,
-  PRO_FEATURES,
+  PRO_MONTHLY_CREDITS,
 } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 export function PricingSection() {
   const t = useTranslations("landing");
+  const tp = useTranslations("landing.pricing");
   const { pro } = useDisplayCurrency();
+
+  const freeFeatures = [
+    tp("freeGenerations", { count: FREE_GENERATION_LIMIT }),
+    tp("fromTopic"),
+    tp("editDownload"),
+  ];
+
+  const proFeatures = [
+    tp("proGenerations", { count: PRO_MONTHLY_CREDITS }),
+    tp("hiRes"),
+    tp("folders"),
+    tp("support"),
+  ];
 
   return (
     <div className="mx-auto w-full max-w-[960px]">
@@ -27,11 +41,9 @@ export function PricingSection() {
               "text-[2.5rem] leading-[1.05] sm:text-5xl",
             )}
           >
-            Simple pricing
+            {tp("title")}
           </h2>
-          <p className={cn(landMuted, "mx-auto mt-4 max-w-md")}>
-            Start free. Move to Pro when you need more generations.
-          </p>
+          <p className={cn(landMuted, "mx-auto mt-4 max-w-md")}>{tp("sub")}</p>
         </RevealItem>
       </RevealStagger>
 
@@ -42,7 +54,7 @@ export function PricingSection() {
         <RevealItem>
           <div className="flex h-full flex-col rounded-[1.5rem] bg-[#F5F4F0] p-7 text-[#050038] sm:rounded-[1.75rem] dark:bg-[#1c1d24] dark:text-land-ink">
             <p className="text-sm font-medium text-[#050038]/45 dark:text-land-ink/45">
-              Free
+              {tp("free")}
             </p>
             <p className="mt-4 flex items-baseline gap-2">
               <span className={cn(landSerif, "text-5xl")}>0</span>
@@ -51,41 +63,35 @@ export function PricingSection() {
               </span>
             </p>
             <ul className="mt-8 flex-1 space-y-3 text-[15px] text-[#050038]/70 dark:text-land-ink/70">
-              <li className="flex items-start gap-2.5">
-                <Check className="mt-0.5 size-4 shrink-0" weight="bold" />
-                {FREE_GENERATION_LIMIT} free AI generations
-              </li>
-              <li className="flex items-start gap-2.5">
-                <Check className="mt-0.5 size-4 shrink-0" weight="bold" />
-                Generation from a topic
-              </li>
-              <li className="flex items-start gap-2.5">
-                <Check className="mt-0.5 size-4 shrink-0" weight="bold" />
-                Edit and download
-              </li>
+              {freeFeatures.map((feature) => (
+                <li key={feature} className="flex items-start gap-2.5">
+                  <Check className="mt-0.5 size-4 shrink-0" weight="bold" />
+                  {feature}
+                </li>
+              ))}
             </ul>
             <Button
               asChild
               className="mt-10 h-11 rounded-full bg-[#050038] px-5 text-[15px] font-medium text-white hover:bg-[#050038]/90 dark:bg-land-ink dark:text-land-mist"
             >
-              <a href="/studio">Start free</a>
+              <a href="/studio">{tp("startFree")}</a>
             </Button>
           </div>
         </RevealItem>
 
         <RevealItem>
           <div className="flex h-full flex-col rounded-[1.5rem] bg-[#050038] p-7 text-white sm:rounded-[1.75rem] dark:bg-[#0a0b10]">
-            <p className="text-sm font-medium text-white/50">Pro</p>
+            <p className="text-sm font-medium text-white/50">{tp("pro")}</p>
             <p className="mt-4 flex items-baseline gap-2">
               <span className={cn(landSerif, "text-5xl text-white")}>
                 {pro.amount}
               </span>
               <span className="text-sm text-white/50">
-                {pro.currency} / month
+                {pro.currency} {tp("perMonth")}
               </span>
             </p>
             <ul className="mt-8 flex-1 space-y-3 text-[15px] text-white/75">
-              {PRO_FEATURES.map((feature) => (
+              {proFeatures.map((feature) => (
                 <li key={feature} className="flex items-start gap-2.5">
                   <Check className="mt-0.5 size-4 shrink-0" weight="bold" />
                   {feature}

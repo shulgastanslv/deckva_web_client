@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
   Accordion,
   AccordionContent,
@@ -17,6 +19,8 @@ export type FaqItem = {
 };
 
 export function FaqSection({ items }: { items: FaqItem[] }) {
+  const t = useTranslations("landing.faq");
+
   return (
     <RevealStagger
       stagger={0.1}
@@ -29,11 +33,9 @@ export function FaqSection({ items }: { items: FaqItem[] }) {
             "text-[2.5rem] leading-[1.05] sm:text-5xl",
           )}
         >
-          Questions
+          {t("title")}
         </h2>
-        <p className={cn(landMuted, "mt-4 max-w-xs")}>
-          Before you open the studio.
-        </p>
+        <p className={cn(landMuted, "mt-4 max-w-xs")}>{t("sub")}</p>
       </RevealItem>
       <RevealItem>
         <Accordion type="single" collapsible defaultValue="project">
