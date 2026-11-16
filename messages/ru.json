@@ -565,6 +565,12 @@
       "addFiles": "Добавить файлы",
       "addAssets": "Добавить ассеты",
       "skills": "Навыки",
+      "skillGroups": {
+        "sell": "Продажи",
+        "teach": "Обучение",
+        "engage": "Вовлечение",
+        "editorial": "Editorial"
+      },
       "comingSoon": "Скоро",
       "connectors": "Коннекторы",
       "connect": "Подключить",
@@ -630,6 +636,38 @@
         "comparison": {
           "label": "Сравнение",
           "hint": "До/после или A vs B"
+        },
+        "checklist": {
+          "label": "Чеклист",
+          "hint": "Один пункт на слайд"
+        },
+        "myths": {
+          "label": "Миф и правда",
+          "hint": "Развеять миф, показать правду"
+        },
+        "framework": {
+          "label": "Фреймворк",
+          "hint": "Этапы модели и как применять"
+        },
+        "pricing": {
+          "label": "Тарифы",
+          "hint": "Пакеты, для кого, как выбрать"
+        },
+        "aesthetic": {
+          "label": "Aesthetic",
+          "hint": "Lifestyle-обложка, спокойные советы"
+        },
+        "manifesto": {
+          "label": "Манифест",
+          "hint": "Короткий слоган и позиция"
+        },
+        "niches": {
+          "label": "Ниши",
+          "hint": "Идеи для экспертов по нишам"
+        },
+        "lookbook": {
+          "label": "Lookbook",
+          "hint": "Идеи кадров для сохранения"
         }
       }
     }

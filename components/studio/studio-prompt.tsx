@@ -55,7 +55,7 @@ import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import {
   applyPromptSkill,
   getPromptSkill,
-  listPromptSkills,
+  listPromptSkillGroups,
   type PromptSkillId,
 } from "@/lib/studio/prompt-skills";
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
@@ -177,7 +177,7 @@ export function StudioPrompt({
   );
   const { moneyForCredits } = useDisplayCurrency();
 
-  const skills = useMemo(() => listPromptSkills(), []);
+  const skillGroups = useMemo(() => listPromptSkillGroups(), []);
 
   const refreshConnectors = async () => {
     const res = await listConnectors();
@@ -563,41 +563,69 @@ export function StudioPrompt({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent
                     sideOffset={8}
-                    className="w-64 rounded-2xl p-1.5"
+                    className="w-52 rounded-2xl p-1.5"
                   >
-                    {skills.map((skill) => {
-                      const active = skillId === skill.id;
+                    {skillGroups.map((group) => {
+                      const groupActive = group.skills.some(
+                        (s) => s.id === skillId,
+                      );
                       return (
-                        <DropdownMenuItem
-                          key={skill.id}
-                          className={cn(
-                            "cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] focus:bg-muted/50",
-                            active && "bg-muted/50",
-                          )}
-                          onSelect={() => {
-                            const next =
-                              skillId === skill.id ? null : skill.id;
-                            pickSkill(next);
-                            trackEvent("prompt_skill_selected", {
-                              skillId: next,
-                            });
-                          }}
-                        >
-                          <span className="min-w-0 flex-1">
-                            <span className="block font-medium text-foreground">
-                              {t(`prompt.skillItems.${skill.id}.label`)}
+                        <DropdownMenuSub key={group.id}>
+                          <DropdownMenuSubTrigger
+                            className={cn(
+                              "cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] font-normal focus:bg-muted/50 data-[state=open]:bg-muted/50",
+                              groupActive && "bg-muted/40",
+                            )}
+                          >
+                            <span className="flex-1 text-left">
+                              {t(`prompt.skillGroups.${group.id}`)}
                             </span>
-                            <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                              {t(`prompt.skillItems.${skill.id}.hint`)}
-                            </span>
-                          </span>
-                          {active ? (
-                            <Check
-                              className="size-4 shrink-0 text-foreground"
-                              weight="bold"
-                            />
-                          ) : null}
-                        </DropdownMenuItem>
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent
+                            sideOffset={8}
+                            className="w-64 rounded-2xl p-1.5"
+                          >
+                            {group.skills.map((skill) => {
+                              const active = skillId === skill.id;
+                              return (
+                                <DropdownMenuItem
+                                  key={skill.id}
+                                  className={cn(
+                                    "cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] font-normal focus:bg-muted/50",
+                                    active && "bg-muted/50",
+                                  )}
+                                  onSelect={() => {
+                                    const next =
+                                      skillId === skill.id ? null : skill.id;
+                                    pickSkill(next);
+                                    trackEvent("prompt_skill_selected", {
+                                      skillId: next,
+                                    });
+                                  }}
+                                >
+                                  <span className="min-w-0 flex-1">
+                                    <span className="block text-foreground">
+                                      {t(
+                                        `prompt.skillItems.${skill.id}.label`,
+                                      )}
+                                    </span>
+                                    <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                                      {t(
+                                        `prompt.skillItems.${skill.id}.hint`,
+                                      )}
+                                    </span>
+                                  </span>
+                                  {active ? (
+                                    <Check
+                                      className="size-4 shrink-0 text-foreground"
+                                      weight="bold"
+                                    />
+                                  ) : null}
+                                </DropdownMenuItem>
+                              );
+                            })}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
                       );
                     })}
                   </DropdownMenuSubContent>

@@ -565,6 +565,12 @@
       "addFiles": "Дадаць файлы",
       "addAssets": "Дадаць ассеты",
       "skills": "Навыкі",
+      "skillGroups": {
+        "sell": "Продажы",
+        "teach": "Навучанне",
+        "engage": "Уцягванне",
+        "editorial": "Editorial"
+      },
       "comingSoon": "Хутка",
       "connectors": "Канэктары",
       "connect": "Падключыць",
@@ -630,6 +636,38 @@
         "comparison": {
           "label": "Параўнанне",
           "hint": "Да/пасля або A vs B"
+        },
+        "checklist": {
+          "label": "Чэкліст",
+          "hint": "Адзін пункт на слайд"
+        },
+        "myths": {
+          "label": "Міф і праўда",
+          "hint": "Развеяць міф, паказаць праўду"
+        },
+        "framework": {
+          "label": "Фрэймворк",
+          "hint": "Этапы мадэлі і як ужываць"
+        },
+        "pricing": {
+          "label": "Тарыфы",
+          "hint": "Пакеты, для каго, як выбраць"
+        },
+        "aesthetic": {
+          "label": "Aesthetic",
+          "hint": "Lifestyle-вокладка, спакойныя парады"
+        },
+        "manifesto": {
+          "label": "Маніфест",
+          "hint": "Кароткі слоган і пазіцыя"
+        },
+        "niches": {
+          "label": "Нішы",
+          "hint": "Ідэі для экспертаў па нішах"
+        },
+        "lookbook": {
+          "label": "Lookbook",
+          "hint": "Ідэі кадраў для захавання"
         }
       }
     }

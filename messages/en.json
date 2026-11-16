@@ -565,6 +565,12 @@
       "addFiles": "Add files",
       "addAssets": "Add assets",
       "skills": "Skills",
+      "skillGroups": {
+        "sell": "Sell",
+        "teach": "Teach",
+        "engage": "Engage",
+        "editorial": "Editorial"
+      },
       "comingSoon": "Coming soon",
       "connectors": "Connectors",
       "connect": "Connect",
@@ -630,6 +636,38 @@
         "comparison": {
           "label": "Compare",
           "hint": "Before/after or A vs B"
+        },
+        "checklist": {
+          "label": "Checklist",
+          "hint": "One item to complete per slide"
+        },
+        "myths": {
+          "label": "Myth vs truth",
+          "hint": "Bust a myth, show the truth"
+        },
+        "framework": {
+          "label": "Framework",
+          "hint": "Name stages, then how to apply"
+        },
+        "pricing": {
+          "label": "Pricing",
+          "hint": "Tiers, who for, how to choose"
+        },
+        "aesthetic": {
+          "label": "Aesthetic",
+          "hint": "Lifestyle cover, calm tips"
+        },
+        "manifesto": {
+          "label": "Manifesto",
+          "hint": "Short slogan, then stance"
+        },
+        "niches": {
+          "label": "Niches",
+          "hint": "Ideas for experts by niche"
+        },
+        "lookbook": {
+          "label": "Lookbook",
+          "hint": "Photo ideas to save"
         }
       }
     }
