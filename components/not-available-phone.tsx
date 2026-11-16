@@ -12,7 +12,7 @@ export function NotAvailablePhone() {
   return (
     <div className="flex min-h-dvh flex-col bg-[#f6f4fb] text-[#14151c]">
       <header className="mx-auto flex w-full max-w-lg items-center px-4 py-4">
-        <Logo width={32} height={32} className="text-[#14151c]" />
+        <Logo width={36} height={36} className="text-[#14151c]" />
       </header>
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-6 pb-16 text-center">
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight">

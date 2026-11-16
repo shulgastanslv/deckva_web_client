@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus } from "@phosphor-icons/react";
+import { ArrowRight, Plus } from "@phosphor-icons/react";
 
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import { StudioPrompt } from "@/components/studio/studio-prompt";
@@ -52,7 +52,7 @@ export function StudioStartSection({
     <section>
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+          <h2 className="text-xl flex items-center gap-2 font-semibold tracking-tight text-foreground sm:text-3xl">
             {t("makeCarousel")}
           </h2>
           <p className="mt-1.5 text-[13px] text-muted-foreground sm:text-sm">

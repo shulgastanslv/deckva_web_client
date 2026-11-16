@@ -134,7 +134,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
       <header className="z-20 grid h-16 w-full shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-b border-border/50 bg-background px-4 select-none">
         {/* Project */}
         <div className="flex min-w-0 items-center gap-1 sm:gap-2">
-          <Logo width={32} height={32} href="/studio" />
+          <Logo width={36} height={36} href="/studio" />
 
           <input
             type="text"

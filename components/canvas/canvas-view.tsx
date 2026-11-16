@@ -614,7 +614,7 @@ export function CanvasView({
       <div
         ref={containerRef}
         className={cn(
-          "absolute inset-0 overflow-auto bg-background/20",
+          "absolute inset-0 overflow-auto bg-muted/20",
           panning && (grabbing ? "cursor-grabbing" : "cursor-grab"),
         )}
         style={{ scrollbarGutter: "stable", overflowAnchor: "none" }}

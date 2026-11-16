@@ -78,8 +78,8 @@ export function StudioHeader({
             )}
           >
             <Logo
-              width={28}
-              height={28}
+              width={36}
+              height={36}
               href="/studio"
               className="shrink-0 hover:rotate-0"
             />

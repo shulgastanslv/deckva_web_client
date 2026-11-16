@@ -109,7 +109,7 @@ export function FeatureOutcomes() {
         {STATS.map((stat) => (
           <RevealItem key={stat.label} soft className="text-center">
             <p className={cn(landSerif, "text-4xl sm:text-5xl")}>{stat.value}</p>
-            <p className="mt-2 text-[14px] leading-relaxed text-[#050038]/55 dark:text-land-ink/55">
+            <p className="mt-2 text-[14px] leading-relaxed text-[#050038]/55 dark:text-muted-foreground">
               {stat.label}
             </p>
           </RevealItem>

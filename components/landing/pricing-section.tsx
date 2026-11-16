@@ -52,17 +52,17 @@ export function PricingSection() {
         className="mt-12 grid gap-3 sm:grid-cols-2 sm:gap-4"
       >
         <RevealItem>
-          <div className="flex h-full flex-col rounded-[1.5rem] bg-[#F5F4F0] p-7 text-[#050038] sm:rounded-[1.75rem] dark:bg-[#1c1d24] dark:text-land-ink">
-            <p className="text-sm font-medium text-[#050038]/45 dark:text-land-ink/45">
+          <div className="flex h-full flex-col rounded-3xl bg-[#F5F4F0] p-7 text-[#050038] dark:bg-muted/50 dark:text-foreground dark:backdrop-blur-md">
+            <p className="text-sm font-medium text-[#050038]/45 dark:text-muted-foreground">
               {tp("free")}
             </p>
             <p className="mt-4 flex items-baseline gap-2">
               <span className={cn(landSerif, "text-5xl")}>0</span>
-              <span className="text-sm text-[#050038]/45 dark:text-land-ink/45">
+              <span className="text-sm text-[#050038]/45 dark:text-muted-foreground">
                 BYN
               </span>
             </p>
-            <ul className="mt-8 flex-1 space-y-3 text-[15px] text-[#050038]/70 dark:text-land-ink/70">
+            <ul className="mt-8 flex-1 space-y-3 text-[15px] text-[#050038]/70 dark:text-muted-foreground">
               {freeFeatures.map((feature) => (
                 <li key={feature} className="flex items-start gap-2.5">
                   <Check className="mt-0.5 size-4 shrink-0" weight="bold" />
@@ -72,7 +72,7 @@ export function PricingSection() {
             </ul>
             <Button
               asChild
-              className="mt-10 h-11 rounded-full bg-[#050038] px-5 text-[15px] font-medium text-white hover:bg-[#050038]/90 dark:bg-land-ink dark:text-land-mist"
+              className="mt-10 h-11 rounded-full bg-[#050038] px-5 text-[15px] font-medium text-white hover:bg-[#050038]/90 dark:bg-foreground dark:text-background"
             >
               <a href="/studio">{tp("startFree")}</a>
             </Button>
@@ -80,17 +80,24 @@ export function PricingSection() {
         </RevealItem>
 
         <RevealItem>
-          <div className="flex h-full flex-col rounded-[1.5rem] bg-[#050038] p-7 text-white sm:rounded-[1.75rem] dark:bg-[#0a0b10]">
-            <p className="text-sm font-medium text-white/50">{tp("pro")}</p>
+          <div className="flex h-full flex-col rounded-3xl bg-[#050038] p-7 text-white dark:bg-foreground dark:text-background">
+            <p className="text-sm font-medium text-white/50 dark:text-background/50">
+              {tp("pro")}
+            </p>
             <p className="mt-4 flex items-baseline gap-2">
-              <span className={cn(landSerif, "text-5xl text-white")}>
+              <span
+                className={cn(
+                  landSerif,
+                  "text-5xl text-white dark:text-background",
+                )}
+              >
                 {pro.amount}
               </span>
-              <span className="text-sm text-white/50">
+              <span className="text-sm text-white/50 dark:text-background/50">
                 {pro.currency} {tp("perMonth")}
               </span>
             </p>
-            <ul className="mt-8 flex-1 space-y-3 text-[15px] text-white/75">
+            <ul className="mt-8 flex-1 space-y-3 text-[15px] text-white/75 dark:text-background/75">
               {proFeatures.map((feature) => (
                 <li key={feature} className="flex items-start gap-2.5">
                   <Check className="mt-0.5 size-4 shrink-0" weight="bold" />
@@ -100,7 +107,7 @@ export function PricingSection() {
             </ul>
             <Button
               asChild
-              className="mt-10 h-11 rounded-full bg-[#FFD02F] px-5 text-[15px] font-medium text-[#050038] hover:bg-[#FFD02F]/90"
+              className="mt-10 h-11 rounded-full bg-primary px-5 text-[15px] font-medium text-primary-foreground hover:bg-primary/90"
             >
               <a href="/studio">{t("ctaStudio")}</a>
             </Button>

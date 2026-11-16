@@ -11,7 +11,12 @@ import {
 import { useTranslations } from "next-intl";
 
 import { BrandIcon, type BrandKey } from "@/components/studio/brand-icon";
-import { landMuted, landSerif } from "@/components/landing/landing-shell";
+import {
+  landIsland,
+  landMuted,
+  landSectionPad,
+  landSerif,
+} from "@/components/landing/landing-shell";
 import { cn } from "@/lib/utils";
 
 const MODELS = [
@@ -65,18 +70,18 @@ function ModelCard({
       style={{ opacity, y, scale, rotate }}
       className={cn(
         "flex flex-col items-center gap-4 rounded-[1.25rem] px-4 py-7 sm:rounded-[1.5rem] sm:px-5 sm:py-8",
-        "bg-[#F5F4F0] dark:bg-[#1c1d24]",
+        "bg-[#F5F4F0] dark:bg-muted/50 dark:backdrop-blur-md",
       )}
     >
       <span
         className={cn(
           "inline-flex size-16 items-center justify-center rounded-md sm:size-[4.5rem]",
-          "bg-white dark:bg-white/10",
+          "bg-white dark:bg-muted/50",
         )}
       >
         <BrandIcon brand={brand} className="size-9 sm:size-11" />
       </span>
-      <h3 className="text-center text-sm font-medium text-[#050038] sm:text-[15px] dark:text-land-ink">
+      <h3 className="text-center text-sm font-medium text-[#050038] sm:text-[15px] dark:text-foreground">
         {name}
       </h3>
     </motion.article>
@@ -139,11 +144,13 @@ export function ModelsSection() {
 
   if (reduceMotion) {
     return (
-      <section
-        id="models"
-        className="scroll-mt-28 px-3 py-3 sm:px-5 sm:py-5"
-      >
-        <div className="mx-auto max-w-[1200px] rounded-[2rem] bg-white px-6 py-14 sm:rounded-[2.5rem] sm:px-10 sm:py-16 dark:bg-[#14151c]">
+      <section id="models" className={cn("scroll-mt-28", landSectionPad)}>
+        <div
+          className={cn(
+            "mx-auto max-w-[1200px] px-6 py-14 sm:px-10 sm:py-16",
+            landIsland,
+          )}
+        >
           {stage}
         </div>
       </section>
@@ -155,10 +162,20 @@ export function ModelsSection() {
       id="models"
       ref={sectionRef}
       className="relative scroll-mt-28"
-      style={{ height: "150vh" }}
+      style={{ height: "140vh" }}
     >
-      <div className="sticky top-0 flex min-h-svh items-center px-3 py-8 sm:px-5 sm:py-10">
-        <div className="mx-auto w-full max-w-[1200px] overflow-visible rounded-[2rem] bg-white px-6 py-12 sm:rounded-[2.5rem] sm:px-10 sm:py-14 dark:bg-[#14151c]">
+      <div
+        className={cn(
+          "sticky top-0 flex min-h-svh items-center",
+          landSectionPad,
+        )}
+      >
+        <div
+          className={cn(
+            "mx-auto w-full max-w-[1200px] overflow-visible px-6 py-12 sm:px-10 sm:py-14",
+            landIsland,
+          )}
+        >
           {stage}
         </div>
       </div>

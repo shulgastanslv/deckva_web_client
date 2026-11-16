@@ -123,7 +123,7 @@ export function LeftSidebar({
       <aside className="flex w-12 shrink-0 flex-col items-center justify-between bg-muted/20 py-4">
         <TooltipProvider delayDuration={300}>
           <div className="flex flex-col items-center gap-1.5">
-            <Logo width={32} height={32} href="/studio" className="mb-1.5" />
+            <Logo width={36} height={36} href="/studio" className="mb-1.5" />
             {navItems.map(({ id, icon: Icon, label }, index) => (
               <RailTooltip key={id} label={`${label} (${index + 1})`}>
                 <Button

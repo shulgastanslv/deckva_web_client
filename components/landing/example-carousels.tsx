@@ -9,6 +9,7 @@ import {
 } from "motion/react";
 import { useTranslations } from "next-intl";
 
+import { landSectionPad } from "@/components/landing/landing-shell";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -25,15 +26,15 @@ const EXAMPLE_IDS = [
 ] as const;
 
 const EXAMPLE_IMAGES = [
-  "/landing/examples/1.jpg",
-  "/landing/examples/2.jpg",
-  "/landing/examples/3.jpg",
-  "/landing/examples/4.jpg",
-  "/landing/examples/5.jpg",
-  "/landing/examples/6.jpg",
-  "/landing/examples/7.jpg",
-  "/landing/examples/8.jpg",
-  "/landing/examples/9.jpg",
+  "/landing/examples/1.png",
+  "/landing/examples/2.png",
+  "/landing/examples/3.png",
+  "/landing/examples/4.png",
+  "/landing/examples/5.png",
+  "/landing/examples/6.png",
+  "/landing/examples/7.png",
+  "/landing/examples/8.png",
+  "/landing/examples/9.png",
 ] as const;
 
 type ExampleItem = {
@@ -81,13 +82,13 @@ function ExampleBlock({
         draggable={false}
       />
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent pt-28 pb-8">
-        <div className="relative mx-auto flex max-w-lg flex-col items-center px-6 text-center text-white">
+        <div className="relative mx-auto flex max-w-sm flex-col items-center px-5 text-center text-white">
           <p className="text-sm font-medium text-white/80 sm:text-[15px]">
             {item.text}
           </p>
           <Button
             asChild
-            className="mt-5 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-[#050038] hover:bg-white/90"
+            className="mt-5 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-foreground hover:bg-white/90 dark:text-background"
           >
             <a href={item.href} tabIndex={active ? 0 : -1}>
               {cta}
@@ -107,12 +108,12 @@ function StaticExamples({
   cta: string;
 }) {
   return (
-    <section id="examples" className="scroll-mt-28 px-3 py-3 sm:px-5 sm:py-5">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-4">
+    <section id="examples" className={cn("scroll-mt-28", landSectionPad)}>
+      <div className="mx-auto flex w-full max-w-[36rem] flex-col gap-3 sm:max-w-[40rem]">
         {items.map((item) => (
           <article
             key={item.id}
-            className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] sm:rounded-[2rem]"
+            className="relative aspect-[3/4] overflow-hidden rounded-4xl bg-muted/50 backdrop-blur-xl"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -122,11 +123,11 @@ function StaticExamples({
               loading="lazy"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent pt-24 pb-6">
-              <div className="relative mx-auto flex max-w-lg flex-col items-center px-6 text-center text-white">
+              <div className="relative mx-auto flex max-w-sm flex-col items-center px-5 text-center text-white">
                 <p className="text-sm font-medium text-white/80">{item.text}</p>
                 <Button
                   asChild
-                  className="mt-4 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-[#050038] hover:bg-white/90"
+                  className="mt-4 h-11 rounded-full bg-white px-6 text-[15px] font-medium text-foreground hover:bg-white/90 dark:text-background"
                 >
                   <a href={item.href}>{cta}</a>
                 </Button>
@@ -183,8 +184,13 @@ export function ExampleCarousels() {
       style={{ height: `${count * 100}vh` }}
       aria-label={t("aria")}
     >
-      <div className="sticky top-0 flex h-svh items-center justify-center px-3 py-3 sm:px-5 sm:py-5">
-        <div className="relative h-full w-full max-w-[1200px] overflow-hidden rounded-[1.75rem] bg-[#14151c] sm:rounded-[2rem]">
+      <div
+        className={cn(
+          "sticky top-0 flex h-svh items-center justify-center",
+          landSectionPad,
+        )}
+      >
+        <div className="relative aspect-[3/4] h-[min(90svh,52rem)] w-auto mt-20 max-w-full overflow-hidden rounded-4xl bg-muted/50 backdrop-blur-xl">
           {items.map((item, index) => (
             <ExampleBlock
               key={item.id}

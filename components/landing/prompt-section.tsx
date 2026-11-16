@@ -8,7 +8,7 @@ export function PromptSection() {
     <div className="mx-auto flex w-full max-w-[920px] flex-col items-center gap-4 pt-2 text-center">
       <Button
         asChild
-        className="h-12 rounded-full bg-[#050038] px-7 text-[15px] font-medium text-white hover:bg-[#050038]/90 dark:bg-land-ink dark:text-land-mist"
+        className="h-12 rounded-full bg-[#050038] px-7 text-[15px] font-medium text-white hover:bg-[#050038]/90 dark:bg-foreground dark:text-background"
       >
         <a
           href="/studio"
@@ -17,7 +17,7 @@ export function PromptSection() {
           Open studio
         </a>
       </Button>
-      <p className="text-sm text-[#050038]/45 dark:text-land-ink/45">
+      <p className="text-sm text-[#050038]/45 dark:text-muted-foreground">
         First generations are free. Desktop works best.
       </p>
     </div>

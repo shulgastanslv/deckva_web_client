@@ -110,11 +110,11 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-x-clip bg-land-blue text-white dark:bg-background dark:text-foreground"
+      className="relative overflow-x-clip dark:bg-background bg-land-blue text-white"
     >
-      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col px-4 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:px-6 sm:pb-16 lg:flex-row lg:items-center lg:gap-12 lg:px-16 lg:pb-20 lg:pt-[calc(7rem+env(safe-area-inset-top))]">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col px-4 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:px-6 sm:pb-16 lg:flex-row lg:items-center lg:justify-center lg:gap-14 lg:px-8 lg:pb-20 lg:pt-[calc(7rem+env(safe-area-inset-top))] xl:gap-20">
         <motion.div
-          className="flex w-full shrink-0 flex-col items-start text-left lg:w-[28rem]"
+          className="flex w-full shrink-0 flex-col items-start text-left lg:w-[26rem] xl:w-[28rem]"
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
@@ -124,13 +124,13 @@ export function HeroSection() {
           <h1 className="max-w-[14ch] text-4xl font-semibold tracking-tight leading-[0.96] sm:text-5xl lg:text-7xl">
             {t("hero.title")}
           </h1>
-          <p className="mt-4 max-w-md text-base leading-snug text-white/80 sm:mt-5 sm:text-xl dark:text-foreground/75">
+          <p className="mt-4 max-w-md text-base leading-snug text-white/80 sm:mt-5 sm:text-xl">
             {t("hero.sub")}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-start gap-x-5 gap-y-3 sm:mt-7">
             <Button
               asChild
-              className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90 dark:bg-foreground dark:text-background dark:hover:bg-foreground/90"
+              className="h-12 rounded-full bg-white px-6 text-land-blue hover:bg-white/90"
             >
               <a
                 href="/studio"
@@ -143,18 +143,18 @@ export function HeroSection() {
             </Button>
             <a
               href="#features"
-              className="text-sm font-medium text-white/75 hover:text-white dark:text-foreground/65 dark:hover:text-foreground"
+              className="text-sm font-medium text-white/75 hover:text-white"
             >
               {t("hero.howLink")}
             </a>
           </div>
-          <p className="mt-3 text-sm text-white/65 sm:mt-4 dark:text-foreground/55">
+          <p className="mt-3 text-sm text-white/65 sm:mt-4">
             {t("freeLine", { count: FREE_GENERATION_LIMIT })}
           </p>
         </motion.div>
 
         <motion.div
-          className="pointer-events-none relative mx-auto mt-10 w-full max-w-[20rem] sm:mt-12 sm:max-w-[24rem] lg:mx-0 lg:mt-0 lg:max-w-[30rem]"
+          className="pointer-events-none relative mx-auto mt-10 w-full max-w-[20rem] sm:mt-12 sm:max-w-[24rem] lg:mx-0 lg:mt-0 lg:max-w-[28rem] xl:max-w-[30rem]"
           initial={reduceMotion ? false : { opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={

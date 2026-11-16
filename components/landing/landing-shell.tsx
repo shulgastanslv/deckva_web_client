@@ -6,6 +6,13 @@ import { motion } from "motion/react";
 import { useSectionReveal } from "@/components/landing/reveal";
 import { cn } from "@/lib/utils";
 
+/** Shared outer pad between landing islands */
+export const landSectionPad = "px-3 py-4 sm:px-5 sm:py-6";
+
+/** Island radius — light solid / dark glass */
+export const landIsland =
+  "rounded-4xl bg-white dark:bg-muted/80 dark:backdrop-blur-xl ";
+
 /** Section / hero-scale title — Miro-style massive, tight type */
 export const landTitle =
   "text-4xl font-extrabold tracking-tighter leading-[1.05] sm:text-5xl md:text-6xl md:leading-[1]";
@@ -15,10 +22,12 @@ export const landCardTitle =
   "text-2xl font-bold tracking-tight leading-[1.12] sm:text-3xl";
 
 /** Section subtitle under LandingHead */
-export const landSub = "text-lg font-medium leading-relaxed text-[#050038]/60 dark:text-white/60 sm:text-xl";
+export const landSub =
+  "text-lg font-medium leading-relaxed text-[#050038]/60 dark:text-muted-foreground sm:text-xl";
 
 /** Card body / supporting line */
-export const landCardSub = "text-base font-medium leading-relaxed sm:text-lg text-[#050038]/60 dark:text-white/60";
+export const landCardSub =
+  "text-base font-medium leading-relaxed sm:text-lg text-[#050038]/60 dark:text-muted-foreground";
 
 /** Shared layout primitives */
 export function LandingSection({
@@ -61,9 +70,9 @@ export function MiroBoard({
       id={id}
       {...motionProps}
       className={cn(
-        "scroll-mt-28 overflow-hidden rounded-[2rem]",
-        "bg-white dark:bg-[#14151c]",
-        "px-6 py-14 sm:rounded-[2.5rem] sm:px-10 sm:py-16 lg:px-14 lg:py-20",
+        "scroll-mt-28 overflow-hidden",
+        landIsland,
+        "px-6 py-14 sm:px-10 sm:py-16 lg:px-14 lg:py-20",
         className,
       )}
     >
@@ -73,10 +82,10 @@ export function MiroBoard({
 }
 
 export const landSerif =
-  "font-[family-name:var(--font-landing-serif)] font-medium tracking-tight text-[#050038] dark:text-land-ink";
+  "font-[family-name:var(--font-landing-serif)] font-medium tracking-tight text-[#050038] dark:text-foreground";
 
 export const landMuted =
-  "text-base leading-relaxed text-[#050038]/55 dark:text-land-ink/55 sm:text-lg";
+  "text-base leading-relaxed text-[#050038]/55 dark:text-muted-foreground sm:text-lg";
 
 export function LandingHead({
   eyebrow,
@@ -104,7 +113,7 @@ export function LandingHead({
       <h2
         className={cn(
           landTitle,
-          light ? "text-white" : "text-[#050038] dark:text-white"
+          light ? "text-white" : "text-[#050038] dark:text-foreground"
         )}
       >
         {title}
@@ -134,7 +143,7 @@ export function LandingLayer({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[2rem] border border-black/10 bg-white shadow-xl sm:rounded-[3rem] dark:border-white/10 dark:bg-[#14151C]",
+        "relative overflow-hidden rounded-4xl bg-white dark:bg-muted/50 dark:backdrop-blur-xl",
         className
       )}
     >

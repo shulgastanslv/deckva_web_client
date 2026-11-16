@@ -46,7 +46,7 @@ export function AdminShell({
     <div className="flex h-dvh w-full overflow-hidden bg-muted/70 text-foreground dark:bg-background">
       <aside className="flex w-[220px] shrink-0 flex-col bg-muted/70 pt-3 dark:bg-background">
         <div className="flex items-center gap-2 px-4 pb-8">
-          <Logo width={32} height={32} href="/studio" className="hover:rotate-0" />
+          <Logo width={36} height={36} href="/studio" className="hover:rotate-0" />
         </div>
 
         <nav className="flex flex-col gap-0.5 px-2.5">

@@ -44,7 +44,7 @@ const WIDTH: Record<RatioKey, string> = {
 export function ViewHeader() {
   return (
     <header className="mx-auto flex w-full max-w-6xl items-center justify-start gap-3 px-4 py-4 sm:px-6">
-      <Logo width={34} height={34} />
+      <Logo width={36} height={36} />
       <ThemeSwitcher className="text-muted-foreground hover:bg-muted/60 hover:text-foreground" />
     </header>
   );

@@ -43,12 +43,12 @@ export function FaqSection({ items }: { items: FaqItem[] }) {
             <AccordionItem
               key={item.value}
               value={item.value}
-              className="border-[#050038]/10 dark:border-white/10"
+              className="border-0"
             >
-              <AccordionTrigger className="min-h-12 py-4 text-left text-[15px] font-medium text-[#050038] hover:no-underline sm:text-base dark:text-land-ink">
+              <AccordionTrigger className="min-h-12 py-4 text-left text-[15px] font-medium text-[#050038] hover:no-underline sm:text-base dark:text-foreground">
                 {item.q}
               </AccordionTrigger>
-              <AccordionContent className="pb-5 text-[15px] leading-relaxed text-[#050038]/55 dark:text-land-ink/55">
+              <AccordionContent className="pb-5 text-[15px] leading-relaxed text-[#050038]/55 dark:text-muted-foreground">
                 {item.a}
               </AccordionContent>
             </AccordionItem>

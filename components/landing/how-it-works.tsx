@@ -7,17 +7,17 @@ const STEPS = [
   {
     title: "Write the topic",
     text: "One sentence is enough. Deckva lays the slides out in order.",
-    tone: "bg-[#FFF6C8] text-[#050038] dark:bg-[#3a3518] dark:text-[#f5f0d8]",
+    tone: "bg-[#FFF6C8] text-[#050038] dark:bg-muted/40 dark:text-foreground",
   },
   {
     title: "Shape the slides",
     text: "Rewrite a line, swap the cover, move a frame. Nothing is locked.",
-    tone: "bg-[#E8EEFF] text-[#050038] dark:bg-[#1c2438] dark:text-[#dce4f8]",
+    tone: "bg-[#E8EEFF] text-[#050038] dark:bg-muted/40 dark:text-foreground",
   },
   {
     title: "Download the post",
     text: "PNG of one slide, or a ZIP of the set. No watermark on the way out.",
-    tone: "bg-[#F0F0EC] text-[#050038] dark:bg-[#2a2a28] dark:text-[#e8e8e2]",
+    tone: "bg-[#F0F0EC] text-[#050038] dark:bg-muted/40 dark:text-foreground",
   },
 ] as const;
 

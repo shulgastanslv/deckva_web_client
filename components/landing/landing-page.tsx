@@ -3,14 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { List as Menu, X } from "@phosphor-icons/react";
+import { ArrowDown, List as Menu, X } from "@phosphor-icons/react";
 import { FaInstagram, FaTelegram, FaThreads, FaTiktok } from "react-icons/fa6";
 
 import Logo from "@/components/logo/logo";
 import { AuthModal } from "@/components/auth";
 import { Button } from "@/components/ui/button";
 import { HeroSection } from "@/components/landing/hero-stage";
-import { MiroBoard } from "@/components/landing/landing-shell";
+import {
+  MiroBoard,
+  landSectionPad,
+} from "@/components/landing/landing-shell";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { trackEvent } from "@/lib/analytics";
@@ -21,6 +24,7 @@ import {
   FREE_GENERATION_LIMIT,
   PRO_MONTHLY_CREDITS,
 } from "@/lib/studio/plans";
+import { cn } from "@/lib/utils";
 import { FeatureBlocks } from "./feature-blocks";
 import { ExampleCarousels } from "./example-carousels";
 import { EditorShowcase } from "./editor-showcase";
@@ -156,27 +160,27 @@ export function LandingPage() {
   }, [menuOpen]);
 
   return (
-    <div className="relative bg-[#ebeae6] dark:bg-[#0e0f12]">
+    <div className="relative bg-[#ebeae6] dark:bg-background">
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
       <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5 sm:pt-3">
-        <div className="mx-auto flex max-w-[1200px] items-center gap-2 rounded-full bg-white/70 px-2 py-1.5 text-land-ink backdrop-blur-xl dark:bg-[#14151c]/70 sm:gap-3 sm:px-3">
+        <div className="mx-auto flex max-w-[1200px] items-center gap-2 rounded-full bg-white/70 px-2 py-1.5 text-foreground backdrop-blur-xl dark:bg-muted/50 sm:gap-3 sm:px-3">
           <div className="flex min-w-0 items-center gap-1">
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="size-10 rounded-full text-land-ink hover:bg-land-ink/10 hover:text-land-ink lg:hidden"
+              className="size-10 rounded-full text-foreground hover:bg-muted/60 hover:text-foreground lg:hidden"
               aria-label={menuOpen ? t("chrome.closeMenu") : t("chrome.openMenu")}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((open) => !open)}
             >
               <Menu />
             </Button>
-            <Logo width={32} height={32} className="text-land-ink" />
-            <nav className="ml-5 hidden items-center gap-5 text-sm font-medium text-land-ink/75 lg:flex">
+            <Logo width={36} height={36} className="text-foreground" />
+            <nav className="ml-5 hidden items-center gap-5 text-sm font-medium text-muted-foreground lg:flex">
               {NAV.map((item) => (
-                <a key={item.link} href={item.link} className="hover:text-land-ink">
+                <a key={item.link} href={item.link} className="hover:text-foreground">
                   {item.name}
                 </a>
               ))}
@@ -184,12 +188,12 @@ export function LandingPage() {
           </div>
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            <LocaleSwitcher className="h-10 w-10 text-land-ink hover:bg-land-ink/10 hover:text-land-ink" />
-            <ThemeSwitcher className="h-10 w-10 text-land-ink hover:bg-land-ink/10 hover:text-land-ink" />
+            <LocaleSwitcher className="h-10 w-10 text-foreground hover:bg-muted/60 hover:text-foreground" />
+            <ThemeSwitcher className="h-10 w-10 text-foreground hover:bg-muted/60 hover:text-foreground" />
             {!signedIn ? (
               <button
                 type="button"
-                className="hidden px-2 text-sm font-medium text-land-ink/80 hover:text-land-ink sm:inline"
+                className="hidden px-2 text-sm font-medium text-muted-foreground hover:text-foreground sm:inline"
                 onClick={() => setAuthOpen(true)}
               >
                 {t("ctaSignIn")}
@@ -197,7 +201,7 @@ export function LandingPage() {
             ) : null}
             <Button
               asChild
-              className="h-10 rounded-full bg-land-ink px-4 text-land-mist hover:bg-land-ink/90"
+              className="h-10 rounded-full bg-foreground px-4 text-background hover:bg-foreground/90"
             >
               <a
                 href="/studio"
@@ -220,16 +224,16 @@ export function LandingPage() {
             className="fixed inset-0 z-[60] bg-black/25 backdrop-blur-[2px]"
             onClick={() => setMenuOpen(false)}
           />
-          <div className="fixed inset-x-3 z-[65] top-[calc(4.75rem+env(safe-area-inset-top))] overflow-auto rounded-[1.75rem] bg-white p-5 text-[#14151c] dark:bg-[#1c1d26] dark:text-[#eef0f6]">
+          <div className="fixed inset-x-3 z-[65] top-[calc(4.75rem+env(safe-area-inset-top))] overflow-auto rounded-4xl bg-background p-5 text-foreground dark:bg-card">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium tracking-[0.16em] text-black/40 uppercase dark:text-white/40">
+              <p className="text-xs font-medium tracking-[0.16em] text-muted-foreground uppercase">
                 {t("chrome.menu")}
               </p>
               <button
                 type="button"
                 aria-label={t("chrome.closeMenu")}
                 onClick={() => setMenuOpen(false)}
-                className="flex size-9 items-center justify-center rounded-xl bg-[#f0f1f4] dark:bg-white/10"
+                className="flex size-9 items-center justify-center rounded-xl bg-muted/40"
               >
                 <X className="size-4" />
               </button>
@@ -260,7 +264,7 @@ export function LandingPage() {
             ) : null}
             <a
               href="/studio"
-              className="mt-4 flex h-12 items-center justify-center rounded-2xl border border-black/15 text-sm font-semibold dark:border-white/20"
+              className="mt-4 flex h-12 items-center justify-center rounded-2xl bg-muted/40 text-sm font-semibold"
             >
               {t("ctaStudio")}
             </a>
@@ -271,7 +275,7 @@ export function LandingPage() {
       <HeroSection />
 
       <main>
-        <div className="py-3 sm:py-5">
+        <div className={landSectionPad}>
           <FeatureBlocks />
         </div>
 
@@ -281,7 +285,12 @@ export function LandingPage() {
 
         <EditorShowcase />
 
-        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-5 sm:py-5">
+        <div
+          className={cn(
+            "mx-auto flex w-full max-w-[1200px] flex-col gap-2 sm:gap-3",
+            landSectionPad,
+          )}
+        >
           <MiroBoard id="pricing">
             <PricingSection />
           </MiroBoard>
@@ -292,78 +301,117 @@ export function LandingPage() {
         </div>
       </main>
 
-      <footer className="mx-3 mb-3 rounded-2xl bg-black text-white sm:mx-5">
-        <div className="mx-auto max-w-[1440px] px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px]">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-            {footerColumns.map((column) => (
-              <div key={column.title}>
-                <p className="text-sm font-semibold text-white">{column.title}</p>
-                <ul className="mt-4 space-y-3">
-                  {column.links.map((item) => (
-                    <li key={item.name}>
+      <section className="relative" style={{ height: "140vh" }}>
+        <div
+          className={cn(
+            "sticky top-0 z-10 flex h-svh flex-col",
+            landSectionPad,
+          )}
+        >
+          <footer
+            className={cn(
+              "flex min-h-0 flex-1 flex-col overflow-hidden rounded-4xl",
+              "bg-black text-white dark:bg-muted/50 dark:backdrop-blur-xl",
+            )}
+          >
+            <div className="mx-auto flex h-full w-full max-w-[1440px] flex-1 flex-col justify-between px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-20 lg:px-[120px] lg:pb-10">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+                {footerColumns.map((column) => (
+                  <div key={column.title}>
+                    <p className="text-sm font-semibold text-white">
+                      {column.title}
+                    </p>
+                    <ul className="mt-4 space-y-3">
+                      {column.links.map((item) => (
+                        <li key={item.name}>
+                          <a
+                            href={item.href}
+                            className="text-sm text-white/70 hover:text-white"
+                            {...(item.href.startsWith("http")
+                              ? {
+                                  target: "_blank",
+                                  rel: "noopener noreferrer",
+                                }
+                              : {})}
+                          >
+                            {item.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    {t("menu.details")}
+                  </p>
+                  <ul className="mt-4 space-y-3 text-sm text-white/70">
+                    <li>{legal.status}</li>
+                    <li>{legal.country}</li>
+                    <li className="text-white">{legal.fullName}</li>
+                    <li>
                       <a
-                        href={item.href}
-                        className="text-sm text-white/70 hover:text-white"
-                        {...(item.href.startsWith("http")
-                          ? { target: "_blank", rel: "noopener noreferrer" }
-                          : {})}
+                        href={`mailto:${legal.email}`}
+                        className="text-white/70 hover:text-white"
                       >
-                        {item.name}
+                        {legal.email}
                       </a>
                     </li>
-                  ))}
-                </ul>
+                  </ul>
+                </div>
               </div>
-            ))}
-            <div>
-              <p className="text-sm font-semibold text-white">{t("menu.details")}</p>
-              <ul className="mt-4 space-y-3 text-sm text-white/70">
-                <li>{legal.status}</li>
-                <li>{legal.country}</li>
-                <li className="text-white">{legal.fullName}</li>
-                <li>
+
+              <div className="flex flex-1 flex-col items-start justify-center py-10 sm:py-14 text-primary-foreground/20">
+                <p
+                  className={cn(
+                    "font-[family-name:var(--font-landing-serif)]",
+                    "flex items-center gap-5 text-[clamp(3.5rem,12vw,9rem)] leading-[0.92] font-medium tracking-tight text-primary-foreground/20 sm:gap-6",
+                  )}
+                >
+                  {t("menu.followUs")}
+                  <ArrowDown
+                    className="size-[0.6em] shrink-0"
+                    weight="bold"
+                    aria-hidden
+                  />
+                </p>
+              </div>
+
+              <div>
+                <div className="flex flex-wrap items-center gap-5">
+                  {SOCIAL.map(({ key, name, href, Icon }) => (
+                    <a
+                      key={key}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={name}
+                      className="text-white/80 hover:text-white"
+                    >
+                      <Icon className="size-4" />
+                    </a>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex flex-col gap-4 text-sm text-white/70 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <Logo width={36} height={36} className="text-white" />
+                    <span className="text-white/80">
+                      Deckva © {new Date().getFullYear()}
+                    </span>
+                  </div>
                   <a
                     href={`mailto:${legal.email}`}
                     className="text-white/70 hover:text-white"
                   >
                     {legal.email}
                   </a>
-                </li>
-              </ul>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="mt-14 flex flex-wrap items-center gap-5 border-t border-white/20 pt-6">
-            {SOCIAL.map(({ key, name, href, Icon }) => (
-              <a
-                key={key}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={name}
-                className="text-white/80 hover:text-white"
-              >
-                <Icon className="size-4" />
-              </a>
-            ))}
-          </div>
-
-          <div className="mt-6 flex flex-col gap-4 border-t border-white/20 pt-6 text-sm text-white/70 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <Logo width={22} height={22} className="text-white" />
-              <span className="text-white/80">
-                Deckva © {new Date().getFullYear()}
-              </span>
-            </div>
-            <a
-              href={`mailto:${legal.email}`}
-              className="text-white/70 hover:text-white"
-            >
-              {legal.email}
-            </a>
-          </div>
+          </footer>
         </div>
-      </footer>
+      </section>
     </div>
   );
 }
