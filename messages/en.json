@@ -410,26 +410,10 @@
       }
     },
     "upgrade": {
-      "features": {
-        "unlimitedAi": "{count} AI generations / month",
-        "hiResExports": "High-resolution exports",
-        "foldersBrand": "Folders & brand kits",
-        "prioritySupport": "Priority support"
-      },
-      "required": "Upgrade to Pro to unlock this",
-      "planPro": "Pro",
-      "planFree": "Free",
-      "freeLimitReached": "You've used your {limit} free generations. Upgrade to Pro for more AI.",
-      "creditsExhausted": "You're out of generation credits. Buy another pack to keep generating.",
-      "upgradeToPro": "Upgrade to Pro",
-      "buyCredits": "Buy credits",
-      "buyCreditsPack": "Buy {credits} credits · {price} {currency}",
-      "freePlan": "Free plan",
-      "unlimitedOnSub": "{remaining} generation credits left ({plan} plan · {topup} top-up).",
-      "creditsLeft": "{remaining} credits left",
-      "remainingFree": "{remaining} of {limit} free generations left.",
-      "proIncludes": "Pro includes",
-      "upgrade": "Upgrade",
+      "freePlan": "Free",
+      "remainingDaily": "{remaining} of {limit} generations left today.",
+      "freeProductHint": "Deckva is free for now. The daily limit resets at midnight UTC.",
+      "dailyLimitReached": "You've used your {limit} generations for today. Come back tomorrow.",
       "dismiss": "Dismiss"
     },
     "create": {
@@ -706,7 +690,7 @@
     "heroEyebrow": "Carousel studio",
     "desktopBanner": "Best on desktop",
     "telegramSupport": "Support in Telegram",
-    "freeLine": "First {count} carousels are free",
+    "freeLine": "Free while we grow — {count} generations a day",
     "whereDesktop": "Works in the browser on a computer. The studio is built for a larger screen.",
     "legalStatus": "Professional income tax payer",
     "legalCountry": "Republic of Belarus",
@@ -811,19 +795,17 @@
       "flow": "Topic → slides → file"
     },
     "pricing": {
-      "title": "Simple pricing",
-      "sub": "Start free. Upgrade to Pro when you need more generations.",
+      "title": "Free for now",
+      "sub": "Deckva is free while we grow. Every account gets a daily generation limit.",
       "free": "Free",
-      "pro": "Pro",
-      "perMonth": "/ month",
-      "startFree": "Start free",
-      "freeGenerations": "{count} free generations",
+      "priceFree": "0",
+      "freeBadge": "No card. No subscription.",
+      "startFree": "Open studio",
+      "freeGenerations": "{count} generations / day",
       "fromTopic": "Generate from a topic",
       "editDownload": "Edit and download",
-      "proGenerations": "{count} generations / month",
       "hiRes": "High-quality exports",
-      "folders": "Folders & brand kit",
-      "support": "Priority support"
+      "folders": "Folders & brand kit"
     },
     "faq": {
       "title": "FAQ",
@@ -838,15 +820,11 @@
       },
       "price": {
         "q": "How much does it cost?",
-        "a": "The first {free} generations are free. Pro is {price} a month with {credits} generations. You can also buy a pack: {packCredits} for {packPrice}."
+        "a": "It's free right now. You get {count} generations per day (UTC). Editing and downloading don’t count."
       },
       "where": {
         "q": "Where do I use it?",
         "a": "In the browser on a computer. The studio is built for a larger screen."
-      },
-      "cancel": {
-        "q": "What if I cancel Pro?",
-        "a": "It won’t renew. Access stays until the end of the paid period, and your projects stay in your account."
       },
       "watermark": {
         "q": "Are there watermarks?",
@@ -862,7 +840,7 @@
       },
       "credits": {
         "q": "How do generations work?",
-        "a": "One topic-to-carousel run uses one credit. Editing and downloading don’t spend credits."
+        "a": "One topic-to-carousel run uses one of your {count} daily generations. The limit resets at midnight UTC. Editing and downloading don’t count."
       },
       "mobile": {
         "q": "Can I use it on my phone?",
@@ -1840,13 +1818,13 @@
     },
     "settings": {
       "title": "Settings",
-      "accountBilling": "Account & billing",
+      "accountBilling": "Account",
       "nav": {
         "profile": "Profile",
-        "billing": "Billing",
         "security": "Security",
         "preferences": "Preferences",
-        "account": "Account"
+        "account": "Account",
+        "usage": "Usage"
       },
       "profilePicture": "Profile Picture",
       "profilePictureHint": "Click the avatar to upload a new image.",
@@ -1892,7 +1870,7 @@
       "language": "Language",
       "languageHint": "Interface language",
       "currency": "Currency",
-      "currencyHint": "Prices in upgrade, landing, and the prompt",
+      "currencyHint": "Preferred display currency",
       "signOut": "Sign out",
       "signOutHint": "End this session on this device.",
       "deleteAccount": "Delete account",
@@ -1908,8 +1886,10 @@
         "currentPassword": "Enter your current password",
         "expiry": "Use MM/YY for expiry"
       },
-      "deleteAccountHint": "Permanently removes projects, billing data, and your account.",
-      "cardExpires": "Exp {month}/{year}"
+      "deleteAccountHint": "Permanently removes projects and your account.",
+      "cardExpires": "Exp {month}/{year}",
+      "dailyUsage": "{remaining} of {limit} generations left today",
+      "freeProductHint": "Deckva is free for now. No subscription or credits."
     },
     "export": {
       "title": "Export",

@@ -2,7 +2,7 @@
 
 import { RevealItem, RevealStagger } from "@/components/landing/reveal";
 import { landMuted, landSerif } from "@/components/landing/landing-shell";
-import { FREE_GENERATION_LIMIT } from "@/lib/studio/plans";
+import { DAILY_GENERATION_LIMIT } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 const CARDS = [
@@ -27,7 +27,7 @@ const CARDS = [
 ] as const;
 
 const STATS = [
-  { value: String(FREE_GENERATION_LIMIT), label: "free AI generations to start" },
+  { value: String(DAILY_GENERATION_LIMIT), label: "AI generations per day" },
   { value: "PNG", label: "single-slide download" },
   { value: "1", label: "project per carousel" },
 ] as const;

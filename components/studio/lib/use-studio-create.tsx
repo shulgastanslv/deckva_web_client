@@ -41,7 +41,9 @@ async function canGenerate(): Promise<boolean> {
   } catch {
     return true;
   }
-  window.dispatchEvent(new CustomEvent("studio:open-upgrade"));
+  window.dispatchEvent(new CustomEvent("studio:generations-changed", {
+    detail: { entitlement: { canGenerate: false, remaining: 0 } },
+  }));
   return false;
 }
 

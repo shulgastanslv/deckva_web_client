@@ -46,10 +46,8 @@ import {
   GenerateOptionsDialog,
   pickRandomHandle,
 } from "@/components/studio/create/generate-options-dialog";
-import { creditCostForModel } from "@/lib/ai/model-pricing";
 import type { AiModelInfo } from "@/lib/ai/types";
 import { trackEvent } from "@/lib/analytics";
-import { useDisplayCurrency } from "@/hooks/use-display-currency";
 import type { ConnectorProviderId, ConnectorPublic } from "@/lib/connectors/types";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import {
@@ -175,8 +173,6 @@ export function StudioPrompt({
   const [connectorBusy, setConnectorBusy] = useState<ConnectorProviderId | null>(
     null,
   );
-  const { moneyForCredits } = useDisplayCurrency();
-
   const skillGroups = useMemo(() => listPromptSkillGroups(), []);
 
   const refreshConnectors = async () => {
@@ -232,17 +228,6 @@ export function StudioPrompt({
   }, [modelMenuOpen]);
 
   const selected = models.find((m) => m.modelId === modelId) ?? models[0];
-  const selectedCost = creditCostForModel(selected);
-  const selectedPriceLabel = t("prompt.creditsPerRun", {
-    count: selectedCost,
-  });
-  const selectedMoney = moneyForCredits(selectedCost);
-  const selectedMoneyHint = selectedMoney
-    ? t("prompt.approxPrice", {
-        price: selectedMoney.amount,
-        currency: selectedMoney.currency,
-      })
-    : null;
   const trimmed = value.trim();
   const canSend = trimmed.length >= 2 && !disabled && !busy && !attaching;
   const connectorById = useMemo(
@@ -737,11 +722,7 @@ export function StudioPrompt({
                   <button
                     type="button"
                     disabled={disabled || busy}
-                    title={
-                      selectedMoneyHint
-                        ? `${selectedPriceLabel} · ${selectedMoneyHint}`
-                        : selectedPriceLabel
-                    }
+                    title={selected?.displayName ?? t("prompt.model")}
                     className={cn(
                       controlH,
                       "inline-flex max-w-[260px] items-center gap-2 rounded-md px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60",
@@ -752,9 +733,6 @@ export function StudioPrompt({
                     ) : null}
                     <span className="truncate">
                       {selected?.displayName ?? t("prompt.model")}
-                    </span>
-                    <span className="shrink-0 text-[12px] font-normal text-muted-foreground">
-                      {selectedPriceLabel}
                     </span>
                   </button>
                 </DropdownMenuTrigger>
@@ -820,12 +798,7 @@ export function StudioPrompt({
                         {t("prompt.noModelsMatch")}
                       </p>
                     ) : (
-                      filteredModels.map((model) => {
-                        const cost = creditCostForModel(model);
-                        const price = t("prompt.creditsPerRun", {
-                          count: cost,
-                        });
-                        return (
+                      filteredModels.map((model) => (
                           <DropdownMenuItem
                             key={model.modelId}
                             className={cn(
@@ -838,12 +811,8 @@ export function StudioPrompt({
                             <span className="min-w-0 flex-1 truncate">
                               {model.displayName}
                             </span>
-                            <span className="shrink-0 text-[12px] font-normal text-muted-foreground tabular-nums">
-                              {price}
-                            </span>
                           </DropdownMenuItem>
-                        );
-                      })
+                        ))
                     )}
                   </div>
                 </DropdownMenuContent>
@@ -893,11 +862,7 @@ export function StudioPrompt({
               type="button"
               disabled={!canSend}
               onClick={openOptions}
-              aria-label={
-                selected
-                  ? `${t("generate")} · ${selectedPriceLabel}`
-                  : t("generate")
-              }
+              aria-label={t("generate")}
               className={cn(
                 controlSize,
                 "inline-flex shrink-0 items-center justify-center rounded-full border-none shadow-none transition-colors",

@@ -5,7 +5,6 @@ import { messages } from "@/lib/messages";
 import { revalidatePath } from "next/cache";
 
 import { ensureUserOrganization } from "@/actions/organizations";
-import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 import {
   canAccessOrgResource,
@@ -71,13 +70,6 @@ export async function createFolder(
     if (!ensured.success) {
       return { success: false, error: messages.errors.loadOrganization };
     }
-    if (!(await userHasPro(userId))) {
-      return {
-        success: false,
-        error: messages.errors.upgradeFolders,
-      };
-    }
-
     const organizationId = ensured.organization.id;
     const trimmed = name?.trim() || "Untitled folder";
 

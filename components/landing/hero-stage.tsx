@@ -13,7 +13,7 @@ import { ThreadsUI, type ThreadsPostData } from "@/components/landing/threads-ui
 import { PhoneFrame } from "@/components/canvas/phone-frame";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
-import { FREE_GENERATION_LIMIT } from "@/lib/studio/plans";
+import { DAILY_GENERATION_LIMIT } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 export { PhoneFrame };
@@ -149,7 +149,7 @@ export function HeroSection() {
             </a>
           </div>
           <p className="mt-3 text-sm text-white/65 sm:mt-4">
-            {t("freeLine", { count: FREE_GENERATION_LIMIT })}
+            {t("freeLine", { count: DAILY_GENERATION_LIMIT })}
           </p>
         </motion.div>
 

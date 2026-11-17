@@ -14,7 +14,7 @@ import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { createFolder, deleteFolder, renameFolder } from "@/actions/folders";
-import { useActiveOrganization, useUserFolders } from "@/lib/studio/queries";
+import { useUserFolders } from "@/lib/studio/queries";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { isUpgradeRequiredError } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
 export function StudioFoldersSection() {
@@ -35,9 +34,7 @@ export function StudioFoldersSection() {
   const activeFolderId = searchParams.get("folder");
 
   const foldersQuery = useUserFolders(signedIn);
-  const organization = useActiveOrganization(signedIn);
   const folders = foldersQuery.data?.folders ?? [];
-  const isUpgrade = Boolean(organization.data?.organization?.isUpgrade);
   const [creating, setCreating] = useState(false);
   const [draftName, setDraftName] = useState("");
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -48,16 +45,8 @@ export function StudioFoldersSection() {
     window.dispatchEvent(new CustomEvent("studio:folders-changed"));
   };
 
-  const openUpgrade = () => {
-    window.dispatchEvent(new CustomEvent("studio:open-upgrade"));
-  };
-
   const startCreate = () => {
     if (!signedIn || busy) return;
-    if (!isUpgrade) {
-      openUpgrade();
-      return;
-    }
     setCreating(true);
     setDraftName("");
   };
@@ -72,9 +61,6 @@ export function StudioFoldersSection() {
         setCreating(false);
         setDraftName("");
         notifyChanged();
-      } else if ("error" in res && isUpgradeRequiredError(res.error)) {
-        setCreating(false);
-        openUpgrade();
       }
     } finally {
       setBusy(false);
@@ -167,7 +153,7 @@ export function StudioFoldersSection() {
 
           {folders.length === 0 && !creating ? (
             <p className="px-1.5 py-1 text-[12px] leading-relaxed text-muted-foreground">
-              {isUpgrade ? t("groupHint") : t("proFeature")}
+              {t("groupHint")}
             </p>
           ) : null}
 
