@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   Camera as CameraIcon,
   Check,
-  CreditCard,
   Key as KeyRound,
   Translate as Languages,
   SpinnerGap as Loader2,
@@ -21,15 +20,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 
-import {
-  attachPaymentCard,
-  cancelSubscription,
-  detachPaymentCard,
-  getBilling,
-  purchaseCredits,
-  resumeSubscription,
-  subscribePro,
-} from "@/actions/billing";
+import { getGenerationStatus } from "@/actions/ai";
 import { deleteAccount, getProfile, updateProfile } from "@/actions/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -42,8 +33,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { formatCardBrand } from "@/lib/billing/card";
-import type { BillingSnapshot } from "@/lib/billing/types";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import {
   localeLabels,
@@ -55,14 +44,19 @@ import { messages } from "@/lib/messages";
 import { isPasswordLongEnough, PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
 import { useDisplayCurrency } from "@/hooks/use-display-currency";
 import { CURRENCY_LABELS } from "@/lib/studio/currency";
-import { CREDIT_PACK_CREDITS } from "@/lib/studio/plans";
+import { DAILY_GENERATION_LIMIT } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
-type Section = "profile" | "billing" | "security" | "preferences" | "account";
+type Section = "profile" | "usage" | "security" | "preferences" | "account";
+
+type UsageState = {
+  remaining: number;
+  limit: number;
+};
 
 const NAV_IDS: { id: Section; icon: typeof UserRound }[] = [
   { id: "profile", icon: UserRound },
-  { id: "billing", icon: Wallet },
+  { id: "usage", icon: Wallet },
   { id: "security", icon: KeyRound },
   { id: "preferences", icon: Monitor },
   { id: "account", icon: LogOut },
@@ -79,37 +73,6 @@ function formatJoined(iso: string) {
   }
 }
 
-function formatDate(iso: string | null) {
-  if (!iso) return "—";
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }).format(new Date(iso));
-  } catch {
-    return "—";
-  }
-}
-
-function formatCardNumber(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 19);
-  return digits.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
-}
-
-function paymentStatusKey(status: string) {
-  switch (status) {
-    case "SUCCEEDED":
-      return "paymentStatus.paid" as const;
-    case "FAILED":
-      return "paymentStatus.failed" as const;
-    case "REFUNDED":
-      return "paymentStatus.refunded" as const;
-    default:
-      return "paymentStatus.pending" as const;
-  }
-}
-
 export function ProfileSettingsDialog({
   open,
   onOpenChange,
@@ -123,7 +86,7 @@ export function ProfileSettingsDialog({
   const locale = useLocale() as AppLocale;
   const t = useTranslations("dialogs.settings");
   const [localePending, startLocaleTransition] = useTransition();
-  const { currency, setCurrency, currencies, pro, pack } = useDisplayCurrency();
+  const { currency, setCurrency, currencies } = useDisplayCurrency();
   const nav = NAV_IDS.map((item) => ({
     ...item,
     label: t(`nav.${item.id}`),
@@ -146,12 +109,10 @@ export function ProfileSettingsDialog({
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
 
-  const [billing, setBilling] = useState<BillingSnapshot | null>(null);
-  const [billingBusy, setBillingBusy] = useState(false);
-  const [showCardForm, setShowCardForm] = useState(false);
-  const [cardNumber, setCardNumber] = useState("");
-  const [exp, setExp] = useState("");
-  const [cvv, setCvv] = useState("");
+  const [usage, setUsage] = useState<UsageState>({
+    remaining: DAILY_GENERATION_LIMIT,
+    limit: DAILY_GENERATION_LIMIT,
+  });
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -192,29 +153,32 @@ export function ProfileSettingsDialog({
     setConfirmPassword("");
     setDeleteConfirm("");
     setDeletePassword("");
-    setCardNumber("");
-    setExp("");
-    setCvv("");
 
-    void Promise.all([getProfile(), getBilling()]).then(([profileRes, billRes]) => {
-      if (cancelled) return;
-      setLoading(false);
-      if (!profileRes.success) {
-        setError((profileRes as { error: string }).error);
-        return;
-      }
-      setName(profileRes.name ?? "");
-      setInitialName(profileRes.name ?? "");
-      setEmail(profileRes.email);
-      setImage(profileRes.image);
-      setHasPassword(profileRes.hasPassword);
-      setEmailVerified(Boolean(profileRes.emailVerified));
-      setCreatedAt(profileRes.createdAt);
-      if (billRes.success) {
-        setBilling(billRes.billing);
-        setShowCardForm(!billRes.billing.paymentMethod);
-      }
-    });
+    void Promise.all([getProfile(), getGenerationStatus()])
+      .then(([profileRes, status]) => {
+        if (cancelled) return;
+        setLoading(false);
+        if (!profileRes.success) {
+          setError((profileRes as { error: string }).error);
+          return;
+        }
+        setName(profileRes.name ?? "");
+        setInitialName(profileRes.name ?? "");
+        setEmail(profileRes.email);
+        setImage(profileRes.image);
+        setHasPassword(profileRes.hasPassword);
+        setEmailVerified(Boolean(profileRes.emailVerified));
+        setCreatedAt(profileRes.createdAt);
+        setUsage({
+          remaining: status.entitlement.remaining,
+          limit: status.entitlement.limit,
+        });
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setLoading(false);
+        setError(err instanceof Error ? err.message : messages.errors.generic);
+      });
 
     return () => {
       cancelled = true;
@@ -346,51 +310,6 @@ export function ProfileSettingsDialog({
     }
   };
 
-  const parseExp = () => {
-    const m = exp.replace(/\s/g, "").match(/^(\d{2})\s*\/\s*(\d{2}|\d{4})$/);
-    if (!m) return null;
-    return { month: Number(m[1]), year: Number(m[2]) };
-  };
-
-  const runBilling = async (
-    fn: () => Promise<
-      | { success: true; billing: BillingSnapshot }
-      | { success: false; error: string }
-    >,
-  ) => {
-    setBillingBusy(true);
-    setError(null);
-    try {
-      const res = await fn();
-      if (res.success === false) {
-        setError(res.error);
-        return;
-      }
-      setBilling(res.billing);
-      window.dispatchEvent(new CustomEvent("studio:org-changed"));
-      setCardNumber("");
-      setExp("");
-      setCvv("");
-      setShowCardForm(false);
-    } finally {
-      setBillingBusy(false);
-    }
-  };
-
-  const onSaveCard = () =>
-    void runBilling(async () => {
-      const parsed = parseExp();
-      if (!parsed) {
-        return { success: false as const, error: t("validation.expiry") };
-      }
-      return attachPaymentCard({
-        number: cardNumber,
-        expMonth: parsed.month,
-        expYear: parsed.year,
-        cvv,
-      });
-    });
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -514,268 +433,20 @@ export function ProfileSettingsDialog({
                     </div>
                   ) : null}
 
-                  {section === "billing" ? (
+                  {section === "usage" ? (
                     <div className="space-y-4">
                       <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-[13px] font-semibold">
-                              {billing?.isPro ? t("planPro") : t("planFree")}
-                            </p>
-                            <p className="mt-0.5 text-[12px] text-muted-foreground">
-                              {billing?.isPro
-                                ? billing.cancelAtPeriodEnd
-                                  ? t("ends", { date: formatDate(billing.subscriptionEndsAt) })
-                                  : t("renews", { date: formatDate(billing.subscriptionEndsAt) })
-                                : t("generationsLeft", {
-                                    remaining: billing?.freeGenerationsRemaining ?? 0,
-                                    limit: billing?.freeGenerationsLimit ?? 3,
-                                    price: pro.amount,
-                                    currency: pro.currency,
-                                  })}
-                            </p>
-                            {billing?.isPro ? (
-                              <p className="mt-1.5 text-[12px] text-muted-foreground">
-                                {t("creditsBalance", {
-                                  total: billing.creditsTotal,
-                                  plan: billing.creditsPlan,
-                                  topup: billing.creditsTopup,
-                                })}
-                              </p>
-                            ) : null}
-                          </div>
-                          {billing?.isPro ? (
-                            billing.cancelAtPeriodEnd ? (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className="rounded-md text-[13px]"
-                                disabled={billingBusy}
-                                onClick={() =>
-                                  void runBilling(() => resumeSubscription())
-                                }
-                              >
-                                {t("resume")}
-                              </Button>
-                            ) : (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                className="rounded-md text-[13px] text-muted-foreground"
-                                disabled={billingBusy}
-                                onClick={() =>
-                                  void runBilling(() => cancelSubscription())
-                                }
-                              >
-                                {t("cancel")}
-                              </Button>
-                            )
-                          ) : (
-                            <Button
-                              type="button"
-                              className="rounded-md text-[13px]"
-                              disabled={billingBusy || !billing?.paymentMethod}
-                              onClick={() =>
-                                void runBilling(() => subscribePro())
-                              }
-                            >
-                              {billingBusy ? (
-                                <Loader2 className="size-5 animate-spin" />
-                              ) : (
-                                t("subscribe")
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                        {billing?.isPro ? (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            className="mt-3 w-full rounded-md text-[13px] shadow-none"
-                            disabled={billingBusy || !billing.paymentMethod}
-                            onClick={() =>
-                              void runBilling(() => purchaseCredits())
-                            }
-                          >
-                            {billingBusy ? (
-                              <Loader2 className="size-3.5 animate-spin" />
-                            ) : (
-                              t("buyCreditsPack", {
-                                credits:
-                                  billing.creditPackCredits ?? CREDIT_PACK_CREDITS,
-                                price: pack.amount,
-                                currency: pack.currency,
-                              })
-                            )}
-                          </Button>
-                        ) : null}
+                        <p className="text-[13px] font-semibold">{t("planFree")}</p>
+                        <p className="mt-0.5 text-[12px] text-muted-foreground">
+                          {t("dailyUsage", {
+                            remaining: usage.remaining,
+                            limit: usage.limit,
+                          })}
+                        </p>
+                        <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+                          {t("freeProductHint")}
+                        </p>
                       </div>
-
-                      <div>
-                        <div className="mb-2 flex items-center justify-between">
-                          <p className="text-[12px] font-medium text-foreground">
-                            {t("paymentMethod")}
-                          </p>
-                          {billing?.paymentMethod && !showCardForm ? (
-                            <button
-                              type="button"
-                              className="text-[11px] font-medium text-[#2f5bff]"
-                              onClick={() => setShowCardForm(true)}
-                            >
-                              {t("replace")}
-                            </button>
-                          ) : null}
-                        </div>
-
-                        {billing?.paymentMethod && !showCardForm ? (
-                          <div className="flex items-center gap-3 rounded-2xl bg-muted/35 px-3.5 py-3">
-                            <CreditCard className="size-4 text-muted-foreground" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-[13px] font-medium">
-                                {formatCardBrand(billing.paymentMethod.brand)}{" "}
-                                ···· {billing.paymentMethod.last4}
-                              </p>
-                              <p className="text-[11px] text-muted-foreground">
-                                {t("cardExpires", {
-                                  month: String(billing.paymentMethod.expMonth).padStart(2, "0"),
-                                  year: String(billing.paymentMethod.expYear).slice(-2),
-                                })}
-                              </p>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="rounded-md text-[13px] text-muted-foreground"
-                              disabled={billingBusy}
-                              onClick={() =>
-                                void runBilling(() =>
-                                  detachPaymentCard(billing.paymentMethod!.id),
-                                )
-                              }
-                            >
-                              {t("remove")}
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <Input
-                              value={cardNumber}
-                              onChange={(e) =>
-                                setCardNumber(formatCardNumber(e.target.value))
-                              }
-                              placeholder={t("cardNumber")}
-                              inputMode="numeric"
-                              autoComplete="cc-number"
-                            />
-                            <div className="grid grid-cols-2 gap-2">
-                              <Input
-                                value={exp}
-                                onChange={(e) => {
-                                  let v = e.target.value.replace(/[^\d/]/g, "");
-                                  if (
-                                    v.length === 2 &&
-                                    !v.includes("/") &&
-                                    exp.length < 2
-                                  ) {
-                                    v = `${v}/`;
-                                  }
-                                  setExp(v.slice(0, 7));
-                                }}
-                                placeholder={t("exp")}
-                                inputMode="numeric"
-                                autoComplete="cc-exp"
-                              />
-                              <Input
-                                value={cvv}
-                                onChange={(e) =>
-                                  setCvv(
-                                    e.target.value.replace(/\D/g, "").slice(0, 4),
-                                  )
-                                }
-                                placeholder={t("cvv")}
-                                inputMode="numeric"
-                                autoComplete="cc-csc"
-                                type="password"
-                              />
-                            </div>
-                            <div className="flex gap-2 pt-1">
-                              {billing?.paymentMethod ? (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  className="rounded-md text-[13px]"
-                                  onClick={() => setShowCardForm(false)}
-                                >
-                                  {t("cancel")}
-                                </Button>
-                              ) : null}
-                              <Button
-                                type="button"
-                                className="rounded-md text-[13px]"
-                                disabled={billingBusy}
-                                onClick={onSaveCard}
-                              >
-                                {billingBusy ? (
-                                  <Loader2 className="size-3.5 animate-spin" />
-                                ) : (
-                                  t("saveCard")
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <p className="mb-2 text-[12px] font-medium">{t("history")}</p>
-                        {billing?.payments.length ? (
-                          <ul className="max-h-48 space-y-1 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
-                            {billing.payments.map((p) => (
-                              <li
-                                key={p.id}
-                                className="flex items-center justify-between gap-3 rounded-xl px-1 py-2 text-[12px]"
-                              >
-                                <div className="min-w-0">
-                                  <p className="truncate font-medium">
-                                    {p.description || t("payment")}
-                                  </p>
-                                  <p className="text-[11px] text-muted-foreground">
-                                    {formatDate(p.paidAt ?? p.createdAt)}
-                                    {p.cardLast4
-                                      ? ` · ${p.cardBrand ?? t("card")} ···· ${p.cardLast4}`
-                                      : null}
-                                  </p>
-                                </div>
-                                <div className="shrink-0 text-right">
-                                  <p className="font-medium tabular-nums">
-                                    {p.amount} {p.currency}
-                                  </p>
-                                  <p
-                                    className={cn(
-                                      "text-[10px]",
-                                      p.status === "SUCCEEDED"
-                                        ? "text-emerald-600 dark:text-emerald-400"
-                                        : p.status === "FAILED"
-                                          ? "text-destructive"
-                                          : "text-muted-foreground",
-                                    )}
-                                  >
-                                    {t(paymentStatusKey(p.status))}
-                                  </p>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-[12px] text-muted-foreground">
-                            {t("noPayments")}
-                          </p>
-                        )}
-                      </div>
-
-                      {error ? (
-                        <p className="text-[12px] text-destructive">{error}</p>
-                      ) : null}
                     </div>
                   ) : null}
 

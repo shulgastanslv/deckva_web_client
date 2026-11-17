@@ -2,21 +2,17 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 import { StudioHome } from "@/components/studio/studio-home";
 import { StudioShell } from "@/components/studio/studio-shell";
-import { Suspense } from "react";
 
-
+/** Legacy /studio/upgrade route — billing removed, redirect home. */
 export default function StudioUpgradeRoute() {
   const router = useRouter();
 
   useEffect(() => {
     router.replace("/studio");
-    const t = window.setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("studio:open-upgrade"));
-    }, 80);
-    return () => window.clearTimeout(t);
   }, [router]);
 
   return (

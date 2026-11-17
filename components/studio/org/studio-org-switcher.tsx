@@ -46,7 +46,6 @@ export function StudioOrgSwitcher({
   className?: string;
 }) {
   const t = useTranslations("studio.org");
-  const tu = useTranslations("studio.upgrade");
   const queryClient = useQueryClient();
   const { status } = useSession();
   const signedIn = status === "authenticated";
@@ -189,7 +188,6 @@ export function StudioOrgSwitcher({
                     {active.name}
                   </p>
                   <p className="text-[12px] text-muted-foreground">
-                    {active.isUpgrade ? tu("planPro") : tu("planFree")} ·{" "}
                     {t("members", { count: active.memberCount })}
                   </p>
                 </div>

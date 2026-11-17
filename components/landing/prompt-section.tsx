@@ -18,7 +18,7 @@ export function PromptSection() {
         </a>
       </Button>
       <p className="text-sm text-[#050038]/45 dark:text-muted-foreground">
-        First generations are free. Desktop works best.
+        Free while we grow — 15 generations a day. Desktop works best.
       </p>
     </div>
   );

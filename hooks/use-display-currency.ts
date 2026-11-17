@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 import {
-  creditPackPrice,
-  creditsToMoney,
   DISPLAY_CURRENCIES,
-  proPrice,
   readDisplayCurrency,
   writeDisplayCurrency,
   type DisplayCurrency,
@@ -54,9 +51,5 @@ export function useDisplayCurrency() {
     currency: mounted ? currency : ("BYN" as DisplayCurrency),
     setCurrency,
     currencies: DISPLAY_CURRENCIES,
-    pro: proPrice(mounted ? currency : "BYN"),
-    pack: creditPackPrice(mounted ? currency : "BYN"),
-    moneyForCredits: (credits: number) =>
-      creditsToMoney(credits, mounted ? currency : "BYN"),
   };
 }

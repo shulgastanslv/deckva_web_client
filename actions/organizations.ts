@@ -4,7 +4,6 @@ import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
 import { revalidatePath } from "next/cache";
 
-import { userHasPro } from "@/lib/billing/entitlements";
 import { prisma } from "@/lib/prisma";
 import {
   isOrgManager,
@@ -15,7 +14,6 @@ import {
 
 export interface OrganizationListItem {
   id: string;
-  isUpgrade: boolean;
   name: string;
   color: string;
   role: OrgMemberRoleValue;
@@ -56,7 +54,6 @@ async function mapOrg(
   return {
     id: org.id,
     name: org.name,
-    isUpgrade: await userHasPro(userId),
     color: org.color,
     role: mine?.role ?? OrgMemberRole.MEMBER,
     memberCount: org._count.members,

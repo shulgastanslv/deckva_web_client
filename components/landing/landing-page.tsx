@@ -18,12 +18,7 @@ import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { trackEvent } from "@/lib/analytics";
 import { SOCIAL_LINKS } from "@/lib/social";
-import { useDisplayCurrency } from "@/hooks/use-display-currency";
-import {
-  CREDIT_PACK_CREDITS,
-  FREE_GENERATION_LIMIT,
-  PRO_MONTHLY_CREDITS,
-} from "@/lib/studio/plans";
+import { DAILY_GENERATION_LIMIT } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 import { FeatureBlocks } from "./feature-blocks";
 import { ExampleCarousels } from "./example-carousels";
@@ -48,7 +43,6 @@ const FAQ_IDS = [
   "where",
   "mobile",
   "commercial",
-  "cancel",
 ] as const;
 
 const SOCIAL = [
@@ -60,7 +54,6 @@ const SOCIAL = [
 
 export function LandingPage() {
   const t = useTranslations("landing");
-  const { pro, pack } = useDisplayCurrency();
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { status } = useSession();
@@ -72,17 +65,11 @@ export function LandingPage() {
         value: id,
         q: t(`faq.${id}.q`),
         a:
-          id === "price"
-            ? t("faq.price.a", {
-                free: FREE_GENERATION_LIMIT,
-                price: pro.label,
-                credits: PRO_MONTHLY_CREDITS,
-                packCredits: CREDIT_PACK_CREDITS,
-                packPrice: pack.label,
-              })
+          id === "price" || id === "credits"
+            ? t(`faq.${id}.a`, { count: DAILY_GENERATION_LIMIT })
             : t(`faq.${id}.a`),
       })),
-    [t, pro.label, pack.label],
+    [t],
   );
 
   const legal = useMemo(

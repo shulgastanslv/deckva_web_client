@@ -21,39 +21,6 @@ enum OrgMemberRole {
   MEMBER
 }
 
-enum SubscriptionStatus {
-  NONE
-  ACTIVE
-  PAST_DUE
-  CANCELED
-}
-
-enum BillingPaymentStatus {
-  PENDING
-  SUCCEEDED
-  FAILED
-  REFUNDED
-}
-
-enum BillingPaymentKind {
-  SUBSCRIPTION
-  CREDITS
-  CARD_VERIFY
-  REFUND
-}
-
-enum CreditBucket {
-  PLAN
-  TOPUP
-}
-
-enum CreditLedgerKind {
-  GRANT
-  SPEND
-  REFUND
-  ADJUSTMENT
-}
-
 enum OrganizationInviteStatus {
   PENDING
   ACCEPTED
@@ -74,20 +41,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  /// Personal Pro subscription (15 BYN / month).
-  subscriptionStatus   SubscriptionStatus @default(NONE)
-  subscriptionEndsAt   DateTime?
-  cancelAtPeriodEnd    Boolean            @default(false)
-  /// Provider customer id (bePaid / Stripe / …) — set by the active payment adapter.
-  paymentCustomerId    String?
-
-  /// Successful AI generations used on the free plan (Pro ignores this).
-  freeGenerationsUsed Int @default(0)
-
-  /// Pro monthly grant balance (refreshed on subscribe / renew).
-  creditPlanBalance  Int @default(0)
-  /// Purchased top-up credits (do not reset on renew).
-  creditTopupBalance Int @default(0)
+  /// Successful AI generations used on the current UTC calendar day.
+  generationsUsedToday Int @default(0)
+  /// UTC day key (YYYY-MM-DD) for {@link generationsUsedToday}.
+  generationDayKey     String?
 
   activeOrganizationId String?
   activeOrganization   Organization? @relation("UserActiveOrganization", fields: [activeOrganizationId], references: [id], onDelete: SetNull)
@@ -101,35 +58,12 @@ model User {
   news            News[]
   notifications   Notification[]
   feedbacks       Feedback[]
-  paymentMethods  PaymentMethod[]
-  billingPayments BillingPayment[]
-  creditLedger    CreditLedgerEntry[]
   mediaAssets     MediaAsset[]
   communityEdits  Project[]            @relation("CommunityEditor")
   connectors      ConnectorAccount[]
   connectorEvents ConnectorEvent[]
 
   @@index([activeOrganizationId])
-  @@index([subscriptionStatus])
-}
-
-model CreditLedgerEntry {
-  id           String           @id @default(cuid())
-  kind         CreditLedgerKind
-  bucket       CreditBucket
-  amount       Int
-  balanceAfter Int
-  modelId      String?
-  coraRunId    String?
-  projectId    String?
-  meta         Json?
-  createdAt    DateTime         @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@index([coraRunId])
 }
 
 enum ConnectorProvider {
@@ -258,50 +192,6 @@ model OrganizationInvite {
   @@index([organizationId, status])
   @@index([email, status])
   @@index([expiresAt])
-}
-
-/// Saved card for recurring Pro billing. PAN/CVV are never stored — only token + display fields.
-model PaymentMethod {
-  id               String   @id @default(cuid())
-  brand            String
-  last4            String
-  expMonth         Int
-  expYear          Int
-  /// Opaque token from the active payment provider (never store PAN/CVV).
-  providerToken    String
-  providerCustomer String?
-  isDefault        Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  payments BillingPayment[]
-
-  @@index([userId])
-}
-
-model BillingPayment {
-  id          String               @id @default(cuid())
-  amount      Int
-  currency    String               @default("BYN")
-  status      BillingPaymentStatus @default(PENDING)
-  kind        BillingPaymentKind   @default(SUBSCRIPTION)
-  description String?
-  providerRef String?
-  failureReason String?
-  paidAt      DateTime?
-  createdAt   DateTime             @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  paymentMethodId String?
-  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
-
-  @@index([userId, createdAt])
-  @@index([status])
 }
 
 model OrganizationMember {

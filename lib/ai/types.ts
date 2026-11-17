@@ -1,7 +1,8 @@
 import type { AiPalette } from "@/lib/ai/generate-palette";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
-import type { GenerationEntitlement } from "@/lib/billing/generations";
+import type { GenerationEntitlement } from "@/lib/studio/generations";
 
+/** Upstream CORA catalog plan id (we always request full catalog). */
 export type AiPlanId = "free" | "pro";
 export type AiCoraMode = "fast" | "thinking";
 
@@ -11,10 +12,6 @@ export type AiModelInfo = {
   tier: "economy" | "standard" | "premium";
   openRouterSlug: string;
   enabled: boolean;
-  /** @deprecated Always false — free quota is generations, not models. */
-  isFree: boolean;
-  /** Credits charged per generation on Pro. */
-  creditCost: number;
 };
 
 export type GenerateCarouselAttachment = {
