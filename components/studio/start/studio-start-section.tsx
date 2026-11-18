@@ -91,7 +91,7 @@ export function StudioStartSection({
     <section>
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          <h2 className="flex items-center gap-2 text-4xl font-medium tracking-tight text-foreground sm:text-4xl">
             {greeting}
           </h2>
           <p className="mt-1.5 text-[13px] text-muted-foreground sm:text-sm">
