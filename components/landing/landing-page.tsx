@@ -26,6 +26,7 @@ import { EditorShowcase } from "./editor-showcase";
 import { ModelsSection } from "./models-section";
 import { PricingSection } from "./pricing-section";
 import { FaqSection } from "./faq-section";
+import { SectionPhraseIntro } from "./section-phrase-intro";
 
 const LEGAL_STATIC = {
   fullName: "Шульга Станислав",
@@ -150,8 +151,8 @@ export function LandingPage() {
     <div className="relative bg-[#ebeae6] dark:bg-background">
       <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
 
-      <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5 sm:pt-3">
-        <div className="mx-auto flex max-w-[1200px] items-center gap-2 rounded-full bg-white/70 px-2 py-1.5 text-foreground backdrop-blur-xl dark:bg-muted/50 sm:gap-3 sm:px-3">
+      <header className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-5 sm:pt-2">
+        <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-2 rounded-full bg-white/70 px-2 text-foreground backdrop-blur-xl dark:bg-muted/50 sm:gap-3 sm:px-3">
           <div className="flex min-w-0 items-center gap-1">
             <Button
               type="button"
@@ -261,10 +262,8 @@ export function LandingPage() {
 
       <HeroSection />
 
-      <main>
-        <div className={landSectionPad}>
-          <FeatureBlocks />
-        </div>
+      <main className="mt-20">
+        <FeatureBlocks />
 
         <ExampleCarousels />
 
@@ -272,16 +271,24 @@ export function LandingPage() {
 
         <EditorShowcase />
 
+        <SectionPhraseIntro
+          id="pricing"
+          phrase={t("pricing.intro")}
+          heightVh={170}
+        >
+          <div className="mx-auto w-full max-w-[1200px]">
+            <MiroBoard>
+              <PricingSection />
+            </MiroBoard>
+          </div>
+        </SectionPhraseIntro>
+
         <div
           className={cn(
             "mx-auto flex w-full max-w-[1200px] flex-col gap-2 sm:gap-3",
             landSectionPad,
           )}
         >
-          <MiroBoard id="pricing">
-            <PricingSection />
-          </MiroBoard>
-
           <MiroBoard id="faq">
             <FaqSection items={faqItems} />
           </MiroBoard>

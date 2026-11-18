@@ -136,8 +136,7 @@ export function EditorShowcase() {
         ) : (
           <video
             className="absolute inset-0 h-full w-full object-cover"
-            src="/export-1793298925294.mp4"
-            poster="/reviews/6.jpg"
+            src="/deckva.mp4"
             controls
             playsInline
             muted={autoplay}

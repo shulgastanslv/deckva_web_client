@@ -691,7 +691,7 @@
       "thePicture": "Image",
       "aiGeneration": "AI generation",
       "findUs": "Find us",
-      "followUs": "Follow us",
+      "followUs": "Generate for now",
       "details": "Details"
     },
     "chrome": {
@@ -714,6 +714,8 @@
       "howLink": "How it works"
     },
     "features": {
+      "sectionTitle": "How it works",
+      "scrollHint": "Scroll",
       "generate": {
         "title": "Write a topic, get slides",
         "points": [
@@ -747,6 +749,8 @@
     },
     "examples": {
       "aria": "Example carousels",
+      "lead": "And now…",
+      "title": "Examples",
       "openInStudio": "Open in studio",
       "items": {
         "launch": {
@@ -809,6 +813,7 @@
       "flow": "Topic → slides → file"
     },
     "pricing": {
+      "intro": "How much does it cost?",
       "title": "Free for now",
       "sub": "Deckva is free while we grow. Every account gets a daily generation limit.",
       "free": "Free",

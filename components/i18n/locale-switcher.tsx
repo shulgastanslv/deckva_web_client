@@ -59,7 +59,10 @@ export function LocaleSwitcher({
           <Languages className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className="min-w-[10rem] rounded-2xl p-1.5">
+      <DropdownMenuContent
+        align={align}
+        className="z-[80] min-w-[10rem] rounded-2xl p-1.5"
+      >
         {locales.map((code) => (
           <DropdownMenuItem
             key={code}
