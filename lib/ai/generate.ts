@@ -25,7 +25,8 @@ export async function generateCarouselUpstream(
   const aspectRatio = input.aspectRatio ?? "4:5";
   const slidesCount = Math.min(10, Math.max(1, input.slidesCount ?? 7));
   const language = input.language?.trim() || inferPromptLanguage(topic);
-  const handle = normalizeHandle(input.handle);
+  const showHandle = input.showHandle !== false;
+  const handle = showHandle ? normalizeHandle(input.handle) : "";
 
   const attachments =
     input.attachments
@@ -48,6 +49,7 @@ export async function generateCarouselUpstream(
       ratio: aspectRatio,
       slidesCount,
       handle,
+      showHandle,
       cover: input.cover ?? "",
       mode: input.mode ?? "fast",
       ...(input.modelId ? { modelId: input.modelId } : {}),

@@ -70,6 +70,7 @@ type StudioCreateValue = {
     slidesCount?: number;
     language?: string;
     handle?: string;
+    showHandle?: boolean;
     skillId?: string;
     seedText?: string;
     images?: string[];
@@ -178,6 +179,7 @@ export function StudioCreateProvider({
       slidesCount?: number;
       language?: string;
       handle?: string;
+      showHandle?: boolean;
       skillId?: string;
       seedText?: string;
       images?: string[];
@@ -192,11 +194,14 @@ export function StudioCreateProvider({
         const aspectRatio: RatioKey = input.aspectRatio ?? "4:5";
         const slidesCount = Math.min(10, Math.max(1, input.slidesCount ?? 7));
         const language = input.language?.trim() || inferPromptLanguage(topic);
-        const handle = normalizeHandle(
-          input.handle ||
-            session?.user?.name ||
-            session?.user?.email?.split("@")[0],
-        );
+        const showHandle = input.showHandle !== false;
+        const handle = showHandle
+          ? normalizeHandle(
+              input.handle ||
+                session?.user?.name ||
+                session?.user?.email?.split("@")[0],
+            )
+          : "";
         const images = (input.images ?? [])
           .map((u) => u.trim())
           .filter(Boolean);
@@ -226,6 +231,7 @@ export function StudioCreateProvider({
           projectId: created.projectId,
           topic,
           handle,
+          showHandle,
           language,
           aspectRatio,
           slidesCount,
@@ -275,6 +281,7 @@ export function StudioCreateProvider({
         slidesCount: input.slidesCount,
         language: input.language,
         handle: input.handle,
+        showHandle: input.showHandle,
         skillId: input.skillId,
         seedText: input.seedText,
         images: input.images,

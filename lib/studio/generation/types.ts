@@ -15,6 +15,8 @@ export type StudioPromptSubmit = {
   slidesCount?: number;
   language?: string;
   handle?: string;
+  /** When false, CORA omits handle chrome on slides. */
+  showHandle?: boolean;
   aspectRatio?: string;
   /** Text attachments for CORA seedText (not stuffed into topic). */
   seedText?: string;

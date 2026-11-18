@@ -7,6 +7,7 @@ export type StudioGenerateIntent = {
   projectId: string;
   topic: string;
   handle: string;
+  showHandle: boolean;
   language: string;
   aspectRatio: RatioKey;
   slidesCount: number;
@@ -42,6 +43,7 @@ function parseIntent(raw: string): StudioIntent | null {
       projectId: parsed.projectId,
       topic: parsed.topic,
       handle: parsed.handle,
+      showHandle: parsed.showHandle !== false,
       language: parsed.language,
       aspectRatio: parsed.aspectRatio as RatioKey,
       slidesCount: parsed.slidesCount,

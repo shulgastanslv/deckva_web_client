@@ -29,6 +29,8 @@ export type GenerateCarouselInput = {
   slidesCount?: number;
   language?: string;
   handle?: string;
+  /** When false, CORA omits handle chrome on slides. Default true. */
+  showHandle?: boolean;
   cover?: string;
   /** Prompt skill → server carousel structure. */
   skillId?: string;

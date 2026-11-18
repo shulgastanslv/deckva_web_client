@@ -19,6 +19,7 @@ import { fitCanvasJSON, fitGeometry, type FrameSize } from "./fit-frame";
 import { isAutoFlowSkippable } from "./auto-flow";
 import { stabilizeGroups } from "./group";
 import { clearTextFontCache, refreshCanvasFonts, relayoutText } from "./paint-live";
+import { preloadCanvasFonts } from "@/lib/fonts/slide-fonts";
 import {
   bakeTextboxScale,
   configureTextboxControls,
@@ -493,7 +494,9 @@ export class CanvasManager {
       if (this.disposed || abort.signal.aborted || !this.canvas.contextTop) return;
       stabilizeGroups(this.canvas.getObjects());
       configureTextboxesInTree(this.canvas.getObjects());
-      // Rewrap with real font metrics once faces are ready (and if already ready).
+      // Load Google faces before measuring — otherwise Fabric caches wrong widths.
+      await preloadCanvasFonts(this.canvas);
+      if (this.disposed || abort.signal.aborted || !this.canvas.contextTop) return;
       refreshCanvasFonts(this.canvas);
       if (typeof document !== "undefined") {
         void document.fonts.ready.then(() => {

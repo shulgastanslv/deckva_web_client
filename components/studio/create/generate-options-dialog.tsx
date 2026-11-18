@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   sidebarSelectTrigger,
   sidebarTextarea,
@@ -61,6 +62,8 @@ type Props = {
   onSlidesCountChange: (value: number) => void;
   handle: string;
   onHandleChange: (value: string) => void;
+  showHandle: boolean;
+  onShowHandleChange: (value: boolean) => void;
   coverUrl: string | null;
   onCoverUrlChange: (value: string | null) => void;
   attaching?: boolean;
@@ -81,6 +84,8 @@ export function GenerateOptionsDialog({
   onSlidesCountChange,
   handle,
   onHandleChange,
+  showHandle,
+  onShowHandleChange,
   coverUrl,
   onCoverUrlChange,
   attaching = false,
@@ -148,15 +153,29 @@ export function GenerateOptionsDialog({
             </div>
 
             <div className="space-y-1.5">
-              <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                {t("handle")}
-              </span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  {t("handle")}
+                </span>
+                <Switch
+                  size="sm"
+                  checked={showHandle}
+                  disabled={locked}
+                  onCheckedChange={onShowHandleChange}
+                  aria-label={t("showHandle")}
+                />
+              </div>
               <Select
                 value={handle}
-                disabled={locked}
+                disabled={locked || !showHandle}
                 onValueChange={onHandleChange}
               >
-                <SelectTrigger className={sidebarSelectTrigger}>
+                <SelectTrigger
+                  className={cn(
+                    sidebarSelectTrigger,
+                    !showHandle && "opacity-50",
+                  )}
+                >
                   <SelectValue placeholder={t("handlePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl p-1.5">

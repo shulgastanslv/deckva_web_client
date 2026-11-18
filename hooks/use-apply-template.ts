@@ -4,6 +4,7 @@ import { useCallback } from "react";
 
 import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { prepareCanvasSlides } from "@/lib/ai/prepare-slides";
 import { renderMissingThumbnails } from "@/lib/canvas/thumbnail";
 import { templateSlidesToItems } from "@/lib/templates/parse";
 import { withRemoteImageCors } from "@/lib/canvas/image-cors";
@@ -22,14 +23,19 @@ export function useApplyTemplate() {
       slides: FabricCanvasJSON[];
       thumbnails?: Array<string | null> | null;
       previewUrl?: string | null;
+      /** Skip cover-fit + font preload when the caller already ran prepareCanvasSlides. */
+      prepared?: boolean;
     }) => {
       slidesController?.saveCurrent();
 
       const store = useCanvasStore.getState();
       store.setCurrentRatio(payload.aspectRatio);
       const size = useCanvasStore.getState().canvasDimensions;
+      const slides = payload.prepared
+        ? payload.slides
+        : await prepareCanvasSlides(payload.slides);
       let items: SlideItem[] = templateSlidesToItems(
-        payload.slides,
+        slides,
         payload.thumbnails,
         payload.previewUrl,
       );

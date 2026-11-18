@@ -169,6 +169,7 @@ export function StudioPrompt({
   const [aspectRatio, setAspectRatio] = useState<RatioKey>("4:5");
   const [slidesCount, setSlidesCount] = useState(7);
   const [handle, setHandle] = useState<string>(() => pickRandomHandle());
+  const [showHandle, setShowHandle] = useState(true);
   const [connectors, setConnectors] = useState<ConnectorPublic[]>([]);
   const [connectorBusy, setConnectorBusy] = useState<ConnectorProviderId | null>(
     null,
@@ -418,7 +419,8 @@ export function StudioPrompt({
       skillId: shaped.skillId ?? skillId ?? undefined,
       slidesCount,
       language,
-      handle,
+      handle: showHandle ? handle : undefined,
+      showHandle,
       aspectRatio,
       seedText: seedText || undefined,
       images,
@@ -917,6 +919,8 @@ export function StudioPrompt({
         onSlidesCountChange={setSlidesCount}
         handle={handle}
         onHandleChange={setHandle}
+        showHandle={showHandle}
+        onShowHandleChange={setShowHandle}
         coverUrl={coverUrl}
         onCoverUrlChange={setCoverUrl}
         onConfirm={confirmGenerate}

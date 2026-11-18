@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { generateCarousel } from "@/actions/ai";
 import { saveProject } from "@/actions/projects";
 import { aiPaletteToProjectPalette } from "@/lib/ai/generate-palette";
+import { prepareCanvasSlides } from "@/lib/ai/prepare-slides";
 import { takePendingCover } from "@/lib/studio/pending-cover";
 import { takePendingMedia } from "@/lib/studio/pending-attachments";
 import {
@@ -94,6 +95,7 @@ export function StudioIntentBootstrap() {
             slidesCount: intent.slidesCount,
             language: intent.language,
             handle: intent.handle,
+            showHandle: intent.showHandle,
             cover,
             modelId: intent.modelId,
             skillId: intent.skillId,
@@ -106,6 +108,9 @@ export function StudioIntentBootstrap() {
             throw new Error(messages.errors.emptyCarousel);
           }
 
+          // Cover-fit photos + preload Google faces before reveal / thumbs.
+          const preparedSlides = await prepareCanvasSlides(result.slides);
+
           // Drop skeleton chrome; keep project-loading so autosave stays off until save.
           useCanvasStore.setState({
             isGeneratingCarousel: false,
@@ -114,13 +119,13 @@ export function StudioIntentBootstrap() {
 
           // Reveal slides one-by-one so the carousel updates as content lands.
           const placeholders = useCanvasStore.getState().slides;
-          const total = Math.max(placeholders.length, result.slides.length);
+          const total = Math.max(placeholders.length, preparedSlides.length);
           useCanvasStore.getState().setCurrentRatio(result.aspectRatio);
 
-          for (let i = 0; i < result.slides.length; i++) {
+          for (let i = 0; i < preparedSlides.length; i++) {
             const nextSlides = Array.from({ length: total }, (_, index) => {
               const existing = placeholders[index];
-              const canvasJSON = result.slides[index];
+              const canvasJSON = preparedSlides[index];
               if (canvasJSON) {
                 return {
                   id: index + 1,
@@ -143,7 +148,7 @@ export function StudioIntentBootstrap() {
             useCanvasStore.getState().setSlides(nextSlides);
             useCanvasStore.getState().setCurrentSlideId(i + 1);
             await slidesController.loadCurrent();
-            if (i < result.slides.length - 1) {
+            if (i < preparedSlides.length - 1) {
               await new Promise((r) => setTimeout(r, 120));
             }
           }
@@ -151,7 +156,8 @@ export function StudioIntentBootstrap() {
           await applyPayload({
             title: result.title,
             aspectRatio: result.aspectRatio,
-            slides: result.slides,
+            slides: preparedSlides,
+            prepared: true,
           });
 
           const next = useCanvasStore.getState();

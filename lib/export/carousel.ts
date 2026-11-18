@@ -1,6 +1,8 @@
 import { Canvas as FabricCanvas } from "fabric";
 import type { FabricCanvasJSON } from "@/lib/types";
 import { withRemoteImageCors } from "@/lib/canvas/image-cors";
+import { refreshCanvasFonts } from "@/lib/canvas/paint-live";
+import { preloadSlideFonts } from "@/lib/fonts/slide-fonts";
 
 export type ExportFormat = "png" | "jpeg" | "pdf";
 export type ImageExportFormat = Exclude<ExportFormat, "pdf">;
@@ -65,12 +67,15 @@ export async function renderSlidesToImages(
   const results: RenderedSlide[] = [];
 
   try {
+    await preloadSlideFonts(slides.map((slide) => slide.canvasJSON));
+
     for (let i = 0; i < slides.length; i++) {
       if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
       const slide = slides[i];
       await canvas.loadFromJSON(withRemoteImageCors(slide.canvasJSON));
       if (!canvas.backgroundColor) canvas.backgroundColor = "#ffffff";
+      refreshCanvasFonts(canvas);
       canvas.requestRenderAll();
 
       let dataUrl: string;
