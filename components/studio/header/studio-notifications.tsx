@@ -75,6 +75,12 @@ function plainPreview(body: string) {
     .trim();
 }
 
+function hrefCtaKey(href: string): "openInvite" | "openProject" | "openLink" {
+  if (href.includes("/invite/")) return "openInvite";
+  if (href.includes("/studio/editor")) return "openProject";
+  return "openLink";
+}
+
 function MarkdownBody({ source }: { source: string }) {
   return (
     <div className="space-y-3 text-[14px] leading-relaxed text-foreground">
@@ -167,12 +173,12 @@ function ReadModal({
             <div className="mt-6">
               <Button
                 type="button"
- className="rounded-md px-5 text-[13px] font-medium"
+                className="rounded-md px-5 text-[13px] font-medium"
                 onClick={() => {
                   window.location.href = item.href!;
                 }}
               >
-                {t("openInvite")}
+                {t(hrefCtaKey(item.href))}
               </Button>
             </div>
           ) : null}
@@ -358,12 +364,12 @@ function NotificationsPanel({
                     <div className="mt-3">
                       <Button
                         type="button"
- className="h-8 rounded-md px-3 text-[12px] font-medium"
+                        className="h-8 rounded-md px-3 text-[12px] font-medium"
                         onClick={() => {
                           window.location.href = item.href!;
                         }}
                       >
-                        {t("openInvite")}
+                        {t(hrefCtaKey(item.href))}
                       </Button>
                     </div>
                   ) : null}
@@ -430,6 +436,16 @@ export function StudioNotifications({
   const loading = signedIn && !notifications.data && !notifications.isError;
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
+
+  useEffect(() => {
+    if (!signedIn) return;
+    const onChanged = () => {
+      void invalidateStudioNotifications(queryClient);
+    };
+    window.addEventListener("studio:notifications-changed", onChanged);
+    return () =>
+      window.removeEventListener("studio:notifications-changed", onChanged);
+  }, [signedIn, queryClient]);
 
   useEffect(() => {
     if (!open || !signedIn) return;

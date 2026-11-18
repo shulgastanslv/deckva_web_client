@@ -4,6 +4,10 @@ import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { CommunityProjectListItem } from "@/actions/community";
+import {
+  communityCategoryChipClass,
+  communityCategoryTone,
+} from "@/lib/community/category-style";
 import { cn } from "@/lib/utils";
 
 const cols =
@@ -87,9 +91,20 @@ export function CommunityRows({
               <span className="text-[13px] text-muted-foreground">
                 {item.slideCount}
               </span>
-              <span className="truncate text-[13px] text-muted-foreground">
-                {item.category ?? "—"}
-              </span>
+              {item.category ? (
+                <span
+                  className={cn(
+                    communityCategoryChipClass,
+                    communityCategoryTone(item.category),
+                  )}
+                >
+                  {item.category}
+                </span>
+              ) : (
+                <span className="truncate text-[13px] text-muted-foreground">
+                  —
+                </span>
+              )}
               <div className="min-w-0">
                 <p className="truncate text-[13px] text-foreground">{when}</p>
                   <p className="truncate text-[11px] text-muted-foreground">

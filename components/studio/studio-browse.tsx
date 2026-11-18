@@ -383,7 +383,7 @@ export function StudioBrowse() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setCommunityView("rows")}
+                    onClick={() => setCommunityView("cards")}
                     aria-label={t("rowsView")}
                     className={cn(
                       "flex h-full aspect-square items-center justify-center rounded-md transition-colors",

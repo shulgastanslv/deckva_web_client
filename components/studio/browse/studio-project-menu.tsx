@@ -6,9 +6,11 @@ import {
   ArrowCounterClockwise as Restore,
   Check,
   Copy,
+  DownloadSimple as Download,
   FolderSimple as FolderInput,
   DotsThree as MoreHorizontal,
   PencilSimple as Pencil,
+  SpinnerGap as Loader2,
   Star,
   Trash as Trash2,
 } from "@phosphor-icons/react";
@@ -17,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { moveProjectToFolder } from "@/actions/folders";
 import { useUserFolders } from "@/lib/studio/queries";
 import {
+  getProjectById,
   permanentlyDeleteProjects,
   restoreProjects,
   trashProjects,
@@ -37,6 +40,14 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  quickExportSlides,
+  type QuickExportFormat,
+} from "@/lib/export/quick-export";
+import { messages } from "@/lib/messages";
+import { notify } from "@/lib/notify";
+import { pushMyNotification } from "@/lib/notifications/client";
+import { reportError } from "@/lib/report-error";
 
 const itemClass =
   "cursor-pointer gap-2.5 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50";
@@ -51,8 +62,11 @@ export function StudioProjectMenu({
   onChanged: () => void;
 }) {
   const t = useTranslations("studio.projectMenu");
+  const te = useTranslations("dialogs.export");
+  const tn = useTranslations("notify");
   const [open, setOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [draft, setDraft] = useState(project.title);
   const folders = useUserFolders(open && !inTrash).data?.folders ?? [];
 
@@ -72,6 +86,39 @@ export function StudioProjectMenu({
 
   const openInNewTab = () => {
     window.open(`/studio/editor?project=${project.id}`, "_blank", "noopener,noreferrer");
+  };
+
+  const handleQuickExport = async (format: QuickExportFormat) => {
+    if (exporting) return;
+    setExporting(true);
+    const loadingId = notify.loading(tn("exporting"));
+    try {
+      const res = await getProjectById(project.id);
+      if (!res.success) {
+        throw new Error(messages.errors.loadProject);
+      }
+      const { project: detail } = res;
+      await quickExportSlides({
+        slides: detail.slides.map((slide) => ({
+          id: slide.id,
+          canvasJSON: slide.canvasJSON,
+        })),
+        size: { width: detail.width, height: detail.height },
+        title: detail.title,
+        format,
+      });
+      notify.dismiss(loadingId);
+      void pushMyNotification("exported", {
+        projectId: detail.id,
+        title: detail.title,
+      });
+      setOpen(false);
+    } catch (err) {
+      notify.dismiss(loadingId);
+      reportError(err, messages.errors.exportFailed);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -174,6 +221,32 @@ export function StudioProjectMenu({
               <Copy className="size-4 text-muted-foreground" />
               {t("duplicate")}
             </DropdownMenuItem>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className={itemClass} disabled={exporting}>
+                {exporting ? (
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <Download className="size-4 text-muted-foreground" />
+                )}
+                {t("quickExport")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="min-w-[140px] rounded-2xl p-1.5">
+                {(["png", "jpeg", "pdf"] as const).map((format) => (
+                  <DropdownMenuItem
+                    key={format}
+                    className={itemClass}
+                    disabled={exporting}
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      void handleQuickExport(format);
+                    }}
+                  >
+                    {te(format)}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
 
             <DropdownMenuItem
               className={itemClass}

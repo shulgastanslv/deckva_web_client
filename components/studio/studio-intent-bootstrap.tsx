@@ -20,6 +20,7 @@ import { useProject } from "@/hooks/use-project";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
+import { signalNotificationsChanged } from "@/lib/notifications/client";
 import { reportError } from "@/lib/report-error";
 
 /**
@@ -189,6 +190,7 @@ export function StudioIntentBootstrap() {
           }
 
           useCanvasStore.getState().markSaved();
+          signalNotificationsChanged();
           window.dispatchEvent(new CustomEvent("core:projects-changed"));
           if (result.entitlement) {
             window.dispatchEvent(

@@ -43,7 +43,7 @@ import {
   Trash as Trash2,
   LockOpen as Unlock,
   UploadSimple as Upload,
-  FlowArrow as Workflow,
+  ArrowElbowDownRight,
 } from "@phosphor-icons/react";
 import { GridSettingsPanel } from "@/components/canvas/grid-controls";
 import {
@@ -489,7 +489,7 @@ export function CanvasToolbar({
 
             <div className="flex items-center justify-between gap-2 rounded-xl px-3 py-2">
               <div className="flex items-center gap-2 text-[13px]">
-                <Workflow className="size-4 text-muted-foreground" />
+                <ArrowElbowDownRight className="size-5 shrink-0 stroke-[1.5] text-muted-foreground" />
                 {t("autoFlow")}
               </div>
               <Switch

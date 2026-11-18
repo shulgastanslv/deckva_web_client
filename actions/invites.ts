@@ -76,14 +76,10 @@ async function notifyUser(input: {
   body: string;
   href?: string | null;
 }) {
-  await prisma.notification.create({
-    data: {
-      userId: input.userId,
-      title: input.title,
-      body: input.body,
-      href: input.href ?? null,
-    },
-  });
+  const { createUserNotification } = await import(
+    "@/lib/notifications/push"
+  );
+  await createUserNotification(input);
 }
 
 function parseEmails(raw: string): string[] {

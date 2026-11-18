@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react";
 import { setProjectPublic } from "@/actions/projects";
 import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
+import { pushMyNotification } from "@/lib/notifications/client";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 import {
@@ -273,6 +274,10 @@ export function ExportModal({ open, onOpenChange, onNeedAuth }: ExportModalProps
       pack: format === "pdf" ? "pdf" : pack,
       format,
       slides: rendered.length,
+    });
+    void pushMyNotification("exported", {
+      projectId: state.currentProjectId ?? undefined,
+      title,
     });
     setDone(true);
   };

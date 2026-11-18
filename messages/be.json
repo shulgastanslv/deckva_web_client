@@ -250,6 +250,7 @@
       "more": "Яшчэ",
       "rename": "Перайменаваць",
       "duplicate": "Дубляваць",
+      "quickExport": "Экспарт",
       "moveToFolder": "Перамясціць у папку",
       "createFolderFirst": "Спачатку стварыце папку ў бакавой панэлі.",
       "delete": "У сметнік",
@@ -449,6 +450,8 @@
       "nothingHere": "Тут пуста",
       "tryAnotherSearch": "Паспрабуйце іншы запыт",
       "openInvite": "Адкрыць запрашэнне",
+      "openProject": "Адкрыць праект",
+      "openLink": "Адкрыць",
       "read": "Прачытана",
       "markUnread": "Адзначыць непрачытаным",
       "markRead": "Адзначыць прачытаным",
@@ -902,6 +905,42 @@
     "emptyBody": "Тут з'явяцца абнаўленні пра каруселі і працоўную прастору.",
     "emptyMenu": "Няма новых апавяшчэнняў"
   },
+  "notify": {
+    "projectCreated": {
+      "title": "Праект створаны",
+      "body": "«{title}» гатовы ў рэдактары."
+    },
+    "generationDone": {
+      "title": "Карусель гатовая",
+      "body": "«{title}» згенераваная — адкрыйце, каб правіць і экспартаваць."
+    },
+    "published": {
+      "title": "Апублікавана ў супольнасці",
+      "body": "«{title}» цяпер у Community."
+    },
+    "republished": {
+      "title": "Публікацыя абноўлена",
+      "body": "«{title}» абноўленая ў Community."
+    },
+    "unpublished": {
+      "title": "Прыбрана з супольнасці",
+      "body": "«{title}» больш не ў Community."
+    },
+    "exported": {
+      "title": "Экспартавана",
+      "body": "PNG-экспарт «{title}» гатовы."
+    },
+    "copied": {
+      "title": "Копія створана",
+      "body": "Копія «{title}» гатовая ў рэдактары."
+    },
+    "imported": {
+      "title": "Імпарт завершаны",
+      "body": "«{title}» імпартаваны і адкрыты ў рэдактары."
+    },
+    "exporting": "Экспарт…",
+    "saved": "Захавана"
+  },
   "errors": {
     "generic": "Нешта пайшло не так",
     "signIn": "Увайдзіце",
@@ -1205,6 +1244,7 @@
       "projectName": "Назва праекта",
       "newDesign": "Новы дызайн",
       "makeCopy": "Стварыць копію",
+      "quickExport": "Экспарт",
       "layoutGrid": "Сетка макета",
       "help": "Даведка",
       "slidesMeta": "{count, plural, one {# слайд} few {# слайды} many {# слайдаў} other {# слайда}} · {width}×{height}"

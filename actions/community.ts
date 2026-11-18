@@ -13,6 +13,7 @@ import {
 } from "@/lib/community/categories";
 import { normalizeKeyMoments } from "@/lib/community/listing-copy";
 import { messages } from "@/lib/messages";
+import { StudioNotify } from "@/lib/notifications/push";
 import { prisma } from "@/lib/prisma";
 import { isPlatformAdmin } from "@/lib/roles";
 import { canManageOrgResource } from "@/lib/studio/org-access";
@@ -297,6 +298,12 @@ export async function publishProjectToCommunity(input: {
       },
     });
 
+    StudioNotify.voidPush(
+      user.id,
+      alreadyLive ? "republished" : "published",
+      { projectId, title },
+    );
+
     revalidatePath("/studio/browse");
     return { success: true, communityStatus, republished: alreadyLive };
   } catch (err) {
@@ -314,7 +321,7 @@ export async function unpublishProject(
 
     const project = await prisma.project.findFirst({
       where: { id: projectId },
-      select: { id: true, userId: true, organizationId: true },
+      select: { id: true, userId: true, organizationId: true, title: true },
     });
     if (!project || !(await canManageOrgResource(userId, project))) {
       return { success: false, error: messages.errors.projectNotFound };
@@ -329,6 +336,11 @@ export async function unpublishProject(
         communityUpdatedById: null,
         communityStatus: "DRAFT",
       },
+    });
+
+    StudioNotify.voidPush(userId, "unpublished", {
+      projectId,
+      title: project.title,
     });
 
     revalidatePath("/studio/browse");

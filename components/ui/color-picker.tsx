@@ -137,7 +137,7 @@ function ColorPickerPopover({
               title={hex}
               onClick={() => apply(hex)}
               className={cn(
-                "aspect-square rounded-full transition-transform hover:scale-110 active:scale-95",
+                "aspect-square rounded-full",
                 draft.toLowerCase() === hex ? "ring-2 ring-foreground/40 ring-offset-1 ring-offset-background" : "",
               )}
               style={{ backgroundColor: hex }}
@@ -194,7 +194,7 @@ export function ColorPicker({
       title={title ?? label ?? "Pick color"}
       aria-label={title ?? label ?? "Pick color"}
       className={cn(
-        "shrink-0 cursor-pointer rounded-full transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50",
+        "shrink-0 cursor-pointer rounded-full disabled:cursor-not-allowed disabled:opacity-50",
         compact ? "size-7" : "size-6",
         "ring-1 ring-border/60",
       )}
@@ -225,7 +225,12 @@ export function ColorPicker({
           {label}
         </label>
       ) : null}
-      <div className={cn(controlField, "flex items-center gap-2 py-0")}>
+      <div
+        className={cn(
+          controlField,
+          "flex items-center gap-2 py-0 hover:bg-muted/40",
+        )}
+      >
         <ColorPickerPopover
           value={value}
           onChange={(hex) => {
@@ -247,7 +252,7 @@ export function ColorPicker({
           }}
           placeholder="#000000"
           spellCheck={false}
-          className="h-full flex-1 border-0 bg-transparent px-1 font-mono text-[13px] uppercase shadow-none focus-visible:ring-0 dark:bg-transparent"
+          className="h-full flex-1 border-0 bg-transparent px-1 font-mono text-[13px] uppercase shadow-none hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 dark:bg-transparent"
         />
         {trailing}
       </div>

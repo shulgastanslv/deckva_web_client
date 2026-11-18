@@ -35,6 +35,7 @@ import {
   sidebarTextarea,
 } from "@/components/canvas/sidebar/sidebar-ui";
 import { messages } from "@/lib/messages";
+import { signalNotificationsChanged } from "@/lib/notifications/client";
 import { reportError } from "@/lib/report-error";
 import { useSlidesController } from "@/context/canvas-manager";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -238,6 +239,7 @@ export function PublishCommunityDialog({
 
       setDoneLabel(res.republished ? t("republished") : t("submitted"));
       setDone(true);
+      signalNotificationsChanged();
       window.dispatchEvent(new CustomEvent("core:community-changed"));
       window.dispatchEvent(new CustomEvent("core:projects-changed"));
       setTimeout(() => onOpenChange(false), 700);
@@ -261,6 +263,7 @@ export function PublishCommunityDialog({
       }
       setDoneLabel(t("removedDone"));
       setDone(true);
+      signalNotificationsChanged();
       window.dispatchEvent(new CustomEvent("core:community-changed"));
       setTimeout(() => onOpenChange(false), 700);
     } catch (err) {

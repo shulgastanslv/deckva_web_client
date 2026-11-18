@@ -250,6 +250,7 @@
       "more": "More",
       "rename": "Rename",
       "duplicate": "Duplicate",
+      "quickExport": "Export",
       "moveToFolder": "Move to folder",
       "createFolderFirst": "Create a folder in the sidebar first.",
       "delete": "Move to trash",
@@ -449,6 +450,8 @@
       "nothingHere": "Nothing here",
       "tryAnotherSearch": "Try another search",
       "openInvite": "Open invite",
+      "openProject": "Open project",
+      "openLink": "Open",
       "read": "Read",
       "markUnread": "Mark unread",
       "markRead": "Mark read",
@@ -902,6 +905,42 @@
     "emptyBody": "Updates about your carousels and workspace will show up here.",
     "emptyMenu": "No new notifications"
   },
+  "notify": {
+    "projectCreated": {
+      "title": "Project created",
+      "body": "“{title}” is ready in the editor."
+    },
+    "generationDone": {
+      "title": "Carousel ready",
+      "body": "“{title}” is generated — open it to edit and export."
+    },
+    "published": {
+      "title": "Published to community",
+      "body": "“{title}” is live in Community."
+    },
+    "republished": {
+      "title": "Community listing updated",
+      "body": "“{title}” was refreshed in Community."
+    },
+    "unpublished": {
+      "title": "Removed from community",
+      "body": "“{title}” is no longer listed in Community."
+    },
+    "exported": {
+      "title": "Exported",
+      "body": "PNG export of “{title}” finished."
+    },
+    "copied": {
+      "title": "Copy created",
+      "body": "A copy of “{title}” is ready in the editor."
+    },
+    "imported": {
+      "title": "Import complete",
+      "body": "“{title}” was imported and opened in the editor."
+    },
+    "exporting": "Exporting…",
+    "saved": "Saved"
+  },
   "errors": {
     "generic": "Something went wrong",
     "signIn": "Sign in",
@@ -1205,6 +1244,7 @@
       "projectName": "Project name",
       "newDesign": "New design",
       "makeCopy": "Make a copy",
+      "quickExport": "Export",
       "layoutGrid": "Layout grid",
       "help": "Help",
       "slidesMeta": "{count, plural, one {# slide} other {# slides}} · {width}×{height}"

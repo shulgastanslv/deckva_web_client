@@ -24,6 +24,10 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  communityCategoryChipClass,
+  communityCategoryTone,
+} from "@/lib/community/category-style";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
@@ -254,7 +258,14 @@ export function CommunityPreviewDialog({
           <aside className="flex w-full shrink-0 flex-col justify-between gap-6 overflow-x-hidden bg-background px-5 py-6 sm:px-6 lg:w-[320px] lg:bg-muted/10">
             <div className="min-w-0 space-y-4">
               <div className="min-w-0">
-                <p className="text-[12px] font-medium tracking-wide text-muted-foreground uppercase">
+                <p
+                  className={cn(
+                    communityCategoryChipClass,
+                    communityCategoryTone(
+                      preview?.category ?? tb("community"),
+                    ),
+                  )}
+                >
                   {preview?.category ?? tb("community")}
                 </p>
                 <h2 className="mt-1.5 break-words text-[22px] leading-tight font-semibold tracking-tight wrap-anywhere text-foreground">

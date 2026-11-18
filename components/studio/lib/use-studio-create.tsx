@@ -10,8 +10,6 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { toast } from "sonner";
-
 import { getGenerationStatus } from "@/actions/ai";
 import { createProject, saveAsNewProject } from "@/actions/projects";
 import {
@@ -25,6 +23,8 @@ import {
 import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
 import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
+import { notify } from "@/lib/notify";
+import { pushMyNotification } from "@/lib/notifications/client";
 import { reportError } from "@/lib/report-error";
 import { stashPendingCover } from "@/lib/studio/pending-cover";
 import { stashPendingMedia } from "@/lib/studio/pending-attachments";
@@ -126,13 +126,17 @@ export function StudioCreateProvider({
           slidesCount: input.slidesCount,
         });
         if (created.success === false) {
-          toast.error(created.error);
+          notify.error(created.error);
           throw new Error(created.error);
         }
         trackEvent("blank_project_created", {
           projectId: created.projectId,
           slidesCount: input.slidesCount,
           aspectRatio: input.aspectRatio,
+        });
+        void pushMyNotification("projectCreated", {
+          projectId: created.projectId,
+          title: input.title,
         });
         router.push(`/studio/editor?project=${created.projectId}`);
       } catch (err) {
@@ -162,9 +166,13 @@ export function StudioCreateProvider({
       if (!saved.success || !("projectId" in saved)) {
         const message =
           "error" in saved ? saved.error : messages.errors.createProject;
-        toast.error(message);
+        notify.error(message);
         throw new Error(message);
       }
+      void pushMyNotification("imported", {
+        projectId: saved.projectId,
+        title: result.title,
+      });
       router.push(`/studio/editor?project=${saved.projectId}`);
     },
     [router],
@@ -216,6 +224,7 @@ export function StudioCreateProvider({
           slidesCount,
         });
         if (!created.success) {
+          notify.error(messages.errors.createCarousel);
           setGenerateError(messages.errors.createCarousel);
           return;
         }

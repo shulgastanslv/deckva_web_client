@@ -13,6 +13,7 @@ import {
   Plus,
   FloppyDisk as Save,
   ShareNetwork as Share2,
+  SpinnerGap as Loader2,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,12 +28,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSyncLayoutGrid } from "@/components/canvas/grid-controls";
 import { duplicateProject } from "@/actions/projects";
-import { useCanvasManager } from "@/context/canvas-manager";
+import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { useProject } from "@/hooks/use-project";
 import { fitCanvasJSON } from "@/lib/canvas/fit-frame";
+import {
+  quickExportSlides,
+  type QuickExportFormat,
+} from "@/lib/export/quick-export";
 import { CANVAS_RATIOS, STUDIO_RATIO_KEYS, type RatioKey } from "@/lib/types";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { messages } from "@/lib/messages";
+import { notify } from "@/lib/notify";
+import { pushMyNotification } from "@/lib/notifications/client";
 import { reportError } from "@/lib/report-error";
 import { cn } from "@/lib/utils";
 import { controlH } from "@/components/ui/control";
@@ -58,8 +65,11 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
   useSyncLayoutGrid();
   const t = useTranslations("editor.fileMenu");
   const tc = useTranslations("common");
+  const te = useTranslations("dialogs.export");
+  const tn = useTranslations("notify");
   const router = useRouter();
   const manager = useCanvasManager();
+  const slidesController = useSlidesController();
   const { rename, persist } = useProject();
   const projectTitle = useCanvasStore((s) => s.projectTitle);
   const currentProjectId = useCanvasStore((s) => s.currentProjectId);
@@ -71,6 +81,7 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(projectTitle);
   const [copying, setCopying] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     setName(projectTitle);
@@ -116,6 +127,10 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
         reportError(new Error(messages.errors.duplicateProject), messages.errors.duplicateProject);
         return;
       }
+      void pushMyNotification("copied", {
+        projectId: res.projectId,
+        title: projectTitle,
+      });
       setOpen(false);
       router.push(`/studio/editor?project=${res.projectId}`);
     } catch (err) {
@@ -125,12 +140,49 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
     }
   };
 
+  const handleQuickExport = async (format: QuickExportFormat) => {
+    if (exporting) return;
+    setExporting(true);
+    const loadingId = notify.loading(tn("exporting"));
+    try {
+      slidesController?.saveCurrent();
+      const state = useCanvasStore.getState();
+      await quickExportSlides({
+        slides: state.slides.map((slide) => ({
+          id: slide.id,
+          canvasJSON: slide.canvasJSON,
+        })),
+        size: state.canvasDimensions,
+        title: state.projectTitle,
+        format,
+      });
+      notify.dismiss(loadingId);
+      void pushMyNotification("exported", {
+        projectId: state.currentProjectId ?? undefined,
+        title: state.projectTitle,
+      });
+      setOpen(false);
+    } catch (err) {
+      notify.dismiss(loadingId);
+      reportError(err, messages.errors.exportFailed);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleSave = async () => {
+    commitName();
+    const saved = await persist();
+    if (saved.success) notify.success(tn("saved"));
+    else notify.error(messages.errors.saveCarousel);
+  };
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
- <Button type="button" variant="ghost" className={ghostTrigger}>
+        <Button type="button" variant="ghost" className={ghostTrigger}>
           {t("file")}
- <ChevronDown className="size-3.5 opacity-70" />
+          <ChevronDown className="size-3.5 opacity-70" />
         </Button>
       </DropdownMenuTrigger>
 
@@ -239,14 +291,44 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
           className={menuItem}
           onSelect={(event) => {
             event.preventDefault();
-            commitName();
-            void persist();
+            void handleSave();
           }}
         >
           <Save className="size-5" />
           {tc("save")}
           <kbd className="ml-auto font-mono text-[11px] text-muted-foreground">⌘S</kbd>
         </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger
+            className={cn(
+              menuItem,
+              "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
+            )}
+            disabled={exporting}
+          >
+            {exporting ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <Download className="size-5" />
+            )}
+            {t("quickExport")}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent sideOffset={8} className="w-40 rounded-2xl p-1.5">
+            {(["png", "jpeg", "pdf"] as const).map((format) => (
+              <DropdownMenuItem
+                key={format}
+                className={menuItem}
+                disabled={exporting}
+                onSelect={(event) => {
+                  event.preventDefault();
+                  void handleQuickExport(format);
+                }}
+              >
+                {te(format)}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         {onShare ? (
           <DropdownMenuItem className={menuItem} onSelect={onShare}>
             <Share2 className="size-5" />

@@ -1,13 +1,10 @@
 import { messages } from "@/lib/messages";
+import { notify } from "@/lib/notify";
 
 /** Log the original error and show a catalog message in the toaster. */
 export function reportError(
   error: unknown,
   message: string = messages.errors.generic,
 ) {
-  console.error(error);
-  if (typeof window === "undefined") return;
-  void import("sonner").then(({ toast }) => {
-    toast.error(message);
-  });
+  notify.fromError(error, message);
 }

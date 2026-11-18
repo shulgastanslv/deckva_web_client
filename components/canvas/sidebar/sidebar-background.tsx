@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
   SpinnerGap as Loader2,
-  Plus,
   Image as ImageIcon,
   Palette,
   Check,
@@ -25,6 +24,7 @@ import { paintSlotOnCanvas } from "@/lib/canvas/paint-live";
 import { scheduleSlideThumbnailHydration } from "@/lib/canvas/thumbnail";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
+import { normalizeHex } from "@/lib/color/hex";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -131,6 +131,7 @@ export function SidebarBackground() {
   const [urlError, setUrlError] = useState<string | null>(null);
   const [activeBg, setActiveBg] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [solidColor, setSolidColor] = useState("#ffffff");
 
   const projectPalette = useCanvasStore((s) => s.palette);
   const markedSlideIds = useCanvasStore((s) => s.markedSlideIds);
@@ -142,6 +143,18 @@ export function SidebarBackground() {
   useEffect(() => {
     setSlidePalette((current) => (current ? useCanvasStore.getState().palette : current));
   }, [currentSlideId]);
+
+  useEffect(() => {
+    const current = manager?.canvas?.backgroundColor;
+    if (typeof current === "string") {
+      const hex = normalizeHex(current);
+      if (hex) {
+        setSolidColor(hex);
+        return;
+      }
+    }
+    setSolidColor(projectPalette.background || "#ffffff");
+  }, [currentSlideId, manager, projectPalette.background]);
 
   useEffect(() => {
     const refresh = () => setBrandKit(loadBrandKit());
@@ -202,8 +215,10 @@ export function SidebarBackground() {
   };
 
   const applySolid = (color: string) => {
+    const hex = normalizeHex(color) ?? color;
     setActiveBg(null);
-    void manager?.setBackground({ type: "solid", color });
+    setSolidColor(hex);
+    void manager?.setBackground({ type: "solid", color: hex });
   };
 
   const applyGradient = (colors: [string, string]) => {
@@ -263,9 +278,10 @@ export function SidebarBackground() {
             <TabsTrigger
               key={item.id}
               value={item.id}
+              title={item.label}
               className={sidebarTabsTrigger}
             >
-              {item.label}
+              <span className="truncate">{item.label}</span>
             </TabsTrigger>
           ))}
         </TabsList>
@@ -320,7 +336,13 @@ export function SidebarBackground() {
           </div>
         </TabsContent>
 
-        <TabsContent value="color">
+        <TabsContent value="color" className="mt-0 space-y-3">
+          <ColorPicker
+            label={t("background")}
+            value={solidColor}
+            onChange={applySolid}
+            title={t("customColor")}
+          />
           <div className={cn(sidebarSwatchGrid, "max-h-64 overflow-y-auto overscroll-contain pr-0.5")}>
             {SOLID_PRESETS.map((p) => (
               <button
@@ -329,22 +351,13 @@ export function SidebarBackground() {
                 title={p.color}
                 onClick={() => applySolid(p.color)}
                 style={{ backgroundColor: p.color }}
-                className="aspect-square rounded-full border border-border/40 transition-transform hover:scale-110 active:scale-95"
+                className={cn(
+                  "aspect-square rounded-full border border-border/40 transition-transform hover:scale-110 active:scale-95",
+                  solidColor.toLowerCase() === p.color.toLowerCase() &&
+                    "ring-2 ring-foreground/40 ring-offset-1 ring-offset-background",
+                )}
               />
             ))}
-            <div
-              title={t("customColor")}
-              className="relative flex aspect-square items-center justify-center rounded-md border border-dashed border-border/80 bg-muted/30 transition-transform hover:scale-110"
-            >
-              <ColorPicker
-                compact
-                value="#ffffff"
-                onChange={(hex) => applySolid(hex)}
-                title={t("customColor")}
-                className="absolute inset-0 flex items-center justify-center [&_button]:size-full [&_button]:rounded-md [&_button]:ring-0 [&_button]:hover:scale-100"
-              />
-              <Plus className="pointer-events-none relative z-10 h-4 w-4 text-muted-foreground" />
-            </div>
           </div>
         </TabsContent>
 

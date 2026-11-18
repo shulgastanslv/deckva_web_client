@@ -41,10 +41,10 @@ export const sidebarSegmentedItemIdle =
   "text-muted-foreground hover:text-foreground";
 
 export const sidebarTabsList =
-  `grid ${controlH} w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] rounded-md ${sidebarSurfaceIdle} p-1 ${controlHTabsHorizontal}`;
+  `grid ${controlH} w-full min-w-0 grid-cols-[repeat(auto-fit,minmax(0,1fr))] rounded-md ${sidebarSurfaceIdle} p-1 ${controlHTabsHorizontal}`;
 
 export const sidebarTabsTrigger =
-  "rounded-md px-3 text-[13px] font-normal text-muted-foreground shadow-none data-active:border-transparent data-active:bg-background data-active:text-foreground dark:data-active:border-transparent dark:data-active:bg-background";
+  "min-w-0 truncate rounded-md px-1.5 text-[12px] font-normal text-muted-foreground shadow-none data-active:border-transparent data-active:bg-background data-active:text-foreground dark:data-active:border-transparent dark:data-active:bg-background sm:px-2 sm:text-[13px]";
 
 /** Height/padding from SelectTrigger (`controlField`) — do not restate h-* / px here. */
 export const sidebarSelectTrigger =

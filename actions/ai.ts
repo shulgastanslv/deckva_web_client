@@ -15,6 +15,7 @@ import {
 } from "@/lib/ai/generate";
 import { listAiModelsUpstream } from "@/lib/ai/models";
 import { messages } from "@/lib/messages";
+import { StudioNotify } from "@/lib/notifications/push";
 
 /** Full model catalog — daily generation cap is enforced below. */
 export async function listAiModels() {
@@ -61,6 +62,12 @@ export async function generateCarousel(
       userId,
       modelId,
       slidesCount,
+    });
+
+    StudioNotify.voidPush(userId, "generationDone", {
+      projectId: input.projectId,
+      title: result.title,
+      slidesCount: result.slides.length,
     });
 
     return {

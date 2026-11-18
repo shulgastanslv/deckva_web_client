@@ -9,10 +9,8 @@ import {
   ArrowClockwise as Redo2,
   Gear as Settings,
   Shapes as ShapesIcon,
-  Toolbox as ToolCase,
   Package,
   ArrowCounterClockwise as Undo2,
-  PuzzlePiece,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 import Logo from "@/components/logo/logo";
@@ -27,7 +25,6 @@ import { CanvasNavHint } from "@/components/canvas/canvas-nav-hint";
 import { ProjectFileMenu } from "@/components/canvas/project-file-menu";
 import { SaveStatusMenu } from "@/components/canvas/save-status-menu";
 import { SidebarAssets } from "./sidebar/sidebar-assets";
-import { SidebarTools } from "./sidebar/sidebar-tools";
 import { navIconClass } from "@/components/canvas/sidebar/sidebar-ui";
 import {
   Tooltip,
@@ -43,11 +40,9 @@ export type NavId =
   | "layers"
   | "settings"
   | "assets"
-  | "background"
-  | "tools";
+  | "background";
 
 export const RAIL_SHORTCUTS: NavId[] = [
-  "tools",
   "elements",
   "layers",
   "background",
@@ -102,12 +97,10 @@ export function LeftSidebar({
     settings: t("settings"),
     assets: t("assets"),
     background: t("background"),
-    tools: t("tools"),
   };
 
   const navItems: { id: NavId; icon: ReactNode; label: string }[] = [
     { id: "elements", icon: <ShapesIcon className={navIconClass} />, label: t("elements") },
-    { id: "tools", icon: <PuzzlePiece className={navIconClass} />, label: t("tools") },
     { id: "layers", icon: <LayersIcon className={navIconClass} />, label: t("layers") },
     { id: "background", icon: <ImageIcon className={navIconClass} />, label: t("background") },
     { id: "assets", icon: <Package className={navIconClass} />, label: t("assets") },
@@ -129,7 +122,7 @@ export function LeftSidebar({
                 <Button
                   variant="ghost"
                   size="icon"
- className={cn(
+                  className={cn(
                     railBtn,
                     activeNav === id &&
                       !isLeftCollapsed &&
@@ -150,7 +143,7 @@ export function LeftSidebar({
               <Button
                 variant="ghost"
                 size="icon"
- className={railBtn}
+                className={railBtn}
                 aria-label={tc("undo")}
                 onClick={() => void manager?.undo()}
               >
@@ -161,7 +154,7 @@ export function LeftSidebar({
               <Button
                 variant="ghost"
                 size="icon"
- className={railBtn}
+                className={railBtn}
                 aria-label={tc("redo")}
                 onClick={() => void manager?.redo()}
               >
@@ -172,7 +165,7 @@ export function LeftSidebar({
               <Button
                 variant="ghost"
                 size="icon"
- className={railBtn}
+                className={railBtn}
                 aria-label={isLeftCollapsed ? t("expandPanel") : t("collapsePanel")}
                 onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
               >
@@ -187,7 +180,7 @@ export function LeftSidebar({
               <Button
                 variant="ghost"
                 size="icon"
- className={cn(
+                className={cn(
                   railBtn,
                   activeNav === "settings" &&
                     !isLeftCollapsed &&
@@ -231,7 +224,6 @@ export function LeftSidebar({
             />
           )}
           {activeNav === "background" && <SidebarBackground />}
-          {activeNav === "tools" && <SidebarTools />}
         </ScrollArea>
       </div>
 
