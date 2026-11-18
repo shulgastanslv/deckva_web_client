@@ -412,7 +412,8 @@
     "upgrade": {
       "freePlan": "Бесплатно",
       "remainingDaily": "Осталось {remaining} из {limit} генераций на сегодня.",
-      "freeProductHint": "Deckva пока бесплатен. Дневной лимит обновляется в полночь UTC.",
+      "dailyLimit": "Дневной лимит",
+      "resetsHint": "Обновляется в полночь UTC.",
       "dailyLimitReached": "Вы использовали {limit} генераций на сегодня. Зайдите завтра.",
       "dismiss": "Закрыть"
     },
@@ -1889,7 +1890,16 @@
       "deleteAccountHint": "Безвозвратно удаляет проекты и аккаунт.",
       "cardExpires": "До {month}/{year}",
       "dailyUsage": "Осталось {remaining} из {limit} генераций на сегодня",
-      "freeProductHint": "Deckva пока бесплатен. Без подписки и кредитов."
+      "dailyLimit": "Дневной лимит",
+      "generationsTitle": "Генерации",
+      "less": "Меньше",
+      "more": "Больше",
+      "mostActiveMonth": "Самый активный месяц",
+      "mostActiveDay": "Самый активный день",
+      "longestStreak": "Самая длинная серия",
+      "currentStreak": "Текущая серия",
+      "streakDays": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
+      "resetsHint": "Обновляется в полночь UTC."
     },
     "export": {
       "title": "Экспорт",

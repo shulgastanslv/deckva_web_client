@@ -11,7 +11,7 @@ export type { GenerateCarouselInput, GenerateCarouselResult };
 
 const TIMEOUT_MS = 180_000;
 
-/** Call CORA only — free-gen / Pro gate lives in `actions/ai.ts`. */
+/** Call CORA only — daily generation limit lives in `actions/ai.ts`. */
 export async function generateCarouselUpstream(
   input: GenerateCarouselInput,
 ): Promise<Omit<GenerateCarouselResult, "entitlement">> {
@@ -23,7 +23,7 @@ export async function generateCarouselUpstream(
   if (!userId) throw new Error("Sign in to generate");
 
   const aspectRatio = input.aspectRatio ?? "4:5";
-  const slidesCount = Math.min(10, Math.max(4, input.slidesCount ?? 7));
+  const slidesCount = Math.min(10, Math.max(1, input.slidesCount ?? 7));
   const language = input.language?.trim() || inferPromptLanguage(topic);
   const handle = normalizeHandle(input.handle);
 
@@ -50,7 +50,6 @@ export async function generateCarouselUpstream(
       handle,
       cover: input.cover ?? "",
       mode: input.mode ?? "fast",
-      plan: input.plan ?? "free",
       ...(input.modelId ? { modelId: input.modelId } : {}),
       ...(input.seedText?.trim() ? { seedText: input.seedText.trim() } : {}),
       ...(input.skillId?.trim() ? { skillId: input.skillId.trim() } : {}),

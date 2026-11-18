@@ -412,7 +412,8 @@
     "upgrade": {
       "freePlan": "Free",
       "remainingDaily": "{remaining} of {limit} generations left today.",
-      "freeProductHint": "Deckva is free for now. The daily limit resets at midnight UTC.",
+      "dailyLimit": "Daily limit",
+      "resetsHint": "Resets at midnight UTC.",
       "dailyLimitReached": "You've used your {limit} generations for today. Come back tomorrow.",
       "dismiss": "Dismiss"
     },
@@ -1889,7 +1890,16 @@
       "deleteAccountHint": "Permanently removes projects and your account.",
       "cardExpires": "Exp {month}/{year}",
       "dailyUsage": "{remaining} of {limit} generations left today",
-      "freeProductHint": "Deckva is free for now. No subscription or credits."
+      "dailyLimit": "Daily limit",
+      "generationsTitle": "Generations",
+      "less": "Less",
+      "more": "More",
+      "mostActiveMonth": "Most active month",
+      "mostActiveDay": "Most active day",
+      "longestStreak": "Longest streak",
+      "currentStreak": "Current streak",
+      "streakDays": "{count, plural, one {# day} other {# days}}",
+      "resetsHint": "Resets at midnight UTC."
     },
     "export": {
       "title": "Export",

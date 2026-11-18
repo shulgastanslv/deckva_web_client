@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 
 import { getGenerationStatus } from "@/actions/ai";
 import { deleteAccount, getProfile, updateProfile } from "@/actions/user";
+import { GenerationHeatmap } from "@/components/studio/ui/generation-heatmap";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +45,10 @@ import { messages } from "@/lib/messages";
 import { isPasswordLongEnough, PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
 import { useDisplayCurrency } from "@/hooks/use-display-currency";
 import { CURRENCY_LABELS } from "@/lib/studio/currency";
+import type {
+  GenerationDayPoint,
+  GenerationUsageStats,
+} from "@/lib/studio/generations";
 import { DAILY_GENERATION_LIMIT } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +56,18 @@ type Section = "profile" | "usage" | "security" | "preferences" | "account";
 
 type UsageState = {
   remaining: number;
+  used: number;
   limit: number;
+  days: GenerationDayPoint[];
+  stats: GenerationUsageStats;
+};
+
+const EMPTY_STATS: GenerationUsageStats = {
+  total: 0,
+  mostActiveMonth: null,
+  mostActiveDay: null,
+  longestStreak: 0,
+  currentStreak: 0,
 };
 
 const NAV_IDS: { id: Section; icon: typeof UserRound }[] = [
@@ -111,7 +127,10 @@ export function ProfileSettingsDialog({
 
   const [usage, setUsage] = useState<UsageState>({
     remaining: DAILY_GENERATION_LIMIT,
+    used: 0,
     limit: DAILY_GENERATION_LIMIT,
+    days: [],
+    stats: EMPTY_STATS,
   });
 
   const [loading, setLoading] = useState(false);
@@ -171,7 +190,10 @@ export function ProfileSettingsDialog({
         setCreatedAt(profileRes.createdAt);
         setUsage({
           remaining: status.entitlement.remaining,
+          used: status.entitlement.used,
           limit: status.entitlement.limit,
+          days: status.days ?? [],
+          stats: status.stats ?? EMPTY_STATS,
         });
       })
       .catch((err) => {
@@ -314,7 +336,7 @@ export function ProfileSettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
-        className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[640px]"
+        className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[720px]"
       >
         <div className="flex min-h-[440px] flex-col sm:flex-row">
           <aside className="flex shrink-0 flex-col bg-muted/25 sm:w-[168px]">
@@ -434,19 +456,19 @@ export function ProfileSettingsDialog({
                   ) : null}
 
                   {section === "usage" ? (
-                    <div className="space-y-4">
-                      <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
-                        <p className="text-[13px] font-semibold">{t("planFree")}</p>
-                        <p className="mt-0.5 text-[12px] text-muted-foreground">
-                          {t("dailyUsage", {
-                            remaining: usage.remaining,
-                            limit: usage.limit,
-                          })}
-                        </p>
-                        <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
-                          {t("freeProductHint")}
-                        </p>
-                      </div>
+                    <div className="space-y-3">
+                      <GenerationHeatmap
+                        days={usage.days}
+                        stats={usage.stats}
+                        remaining={usage.remaining}
+                        limit={usage.limit}
+                      />
+                      <p className="px-0.5 text-[12px] text-muted-foreground">
+                        {t("dailyUsage", {
+                          remaining: usage.remaining,
+                          limit: usage.limit,
+                        })}
+                      </p>
                     </div>
                   ) : null}
 

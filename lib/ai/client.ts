@@ -33,7 +33,7 @@ export function upstreamErrorMessage(
     }
     if (typeof row.error === "string" && row.error.trim()) return row.error;
   }
-  if (status === 402) return "Upgrade to Pro to keep generating";
+  if (status === 402) return "Daily generation limit reached";
   return `${fallback} (${status})`;
 }
 

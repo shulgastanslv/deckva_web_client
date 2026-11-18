@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Coins } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
@@ -48,7 +47,7 @@ export function PlanDropdown() {
           limit: row.entitlement.limit || DAILY_GENERATION_LIMIT,
         });
       } catch {
-        // keep last known / optimistic free limit
+        // keep last known / optimistic limit
       }
     })();
 
@@ -99,19 +98,21 @@ export function PlanDropdown() {
             "gap-1.5 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
           )}
         >
-          <Coins className="size-5 opacity-80" weight="duotone" />
           <span className="tabular-nums">{label}</span>
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="start" sideOffset={10} className="w-[280px] rounded-2xl p-5">
+      <PopoverContent
+        align="start"
+        sideOffset={10}
+        className="w-[280px] rounded-2xl p-5"
+      >
         <div className="flex flex-col">
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
-              {t("freePlan")}
+              {t("dailyLimit")}
             </h3>
-            <p className="flex items-center gap-1 text-[13px] font-medium tabular-nums text-foreground">
-              <Coins className="size-3.5 text-muted-foreground" weight="duotone" />
+            <p className="text-[13px] font-medium tabular-nums text-foreground">
               {label}
             </p>
           </div>
@@ -122,7 +123,7 @@ export function PlanDropdown() {
             })}
           </p>
           <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">
-            {t("freeProductHint")}
+            {t("resetsHint")}
           </p>
         </div>
       </PopoverContent>

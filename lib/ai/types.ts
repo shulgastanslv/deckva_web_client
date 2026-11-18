@@ -2,8 +2,6 @@ import type { AiPalette } from "@/lib/ai/generate-palette";
 import type { FabricCanvasJSON, RatioKey } from "@/lib/types";
 import type { GenerationEntitlement } from "@/lib/studio/generations";
 
-/** Upstream CORA catalog plan id (we always request full catalog). */
-export type AiPlanId = "free" | "pro";
 export type AiCoraMode = "fast" | "thinking";
 
 export type AiModelInfo = {
@@ -37,7 +35,6 @@ export type GenerateCarouselInput = {
   /** Extra images / notes for CORA (cover still via `cover`). */
   attachments?: GenerateCarouselAttachment[];
   modelId?: string;
-  plan?: AiPlanId;
   mode?: AiCoraMode;
 };
 

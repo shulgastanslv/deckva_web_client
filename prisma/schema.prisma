@@ -49,21 +49,35 @@ model User {
   activeOrganizationId String?
   activeOrganization   Organization? @relation("UserActiveOrganization", fields: [activeOrganizationId], references: [id], onDelete: SetNull)
 
-  projects        Project[]
-  folders         Folder[]
-  memberships     OrganizationMember[]
-  sentInvites     OrganizationInvite[] @relation("OrganizationInviteSender")
-  savedProjects   SavedProject[]
-  authTokens      AuthToken[]
-  news            News[]
-  notifications   Notification[]
-  feedbacks       Feedback[]
-  mediaAssets     MediaAsset[]
-  communityEdits  Project[]            @relation("CommunityEditor")
-  connectors      ConnectorAccount[]
-  connectorEvents ConnectorEvent[]
+  projects         Project[]
+  folders          Folder[]
+  memberships      OrganizationMember[]
+  sentInvites      OrganizationInvite[] @relation("OrganizationInviteSender")
+  savedProjects    SavedProject[]
+  authTokens       AuthToken[]
+  news             News[]
+  notifications    Notification[]
+  feedbacks        Feedback[]
+  mediaAssets      MediaAsset[]
+  communityEdits   Project[]            @relation("CommunityEditor")
+  connectors       ConnectorAccount[]
+  connectorEvents  ConnectorEvent[]
+  generationDays   GenerationDay[]
 
   @@index([activeOrganizationId])
+}
+
+/// Per-UTC-day generation counts for the usage heatmap.
+model GenerationDay {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// UTC calendar day key (YYYY-MM-DD).
+  dayKey String
+  count  Int    @default(0)
+
+  @@unique([userId, dayKey])
+  @@index([userId, dayKey])
 }
 
 enum ConnectorProvider {

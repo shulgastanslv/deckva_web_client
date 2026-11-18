@@ -5,6 +5,7 @@ import {
   consumeGeneration,
   generationBlockedMessage,
   getGenerationEntitlement,
+  getGenerationUsageOverview,
   refundGeneration,
 } from "@/lib/studio/generations";
 import {
@@ -13,24 +14,20 @@ import {
   type GenerateCarouselResult,
 } from "@/lib/ai/generate";
 import { listAiModelsUpstream } from "@/lib/ai/models";
-import type { AiPlanId } from "@/lib/ai/types";
 import { messages } from "@/lib/messages";
 
-/** Full model catalog — product is free with a daily generation cap. */
-const AI_PLAN: AiPlanId = "pro";
-
+/** Full model catalog — daily generation cap is enforced below. */
 export async function listAiModels() {
   const userId = await requireUserId();
   if (!userId) throw new Error(messages.errors.signIn);
-  return listAiModelsUpstream(AI_PLAN);
+  return listAiModelsUpstream();
 }
 
-/** Daily generations left for UI chips. */
+/** Daily generations left for UI chips + heatmap history. */
 export async function getGenerationStatus() {
   const userId = await requireUserId();
   if (!userId) throw new Error(messages.errors.signIn);
-  const entitlement = await getGenerationEntitlement(userId);
-  return { plan: AI_PLAN, entitlement };
+  return getGenerationUsageOverview(userId);
 }
 
 /**
@@ -38,7 +35,7 @@ export async function getGenerationStatus() {
  * Refunds the consume if CORA fails.
  */
 export async function generateCarousel(
-  input: Omit<GenerateCarouselInput, "userId" | "plan"> & {
+  input: Omit<GenerateCarouselInput, "userId"> & {
     projectId?: string;
   },
 ): Promise<GenerateCarouselResult> {
@@ -62,7 +59,6 @@ export async function generateCarousel(
     const result = await generateCarouselUpstream({
       ...input,
       userId,
-      plan: AI_PLAN,
       modelId,
       slidesCount,
     });

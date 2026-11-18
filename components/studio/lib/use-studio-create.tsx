@@ -190,7 +190,7 @@ export function StudioCreateProvider({
       try {
         const topic = input.topic.trim();
         const aspectRatio: RatioKey = input.aspectRatio ?? "4:5";
-        const slidesCount = Math.min(10, Math.max(4, input.slidesCount ?? 7));
+        const slidesCount = Math.min(10, Math.max(1, input.slidesCount ?? 7));
         const language = input.language?.trim() || inferPromptLanguage(topic);
         const handle = normalizeHandle(
           input.handle ||

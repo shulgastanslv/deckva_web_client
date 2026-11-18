@@ -1,16 +1,15 @@
 import { fetchAiGet } from "@/lib/ai/client";
-import type { AiModelInfo, AiPlanId } from "@/lib/ai/types";
+import type { AiModelInfo } from "@/lib/ai/types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
-export async function listAiModelsUpstream(
-  plan: AiPlanId = "pro",
-): Promise<{ plan: AiPlanId; models: AiModelInfo[] }> {
+export async function listAiModelsUpstream(): Promise<{
+  models: AiModelInfo[];
+}> {
   const payload = (await fetchAiGet("/models", {
     label: "AI models",
-    params: { plan },
   })) as Record<string, unknown>;
 
   const modelsRaw = Array.isArray(payload.models) ? payload.models : [];
@@ -35,8 +34,5 @@ export async function listAiModelsUpstream(
     });
   }
 
-  return {
-    plan: payload.plan === "pro" ? "pro" : "free",
-    models,
-  };
+  return { models };
 }

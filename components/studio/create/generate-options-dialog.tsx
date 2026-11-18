@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 
 const PROMPT_LANGUAGES = ["ru", "en", "be"] as const;
 const RATIO_OPTIONS = STUDIO_RATIO_KEYS;
-const SLIDE_OPTIONS = [4, 5, 6, 7, 8, 9, 10] as const;
+const SLIDE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 const HANDLE_OPTIONS = [
   "@coach",
   "@founder",
