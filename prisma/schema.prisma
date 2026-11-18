@@ -45,6 +45,8 @@ model User {
   generationsUsedToday Int @default(0)
   /// UTC day key (YYYY-MM-DD) for {@link generationsUsedToday}.
   generationDayKey     String?
+  /// When true, daily generation cap is skipped (kept in sync for platform admins).
+  unlimitedGenerations Boolean @default(false)
 
   activeOrganizationId String?
   activeOrganization   Organization? @relation("UserActiveOrganization", fields: [activeOrganizationId], references: [id], onDelete: SetNull)

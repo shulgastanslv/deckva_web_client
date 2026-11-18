@@ -4,8 +4,9 @@ import { requireUserId } from "@/lib/auth/session";
 import { messages } from "@/lib/messages";
 
 import { emailIsAdmin } from "@/lib/auth-role";
-import { UserRole, isPlatformAdmin } from "@/lib/roles";
+import { isPlatformAdmin } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
+import { promotePlatformAdmin } from "@/lib/studio/admin-unlimited";
 
 type ActionResult<T extends object = object> =
   | ({ success: true } & T)
@@ -37,9 +38,7 @@ async function requireAdminId(): Promise<string | null> {
   });
   if (!user) return null;
   if (isPlatformAdmin(user.role) || emailIsAdmin(user.email)) {
-    if (!isPlatformAdmin(user.role)) {
-      await prisma.user.update({ where: { id: user.id }, data: { role: UserRole.ADMIN } });
-    }
+    await promotePlatformAdmin(user.id);
     return user.id;
   }
   return null;

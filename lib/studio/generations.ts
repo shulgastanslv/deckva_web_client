@@ -1,6 +1,6 @@
-import { emailIsAdmin } from "@/lib/auth-role";
 import { prisma } from "@/lib/prisma";
-import { isPlatformAdmin } from "@/lib/roles";
+import { UserRole, isPlatformAdmin } from "@/lib/roles";
+import { resolveUnlimitedGenerations } from "@/lib/studio/admin-unlimited";
 import {
   DAILY_GENERATION_LIMIT,
   dailyGenerationLimitMessage,
@@ -11,18 +11,11 @@ export type GenerationEntitlement = {
   limit: number;
   remaining: number;
   canGenerate: boolean;
-  /** Platform admins bypass the daily cap. */
+  /** DB flag `User.unlimitedGenerations` (admins). */
   unlimited: boolean;
   /** UTC calendar day key (YYYY-MM-DD). */
   dayKey: string;
 };
-
-function hasUnlimitedGenerations(user: {
-  role: string;
-  email: string;
-}): boolean {
-  return isPlatformAdmin(user.role) || emailIsAdmin(user.email);
-}
 
 export type GenerationDayPoint = {
   dayKey: string;
@@ -84,16 +77,17 @@ async function readDailyUsage(userId: string): Promise<{
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      id: true,
       generationsUsedToday: true,
       generationDayKey: true,
       role: true,
-      email: true,
+      unlimitedGenerations: true,
     },
   });
   if (!user) {
     return { used: 0, dayKey: today, unlimited: false };
   }
-  const unlimited = hasUnlimitedGenerations(user);
+  const unlimited = await resolveUnlimitedGenerations(user);
   if (user.generationDayKey !== today) {
     return { used: 0, dayKey: today, unlimited };
   }
@@ -273,15 +267,27 @@ export async function consumeGeneration(
     const user = await tx.user.findUnique({
       where: { id: userId },
       select: {
+        id: true,
         generationsUsedToday: true,
         generationDayKey: true,
         role: true,
-        email: true,
+        unlimitedGenerations: true,
       },
     });
     if (!user) throw new Error("User not found");
 
-    const unlimited = hasUnlimitedGenerations(user);
+    let unlimited = user.unlimitedGenerations;
+    if (!unlimited && isPlatformAdmin(user.role)) {
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          unlimitedGenerations: true,
+          role: UserRole.ADMIN,
+        },
+      });
+      unlimited = true;
+    }
+
     const usedToday =
       user.generationDayKey === today ? user.generationsUsedToday : 0;
 

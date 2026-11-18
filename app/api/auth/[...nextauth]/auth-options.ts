@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { emailIsAdmin } from "@/lib/auth-role";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 import { UserRole } from "@/lib/roles";
+import { promotePlatformAdmin } from "@/lib/studio/admin-unlimited";
 import bcrypt from "bcryptjs";
 import { type AuthOptions, type Profile } from "next-auth";
 import type { User as DbUser } from "@/lib/generated/prisma/client";
@@ -195,15 +196,19 @@ export const authOptions: AuthOptions = {
       if (token.id && (user || account || !token.role)) {
         const row = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, email: true },
+          select: {
+            role: true,
+            email: true,
+            unlimitedGenerations: true,
+          },
         });
         if (row) {
           const role = emailIsAdmin(row.email) ? UserRole.ADMIN : row.role;
-          if (role !== row.role) {
-            await prisma.user.update({
-              where: { id: token.id as string },
-              data: { role },
-            });
+          const needsAdminSync =
+            role === UserRole.ADMIN &&
+            (role !== row.role || !row.unlimitedGenerations);
+          if (needsAdminSync) {
+            await promotePlatformAdmin(token.id as string);
           }
           token.role = role;
         }
