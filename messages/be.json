@@ -118,8 +118,8 @@
     "titleTemplate": "%s · Deckva",
     "description": "Deckva — студыя каруселяў для сацсетак. Збярыце слайды на палатне, адрэдагуйце і экспартуйце ў PNG, ZIP або PDF.",
     "keywords": "Deckva,карусель,каруселі,Instagram,студыя,рэдактар слайдаў,сацсеткі",
-    "ogTitle": "Deckva — студыя каруселяў",
-    "ogDescription": "Шаблоны, палатно і экспарт. Каруселі для Instagram і іншых сетак."
+    "ogTitle": "AI Carousel Editor",
+    "ogDescription": "Генеруйце каруселі, рэдагуйце слайды і экспартуйце ў PNG, ZIP або PDF."
   },
   "studio": {
     "makeCarousel": "Зрабіце карусель",

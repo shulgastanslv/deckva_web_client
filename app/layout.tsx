@@ -25,12 +25,21 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
+const ogImage = {
+  url: "/presentation.png",
+  width: 3840,
+  height: 2160,
+  alt: "Deckva — AI Carousel Editor",
+  type: "image/png",
+} as const;
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
   const localeRaw = await getLocale();
   const locale: AppLocale = isAppLocale(localeRaw) ? localeRaw : "ru";
 
   return {
+    metadataBase: new URL("https://deckva.by"),
     applicationName: "Deckva",
     title: {
       default: t("titleDefault"),
@@ -53,11 +62,14 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Deckva",
       title: t("ogTitle"),
       description: t("ogDescription"),
+      url: "https://deckva.by",
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: t("ogTitle"),
       description: t("ogDescription"),
+      images: [ogImage],
     },
   };
 }

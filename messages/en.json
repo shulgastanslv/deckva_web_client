@@ -118,8 +118,8 @@
     "titleTemplate": "%s · Deckva",
     "description": "Deckva is a carousel studio for social media. Build slides on a canvas, edit, and export to PNG, ZIP, or PDF.",
     "keywords": "Deckva,carousel,Instagram,studio,slide editor,social media",
-    "ogTitle": "Deckva — carousel studio",
-    "ogDescription": "Community, canvas, and export. Carousels for Instagram and other networks."
+    "ogTitle": "AI Carousel Editor",
+    "ogDescription": "Generate carousels, edit slides, and export to PNG, ZIP, or PDF."
   },
   "studio": {
     "makeCarousel": "Make a carousel",

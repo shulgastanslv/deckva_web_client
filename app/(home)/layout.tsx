@@ -21,18 +21,28 @@ export const metadata: Metadata = {
   creator: "Deckva",
   publisher: "Deckva",
   openGraph: {
-    title: "Deckva — carousel studio",
+    title: "AI Carousel Editor",
     description:
-      "Write the topic. The slides follow. Edit them and download the post.",
+      "Generate carousels, edit slides, and export to PNG, ZIP, or PDF.",
     siteName: "Deckva",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/presentation.png",
+        width: 3840,
+        height: 2160,
+        alt: "Deckva — AI Carousel Editor",
+        type: "image/png",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deckva — carousel studio",
+    title: "AI Carousel Editor",
     description:
-      "Write the topic. The slides follow. Edit them and download the post.",
+      "Generate carousels, edit slides, and export to PNG, ZIP, or PDF.",
+    images: ["/presentation.png"],
   },
 };
 
