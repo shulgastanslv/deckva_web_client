@@ -94,7 +94,7 @@ export function StudioCreateMenu({
           >
             {leading}
             {triggerLabel}
-            <ChevronDown className="size-3.5 opacity-50" />
+            <ChevronDown className="size-4 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
 
