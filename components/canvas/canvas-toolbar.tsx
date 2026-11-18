@@ -31,7 +31,6 @@ import {
   Eye,
   EyeSlash as EyeOff,
   FilePlus,
-  GridFour as Grid3X3,
   Hash,
   Hand,
   Lock,
@@ -43,9 +42,7 @@ import {
   Trash as Trash2,
   LockOpen as Unlock,
   UploadSimple as Upload,
-  ArrowElbowDownRight,
 } from "@phosphor-icons/react";
-import { GridSettingsPanel } from "@/components/canvas/grid-controls";
 import {
   FindReplacePanel,
   SlideNumberPanel,
@@ -62,8 +59,6 @@ import {
   parseImportedTemplate,
   type ImportedTemplate,
 } from "@/lib/templates/parse";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useSlides } from "@/hooks/use-slides";
 import { useTranslations } from "next-intl";
@@ -148,11 +143,6 @@ export function CanvasToolbar({
   } = useSlides();
 
   const projectTitle = useCanvasStore((s) => s.projectTitle);
-  const autoFlowEnabled = useCanvasStore((s) => s.autoFlowEnabled);
-  const autoFlowEdgeTolerance = useCanvasStore((s) => s.autoFlowEdgeTolerance);
-  const autoFlowPadding = useCanvasStore((s) => s.autoFlowPadding);
-  const setAutoFlowEdgeTolerance = useCanvasStore((s) => s.setAutoFlowEdgeTolerance);
-  const setAutoFlowPadding = useCanvasStore((s) => s.setAutoFlowPadding);
   const handActive = useCanvasStore((s) => s.handActive);
   const setHandActive = useCanvasStore((s) => s.setHandActive);
   const eraserActive = useCanvasStore((s) => s.eraserActive);
@@ -432,26 +422,6 @@ export function CanvasToolbar({
                   "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
                 )}
               >
-                <Grid3X3 className="size-5" />
-                {t("layoutGrid")}
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent
-                sideOffset={8}
-                className="w-72 rounded-2xl p-3"
-                onPointerDown={keepSubmenuOpen}
-                onKeyDown={(event) => event.stopPropagation()}
-              >
-                <GridSettingsPanel />
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger
-                className={cn(
-                  menuItem,
-                  "focus:bg-muted/50 data-[state=open]:bg-muted/50 [&_svg:not([class*='text-'])]:text-muted-foreground",
-                )}
-              >
                 <Hash className="size-5" />
                 {t("slideNumber")}
               </DropdownMenuSubTrigger>
@@ -484,56 +454,6 @@ export function CanvasToolbar({
                 <FindReplacePanel />
               </DropdownMenuSubContent>
             </DropdownMenuSub>
-
-            <DropdownMenuSeparator className="bg-border/50" />
-
-            <div className="flex items-center justify-between gap-2 rounded-xl px-3 py-2">
-              <div className="flex items-center gap-2 text-[13px]">
-                <ArrowElbowDownRight className="size-5 shrink-0 stroke-[1.5] text-muted-foreground" />
-                {t("autoFlow")}
-              </div>
-              <Switch
-                checked={autoFlowEnabled}
-                onCheckedChange={(v) =>
-                  useCanvasStore.getState().setAutoFlowEnabled(v)
-                }
-              />
-            </div>
-            <div
-              className={cn(
-                "flex flex-col gap-2 px-3 pb-2 pt-1 transition-opacity",
-                !autoFlowEnabled && "pointer-events-none opacity-50",
-              )}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[13px] text-muted-foreground">{t("edge")}</span>
-                <Input
-                  type="number"
-                  min={0}
-                  max={64}
-                  value={autoFlowEdgeTolerance}
-                  onChange={(e) => {
-                    const n = Number(e.target.value);
-                    if (Number.isFinite(n)) setAutoFlowEdgeTolerance(n);
-                  }}
-                  className="h-9 w-16 rounded-md border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[13px] text-muted-foreground">{t("padding")}</span>
-                <Input
-                  type="number"
-                  min={0}
-                  max={200}
-                  value={autoFlowPadding}
-                  onChange={(e) => {
-                    const n = Number(e.target.value);
-                    if (Number.isFinite(n)) setAutoFlowPadding(n);
-                  }}
-                  className="h-9 w-16 rounded-md border-none bg-muted/40 px-2 text-center text-[13px] tabular-nums shadow-none"
-                />
-              </div>
-            </div>
 
             <DropdownMenuSeparator className="bg-border/50" />
 

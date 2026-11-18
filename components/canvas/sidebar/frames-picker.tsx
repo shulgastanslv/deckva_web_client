@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CaretUpDown as ChevronsUpDown,
   MagnifyingGlass as Search,
@@ -12,16 +12,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { controlH } from "@/components/ui/control";
+import { FRAME_ITEMS } from "@/components/canvas/use-element-library";
 import type { FrameKind } from "@/lib/canvas/frames";
 import {
+  FRAME_FAMILY_FILTERS,
   FRAME_LAYOUT_PRESETS,
   frameFamilyForKind,
+  type FrameFamilyFilter,
   type FrameLayoutPreset,
 } from "@/lib/canvas/frame-layouts";
 import { getDeviceScreenSize } from "@/lib/canvas/device-mockup";
 import { cn } from "@/lib/utils";
-import { controlH } from "@/components/ui/control";
-import { FRAME_ITEMS } from "@/components/canvas/use-element-library";
 
 type FrameItem = (typeof FRAME_ITEMS)[number];
 type FrameFamily = FrameLayoutPreset["family"];
@@ -32,17 +34,12 @@ export type FramePlaceOptions = {
   fit: FrameFitMode;
 };
 
-const CHECKER_STYLE = {
-  backgroundColor: "#ffffff",
-  backgroundImage: [
-    "linear-gradient(45deg, #c4c4c4 25%, transparent 25%)",
-    "linear-gradient(-45deg, #c4c4c4 25%, transparent 25%)",
-    "linear-gradient(45deg, transparent 75%, #c4c4c4 75%)",
-    "linear-gradient(-45deg, transparent 75%, #c4c4c4 75%)",
-  ].join(","),
-  backgroundSize: "8px 8px",
-  backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
-} as const;
+const FAMILY_LABEL: Record<Exclude<FrameFamilyFilter, "all">, string> = {
+  phone: "Phone",
+  tablet: "Tablet",
+  desktop: "Desktop",
+  watch: "Watch",
+};
 
 function previewSize(family: FrameFamily) {
   switch (family) {
@@ -57,17 +54,44 @@ function previewSize(family: FrameFamily) {
   }
 }
 
+function DeviceThumb({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "relative flex w-full items-center justify-center overflow-hidden bg-muted/30",
+        className,
+      )}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        draggable={false}
+        className="max-h-[72%] max-w-[55%] object-contain"
+      />
+    </span>
+  );
+}
+
 function LayoutCard({
   layout,
   frame,
   family,
   active,
+  disabled,
   onSelect,
 }: {
   layout: FrameLayoutPreset;
   frame: FrameItem;
   family: FrameFamily;
   active: boolean;
+  disabled?: boolean;
   onSelect: () => void;
 }) {
   const size = previewSize(family);
@@ -75,34 +99,38 @@ function LayoutCard({
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={onSelect}
       title={layout.label}
       className={cn(
-        "group relative mx-1 block aspect-[5/4] w-[calc(100%-0.5rem)] min-w-0 overflow-hidden rounded-md text-left transition-colors",
+        "group relative flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1.5 py-2 text-center transition-colors disabled:opacity-40",
         active
-          ? "bg-muted/60 ring-1 ring-ring/40"
-          : "hover:bg-muted/40",
+          ? "ring-1 ring-primary px-2 m-2"
+          : "hover:bg-muted/60 dark:hover:bg-muted/35",
       )}
-      style={CHECKER_STYLE}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={frame.src}
-        alt=""
-        draggable={false}
-        className="pointer-events-none absolute object-contain drop-shadow-sm"
-        style={{
-          left: `${layout.x * 100}%`,
-          top: `${layout.y * 100}%`,
-          maxWidth: size.maxWidth,
-          maxHeight: size.maxHeight,
-          width: "auto",
-          height: "auto",
-          transform: `translate(-50%, -50%) rotate(${layout.angle}deg) scale(${layout.scale})`,
-          transformOrigin: "center center",
-        }}
-      />
-      <span className="sr-only">{layout.label}</span>
+      <span className="relative aspect-[5/4] w-full overflow-hidden rounded-xl bg-muted/30">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={frame.src}
+          alt=""
+          draggable={false}
+          className="pointer-events-none absolute object-contain"
+          style={{
+            left: `${layout.x * 100}%`,
+            top: `${layout.y * 100}%`,
+            maxWidth: size.maxWidth,
+            maxHeight: size.maxHeight,
+            width: "auto",
+            height: "auto",
+            transform: `translate(-50%, -50%) rotate(${layout.angle}deg) scale(${layout.scale})`,
+            transformOrigin: "center center",
+          }}
+        />
+      </span>
+      <span className="w-full truncate text-[11px] font-normal leading-tight text-foreground">
+        {layout.label}
+      </span>
     </button>
   );
 }
@@ -122,80 +150,83 @@ export function FramesPicker({
 }) {
   const t = useTranslations("editor.frames");
   const te = useTranslations("editor.elements");
-  const [selectedKind, setSelectedKind] = useState<FrameKind>("iphone18pro");
-  const [layoutId, setLayoutId] = useState(FRAME_LAYOUT_PRESETS[0]!.id);
-  const [deviceOpen, setDeviceOpen] = useState(false);
-  const [deviceQuery, setDeviceQuery] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
-  const fit: FrameFitMode = "max";
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [familyFilter, setFamilyFilter] =
+    useState<FrameFamilyFilter>("all");
+  const [kind, setKind] = useState<FrameKind>("iphone18pro");
+  const [layoutId, setLayoutId] = useState("center");
 
   const devices = useMemo(() => {
-    const q = (deviceOpen ? deviceQuery : externalSearch).trim().toLowerCase();
+    const q = (open ? query : externalSearch).trim().toLowerCase();
     return FRAME_ITEMS.filter((item) => {
-      if (!q) return true;
       const family = frameFamilyForKind(item.kind);
+      if (familyFilter !== "all" && family !== familyFilter) return false;
+      if (!q) return true;
       return (
         item.label.toLowerCase().includes(q) ||
         item.kind.toLowerCase().includes(q) ||
         family.includes(q)
       );
     });
-  }, [deviceOpen, deviceQuery, externalSearch]);
+  }, [open, query, externalSearch, familyFilter]);
 
   useEffect(() => {
-    if (devices.some((item) => item.kind === selectedKind)) return;
+    if (devices.some((item) => item.kind === kind)) return;
     const next = devices[0];
-    if (next) setSelectedKind(next.kind as FrameKind);
-  }, [devices, selectedKind]);
+    if (next) setKind(next.kind as FrameKind);
+  }, [devices, kind]);
 
   const selectedFrame =
-    FRAME_ITEMS.find((item) => item.kind === selectedKind) ?? FRAME_ITEMS[0]!;
-  const family = frameFamilyForKind(selectedKind);
-  const selectedSize = getDeviceScreenSize(selectedKind);
+    FRAME_ITEMS.find((item) => item.kind === kind) ?? FRAME_ITEMS[0]!;
+  const family = frameFamilyForKind(kind);
+  const selectedSize = getDeviceScreenSize(kind);
 
-  const layoutPresets = useMemo(() => {
+  const layouts = useMemo(() => {
     const matched = FRAME_LAYOUT_PRESETS.filter((p) => p.family === family);
     return matched.length > 0
       ? matched
       : FRAME_LAYOUT_PRESETS.filter((p) => p.family === "phone");
   }, [family]);
 
+  useEffect(() => {
+    if (layouts.some((p) => p.id === layoutId)) return;
+    setLayoutId(layouts[0]?.id ?? "center");
+  }, [layouts, layoutId]);
+
   const place = (layout: FrameLayoutPreset) => {
+    if (disabled) return;
     setLayoutId(layout.id);
-    onPlace(selectedKind, layout, { fit });
+    onPlace(kind, layout, { fit: "max" });
   };
 
   return (
     <div className="flex w-full min-w-0 max-w-full flex-col gap-3 overflow-x-hidden">
       <Popover
-        open={deviceOpen}
-        onOpenChange={(open) => {
-          setDeviceOpen(open);
-          if (!open) setDeviceQuery("");
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (!next) {
+            setQuery("");
+            setFamilyFilter("all");
+          }
         }}
       >
         <PopoverTrigger asChild>
           <button
             type="button"
             disabled={disabled || devices.length === 0}
+            aria-label={t("deviceAria")}
             className={cn(
               controlH,
-              "box-border flex w-full min-w-0 items-center gap-2.5 rounded-md border-none bg-muted/40 px-3.5 py-0 text-left shadow-none transition-colors hover:bg-muted/60 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45",
+              "box-border flex w-full min-w-0 items-center gap-2 rounded-md border-none bg-muted/40 px-3.5 py-0 text-left shadow-none transition-colors hover:bg-muted/60 disabled:opacity-40 dark:bg-muted/30 dark:hover:bg-muted/45",
             )}
           >
-            <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background/80 dark:bg-background/35">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={selectedFrame.src}
-                alt=""
-                className="max-h-5 max-w-5 object-contain"
-              />
-            </span>
             <span className="min-w-0 flex-1 truncate text-[13px] font-normal leading-none text-foreground">
               {selectedFrame.label}
               <span className="text-muted-foreground"> / </span>
               <span className="tabular-nums text-muted-foreground">
-                {selectedSize.width} × {selectedSize.height}
+                {selectedSize.width}×{selectedSize.height}
               </span>
             </span>
             <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
@@ -206,92 +237,102 @@ export function FramesPicker({
           align="start"
           sideOffset={8}
           collisionPadding={12}
-          className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border-0 p-0 shadow-sm dark:border dark:border-border/50"
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            requestAnimationFrame(() => searchRef.current?.focus());
-          }}
-          onCloseAutoFocus={(e) => e.preventDefault()}
+          className="w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.35rem] p-0"
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <div className="flex flex-col">
-            <div className="shrink-0 px-2.5 pt-2.5">
-              <div className="relative">
-                <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  ref={searchRef}
-                  value={deviceQuery}
-                  onChange={(e) => setDeviceQuery(e.target.value)}
-                  placeholder={te("searchDevices")}
-                  aria-label={te("searchDevices")}
-                  className={cn(
-                    controlH,
-                    "w-full rounded-md border-none bg-muted/40 pl-9 pr-3 text-[13px] font-normal text-foreground shadow-none outline-none placeholder:text-muted-foreground/70 focus:bg-muted/60",
-                  )}
-                />
-              </div>
-            </div>
-            <div className="max-h-[min(20rem,45vh)] overflow-y-auto overscroll-contain px-2.5 pt-1.5 pb-2 [scrollbar-width:thin]">
-              <div className="grid grid-cols-3 gap-1.5">
-                {devices.map((item) => {
-                  const active = item.kind === selectedKind;
-                  const size = getDeviceScreenSize(item.kind as FrameKind);
-                  return (
-                    <button
-                      key={item.kind}
-                      type="button"
-                      title={item.label}
-                      onClick={() => {
-                        setSelectedKind(item.kind as FrameKind);
-                        setDeviceOpen(false);
-                        setDeviceQuery("");
-                      }}
-                      className={cn(
-                        "flex min-w-0 flex-col items-center gap-1.5 rounded-md px-1.5 py-2.5 text-center transition-colors",
-                        active
-                          ? "bg-muted/60 text-foreground"
-                          : "hover:bg-muted/40 dark:hover:bg-muted/35",
-                      )}
-                    >
-                      <span className="flex h-16 w-full items-center justify-center">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={item.src}
-                          alt=""
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      </span>
-                      <span className="w-full truncate text-[11px] font-normal leading-tight text-foreground">
-                        {item.label}
-                      </span>
-                      <span className="w-full truncate text-[10px] tabular-nums text-muted-foreground">
-                        {size.width} × {size.height}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+          <div className="flex items-center gap-2.5 border-b border-border/40 px-3.5 py-2.5">
+            <Search className="size-4 shrink-0 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={te("searchDevices")}
+              aria-label={te("searchDevices")}
+              className="h-9 w-full bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+
+          <div className="max-h-[min(22rem,50vh)] overflow-y-auto overscroll-contain px-2.5 pt-2.5 pb-2 [scrollbar-width:thin]">
+            <div className="grid grid-cols-2 gap-2">
+              {devices.map((item) => {
+                const active = item.kind === kind;
+                return (
+                  <button
+                    key={item.kind}
+                    type="button"
+                    title={item.label}
+                    onClick={() => {
+                      setKind(item.kind as FrameKind);
+                      setOpen(false);
+                      setQuery("");
+                    }}
+                    className={cn(
+                      "flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1.5 py-2 text-center transition-colors",
+                      active
+                        ? "bg-muted/70 dark:bg-muted/45"
+                        : "hover:bg-muted/60 dark:hover:bg-muted/35",
+                    )}
+                  >
+                    <DeviceThumb
+                      src={item.src}
+                      className="aspect-[5/4] w-full rounded-xl"
+                    />
+                    <span className="w-full truncate text-[11px] font-normal leading-tight text-foreground">
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              })}
               {devices.length === 0 ? (
-                <p className="px-2 py-10 text-center text-[13px] text-muted-foreground">
+                <p className="col-span-2 px-2 py-10 text-center text-[13px] text-muted-foreground">
                   {t("noDevices")}
                 </p>
               ) : null}
             </div>
           </div>
+
+          <div className="border-t border-border/40 px-3 py-3">
+            <div
+              className={cn(
+                "flex w-full min-w-0 items-center overflow-x-auto rounded-md bg-muted/40 p-1 [scrollbar-width:none]",
+                controlH,
+              )}
+            >
+              {FRAME_FAMILY_FILTERS.map((id) => {
+                const active = familyFilter === id;
+                const label =
+                  id === "all" ? t("allDevices") : FAMILY_LABEL[id];
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setFamilyFilter(id)}
+                    className={cn(
+                      "h-full shrink-0 rounded-md px-3 text-[13px] font-normal whitespace-nowrap transition-colors",
+                      active
+                        ? "bg-background text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </PopoverContent>
       </Popover>
 
-      <div className="flex w-full flex-col gap-2.5">
-        {layoutPresets.map((layout) => (
+      <div className="grid w-full grid-cols-1">
+        {layouts.map((layout) => (
           <LayoutCard
             key={layout.id}
             layout={layout}
             frame={selectedFrame}
             family={family}
             active={layout.id === layoutId}
-            onSelect={() => {
-              if (disabled) return;
-              place(layout);
-            }}
+            disabled={disabled}
+            onSelect={() => place(layout)}
           />
         ))}
       </div>

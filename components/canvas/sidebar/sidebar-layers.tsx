@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   CaretRight as ChevronRight,
   Copy,
@@ -92,6 +92,14 @@ function isRowSelected(active: FabricObject | null, obj: FabricObject) {
   return false;
 }
 
+function selectionMembers(active: FabricObject | null): FabricObject[] {
+  if (!active) return [];
+  if (active.type === "activeselection") {
+    return (active as ActiveSelection).getObjects();
+  }
+  return [active];
+}
+
 export function SidebarLayers() {
   const t = useTranslations("editor.layers");
   const manager = useCanvasManager();
@@ -102,6 +110,7 @@ export function SidebarLayers() {
   const [draft, setDraft] = useState("");
   const [drop, setDrop] = useState<DropMark | null>(null);
   const dragging = useRef<FabricObject | null>(null);
+  const anchorRef = useRef<FabricObject | null>(null);
 
   useEffect(() => {
     if (!manager) return;
@@ -121,29 +130,91 @@ export function SidebarLayers() {
     manager?.transact(work);
   };
 
-  const select = (obj: FabricObject, shift: boolean) => {
+  const applySelection = (targets: FabricObject[]) => {
     if (!manager) return;
     const canvas = manager.canvas;
-    const current = canvas.getActiveObject();
-    if (
-      shift &&
-      current &&
-      current !== obj &&
-      layerParent(current) === layerParent(obj) &&
-      current.type !== "activeselection"
-    ) {
+    const unique = Array.from(new Set(targets));
+    if (unique.length === 0) {
       canvas.discardActiveObject();
-      canvas.setActiveObject(new ActiveSelection([current, obj], { canvas }));
-    } else if (shift && current?.type === "activeselection" && layerParent(obj) === null) {
-      const members = (current as ActiveSelection).getObjects().filter((item) => layerParent(item) === null);
-      if (!members.includes(obj)) {
-        canvas.discardActiveObject();
-        canvas.setActiveObject(new ActiveSelection([...members, obj], { canvas }));
-      }
+    } else if (unique.length === 1) {
+      canvas.setActiveObject(unique[0]!);
     } else {
-      canvas.setActiveObject(obj);
+      canvas.discardActiveObject();
+      canvas.setActiveObject(new ActiveSelection(unique, { canvas }));
     }
     canvas.requestRenderAll();
+  };
+
+  /** Figma-like: click = one, ⌘/Ctrl = toggle, Shift = range (same parent). */
+  const select = (obj: FabricObject, event: React.MouseEvent) => {
+    if (!manager) return;
+    const meta = event.metaKey || event.ctrlKey;
+    const shift = event.shiftKey;
+    const parent = layerParent(obj);
+    const siblings = rows
+      .map((row) => row.obj)
+      .filter((item) => layerParent(item) === parent);
+    const current = selectionMembers(selected).filter(
+      (item) => layerParent(item) === parent,
+    );
+
+    if (shift && anchorRef.current && layerParent(anchorRef.current) === parent) {
+      const a = siblings.indexOf(anchorRef.current);
+      const b = siblings.indexOf(obj);
+      if (a >= 0 && b >= 0) {
+        const [lo, hi] = a < b ? [a, b] : [b, a];
+        const range = siblings.slice(lo, hi + 1);
+        applySelection(meta ? [...current, ...range] : range);
+        return;
+      }
+    }
+
+    if (meta) {
+      if (current.includes(obj)) {
+        applySelection(current.filter((item) => item !== obj));
+      } else {
+        applySelection([...current, obj]);
+      }
+      anchorRef.current = obj;
+      return;
+    }
+
+    applySelection([obj]);
+    anchorRef.current = obj;
+  };
+
+  const selectedSet = useMemo(() => new Set(selectionMembers(selected)), [selected]);
+
+  const deleteTargets = (obj: FabricObject) => {
+    if (!manager) return;
+    const targets =
+      selectedSet.has(obj) && selectedSet.size > 1
+        ? Array.from(selectedSet)
+        : [obj];
+    run(() => {
+      manager.canvas.discardActiveObject();
+      for (const item of targets) removeLayer(manager.canvas, item);
+    });
+  };
+
+  const setVisibleTargets = (obj: FabricObject, visible: boolean) => {
+    const targets =
+      selectedSet.has(obj) && selectedSet.size > 1
+        ? Array.from(selectedSet)
+        : [obj];
+    run(() => {
+      for (const item of targets) setLayerVisible(item, visible);
+    });
+  };
+
+  const setLockedTargets = (obj: FabricObject, locked: boolean) => {
+    const targets =
+      selectedSet.has(obj) && selectedSet.size > 1
+        ? Array.from(selectedSet)
+        : [obj];
+    run(() => {
+      for (const item of targets) setLayerLocked(item, locked);
+    });
   };
 
   const commitName = (obj: FabricObject) => {
@@ -248,10 +319,11 @@ export function SidebarLayers() {
         const open = !collapsed.has(id);
         const hidden = obj.visible === false;
         const locked = isLayerLocked(obj);
-        const active = isRowSelected(selected, obj);
+        const active = selectedSet.has(obj) || isRowSelected(selected, obj);
         const renaming = renamingId === id;
         const Icon = layerGlyph(obj);
         const mark = drop?.id === id ? drop.edge : null;
+        const multi = selectedSet.has(obj) && selectedSet.size > 1;
         const menuItem =
           "cursor-pointer gap-2 rounded-md px-2.5 py-2.5 text-[13px] font-normal text-foreground focus:bg-muted/50 focus:text-foreground";
 
@@ -263,7 +335,7 @@ export function SidebarLayers() {
               onDragOver={(event) => onDragOver(event, obj)}
               onDrop={(event) => onDrop(event, obj)}
               onDragEnd={endDrag}
-              onClick={(event) => select(obj, event.shiftKey)}
+              onClick={(event) => select(obj, event)}
               className={cn(
                 "group/row flex h-9 cursor-pointer items-center gap-1 rounded-md px-2 transition-colors",
                 active
@@ -327,7 +399,7 @@ export function SidebarLayers() {
                     className="h-7 min-w-0 flex-1 rounded-md bg-background px-2 text-left text-[13px] text-foreground outline-none ring-1 ring-border/50"
                   />
                 ) : (
-                  <span className="min-w-0 flex-1 truncate px-0.5 text-left text-[13px] font-medium text-foreground">
+                  <span className="min-w-0 flex-1 truncate px-0.5 text-left text-[13px] font-normal text-foreground">
                     {layerLabel(obj)}
                   </span>
                 )}
@@ -341,11 +413,11 @@ export function SidebarLayers() {
               >
                 <button
                   type="button"
-                  aria-label={hidden ? "Show" : "Hide"}
-                  title={hidden ? "Show" : "Hide"}
+                  aria-label={hidden ? t("show") : t("hide")}
+                  title={hidden ? t("show") : t("hide")}
                   onClick={(event) => {
                     event.stopPropagation();
-                    run(() => setLayerVisible(obj, hidden));
+                    setVisibleTargets(obj, hidden);
                   }}
                   className={cn(
                     "flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-background/70 hover:text-foreground",
@@ -356,11 +428,11 @@ export function SidebarLayers() {
                 </button>
                 <button
                   type="button"
-                  aria-label={locked ? "Unlock" : "Lock"}
-                  title={locked ? "Unlock" : "Lock"}
+                  aria-label={locked ? t("unlock") : t("lock")}
+                  title={locked ? t("unlock") : t("lock")}
                   onClick={(event) => {
                     event.stopPropagation();
-                    run(() => setLayerLocked(obj, !locked));
+                    setLockedTargets(obj, !locked);
                   }}
                   className={cn(
                     "flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-background/70 hover:text-foreground",
@@ -388,60 +460,78 @@ export function SidebarLayers() {
                     sideOffset={6}
                     className="w-52 rounded-2xl p-1.5 text-[13px]"
                   >
-                    <DropdownMenuItem className={menuItem} onSelect={() => startRename(obj)}>
-                      <Pencil className="size-4" />
-                      Rename
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className={menuItem} onSelect={() => duplicate(obj)}>
-                      <Copy className="size-4" />
-                      Duplicate
-                      <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="my-1 bg-border/50" />
+                    {!multi ? (
+                      <DropdownMenuItem className={menuItem} onSelect={() => startRename(obj)}>
+                        <Pencil className="size-4" />
+                        {t("rename")}
+                      </DropdownMenuItem>
+                    ) : null}
+                    {!multi ? (
+                      <DropdownMenuItem className={menuItem} onSelect={() => duplicate(obj)}>
+                        <Copy className="size-4" />
+                        {t("duplicate")}
+                        <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
+                      </DropdownMenuItem>
+                    ) : null}
+                    {!multi ? <DropdownMenuSeparator className="my-1 bg-border/50" /> : null}
+                    {!multi ? (
+                      <>
+                        <DropdownMenuItem
+                          className={menuItem}
+                          onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "front"))}
+                        >
+                          <BringToFrontIcon className="size-5" />
+                          {t("bringToFront")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className={menuItem}
+                          onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "forward"))}
+                        >
+                          <BringForwardIcon className="size-5" />
+                          {t("bringForward")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className={menuItem}
+                          onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "backward"))}
+                        >
+                          <SendBackwardIcon className="size-5" />
+                          {t("sendBackward")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className={menuItem}
+                          onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "back"))}
+                        >
+                          <SendToBackIcon className="size-5" />
+                          {t("sendToBack")}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="my-1 bg-border/50" />
+                      </>
+                    ) : null}
                     <DropdownMenuItem
                       className={menuItem}
-                      onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "front"))}
-                    >
-                      <BringToFrontIcon className="size-5" />
-                      Bring to front
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={menuItem}
-                      onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "forward"))}
-                    >
-                      <BringForwardIcon className="size-5" />
-                      Bring forward
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={menuItem}
-                      onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "backward"))}
-                    >
-                      <SendBackwardIcon className="size-5" />
-                      Send backward
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={menuItem}
-                      onSelect={() => run(() => moveLayerStep(manager!.canvas, obj, "back"))}
-                    >
-                      <SendToBackIcon className="size-5" />
-                      Send to back
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="my-1 bg-border/50" />
-                    <DropdownMenuItem
-                      className={menuItem}
-                      onSelect={() => run(() => setLayerVisible(obj, hidden))}
+                      onSelect={() => setVisibleTargets(obj, hidden)}
                     >
                       {hidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                      {hidden ? "Show" : "Hide"}
+                      {hidden ? t("show") : t("hide")}
+                      {multi ? (
+                        <span className="ml-auto text-[11px] text-muted-foreground">
+                          {selectedSet.size}
+                        </span>
+                      ) : null}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className={menuItem}
-                      onSelect={() => run(() => setLayerLocked(obj, !locked))}
+                      onSelect={() => setLockedTargets(obj, !locked)}
                     >
                       {locked ? <Unlock className="size-4" /> : <Lock className="size-4" />}
-                      {locked ? "Unlock" : "Lock"}
+                      {locked ? t("unlock") : t("lock")}
+                      {multi ? (
+                        <span className="ml-auto text-[11px] text-muted-foreground">
+                          {selectedSet.size}
+                        </span>
+                      ) : null}
                     </DropdownMenuItem>
-                    {isLayerGroup(obj) && (
+                    {!multi && isLayerGroup(obj) ? (
                       <DropdownMenuItem
                         className={menuItem}
                         onSelect={() => {
@@ -451,18 +541,23 @@ export function SidebarLayers() {
                         }}
                       >
                         <Ungroup className="size-4" />
-                        Ungroup
+                        {t("ungroup")}
                         <DropdownMenuShortcut>⇧⌘G</DropdownMenuShortcut>
                       </DropdownMenuItem>
-                    )}
+                    ) : null}
                     <DropdownMenuSeparator className="my-1 bg-border/50" />
                     <DropdownMenuItem
                       variant="destructive"
                       className={cn(menuItem, "text-destructive focus:text-destructive")}
-                      onSelect={() => run(() => removeLayer(manager!.canvas, obj))}
+                      onSelect={() => deleteTargets(obj)}
                     >
                       <Trash2 className="size-4" />
-                      Delete
+                      {t("delete")}
+                      {multi ? (
+                        <span className="ml-auto text-[11px] tabular-nums opacity-80">
+                          {selectedSet.size}
+                        </span>
+                      ) : null}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

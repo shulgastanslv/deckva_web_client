@@ -53,6 +53,7 @@ import {
   ArrowBendUpLeftIcon,
   ArrowBendDownLeftIcon,
   ArrowBendUpRightIcon,
+  SelectionBackgroundIcon,
 } from "@phosphor-icons/react";
 import { useSelectedObject } from "@/hooks/use-selected-object";
 import {
@@ -198,15 +199,15 @@ function BlendSelect({
 
   return (
     <Select value={resolved} onValueChange={onChange}>
-      <SelectTrigger className={sidebarSelectTrigger} aria-label="Blend">
+      <SelectTrigger className={cn(sidebarSelectTrigger, "w-full")} aria-label="Blend">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent className="rounded-2xl p-1.5">
+      <SelectContent position="popper" className="rounded-2xl p-1.5">
         {BLEND_MODES.map((mode) => (
           <SelectItem
             key={mode.id}
             value={mode.id}
-            className="rounded-md text-[13px] font-normal focus:bg-muted/50"
+            className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50"
           >
             {mode.label}
           </SelectItem>
@@ -1372,10 +1373,14 @@ export function RightSidebar({
                         }
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-3.5 py-2">
+                    <div
+                      className={cn(
+                        "flex items-center justify-between gap-2 rounded-md bg-muted/40 px-3.5",
+                        controlH,
+                      )}
+                    >
                       <FieldLabel>Shadow</FieldLabel>
                       <Switch
-                        size="sm"
                         checked={formValues.hasShadow}
                         onCheckedChange={toggleShadow}
                         aria-label={t("enableShadow")}
@@ -1538,7 +1543,7 @@ export function RightSidebar({
                       {enhanceBusy === "remove-bg" ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        <WandSparkles className="size-5" />
+                        <SelectionBackgroundIcon className="size-5" />
                       )}
                       {enhanceBusy === "remove-bg" ? t("removingBg") : t("removeBg")}
                     </Button>
@@ -2013,7 +2018,6 @@ export function RightSidebar({
                 defaultOpen={false}
                 headerRight={
                   <Switch
-                    size="sm"
                     checked={formValues.hasShadow}
                     onCheckedChange={toggleShadow}
                     aria-label={t("enableShadow")}

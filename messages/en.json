@@ -1510,6 +1510,10 @@
     "settings": {
       "title": "Canvas Preferences",
       "dotGrid": "Show dot grid background",
+      "layoutGrid": "Layout grid",
+      "layoutGridHint": "Applies to all slides",
+      "autoFlow": "Auto Flow",
+      "autoFlowHint": "Applies to all slides",
       "autosave": "Autosave",
       "autosaveHint": "Saves quietly in the background"
     },
@@ -1658,6 +1662,8 @@
     },
     "frames": {
       "noDevices": "No devices found",
+      "allDevices": "All",
+      "deviceAria": "Choose device frame",
       "backgroundColor": "Background color",
       "transparent": "Transparent",
       "transparentBackground": "Transparent background",
@@ -1879,6 +1885,8 @@
       },
       "profilePicture": "Profile Picture",
       "profilePictureHint": "Click the avatar to upload a new image.",
+      "removeAvatar": "Remove",
+      "removeAvatarAria": "Remove profile picture",
       "displayName": "Display name",
       "email": "Email",
       "yourName": "Your name",

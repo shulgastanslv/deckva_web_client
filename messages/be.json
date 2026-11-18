@@ -1510,6 +1510,10 @@
     "settings": {
       "title": "Налады палатна",
       "dotGrid": "Паказваць кропкавую сетку",
+      "layoutGrid": "Сетка макета",
+      "layoutGridHint": "Для ўсіх слайдаў",
+      "autoFlow": "Аўтапаток",
+      "autoFlowHint": "Для ўсіх слайдаў",
       "autosave": "Аўтазахаванне",
       "autosaveHint": "Ціха захоўвае ў фоне"
     },
@@ -1658,6 +1662,8 @@
     },
     "frames": {
       "noDevices": "Прылады не знойдзены",
+      "allDevices": "Усе",
+      "deviceAria": "Выбраць frame прылады",
       "backgroundColor": "Колер фону",
       "transparent": "Празрысты",
       "transparentBackground": "Празрысты фон",
@@ -1879,6 +1885,8 @@
       },
       "profilePicture": "Фота профілю",
       "profilePictureHint": "Націсніце на аватар, каб загрузіць новую выяву.",
+      "removeAvatar": "Выдаліць",
+      "removeAvatarAria": "Выдаліць фота профілю",
       "displayName": "Адлюстраванае імя",
       "email": "Email",
       "yourName": "Ваша імя",

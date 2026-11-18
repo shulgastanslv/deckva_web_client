@@ -5,7 +5,8 @@
 
 Источник токенов: `app/globals.css` (`--primary`, `--muted`, `--foreground`, …).  
 Базовые примитивы: `components/ui/{button,select,dropdown-menu,input,dialog}.tsx` — при расхождении **переопределяй через `className`**, не плоди новые темы.  
-Высота контролов: **один раз** в `components/ui/control.ts` (`controlH` / `controlSize`, сейчас **`h-9` / `size-9` = Button `sm`**).
+Высота контролов: **один раз** в `components/ui/control.ts` (`controlH` / `controlSize`, сейчас **`h-10` / `size-10` = Button `sm`**).  
+Switch: дефолт **`h-5 w-9`** (thumb `size-4`) рядом с `controlH`; `size="sm"` → `h-4 w-7`. Track всегда `rounded-full`.
 
 ---
 
@@ -124,8 +125,28 @@
 - `rounded-full` на кнопках (это не Miro; круги — только аватары / свитчи / точки)
 - `variant="outline"` как дефолт студии (тянет border + dark-ветки)
 - `shadow-*`
-- Локальные `h-10` / `h-11` / `size-10` / `size-11` в хедере, диалогах, settings, dropdown
+- Локальные `h-*` / `size-*` вне `control.ts` в хедере, диалогах, settings, dropdown
 - Разный размер у соседних Search + icon button / Cancel + Save
+
+---
+
+## 4b. Switch
+
+Источник: `components/ui/switch.tsx`. Остаётся **`rounded-full`** (исключение из soft-rect).
+
+| | |
+|---|---|
+| Дефолт | `h-5 w-9`, thumb `size-4` — рядом с рядом `controlH` (`h-10`) |
+| sm | `h-4 w-7`, thumb `size-3` — только плотный chrome |
+| Цвета | checked `bg-primary`, unchecked `bg-muted` |
+| Фокус | `focus-visible:ring-2 focus-visible:ring-ring/20` |
+
+```tsx
+<Switch checked={on} onCheckedChange={setOn} />
+<Switch size="sm" checked={on} onCheckedChange={setOn} />
+```
+
+Нельзя: локальные `h-*`/`w-*` на Switch; `rounded-md` на track; unchecked через `bg-input`.
 
 ---
 

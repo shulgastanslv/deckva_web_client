@@ -3,6 +3,7 @@
 import {
   CaretRight as ChevronRight,
 } from "@phosphor-icons/react";
+import { controlH } from "@/components/ui/control";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -59,7 +60,7 @@ export function CollapsibleGroup({
         </button>
         {headerRight ? (
           <div
-            className="shrink-0"
+            className={cn("flex shrink-0 items-center pr-3.5", controlH)}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >

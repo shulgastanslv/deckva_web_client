@@ -282,6 +282,26 @@ export function ProfileSettingsDialog({
     }
   };
 
+  const onRemoveAvatar = async () => {
+    if (!avatarSrc || saving) return;
+    setError(null);
+    setSaved(false);
+    setSaving(true);
+    try {
+      const res = await updateProfile({ image: null });
+      if (!res.success) {
+        setError((res as { error: string }).error);
+        return;
+      }
+      setImage(null);
+      await update({ image: null });
+      setSaved(true);
+      window.dispatchEvent(new CustomEvent("studio:profile-changed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const onSaveSecurity = async () => {
     setError(null);
     setSaved(false);
@@ -398,13 +418,13 @@ export function ProfileSettingsDialog({
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
                           <div className="relative group cursor-pointer">
-                            <Avatar className="size-16 ring-1 ring-border/20">
-                              <AvatarImage src={avatarSrc} alt={name || email} className="object-cover" />
+                            <Avatar className="size-16 rounded-full ring-1 ring-border/20">
+                              <AvatarImage src={avatarSrc ?? undefined} alt={name || email} className="object-cover" />
                               <AvatarFallback className="bg-muted text-lg font-medium text-foreground">
                                 {initial}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
+                            <div className="absolute inset-0 hidden items-center justify-center rounded-full bg-black/40 transition-all group-hover:flex">
                               <CameraIcon className="size-5 text-white/90" />
                             </div>
                             <input
@@ -424,6 +444,18 @@ export function ProfileSettingsDialog({
                             <p className="mt-1 text-[12px] text-muted-foreground">
                               {t("profilePictureHint")}
                             </p>
+                            {avatarSrc ? (
+                              <button
+                                type="button"
+                                disabled={saving}
+                                aria-label={t("removeAvatarAria")}
+                                onClick={() => void onRemoveAvatar()}
+                                className="mt-2 inline-flex items-center gap-1.5 rounded-md px-0 text-[12px] font-normal text-muted-foreground transition-colors hover:text-destructive disabled:opacity-40"
+                              >
+                                <Trash2 className="size-3.5" />
+                                {t("removeAvatar")}
+                              </button>
+                            ) : null}
                           </div>
                         </div>
 

@@ -1510,6 +1510,10 @@
     "settings": {
       "title": "Настройки холста",
       "dotGrid": "Показывать точечную сетку",
+      "layoutGrid": "Сетка макета",
+      "layoutGridHint": "Для всех слайдов",
+      "autoFlow": "Автопоток",
+      "autoFlowHint": "Для всех слайдов",
       "autosave": "Автосохранение",
       "autosaveHint": "Тихо сохраняет в фоне"
     },
@@ -1658,6 +1662,8 @@
     },
     "frames": {
       "noDevices": "Устройства не найдены",
+      "allDevices": "Все",
+      "deviceAria": "Выбрать frame устройства",
       "backgroundColor": "Цвет фона",
       "transparent": "Прозрачный",
       "transparentBackground": "Прозрачный фон",
@@ -1879,6 +1885,8 @@
       },
       "profilePicture": "Фото профиля",
       "profilePictureHint": "Нажмите на аватар, чтобы загрузить новое изображение.",
+      "removeAvatar": "Удалить",
+      "removeAvatarAria": "Удалить фото профиля",
       "displayName": "Отображаемое имя",
       "email": "Email",
       "yourName": "Ваше имя",

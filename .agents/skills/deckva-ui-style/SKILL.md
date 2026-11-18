@@ -25,8 +25,9 @@ description: >-
 2. **Триггеры / инпуты / чипы / кнопки** — **без** `shadow-*` и без видимых `border` (`border-none`).
 3. **Menus / popovers / select content** — `bg-popover text-popover-foreground shadow-sm border-0 dark:border dark:border-border/50` (не `shadow-none` / `shadow-md+`).
 4. **Dialogs** — `bg-background text-foreground border border-border/50 shadow-none` (не `bg-popover`, не `shadow-sm`).
-5. **Высота = Button `sm`**: **`controlH` / `controlSize` / `controlField`** из `components/ui/control.ts` (сейчас **`h-9` / `size-9`**). `<Button>` по умолчанию `size="sm"`. Input и SelectTrigger делят **`controlField`** (одинаковые h/px/text). Не дублируй `h-*` / `size-*` на Button / Input / SelectTrigger; для сырых `<button>` / shell — `cn(..., controlH)` / `controlField` / `controlSize`.
+5. **Высота = Button `sm`**: **`controlH` / `controlSize` / `controlField`** из `components/ui/control.ts` (сейчас **`h-10` / `size-10`**). `<Button>` по умолчанию `size="sm"`. Input и SelectTrigger делят **`controlField`** (одинаковые h/px/text). Не дублируй `h-*` / `size-*` на Button / Input / SelectTrigger; для сырых `<button>` / shell — `cn(..., controlH)` / `controlField` / `controlSize`.
 6. **Один размер везде в продуктовом chrome**: settings / profile, все диалоги, хедер студии, dropdown / popover триггеры, search + соседний icon button, Input рядом с Select. Соседи в одном ряду — одна высота.
+6b. **Switch**: `rounded-full` (исключение из soft-rect). Дефолт **`h-5 w-9`**, thumb **`size-4`** — рядом с рядом `controlH`. `size="sm"` → `h-4 w-7` / thumb `size-3` только в плотном chrome. `data-checked:bg-primary`, `data-unchecked:bg-muted`. Не ставь локальные `h-*`/`w-*` на Switch.
 7. Поверхности контролов: `bg-muted/20` → `/30` → `/40` → `/50` → `/60`.
 8. Только шаблонные токены: `bg-primary`, `bg-foreground`, `bg-muted`, `bg-background`, `bg-popover`, `text-foreground`, `text-muted-foreground`, `text-primary-foreground`, `border-border` — без кучи dark-вариаций и hex (исключение: `dark:border-border/50` на меню).
 9. Триггеры и чипы: `rounded-md` + `bg-muted/40` + `hover:bg-muted/60`.
@@ -50,10 +51,30 @@ description: >-
 
 | | |
 |---|---|
-| Дефолт | `size="sm"` → `controlH` (`h-9`) |
-| Icon | `size="icon"` → `controlSize` (`size-9`) |
+| Дефолт | `size="sm"` → `controlH` (`h-10`) |
+| Icon | `size="icon"` → `controlSize` (`size-10`) |
 | Где | header, settings/profile, все Dialog, dropdown/popover triggers, toolbar chips |
-| Нельзя | локальные `h-10` / `h-11` / `size-10` / `size-11`; разный размер у Search и «+»; Save выше Input |
+| Нельзя | локальные `h-*` / `size-*` вне `control.ts`; разный размер у Search и «+»; Save выше Input |
+
+## Switch (обязательно)
+
+```tsx
+import { Switch } from "@/components/ui/switch";
+
+// рядом с controlH / settings rows
+<Switch checked={on} onCheckedChange={setOn} />
+
+// только в плотных рядах
+<Switch size="sm" checked={on} onCheckedChange={setOn} />
+```
+
+| | |
+|---|---|
+| Дефолт | `h-5 w-9`, thumb `size-4` — компаньон к `controlH` |
+| sm | `h-4 w-7`, thumb `size-3` |
+| Скругление | только `rounded-full` (аватар / свитч / точка) |
+| Цвета | checked `bg-primary`, unchecked `bg-muted` |
+| Нельзя | локальные размеры; `rounded-md` на track; `bg-input` как дефолт unchecked |
 
 ## Select (обязательно)
 
