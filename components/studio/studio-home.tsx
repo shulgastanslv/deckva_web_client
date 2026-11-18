@@ -138,7 +138,7 @@ export function StudioHome() {
 
   return (
     <StudioContent>
-      <StudioContentBody className="pt-8">
+      <StudioContentBody className="pt-12">
         <StudioStartSection
           topic={topic}
           focusMode={focusMode}

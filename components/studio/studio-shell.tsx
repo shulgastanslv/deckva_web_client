@@ -137,7 +137,7 @@ function StudioShellInner({
           </div>
         ) : null}
 
-        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background md:m-2 md:ml-0 md:rounded-2xl">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:m-2 md:ml-0 md:rounded-2xl">
           <StudioUpgradeBanner />
           <StudioHeader
             onSignIn={onMenuAuth}

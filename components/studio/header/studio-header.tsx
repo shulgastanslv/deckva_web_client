@@ -29,7 +29,7 @@ export function StudioHeader({
   const signedIn = status === "authenticated";
 
   return (
-    <header className="flex shrink-0 items-center justify-between gap-2 rounded-t-2xl bg-muted/20 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 sm:gap-3 sm:px-6">
+    <header className="flex shrink-0 items-center justify-between gap-2 py-4 px-3 bg-muted/20 rounded-t-2xl sm:gap-3 sm:px-6">
       <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
         {onMenu ? (
           <button
