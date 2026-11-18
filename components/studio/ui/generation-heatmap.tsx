@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Infinity as InfinityIcon } from "@phosphor-icons/react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type {
@@ -59,6 +60,7 @@ type Props = {
   stats: GenerationUsageStats;
   remaining: number;
   limit: number;
+  unlimited?: boolean;
   className?: string;
 };
 
@@ -67,6 +69,7 @@ export function GenerationHeatmap({
   stats,
   remaining,
   limit,
+  unlimited = false,
   className,
 }: Props) {
   const t = useTranslations("dialogs.settings");
@@ -133,8 +136,12 @@ export function GenerationHeatmap({
         </div>
         <div className="text-right">
           <p className="text-[12px] text-muted-foreground">{t("dailyLimit")}</p>
-          <p className="mt-0.5 text-[15px] font-medium tabular-nums text-foreground">
-            {remaining}/{limit}
+          <p className="mt-0.5 inline-flex items-center justify-end text-[15px] font-medium tabular-nums text-foreground">
+            {unlimited ? (
+              <InfinityIcon className="size-4" weight="regular" aria-hidden />
+            ) : (
+              `${remaining}/${limit}`
+            )}
           </p>
         </div>
       </div>

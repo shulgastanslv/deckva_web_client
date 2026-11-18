@@ -1,4 +1,6 @@
+import { emailIsAdmin } from "@/lib/auth-role";
 import { prisma } from "@/lib/prisma";
+import { isPlatformAdmin } from "@/lib/roles";
 import {
   DAILY_GENERATION_LIMIT,
   dailyGenerationLimitMessage,
@@ -9,9 +11,18 @@ export type GenerationEntitlement = {
   limit: number;
   remaining: number;
   canGenerate: boolean;
+  /** Platform admins bypass the daily cap. */
+  unlimited: boolean;
   /** UTC calendar day key (YYYY-MM-DD). */
   dayKey: string;
 };
+
+function hasUnlimitedGenerations(user: {
+  role: string;
+  email: string;
+}): boolean {
+  return isPlatformAdmin(user.role) || emailIsAdmin(user.email);
+}
 
 export type GenerationDayPoint = {
   dayKey: string;
@@ -37,14 +48,29 @@ export function utcDayKey(date = new Date()): string {
   return date.toISOString().slice(0, 10);
 }
 
-function toEntitlement(used: number, dayKey: string): GenerationEntitlement {
+function toEntitlement(
+  used: number,
+  dayKey: string,
+  unlimited = false,
+): GenerationEntitlement {
   const capped = Math.max(0, used);
+  if (unlimited) {
+    return {
+      used: capped,
+      limit: 0,
+      remaining: 0,
+      canGenerate: true,
+      unlimited: true,
+      dayKey,
+    };
+  }
   const remaining = Math.max(0, DAILY_GENERATION_LIMIT - capped);
   return {
     used: capped,
     limit: DAILY_GENERATION_LIMIT,
     remaining,
     canGenerate: remaining > 0,
+    unlimited: false,
     dayKey,
   };
 }
@@ -52,6 +78,7 @@ function toEntitlement(used: number, dayKey: string): GenerationEntitlement {
 async function readDailyUsage(userId: string): Promise<{
   used: number;
   dayKey: string;
+  unlimited: boolean;
 }> {
   const today = utcDayKey();
   const user = await prisma.user.findUnique({
@@ -59,22 +86,25 @@ async function readDailyUsage(userId: string): Promise<{
     select: {
       generationsUsedToday: true,
       generationDayKey: true,
+      role: true,
+      email: true,
     },
   });
   if (!user) {
-    return { used: 0, dayKey: today };
+    return { used: 0, dayKey: today, unlimited: false };
   }
+  const unlimited = hasUnlimitedGenerations(user);
   if (user.generationDayKey !== today) {
-    return { used: 0, dayKey: today };
+    return { used: 0, dayKey: today, unlimited };
   }
-  return { used: user.generationsUsedToday, dayKey: today };
+  return { used: user.generationsUsedToday, dayKey: today, unlimited };
 }
 
 export async function getGenerationEntitlement(
   userId: string,
 ): Promise<GenerationEntitlement> {
-  const { used, dayKey } = await readDailyUsage(userId);
-  return toEntitlement(used, dayKey);
+  const { used, dayKey, unlimited } = await readDailyUsage(userId);
+  return toEntitlement(used, dayKey, unlimited);
 }
 
 function shiftUtcDay(dayKey: string, delta: number): string {
@@ -245,14 +275,17 @@ export async function consumeGeneration(
       select: {
         generationsUsedToday: true,
         generationDayKey: true,
+        role: true,
+        email: true,
       },
     });
     if (!user) throw new Error("User not found");
 
+    const unlimited = hasUnlimitedGenerations(user);
     const usedToday =
       user.generationDayKey === today ? user.generationsUsedToday : 0;
 
-    if (usedToday >= DAILY_GENERATION_LIMIT) {
+    if (!unlimited && usedToday >= DAILY_GENERATION_LIMIT) {
       throw new Error(dailyGenerationLimitMessage());
     }
 
@@ -269,13 +302,14 @@ export async function consumeGeneration(
     });
 
     await bumpGenerationDay(tx, userId, today, 1);
-    return row;
+    return { row, unlimited };
   });
 
   return {
     entitlement: toEntitlement(
-      updated.generationsUsedToday,
-      updated.generationDayKey ?? today,
+      updated.row.generationsUsedToday,
+      updated.row.generationDayKey ?? today,
+      updated.unlimited,
     ),
   };
 }

@@ -58,6 +58,7 @@ type UsageState = {
   remaining: number;
   used: number;
   limit: number;
+  unlimited: boolean;
   days: GenerationDayPoint[];
   stats: GenerationUsageStats;
 };
@@ -129,6 +130,7 @@ export function ProfileSettingsDialog({
     remaining: DAILY_GENERATION_LIMIT,
     used: 0,
     limit: DAILY_GENERATION_LIMIT,
+    unlimited: false,
     days: [],
     stats: EMPTY_STATS,
   });
@@ -192,6 +194,7 @@ export function ProfileSettingsDialog({
           remaining: status.entitlement.remaining,
           used: status.entitlement.used,
           limit: status.entitlement.limit,
+          unlimited: Boolean(status.entitlement.unlimited),
           days: status.days ?? [],
           stats: status.stats ?? EMPTY_STATS,
         });
@@ -462,12 +465,15 @@ export function ProfileSettingsDialog({
                         stats={usage.stats}
                         remaining={usage.remaining}
                         limit={usage.limit}
+                        unlimited={usage.unlimited}
                       />
                       <p className="px-0.5 text-[12px] text-muted-foreground">
-                        {t("dailyUsage", {
-                          remaining: usage.remaining,
-                          limit: usage.limit,
-                        })}
+                        {usage.unlimited
+                          ? t("unlimitedUsage")
+                          : t("dailyUsage", {
+                              remaining: usage.remaining,
+                              limit: usage.limit,
+                            })}
                       </p>
                     </div>
                   ) : null}

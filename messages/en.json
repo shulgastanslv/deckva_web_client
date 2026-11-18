@@ -419,9 +419,12 @@
     "upgrade": {
       "freePlan": "Free",
       "remainingDaily": "{remaining} of {limit} generations left today.",
+      "unlimitedDaily": "Unlimited generations for admins.",
       "dailyLimit": "Daily limit",
       "resetsHint": "Resets at midnight UTC.",
       "dailyLimitReached": "You've used your {limit} generations for today. Come back tomorrow.",
+      "followSocial": "Follow us on <threads>Threads</threads> and <telegram>Telegram</telegram>.",
+      "slideDot": "Notification {index}",
       "dismiss": "Dismiss"
     },
     "create": {
@@ -1937,6 +1940,7 @@
       "deleteAccountHint": "Permanently removes projects and your account.",
       "cardExpires": "Exp {month}/{year}",
       "dailyUsage": "{remaining} of {limit} generations left today",
+      "unlimitedUsage": "Unlimited generations for admins",
       "dailyLimit": "Daily limit",
       "generationsTitle": "Generations",
       "less": "Less",

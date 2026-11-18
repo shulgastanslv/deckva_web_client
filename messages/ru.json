@@ -419,9 +419,12 @@
     "upgrade": {
       "freePlan": "Бесплатно",
       "remainingDaily": "Осталось {remaining} из {limit} генераций на сегодня.",
+      "unlimitedDaily": "Безлимитные генерации для админов.",
       "dailyLimit": "Дневной лимит",
       "resetsHint": "Обновляется в полночь UTC.",
       "dailyLimitReached": "Вы использовали {limit} генераций на сегодня. Зайдите завтра.",
+      "followSocial": "Подпишись на <threads>Threads</threads> и <telegram>Telegram</telegram>.",
+      "slideDot": "Уведомление {index}",
       "dismiss": "Закрыть"
     },
     "create": {
@@ -1937,6 +1940,7 @@
       "deleteAccountHint": "Безвозвратно удаляет проекты и аккаунт.",
       "cardExpires": "До {month}/{year}",
       "dailyUsage": "Осталось {remaining} из {limit} генераций на сегодня",
+      "unlimitedUsage": "Безлимитные генерации для админов",
       "dailyLimit": "Дневной лимит",
       "generationsTitle": "Генерации",
       "less": "Меньше",
