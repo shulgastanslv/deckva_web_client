@@ -561,6 +561,10 @@
       "add": "Add",
       "addFiles": "Add files",
       "addAssets": "Add assets",
+      "recentAssets": "Recent assets",
+      "noRecentAssets": "No saved assets yet. Upload files or save images from the editor.",
+      "recentPhoto": "Recent photo",
+      "assetAlreadyAdded": "That asset is already attached",
       "skills": "Skills",
       "skillGroups": {
         "sell": "Sell",

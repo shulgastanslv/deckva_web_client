@@ -47,6 +47,7 @@ export const RAIL_SHORTCUTS: NavId[] = [
   "layers",
   "background",
   "assets",
+  "settings",
 ];
 
 interface LeftSidebarProps {
@@ -176,7 +177,7 @@ export function LeftSidebar({
                 )}
               </Button>
             </RailTooltip>
-            <RailTooltip label={t("settings")}>
+            <RailTooltip label={`${t("settings")} (5)`}>
               <Button
                 variant="ghost"
                 size="icon"

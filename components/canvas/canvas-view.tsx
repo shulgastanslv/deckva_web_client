@@ -349,15 +349,12 @@ export function CanvasView({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (typing()) return;
+      // Tool keys (H/V/E/…) live in bindKeyboardShortcuts; Space pan stays here.
+      if (managerRef.current?.crop.active) return;
       if (event.code === "Space") {
         if (event.repeat) return;
         event.preventDefault();
         setSpaceDown(true);
-        return;
-      }
-      if (event.code === "KeyH" && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) {
-        event.preventDefault();
-        useCanvasStore.getState().toggleHand();
       }
     };
     const onKeyUp = (event: KeyboardEvent) => {
