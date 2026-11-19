@@ -121,10 +121,26 @@ export function bindKeyboardShortcuts(
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Escape" && manager.crop.active) {
-      e.preventDefault();
-      manager.crop.cancel();
-      return;
+    if (manager.crop.active) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        manager.crop.cancel();
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        manager.crop.apply();
+        return;
+      }
+      // Don't delete / duplicate / etc. while reframing.
+      if (
+        e.key === "Delete" ||
+        e.key === "Backspace" ||
+        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d")
+      ) {
+        e.preventDefault();
+        return;
+      }
     }
     if (isTypingTarget(document.activeElement)) return;
     if (isEditingCanvasText(manager)) return;

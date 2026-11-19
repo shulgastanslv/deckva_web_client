@@ -10,9 +10,9 @@ import {
   frameInSource,
   largestWindow,
   sceneDelta,
-  sourceDelta,
   windowAtZoom,
 } from "./crop";
+import { syncImageClip } from "./image-cover";
 
 const MAX_ZOOM = 4;
 const MIN_WINDOW = 8;
@@ -80,6 +80,19 @@ export class ImageCropSession {
 
   get active() {
     return this.image != null;
+  }
+
+  /** Fixed crop frame in scene space (for floating chrome). */
+  get frameBounds() {
+    if (!this.image) return null;
+    return {
+      left: this.frameCenter.x - this.frame.w / 2,
+      top: this.frameCenter.y - this.frame.h / 2,
+      width: this.frame.w,
+      height: this.frame.h,
+      centerX: this.frameCenter.x,
+      centerY: this.frameCenter.y,
+    };
   }
 
   subscribe(listener: () => void) {
@@ -227,10 +240,12 @@ export class ImageCropSession {
       originY: "center",
       left: this.frameCenter.x,
       top: this.frameCenter.y,
+      clipPath: snap.clipPath,
       dirty: true,
     });
 
-    this.restoreClipPath(snap.clipPath, placed.width, placed.height, snap.width, snap.height);
+    // Mask / radius rebuild from current crop window; shape clips rescale.
+    syncImageClip(img, snap.width, snap.height);
     img.setCoords();
 
     const changed = this.changedFromSnapshot(snap, placed);
@@ -466,26 +481,6 @@ export class ImageCropSession {
       this.canvas.remove(this.frameStroke);
       this.frameStroke = null;
     }
-  }
-
-  private restoreClipPath(
-    clip: FabricObject | undefined,
-    nextW: number,
-    nextH: number,
-    prevW: number,
-    prevH: number,
-  ) {
-    if (!this.image) return;
-    if (!clip) {
-      this.image.clipPath = undefined;
-      return;
-    }
-    clip.set({
-      scaleX: (clip.scaleX || 1) * (nextW / (prevW || 1)),
-      scaleY: (clip.scaleY || 1) * (nextH / (prevH || 1)),
-      dirty: true,
-    });
-    this.image.clipPath = clip;
   }
 
   private restoreInteraction() {

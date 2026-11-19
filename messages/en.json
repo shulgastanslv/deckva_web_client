@@ -1303,7 +1303,10 @@
       "left": "Left",
       "center": "Center",
       "right": "Right",
-      "justify": "Justify"
+      "justify": "Justify",
+      "zoom": "Zoom",
+      "done": "Done",
+      "cancel": "Cancel"
     },
     "filters": {
       "image": "Image",
@@ -1768,7 +1771,7 @@
       "done": "Done",
       "cancel": "Cancel",
       "fillWithImage": "Fill with image",
-      "reframeHint": "Drag to reframe. Scroll to zoom. Esc cancels.",
+      "reframeHint": "Drag to reframe. Scroll to zoom. Enter confirms, Esc cancels.",
       "textContent": "Text content",
       "refactor": "Refactor",
       "refactorParagraphs": "Split into paragraphs",

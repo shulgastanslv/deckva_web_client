@@ -1,5 +1,6 @@
 "use client";
 
+import { coverFit } from "@/lib/canvas/image-cover";
 import type { FabricCanvasJSON } from "@/lib/types";
 
 type ImageNode = Record<string, unknown> & {
@@ -61,18 +62,15 @@ export function applyCoverFitToImageNode(
   const frameW = Math.max(1, Math.abs(Number(node.width) * scaleX) || 1);
   const frameH = Math.max(1, Math.abs(Number(node.height) * scaleY) || 1);
 
-  const coverScale = Math.max(frameW / naturalW, frameH / naturalH);
-  if (!Number.isFinite(coverScale) || coverScale <= 0) return;
+  const fit = coverFit(naturalW, naturalH, frameW, frameH);
+  if (!Number.isFinite(fit.scaleX) || fit.scaleX <= 0) return;
 
-  const cropW = frameW / coverScale;
-  const cropH = frameH / coverScale;
-
-  node.cropX = Math.max(0, (naturalW - cropW) / 2);
-  node.cropY = Math.max(0, (naturalH - cropH) / 2);
-  node.width = cropW;
-  node.height = cropH;
-  node.scaleX = coverScale * Math.sign(scaleX || 1);
-  node.scaleY = coverScale * Math.sign(scaleY || 1);
+  node.cropX = fit.cropX;
+  node.cropY = fit.cropY;
+  node.width = fit.width;
+  node.height = fit.height;
+  node.scaleX = fit.scaleX * Math.sign(scaleX || 1);
+  node.scaleY = fit.scaleY * Math.sign(scaleY || 1);
 }
 
 async function visitObjects(objects: unknown[]): Promise<void> {

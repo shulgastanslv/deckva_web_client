@@ -1,6 +1,7 @@
 import { Image as FabricImage, Point, util, type FabricObject } from "fabric";
 
 import type { CanvasManager } from "@/lib/canvas/manager";
+import { replaceImageCover } from "@/lib/canvas/image-cover";
 import type { MagicLayer, MagicLayerResult } from "@/lib/image/deckva-tools";
 
 function isFabricImage(obj: FabricObject | null | undefined): obj is FabricImage {
@@ -37,18 +38,14 @@ export async function replaceImageSource(
   newSrc: string,
   options?: { keepVisualSize?: boolean },
 ): Promise<void> {
-  const prevW = (img.width || 1) * (img.scaleX || 1);
-  const prevH = (img.height || 1) * (img.scaleY || 1);
-
   await manager.runBatched(async () => {
-    await img.setSrc(newSrc, { crossOrigin: "anonymous" });
     if (options?.keepVisualSize) {
-      img.set({
-        scaleX: prevW / (img.width || 1),
-        scaleY: prevH / (img.height || 1),
-      });
+      // Figma Fill: new bitmap covers the previous frame without stretching.
+      await replaceImageCover(img, newSrc);
+    } else {
+      await img.setSrc(newSrc, { crossOrigin: "anonymous" });
+      img.setCoords();
     }
-    img.setCoords();
   });
 }
 

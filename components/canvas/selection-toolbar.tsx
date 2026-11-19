@@ -285,14 +285,12 @@ function TextColorButton({
   );
 }
 
-function measureAnchor(
+function sceneRectToAnchor(
   canvas: { getZoom: () => number; getWidth: () => number; getHeight: () => number },
   canvasEl: HTMLElement,
-  obj: FabricObject,
+  rect: { left: number; top: number; width: number; height: number },
   viewport: DOMRect,
-): ToolbarAnchor | null {
-  obj.setCoords();
-  const rect = obj.getBoundingRect();
+): ToolbarAnchor {
   const canvasRect = canvasEl.getBoundingClientRect();
   const zoom = canvas.getZoom() || 1;
   const nativeW = Math.max(1, (canvas.getWidth() || 1) / zoom);
@@ -312,6 +310,16 @@ function measureAnchor(
     width,
     below: !fitsAbove,
   };
+}
+
+function measureAnchor(
+  canvas: { getZoom: () => number; getWidth: () => number; getHeight: () => number },
+  canvasEl: HTMLElement,
+  obj: FabricObject,
+  viewport: DOMRect,
+): ToolbarAnchor | null {
+  obj.setCoords();
+  return sceneRectToAnchor(canvas, canvasEl, obj.getBoundingRect(), viewport);
 }
 
 function sameAnchor(a: ToolbarAnchor | null, b: ToolbarAnchor | null): boolean {
@@ -343,11 +351,30 @@ export function SelectionToolbar() {
   const active = selectedObject;
   const textObj = textTarget(active);
   const showText = textObj != null;
-  const cropping = Boolean(manager?.crop.active);
-  const visible = Boolean(manager && active && !handActive && !eraserActive && !cropping);
+  const [cropping, setCropping] = useState(false);
+  const [cropZoom, setCropZoom] = useState(1);
+  const [cropMax, setCropMax] = useState(4);
+
+  useEffect(() => {
+    if (!manager) {
+      setCropping(false);
+      return;
+    }
+    setCropping(manager.crop.active);
+    setCropZoom(manager.crop.zoom);
+    setCropMax(manager.crop.maxZoom);
+    return manager.crop.subscribe(() => {
+      setCropping(manager.crop.active);
+      setCropZoom(manager.crop.zoom);
+      setCropMax(manager.crop.maxZoom);
+    });
+  }, [manager]);
+
+  const showDefault = Boolean(manager && active && !handActive && !eraserActive && !cropping);
+  const showCrop = Boolean(manager && cropping && !handActive && !eraserActive);
 
   const refresh = useCallback(() => {
-    if (!manager || !active) {
+    if (!manager || (!active && !manager.crop.active)) {
       setAnchor(null);
       setTextState(null);
       return;
@@ -359,7 +386,12 @@ export function SelectionToolbar() {
     }
     const parent = canvasEl.closest("main") ?? document.documentElement;
     const viewport = parent.getBoundingClientRect();
-    const next = measureAnchor(manager.canvas, canvasEl, active, viewport);
+    const frame = manager.crop.frameBounds;
+    const next = frame
+      ? sceneRectToAnchor(manager.canvas, canvasEl, frame, viewport)
+      : active
+        ? measureAnchor(manager.canvas, canvasEl, active, viewport)
+        : null;
     setAnchor((prev) => (sameAnchor(prev, next) ? prev : next));
     const target = textTarget(active);
     setTextState(target ? readTextState(target) : null);
@@ -375,7 +407,7 @@ export function SelectionToolbar() {
 
   useLayoutEffect(() => {
     refresh();
-  }, [refresh, zoom, selectedObject]);
+  }, [refresh, zoom, selectedObject, cropping, cropZoom]);
 
   useEffect(() => {
     if (!manager) return;
@@ -512,7 +544,9 @@ export function SelectionToolbar() {
     copyStyleFromSelection(manager.canvas);
   };
 
-  if (!visible || !anchor || (showText && !textState)) return null;
+  if ((!showDefault && !showCrop) || !anchor || (showDefault && showText && !textState)) {
+    return null;
+  }
 
   const alignIcon = {
     left: AlignLeft,
@@ -521,6 +555,60 @@ export function SelectionToolbar() {
     justify: AlignJustify,
   } as const;
   const AlignIcon = alignIcon[textState?.textAlign ?? "left"];
+
+  if (showCrop) {
+    return (
+      <TooltipProvider delayDuration={400}>
+        <div
+          className="pointer-events-none fixed z-40"
+          style={{
+            left: anchor.left,
+            top: anchor.top,
+            transform: anchor.below
+              ? "translate(-50%, 0)"
+              : "translate(-50%, -100%)",
+          }}
+        >
+          <div
+            className="pointer-events-auto flex h-12 max-w-[min(920px,calc(100vw-24px))] items-center gap-1.5 rounded-md border border-border/50 bg-background p-1 backdrop-blur-md"
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <PillSlider
+              label={t("zoom")}
+              value={cropZoom}
+              min={1}
+              max={cropMax}
+              step={0.01}
+              suffix="×"
+              onValueChange={(value) => manager?.crop.setZoom(value)}
+              className="w-40"
+            />
+            <div className="mx-1 h-7 w-px shrink-0 bg-border/60" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="rounded-md"
+              onClick={() => manager?.crop.cancel()}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              className="rounded-md"
+              onClick={() => manager?.crop.apply()}
+            >
+              {t("done")}
+            </Button>
+          </div>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
+  if (!showDefault) return null;
 
   return (
     <TooltipProvider delayDuration={400}>

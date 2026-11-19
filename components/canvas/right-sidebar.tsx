@@ -67,6 +67,7 @@ import {
 import { useCanvasManager } from "@/context/canvas-manager";
 import { useImageTools } from "@/components/canvas/use-image-tools";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { replaceImageCover } from "@/lib/canvas/image-cover";
 import { canFillShape } from "@/lib/canvas/objects";
 import { iconFill } from "@/lib/canvas/recolor-icon";
 import { FontSelect } from "@/components/canvas/font-select";
@@ -720,23 +721,25 @@ export function RightSidebar({
         ry: radius,
       } as unknown as Partial<FabricObject>);
     } else if (selectedObject.type === "image") {
-      const img = selectedObject as FabricImage;
-
+      const img = selectedObject as FabricImage & { rx?: number; swibpMask?: string };
       img.set("rx" as keyof FabricImage, radius);
-
+      // Corner radius wins over swibpMask when the user edits it here.
       if (radius > 0) {
-        const clipRect = new Rect({
-          width: img.width,
-          height: img.height,
+        img.swibpMask = "";
+        img.clipPath = new Rect({
+          width: Math.max(1, img.width || 1),
+          height: Math.max(1, img.height || 1),
           rx: radius,
           ry: radius,
           originX: "center",
           originY: "center",
+          left: 0,
+          top: 0,
         });
-        img.set({ clipPath: clipRect });
       } else {
-        img.set({ clipPath: undefined });
+        img.clipPath = undefined;
       }
+      img.dirty = true;
       canvas.requestRenderAll();
       canvas.fire("object:modified");
     }
@@ -789,34 +792,32 @@ export function RightSidebar({
     manager?.commit();
   };
 
-  const changeImageSource = (newSrc: string) => {
-    if (!selectedObject || selectedObject.type !== "image" || !canvas) return;
+  const changeImageSource = async (newSrc: string) => {
+    if (!selectedObject || selectedObject.type !== "image" || !canvas || !manager) return;
 
     const imgObj = selectedObject as unknown as FabricImage;
-    if (typeof imgObj.setSrc === "function") {
-      imgObj.setSrc(newSrc, { crossOrigin: "anonymous" }).then(() => {
-        imgObj.setCoords();
-        canvas.requestRenderAll();
-        canvas.fire("object:modified");
-        setFormValues((prev) => (prev ? { ...prev, src: newSrc } : null));
-      });
-    }
+    if (typeof imgObj.setSrc !== "function") return;
+
+    await replaceImageCover(imgObj, newSrc);
+    canvas.requestRenderAll();
+    manager.commit();
+    setFormValues((prev) => (prev ? { ...prev, src: newSrc } : null));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const intoFrame =
-      canFillShape(selectedObject?.type) ||
-      (selectedObject?.type === "image" && Boolean(selectedObject.clipPath));
+    const intoShape = canFillShape(selectedObject?.type);
 
     void fileToDataUrl(file)
-      .then((dataUrl) => {
-        if (intoFrame && selectedObject && manager) {
-          return manager.objects.fillFrameWithImage(selectedObject, dataUrl);
+      .then(async (dataUrl) => {
+        if (intoShape && selectedObject && manager) {
+          await manager.objects.fillFrameWithImage(selectedObject, dataUrl);
+          manager.commit();
+          return;
         }
-        changeImageSource(dataUrl);
+        await changeImageSource(dataUrl);
         setImageUrlInput("");
       })
       .catch((err) => reportError(err, messages.errors.addImage));
