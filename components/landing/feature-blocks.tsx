@@ -7,24 +7,44 @@ import { landIsland, landSerif } from "@/components/landing/landing-shell";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
-const FEATURE_IDS = ["generate", "edit", "export"] as const;
+const FEATURE_IDS = [
+  "generate",
+  "edit",
+  "codeblock",
+  "mockups",
+  "export",
+] as const;
 
-const FEATURE_META: Record<
-  (typeof FEATURE_IDS)[number],
-  {
-    href: string;
-    place: string;
-    reverse?: boolean;
-    src: string;
-    width: number;
-    height: number;
-    grid: string;
-    visual: string;
-  }
-> = {
+type FeatureId = (typeof FEATURE_IDS)[number];
+
+type ImageFeatureMeta = {
+  href: string;
+  place: string;
+  reverse?: boolean;
+  kind: "image";
+  src: string;
+  width: number;
+  height: number;
+  grid: string;
+  visual: string;
+};
+
+type CustomFeatureMeta = {
+  href: string;
+  place: string;
+  reverse?: boolean;
+  kind: "codeblock";
+  grid: string;
+  visual: string;
+};
+
+type FeatureMeta = ImageFeatureMeta | CustomFeatureMeta;
+
+const FEATURE_META: Record<FeatureId, FeatureMeta> = {
   generate: {
     href: "/studio",
     place: "feature_generate",
+    kind: "image",
     src: "/landing/write-topic.png",
     width: 1083,
     height: 710,
@@ -35,15 +55,35 @@ const FEATURE_META: Record<
     href: "/studio",
     place: "feature_edit",
     reverse: true,
+    kind: "image",
     src: "/landing/edit-slide.png",
     width: 739,
     height: 869,
     grid: "lg:grid-cols-[0.75fr_1.5fr] lg:gap-12 xl:gap-14",
     visual: "max-w-[120rem] lg:max-w-none",
   },
+  codeblock: {
+    href: "/studio",
+    place: "feature_codeblock",
+    kind: "codeblock",
+    grid: "lg:grid-cols-[0.95fr_1.2fr] lg:gap-12 xl:gap-14",
+    visual: "max-w-[36rem] sm:max-w-[40rem] lg:max-w-none",
+  },
+  mockups: {
+    href: "/studio",
+    place: "feature_mockups",
+    reverse: true,
+    kind: "image",
+    src: "/landing/mockups.jpg",
+    width: 1000,
+    height: 1500,
+    grid: "lg:grid-cols-[0.85fr_1.15fr] lg:gap-12 xl:gap-14",
+    visual: "max-w-[22rem] sm:max-w-[26rem] lg:max-w-[30rem]",
+  },
   export: {
     href: "#pricing",
     place: "feature_export",
+    kind: "image",
     src: "/landing/export.png",
     width: 739,
     height: 869,
@@ -52,7 +92,7 @@ const FEATURE_META: Record<
   },
 };
 
-function FeatureVisual({
+function FeatureImage({
   src,
   alt,
   width,
@@ -84,6 +124,93 @@ function FeatureVisual({
         decoding="async"
         draggable={false}
       />
+    </div>
+  );
+}
+
+/** Product-like code window for the code-block feature card. */
+function CodeBlockVisual({ alt, className }: { alt: string; className?: string }) {
+  return (
+    <div
+      role="img"
+      aria-label={alt}
+      className={cn(
+        "relative mx-auto w-full overflow-hidden rounded-3xl",
+        "bg-[#ebeae6] dark:bg-muted/40",
+        "aspect-[5/4] p-5 sm:p-7 lg:p-8",
+        className,
+      )}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-40 dark:opacity-50"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, color-mix(in oklab, var(--foreground) 16%, transparent) 1px, transparent 1px)",
+          backgroundSize: "18px 18px",
+        }}
+      />
+      <div className="relative mx-auto flex h-full max-w-[34rem] items-center justify-center">
+        <div
+          className={cn(
+            "w-full overflow-hidden rounded-2xl",
+            "bg-[#121214] text-white shadow-[0_18px_50px_rgba(5,0,56,0.18)]",
+            "ring-1 ring-black/10 dark:ring-white/10",
+          )}
+        >
+          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+            <span className="size-2.5 rounded-full bg-[#ff5f57]" />
+            <span className="size-2.5 rounded-full bg-[#febc2e]" />
+            <span className="size-2.5 rounded-full bg-[#28c840]" />
+            <span className="ml-3 truncate font-mono text-[11px] tracking-wide text-white/45">
+              carousel.ts
+            </span>
+          </div>
+          <pre className="overflow-x-auto px-4 py-4 font-mono text-[12px] leading-[1.7] sm:text-[13px]">
+            <code>
+              <span className="text-[#6599FF]">const</span>
+              <span className="text-white">{" slides "}</span>
+              <span className="text-[#F8518D]">=</span>
+              <span className="text-white">{" await "}</span>
+              <span className="text-[#F8518D]">generate</span>
+              <span className="text-white">{"({"}</span>
+              {"\n"}
+              <span className="text-white">{"  "}</span>
+              <span className="text-[#49E8F2]">topic</span>
+              <span className="text-white">:</span>
+              <span className="text-[#E9AEFE]">
+                {' "How to ship a carousel"'}
+              </span>
+              <span className="text-white">,</span>
+              {"\n"}
+              <span className="text-white">{"  "}</span>
+              <span className="text-[#49E8F2]">format</span>
+              <span className="text-white">:</span>
+              <span className="text-[#E9AEFE]">{" \"4:5\""}</span>
+              <span className="text-white">,</span>
+              {"\n"}
+              <span className="text-white">{"  "}</span>
+              <span className="text-[#49E8F2]">blocks</span>
+              <span className="text-white">:</span>
+              <span className="text-white">{" ["}</span>
+              <span className="text-[#E9AEFE]">{'"code"'}</span>
+              <span className="text-white">{", "}</span>
+              <span className="text-[#E9AEFE]">{'"mockup"'}</span>
+              <span className="text-white">{"],"}</span>
+              {"\n"}
+              <span className="text-white">{"});"}</span>
+              {"\n\n"}
+              <span className="text-[#8A757D]">
+                {"// highlight · theme · chrome"}
+              </span>
+              {"\n"}
+              <span className="text-white">{"export("}</span>
+              <span className="text-white">slides</span>
+              <span className="text-white">);</span>
+            </code>
+          </pre>
+        </div>
+      </div>
     </div>
   );
 }
@@ -157,13 +284,17 @@ export function FeatureBlocks() {
                 </Button>
               </div>
 
-              <FeatureVisual
-                src={meta.src}
-                alt={t(`${id}.alt`)}
-                width={meta.width}
-                height={meta.height}
-                className={meta.visual}
-              />
+              {meta.kind === "codeblock" ? (
+                <CodeBlockVisual alt={t(`${id}.alt`)} className={meta.visual} />
+              ) : (
+                <FeatureImage
+                  src={meta.src}
+                  alt={t(`${id}.alt`)}
+                  width={meta.width}
+                  height={meta.height}
+                  className={meta.visual}
+                />
+              )}
             </div>
           </article>
         );

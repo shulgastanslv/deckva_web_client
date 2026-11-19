@@ -736,6 +736,26 @@
         "cta": "Open studio",
         "alt": "Edit step preview"
       },
+      "codeblock": {
+        "title": "Drop in a code block",
+        "points": [
+          "Paste a snippet with syntax highlighting",
+          "Pick a theme and chrome that fit the slide",
+          "Built for tutorials, APIs, and product posts"
+        ],
+        "cta": "Open studio",
+        "alt": "Code block preview"
+      },
+      "mockups": {
+        "title": "Frame screens in device mockups",
+        "points": [
+          "Phones, tablets, and laptops ready to drop",
+          "Fill screens from a multi-select of screenshots",
+          "Build ranked lists and device rows in one move"
+        ],
+        "cta": "Open studio",
+        "alt": "Device mockups preview"
+      },
       "export": {
         "title": "Download a ready post",
         "points": [
