@@ -28,6 +28,7 @@ import {
   rebuildCodeBlock,
   type CodeBlockOptions,
 } from "@/lib/canvas/code-block";
+import { applyCoverFit, frameSizeOf } from "@/lib/canvas/image-cover";
 import { setTextResizeMode } from "@/lib/canvas/text-fit";
 import { remintLayerTreeIds } from "@/lib/canvas/layers";
 
@@ -503,11 +504,7 @@ export class ObjectFactory {
 
   fillSplitFromFile(file: File) {
     if (!file.type.startsWith("image/") || !this.findSplit()) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") void this.fillSplitImage(reader.result);
-    };
-    reader.readAsDataURL(file);
+    void fileToDataUrl(file).then((source) => this.fillSplitImage(source));
   }
 
   /** Covers the split region with a picture and keeps that region fixed. */
@@ -737,19 +734,13 @@ export class ObjectFactory {
     input.onchange = () => {
       const file = input.files?.[0];
       if (!file?.type.startsWith("image/")) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          void this.fillFrameWithImage(shape, reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+      void fileToDataUrl(file).then((source) => this.fillFrameWithImage(shape, source));
     };
     input.click();
   }
 
   /**
-   * Covers a shape with a picture and clips it to that shape.
+   * Covers a shape with a picture and clips it to that shape (Figma Fill).
    * A picture that is already clipped keeps its outline.
    */
   async fillFrameWithImage(target: FabricObject, source: string) {
@@ -758,17 +749,10 @@ export class ObjectFactory {
     const tagged = target as FabricObject & { swibpRole?: string; swibpSlot?: string };
     const keepLocked = this.isSplit(target) || Boolean(target.lockMovementX && target.lockMovementY);
     const center = target.getCenterPoint();
-    const frameW = Math.max(1, Math.abs((target.width || 1) * (target.scaleX || 1)));
-    const frameH = Math.max(1, Math.abs((target.height || 1) * (target.scaleY || 1)));
+    const frame = frameSizeOf(target);
     const index = this.canvas.getObjects().indexOf(target);
 
     const img = await Image.fromURL(source);
-    const sourceW = img.width || 1;
-    const sourceH = img.height || 1;
-    const scale = Math.max(frameW / sourceW, frameH / sourceH);
-    const cropW = frameW / scale;
-    const cropH = frameH / scale;
-
     img.set({
       left: center.x,
       top: center.y,
@@ -777,15 +761,12 @@ export class ObjectFactory {
       angle: target.angle || 0,
       flipX: Boolean(target.flipX),
       flipY: Boolean(target.flipY),
-      cropX: Math.max(0, (sourceW - cropW) / 2),
-      cropY: Math.max(0, (sourceH - cropH) / 2),
-      width: cropW,
-      height: cropH,
-      scaleX: scale,
-      scaleY: scale,
+      cropX: 0,
+      cropY: 0,
     });
+    const fit = applyCoverFit(img, frame.w, frame.h);
 
-    const clip = await this.shapeClip(target, scale);
+    const clip = await this.shapeClip(target, Math.abs(fit.scaleX));
     if (clip) img.clipPath = clip;
 
     if (tagged.swibpRole || tagged.swibpSlot) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import type { FabricObject } from "fabric";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,40 +160,6 @@ export function CanvasToolbar({
   const pageLabel = projectTitle.trim()
     ? t("slideTitleNamed", { n: currentIndex + 1, title: projectTitle.trim() })
     : t("slideTitle", { n: currentIndex + 1 });
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return;
-      const el = document.activeElement;
-      const typing =
-        el instanceof HTMLElement &&
-        (el.tagName === "INPUT" ||
-          el.tagName === "TEXTAREA" ||
-          el.tagName === "SELECT" ||
-          el.isContentEditable);
-      if (typing) return;
-      const editing = manager?.getActiveObject() as { isEditing?: boolean } | null;
-      if (editing?.isEditing) return;
-      const key = event.key.toLowerCase();
-      if (key === "v") {
-        event.preventDefault();
-        setHandActive(false);
-        setEraserActive(false);
-        return;
-      }
-      if (key === "h") {
-        event.preventDefault();
-        setHandActive(true);
-        return;
-      }
-      if (key === "e") {
-        event.preventDefault();
-        setEraserActive(!useCanvasStore.getState().eraserActive);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [manager, setHandActive, setEraserActive]);
 
   const handleExportJSON = async () => {
     if (!manager) return;

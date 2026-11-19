@@ -26,6 +26,7 @@ import { CollapsibleGroup } from "@/components/ui/collapsible-group";
 import { Button } from "@/components/ui/button";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
+import { replaceImageCover } from "@/lib/canvas/image-cover";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { canFillShape } from "@/lib/canvas/objects";
@@ -127,20 +128,7 @@ export function InspectorAssets({ target, isImage, canFill }: Props) {
     }
     if (isImage) {
       const img = target as FabricImage;
-      const w = Math.max(1, img.getScaledWidth());
-      const h = Math.max(1, img.getScaledHeight());
-      const { left, top, originX, originY, angle } = img;
-      await img.setSrc(dataUrl, { crossOrigin: "anonymous" });
-      img.set({
-        scaleX: w / (img.width || 1),
-        scaleY: h / (img.height || 1),
-        left,
-        top,
-        originX,
-        originY,
-        angle,
-      });
-      img.setCoords();
+      await replaceImageCover(img, dataUrl);
       manager.canvas.requestRenderAll();
       manager.commit();
       return;

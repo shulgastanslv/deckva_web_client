@@ -15,6 +15,7 @@ import { withRemoteImageCors } from "./image-cors";
 import { ImageCropSession } from "./crop-session";
 import { ImageEraserSession } from "./eraser-session";
 import { refreshMask } from "./object-appearance";
+import { reflowImageCover } from "./image-cover";
 import { fitCanvasJSON, fitGeometry, type FrameSize } from "./fit-frame";
 import { isAutoFlowSkippable } from "./auto-flow";
 import { stabilizeGroups } from "./group";
@@ -354,6 +355,8 @@ export class CanvasManager {
           const text = obj as { initDimensions?: () => void };
           text.initDimensions?.();
         }
+        // Photos: never stretch — re-cover into the new frame (Figma Fill).
+        if (obj.type === "image") reflowImageCover(obj);
         obj.setCoords();
       }
 
@@ -591,6 +594,15 @@ export class CanvasManager {
       if (isTextbox(e.target)) {
         bakeTextboxScale(e.target);
         relayoutText(e.target);
+      }
+      // Images: bake non-uniform resize into a fresh cover crop (no stretch).
+      // Skip pure move / rotate / uniform scale — those keep a correct cover.
+      if (e.target?.type === "image" && !this.crop.active) {
+        const sx = Math.abs(e.target.scaleX || 1);
+        const sy = Math.abs(e.target.scaleY || 1);
+        if (Math.abs(sx - sy) > 0.001) {
+          reflowImageCover(e.target);
+        }
       }
       onMutation(e);
     });

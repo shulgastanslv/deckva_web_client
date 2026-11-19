@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState, type DragEvent, type ReactNode } from "react";
+import { useMemo, useState, type DragEvent, type ReactNode } from "react";
 import {
   TextAlignLeft as AlignLeft,
   CaretDown as ChevronDown,
@@ -67,20 +67,6 @@ interface ToolDef {
   key?: string;
 }
 
-
-function isTypingTarget() {
-  const el = document.activeElement;
-  if (
-    el instanceof HTMLElement &&
-    (el.tagName === "INPUT" ||
-      el.tagName === "TEXTAREA" ||
-      el.tagName === "SELECT" ||
-      el.isContentEditable)
-  ) {
-    return true;
-  }
-  return false;
-}
 
 function ToolHint({
   label,
@@ -360,7 +346,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
     () => [
       { id: "heading", actionKey: "Heading", label: t("elements.heading"), hint: t("elements.largeTitle"), icon: Heading1 },
       { id: "subtitle", actionKey: "Subtitle", label: t("elements.subtitle"), hint: t("elements.smallerTitleUnder"), icon: Heading2 },
-      { id: "paragraph", actionKey: "Paragraph", label: t("elements.paragraph"), hint: t("elements.bodyText"), icon: AlignLeft },
+      { id: "paragraph", actionKey: "Paragraph", label: t("elements.paragraph"), hint: t("elements.bodyText"), icon: AlignLeft, shortcut: "T", key: "t" },
       { id: "quote", actionKey: "Quote", label: t("elements.quote"), hint: t("elements.quotedLine"), icon: Quote },
     ],
     [t],
@@ -417,52 +403,7 @@ export function ElementsToolbar({ onExit }: ElementsToolbarProps) {
     actions.get(tool.actionKey)?.();
   };
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat)
-        return;
-      if (isTypingTarget()) return;
-      if (
-        event.target instanceof Element &&
-        event.target.closest("[data-slot='popover-content']")
-      ) {
-        return;
-      }
-      const active = manager?.getActiveObject() as { isEditing?: boolean } | null;
-      if (active?.isEditing) return;
-
-      const key = event.key.toLowerCase();
-      if (key === "v") {
-        event.preventDefault();
-        setHandActive(false);
-        setEraserActive(false);
-        return;
-      }
-      if (key === "e") {
-        event.preventDefault();
-        setEraserActive(!useCanvasStore.getState().eraserActive);
-        return;
-      }
-
-      const shape = SHAPES.find((tool) => tool.key === key);
-      if (shape) {
-        event.preventDefault();
-        setEraserActive(false);
-        setShapeId(shape.id);
-        actions.get(shape.label)?.();
-        return;
-      }
-      const text = TEXTS.find((tool) => tool.key === key);
-      if (text) {
-        event.preventDefault();
-        setEraserActive(false);
-        setTextId(text.id);
-        actions.get(text.label)?.();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [actions, manager, setEraserActive, setHandActive]);
+  // V / H / E / T / R / O / L are handled globally in bindKeyboardShortcuts.
 
   const onImageDragOver = (event: DragEvent<HTMLButtonElement>) => {
     event.preventDefault();

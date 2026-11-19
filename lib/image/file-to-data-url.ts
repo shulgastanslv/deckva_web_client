@@ -1,4 +1,4 @@
-/** Read a local image file as a resized data URL suitable for Fabric / project save. */
+/** Read a local image file as a data URL suitable for Fabric / project save. */
 export async function fileToDataUrl(
   file: File,
   options?: {
@@ -6,8 +6,10 @@ export async function fileToDataUrl(
     quality?: number;
   },
 ): Promise<string> {
-  const maxEdge = options?.maxEdge ?? 1920;
-  const quality = options?.quality ?? 0.82;
+  // Canvas work needs headroom: Figma-like crop zooms into the bitmap.
+  // Only downscale when the source is truly huge.
+  const maxEdge = options?.maxEdge ?? 4096;
+  const quality = options?.quality ?? 0.92;
 
   // SVG stays vector; GIF would lose animation if rasterized.
   if (file.type === "image/svg+xml" || file.type === "image/gif") {
@@ -22,6 +24,14 @@ export async function fileToDataUrl(
   }
 
   try {
+    const needsResize =
+      bitmap.width > maxEdge || bitmap.height > maxEdge;
+
+    // Already within budget — keep the original bytes (no JPEG re-encode).
+    if (!needsResize) {
+      return readFileAsDataUrl(file);
+    }
+
     const scale = Math.min(1, maxEdge / bitmap.width, maxEdge / bitmap.height);
     const width = Math.max(1, Math.round(bitmap.width * scale));
     const height = Math.max(1, Math.round(bitmap.height * scale));

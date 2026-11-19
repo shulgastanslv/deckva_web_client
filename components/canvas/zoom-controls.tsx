@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import {
   Eraser,
   Hand,
@@ -37,38 +36,7 @@ export function ZoomControls({
   const setEraserActive = useCanvasStore((s) => s.setEraserActive);
   const t = useTranslations("editor.zoom");
 
-  useEffect(() => {
-    if (!showTools) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return;
-      const el = document.activeElement;
-      const typing =
-        el instanceof HTMLElement &&
-        (el.tagName === "INPUT" ||
-          el.tagName === "TEXTAREA" ||
-          el.tagName === "SELECT" ||
-          el.isContentEditable);
-      if (typing) return;
-      const key = event.key.toLowerCase();
-      if (key === "v") {
-        event.preventDefault();
-        setHandActive(false);
-        setEraserActive(false);
-        return;
-      }
-      if (key === "h") {
-        event.preventDefault();
-        setHandActive(true);
-        return;
-      }
-      if (key === "e") {
-        event.preventDefault();
-        setEraserActive(!useCanvasStore.getState().eraserActive);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [showTools, setHandActive, setEraserActive]);
+  // V / H / E are handled globally in bindKeyboardShortcuts.
 
   const selectActive = !handActive && !eraserActive;
 

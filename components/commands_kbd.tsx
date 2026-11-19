@@ -63,6 +63,7 @@ export function CommandsKbd() {
         { label: t("stepSlides"), keys: "scroll", mod: true },
         { label: t("browseSlides"), keys: "↔" },
         { label: t("leaveCrop"), keys: "Esc" },
+        { label: tc("done"), keys: "Enter" },
         { label: t("leaveFocus"), keys: "Esc" },
       ],
     },
@@ -78,12 +79,11 @@ export function CommandsKbd() {
     {
       title: t("sections.panels"),
       rows: [
-        { label: te("panels.tools"), keys: "1" },
-        { label: te("panels.elements"), keys: "2" },
-        { label: te("panels.layers"), keys: "3" },
-        { label: te("panels.background"), keys: "4" },
-        { label: t("sections.filter"), keys: "5" },
-        { label: t("icons"), keys: "6" },
+        { label: te("panels.elements"), keys: "1" },
+        { label: te("panels.layers"), keys: "2" },
+        { label: te("panels.background"), keys: "3" },
+        { label: te("panels.assets"), keys: "4" },
+        { label: te("panels.settings"), keys: "5" },
       ],
     },
   ];

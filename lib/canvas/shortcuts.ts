@@ -1,6 +1,7 @@
 import type { CanvasManager } from "./manager";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
+import { useCanvasStore } from "@/store/useCanvasStore";
 import {
   canCopySelection,
   hasRememberedSelection,
@@ -35,9 +36,26 @@ function isEditingCanvasText(manager: CanvasManager): boolean {
   return Boolean(active && "isEditing" in active && active.isEditing);
 }
 
+function hasOpenOverlay(): boolean {
+  return Boolean(
+    document.querySelector(
+      "[role='dialog'][data-state='open'], [data-slot='select-content'], [data-slot='dropdown-menu-content'], [data-slot='popover-content']",
+    ),
+  );
+}
+
 function hasDomTextSelection(): boolean {
   const selection = window.getSelection();
   return Boolean(selection && !selection.isCollapsed && selection.toString().length > 0);
+}
+
+function stepSlide(dir: 1 | -1) {
+  const { slides, currentSlideId, setCurrentSlideId } = useCanvasStore.getState();
+  const index = slides.findIndex((slide) => slide.id === currentSlideId);
+  if (index < 0) return;
+  const next = slides[index + dir];
+  if (!next) return;
+  setCurrentSlideId(next.id);
 }
 
 export function bindKeyboardShortcuts(
@@ -121,17 +139,33 @@ export function bindKeyboardShortcuts(
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Escape" && manager.crop.active) {
-      e.preventDefault();
-      manager.crop.cancel();
+    // Crop is modal: only Esc / Enter escape it.
+    if (manager.crop.active) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        manager.crop.cancel();
+        return;
+      }
+      if (e.key === "Enter" && !isTypingTarget(document.activeElement)) {
+        e.preventDefault();
+        manager.crop.apply();
+        return;
+      }
+      // Swallow the rest so delete / tools / undo don't leak through.
+      if (!isTypingTarget(document.activeElement)) {
+        e.preventDefault();
+      }
       return;
     }
+
     if (isTypingTarget(document.activeElement)) return;
     if (isEditingCanvasText(manager)) return;
+    if (hasOpenOverlay()) return;
 
     const active = manager.getActiveObject();
     const mod = e.ctrlKey || e.metaKey;
     const key = e.key.toLowerCase();
+    const store = useCanvasStore.getState();
 
     // Ctrl/⌘+Alt+C and Ctrl/⌘+Alt+V center the selection. Don't also copy or paste.
     if (mod && e.altKey && (key === "c" || key === "v")) {
@@ -142,44 +176,135 @@ export function bindKeyboardShortcuts(
     }
 
     if (key === "delete" || key === "backspace") {
+      e.preventDefault();
       manager.objects.deleteSelected();
-    } else if (mod && key === "d") {
+      return;
+    }
+
+    if (mod && key === "d") {
       e.preventDefault();
       manager.objects.duplicateSelected();
-    } else if (mod && key === "z" && !e.shiftKey) {
+      return;
+    }
+
+    if (mod && key === "z" && !e.shiftKey) {
       e.preventDefault();
       void manager.undo();
-    } else if (mod && (key === "y" || (key === "z" && e.shiftKey))) {
+      return;
+    }
+
+    if (mod && (key === "y" || (key === "z" && e.shiftKey))) {
       e.preventDefault();
       void manager.redo();
-    } else if (mod && e.altKey && key === "h" && active) {
-      // Ctrl/⌘+Alt+H — center horizontally
+      return;
+    }
+
+    if (mod && e.altKey && key === "h" && active) {
       e.preventDefault();
       manager.grid.centerObject(active, "horizontal");
       manager.commit();
-    } else if (mod && e.altKey && key === "v" && active) {
-      // Ctrl/⌘+Alt+V — center vertically
+      return;
+    }
+
+    if (mod && e.altKey && key === "v" && active) {
       e.preventDefault();
       manager.grid.centerObject(active, "vertical");
       manager.commit();
-    } else if (mod && e.altKey && key === "c" && active) {
-      // Ctrl/⌘+Alt+C — center both axes
+      return;
+    }
+
+    if (mod && e.altKey && key === "c" && active) {
       e.preventDefault();
       manager.grid.centerObject(active, "both");
       manager.commit();
-    } else if (mod && key === "g") {
+      return;
+    }
+
+    if (mod && key === "g") {
       e.preventDefault();
       if (e.shiftKey) {
         if (canUngroup(active)) manager.transact(() => ungroupSelection(manager.canvas));
       } else if (manager.canvas.getActiveObjects().length >= 2) {
         manager.transact(() => groupSelection(manager.canvas));
       }
-    } else if (mod && e.shiftKey && key === "c") {
+      return;
+    }
+
+    if (mod && e.shiftKey && key === "c") {
       e.preventDefault();
       copyStyleFromSelection(manager.canvas);
-    } else if (mod && e.shiftKey && key === "v") {
+      return;
+    }
+
+    if (mod && e.shiftKey && key === "v") {
       e.preventDefault();
       if (hasCopiedStyle()) manager.transact(() => pasteObjectStyle(manager.canvas));
+      return;
+    }
+
+    // Plain tool / place shortcuts (no modifiers).
+    if (mod || e.altKey || e.shiftKey || e.repeat) return;
+
+    if (key === "v") {
+      e.preventDefault();
+      store.setHandActive(false);
+      store.setEraserActive(false);
+      return;
+    }
+
+    if (key === "h") {
+      e.preventDefault();
+      store.toggleHand();
+      return;
+    }
+
+    if (key === "e") {
+      e.preventDefault();
+      store.setEraserActive(!store.eraserActive);
+      return;
+    }
+
+    if (key === "t") {
+      e.preventDefault();
+      store.setHandActive(false);
+      store.setEraserActive(false);
+      manager.objects.addParagraph();
+      return;
+    }
+
+    if (key === "r") {
+      e.preventDefault();
+      store.setHandActive(false);
+      store.setEraserActive(false);
+      manager.objects.addRectangle();
+      return;
+    }
+
+    if (key === "o") {
+      e.preventDefault();
+      store.setHandActive(false);
+      store.setEraserActive(false);
+      manager.objects.addEllipse();
+      return;
+    }
+
+    if (key === "l") {
+      e.preventDefault();
+      store.setHandActive(false);
+      store.setEraserActive(false);
+      manager.objects.addLine();
+      return;
+    }
+
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      stepSlide(-1);
+      return;
+    }
+
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      stepSlide(1);
     }
   };
 

@@ -19,10 +19,15 @@ import { toast } from "sonner";
 import { useLocale, useTranslations } from "next-intl";
 
 import { listAiModels } from "@/actions/ai";
+import { listMediaAssets, type MediaAssetDTO } from "@/actions/assets";
 import {
   disconnectConnectorAction,
   listConnectors,
 } from "@/actions/connectors";
+import {
+  readRecentPhotos,
+  type RecentPhoto,
+} from "@/lib/canvas/recent-photos";
 import {
   AiModelIcon,
   BrandIcon,
@@ -174,6 +179,10 @@ export function StudioPrompt({
   const [connectorBusy, setConnectorBusy] = useState<ConnectorProviderId | null>(
     null,
   );
+  const [assetsOpen, setAssetsOpen] = useState(false);
+  const [libraryAssets, setLibraryAssets] = useState<MediaAssetDTO[]>([]);
+  const [recentPhotos, setRecentPhotos] = useState<RecentPhoto[]>([]);
+  const [assetsLoading, setAssetsLoading] = useState(false);
   const skillGroups = useMemo(() => listPromptSkillGroups(), []);
 
   const refreshConnectors = async () => {
@@ -221,6 +230,28 @@ export function StudioPrompt({
     if (!plusOpen) return;
     void refreshConnectors();
   }, [plusOpen]);
+
+  useEffect(() => {
+    if (!assetsOpen) return;
+    let cancelled = false;
+    setAssetsLoading(true);
+    setRecentPhotos(readRecentPhotos().slice(0, 12));
+    void listMediaAssets()
+      .then((result) => {
+        if (cancelled) return;
+        if (result.success) setLibraryAssets(result.assets.slice(0, 24));
+        else setLibraryAssets([]);
+      })
+      .catch(() => {
+        if (!cancelled) setLibraryAssets([]);
+      })
+      .finally(() => {
+        if (!cancelled) setAssetsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [assetsOpen]);
 
   useEffect(() => {
     if (!modelMenuOpen) return;
@@ -326,6 +357,33 @@ export function StudioPrompt({
     } finally {
       setAttaching(false);
     }
+  };
+
+  const addAssetAttachment = (item: {
+    id: string;
+    name: string;
+    dataUrl: string;
+  }) => {
+    if (attachments.length >= MAX_ATTACHMENTS) {
+      toast.error(t("prompt.tooManyFiles", { max: MAX_ATTACHMENTS }));
+      return;
+    }
+    if (attachments.some((a) => a.payload === item.dataUrl)) {
+      toast.message(t("prompt.assetAlreadyAdded"));
+      return;
+    }
+    setAttachments((prev) => [
+      ...prev,
+      {
+        id: `asset-${item.id}-${Date.now()}`,
+        name: item.name,
+        kind: "image",
+        payload: item.dataUrl,
+      },
+    ]);
+    if (!coverUrl) setCoverUrl(item.dataUrl);
+    setPlusOpen(false);
+    trackEvent("prompt_asset_attached", { source: "library" });
   };
 
   const removeAttachment = (id: string) => {
@@ -698,14 +756,93 @@ export function StudioPrompt({
                     </DropdownMenuItem>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
-                <DropdownMenuItem
-                  disabled
-                  className="cursor-default gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] text-muted-foreground"
-                >
-                  <Shapes className={menuIconClass} />
-                  {t("prompt.addAssets")}
-                  <span className="ml-auto text-[11px]">{t("prompt.soon")}</span>
-                </DropdownMenuItem>
+                <DropdownMenuSub onOpenChange={setAssetsOpen}>
+                  <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] focus:bg-muted/50 data-[state=open]:bg-muted/50">
+                    <Shapes className={menuIconClass} />
+                    <span className="flex-1 text-left">
+                      {t("prompt.addAssets")}
+                    </span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent
+                    sideOffset={8}
+                    className="w-72 rounded-2xl p-1.5"
+                  >
+                    <DropdownMenuLabel className="px-2.5 py-1.5 text-[11px] font-normal text-muted-foreground">
+                      {t("prompt.recentAssets")}
+                    </DropdownMenuLabel>
+                    {assetsLoading ? (
+                      <div className="flex items-center justify-center gap-2 px-2.5 py-6 text-[12px] text-muted-foreground">
+                        <Loader2 className="size-3.5 animate-spin" />
+                        {tc("loading")}
+                      </div>
+                    ) : libraryAssets.length === 0 && recentPhotos.length === 0 ? (
+                      <div className="px-2.5 py-4 text-[12px] leading-snug text-muted-foreground">
+                        {t("prompt.noRecentAssets")}
+                      </div>
+                    ) : (
+                      <div className="max-h-64 overflow-y-auto">
+                        {libraryAssets.map((asset) => (
+                          <DropdownMenuItem
+                            key={asset.id}
+                            className="cursor-pointer gap-2.5 rounded-md px-2 py-2 text-[13px] font-normal focus:bg-muted/50"
+                            onSelect={(event) => {
+                              event.preventDefault();
+                              addAssetAttachment({
+                                id: asset.id,
+                                name: asset.name,
+                                dataUrl: asset.dataUrl,
+                              });
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={asset.dataUrl}
+                              alt=""
+                              className="size-8 shrink-0 rounded-md object-cover bg-muted/40"
+                            />
+                            <span className="min-w-0 flex-1 truncate">
+                              {asset.name}
+                            </span>
+                          </DropdownMenuItem>
+                        ))}
+                        {libraryAssets.length === 0
+                          ? recentPhotos.map((photo) => (
+                              <DropdownMenuItem
+                                key={photo.id}
+                                className="cursor-pointer gap-2.5 rounded-md px-2 py-2 text-[13px] font-normal focus:bg-muted/50"
+                                onSelect={(event) => {
+                                  event.preventDefault();
+                                  addAssetAttachment({
+                                    id: photo.id,
+                                    name: t("prompt.recentPhoto"),
+                                    dataUrl: photo.placeSrc || photo.src,
+                                  });
+                                }}
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={photo.src}
+                                  alt=""
+                                  className="size-8 shrink-0 rounded-md object-cover bg-muted/40"
+                                />
+                                <span className="min-w-0 flex-1 truncate">
+                                  {t("prompt.recentPhoto")}
+                                </span>
+                              </DropdownMenuItem>
+                            ))
+                          : null}
+                      </div>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-normal focus:bg-muted/50"
+                      onSelect={() => fileInputRef.current?.click()}
+                    >
+                      <Paperclip className={menuIconClass} />
+                      {t("prompt.addFiles")}
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
               </DropdownMenuContent>
             </DropdownMenu>
 
