@@ -17,6 +17,8 @@ const SIZE = {
   lg: "w-[min(100%,18.5rem)]",
   xl: "w-[min(100%,20.5rem)]",
   fluid: "w-full",
+  /** Width comes from height + aspect-ratio (or className). */
+  auto: "",
 } as const;
 
 export function PhoneFrame({
@@ -38,6 +40,7 @@ export function PhoneFrame({
     <div
       className={cn(
         "relative mx-auto",
+        // Height-constrained callers pass `h-* w-auto` via className (wins over fluid).
         SIZE[size],
         widthClass,
         className,

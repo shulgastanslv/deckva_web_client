@@ -177,21 +177,26 @@ function SlideImage({
   className,
   fit = "cover",
   badge,
-  maxHeight,
+  fill,
 }: {
   image: string | null;
   loading?: boolean;
-  aspectRatio: number;
+  aspectRatio?: number;
   className?: string;
   fit?: "cover" | "contain";
   badge?: string;
-  maxHeight?: string;
+  /** Fill a flex parent instead of driving height via aspect-ratio. */
+  fill?: boolean;
 }) {
   const t = useTranslations("editor.phonePreview");
   return (
     <div
-      className={cn("relative w-full overflow-hidden bg-neutral-100", className)}
-      style={{ aspectRatio, maxHeight }}
+      className={cn(
+        "relative w-full overflow-hidden bg-neutral-100",
+        fill && "min-h-0 flex-1",
+        className,
+      )}
+      style={fill || aspectRatio == null ? undefined : { aspectRatio }}
     >
       {loading && !image ? (
         <div className="absolute inset-0 animate-pulse bg-neutral-200" />
@@ -202,7 +207,7 @@ function SlideImage({
           alt=""
           draggable={false}
           className={cn(
-            "h-full w-full",
+            fill ? "absolute inset-0 size-full" : "h-full w-full",
             fit === "cover" ? "object-cover" : "object-contain bg-neutral-50",
           )}
         />
@@ -268,10 +273,8 @@ function TabIcon({
 
 function InstagramChrome(props: Props) {
   const t = useTranslations("editor.phonePreview");
-  const tc = useTranslations("common");
 
   const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
-  const ar = clampFeedAspect(props.aspectRatio);
   const body = captionOrFallback(
     caption,
     slideTotal > 1 ? `Slide ${slideIndex + 1} of ${slideTotal}` : t("newPost"),
@@ -293,10 +296,8 @@ function InstagramChrome(props: Props) {
       <SlideImage
         image={image}
         loading={loading}
-        aspectRatio={ar}
-        maxHeight="52%"
+        fill
         badge={slideTotal > 1 ? `${slideIndex + 1}/${slideTotal}` : undefined}
-        className="shrink-0"
       />
 
       <div className="relative flex shrink-0 items-center px-3 pt-2.5">
@@ -306,16 +307,16 @@ function InstagramChrome(props: Props) {
           <Send className="size-[24px]" strokeWidth={1.6} />
         </div>
         {slideTotal > 1 ? (
-          <div className="pointer-events-none absolute inset-x-0 flex justify-center">
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <CarouselDots total={slideTotal} active={slideIndex} />
           </div>
         ) : null}
         <Bookmark className="ml-auto size-[24px]" strokeWidth={1.6} />
       </div>
 
-      <div className="min-h-0 flex-1 space-y-1 overflow-hidden px-3 pt-2">
+      <div className="shrink-0 space-y-1 px-3 pt-2 pb-2">
         <p className="text-[13px] font-semibold leading-none">128 likes</p>
-        <p className="line-clamp-4 text-[13px] leading-snug whitespace-pre-wrap">
+        <p className="line-clamp-3 text-[13px] leading-snug whitespace-pre-wrap">
           <span className="font-semibold">{author}</span>{" "}
           <span className="text-neutral-800">{body}</span>
         </p>
@@ -346,7 +347,6 @@ function InstagramChrome(props: Props) {
 
 function ThreadsChrome(props: Props) {
   const t = useTranslations("editor.phonePreview");
-  const tc = useTranslations("common");
 
   const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
   const ar = clampFeedAspect(props.aspectRatio);
@@ -382,12 +382,13 @@ function ThreadsChrome(props: Props) {
             <p className="mt-1 line-clamp-5 text-[14px] leading-[1.3] text-neutral-900 whitespace-pre-wrap">
               {body}
             </p>
-            <div className="mt-2.5 overflow-hidden rounded-[16px] border border-black/[0.08]">
+            <div className="mt-2.5 max-h-[48%] overflow-hidden rounded-[16px] border border-black/[0.08]">
               <SlideImage
                 image={image}
                 loading={loading}
                 aspectRatio={ar}
                 badge={slideTotal > 1 ? `${slideIndex + 1}/${slideTotal}` : undefined}
+                className="max-h-full"
               />
             </div>
             <div className="mt-2.5 flex items-center gap-4 text-neutral-800">
@@ -416,7 +417,6 @@ function ThreadsChrome(props: Props) {
 
 function StoriesChrome(props: Props) {
   const t = useTranslations("editor.phonePreview");
-  const tc = useTranslations("common");
 
   const { author = "deckva", slideIndex, slideTotal, image, loading } = props;
 
@@ -476,26 +476,23 @@ function StoriesChrome(props: Props) {
 }
 
 function CleanChrome(props: Props) {
-  const t = useTranslations("editor.phonePreview");
-  const tc = useTranslations("common");
-
-  const { slideIndex, slideTotal, image, loading, aspectRatio } = props;
+  const { slideIndex, slideTotal, image, loading } = props;
   return (
     <div className="flex h-full w-full flex-col bg-neutral-950">
       <StatusBar tone="light" />
       <div className="flex min-h-0 flex-1 items-center justify-center px-3 py-2">
-        <div className="w-full overflow-hidden rounded-2xl ring-1 ring-white/10">
+        <div className="relative h-full w-full overflow-hidden rounded-2xl ring-1 ring-white/10">
           <SlideImage
             image={image}
             loading={loading}
-            aspectRatio={aspectRatio}
+            fill
             fit="contain"
             className="bg-neutral-900"
           />
         </div>
       </div>
       {slideTotal > 1 ? (
-        <div className="flex justify-center gap-1.5 pb-2">
+        <div className="flex shrink-0 justify-center gap-1.5 pb-2">
           <CarouselDots total={slideTotal} active={slideIndex} tone="light" />
         </div>
       ) : null}
@@ -512,13 +509,17 @@ const CHROME: Record<SocialPreviewNetwork, (props: Props) => ReactNode> = {
 };
 
 export function SocialPhonePreview(props: Props) {
-  const t = useTranslations("editor.phonePreview");
-  const tc = useTranslations("common");
-
   const startX = useRef<number | null>(null);
 
   return (
-    <PhoneFrame className="shrink-0">
+    <PhoneFrame
+      size="auto"
+      className={cn(
+        // Prefer stage height; width follows device AR. max-w keeps narrow viewports safe.
+        "h-[min(100%,calc(100dvh-11.5rem))] w-auto max-w-full shrink-0",
+        props.className,
+      )}
+    >
       <div
         className="h-full w-full touch-pan-y select-none"
         onPointerDown={(e) => {

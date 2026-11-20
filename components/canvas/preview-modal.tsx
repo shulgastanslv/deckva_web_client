@@ -320,29 +320,32 @@ export function PreviewModal({
         </div>
       ) : null}
 
-      <div className="flex min-h-0 flex-1 items-center justify-center gap-4 px-8">
+      <div className="flex min-h-0 flex-1 items-center justify-center gap-4 px-4 sm:px-8">
         <Button
           variant="ghost"
           size="icon"
           onClick={goPrev}
           disabled={activeIdx === 0}
- className="w-10 shrink-0 rounded-md disabled:opacity-20"
+          className="w-10 shrink-0 rounded-md disabled:opacity-20"
         >
           <ChevronLeft className="size-5" />
         </Button>
 
         {view === "phone" ? (
-          <SocialPhonePreview
-            network={network}
-            image={activeImage}
-            loading={activeSnap?.loading}
-            aspectRatio={aspectRatio}
-            slideIndex={activeIdx}
-            slideTotal={Math.max(slides.length, 1)}
-            author={author}
-            onPrev={goPrev}
-            onNext={goNext}
-          />
+          <div className="flex h-full min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
+            <SocialPhonePreview
+              network={network}
+              image={activeImage}
+              loading={activeSnap?.loading}
+              aspectRatio={aspectRatio}
+              slideIndex={activeIdx}
+              slideTotal={Math.max(slides.length, 1)}
+              author={author}
+              onPrev={goPrev}
+              onNext={goNext}
+              className="max-h-full max-w-[min(100%,22rem)]"
+            />
+          </div>
         ) : (
           <div
             className="relative overflow-hidden rounded-xl bg-muted/20 ring-1 ring-border/50 transition-all duration-200"
@@ -379,7 +382,7 @@ export function PreviewModal({
           size="icon"
           onClick={goNext}
           disabled={activeIdx === slides.length - 1}
- className="w-10 shrink-0 rounded-md disabled:opacity-20"
+          className="w-10 shrink-0 rounded-md disabled:opacity-20"
         >
           <ChevronRight className="size-5" />
         </Button>
