@@ -165,7 +165,7 @@ export default function CarouselEditor() {
   }, [focusMode, manager, phoneSheet]);
 
   const sheetFrame =
-    "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:overflow-hidden max-md:rounded-t-3xl max-md:bg-background max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:h-[min(72dvh,calc(100dvh-8.5rem))] md:static md:flex md:h-full md:shrink-0";
+    "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:overflow-hidden max-md:rounded-t-3xl max-md:bg-background max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:h-[min(72dvh,calc(100dvh-8.5rem))] md:relative md:z-20 md:flex md:h-full md:min-h-0 md:shrink-0 md:overflow-visible";
 
   const openPreview = (view: "slides" | "phone") => {
     setPreviewSlideId(useCanvasStore.getState().currentSlideId);
@@ -181,7 +181,21 @@ export default function CarouselEditor() {
         <AuthLinkHandler />
       </Suspense>
 
-      <div className="flex min-h-0 flex-1">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 bg-muted/20",
+          "md:gap-3 md:p-3",
+        )}
+        style={
+          showDotGrid
+            ? {
+                backgroundImage:
+                  "radial-gradient(var(--border) 1px, transparent 1px)",
+                backgroundSize: "24px 24px",
+              }
+            : undefined
+        }
+      >
         {!focusMode && (
           <div
             className={cn(
@@ -200,18 +214,7 @@ export default function CarouselEditor() {
           </div>
         )}
 
-        <main
-          className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/20"
-          style={
-            showDotGrid
-              ? {
-                  backgroundImage:
-                    "radial-gradient(var(--border) 1px, transparent 1px)",
-                  backgroundSize: "24px 24px",
-                }
-              : {}
-          }
-        >
+        <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
           <div className="relative flex min-h-0 flex-1">
             <CanvasView
               pageChrome={
@@ -251,20 +254,15 @@ export default function CarouselEditor() {
           <div
             className={cn(
               sheetFrame,
-              "md:overflow-hidden",
               phoneSheet === "style" ? "max-md:flex" : "max-md:hidden",
             )}
           >
-            <div className="relative h-full min-h-0 max-md:w-full md:w-auto">
-              <div className="relative z-10 flex h-full min-h-0 max-md:w-full md:w-auto">
-                <RightSidebar
-                  isRightCollapsed={isRightCollapsed}
-                  setIsRightCollapsed={setIsRightCollapsed}
-                  onPreview={() => openPreview("slides")}
-                  onPhonePreview={() => openPreview("phone")}
-                />
-              </div>
-            </div>
+            <RightSidebar
+              isRightCollapsed={isRightCollapsed}
+              setIsRightCollapsed={setIsRightCollapsed}
+              onPreview={() => openPreview("slides")}
+              onPhonePreview={() => openPreview("phone")}
+            />
           </div>
         )}
       </div>

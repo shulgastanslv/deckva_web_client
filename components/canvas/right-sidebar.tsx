@@ -17,7 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CollapsibleGroup } from "@/components/ui/collapsible-group";
-import { sidebarSelectTrigger } from "@/components/canvas/sidebar/sidebar-ui";
+import {
+  sidebarFloatShell,
+  sidebarSelectTrigger,
+} from "@/components/canvas/sidebar/sidebar-ui";
 import {
   TextAlignLeft as AlignLeft,
   TextAlignCenter as AlignCenter,
@@ -1048,10 +1051,9 @@ export function RightSidebar({
   return (
     <div
       className={cn(
-        "relative flex h-full overflow-hidden bg-background transition-[width,opacity,border-color] duration-300 ease-out max-md:w-full",
-        showPanel
-          ? "md:w-80 md:opacity-100 border-l border-border/50"
-          : "md:w-12 md:opacity-100 border-l border-border/50",
+        "relative flex h-full overflow-hidden transition-[width,opacity] duration-300 ease-out max-md:w-full",
+        sidebarFloatShell,
+        showPanel ? "md:w-80 md:opacity-100" : "md:w-12 md:opacity-100",
       )}
     >
       {showCollapsedRail ? (
@@ -1077,7 +1079,7 @@ export function RightSidebar({
         )}
       >
         {/* Panel chrome: actions only — zoom / context live on the canvas bar */}
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/40 px-3 py-2.5">
+        <div className="flex shrink-0 items-center justify-between gap-2 px-3 py-2.5">
           <EditorPanelActions
             onPreview={onPreview}
             onPhonePreview={onPhonePreview}
@@ -1105,7 +1107,7 @@ export function RightSidebar({
           </ScrollArea>
         ) : (
           <>
-        <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border/40 px-3.5">
+        <div className="flex h-12 shrink-0 items-center justify-between gap-2 px-3.5">
           <div className="min-w-0 flex-1 p-2">
             <span className="block truncate text-[13px] font-semibold tracking-tight text-foreground">
               {panelTitle}

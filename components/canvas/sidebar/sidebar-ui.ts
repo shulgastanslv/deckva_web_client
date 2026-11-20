@@ -19,6 +19,9 @@ export const sidebarControlH = controlH;
 export const sidebarPanel =
   "flex min-w-0 flex-col gap-3 px-3.5 py-3 text-[13px] text-foreground";
 
+/** Floating editor chrome — solid surface, no shadow / blur / border. */
+export const sidebarFloatShell = "md:rounded-2xl md:bg-background";
+
 export const sidebarActionBtn =
   `${controlH} rounded-md border-none ${sidebarSurface} px-3.5 text-[13px] font-medium text-foreground shadow-none transition-colors disabled:pointer-events-none disabled:opacity-40 flex items-center justify-center gap-1.5`;
 

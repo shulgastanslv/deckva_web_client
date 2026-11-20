@@ -25,7 +25,10 @@ import { CanvasNavHint } from "@/components/canvas/canvas-nav-hint";
 import { ProjectFileMenu } from "@/components/canvas/project-file-menu";
 import { SaveStatusMenu } from "@/components/canvas/save-status-menu";
 import { SidebarAssets } from "./sidebar/sidebar-assets";
-import { navIconClass } from "@/components/canvas/sidebar/sidebar-ui";
+import {
+  navIconClass,
+  sidebarFloatShell,
+} from "@/components/canvas/sidebar/sidebar-ui";
 import {
   Tooltip,
   TooltipContent,
@@ -113,8 +116,13 @@ export function LeftSidebar({
   };
 
   return (
-    <div className="flex h-full min-h-0 w-full overflow-hidden bg-background max-md:border-0 md:w-auto">
-      <aside className="flex w-12 shrink-0 flex-col items-center justify-between bg-muted/20 py-4">
+    <div
+      className={cn(
+        "flex h-full min-h-0 w-full overflow-hidden max-md:border-0 md:w-auto",
+        sidebarFloatShell,
+      )}
+    >
+      <aside className="flex w-14 shrink-0 flex-col items-center justify-between bg-background py-4">
         <TooltipProvider delayDuration={300}>
           <div className="flex flex-col items-center gap-1.5">
             <Logo width={36} height={36} href="/studio" className="mb-1.5" />
@@ -203,7 +211,7 @@ export function LeftSidebar({
           isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-80 md:flex-none md:opacity-100",
         )}
       >
-        <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border/40 px-3.5">
+        <div className="flex h-12 shrink-0 items-center justify-between gap-2 px-3.5">
           <h2 className="text-[14px] font-semibold tracking-tight text-foreground">
             {panelTitles[activeNav] ?? activeNav}
           </h2>
