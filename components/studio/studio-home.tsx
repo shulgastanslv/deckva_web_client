@@ -33,7 +33,6 @@ import {
   parseAiPalette,
 } from "@/lib/ai/generate-palette";
 import { normalizeDocument } from "@/lib/canvas/document";
-import { pushMyNotification } from "@/lib/notifications/client";
 import { reportError } from "@/lib/report-error";
 import { messages } from "@/lib/messages";
 import { parseImportedTemplate } from "@/lib/templates/parse";
@@ -199,13 +198,6 @@ export function StudioHome() {
                 );
               }
               await refreshProjects();
-              void pushMyNotification("imported", {
-                projectId: res.projectId,
-                title:
-                  template.title ||
-                  file.name.replace(/\.json$/i, "") ||
-                  t("importedTitle"),
-              });
               router.push(`/studio/editor?project=${res.projectId}`);
             } catch (err) {
               reportError(err, messages.errors.importJson);

@@ -122,7 +122,10 @@ export function LeftSidebar({
         sidebarFloatShell,
       )}
     >
-      <aside className="flex w-14 shrink-0 flex-col items-center justify-between bg-background py-4">
+      <aside
+        data-tour="editorRail"
+        className="flex w-14 shrink-0 flex-col items-center justify-between bg-background py-4"
+      >
         <TooltipProvider delayDuration={300}>
           <div className="flex flex-col items-center gap-1.5">
             <Logo width={36} height={36} href="/studio" className="mb-1.5" />
@@ -206,6 +209,7 @@ export function LeftSidebar({
       </aside>
 
       <div
+        data-tour="editorElements"
         className={cn(
           "flex min-h-0 min-w-0 flex-col overflow-hidden transition-all duration-200 ease-in-out py-2 max-md:w-auto max-md:flex-1 max-md:opacity-100",
           isLeftCollapsed ? "md:w-0 md:flex-none md:opacity-0" : "md:w-80 md:flex-none md:opacity-100",

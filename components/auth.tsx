@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -370,6 +371,8 @@ export function AuthModal({
                 </Button>
               </form>
 
+              <AuthLegalAgree />
+
               <div className="text-center mt-6 text-[13px] text-muted-foreground">
                 {t("noAccount")}{" "}
                 <button
@@ -464,6 +467,8 @@ export function AuthModal({
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("createAccount")}
                 </Button>
               </form>
+
+              <AuthLegalAgree />
 
               <div className="text-center mt-6 text-[13px] text-muted-foreground">
                 {t("haveAccount")}{" "}
@@ -592,6 +597,36 @@ export function AuthModal({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function AuthLegalAgree() {
+  const t = useTranslations("dialogs.auth");
+  return (
+    <p className="mt-4 text-center text-[12px] leading-relaxed text-muted-foreground">
+      {t.rich("agreeLegal", {
+        terms: (chunks) => (
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline-offset-2 hover:underline"
+          >
+            {chunks}
+          </Link>
+        ),
+        privacy: (chunks) => (
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline-offset-2 hover:underline"
+          >
+            {chunks}
+          </Link>
+        ),
+      })}
+    </p>
   );
 }
 

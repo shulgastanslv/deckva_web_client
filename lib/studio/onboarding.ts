@@ -90,6 +90,96 @@ export const STARTER_CAROUSEL_PROMPTS = [
     topic:
       "A customer onboarding carousel: day-one setup, first win, common blockers, and the next milestone.",
   },
+  {
+    id: "faq",
+    label: "FAQ",
+    topic:
+      "An FAQ carousel: one common question per slide with a short clear answer, ending with how to ask more.",
+  },
+  {
+    id: "beforeAfter",
+    label: "Before/after",
+    topic:
+      "A before-and-after carousel: the old way, the pain, the change, the new result, and what to try next.",
+  },
+  {
+    id: "roadmap",
+    label: "Roadmap",
+    topic:
+      "A roadmap carousel: the destination, 4–5 milestones in order, and the first step to start today.",
+  },
+  {
+    id: "testimonials",
+    label: "Proof",
+    topic:
+      "A social-proof carousel: a bold claim, 3–4 short testimonials or results, then a soft CTA.",
+  },
+  {
+    id: "trends",
+    label: "Trends",
+    topic:
+      "A trends carousel: what’s shifting now, why it matters, 3 concrete examples, and how to respond.",
+  },
+  {
+    id: "habits",
+    label: "Habits",
+    topic:
+      "A habits carousel: one small daily habit per slide with why it works, ending with a 7-day challenge.",
+  },
+  {
+    id: "unpopular",
+    label: "Hot take",
+    topic:
+      "An unpopular-opinion carousel: a sharp take, why most people get it wrong, the better approach, and a CTA.",
+  },
+  {
+    id: "stats",
+    label: "Stats",
+    topic:
+      "A stats carousel: one surprising number per slide with a one-line meaning, closing with the insight.",
+  },
+  {
+    id: "tools",
+    label: "Tools",
+    topic:
+      "A tools carousel: 5 tools for one job, who each is for, and a simple pick for beginners.",
+  },
+  {
+    id: "audience",
+    label: "Audience",
+    topic:
+      "An audience carousel: who you serve, their pains, the transformation, and how they usually find you.",
+  },
+  {
+    id: "webinar",
+    label: "Event",
+    topic:
+      "An event promo carousel: the promise, who it’s for, the agenda highlights, and how to join.",
+  },
+  {
+    id: "teaser",
+    label: "Teaser",
+    topic:
+      "A teaser carousel: a hook, three curiosity gaps, a reveal of what’s coming, and a waitlist CTA.",
+  },
+  {
+    id: "recap",
+    label: "Recap",
+    topic:
+      "A weekly recap carousel: 5 highlights, one lesson, and what you’re focusing on next.",
+  },
+  {
+    id: "manifesto",
+    label: "Manifesto",
+    topic:
+      "A manifesto carousel: the belief, what you reject, what you stand for, and an invite to join.",
+  },
+  {
+    id: "swipeFile",
+    label: "Swipe file",
+    topic:
+      "A swipe-file carousel: 5 examples worth stealing, what makes each work, and how to adapt one today.",
+  },
 ] as const;
 
 export type StarterCarouselId = (typeof STARTER_CAROUSEL_PROMPTS)[number]["id"];

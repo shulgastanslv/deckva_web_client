@@ -11,7 +11,8 @@ import GoogleProvider from "next-auth/providers/google";
 
 function verifiedGoogleEmail(profile: Profile | undefined): string | null {
   if (!profile || typeof profile.email !== "string") return null;
-  const verified = (profile as { email_verified?: unknown }).email_verified === true;
+  const verified =
+    (profile as { email_verified?: unknown }).email_verified === true;
   if (!verified) return null;
   const email = normalizeEmail(profile.email);
   return isValidEmail(email) ? email : null;
@@ -78,9 +79,16 @@ async function mergeGoogleProfile(
   input: { name?: string | null; image?: string | null },
 ): Promise<DbUser> {
   const name = existing.name ?? input.name ?? null;
-  const image = existing.image ?? input.image ?? null;
+  // Google-only → always refresh Google photo. Password accounts keep DB image.
+  const image = existing.password
+    ? (existing.image ?? null)
+    : (input.image ?? existing.image ?? null);
   const emailVerified = existing.emailVerified ?? new Date();
-  if (existing.name === name && existing.image === image && existing.emailVerified) {
+  if (
+    existing.name === name &&
+    existing.image === image &&
+    existing.emailVerified
+  ) {
     return existing;
   }
   return prisma.user.update({
@@ -133,6 +141,10 @@ export const authOptions: AuthOptions = {
           throw new Error("Confirm your email before signing in");
         }
 
+        if (user.bannedAt) {
+          throw new Error("This account has been suspended");
+        }
+
         return {
           id: user.id,
           email: user.email,
@@ -152,9 +164,25 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ account, profile }) {
-      if (account?.provider !== "google") return true;
-      return verifiedGoogleEmail(profile) !== null;
+    async signIn({ account, profile, user }) {
+      if (account?.provider === "google") {
+        const email = verifiedGoogleEmail(profile);
+        if (!email) return false;
+        const row = await prisma.user.findUnique({
+          where: { email },
+          select: { bannedAt: true },
+        });
+        if (row?.bannedAt) return false;
+        return true;
+      }
+      if (user?.id) {
+        const row = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { bannedAt: true },
+        });
+        if (row?.bannedAt) return false;
+      }
+      return true;
     },
     async jwt({ token, user, account, profile, trigger, session }) {
       if (trigger === "update" && session) {
@@ -176,6 +204,9 @@ export const authOptions: AuthOptions = {
           name: user?.name,
           image: cookieSafeImage(user?.image),
         });
+        if (dbUser.bannedAt) {
+          throw new Error("This account has been suspended");
+        }
         token.id = dbUser.id;
         token.sub = dbUser.id;
         token.email = dbUser.email;
@@ -183,6 +214,7 @@ export const authOptions: AuthOptions = {
         const image = cookieSafeImage(dbUser.image);
         token.image = image;
         token.picture = image;
+        token.banned = false;
       } else if (user?.id) {
         token.id = user.id;
         token.sub = user.id;
@@ -191,31 +223,42 @@ export const authOptions: AuthOptions = {
         const image = cookieSafeImage(user.image);
         token.image = image;
         token.picture = image;
+        token.banned = false;
       }
 
-      if (token.id && (user || account || !token.role)) {
+      if (token.id) {
         const row = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
             role: true,
             email: true,
             unlimitedGenerations: true,
+            bannedAt: true,
           },
         });
-        if (row) {
-          const role = emailIsAdmin(row.email) ? UserRole.ADMIN : row.role;
-          const needsAdminSync =
-            role === UserRole.ADMIN &&
-            (role !== row.role || !row.unlimitedGenerations);
-          if (needsAdminSync) {
-            await promotePlatformAdmin(token.id as string);
+        if (!row || row.bannedAt) {
+          token.banned = true;
+          delete token.role;
+        } else {
+          token.banned = false;
+          if (user || account || !token.role) {
+            const role = emailIsAdmin(row.email) ? UserRole.ADMIN : row.role;
+            const needsAdminSync =
+              role === UserRole.ADMIN &&
+              (role !== row.role || !row.unlimitedGenerations);
+            if (needsAdminSync) {
+              await promotePlatformAdmin(token.id as string);
+            }
+            token.role = role;
           }
-          token.role = role;
         }
       }
       return slimJwt(token as Record<string, unknown>) as typeof token;
     },
     async session({ session, token }) {
+      if (token.banned) {
+        return { ...session, user: undefined as never, expires: session.expires };
+      }
       if (session.user) {
         session.user.id = token.id;
         session.user.role =

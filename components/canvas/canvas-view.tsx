@@ -607,7 +607,7 @@ export function CanvasView({
   };
 
   return (
-    <div className="relative min-h-0 flex-1">
+    <div data-tour="editorCanvas" className="relative min-h-0 flex-1">
       <div
         ref={containerRef}
         className={cn(

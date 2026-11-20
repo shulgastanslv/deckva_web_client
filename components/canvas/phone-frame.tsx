@@ -11,21 +11,37 @@ export const IPHONE_17_PRO = {
   screen: { x: 100, y: 100, width: 1206, height: 2622 },
 } as const;
 
+const SIZE = {
+  sm: "w-[min(100%,14.5rem)]",
+  md: "w-[min(100%,16.5rem)]",
+  lg: "w-[min(100%,18.5rem)]",
+  xl: "w-[min(100%,20.5rem)]",
+  fluid: "w-full",
+} as const;
+
 export function PhoneFrame({
   children,
   className,
   widthClass,
+  size = "fluid",
 }: {
   children: ReactNode;
   className?: string;
   widthClass?: string;
+  /** Preset widths for adaptive phone grids */
+  size?: keyof typeof SIZE;
 }) {
   const { width, height, screen } = IPHONE_17_PRO;
   const bleed = 12;
 
   return (
     <div
-      className={cn("relative mx-auto w-[min(300px,72vw)]", widthClass, className)}
+      className={cn(
+        "relative mx-auto",
+        SIZE[size],
+        widthClass,
+        className,
+      )}
       style={{ aspectRatio: `${width} / ${height}` }}
     >
       <div

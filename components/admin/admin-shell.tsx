@@ -7,6 +7,7 @@ import {
   Layout as LayoutTemplate,
   ChatTeardropText as MessageSquareText,
   Newspaper,
+  UserCircle,
   Users,
 } from "@phosphor-icons/react";
 
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 export type AdminSection =
   | "community"
+  | "users"
   | "notify"
   | "news"
   | "feedback";
@@ -25,6 +27,7 @@ const NAV: Array<{
   icon: typeof LayoutTemplate;
 }> = [
   { id: "community", label: "Community", icon: Users },
+  { id: "users", label: "Users", icon: UserCircle },
   { id: "notify", label: "Notify", icon: Bell },
   { id: "news", label: "News", icon: Newspaper },
   { id: "feedback", label: "Feedback", icon: MessageSquareText },

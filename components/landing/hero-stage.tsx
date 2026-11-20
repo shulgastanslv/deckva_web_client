@@ -6,11 +6,13 @@ import {
   useReducedMotion,
   useScroll,
   useTransform,
+  type MotionValue,
 } from "motion/react";
 import { useTranslations } from "next-intl";
 
+import { heroThreadsPosts } from "@/components/landing/threads-content";
 import { ThreadsUI, type ThreadsPostData } from "@/components/landing/threads-ui";
-import { PhoneFrame } from "@/components/canvas/phone-frame";
+import { IPHONE_17_PRO, PhoneFrame } from "@/components/canvas/phone-frame";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
 import { DAILY_GENERATION_LIMIT } from "@/lib/studio/plans";
@@ -18,32 +20,34 @@ import { cn } from "@/lib/utils";
 
 export { PhoneFrame };
 
-/** @deprecated Prefer inserting frames via ThreadsUI `media` */
-export const THREAD_SHOTS = [
-  "/reviews/1.jpg",
-  "/reviews/2.jpg",
-  "/reviews/3.jpg",
-] as const;
-
 const easeOut = [0.22, 1, 0.36, 1] as const;
+
+/** Native phone aspect (width / height). */
+const PHONE_AR = IPHONE_17_PRO.width / IPHONE_17_PRO.height;
+
+/** Front phone width as a fraction of the stack stage. */
+const PHONE_W = 0.8;
+/** Back phone — slightly smaller so it reads farther away. */
+const BACK_PHONE_W = 0.72;
+/** Extra stage height for the offset + tilted pair. */
+const STACK_Y = 1;
+
+const phoneShadow = "drop-shadow-[0_18px_40px_rgba(0,0,0,0.28)]";
 
 function ThreadsPhone({
   posts,
+  autoplay = false,
   className,
-  size = "default",
-  compact,
 }: {
   posts: ThreadsPostData[];
+  autoplay?: boolean;
   className?: string;
-  size?: "default" | "hero";
-  compact?: boolean;
 }) {
   return (
-    <PhoneFrame className={cn("w-[270px]", className)}>
+    <PhoneFrame size="fluid" className={cn(phoneShadow, className)}>
       <ThreadsUI
         posts={posts}
-        compact={compact ?? false}
-        autoplay={size === "hero"}
+        autoplay={autoplay}
         showReplyBar={false}
         showTabBar
       />
@@ -55,42 +59,84 @@ function useHeroPosts() {
   const t = useTranslations("landing.heroPosts");
 
   return useMemo(
-    () => ({
-      back: [
-        {
-          id: "hero-b",
-          author: "alex",
-          avatar: "/post_logo.jpg",
-          time: t("postB.time"),
-          text: t("postB.text"),
-          media: ["/reviews/6.jpg", "/reviews/8.jpg", "/reviews/4.jpg"],
-          likes: "97",
-          replies: "12",
-          reposts: "6",
-        },
-      ] satisfies ThreadsPostData[],
-      front: [
-        {
-          id: "hero-a",
-          author: "mira",
-          avatar: "/post_logo.jpg",
-          verified: true,
-          time: t("postA.time"),
-          liked: true,
-          topic: t("postA.topic"),
+    () =>
+      heroThreadsPosts({
+        front: {
           text: t("postA.text"),
-          media: ["/reviews/1.jpg", "/reviews/2.jpg", "/reviews/3.jpg"],
-          likes: "214",
-          replies: "31",
-          reposts: "18",
+          time: t("postA.time"),
+          topic: t("postA.topic"),
         },
-      ] satisfies ThreadsPostData[],
-    }),
+        back: {
+          text: t("postB.text"),
+          time: t("postB.time"),
+        },
+        comments: {
+          c1: { text: t("comments.c1.text"), time: t("comments.c1.time") },
+          c1r1: {
+            text: t("comments.c1r1.text"),
+            time: t("comments.c1r1.time"),
+          },
+          c2: { text: t("comments.c2.text"), time: t("comments.c2.time") },
+          b1: { text: t("comments.b1.text"), time: t("comments.b1.time") },
+        },
+      }),
     [t],
   );
 }
 
-/** Natural-height hero: text, then two complete phones. No overflow crop. */
+function PhoneStack({
+  front,
+  back,
+  className,
+  reduceMotion,
+  backX,
+  backRotate,
+  frontX,
+  frontRotate,
+}: {
+  front: ThreadsPostData[];
+  back: ThreadsPostData[];
+  className?: string;
+  reduceMotion: boolean | null;
+  backX?: MotionValue<string>;
+  backRotate?: MotionValue<number>;
+  frontX?: MotionValue<string>;
+  frontRotate?: MotionValue<number>;
+}) {
+  return (
+    <div
+      className={cn("pointer-events-none relative", className)}
+      style={{
+        aspectRatio: `${1} / ${(PHONE_W / PHONE_AR) * STACK_Y}`,
+      }}
+    >
+      <motion.div
+        className="absolute top-0 left-0 z-[1]"
+        style={{
+          width: `${BACK_PHONE_W * 100}%`,
+          ...(reduceMotion
+            ? { rotate: -6 }
+            : { x: backX, rotate: backRotate }),
+        }}
+      >
+        <ThreadsPhone posts={back} />
+      </motion.div>
+
+      <motion.div
+        className="absolute right-0 bottom-0 z-10"
+        style={{
+          width: `${PHONE_W * 100}%`,
+          ...(reduceMotion
+            ? { rotate: 3 }
+            : { x: frontX, rotate: frontRotate }),
+        }}
+      >
+        <ThreadsPhone posts={front} autoplay />
+      </motion.div>
+    </div>
+  );
+}
+
 export function HeroSection() {
   const t = useTranslations("landing");
   const reduceMotion = useReducedMotion();
@@ -102,17 +148,17 @@ export function HeroSection() {
     offset: ["start start", "end start"],
   });
 
-  const backX = useTransform(scrollYProgress, [0, 1], ["0%", "-4%"]);
-  const backRotate = useTransform(scrollYProgress, [0, 1], [-6, -10]);
-  const frontX = useTransform(scrollYProgress, [0, 1], ["0%", "3%"]);
-  const frontRotate = useTransform(scrollYProgress, [0, 1], [0, 4]);
+  const backX = useTransform(scrollYProgress, [0, 1], ["0%", "-5%"]);
+  const backRotate = useTransform(scrollYProgress, [0, 1], [-6, -12]);
+  const frontX = useTransform(scrollYProgress, [0, 1], ["0%", "4%"]);
+  const frontRotate = useTransform(scrollYProgress, [0, 1], [3, 8]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-x-clip dark:bg-background bg-land-blue text-white"
+      className="relative min-h-[90svh] overflow-x-clip dark:bg-background bg-land-blue text-white"
     >
-      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col px-4 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-12 sm:px-6 sm:pb-16 lg:flex-row lg:items-center lg:justify-center lg:gap-14 lg:px-8 lg:pb-20 lg:pt-[calc(7rem+env(safe-area-inset-top))] xl:gap-20">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col px-4 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-16 sm:px-6 sm:pb-20 lg:min-h-[100svh] lg:flex-row lg:items-center lg:justify-center lg:gap-12 lg:px-8 lg:pb-28 lg:pt-[calc(7rem+env(safe-area-inset-top))] xl:gap-16">
         <motion.div
           className="flex w-full shrink-0 flex-col items-start text-left lg:w-[26rem] xl:w-[28rem]"
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
@@ -154,8 +200,8 @@ export function HeroSection() {
         </motion.div>
 
         <motion.div
-          className="pointer-events-none relative mx-auto mt-10 w-full max-w-[20rem] sm:mt-12 sm:max-w-[24rem] lg:mx-0 lg:mt-0 lg:max-w-[28rem] xl:max-w-[30rem]"
-          initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+          className="mx-auto mt-6 w-[min(100%,24rem)] sm:w-[min(100%,28rem)] lg:mx-0 lg:mt-0 lg:w-[min(100%,30rem)] xl:w-[32rem]"
+          initial={reduceMotion ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
             reduceMotion
@@ -163,34 +209,15 @@ export function HeroSection() {
               : { duration: 0.8, delay: 0.1, ease: easeOut }
           }
         >
-          <motion.div
-            className="absolute top-5 left-[2%] z-[1] w-[68%] sm:top-6 sm:left-[3%] sm:w-[62%]"
-            style={
-              reduceMotion
-                ? undefined
-                : { x: backX, rotate: backRotate }
-            }
-          >
-            <ThreadsPhone
-              posts={posts.back}
-              className={cn("w-full", reduceMotion && "-rotate-6")}
-            />
-          </motion.div>
-
-          <motion.div
-            className="relative z-10 ml-auto w-[90%] sm:w-[82%]"
-            style={
-              reduceMotion
-                ? undefined
-                : { x: frontX, rotate: frontRotate }
-            }
-          >
-            <ThreadsPhone
-              posts={posts.front}
-              size="hero"
-              className="w-full"
-            />
-          </motion.div>
+          <PhoneStack
+            front={posts.front}
+            back={posts.back}
+            reduceMotion={reduceMotion}
+            backX={backX}
+            backRotate={backRotate}
+            frontX={frontX}
+            frontRotate={frontRotate}
+          />
         </motion.div>
       </div>
     </section>
@@ -201,16 +228,11 @@ export function HeroSection() {
 export function HeroStage() {
   const posts = useHeroPosts();
   return (
-    <div className="pointer-events-none relative mx-auto w-full max-w-[28rem] sm:max-w-[36rem]">
-      <ThreadsPhone
-        posts={posts.back}
-        className="absolute top-6 left-[4%] w-[66%] origin-center -rotate-6 sm:top-8 sm:left-[5%] sm:w-[62%]"
-      />
-      <ThreadsPhone
-        posts={posts.front}
-        size="hero"
-        className="relative z-10 ml-auto w-[86%] sm:w-[78%]"
-      />
-    </div>
+    <PhoneStack
+      front={posts.front}
+      back={posts.back}
+      reduceMotion
+      className="mx-auto w-[min(100%,28rem)]"
+    />
   );
 }

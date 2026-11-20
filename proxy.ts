@@ -32,10 +32,12 @@ export async function proxy(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
   });
 
+  const banned = token?.banned === true;
   const userId =
-    (typeof token?.id === "string" && token.id) ||
-    (typeof token?.sub === "string" && token.sub) ||
-    null;
+    !banned &&
+    ((typeof token?.id === "string" && token.id) ||
+      (typeof token?.sub === "string" && token.sub) ||
+      null);
 
   if (userId) {
     requestHeaders.set(AUTH_USER_ID_HEADER, userId);

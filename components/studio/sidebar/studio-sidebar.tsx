@@ -23,6 +23,7 @@ export function StudioSidebar({
 }) {
   return (
     <aside
+      data-tour="sidebar"
       className={cn(
         "flex h-full w-[252px] shrink-0 flex-col bg-muted/20 dark:bg-background",
         className,

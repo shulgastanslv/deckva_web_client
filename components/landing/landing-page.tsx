@@ -26,7 +26,6 @@ import { EditorShowcase } from "./editor-showcase";
 import { ModelsSection } from "./models-section";
 import { PricingSection } from "./pricing-section";
 import { FaqSection } from "./faq-section";
-import { SectionPhraseIntro } from "./section-phrase-intro";
 
 const LEGAL_STATIC = {
   fullName: "Шульга Станислав",
@@ -95,6 +94,8 @@ export function LandingPage() {
     [t],
   );
 
+  const tc = useTranslations("common");
+
   const footerColumns = useMemo(
     () => [
       {
@@ -105,6 +106,8 @@ export function LandingPage() {
           { name: t("nav.examples"), href: "#examples" },
           { name: t("nav.price"), href: "#pricing" },
           { name: t("nav.questions"), href: "#faq" },
+          { name: tc("terms"), href: "/terms" },
+          { name: tc("privacy"), href: "/privacy" },
         ],
       },
       {
@@ -125,7 +128,7 @@ export function LandingPage() {
         ],
       },
     ],
-    [t],
+    [t, tc],
   );
 
   useEffect(() => {
@@ -271,24 +274,16 @@ export function LandingPage() {
 
         <EditorShowcase />
 
-        <SectionPhraseIntro
-          id="pricing"
-          phrase={t("pricing.intro")}
-          heightVh={170}
-        >
-          <div className="mx-auto w-full max-w-[1200px]">
-            <MiroBoard>
-              <PricingSection />
-            </MiroBoard>
-          </div>
-        </SectionPhraseIntro>
-
         <div
           className={cn(
             "mx-auto flex w-full max-w-[1200px] flex-col gap-2 sm:gap-3",
             landSectionPad,
           )}
         >
+          <MiroBoard id="pricing">
+            <PricingSection />
+          </MiroBoard>
+
           <MiroBoard id="faq">
             <FaqSection items={faqItems} />
           </MiroBoard>

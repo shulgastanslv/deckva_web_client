@@ -20,6 +20,7 @@ import remarkGfm from "remark-gfm";
 
 import {
   deleteNotification,
+  listMyNotifications,
   markNotificationsRead,
   toggleNotificationRead,
   type NotificationItem,
@@ -193,11 +194,13 @@ function NotificationsPanel({
   setFilter,
   items,
   loading,
+  nextCursor,
 }: {
   filter: Filter;
   setFilter: (filter: Filter) => void;
   items: NotificationItem[];
   loading: boolean;
+  nextCursor: string | null;
 }) {
   const t = useTranslations("studio.notifications");
   const tn = useTranslations("notifications");
@@ -205,6 +208,7 @@ function NotificationsPanel({
   const [searchQuery, setSearchQuery] = useState("");
   const [readingItem, setReadingItem] = useState<NotificationItem | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const filterLabel: Record<Filter, string> = {
     unread: t("unread"),
@@ -226,16 +230,57 @@ function NotificationsPanel({
   ) => {
     queryClient.setQueryData(
       studioKeys.notifications,
-      (old: { items: NotificationItem[]; unread: number } | undefined) => {
+      (
+        old:
+          | {
+              items: NotificationItem[];
+              unread: number;
+              nextCursor?: string | null;
+            }
+          | undefined,
+      ) => {
         if (!old) return old;
         const nextItems = updater(old.items);
         return {
           ...old,
           items: nextItems,
           unread: nextItems.filter((item) => !item.read).length,
+          nextCursor: old.nextCursor ?? null,
         };
       },
     );
+  };
+
+  const handleLoadMore = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const page = await listMyNotifications({ cursor: nextCursor });
+      if (!page.success) return;
+      queryClient.setQueryData(
+        studioKeys.notifications,
+        (
+          old:
+            | {
+                items: NotificationItem[];
+                unread: number;
+                nextCursor?: string | null;
+              }
+            | undefined,
+        ) => {
+          const seen = new Set((old?.items ?? []).map((item) => item.id));
+          const appended = page.items.filter((item) => !seen.has(item.id));
+          return {
+            success: true as const,
+            items: [...(old?.items ?? []), ...appended],
+            unread: page.unread,
+            nextCursor: page.nextCursor,
+          };
+        },
+      );
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -266,14 +311,14 @@ function NotificationsPanel({
 
   return (
     <>
-      <div className="flex h-full flex-col">
-        <div className="px-6 pt-5 pb-3">
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="shrink-0 px-6 pt-5 pb-3">
           <h2 className="text-[17px] font-bold text-foreground">
             {tn("title")}
           </h2>
         </div>
 
-        <div className="flex items-center gap-2 px-4 pb-3">
+        <div className="flex shrink-0 items-center gap-2 px-4 pb-3">
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -289,7 +334,7 @@ function NotificationsPanel({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="secondary"
- className="rounded-md border-none bg-muted/40 px-4 text-[13px] font-medium"
+                className="rounded-md border-none bg-muted/40 px-4 text-[13px] font-medium"
               >
                 {filterLabel[filter]}
                 <ChevronDown className="ml-1 size-3.5 text-muted-foreground" />
@@ -317,7 +362,7 @@ function NotificationsPanel({
           </DropdownMenu>
         </div>
 
-        <ScrollArea className="flex-1 px-2 pb-2">
+        <ScrollArea className="min-h-0 flex-1 px-2 pb-2">
           {loading ? (
             <div className="flex h-40 items-center justify-center">
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -332,7 +377,7 @@ function NotificationsPanel({
               </p>
             </div>
           ) : (
-            <ul className="flex flex-col gap-1">
+            <ul className="flex flex-col gap-1 pb-2">
               {visible.map((item) => (
                 <li
                   key={item.id}
@@ -409,6 +454,23 @@ function NotificationsPanel({
                   </div>
                 </li>
               ))}
+              {nextCursor && !searchQuery ? (
+                <li className="px-2 py-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={loadingMore}
+                    className="w-full rounded-md border-none bg-muted/40 text-[13px] font-normal shadow-none hover:bg-muted/60"
+                    onClick={() => void handleLoadMore()}
+                  >
+                    {loadingMore ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      t("loadMore")
+                    )}
+                  </Button>
+                </li>
+              ) : null}
             </ul>
           )}
         </ScrollArea>
@@ -433,6 +495,7 @@ export function StudioNotifications({
 
   const items = notifications.data?.items ?? [];
   const unread = notifications.data?.unread ?? 0;
+  const nextCursor = notifications.data?.nextCursor ?? null;
   const loading = signedIn && !notifications.data && !notifications.isError;
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
@@ -492,13 +555,14 @@ export function StudioNotifications({
       <PopoverContent
         align="end"
         alignOffset={-4}
-        className="h-[min(480px,calc(100dvh-32px))] w-xs overflow-hidden rounded-[28px] p-0"
+        className="flex h-[min(480px,calc(100dvh-32px))] w-xs flex-col overflow-hidden rounded-[28px] p-0"
       >
         <NotificationsPanel
           filter={filter}
           setFilter={setFilter}
           items={items}
           loading={loading}
+          nextCursor={nextCursor}
         />
       </PopoverContent>
     </Popover>

@@ -214,6 +214,7 @@ type NotificationCache = {
   success: true;
   items: NotificationItem[];
   unread: number;
+  nextCursor: string | null;
 };
 
 /** Keep the open panel marked read, and force the next list read to hit the server. */
@@ -223,6 +224,7 @@ export function markNotificationCacheRead(client: QueryClient) {
     return {
       ...current,
       unread: 0,
+      nextCursor: current.nextCursor ?? null,
       items: current.items.map((item) => ({ ...item, read: true })),
     };
   });

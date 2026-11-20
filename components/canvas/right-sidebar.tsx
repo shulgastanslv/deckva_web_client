@@ -1050,6 +1050,7 @@ export function RightSidebar({
 
   return (
     <div
+      data-tour="editorInspector"
       className={cn(
         "relative flex h-full overflow-hidden transition-[width,opacity] duration-300 ease-out max-md:w-full",
         sidebarFloatShell,

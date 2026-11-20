@@ -141,13 +141,7 @@ export function ProfileSettingsDialog({
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  const userId = session?.user?.id ?? "";
-  const avatarSrc =
-    image ||
-    session?.user?.image ||
-    (userId
-      ? `https://api.dicebear.com/10.x/squircles/svg?seed=${userId}`
-      : undefined);
+  const avatarSrc = image || session?.user?.image || null;
   const initial = (name.trim()[0] || email[0] || "U").toUpperCase();
   const isDark = themeMounted && resolvedTheme === "dark";
 
@@ -419,8 +413,15 @@ export function ProfileSettingsDialog({
                       <div className="flex items-center gap-3">
                           <div className="relative group cursor-pointer">
                             <Avatar className="size-16 rounded-full ring-1 ring-border/20">
-                              <AvatarImage src={avatarSrc ?? undefined} alt={name || email} className="object-cover" />
-                              <AvatarFallback className="bg-muted text-lg font-medium text-foreground">
+                              {avatarSrc ? (
+                                <AvatarImage
+                                  src={avatarSrc}
+                                  alt={name || email}
+                                  referrerPolicy="no-referrer"
+                                  className="rounded-full object-cover"
+                                />
+                              ) : null}
+                              <AvatarFallback className="rounded-full bg-primary text-lg font-semibold text-primary-foreground">
                                 {initial}
                               </AvatarFallback>
                             </Avatar>

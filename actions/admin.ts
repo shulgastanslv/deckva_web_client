@@ -1,11 +1,14 @@
 "use server";
 
-import { requireUserId } from "@/lib/auth/session";
-import { messages } from "@/lib/messages";
+import bcrypt from "bcryptjs";
 
+import { requireUserId } from "@/lib/auth/session";
+import { isPasswordLongEnough } from "@/lib/auth/password";
 import { emailIsAdmin } from "@/lib/auth-role";
-import { isPlatformAdmin } from "@/lib/roles";
+import { isValidEmail, normalizeEmail } from "@/lib/email";
+import { messages } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
+import { isPlatformAdmin } from "@/lib/roles";
 import { promotePlatformAdmin } from "@/lib/studio/admin-unlimited";
 
 type ActionResult<T extends object = object> =
@@ -145,18 +148,73 @@ export async function sendNotification(input: {
   }
 }
 
-export async function listMyNotifications(): Promise<
-  ActionResult<{ items: NotificationItem[]; unread: number }>
+/** Project lifecycle inbox noise (created / ready / copy / import) — hidden + pruned. */
+const PROJECT_NOISE_TITLES = new Set([
+  "Project created",
+  "Carousel ready",
+  "Copy created",
+  "Import complete",
+  "Проект создан",
+  "Карусель готова",
+  "Копия создана",
+  "Импорт завершён",
+  "Праект створаны",
+  "Карусель гатовая",
+  "Копія створана",
+  "Імпарт завершаны",
+]);
+
+export async function listMyNotifications(input?: {
+  cursor?: string | null;
+  take?: number;
+}): Promise<
+  ActionResult<{
+    items: NotificationItem[];
+    unread: number;
+    nextCursor: string | null;
+  }>
 > {
   try {
     const userId = await requireUserId();
     if (!userId) return { success: false, error: messages.errors.signIn };
-    const rows = await prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: 20,
+
+    await prisma.notification.deleteMany({
+      where: {
+        userId,
+        newsId: null,
+        title: { in: [...PROJECT_NOISE_TITLES] },
+      },
     });
-    const items = rows.map((row) => ({
+
+    const noiseTitles = [...PROJECT_NOISE_TITLES];
+    const where = {
+      userId,
+      NOT: { title: { in: noiseTitles } },
+    };
+
+    const take = Math.min(40, Math.max(10, Math.round(input?.take ?? 20)));
+    const cursor = input?.cursor?.trim() || null;
+
+    const [rows, unread] = await Promise.all([
+      prisma.notification.findMany({
+        where,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: take + 1,
+        ...(cursor
+          ? {
+              cursor: { id: cursor },
+              skip: 1,
+            }
+          : {}),
+      }),
+      prisma.notification.count({
+        where: { ...where, readAt: null },
+      }),
+    ]);
+
+    const hasMore = rows.length > take;
+    const page = hasMore ? rows.slice(0, take) : rows;
+    const items = page.map((row) => ({
       id: row.id,
       title: row.title,
       body: row.body,
@@ -164,7 +222,12 @@ export async function listMyNotifications(): Promise<
       createdAt: row.createdAt.toISOString(),
       read: row.readAt != null,
     }));
-    return { success: true, items, unread: items.filter((item) => !item.read).length };
+    return {
+      success: true,
+      items,
+      unread,
+      nextCursor: hasMore ? (page.at(-1)?.id ?? null) : null,
+    };
   } catch (err) {
     console.error("listMyNotifications error:", err);
     return { success: false, error: messages.errors.loadNotifications };
@@ -214,5 +277,207 @@ export async function markNotificationsRead(): Promise<ActionResult<object>> {
   } catch (err) {
     console.error("markNotificationsRead error:", err);
     return { success: false, error: messages.errors.updateNotifications };
+  }
+}
+
+export interface AdminUserRow {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+  unlimitedGenerations: boolean;
+  generationsUsedToday: number;
+  banned: boolean;
+  createdAt: string;
+}
+
+export async function listUsers(): Promise<
+  ActionResult<{ users: AdminUserRow[] }>
+> {
+  try {
+    if (!(await requireAdminId())) {
+      return { success: false, error: messages.errors.adminsOnly };
+    }
+    const rows = await prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 200,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        unlimitedGenerations: true,
+        generationsUsedToday: true,
+        bannedAt: true,
+        createdAt: true,
+      },
+    });
+    return {
+      success: true,
+      users: rows.map((row) => ({
+        id: row.id,
+        email: row.email,
+        name: row.name,
+        role: row.role,
+        unlimitedGenerations: row.unlimitedGenerations,
+        generationsUsedToday: row.generationsUsedToday,
+        banned: row.bannedAt != null,
+        createdAt: row.createdAt.toISOString(),
+      })),
+    };
+  } catch (err) {
+    console.error("listUsers error:", err);
+    return { success: false, error: messages.errors.generic };
+  }
+}
+
+export async function updateUserFlags(input: {
+  userId: string;
+  role?: "USER" | "ADMIN";
+  unlimitedGenerations?: boolean;
+  banned?: boolean;
+}): Promise<ActionResult<object>> {
+  try {
+    const adminId = await requireAdminId();
+    if (!adminId) return { success: false, error: messages.errors.adminsOnly };
+    if (!input.userId.trim()) {
+      return { success: false, error: messages.errors.generic };
+    }
+    if (input.userId === adminId && input.role === "USER") {
+      return { success: false, error: messages.errors.generic };
+    }
+    if (input.userId === adminId && input.banned === true) {
+      return { success: false, error: messages.errors.generic };
+    }
+
+    const data: {
+      role?: "USER" | "ADMIN";
+      unlimitedGenerations?: boolean;
+      bannedAt?: Date | null;
+    } = {};
+    if (input.role === "USER" || input.role === "ADMIN") {
+      data.role = input.role;
+      if (input.role === "ADMIN" && input.unlimitedGenerations === undefined) {
+        data.unlimitedGenerations = true;
+      }
+    }
+    if (typeof input.unlimitedGenerations === "boolean") {
+      data.unlimitedGenerations = input.unlimitedGenerations;
+    }
+    if (typeof input.banned === "boolean") {
+      data.bannedAt = input.banned ? new Date() : null;
+    }
+    if (Object.keys(data).length === 0) {
+      return { success: false, error: messages.errors.generic };
+    }
+
+    await prisma.user.update({
+      where: { id: input.userId },
+      data,
+    });
+    return { success: true };
+  } catch (err) {
+    console.error("updateUserFlags error:", err);
+    return { success: false, error: messages.errors.generic };
+  }
+}
+
+export async function createUser(input: {
+  email: string;
+  password: string;
+  name?: string;
+  role?: "USER" | "ADMIN";
+  /** When true, mark email as verified so the user can sign in immediately. */
+  verifyEmail?: boolean;
+}): Promise<ActionResult<{ user: AdminUserRow }>> {
+  try {
+    if (!(await requireAdminId())) {
+      return { success: false, error: messages.errors.adminsOnly };
+    }
+
+    const email = normalizeEmail(input.email);
+    if (!isValidEmail(email) || !input.password) {
+      return { success: false, error: messages.errors.validEmailAndPassword };
+    }
+    if (!isPasswordLongEnough(input.password)) {
+      return { success: false, error: messages.errors.passwordTooShort };
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return { success: false, error: messages.errors.accountExists };
+    }
+
+    const role = input.role === "ADMIN" ? "ADMIN" : "USER";
+    const name = input.name?.trim() || null;
+    const password = await bcrypt.hash(input.password, 10);
+    const verifyEmail = input.verifyEmail !== false;
+
+    const row = await prisma.user.create({
+      data: {
+        email,
+        name,
+        password,
+        role,
+        emailVerified: verifyEmail ? new Date() : null,
+        unlimitedGenerations: role === "ADMIN",
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        unlimitedGenerations: true,
+        generationsUsedToday: true,
+        bannedAt: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      success: true,
+      user: {
+        id: row.id,
+        email: row.email,
+        name: row.name,
+        role: row.role,
+        unlimitedGenerations: row.unlimitedGenerations,
+        generationsUsedToday: row.generationsUsedToday,
+        banned: row.bannedAt != null,
+        createdAt: row.createdAt.toISOString(),
+      },
+    };
+  } catch (err) {
+    console.error("createUser error:", err);
+    return { success: false, error: messages.errors.generic };
+  }
+}
+
+export async function deleteUser(
+  userId: string,
+): Promise<ActionResult<object>> {
+  try {
+    const adminId = await requireAdminId();
+    if (!adminId) return { success: false, error: messages.errors.adminsOnly };
+    if (!userId.trim()) {
+      return { success: false, error: messages.errors.generic };
+    }
+    if (userId === adminId) {
+      return { success: false, error: "You can’t delete your own account here" };
+    }
+
+    const target = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!target) {
+      return { success: false, error: messages.errors.accountNotFound };
+    }
+
+    await prisma.user.delete({ where: { id: userId } });
+    return { success: true };
+  } catch (err) {
+    console.error("deleteUser error:", err);
+    return { success: false, error: messages.errors.generic };
   }
 }

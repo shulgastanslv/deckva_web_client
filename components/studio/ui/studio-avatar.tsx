@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -29,23 +29,31 @@ export const StudioAvatar = forwardRef<HTMLButtonElement, StudioAvatarProps>(
     ref,
   ) {
     const [broken, setBroken] = useState(false);
-    const initial = letter?.trim() || name?.trim()?.[0] || "U";
+
+    useEffect(() => {
+      setBroken(false);
+    }, [src]);
+
+    const initial = (letter?.trim() || name?.trim()?.[0] || "U").toUpperCase();
     const showImage = Boolean(src) && !broken;
 
     const face = showImage ? (
-      // eslint-disable-next-line @next/next/no-img-element
+      // eslint-disable-next-line @next/next/no-img-element -- remote Google + data URLs
       <img
         src={src!}
         alt=""
-        className="absolute inset-0 size-full object-cover"
+        referrerPolicy="no-referrer"
+        className="absolute inset-0 size-full rounded-full object-cover"
         onError={() => setBroken(true)}
       />
     ) : (
-      <span className="relative z-10">{initial.toUpperCase()}</span>
+      <span className="relative z-10 select-none">{initial}</span>
     );
 
     const shellClass = cn(
-      "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#2f5bff] font-semibold text-white border-none",
+      "relative inline-flex aspect-square shrink-0 items-center justify-center overflow-hidden rounded-full",
+      "border-none bg-primary font-semibold text-primary-foreground",
+      "isolate [transform:translateZ(0)]",
       className,
     );
 
@@ -63,22 +71,16 @@ export const StudioAvatar = forwardRef<HTMLButtonElement, StudioAvatarProps>(
         type={type}
         {...props}
         aria-label={props["aria-label"] ?? name ?? "Account"}
-        // Auth/chrome often disagrees with SSR (extensions, Radix Slot merge).
         suppressHydrationWarning
         className={cn(
           shellClass,
-          "group cursor-pointer outline-none transition-[transform,box-shadow,opacity] duration-150",
-          "hover:scale-105 hover:opacity-95",
-          "focus-visible:ring-2 focus-visible:ring-[#4262ff]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          "active:scale-95",
-          "data-[state=open]:scale-105 data-[state=open]:ring-2 data-[state=open]:ring-[#4262ff]/45 data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background",
+          "group cursor-pointer outline-none transition-[opacity] duration-150",
+          "hover:opacity-90",
+          "focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "data-[state=open]:ring-2 data-[state=open]:ring-ring/40 data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background",
         )}
       >
         {face}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-full bg-black/0 transition-colors duration-150 hover:bg-black/15 group-data-[state=open]:bg-black/15"
-        />
       </button>
     );
   },

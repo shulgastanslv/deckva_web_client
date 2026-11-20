@@ -132,6 +132,52 @@
     "greetingEveningNamed": "Good evening, {name}",
     "activationSub": "One topic → slides → edit → export PNG, ZIP, or PDF.",
     "activationHint": "Enter → carousel · then export PNG/ZIP/PDF",
+    "tour": {
+      "next": "Next",
+      "skip": "Skip",
+      "done": "Got it",
+      "opening": "Opening…",
+      "openEditorCta": "Open editor",
+      "progress": "{current} / {total}",
+      "steps": {
+        "prompt": {
+          "title": "Generate a carousel",
+          "body": "Describe the topic here. Deckva builds the slides — then you refine them in the editor."
+        },
+        "starters": {
+          "title": "Ready topics",
+          "body": "Chips fill the prompt with a solid structure so you can generate faster."
+        },
+        "openEditor": {
+          "title": "Next: the editor",
+          "body": "We’ll open the canvas so you can see panels, slides, and export. Your sign-in stays put."
+        },
+        "editorRail": {
+          "title": "Tool rail",
+          "body": "Switch Elements, Layers, Background, Assets, and Settings. Keys 1–5 do the same."
+        },
+        "editorElements": {
+          "title": "Library panel",
+          "body": "Add text, shapes, photos, and assets to the current slide from this panel."
+        },
+        "editorCanvas": {
+          "title": "The canvas",
+          "body": "Drag objects, scroll to zoom, and swipe between slides in the strip."
+        },
+        "editorToolbar": {
+          "title": "Slide toolbar",
+          "body": "Duplicate, reorder, hide, or focus the current slide without leaving the canvas."
+        },
+        "editorInspector": {
+          "title": "Style inspector",
+          "body": "With something selected, edit type, color, size, and image tools here."
+        },
+        "editorExport": {
+          "title": "Share & export",
+          "body": "Export PNG/ZIP/PDF, share a link, publish to community, or send to Figma."
+        }
+      }
+    },
     "tryStarter": "Or start from a ready topic",
     "makeLikeThis": "Make one like this",
     "recent": "Recent",
@@ -452,6 +498,7 @@
       "all": "All",
       "nothingHere": "Nothing here",
       "tryAnotherSearch": "Try another search",
+      "loadMore": "Load more",
       "openInvite": "Open invite",
       "openProject": "Open project",
       "openLink": "Open",
@@ -521,6 +568,66 @@
       "onboarding": {
         "label": "Customer onboarding",
         "topic": "A customer onboarding carousel: day-one setup, first win, common blockers, and the next milestone."
+      },
+      "faq": {
+        "label": "FAQ answers",
+        "topic": "An FAQ carousel: one common question per slide with a short clear answer, ending with how to ask more."
+      },
+      "beforeAfter": {
+        "label": "Before / after",
+        "topic": "A before-and-after carousel: the old way, the pain, the change, the new result, and what to try next."
+      },
+      "roadmap": {
+        "label": "Roadmap",
+        "topic": "A roadmap carousel: the destination, 4–5 milestones in order, and the first step to start today."
+      },
+      "testimonials": {
+        "label": "Social proof",
+        "topic": "A social-proof carousel: a bold claim, 3–4 short testimonials or results, then a soft CTA."
+      },
+      "trends": {
+        "label": "Trends now",
+        "topic": "A trends carousel: what’s shifting now, why it matters, 3 concrete examples, and how to respond."
+      },
+      "habits": {
+        "label": "Daily habits",
+        "topic": "A habits carousel: one small daily habit per slide with why it works, ending with a 7-day challenge."
+      },
+      "unpopular": {
+        "label": "Hot take",
+        "topic": "An unpopular-opinion carousel: a sharp take, why most people get it wrong, the better approach, and a CTA."
+      },
+      "stats": {
+        "label": "Surprising stats",
+        "topic": "A stats carousel: one surprising number per slide with a one-line meaning, closing with the insight."
+      },
+      "tools": {
+        "label": "Tool stack",
+        "topic": "A tools carousel: 5 tools for one job, who each is for, and a simple pick for beginners."
+      },
+      "audience": {
+        "label": "Ideal audience",
+        "topic": "An audience carousel: who you serve, their pains, the transformation, and how they usually find you."
+      },
+      "webinar": {
+        "label": "Event promo",
+        "topic": "An event promo carousel: the promise, who it’s for, the agenda highlights, and how to join."
+      },
+      "teaser": {
+        "label": "Coming soon",
+        "topic": "A teaser carousel: a hook, three curiosity gaps, a reveal of what’s coming, and a waitlist CTA."
+      },
+      "recap": {
+        "label": "Weekly recap",
+        "topic": "A weekly recap carousel: 5 highlights, one lesson, and what you’re focusing on next."
+      },
+      "manifesto": {
+        "label": "Manifesto",
+        "topic": "A manifesto carousel: the belief, what you reject, what you stand for, and an invite to join."
+      },
+      "swipeFile": {
+        "label": "Swipe file",
+        "topic": "A swipe-file carousel: 5 examples worth stealing, what makes each work, and how to adapt one today."
       }
     },
     "userNav": {
@@ -896,13 +1003,31 @@
     },
     "heroPosts": {
       "postA": {
-        "topic": "Examples",
-        "text": "Carousels ready to publish.",
-        "time": "1h"
+        "topic": "Deckva",
+        "text": "One line → a carousel. Edit on the canvas, download a ZIP — no watermarks.",
+        "time": "2h"
       },
       "postB": {
-        "text": "One idea — already in order.",
-        "time": "3h"
+        "text": "Six slides in a minute — already in the thread.",
+        "time": "5h"
+      },
+      "comments": {
+        "c1": {
+          "text": "Used to spend an hour in Canva. Now it’s a minute.",
+          "time": "1h"
+        },
+        "c1r1": {
+          "text": "And straight to ZIP — no watermarks 🙌",
+          "time": "48m"
+        },
+        "c2": {
+          "text": "That first slide actually stops the scroll.",
+          "time": "1h"
+        },
+        "b1": {
+          "text": "Six slides — already live.",
+          "time": "3h"
+        }
       }
     },
     "models": {
@@ -1874,6 +1999,7 @@
       "signIn": "Sign in",
       "signUp": "Sign up",
       "createAccount": "Create account",
+      "agreeLegal": "By continuing, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
       "noAccount": "Don't have an account?",
       "haveAccount": "Already have an account?",
       "createTitle": "Create an account",

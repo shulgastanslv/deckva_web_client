@@ -127,10 +127,6 @@ export function ProjectFileMenu({ onExport, onShare, onHelp }: ProjectFileMenuPr
         reportError(new Error(messages.errors.duplicateProject), messages.errors.duplicateProject);
         return;
       }
-      void pushMyNotification("copied", {
-        projectId: res.projectId,
-        title: projectTitle,
-      });
       setOpen(false);
       router.push(`/studio/editor?project=${res.projectId}`);
     } catch (err) {

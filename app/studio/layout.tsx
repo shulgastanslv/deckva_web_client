@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Instrument_Serif, Cormorant_Garamond } from "next/font/google";
 
 import { StudioSessionCache } from "@/components/studio/studio-session-cache";
+import { StudioTourHost } from "@/components/studio/tour/studio-tour-host";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -67,6 +68,7 @@ export default function StudioLayout({
       className={`${inter.variable} ${instrumentSerif.variable} ${cormorantGaramond.variable} ${inter.className} h-dvh antialiased`}
     >
       <StudioSessionCache />
+      <StudioTourHost />
       {children}
     </div>
   );

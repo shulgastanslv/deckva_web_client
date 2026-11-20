@@ -60,7 +60,11 @@ export function StudioHeader({
             className="shrink-0 hover:rotate-0"
           />
         </button>
-        {signedIn ? <PlanDropdown /> : null}
+        {signedIn ? (
+          <span data-tour="plan" className="inline-flex">
+            <PlanDropdown />
+          </span>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2">

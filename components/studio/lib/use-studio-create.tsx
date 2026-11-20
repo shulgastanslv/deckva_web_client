@@ -24,7 +24,6 @@ import { inferPromptLanguage, normalizeHandle } from "@/lib/ai/prompt";
 import { trackEvent } from "@/lib/analytics";
 import { messages } from "@/lib/messages";
 import { notify } from "@/lib/notify";
-import { pushMyNotification } from "@/lib/notifications/client";
 import { reportError } from "@/lib/report-error";
 import { stashPendingCover } from "@/lib/studio/pending-cover";
 import { stashPendingMedia } from "@/lib/studio/pending-attachments";
@@ -134,10 +133,6 @@ export function StudioCreateProvider({
           slidesCount: input.slidesCount,
           aspectRatio: input.aspectRatio,
         });
-        void pushMyNotification("projectCreated", {
-          projectId: created.projectId,
-          title: input.title,
-        });
         router.push(`/studio/editor?project=${created.projectId}`);
       } catch (err) {
         reportError(err, messages.errors.createProject);
@@ -169,10 +164,6 @@ export function StudioCreateProvider({
         notify.error(message);
         throw new Error(message);
       }
-      void pushMyNotification("imported", {
-        projectId: saved.projectId,
-        title: result.title,
-      });
       router.push(`/studio/editor?project=${saved.projectId}`);
     },
     [router],

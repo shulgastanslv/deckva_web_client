@@ -17,6 +17,7 @@ import {
   type AdminSection,
 } from "@/components/admin/admin-shell";
 import { AdminCommunity } from "@/components/admin/admin-community";
+import { AdminUsers } from "@/components/admin/admin-users";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -143,6 +144,8 @@ export function AdminPanel({ email }: { email: string }) {
     
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-16 sm:px-8">
         {section === "community" ? <AdminCommunity /> : null}
+
+        {section === "users" ? <AdminUsers /> : null}
 
         {section === "notify" ? (
           <div className="pt-4">

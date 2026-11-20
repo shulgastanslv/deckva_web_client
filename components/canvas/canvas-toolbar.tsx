@@ -261,7 +261,10 @@ export function CanvasToolbar({
   const slideCount = pendingImport?.slides.length ?? 0;
 
   return (
-    <div className="flex h-full w-full min-w-0 items-center gap-3 select-none">
+    <div
+      data-tour="editorToolbar"
+      className="flex h-full w-full min-w-0 items-center gap-3 select-none"
+    >
       <div
         className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground"
         title={pageLabel}

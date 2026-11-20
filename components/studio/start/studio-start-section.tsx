@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
@@ -98,26 +97,33 @@ export function StudioStartSection({
             {t("activationSub")}
           </p>
         </div>
-        <StudioCreateMenu
-          onBlank={onBlank}
-          onTemplates={onTemplates}
-          onBrandKit={onBrandKit}
-          onImportJson={onImportJson}
-          label={t("otherWays")}
-          align="end"
-          triggerClassName="shrink-0 gap-1.5 bg-muted/40 px-3.5 text-[13px] font-normal text-foreground hover:bg-muted/60 data-[state=open]:bg-muted/60"
+        <span data-tour="create" className="inline-flex shrink-0">
+          <StudioCreateMenu
+            onBlank={onBlank}
+            onTemplates={onTemplates}
+            onBrandKit={onBrandKit}
+            onImportJson={onImportJson}
+            label={t("otherWays")}
+            align="end"
+            triggerClassName="shrink-0 gap-1.5 bg-muted/40 px-3.5 text-[13px] font-normal text-foreground hover:bg-muted/60 data-[state=open]:bg-muted/60"
+          />
+        </span>
+      </div>
+
+      <div data-tour="prompt">
+        <StudioPrompt
+          initialTopic={topic}
+          onSubmit={onGenerate}
+          busy={generating}
+          error={generateError}
         />
       </div>
 
-      <StudioPrompt
-        initialTopic={topic}
-        onSubmit={onGenerate}
-        busy={generating}
-        error={generateError}
-      />
-
       {onStarter && starters.length > 0 ? (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div
+          data-tour="starters"
+          className="mt-3 flex flex-wrap items-center gap-2"
+        >
           <span className="text-[12px] text-muted-foreground">
             {t("tryStarter")}
           </span>
