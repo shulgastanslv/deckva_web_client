@@ -544,6 +544,7 @@ export function StudioBrowse() {
             if (!next) setPreviewId(null);
           }}
           onAuthRequired={() => setAuthOpen(true)}
+          onSelectProject={setPreviewId}
         />
         <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
       </StudioContentBody>

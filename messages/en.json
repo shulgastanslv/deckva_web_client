@@ -662,7 +662,11 @@
       "ownerHint": "Open the original project. Republish from the editor when you're done.",
       "updatedBy": "Updated {when} by {name}",
       "slidesMeta": "{count, plural, one {# slide} other {# slides}} · {ratio}",
-      "keyMoments": "Key moments"
+      "keyMoments": "Key moments",
+      "share": "Share",
+      "shareCopied": "Link copied",
+      "related": "Related templates",
+      "relatedEmpty": "No related templates in this category yet."
     },
     "prompt": {
       "add": "Add",

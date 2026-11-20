@@ -398,6 +398,76 @@ export type CommunityPreview = {
   slides: Array<string | null>;
 };
 
+/** Same-category approved templates for the preview dialog. */
+export async function listRelatedCommunityProjects(input: {
+  projectId: string;
+  category?: string | null;
+  take?: number;
+}): Promise<ActionResult<{ projects: CommunityProjectListItem[] }>> {
+  try {
+    const projectId = input.projectId?.trim();
+    if (!projectId) {
+      return { success: false, error: messages.errors.projectIdRequired };
+    }
+
+    const take = Math.min(12, Math.max(1, Math.round(input.take ?? 6)));
+    const category = input.category?.trim() || null;
+    const user = await requireUser();
+
+    const where: Prisma.ProjectWhereInput = {
+      id: { not: projectId },
+      isPublic: true,
+      trashedAt: null,
+      communityStatus: "APPROVED",
+      ...(category && isCommunityCategory(category)
+        ? { communityCategory: category }
+        : {}),
+    };
+
+    const rows = await prisma.project.findMany({
+      where,
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      take,
+      select: {
+        id: true,
+        title: true,
+        aspectRatio: true,
+        thumbnail: true,
+        communityCategory: true,
+        publishedAt: true,
+        communityUpdatedAt: true,
+        communityStatus: true,
+        userId: true,
+        user: { select: { name: true, image: true } },
+        communityUpdatedBy: { select: { name: true } },
+        _count: { select: { slides: true } },
+      },
+    });
+
+    return {
+      success: true,
+      projects: rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        aspectRatio: row.aspectRatio,
+        thumbnail: row.thumbnail,
+        category: row.communityCategory,
+        publishedAt: row.publishedAt?.toISOString() ?? null,
+        communityUpdatedAt: row.communityUpdatedAt?.toISOString() ?? null,
+        slideCount: row._count.slides,
+        authorName: row.user.name,
+        authorImage: row.user.image,
+        updatedByName: row.communityUpdatedBy?.name ?? row.user.name,
+        communityStatus: row.communityStatus as CommunityReviewStatus,
+        isOwner: Boolean(user && row.userId === user.id),
+      })),
+    };
+  } catch (err) {
+    console.error("listRelatedCommunityProjects error:", err);
+    return { success: false, error: messages.errors.loadCommunity };
+  }
+}
+
 /** Public approved community project for the preview dialog. */
 export async function getCommunityPreview(
   projectId: string,
