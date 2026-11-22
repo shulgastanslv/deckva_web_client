@@ -205,6 +205,8 @@ export function useProject() {
               thumbnail: slide.thumbnail ?? null,
             })),
             document: currentDocument(),
+            // Manual / thumbnail saves land in change history; quiet autosaves do not.
+            recordRevision: thumbnail,
           };
 
           let projectId = snap.currentProjectId;

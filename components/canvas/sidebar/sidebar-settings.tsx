@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { useCanvasStore } from "@/store/useCanvasStore";
 
 const STORAGE_KEY = "swibp.autosave";
+const CANVASES_KEY = "swibp.showAllCanvases";
+const NAV_KEY = "swibp.showSlideNav";
 
 interface SidebarSettingsProps {
   showDotGrid: boolean;
@@ -80,6 +82,10 @@ function NumberField({
 export function SidebarSettings({ showDotGrid, setShowDotGrid }: SidebarSettingsProps) {
   const autoSave = useCanvasStore((state) => state.autoSave);
   const setAutoSave = useCanvasStore((state) => state.setAutoSave);
+  const showAllCanvases = useCanvasStore((s) => s.showAllCanvases);
+  const setShowAllCanvases = useCanvasStore((s) => s.setShowAllCanvases);
+  const showSlideNav = useCanvasStore((s) => s.showSlideNav);
+  const setShowSlideNav = useCanvasStore((s) => s.setShowSlideNav);
 
   const autoFlowEnabled = useCanvasStore((s) => s.autoFlowEnabled);
   const autoFlowEdgeTolerance = useCanvasStore((s) => s.autoFlowEdgeTolerance);
@@ -176,6 +182,26 @@ export function SidebarSettings({ showDotGrid, setShowDotGrid }: SidebarSettings
           max={200}
         />
       </div>
+
+      <SettingRow
+        label={t("allCanvases")}
+        hint={t("allCanvasesHint")}
+        checked={showAllCanvases}
+        onCheckedChange={(enabled) => {
+          setShowAllCanvases(enabled);
+          window.localStorage.setItem(CANVASES_KEY, enabled ? "1" : "0");
+        }}
+      />
+
+      <SettingRow
+        label={t("slideNav")}
+        hint={t("slideNavHint")}
+        checked={showSlideNav}
+        onCheckedChange={(enabled) => {
+          setShowSlideNav(enabled);
+          window.localStorage.setItem(NAV_KEY, enabled ? "1" : "0");
+        }}
+      />
 
       <SettingRow
         label={t("autosave")}

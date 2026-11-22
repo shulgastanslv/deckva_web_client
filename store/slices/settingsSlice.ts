@@ -9,6 +9,10 @@ export interface SettingsSlice {
   gridOpacity: number;
   snapToGrid: boolean;
   autoSave: boolean;
+  /** Show every slide as a continuous horizontal ribbon (default: active slide only). */
+  showAllCanvases: boolean;
+  /** Floating prev/next controls on the canvas. */
+  showSlideNav: boolean;
   vignette: number;
   noise: number;
   warmth: number;
@@ -26,6 +30,8 @@ export interface SettingsSlice {
   setGridOpacity: (opacity: number) => void;
   setSnapToGrid: (enabled: boolean) => void;
   setAutoSave: (enabled: boolean) => void;
+  setShowAllCanvases: (enabled: boolean) => void;
+  setShowSlideNav: (enabled: boolean) => void;
   setVignette: (vignette: number) => void;
   setNoise: (noise: number) => void;
   setWarmth: (warmth: number) => void;
@@ -74,6 +80,8 @@ export const createSettingsSlice: StateCreator<
   gridOpacity: 0.16,
   snapToGrid: true,
   autoSave: true,
+  showAllCanvases: false,
+  showSlideNav: true,
   ...FILTER_DEFAULTS,
 
   toggleGrid: () => set((s) => ({ isGridVisible: !s.isGridVisible })),
@@ -89,6 +97,8 @@ export const createSettingsSlice: StateCreator<
     set({ gridOpacity: Math.min(1, Math.max(0, gridOpacity)) }),
   setSnapToGrid: (snapToGrid) => set({ snapToGrid }),
   setAutoSave: (autoSave) => set({ autoSave }),
+  setShowAllCanvases: (showAllCanvases) => set({ showAllCanvases }),
+  setShowSlideNav: (showSlideNav) => set({ showSlideNav }),
   setVignette: (vignette) => set({ vignette }),
   setNoise: (noise) => set({ noise }),
   setWarmth: (warmth) => set({ warmth }),

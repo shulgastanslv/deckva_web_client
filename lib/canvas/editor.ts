@@ -55,7 +55,7 @@ export function createEditor(
       if (touched.length > 0) scheduleSlideThumbnailHydration(touched);
     }),
     manager.on("selection", (obj) => store.getState().setSelectedObject(obj)),
-    bindKeyboardShortcuts(manager),
+    bindKeyboardShortcuts(manager, slides),
   ];
 
   let structure = slideStructure(useCanvasStore.getState());

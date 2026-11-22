@@ -42,8 +42,11 @@ export async function consumeAuthToken(
   const tokenHash = hashToken(token.trim());
   const row = await prisma.authToken.findUnique({ where: { tokenHash } });
   if (!row || row.type !== type) return null;
+  if (row.expiresAt.getTime() < Date.now()) {
+    await prisma.authToken.delete({ where: { id: row.id } }).catch(() => null);
+    return null;
+  }
 
   await prisma.authToken.delete({ where: { id: row.id } });
-  if (row.expiresAt.getTime() < Date.now()) return null;
   return { email: row.email };
 }

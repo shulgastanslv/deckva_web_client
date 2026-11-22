@@ -58,6 +58,20 @@ interface AuthModalProps {
   resetToken?: string | null;
 }
 
+function stripAuthParams() {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  let changed = false;
+  for (const key of ["verify", "reset", "error", "auth"] as const) {
+    if (!url.searchParams.has(key)) continue;
+    url.searchParams.delete(key);
+    changed = true;
+  }
+  if (changed) {
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+}
+
 export function AuthModal({
   isOpen,
   onOpenChange,
@@ -76,9 +90,15 @@ export function AuthModal({
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [linkVerify, setLinkVerify] = useState<string | null>(null);
+  const [linkReset, setLinkReset] = useState<string | null>(null);
 
   const router = useRouter();
   const shownAuthError = useRef(false);
+  const consumedLink = useRef(false);
+
+  const activeVerify = verifyToken || linkVerify;
+  const activeReset = resetToken || linkReset;
 
   const resetForm = () => {
     setEmail("");
@@ -89,15 +109,44 @@ export function AuthModal({
     setUnverifiedEmail(null);
   };
 
+  // Pick up ?verify= / ?reset= from any page that mounts AuthModal (landing included).
   useEffect(() => {
-    if (!verifyToken) return;
+    if (consumedLink.current) return;
+    const verify = queryParam("verify");
+    const reset = queryParam("reset");
+    const code = queryParam("error");
+    if (!verify && !reset && !code) return;
+    consumedLink.current = true;
+
+    if (verify) {
+      setLinkVerify(verify);
+      onOpenChange?.(true);
+    }
+    if (reset) {
+      setLinkReset(reset);
+      onOpenChange?.(true);
+    }
+    if (code && !shownAuthError.current) {
+      shownAuthError.current = true;
+      setView("login");
+      setInfoMessage(null);
+      setErrorMessage(
+        code === "AccessDenied" ? t("googleUnconfirmed") : t("googleFailed"),
+      );
+      onOpenChange?.(true);
+    }
+    stripAuthParams();
+  }, [onOpenChange, t]);
+
+  useEffect(() => {
+    if (!activeVerify) return;
     let cancelled = false;
     setView("login");
     setIsLoading(true);
     setErrorMessage(null);
     setInfoMessage(null);
 
-    void verifyEmailOnce(verifyToken).then((res) => {
+    void verifyEmailOnce(activeVerify).then((res) => {
       if (cancelled) return;
       setIsLoading(false);
       if ("error" in res && res.error) setErrorMessage(res.error);
@@ -107,30 +156,15 @@ export function AuthModal({
     return () => {
       cancelled = true;
     };
-  }, [verifyToken, t]);
+  }, [activeVerify, t]);
 
   useEffect(() => {
-    if (!resetToken) return;
+    if (!activeReset) return;
     setView("reset-password");
     setErrorMessage(null);
     setInfoMessage(null);
     setPassword("");
-  }, [resetToken]);
-
-  useEffect(() => {
-    if (shownAuthError.current) return;
-    const code = queryParam("error");
-    if (!code) return;
-    shownAuthError.current = true;
-    setView("login");
-    setInfoMessage(null);
-    setErrorMessage(
-      code === "AccessDenied" ? t("googleUnconfirmed") : t("googleFailed"),
-    );
-    const url = new URL(window.location.href);
-    url.searchParams.delete("error");
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
-  }, [t]);
+  }, [activeReset]);
 
   const handleSwitchView = (newView: View) => {
     setView(newView);
@@ -142,6 +176,8 @@ export function AuthModal({
     if (!open) {
       setView("login");
       resetForm();
+      setLinkVerify(null);
+      setLinkReset(null);
     }
     onOpenChange?.(open);
   };
@@ -221,12 +257,12 @@ export function AuthModal({
       }
 
       if (view === "reset-password") {
-        if (!resetToken) {
+        if (!activeReset) {
           setErrorMessage(t("resetLinkMissing"));
           setIsLoading(false);
           return;
         }
-        const res = await resetPassword(resetToken, password);
+        const res = await resetPassword(activeReset, password);
         if ("error" in res && res.error) {
           setErrorMessage(res.error);
         } else {

@@ -16,8 +16,15 @@ export function useAutoSave(persist: Persist) {
   persistRef.current = persist;
 
   useEffect(() => {
+    const store = useCanvasStore.getState();
     if (window.localStorage.getItem(STORAGE_KEY) === "0") {
-      useCanvasStore.getState().setAutoSave(false);
+      store.setAutoSave(false);
+    }
+    if (window.localStorage.getItem("swibp.showAllCanvases") === "1") {
+      store.setShowAllCanvases(true);
+    }
+    if (window.localStorage.getItem("swibp.showSlideNav") === "0") {
+      store.setShowSlideNav(false);
     }
 
     let timer = 0;

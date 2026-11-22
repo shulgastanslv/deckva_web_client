@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+  At as AtIcon,
   Camera as CameraIcon,
   Check,
   Key as KeyRound,
@@ -90,6 +91,29 @@ function formatJoined(iso: string) {
   }
 }
 
+function GoogleMark({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="#EA4335"
+        d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.8 7.3l3.7 2.9C6.4 7.2 9 5 12 5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.5 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.8 7.3C.7 9.5 0 10.7 0 12.5s.7 3 1.8 5.2l3.7-2.9z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.6-2.2-6.5-5.2L1.8 15.8C3.7 19.5 7.5 23 12 23z"
+      />
+    </svg>
+  );
+}
+
 export function ProfileSettingsDialog({
   open,
   onOpenChange,
@@ -104,12 +128,10 @@ export function ProfileSettingsDialog({
   const t = useTranslations("dialogs.settings");
   const [localePending, startLocaleTransition] = useTransition();
   const { currency, setCurrency, currencies } = useDisplayCurrency();
-  const nav = NAV_IDS.map((item) => ({
-    ...item,
-    label: t(`nav.${item.id}`),
-  }));
   const [section, setSection] = useState<Section>("profile");
   const [themeMounted, setThemeMounted] = useState(false);
+  const [hasPassword, setHasPassword] = useState(true);
+  const [profileReady, setProfileReady] = useState(false);
 
   const [name, setName] = useState("");
   const [initialName, setInitialName] = useState("");
@@ -117,7 +139,6 @@ export function ProfileSettingsDialog({
   const [image, setImage] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [emailVerified, setEmailVerified] = useState(false);
-  const [hasPassword, setHasPassword] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -141,6 +162,15 @@ export function ProfileSettingsDialog({
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  /** Google / OAuth-only accounts have no local password. */
+  const isGoogleAccount = profileReady && !hasPassword;
+  const nav = NAV_IDS.filter((item) => !(isGoogleAccount && item.id === "security")).map(
+    (item) => ({
+      ...item,
+      label: t(`nav.${item.id}`),
+    }),
+  );
+
   const avatarSrc = image || session?.user?.image || null;
   const initial = (name.trim()[0] || email[0] || "U").toUpperCase();
   const isDark = themeMounted && resolvedTheme === "dark";
@@ -161,6 +191,7 @@ export function ProfileSettingsDialog({
     let cancelled = false;
     setSection("profile");
     setLoading(true);
+    setProfileReady(false);
     setError(null);
     setSaved(false);
     setCurrentPassword("");
@@ -182,6 +213,7 @@ export function ProfileSettingsDialog({
         setEmail(profileRes.email);
         setImage(profileRes.image);
         setHasPassword(profileRes.hasPassword);
+        setProfileReady(true);
         setEmailVerified(Boolean(profileRes.emailVerified));
         setCreatedAt(profileRes.createdAt);
         setUsage({
@@ -488,6 +520,28 @@ export function ProfileSettingsDialog({
                             className="bg-muted/30 text-muted-foreground hover:bg-muted/30"
                           />
                         </div>
+
+                        {profileReady ? (
+                          <div
+                            className="flex w-full min-h-12 items-center gap-2.5 rounded-md bg-muted/40 px-4 py-3.5 text-[13px] font-normal text-foreground"
+                            title={
+                              isGoogleAccount
+                                ? t("signedInGoogle")
+                                : t("signedInEmail")
+                            }
+                          >
+                            {isGoogleAccount ? (
+                              <GoogleMark className="size-5 shrink-0" />
+                            ) : (
+                              <AtIcon className="size-5 shrink-0 text-muted-foreground" />
+                            )}
+                            <span>
+                              {isGoogleAccount
+                                ? t("signedInGoogle")
+                                : t("signedInEmail")}
+                            </span>
+                          </div>
+                        ) : null}
                     </div>
                   ) : null}
 
@@ -511,34 +565,30 @@ export function ProfileSettingsDialog({
                     </div>
                   ) : null}
 
-                  {section === "security" ? (
+                  {section === "security" && !isGoogleAccount ? (
                     <div className="space-y-3.5">
                       <p className="text-[12px] leading-relaxed text-muted-foreground">
-                        {hasPassword
-                          ? t("changePasswordHint")
-                          : t("setPasswordHint")}
+                        {t("changePasswordHint")}
                       </p>
 
-                      {hasPassword ? (
-                        <div className="space-y-1.5">
-                          <Label
-                            htmlFor="profile-current-password"
-                            className="text-[12px]"
-                          >
-                            {t("currentPassword")}
-                          </Label>
-                          <Input
-                            id="profile-current-password"
-                            type="password"
-                            value={currentPassword}
-                            onChange={(event) => {
-                              setCurrentPassword(event.target.value);
-                              setSaved(false);
-                            }}
-                            autoComplete="current-password"
-                          />
-                        </div>
-                      ) : null}
+                      <div className="space-y-1.5">
+                        <Label
+                          htmlFor="profile-current-password"
+                          className="text-[12px]"
+                        >
+                          {t("currentPassword")}
+                        </Label>
+                        <Input
+                          id="profile-current-password"
+                          type="password"
+                          value={currentPassword}
+                          onChange={(event) => {
+                            setCurrentPassword(event.target.value);
+                            setSaved(false);
+                          }}
+                          autoComplete="current-password"
+                        />
+                      </div>
 
                       <div className="space-y-1.5">
                         <Label
@@ -691,15 +741,22 @@ export function ProfileSettingsDialog({
                         </Button>
                       </div>
 
-                      <div className="rounded-2xl bg-destructive/5 px-4 py-3.5 ring-1 ring-destructive/10">
-                        <p className="text-[13px] font-medium text-destructive">
-                          {t("deleteAccount")}
-                        </p>
-                        <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">
-                          {t("deleteAccountHint")}
-                        </p>
+                      {isGoogleAccount ? (
+                        <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
+                          <p className="text-[13px] font-medium">{t("nav.security")}</p>
+                          <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">
+                            {t("googleAccountHint")}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl bg-destructive/5 px-4 py-3.5 ring-1 ring-destructive/10">
+                          <p className="text-[13px] font-medium text-destructive">
+                            {t("deleteAccount")}
+                          </p>
+                          <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">
+                            {t("deleteAccountHint")}
+                          </p>
 
-                        {hasPassword ? (
                           <div className="mt-3 space-y-1.5">
                             <Label htmlFor="delete-password" className="text-[12px]">
                               {t("deletePassword")}
@@ -715,43 +772,43 @@ export function ProfileSettingsDialog({
                               className="bg-background/80"
                             />
                           </div>
-                        ) : null}
 
-                        <div className="mt-3 space-y-1.5">
-                          <Label htmlFor="delete-confirm" className="text-[12px]">
-                            {t("typeDelete")}
-                          </Label>
-                          <Input
-                            id="delete-confirm"
-                            value={deleteConfirm}
-                            onChange={(event) =>
-                              setDeleteConfirm(event.target.value)
+                          <div className="mt-3 space-y-1.5">
+                            <Label htmlFor="delete-confirm" className="text-[12px]">
+                              {t("typeDelete")}
+                            </Label>
+                            <Input
+                              id="delete-confirm"
+                              value={deleteConfirm}
+                              onChange={(event) =>
+                                setDeleteConfirm(event.target.value)
+                              }
+                              placeholder={t("deletePlaceholder")}
+                              className="bg-background/80"
+                              autoComplete="off"
+                            />
+                          </div>
+
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            className="mt-3 rounded-md"
+                            disabled={
+                              deleting ||
+                              deleteConfirm.trim().toUpperCase() !== "DELETE" ||
+                              !deletePassword
                             }
-                            placeholder={t("deletePlaceholder")}
-                            className="bg-background/80"
-                            autoComplete="off"
-                          />
+                            onClick={() => void onDelete()}
+                          >
+                            {deleting ? (
+                              <Loader2 className="size-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="size-3.5" />
+                            )}
+                            {t("deleteAccount")}
+                          </Button>
                         </div>
-
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          className="mt-3 rounded-md"
-                          disabled={
-                            deleting ||
-                            deleteConfirm.trim().toUpperCase() !== "DELETE" ||
-                            (hasPassword && !deletePassword)
-                          }
-                          onClick={() => void onDelete()}
-                        >
-                          {deleting ? (
-                            <Loader2 className="size-3.5 animate-spin" />
-                          ) : (
-                            <Trash2 className="size-3.5" />
-                          )}
-                          {t("deleteAccount")}
-                        </Button>
-                      </div>
+                      )}
 
                       {error ? (
                         <p className="text-[12px] text-destructive">{error}</p>

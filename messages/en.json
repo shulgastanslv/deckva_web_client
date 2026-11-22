@@ -1675,8 +1675,20 @@
       "layoutGridHint": "Applies to all slides",
       "autoFlow": "Auto Flow",
       "autoFlowHint": "Applies to all slides",
+      "allCanvases": "All canvases",
+      "allCanvasesHint": "Show every slide in one continuous ribbon",
+      "slideNav": "Slide navigation",
+      "slideNavHint": "Show previous / next buttons on the canvas",
       "autosave": "Autosave",
       "autosaveHint": "Saves quietly in the background"
+    },
+    "history": {
+      "title": "Change history",
+      "empty": "No saved versions yet",
+      "restore": "Restore",
+      "delete": "Delete",
+      "restoring": "Restoring…",
+      "savedAt": "Saved {time}"
     },
     "tools": {
       "move": "Move",
@@ -2081,6 +2093,9 @@
       },
       "changePasswordHint": "Change the password for email sign-in.",
       "setPasswordHint": "Set a password to also sign in with email.",
+      "signedInGoogle": "Signed in with Google",
+      "signedInEmail": "Signed in with email",
+      "googleAccountHint": "This Google account manages sign-in. Password and account deletion are unavailable here.",
       "currentPassword": "Current password",
       "newPassword": "New password",
       "confirmPassword": "Confirm password",

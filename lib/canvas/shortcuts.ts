@@ -1,4 +1,5 @@
 import type { CanvasManager } from "./manager";
+import type { SlidesController } from "./slides";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -49,20 +50,17 @@ function hasDomTextSelection(): boolean {
   return Boolean(selection && !selection.isCollapsed && selection.toString().length > 0);
 }
 
-function stepSlide(dir: 1 | -1) {
-  const { slides, currentSlideId, setCurrentSlideId } = useCanvasStore.getState();
-  const index = slides.findIndex((slide) => slide.id === currentSlideId);
-  if (index < 0) return;
-  const next = slides[index + dir];
-  if (!next) return;
-  setCurrentSlideId(next.id);
-}
-
 export function bindKeyboardShortcuts(
   manager: CanvasManager,
+  slides: SlidesController,
   target: Window = window,
 ): () => void {
   let suppressClipboard = false;
+
+  const stepSlide = (dir: 1 | -1) => {
+    if (dir < 0) void slides.prev();
+    else void slides.next();
+  };
 
   const handleCopy = (e: ClipboardEvent) => {
     if (suppressClipboard) return;

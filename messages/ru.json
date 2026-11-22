@@ -1675,8 +1675,20 @@
       "layoutGridHint": "Для всех слайдов",
       "autoFlow": "Автопоток",
       "autoFlowHint": "Для всех слайдов",
+      "allCanvases": "Все холсты",
+      "allCanvasesHint": "Показывать все слайды одной сплошной лентой",
+      "slideNav": "Навигация по слайдам",
+      "slideNavHint": "Кнопки назад / вперёд на холсте",
       "autosave": "Автосохранение",
       "autosaveHint": "Тихо сохраняет в фоне"
+    },
+    "history": {
+      "title": "История изменений",
+      "empty": "Пока нет сохранённых версий",
+      "restore": "Откатить",
+      "delete": "Удалить",
+      "restoring": "Восстановление…",
+      "savedAt": "Сохранено {time}"
     },
     "tools": {
       "move": "Перемещение",
@@ -2081,6 +2093,9 @@
       },
       "changePasswordHint": "Смените пароль для входа по email.",
       "setPasswordHint": "Задайте пароль, чтобы также входить по email.",
+      "signedInGoogle": "Вход через Google",
+      "signedInEmail": "Вход через email",
+      "googleAccountHint": "Вход через Google. Смена пароля и удаление аккаунта здесь недоступны.",
       "currentPassword": "Текущий пароль",
       "newPassword": "Новый пароль",
       "confirmPassword": "Подтвердите пароль",

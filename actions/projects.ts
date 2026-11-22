@@ -59,7 +59,19 @@ export interface SaveProjectInput {
     thumbnail?: string | null;
   }>;
   document?: DocumentMeta;
+  /** Persist a change-history snapshot (manual saves). */
+  recordRevision?: boolean;
 }
+
+export interface ProjectRevisionListItem {
+  id: string;
+  createdAt: string;
+  title: string;
+  thumbnail: string | null;
+  slideCount: number;
+}
+
+const MAX_PROJECT_REVISIONS = 25;
 
 type ActionResult<T extends object = object> =
   | ({ success: true } & T)
@@ -407,22 +419,78 @@ export async function saveProject(
       CANVAS_RATIOS[input.aspectRatio] ??
       ({ width: input.width, height: input.height } as const);
 
-    const updated = await prisma.$transaction(async (tx) => {
-      await tx.slide.deleteMany({ where: { projectId } });
+    const title = input.title.trim() || "Untitled Carousel";
+    const slideRows = input.slides.map((slide, order) => ({
+      projectId,
+      order,
+      canvasJSON: slide.canvasJSON as unknown as Prisma.InputJsonValue,
+      thumbnail: slide.thumbnail ?? null,
+    }));
 
-      await tx.slide.createMany({
-        data: input.slides.map((slide, order) => ({
-          projectId,
-          order,
-          canvasJSON: slide.canvasJSON as unknown as Prisma.InputJsonValue,
-          thumbnail: slide.thumbnail ?? null,
-        })),
+    const updated = await prisma.$transaction(async (tx) => {
+      const existingSlides = await tx.slide.findMany({
+        where: { projectId },
+        orderBy: { order: "asc" },
+        select: { id: true },
       });
+
+      const shared = Math.min(existingSlides.length, slideRows.length);
+      for (let order = 0; order < shared; order += 1) {
+        const row = slideRows[order]!;
+        await tx.slide.update({
+          where: { id: existingSlides[order]!.id },
+          data: {
+            order,
+            canvasJSON: row.canvasJSON,
+            thumbnail: row.thumbnail,
+          },
+        });
+      }
+
+      if (slideRows.length > existingSlides.length) {
+        await tx.slide.createMany({
+          data: slideRows.slice(existingSlides.length),
+        });
+      } else if (existingSlides.length > slideRows.length) {
+        await tx.slide.deleteMany({
+          where: {
+            id: {
+              in: existingSlides.slice(slideRows.length).map((slide) => slide.id),
+            },
+          },
+        });
+      }
+
+      if (input.recordRevision) {
+        await tx.projectRevision.create({
+          data: {
+            projectId,
+            title,
+            thumbnail: input.slides[0]?.thumbnail ?? null,
+            slides: input.slides.map((slide) => ({
+              canvasJSON: slide.canvasJSON,
+              thumbnail: slide.thumbnail ?? null,
+            })) as unknown as Prisma.InputJsonValue,
+          },
+        });
+
+        const stale = await tx.projectRevision.findMany({
+          where: { projectId },
+          orderBy: { createdAt: "desc" },
+          skip: MAX_PROJECT_REVISIONS,
+          select: { id: true },
+        });
+        if (stale.length > 0) {
+          await tx.projectRevision.deleteMany({
+            where: { id: { in: stale.map((row) => row.id) } },
+          });
+        }
+      }
 
       return tx.project.update({
         where: { id: projectId },
         data: {
-          title: input.title.trim() || "Untitled Carousel",
+          title,
           aspectRatio: input.aspectRatio,
           width: dims.width,
           height: dims.height,
@@ -436,6 +504,155 @@ export async function saveProject(
     return { success: true, updatedAt: updated.updatedAt.toISOString() };
   } catch (err) {
     console.error("saveProject error:", err);
+    return { success: false, error: messages.errors.saveProject };
+  }
+}
+
+export async function listProjectRevisions(
+  projectId: string,
+): Promise<ActionResult<{ revisions: ProjectRevisionListItem[] }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId) return { success: false, error: messages.errors.projectIdRequired };
+
+    const project = await prisma.project.findFirst({
+      where: { id: projectId },
+      select: { id: true, userId: true, organizationId: true },
+    });
+    if (!project || !(await canAccessOrgResource(userId, project))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    const rows = await prisma.projectRevision.findMany({
+      where: { projectId },
+      orderBy: { createdAt: "desc" },
+      take: MAX_PROJECT_REVISIONS,
+      select: { id: true, createdAt: true, title: true, thumbnail: true, slides: true },
+    });
+
+    return {
+      success: true,
+      revisions: rows.map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt.toISOString(),
+        title: row.title,
+        thumbnail: row.thumbnail,
+        slideCount: Array.isArray(row.slides) ? row.slides.length : 0,
+      })),
+    };
+  } catch (err) {
+    console.error("listProjectRevisions error:", err);
+    return { success: false, error: messages.errors.loadProject };
+  }
+}
+
+export async function restoreProjectRevision(
+  projectId: string,
+  revisionId: string,
+): Promise<ActionResult<{ project: ProjectDetail }>> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId || !revisionId) {
+      return { success: false, error: messages.errors.projectIdRequired };
+    }
+
+    const project = await prisma.project.findFirst({
+      where: { id: projectId },
+      select: {
+        id: true,
+        userId: true,
+        organizationId: true,
+        aspectRatio: true,
+        width: true,
+        height: true,
+        canvasJSON: true,
+      },
+    });
+    if (!project || !(await canManageOrgResource(userId, project))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    const revision = await prisma.projectRevision.findFirst({
+      where: { id: revisionId, projectId },
+    });
+    if (!revision) return { success: false, error: messages.errors.projectNotFound };
+
+    const slidesRaw = Array.isArray(revision.slides) ? revision.slides : [];
+    const slides = slidesRaw.map((entry) => {
+      const row = (entry && typeof entry === "object" ? entry : {}) as {
+        canvasJSON?: unknown;
+        thumbnail?: string | null;
+      };
+      return {
+        canvasJSON: toFabricJSON(row.canvasJSON),
+        thumbnail: typeof row.thumbnail === "string" ? row.thumbnail : null,
+      };
+    });
+    if (slides.length === 0) {
+      return { success: false, error: messages.errors.slideRequired };
+    }
+
+    const document = readStoredDocument(project.canvasJSON);
+    await prisma.$transaction(async (tx) => {
+      await tx.slide.deleteMany({ where: { projectId } });
+      await tx.slide.createMany({
+        data: slides.map((slide, order) => ({
+          projectId,
+          order,
+          canvasJSON: slide.canvasJSON as unknown as Prisma.InputJsonValue,
+          thumbnail: slide.thumbnail,
+        })),
+      });
+      await tx.project.update({
+        where: { id: projectId },
+        data: {
+          title: revision.title,
+          ...projectSnapshot(slides, document),
+        },
+      });
+    });
+
+    const fresh = await getProjectById(projectId);
+    if (!fresh.success) {
+      return { success: false, error: messages.errors.loadProject };
+    }
+    return { success: true, project: fresh.project };
+  } catch (err) {
+    console.error("restoreProjectRevision error:", err);
+    return { success: false, error: messages.errors.saveProject };
+  }
+}
+
+export async function deleteProjectRevision(
+  projectId: string,
+  revisionId: string,
+): Promise<ActionResult> {
+  try {
+    const userId = await requireUserId();
+    if (!userId) return { success: false, error: messages.errors.signIn };
+    if (!projectId || !revisionId) {
+      return { success: false, error: messages.errors.projectIdRequired };
+    }
+
+    const project = await prisma.project.findFirst({
+      where: { id: projectId },
+      select: { id: true, userId: true, organizationId: true },
+    });
+    if (!project || !(await canManageOrgResource(userId, project))) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+
+    const result = await prisma.projectRevision.deleteMany({
+      where: { id: revisionId, projectId },
+    });
+    if (result.count === 0) {
+      return { success: false, error: messages.errors.projectNotFound };
+    }
+    return { success: true };
+  } catch (err) {
+    console.error("deleteProjectRevision error:", err);
     return { success: false, error: messages.errors.saveProject };
   }
 }

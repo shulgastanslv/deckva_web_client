@@ -104,6 +104,7 @@ export default function CarouselEditor() {
   const [focusMode, setFocusMode] = useState(false);
   const [canvasChrome, setCanvasChrome] = useState(true);
   const [phoneSheet, setPhoneSheet] = useState<"library" | "style" | null>(null);
+  const showSlideNav = useCanvasStore((s) => s.showSlideNav);
   const manager = useCanvasManager();
 
   useEffect(() => {
@@ -217,6 +218,7 @@ export default function CarouselEditor() {
         <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
           <div className="relative flex min-h-0 flex-1">
             <CanvasView
+              slideNav={!focusMode}
               pageChrome={
                 !focusMode && canvasChrome ? (
                   <CanvasToolbar
@@ -229,7 +231,7 @@ export default function CarouselEditor() {
                 ) : null
               }
             />
-            {focusMode && <FocusSlideNav />}
+            {focusMode && showSlideNav ? <FocusSlideNav /> : null}
             {focusMode && <SelectionToolbar />}
             {focusMode && (
               <ElementsToolbar onExit={() => setFocusMode(false)} />

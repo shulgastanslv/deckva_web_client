@@ -2,6 +2,8 @@
 
 import React, { useRef, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
   Plus,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
@@ -33,10 +35,14 @@ function SlideSkeleton({ className }: { className?: string }) {
 }
 
 const PADDING = 56;
-/** Space between slides in the horizontal strip. */
-const SLIDE_GAP = 56;
+/** Space between slides when the multi-canvas ribbon is on. */
+const RIBBON_GAP = 28;
+/** Space after the active slide before the “add” slot in single-canvas mode. */
+const SINGLE_GAP = 56;
 /** Canva-style page bar height reserved above the slide stage. */
 export const PAGE_BAR_H = 44;
+/** Space under the active slide for the slide index caption. */
+const SLIDE_CAPTION_H = 36;
 /** Re-rasterize once the stretched bitmap would look soft. */
 const ZOOM_STRETCH = 1.35;
 const ZOOM_SETTLE_MS = 90;
@@ -73,6 +79,7 @@ function stageFrame(
   zoomPercent: number,
   slideCount: number,
   pageBarH = 0,
+  ribbon = false,
 ): StageFrame {
   const availW = Math.max(viewportW - PADDING * 2 - RULER_SIZE, 1);
   const availH = Math.max(viewportH - PADDING * 2 - pageBarH - RULER_SIZE, 1);
@@ -80,11 +87,12 @@ function stageFrame(
   const scale = Math.max(0.05, fit * (zoomPercent / 100));
   const width = Math.max(1, Math.round(nativeW * scale));
   const height = Math.max(1, Math.round(nativeH * scale));
-  const count = Math.max(1, slideCount);
+  const count = Math.max(1, ribbon ? slideCount : 1);
+  const gap = ribbon ? RIBBON_GAP : SINGLE_GAP;
   const addSlotW = 112;
   const pagesWidth =
-    count * width + Math.max(0, count - 1) * SLIDE_GAP + SLIDE_GAP + addSlotW;
-  const stackH = height + pageBarH;
+    count * width + Math.max(0, count - 1) * gap + gap + addSlotW;
+  const stackH = height + pageBarH + SLIDE_CAPTION_H;
   const contentWidth = Math.max(viewportW, pagesWidth + PADDING * 2 + RULER_SIZE);
   const contentHeight = Math.max(viewportH, stackH + PADDING * 2 + RULER_SIZE);
   const stackTop = (contentHeight - stackH) / 2;
@@ -98,7 +106,7 @@ function stageFrame(
     nativeW,
     nativeH,
     originX: Math.max((contentWidth - pagesWidth) / 2, RULER_SIZE + PADDING / 2),
-    gap: SLIDE_GAP,
+    gap,
     count,
     addSlotW,
   };
@@ -115,9 +123,12 @@ function neighborHaze(zoomPercent: number): number {
 
 export function CanvasView({
   pageChrome = null,
+  slideNav = true,
 }: {
   /** Canva-style controls docked to the top edge of the slide stage. */
   pageChrome?: React.ReactNode;
+  /** When false, skip in-canvas prev/next (e.g. focus mode uses its own). */
+  slideNav?: boolean;
 } = {}) {
   const canvasElementRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -132,8 +143,11 @@ export function CanvasView({
   const currentSlideId = useCanvasStore((s) => s.currentSlideId);
   const isGeneratingCarousel = useCanvasStore((s) => s.isGeneratingCarousel);
   const tCommon = useTranslations("common");
+  const tToolbar = useTranslations("editor.toolbar");
   const handActive = useCanvasStore((s) => s.handActive);
   const eraserActive = useCanvasStore((s) => s.eraserActive);
+  const showAllCanvases = useCanvasStore((s) => s.showAllCanvases);
+  const showSlideNav = useCanvasStore((s) => s.showSlideNav);
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const [scroll, setScroll] = useState({ left: 0, top: 0 });
   const [spaceDown, setSpaceDown] = useState(false);
@@ -172,12 +186,17 @@ export function CanvasView({
       zoom,
       slides.length,
       pageBarH,
+      showAllCanvases,
     );
-  }, [viewport, canvasDimensions, zoom, slides.length, pageBarH]);
+  }, [viewport, canvasDimensions, zoom, slides.length, pageBarH, showAllCanvases]);
   const frameRef = useRef(frame);
   frameRef.current = frame;
 
-  const activeLeft = frame ? slideLeft(frame, currentIndex) : 0;
+  /** In single-canvas mode the live stage is always index 0 of the layout. */
+  const stageIndex = showAllCanvases ? currentIndex : 0;
+  const activeLeft = frame ? slideLeft(frame, stageIndex) : 0;
+  const canGoPrev = currentIndex > 0;
+  const canGoNext = currentIndex < slides.length - 1;
   const frameReady = frame !== null;
 
   useLayoutEffect(() => {
@@ -289,8 +308,8 @@ export function CanvasView({
   useEffect(() => {
     if (lastFocusedIdRef.current === currentSlideId) return;
     lastFocusedIdRef.current = currentSlideId;
-    scrollSlideToCenter(currentIndex, "smooth");
-  }, [currentSlideId, currentIndex]);
+    scrollSlideToCenter(showAllCanvases ? currentIndex : 0, "smooth");
+  }, [currentSlideId, currentIndex, showAllCanvases]);
 
   useEffect(() => {
     if (!manager) return;
@@ -497,13 +516,18 @@ export function CanvasView({
     };
 
     const stepSlide = (dir: 1 | -1) => {
-      const { slides: list, currentSlideId: id } = useCanvasStore.getState();
+      const {
+        slides: list,
+        currentSlideId: id,
+        showAllCanvases: ribbon,
+      } = useCanvasStore.getState();
       const index = list.findIndex((slide) => slide.id === id);
       const next = list[index + dir];
       if (!next) return;
       const live = frameRef.current;
       if (live) {
-        const left = slideLeft(live, index + dir);
+        const targetIndex = ribbon ? index + dir : 0;
+        const left = slideLeft(live, targetIndex);
         const maxX = Math.max(0, container.scrollWidth - container.clientWidth);
         const maxY = Math.max(0, container.scrollHeight - container.clientHeight);
         container.scrollTo({
@@ -592,7 +616,7 @@ export function CanvasView({
     const index = slides.findIndex((slide) => slide.id === id);
     if (index < 0) return;
     // Scroll first so an off-screen left/right slide lands in the middle.
-    scrollSlideToCenter(index, "smooth");
+    scrollSlideToCenter(showAllCanvases ? index : 0, "smooth");
     if (id === currentSlideId) return;
     lastFocusedIdRef.current = id;
     void slidesController?.switchTo(id);
@@ -638,13 +662,13 @@ export function CanvasView({
             </div>
           ) : null}
 
-          {frame
+          {frame && showAllCanvases
             ? slides.map((slide, index) => {
                 if (slide.id === currentSlideId) return null;
                 const left = slideLeft(frame, index);
                 const hovered = hoveredSlideId === slide.id;
-                const opacity = Math.max(0.08, (hovered ? 0.95 : 0.78) * (1 - haze * 0.92));
-                const blurPx = haze * (hovered ? 4 : 12);
+                const opacity = Math.max(0.2, (hovered ? 1 : 0.92) * (1 - haze * 0.85));
+                const blurPx = haze * (hovered ? 2 : 8);
                 return (
                   <button
                     key={slide.id}
@@ -664,7 +688,7 @@ export function CanvasView({
                       top: frame.top,
                       opacity,
                       filter: blurPx > 0.15 ? `blur(${blurPx}px)` : undefined,
-                      transform: haze > 0 ? `scale(${1 - haze * 0.015})` : undefined,
+                      transform: haze > 0 ? `scale(${1 - haze * 0.01})` : undefined,
                       transition:
                         "opacity 220ms ease, filter 220ms ease, transform 220ms ease",
                       zIndex: hovered ? 2 : 0,
@@ -685,10 +709,10 @@ export function CanvasView({
                         {index + 1}
                       </span>
                     )}
-                    {haze > 0.2 ? (
+                    {haze > 0.25 ? (
                       <span
-                        className="pointer-events-none absolute inset-0 bg-background/40"
-                        style={{ opacity: haze * 0.55 }}
+                        className="pointer-events-none absolute inset-0 bg-background/35"
+                        style={{ opacity: haze * 0.45 }}
                       />
                     ) : null}
                   </button>
@@ -732,6 +756,26 @@ export function CanvasView({
             ) : null}
           </div>
 
+          {frame ? (
+            <div
+              className="pointer-events-none absolute z-[1] flex items-start justify-center pt-2"
+              style={{
+                left: activeLeft,
+                top: frame.top + frame.height,
+                width: frame.width,
+                height: SLIDE_CAPTION_H,
+              }}
+            >
+              <span className="text-[13px] font-normal tabular-nums text-muted-foreground">
+                {tToolbar("slideTitle", { n: currentIndex + 1 })}
+                <span className="text-muted-foreground/70">
+                  {" / "}
+                  {Math.max(slides.length, 1)}
+                </span>
+              </span>
+            </div>
+          ) : null}
+
           {frame && !isGeneratingCarousel ? (
             <button
               type="button"
@@ -754,6 +798,50 @@ export function CanvasView({
             >
               <Plus className="size-8 stroke-[1.5]" />
             </button>
+          ) : null}
+
+          {frame && slideNav && showSlideNav && slides.length > 1 ? (
+            <>
+              <button
+                type="button"
+                disabled={!canGoPrev}
+                title="Previous slide"
+                aria-label="Previous slide"
+                onClick={() => void slidesController?.prev()}
+                className={cn(
+                  "absolute z-20 flex size-11 items-center justify-center rounded-full",
+                  "bg-background/95 text-foreground shadow-sm",
+                  "transition-opacity hover:bg-background/80 disabled:pointer-events-none disabled:opacity-0",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+                  "dark:bg-background/95",
+                )}
+                style={{
+                  left: Math.max(8, activeLeft - 22),
+                  top: frame.top + frame.height / 2 - 22,
+                }}
+              >
+                <ChevronLeft className="size-5 stroke-[1.5]" />
+              </button>
+              <button
+                type="button"
+                disabled={!canGoNext}
+                title="Next slide"
+                aria-label="Next slide"
+                onClick={() => void slidesController?.next()}
+                className={cn(
+                  "absolute z-20 flex size-11 items-center justify-center rounded-full",
+                  "bg-background/95 text-foreground shadow-sm",
+                  "transition-opacity hover:bg-background/80 disabled:pointer-events-none disabled:opacity-0",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+                )}
+                style={{
+                  left: activeLeft + frame.width - 22,
+                  top: frame.top + frame.height / 2 - 22,
+                }}
+              >
+                <ChevronRight className="size-5 stroke-[1.5]" />
+              </button>
+            </>
           ) : null}
         </div>
         <CodeBlockEditDialog />

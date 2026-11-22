@@ -133,12 +133,13 @@ export function LandingPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("auth") !== "1") return;
+    const openAuth =
+      params.get("auth") === "1" ||
+      params.has("verify") ||
+      params.has("reset") ||
+      params.has("error");
+    if (!openAuth) return;
     setAuthOpen(true);
-    params.delete("auth");
-    const query = params.toString();
-    const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
-    window.history.replaceState(null, "", next);
   }, []);
 
   useEffect(() => {

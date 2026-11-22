@@ -187,7 +187,7 @@ function Avatar({
   size?: "sm" | "md" | "xs";
   follow?: boolean;
 }) {
-  // Reference: ~28–32px avatar on phone mock
+  // ~28–32px avatar — phone chrome density
   const dim =
     size === "xs" ? "size-5" : size === "sm" ? "size-6" : "size-[28px]";
   const initial = name.slice(0, 1).toUpperCase();
@@ -266,27 +266,27 @@ function ActionRow({
   trailing?: "bookmark" | "insights" | "none";
   compact?: boolean;
 }) {
-  // Reference: thin ~15–16px icons, ~11px counts, muted
-  const icon = compact ? "size-3.5" : "size-4";
-  const gap = compact ? "gap-2.5" : "gap-3";
+  // Project chrome: size-5 (navIconClass), light stroke
+  const icon = "size-5 shrink-0 opacity-90";
+  const gap = compact ? "gap-3" : "gap-3.5";
   const text = "text-[11px] font-normal tabular-nums";
 
   return (
-    <div className={cn("mt-1.5 flex items-center text-neutral-600", gap)}>
+    <div className={cn("mt-2 flex items-center text-neutral-600", gap)}>
       <span
-        className={cn("flex items-center gap-0.5", liked && "text-[#ff3040]")}
+        className={cn("flex items-center gap-1", liked && "text-[#ff3040]")}
       >
         <Heart
-          className={cn(icon, liked && "fill-[#ff3040] text-[#ff3040]")}
+          className={cn(icon, liked && "fill-[#ff3040] text-[#ff3040] opacity-100")}
           weight={liked ? "fill" : "regular"}
         />
         {likes ? <span className={text}>{likes}</span> : null}
       </span>
-      <span className="flex items-center gap-0.5">
+      <span className="flex items-center gap-1">
         <MessageCircle className={icon} weight="regular" />
         {replies ? <span className={text}>{replies}</span> : null}
       </span>
-      <span className="flex items-center gap-0.5">
+      <span className="flex items-center gap-1">
         <Repeat2 className={icon} weight="regular" />
         {reposts ? <span className={text}>{reposts}</span> : null}
       </span>
@@ -336,7 +336,7 @@ export function ThreadsPost({
   const reposts = formatCount(postData.reposts);
 
   return (
-    <article className={cn("relative flex gap-2 px-3 pt-2", className)}>
+    <article className={cn("relative flex gap-2.5 px-4 pt-3", className)}>
       <div className="relative flex w-[28px] shrink-0 flex-col items-center">
         <Avatar src={postData.avatar} name={postData.author} size="md" />
         {showThreadLine ? (
@@ -344,7 +344,7 @@ export function ThreadsPost({
         ) : null}
       </div>
 
-      <div className="min-w-0 flex-1 pb-2">
+      <div className="min-w-0 flex-1 pb-3">
         <div className="flex min-w-0 items-center gap-0.5">
           <span className="truncate text-[13px] font-semibold tracking-tight text-neutral-950">
             {postData.author}
@@ -362,7 +362,7 @@ export function ThreadsPost({
           {postData.topic ? (
             <>
               <ChevronRight
-                className="size-2.5 shrink-0 text-neutral-400"
+                className="size-3 shrink-0 text-neutral-400"
                 weight="bold"
               />
               <span className="max-w-[45%] truncate text-[13px] font-semibold text-neutral-950">
@@ -375,11 +375,11 @@ export function ThreadsPost({
               {postData.time}
             </span>
           ) : null}
-          <div className="ml-auto flex shrink-0 items-center gap-1 pl-1">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 pl-2">
             {postData.time && postData.topic ? (
               <span className="text-[12px] text-neutral-400">{postData.time}</span>
             ) : null}
-            <MoreHorizontal className="size-3.5 text-neutral-400" weight="bold" />
+            <MoreHorizontal className="size-5 shrink-0 text-neutral-400 opacity-90" weight="regular" />
           </div>
         </div>
 
@@ -414,7 +414,7 @@ function ThreadsReply({
   const hasKids = Boolean(item.children?.length);
 
   return (
-    <div className={cn("relative flex gap-2 px-3 py-1.5", nested && "pl-10")}>
+    <div className={cn("relative flex gap-2.5 px-4 py-2", nested && "pl-12")}>
       <div className="relative flex w-[28px] shrink-0 flex-col items-center">
         <Avatar
           src={item.avatar}
@@ -441,7 +441,7 @@ function ThreadsReply({
               {item.time}
             </span>
           ) : null}
-          <MoreHorizontal className="ml-auto size-3.5 shrink-0 text-neutral-400" weight="bold" />
+          <MoreHorizontal className="ml-auto size-5 shrink-0 text-neutral-400 opacity-90" weight="regular" />
         </div>
         <p className="mt-0.5 whitespace-pre-wrap text-[13px] leading-[1.3] text-neutral-900">
           {item.text}
@@ -463,11 +463,11 @@ function ThreadsReply({
 
 function StatusBar() {
   return (
-    <div className="flex h-10 shrink-0 items-end justify-between bg-white px-5 pb-1 pt-4">
-      <span className="min-w-[40px] text-[12px] font-semibold tracking-[-0.02em] text-neutral-950 px-2">
+    <div className="flex h-11 shrink-0 items-end justify-between bg-white px-5 pb-1.5 pt-4">
+      <span className="min-w-[40px] px-1 text-[12px] font-semibold tracking-[-0.02em] text-neutral-950">
         9:41
       </span>
-      <div className="mb-px flex items-center gap-1 px-2">
+      <div className="mb-px flex items-center gap-1.5 px-1">
         <svg width="14" height="9" viewBox="0 0 17 11" fill="none" aria-hidden>
           <rect x="0.5" y="2.5" width="3" height="8" rx="0.8" fill="currentColor" />
           <rect x="4.5" y="1.5" width="3" height="9" rx="0.8" fill="currentColor" />
@@ -496,18 +496,18 @@ function StatusBar() {
 
 function ThreadsHeader() {
   return (
-    <header className="relative isolate z-10 flex h-10 shrink-0 items-center justify-center bg-white px-4">
+    <header className="relative isolate z-10 flex h-11 shrink-0 items-center justify-center bg-white px-4">
       <ChevronLeft
-        className="absolute left-2.5 top-1/2 size-[18px] -translate-y-1/2 text-neutral-950"
+        className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-neutral-950 opacity-90"
         weight="regular"
       />
-      <FaThreads className="size-[18px] text-neutral-950" aria-label="Threads" />
+      <FaThreads className="size-5 text-neutral-950 opacity-90" aria-label="Threads" />
       <div
-        className="absolute right-3.5 top-1/2 flex -translate-y-1/2 flex-col gap-1"
+        className="absolute right-4 top-1/2 flex -translate-y-1/2 flex-col gap-1.5"
         aria-label="Menu"
       >
-        <span className="h-px w-3.5 rounded-full bg-neutral-950" />
-        <span className="h-px w-3.5 rounded-full bg-neutral-950" />
+        <span className="h-px w-4 rounded-full bg-neutral-950" />
+        <span className="h-px w-4 rounded-full bg-neutral-950" />
       </div>
     </header>
   );
@@ -515,21 +515,21 @@ function ThreadsHeader() {
 
 function ThreadsFilterBar() {
   return (
-    <div className="flex shrink-0 items-center px-3 py-2 text-[12px]">
+    <div className="flex shrink-0 items-center px-4 py-2.5 text-[12px]">
       <button
         type="button"
-        className="inline-flex items-center gap-0.5 font-semibold text-neutral-950"
+        className="inline-flex items-center gap-1 font-semibold text-neutral-950"
       >
-        <ArrowUpDown className="size-3" weight="bold" />
+        <ArrowUpDown className="size-3.5 opacity-90" weight="regular" />
         Top
-        <ChevronDown className="size-3 text-neutral-500" weight="bold" />
+        <ChevronDown className="size-3.5 text-neutral-500" weight="bold" />
       </button>
       <button
         type="button"
-        className="ml-auto inline-flex items-center gap-px text-neutral-400"
+        className="ml-auto inline-flex items-center gap-0.5 text-neutral-400"
       >
         View activity
-        <ChevronRight className="size-3" weight="bold" />
+        <ChevronRight className="size-3.5" weight="bold" />
       </button>
     </div>
   );
@@ -537,33 +537,33 @@ function ThreadsFilterBar() {
 
 function ThreadsReplyBar({ author }: { author: string }) {
   return (
-    <div className="shrink-0 bg-white px-2.5 pb-1 pt-1.5">
-      <div className="flex items-center gap-1.5 rounded-2xl bg-neutral-100 px-2 py-1.5">
+    <div className="shrink-0 bg-white px-4 pb-1.5 pt-2">
+      <div className="flex items-center gap-2 rounded-md bg-neutral-100 px-3 py-2">
         <Avatar name="you" src={THREADS_AVATAR} size="xs" />
         <span className="min-w-0 flex-1 truncate text-[12px] text-neutral-400">
           Reply to {author}...
         </span>
-        <ImageIcon className="size-3.5 shrink-0 text-neutral-500" weight="regular" />
-        <span className="text-[9px] font-bold tracking-wide text-neutral-500">
+        <ImageIcon className="size-5 shrink-0 text-neutral-500 opacity-90" weight="regular" />
+        <span className="text-[10px] font-bold tracking-wide text-neutral-500">
           GIF
         </span>
-        <Maximize2 className="size-3 shrink-0 text-neutral-500" weight="regular" />
+        <Maximize2 className="size-5 shrink-0 text-neutral-500 opacity-90" weight="regular" />
       </div>
     </div>
   );
 }
 
-/** Tab bar — Home · Search · Create · Activity · Profile (as in hero ref) */
+/** Tab bar — Home · Search · Create · Activity · Profile */
 function ThreadsTabBar() {
   return (
-    <nav className="grid h-14 grid-cols-5 gap-4 items-center justify-around bg-white px-14 pb-4">
-      <Home className="size-[22px] text-neutral-950" weight="regular" />
-      <Search className="size-[22px] text-neutral-950" weight="regular" />
-      <div className="flex size-7 items-center justify-center rounded-md bg-neutral-100">
-        <Plus className="size-3.5 text-neutral-800" weight="regular" />
+    <nav className="grid h-14 shrink-0 grid-cols-5 items-center justify-items-center bg-white px-4 pb-3 pt-1.5">
+      <Home className="size-5 text-neutral-950 opacity-90" weight="regular" />
+      <Search className="size-5 text-neutral-950 opacity-90" weight="regular" />
+      <div className="flex size-8 items-center justify-center rounded-md bg-neutral-100">
+        <Plus className="size-5 text-neutral-800 opacity-90" weight="regular" />
       </div>
-      <Heart className="size-[22px] text-neutral-950" weight="regular" />
-      <User className="size-[22px] text-neutral-950" weight="regular" />
+      <Heart className="size-5 text-neutral-950 opacity-90" weight="regular" />
+      <User className="size-5 text-neutral-950 opacity-90" weight="regular" />
     </nav>
   );
 }

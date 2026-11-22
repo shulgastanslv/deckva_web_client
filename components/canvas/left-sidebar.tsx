@@ -24,6 +24,7 @@ import { LegalDialog, type LegalKind } from "@/components/legal-dialog";
 import { CanvasNavHint } from "@/components/canvas/canvas-nav-hint";
 import { ProjectFileMenu } from "@/components/canvas/project-file-menu";
 import { SaveStatusMenu } from "@/components/canvas/save-status-menu";
+import { ChangeHistoryMenu } from "@/components/canvas/change-history-menu";
 import { SidebarAssets } from "./sidebar/sidebar-assets";
 import {
   navIconClass,
@@ -222,6 +223,7 @@ export function LeftSidebar({
           <div className="flex items-center gap-1">
             <ProjectFileMenu />
             <CanvasNavHint />
+            <ChangeHistoryMenu />
             <SaveStatusMenu />
           </div>
         </div>

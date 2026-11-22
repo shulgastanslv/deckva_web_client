@@ -309,6 +309,7 @@ model Project {
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 
   slides       Slide[]
+  revisions    ProjectRevision[]
   savedBy      SavedProject[]
 
   @@index([userId])
@@ -321,6 +322,23 @@ model Project {
   @@index([isPublic, communityStatus])
   @@index([communityCategory, communityStatus])
   @@index([communityUpdatedAt])
+}
+
+/// Named snapshot of a project’s slides for editor change history.
+model ProjectRevision {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  /// Project title at save time.
+  title     String
+  /// Ordered slide payloads: { canvasJSON, thumbnail }.
+  slides    Json
+  /// Cover thumb for the history list (usually slide 0).
+  thumbnail String?  @db.Text
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
 }
 
 

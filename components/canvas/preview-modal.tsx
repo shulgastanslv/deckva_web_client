@@ -62,6 +62,9 @@ export function PreviewModal({
   const [rendering, setRendering] = useState(false);
   const [view, setView] = useState<"slides" | "phone">(initialView);
   const [network, setNetwork] = useState<SocialPreviewNetwork>("instagram");
+  // Stories / Clean were removed from the picker — keep a safe active network.
+  const phoneNetwork =
+    network === "instagram" || network === "threads" ? network : "instagram";
 
   const renderGenRef = useRef(0);
   const offscreenRef = useRef<FabricCanvas | null>(null);
@@ -308,7 +311,7 @@ export function PreviewModal({
                 onClick={() => setNetwork(item.id)}
                 className={cn(
                   "h-8 shrink-0 rounded-md px-3 text-[12px] font-medium tracking-tight transition-colors",
-                  network === item.id
+                  phoneNetwork === item.id
                     ? "bg-background text-foreground"
                     : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
                 )}
@@ -334,7 +337,7 @@ export function PreviewModal({
         {view === "phone" ? (
           <div className="flex h-full min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
             <SocialPhonePreview
-              network={network}
+              network={phoneNetwork}
               image={activeImage}
               loading={activeSnap?.loading}
               aspectRatio={aspectRatio}

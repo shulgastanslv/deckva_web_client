@@ -30,9 +30,7 @@ export const SOCIAL_PREVIEW_NETWORKS: {
   label: string;
 }[] = [
   { id: "instagram", label: "Instagram" },
-  { id: "stories", label: "Stories" },
   { id: "threads", label: "Threads" },
-  { id: "clean", label: "Clean" },
 ];
 
 type Props = {

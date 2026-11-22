@@ -131,7 +131,6 @@ export function CanvasToolbar({
   const { applyPayload } = useApplyTemplate();
   const importRef = useRef<HTMLInputElement>(null);
   const {
-    currentIndex,
     currentSlideId,
     canGoPrev,
     canGoNext,
@@ -142,7 +141,6 @@ export function CanvasToolbar({
     move,
   } = useSlides();
 
-  const projectTitle = useCanvasStore((s) => s.projectTitle);
   const handActive = useCanvasStore((s) => s.handActive);
   const setHandActive = useCanvasStore((s) => s.setHandActive);
   const eraserActive = useCanvasStore((s) => s.eraserActive);
@@ -157,10 +155,6 @@ export function CanvasToolbar({
   const targetHidden = target ? target.visible === false : false;
   const targetLocked = target ? isLayerLocked(target) : false;
   const selectActive = !handActive && !eraserActive;
-  const pageLabel = projectTitle.trim()
-    ? t("slideTitleNamed", { n: currentIndex + 1, title: projectTitle.trim() })
-    : t("slideTitle", { n: currentIndex + 1 });
-
   const handleExportJSON = async () => {
     if (!manager) return;
     try {
@@ -263,15 +257,8 @@ export function CanvasToolbar({
   return (
     <div
       data-tour="editorToolbar"
-      className="flex h-full w-full min-w-0 items-center gap-3 select-none"
+      className="flex h-full w-full min-w-0 items-center justify-end gap-1.5 select-none"
     >
-      <div
-        className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground"
-        title={pageLabel}
-      >
-        {pageLabel}
-      </div>
-
       <div className="flex shrink-0 items-center gap-1.5">
         <div className="flex items-center rounded-md p-0.5">
           <PageIcon

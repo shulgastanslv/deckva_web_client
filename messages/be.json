@@ -1675,8 +1675,20 @@
       "layoutGridHint": "Для ўсіх слайдаў",
       "autoFlow": "Аўтапаток",
       "autoFlowHint": "Для ўсіх слайдаў",
+      "allCanvases": "Усе палотны",
+      "allCanvasesHint": "Паказваць усе слайды адной суцэльнай стужкай",
+      "slideNav": "Навігацыя па слайдах",
+      "slideNavHint": "Кнопкі назад / наперад на палатне",
       "autosave": "Аўтазахаванне",
       "autosaveHint": "Ціха захоўвае ў фоне"
+    },
+    "history": {
+      "title": "Гісторыя змен",
+      "empty": "Пакуль няма захаваных версій",
+      "restore": "Адкаціць",
+      "delete": "Выдаліць",
+      "restoring": "Аднаўленне…",
+      "savedAt": "Захавана {time}"
     },
     "tools": {
       "move": "Перамяшчэнне",
@@ -2081,6 +2093,9 @@
       },
       "changePasswordHint": "Змяніце пароль для ўваходу па email.",
       "setPasswordHint": "Задайце пароль, каб таксама ўваходзіць па email.",
+      "signedInGoogle": "Уваход праз Google",
+      "signedInEmail": "Уваход праз email",
+      "googleAccountHint": "Уваход праз Google. Змена пароля і выдаленне акаўнта тут недаступныя.",
       "currentPassword": "Бягучы пароль",
       "newPassword": "Новы пароль",
       "confirmPassword": "Пацвердзіце пароль",
