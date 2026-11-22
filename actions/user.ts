@@ -192,7 +192,7 @@ export async function registerUser({ name, email, password }: RegisterInput) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name,
         email: normalized,
@@ -202,18 +202,15 @@ export async function registerUser({ name, email, password }: RegisterInput) {
 
     const mailed = await sendVerificationEmail(normalized);
     if ("error" in mailed && mailed.error) {
-      return {
-        success: true as const,
-        needsVerification: true as const,
-        delivered: false,
-        error: mailed.error,
-      };
+      await prisma.authToken.deleteMany({ where: { email: normalized } }).catch(() => null);
+      await prisma.user.delete({ where: { id: user.id } }).catch(() => null);
+      return { error: mailed.error };
     }
 
     return {
       success: true as const,
       needsVerification: true as const,
-      delivered: "delivered" in mailed ? mailed.delivered : false,
+      delivered: true as const,
     };
   } catch (err) {
     console.error("Register user error:", err);

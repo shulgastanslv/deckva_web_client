@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
-  At as AtIcon,
   Camera as CameraIcon,
   Check,
   Key as KeyRound,
@@ -521,25 +520,13 @@ export function ProfileSettingsDialog({
                           />
                         </div>
 
-                        {profileReady ? (
+                        {profileReady && isGoogleAccount ? (
                           <div
                             className="flex w-full min-h-12 items-center gap-2.5 rounded-md bg-muted/40 px-4 py-3.5 text-[13px] font-normal text-foreground"
-                            title={
-                              isGoogleAccount
-                                ? t("signedInGoogle")
-                                : t("signedInEmail")
-                            }
+                            title={t("signedInGoogle")}
                           >
-                            {isGoogleAccount ? (
-                              <GoogleMark className="size-5 shrink-0" />
-                            ) : (
-                              <AtIcon className="size-5 shrink-0 text-muted-foreground" />
-                            )}
-                            <span>
-                              {isGoogleAccount
-                                ? t("signedInGoogle")
-                                : t("signedInEmail")}
-                            </span>
+                            <GoogleMark className="size-5 shrink-0" />
+                            <span>{t("signedInGoogle")}</span>
                           </div>
                         ) : null}
                     </div>
@@ -741,14 +728,7 @@ export function ProfileSettingsDialog({
                         </Button>
                       </div>
 
-                      {isGoogleAccount ? (
-                        <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
-                          <p className="text-[13px] font-medium">{t("nav.security")}</p>
-                          <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">
-                            {t("googleAccountHint")}
-                          </p>
-                        </div>
-                      ) : (
+                      {!isGoogleAccount ? (
                         <div className="rounded-2xl bg-destructive/5 px-4 py-3.5 ring-1 ring-destructive/10">
                           <p className="text-[13px] font-medium text-destructive">
                             {t("deleteAccount")}
@@ -808,7 +788,7 @@ export function ProfileSettingsDialog({
                             {t("deleteAccount")}
                           </Button>
                         </div>
-                      )}
+                      ) : null}
 
                       {error ? (
                         <p className="text-[12px] text-destructive">{error}</p>

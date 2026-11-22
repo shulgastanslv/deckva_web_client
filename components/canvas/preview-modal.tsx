@@ -339,6 +339,9 @@ export function PreviewModal({
             <SocialPhonePreview
               network={phoneNetwork}
               image={activeImage}
+              images={snapshots.map(
+                (snap) => snap.preview ?? snap.thumbnail ?? null,
+              )}
               loading={activeSnap?.loading}
               aspectRatio={aspectRatio}
               slideIndex={activeIdx}

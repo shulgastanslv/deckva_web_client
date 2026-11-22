@@ -9,15 +9,15 @@ import {
   ChatCircle as MessageCircle,
   DotsThree as MoreHorizontal,
   Plus,
-  ArrowsClockwise as Repeat2,
   MagnifyingGlass as Search,
   PaperPlaneTilt as Send,
   User,
   X as XIcon,
 } from "@phosphor-icons/react";
-import { FaThreads } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { PhoneFrame } from "@/components/canvas/phone-frame";
+import { ThreadsUI, type ThreadsReplyData } from "@/components/landing/threads-ui";
+import { post, reply, THREADS_AVATAR } from "@/components/landing/threads-content";
 
 export type SocialPreviewNetwork =
   | "instagram"
@@ -35,6 +35,8 @@ export const SOCIAL_PREVIEW_NETWORKS: {
 
 type Props = {
   image: string | null;
+  /** All slide previews for Threads carousel chrome (ordered). */
+  images?: Array<string | null>;
   loading?: boolean;
   aspectRatio: number;
   slideIndex: number;
@@ -51,11 +53,6 @@ type Props = {
 function captionOrFallback(caption: string | undefined, fallback: string) {
   const trimmed = caption?.trim();
   return trimmed || fallback;
-}
-
-/** Instagram feed posts sit between 4:5 and ~1.91:1. */
-function clampFeedAspect(ratio: number) {
-  return Math.min(1.91, Math.max(0.8, ratio || 0.8));
 }
 
 function SignalIcon({ className }: { className?: string }) {
@@ -343,73 +340,167 @@ function InstagramChrome(props: Props) {
   );
 }
 
+function hashSeed(input: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function pick<T>(list: readonly T[], seed: number, salt: number): T {
+  return list[(seed + salt * 97) % list.length]!;
+}
+
+function formatEngagement(n: number): string {
+  if (n >= 10_000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+  return String(n);
+}
+
+const COMMENT_AUTHORS = [
+  "mira",
+  "noah",
+  "lena",
+  "kai",
+  "sofia",
+  "owen",
+  "aria",
+  "julio",
+  "nina",
+  "theo",
+] as const;
+
+const COMMENT_LINES = [
+  "This carousel hits hard 🔥",
+  "Saving this for later.",
+  "Slide 1 alone already stops the scroll.",
+  "Need this energy for my next post.",
+  "Clean layout. Who designed this?",
+  "The pacing between frames is perfect.",
+  "Okay this is actually useful.",
+  "Sending this to the team rn.",
+  "More of this please.",
+  "Looks ready to publish as-is.",
+  "The last slide is the hook.",
+  "Bookmarking — great example.",
+] as const;
+
+const NESTED_LINES = [
+  "Agreed 🙌",
+  "Same here.",
+  "Exactly.",
+  "This.",
+  "Facts.",
+] as const;
+
+const POST_TIMES = ["12m", "34m", "1h", "2h", "3h", "5h"] as const;
+const REPLY_TIMES = ["2m", "8m", "14m", "22m", "41m", "1h"] as const;
+
+function buildPreviewEngagement(author: string, slideTotal: number) {
+  const seed = hashSeed(`${author}:${slideTotal}`);
+  const likes = 48 + (seed % 920) + slideTotal * 17;
+  const replies = 3 + (seed % 38) + Math.min(slideTotal, 6);
+  const reposts = 2 + (seed % 24) + Math.floor(slideTotal / 2);
+
+  const commentCount = 2 + (seed % 3);
+  const comments: ThreadsReplyData[] = [];
+
+  for (let i = 0; i < commentCount; i += 1) {
+    const name = pick(COMMENT_AUTHORS, seed, i + 1);
+    const withNest = (seed + i) % 3 === 0;
+    const kids: ThreadsReplyData[] | undefined = withNest
+      ? [
+          reply({
+            id: `c${i}-r1`,
+            author,
+            time: pick(REPLY_TIMES, seed, i + 11),
+            text: pick(NESTED_LINES, seed, i + 13),
+            isAuthor: true,
+            likes: 1 + ((seed + i) % 9),
+          }),
+        ]
+      : undefined;
+
+    comments.push(
+      reply({
+        id: `c${i}`,
+        author: name,
+        time: pick(REPLY_TIMES, seed, i + 3),
+        text: pick(COMMENT_LINES, seed, i + 5),
+        likes: 2 + ((seed + i * 7) % 48),
+        replies: kids ? String(kids.length) : ((seed + i) % 4 === 0 ? "1" : undefined),
+        liked: (seed + i) % 2 === 0,
+        showFollow: (seed + i) % 3 === 1,
+        showTranslate: (seed + i) % 5 === 0,
+        children: kids,
+      }),
+    );
+  }
+
+  return {
+    likes: formatEngagement(likes),
+    replies: formatEngagement(replies),
+    reposts: formatEngagement(reposts),
+    time: pick(POST_TIMES, seed, 2),
+    liked: seed % 3 !== 0,
+    comments,
+  };
+}
+
 function ThreadsChrome(props: Props) {
   const t = useTranslations("editor.phonePreview");
+  const {
+    author = "deckva",
+    slideIndex,
+    slideTotal,
+    image,
+    images,
+    caption,
+  } = props;
 
-  const { author = "deckva", slideIndex, slideTotal, image, loading, caption } = props;
-  const ar = clampFeedAspect(props.aspectRatio);
+  const media = Array.from({ length: Math.max(slideTotal, 1) }, (_, i) => {
+    const fromList = images?.[i];
+    if (fromList) return fromList;
+    if (i === slideIndex && image) return image;
+    return THREADS_AVATAR;
+  });
+
   const body = captionOrFallback(
     caption,
     slideTotal > 1
-      ? `Carousel preview · ${slideIndex + 1}/${slideTotal}`
+      ? `Carousel · ${slideIndex + 1}/${slideTotal}`
       : t("previewingThreads"),
   );
 
+  const engagement = buildPreviewEngagement(author, slideTotal);
+
+  const posts = [
+    post({
+      id: "editor-preview",
+      author,
+      verified: true,
+      time: engagement.time,
+      text: body,
+      media,
+      likes: engagement.likes,
+      replies: engagement.replies,
+      reposts: engagement.reposts,
+      liked: engagement.liked,
+      insights: true,
+      comments: engagement.comments,
+    }),
+  ];
+
   return (
-    <div className="flex h-full w-full flex-col bg-white text-neutral-950">
-      <StatusBar />
-      <header className="relative flex h-9 shrink-0 items-center justify-center border-b border-neutral-100 px-3">
-        <FaThreads className="size-[22px]" aria-label="Threads" />
-        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col gap-[5px]" aria-hidden>
-          <span className="h-[1.5px] w-[15px] rounded-md bg-neutral-950" />
-          <span className="h-[1.5px] w-[15px] rounded-md bg-neutral-950" />
-        </div>
-      </header>
-
-      <div className="min-h-0 flex-1 overflow-hidden px-3 pt-3">
-        <div className="flex gap-2.5">
-          <div className="flex flex-col items-center">
-            <Avatar name={author} size="md" />
-            <span className="mt-2 w-px flex-1 bg-neutral-200" />
-          </div>
-          <div className="min-w-0 flex-1 pb-3">
-            <div className="flex items-baseline gap-1.5">
-              <span className="truncate text-[14px] font-semibold tracking-tight">{author}</span>
-              <span className="shrink-0 text-[13px] text-neutral-400">2h</span>
-            </div>
-            <p className="mt-1 line-clamp-5 text-[14px] leading-[1.3] text-neutral-900 whitespace-pre-wrap">
-              {body}
-            </p>
-            <div className="mt-2.5 max-h-[48%] overflow-hidden rounded-[16px] border border-black/[0.08]">
-              <SlideImage
-                image={image}
-                loading={loading}
-                aspectRatio={ar}
-                badge={slideTotal > 1 ? `${slideIndex + 1}/${slideTotal}` : undefined}
-                className="max-h-full"
-              />
-            </div>
-            <div className="mt-2.5 flex items-center gap-4 text-neutral-800">
-              <Heart className="size-[18px]" strokeWidth={1.75} />
-              <MessageCircle className="size-[18px]" strokeWidth={1.75} />
-              <Repeat2 className="size-[18px]" strokeWidth={1.75} />
-              <Send className="size-[18px]" strokeWidth={1.75} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <nav className="flex h-[50px] shrink-0 items-center justify-around border-t border-neutral-100 px-2">
-        <Home className="size-6 text-neutral-950" strokeWidth={1.6} />
-        <Search className="size-6 text-neutral-400" strokeWidth={1.6} />
-        <div className="flex h-7 w-10 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50">
-          <Plus className="size-4 text-neutral-700" strokeWidth={1.75} />
-        </div>
-        <Heart className="size-6 text-neutral-400" strokeWidth={1.6} />
-        <User className="size-6 text-neutral-400" strokeWidth={1.6} />
-      </nav>
-      <HomeIndicator />
-    </div>
+    <ThreadsUI
+      posts={posts}
+      mediaIndex={slideIndex}
+      autoplay={false}
+      showReplyBar
+      showTabBar
+    />
   );
 }
 

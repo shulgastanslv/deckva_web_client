@@ -44,9 +44,6 @@ const centerBtn =
 const sideBtn =
   "h-9 gap-1.5 rounded-md border-none px-3.5 text-[13px] font-medium shadow-none";
 
-const chipTrigger =
-  "inline-flex h-10 items-center gap-1.5 rounded-md border-none bg-transparent px-3.5 text-[13px] font-medium text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 data-[state=open]:text-foreground";
-
 const menuItem =
   "cursor-pointer gap-2 rounded-xl px-3 py-2.5 text-[13px] focus:bg-muted/50";
 
@@ -131,7 +128,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
 
   return (
     <>
-      <header className="z-20 grid h-16 w-full shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-b border-border/50 bg-background px-4 select-none">
+      <header className="z-20 grid h-14 w-full shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-b border-border/50 bg-background px-4 select-none">
         {/* Project */}
         <div className="flex min-w-0 items-center gap-1 sm:gap-2">
           <Logo width={36} height={36} href="/studio" />

@@ -61,6 +61,18 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Landing is guests-only — signed-in users go to the studio.
+  // Keep verify/reset/auth query so email links still resolve on /studio.
+  if (userId && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/studio";
+    const keep = ["verify", "reset", "auth", "error"] as const;
+    for (const key of [...url.searchParams.keys()]) {
+      if (!(keep as readonly string[]).includes(key)) url.searchParams.delete(key);
+    }
+    return NextResponse.redirect(url);
+  }
+
   if (
     (pathname === "/admin" || pathname.startsWith("/admin/")) &&
     token?.role !== UserRole.ADMIN

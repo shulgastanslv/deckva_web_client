@@ -23,10 +23,13 @@ import {
 } from "@/actions/auth-email";
 import { registerUser } from "@/actions/user";
 import {
+  Eye,
+  EyeSlash as EyeOff,
   SpinnerGap as Loader2,
 } from "@phosphor-icons/react";
 import Logo from "./logo/logo";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
+import { cn } from "@/lib/utils";
 
 type View = "login" | "register" | "forgot-password" | "reset-password" | "check-email";
 type CheckKind = "verify" | "reset";
@@ -48,6 +51,102 @@ function verifyEmailOnce(token: string) {
   const request = verifyEmail(token);
   verifyRequests.set(token, request);
   return request;
+}
+
+function PasswordField({
+  id,
+  value,
+  onChange,
+  placeholder,
+  required,
+  minLength,
+  autoComplete,
+}: {
+  id?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  required?: boolean;
+  minLength?: number;
+  autoComplete?: string;
+}) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={visible ? "text" : "password"}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        minLength={minLength}
+        autoComplete={autoComplete}
+        className="pr-10"
+      />
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label={visible ? "Hide password" : "Show password"}
+        onClick={() => setVisible((open) => !open)}
+        className={cn(
+          "absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-md",
+          "text-muted-foreground transition-colors hover:text-foreground",
+        )}
+      >
+        {visible ? (
+          <EyeOff className="size-5 stroke-[1.5]" />
+        ) : (
+          <Eye className="size-5 stroke-[1.5]" />
+        )}
+      </button>
+    </div>
+  );
+}
+
+function FieldLabel({
+  children,
+  htmlFor,
+  className,
+}: {
+  children: React.ReactNode;
+  htmlFor?: string;
+  className?: string;
+}) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      className={cn(
+        "mb-1.5 block text-[13px] font-normal text-foreground",
+        className,
+      )}
+    >
+      {children}
+    </label>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg className="size-5" viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="#EA4335"
+        d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.8 7.3l3.7 2.9C6.4 7.2 9 5 12 5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.5 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.8 7.3C.7 9.5 0 10.7 0 12.5s.7 3 1.8 5.2l3.7-2.9z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.6-2.2-6.5-5.2L1.8 15.8C3.7 19.5 7.5 23 12 23z"
+      />
+    </svg>
+  );
 }
 
 interface AuthModalProps {
@@ -190,10 +289,10 @@ export function AuthModal({
     try {
       const callbackUrl = callbackUrlFromQuery();
 
-      // 1. Register a new account
+      // 1. Register a new account (user is kept only if verification email sends)
       if (view === "register") {
         const res = await registerUser({ name, email, password });
-        if ("error" in res && res.error && !("needsVerification" in res)) {
+        if ("error" in res && res.error) {
           setErrorMessage(res.error);
           setIsLoading(false);
           return;
@@ -201,13 +300,7 @@ export function AuthModal({
 
         setCheckKind("verify");
         setView("check-email");
-        setInfoMessage(
-          "error" in res && res.error
-            ? res.error
-            : "delivered" in res && res.delivered === false
-              ? t("accountCreatedNoEmail")
-              : t("sentConfirm", { email: email.trim() }),
-        );
+        setInfoMessage(t("sentConfirm", { email: email.trim() }));
         setIsLoading(false);
         return;
       }
@@ -216,8 +309,11 @@ export function AuthModal({
       if (view === "login") {
         const check = await checkCredentials(email, password);
         if ("error" in check && check.error) {
-          setErrorMessage(check.error);
-          setUnverifiedEmail("code" in check && check.code === "unverified" ? email.trim() : null);
+          const code = "code" in check ? check.code : undefined;
+          setErrorMessage(
+            code === "google" ? te("useGoogleSignIn") : check.error,
+          );
+          setUnverifiedEmail(code === "unverified" ? email.trim() : null);
           setIsLoading(false);
           return;
         }
@@ -288,21 +384,19 @@ export function AuthModal({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         showCloseButton={!required}
-        className="w-full max-w-md gap-0 rounded-3xl p-0"
+        className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-sm"
         onPointerDownOutside={required ? (e) => e.preventDefault() : undefined}
         onEscapeKeyDown={required ? (e) => e.preventDefault() : undefined}
         onInteractOutside={required ? (e) => e.preventDefault() : undefined}
       >
-        <div className="p-8 flex flex-col justify-center">
-
-          {/* Error banner */}
+        <div className="flex flex-col justify-center p-5">
           {errorMessage && (
-            <div className="mb-4 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-[13px] text-destructive text-center">
+            <div className="mb-3 rounded-md bg-destructive/10 px-3 py-2.5 text-center text-[13px] font-normal text-destructive">
               {errorMessage}
               {unverifiedEmail && (
                 <button
                   type="button"
-                  className="mt-2 block w-full text-[13px] font-medium text-foreground underline-offset-4 hover:underline"
+                  className="mt-1.5 block w-full text-[13px] font-normal text-foreground underline-offset-4 hover:underline"
                   onClick={() => {
                     setIsLoading(true);
                     void sendVerificationEmail(unverifiedEmail).then((res) => {
@@ -324,97 +418,85 @@ export function AuthModal({
           )}
 
           {infoMessage && (
-            <div className="mb-4 rounded-xl bg-muted px-3 py-3 text-center text-[13px] text-foreground">
+            <div className="mb-3 rounded-md bg-muted/40 px-3 py-2.5 text-center text-[13px] font-normal text-foreground">
               {infoMessage}
             </div>
           )}
 
-          {/* ==================== LOGIN VIEW ==================== */}
           {view === "login" && (
             <>
-              <DialogHeader className="space-y-1 mb-6 text-center">
-                <div className="flex items-center justify-center mb-4"> 
-                  <Logo width={36} height={36} />
+              <DialogHeader className="mb-4 space-y-1 text-center">
+                <div className="mb-3 flex items-center justify-center">
+                  <Logo width={42} height={42} />
                 </div>
-                <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+                <DialogTitle className="text-base font-semibold tracking-tight text-foreground">
                   {t("welcomeBack")}
                 </DialogTitle>
-                <DialogDescription className="text-[13px] text-muted-foreground">
+                <DialogDescription className="text-[13px] font-normal text-muted-foreground">
                   {t("welcomeSub")}
                 </DialogDescription>
               </DialogHeader>
 
               <Button
-                variant="outline"
+                variant="secondary"
                 type="button"
-                className="w-full h-10 rounded-md text-[13px] font-medium transition-all mb-6 flex items-center justify-center gap-2 border-input bg-muted/50 hover:bg-accent"
+                className="mb-4 w-full font-normal"
                 onClick={handleGoogleSignIn}
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24">
-                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.8 7.3l3.7 2.9C6.4 7.2 9 5 12 5z" />
-                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
-                  <path fill="#FBBC05" d="M5.5 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.8 7.3C.7 9.5 0 10.7 0 12.5s.7 3 1.8 5.2l3.7-2.9z" />
-                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.6-2.2-6.5-5.2L1.8 15.8C3.7 19.5 7.5 23 12 23z" />
-                </svg>
+                <GoogleIcon />
                 {t("continueGoogle")}
               </Button>
 
               <Divider text={t("orContinueEmail")} />
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    {t("email")}
-                  </label>
+                  <FieldLabel>{t("email")}</FieldLabel>
                   <Input
                     type="email"
                     placeholder={t("phEmail")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[13px] font-medium text-foreground">
-                      {t("password")}
-                    </label>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <FieldLabel className="mb-0">{t("password")}</FieldLabel>
                     <button
                       type="button"
                       onClick={() => handleSwitchView("forgot-password")}
-                      className="text-[13px] text-muted-foreground hover:text-primary transition-colors bg-transparent p-0"
+                      className="bg-transparent p-0 text-[13px] font-normal text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {t("forgotPassword")}
                     </button>
                   </div>
-                  <Input
-                    type="password"
-                    placeholder="••••••••"
+                  <PasswordField
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={setPassword}
+                    placeholder="••••••••"
                     required
-                    className="h-10 rounded-md bg-muted/50 border-input"
+                    autoComplete="current-password"
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("signIn")}
+                <Button type="submit" disabled={isLoading} className="mt-1 w-full font-normal">
+                  {isLoading ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    t("signIn")
+                  )}
                 </Button>
               </form>
 
               <AuthLegalAgree />
 
-              <div className="text-center mt-6 text-[13px] text-muted-foreground">
+              <div className="mt-4 text-center text-[13px] font-normal text-muted-foreground">
                 {t("noAccount")}{" "}
                 <button
                   type="button"
                   onClick={() => handleSwitchView("register")}
-                  className="text-primary font-medium hover:underline bg-transparent p-0"
+                  className="bg-transparent p-0 font-normal text-primary hover:underline"
                 >
                   {t("signUp")}
                 </button>
@@ -422,96 +504,82 @@ export function AuthModal({
             </>
           )}
 
-          {/* ==================== REGISTER VIEW ==================== */}
           {view === "register" && (
             <>
-              <DialogHeader className="space-y-1 mb-6 text-center">
-                <div className="flex items-center justify-center mb-4"> 
-                  <Logo width={36} height={36} />
+              <DialogHeader className="mb-4 space-y-1 text-center">
+                <div className="mb-3 flex items-center justify-center">
+                  <Logo width={32} height={32} />
                 </div>
-                <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+                <DialogTitle className="text-base font-semibold tracking-tight text-foreground">
                   {t("createTitle")}
                 </DialogTitle>
-                <DialogDescription className="text-[13px] text-muted-foreground">
+                <DialogDescription className="text-[13px] font-normal text-muted-foreground">
                   {t("createSub")}
                 </DialogDescription>
               </DialogHeader>
 
               <Button
-                variant="outline"
+                variant="secondary"
                 type="button"
-                className="w-full h-10 rounded-md text-[13px] font-medium transition-all mb-6 flex items-center justify-center gap-2 border-input bg-muted/50 hover:bg-accent"
+                className="mb-4 w-full font-normal"
                 onClick={handleGoogleSignIn}
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24">
-                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.8 7.3l3.7 2.9C6.4 7.2 9 5 12 5z" />
-                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
-                  <path fill="#FBBC05" d="M5.5 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.8 7.3C.7 9.5 0 10.7 0 12.5s.7 3 1.8 5.2l3.7-2.9z" />
-                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.6-2.2-6.5-5.2L1.8 15.8C3.7 19.5 7.5 23 12 23z" />
-                </svg>
+                <GoogleIcon />
                 {t("continueGoogle")}
               </Button>
 
               <Divider text={t("orRegisterEmail")} />
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    {t("fullName")}
-                  </label>
+                  <FieldLabel>{t("fullName")}</FieldLabel>
                   <Input
                     type="text"
                     placeholder={t("phName")}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    {t("email")}
-                  </label>
+                  <FieldLabel>{t("email")}</FieldLabel>
                   <Input
                     type="email"
                     placeholder={t("phEmail")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    {t("password")}
-                  </label>
-                  <Input
-                    type="password"
-                    placeholder={t("phPasswordMin")}
+                  <FieldLabel>{t("password")}</FieldLabel>
+                  <PasswordField
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={setPassword}
+                    placeholder={t("phPasswordMin")}
                     required
-                    className="h-10 rounded-md bg-muted/50 border-input"
+                    minLength={PASSWORD_MIN_LENGTH}
+                    autoComplete="new-password"
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("createAccount")}
+                <Button type="submit" disabled={isLoading} className="mt-1 w-full font-normal">
+                  {isLoading ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    t("createAccount")
+                  )}
                 </Button>
               </form>
 
               <AuthLegalAgree />
 
-              <div className="text-center mt-6 text-[13px] text-muted-foreground">
+              <div className="mt-4 text-center text-[13px] font-normal text-muted-foreground">
                 {t("haveAccount")}{" "}
                 <button
                   type="button"
                   onClick={() => handleSwitchView("login")}
-                  className="text-primary font-medium hover:underline bg-transparent p-0"
+                  className="bg-transparent p-0 font-normal text-primary hover:underline"
                 >
                   {t("signIn")}
                 </button>
@@ -519,48 +587,44 @@ export function AuthModal({
             </>
           )}
 
-          {/* ==================== FORGOT PASSWORD VIEW ==================== */}
           {view === "forgot-password" && (
             <>
-              <DialogHeader className="space-y-1 mb-6 text-center">
-                <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+              <DialogHeader className="mb-4 space-y-1 text-center">
+                <DialogTitle className="text-base font-semibold tracking-tight text-foreground">
                   {t("resetTitle")}
                 </DialogTitle>
-                <DialogDescription className="text-[13px] text-muted-foreground">
+                <DialogDescription className="text-[13px] font-normal text-muted-foreground">
                   {t("resetSub")}
                 </DialogDescription>
               </DialogHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <form onSubmit={handleSubmit} className="mt-1 space-y-3">
                 <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    {t("email")}
-                  </label>
+                  <FieldLabel>{t("email")}</FieldLabel>
                   <Input
                     type="email"
                     placeholder={t("phEmail")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-10 rounded-md bg-muted/50 border-input"
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("sendResetLink")}
+                <Button type="submit" disabled={isLoading} className="mt-1 w-full font-normal">
+                  {isLoading ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    t("sendResetLink")
+                  )}
                 </Button>
               </form>
 
-              <div className="text-center mt-6 text-[13px] text-muted-foreground">
+              <div className="mt-4 text-center text-[13px] font-normal text-muted-foreground">
                 {t("rememberPassword")}{" "}
                 <button
                   type="button"
                   onClick={() => handleSwitchView("login")}
-                  className="text-primary font-medium hover:underline bg-transparent p-0"
+                  className="bg-transparent p-0 font-normal text-primary hover:underline"
                 >
                   {t("backToSignIn")}
                 </button>
@@ -570,37 +634,34 @@ export function AuthModal({
 
           {view === "reset-password" && (
             <>
-              <DialogHeader className="space-y-1 mb-6 text-center">
-                <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+              <DialogHeader className="mb-4 space-y-1 text-center">
+                <DialogTitle className="text-base font-semibold tracking-tight text-foreground">
                   {t("choosePasswordTitle")}
                 </DialogTitle>
-                <DialogDescription className="text-[13px] text-muted-foreground">
+                <DialogDescription className="text-[13px] font-normal text-muted-foreground">
                   {t("choosePasswordSub")}
                 </DialogDescription>
               </DialogHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <form onSubmit={handleSubmit} className="mt-1 space-y-3">
                 <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">
-                    {t("newPassword")}
-                  </label>
-                  <Input
-                    type="password"
-                    placeholder={t("phPasswordMin")}
+                  <FieldLabel>{t("newPassword")}</FieldLabel>
+                  <PasswordField
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={setPassword}
+                    placeholder={t("phPasswordMin")}
                     required
                     minLength={PASSWORD_MIN_LENGTH}
-                    className="h-10 rounded-md bg-muted/50 border-input"
+                    autoComplete="new-password"
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-[13px] font-semibold mt-2"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("updatePassword")}
+                <Button type="submit" disabled={isLoading} className="mt-1 w-full font-normal">
+                  {isLoading ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    t("updatePassword")
+                  )}
                 </Button>
               </form>
             </>
@@ -608,11 +669,11 @@ export function AuthModal({
 
           {view === "check-email" && (
             <>
-              <DialogHeader className="space-y-1 mb-6 text-center">
-                <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+              <DialogHeader className="mb-4 space-y-1 text-center">
+                <DialogTitle className="text-base font-semibold tracking-tight text-foreground">
                   {t("checkEmailTitle")}
                 </DialogTitle>
-                <DialogDescription className="text-[13px] text-muted-foreground">
+                <DialogDescription className="text-[13px] font-normal text-muted-foreground">
                   {checkKind === "verify"
                     ? t("checkEmailConfirm")
                     : t("checkEmailReset")}
@@ -621,15 +682,14 @@ export function AuthModal({
 
               <Button
                 type="button"
-                variant="outline"
-                className="w-full h-10 rounded-md text-[13px]"
+                variant="secondary"
+                className="w-full font-normal"
                 onClick={() => handleSwitchView("login")}
               >
                 {t("backToSignIn")}
               </Button>
             </>
           )}
-
         </div>
       </DialogContent>
     </Dialog>
@@ -639,7 +699,7 @@ export function AuthModal({
 function AuthLegalAgree() {
   const t = useTranslations("dialogs.auth");
   return (
-    <p className="mt-4 text-center text-[12px] leading-relaxed text-muted-foreground">
+    <p className="mt-3 text-center text-[12px] font-normal leading-relaxed text-muted-foreground">
       {t.rich("agreeLegal", {
         terms: (chunks) => (
           <Link
@@ -667,11 +727,11 @@ function AuthLegalAgree() {
 }
 
 const Divider = ({ text }: { text: string }) => (
-  <div className="relative flex items-center justify-center mb-6">
+  <div className="relative mb-4 flex items-center justify-center">
     <div className="absolute inset-0 flex items-center">
-      <div className="w-full border-t border-border" />
+      <div className="h-px w-full bg-muted" />
     </div>
-    <span className="relative px-3 text-[13px] tracking-wider uppercase text-muted-foreground font-semibold bg-background">
+    <span className="relative bg-background px-2.5 text-[12px] font-normal text-muted-foreground">
       {text}
     </span>
   </div>

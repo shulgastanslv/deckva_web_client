@@ -559,7 +559,7 @@ function ThreadsTabBar() {
     <nav className="grid h-14 shrink-0 grid-cols-5 items-center justify-items-center bg-white px-4 pb-3 pt-1.5">
       <Home className="size-5 text-neutral-950 opacity-90" weight="regular" />
       <Search className="size-5 text-neutral-950 opacity-90" weight="regular" />
-      <div className="flex size-8 items-center justify-center rounded-md bg-neutral-100">
+      <div className="flex size-8 items-center justify-center rounded-full bg-neutral-100">
         <Plus className="size-5 text-neutral-800 opacity-90" weight="regular" />
       </div>
       <Heart className="size-5 text-neutral-950 opacity-90" weight="regular" />

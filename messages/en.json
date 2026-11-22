@@ -824,8 +824,8 @@
     "legalStatus": "Professional income tax payer",
     "legalCountry": "Republic of Belarus",
     "hero": {
-      "title": "A carousel from one line",
-      "sub": "Write the topic — slides arrive in order. Edit them, then download.",
+      "title": "Create a carousel in a few clicks",
+      "sub": "Write your topic, get slides, edit them, and download when you’re ready.",
       "howLink": "How it works"
     },
     "features": {
@@ -1117,13 +1117,14 @@
     "sendNotification": "Couldn't send the notification",
     "loadNotifications": "Couldn't load notifications",
     "updateNotifications": "Couldn't update notifications",
-    "sendEmail": "Couldn't send the email. Try again.",
+    "sendEmail": "Couldn't send the email. Try again in a moment.",
     "emailNotConfigured": "Email delivery is not configured",
     "validEmail": "Enter a valid email",
     "validEmailAndPassword": "Enter a valid email and a password",
     "linkExpired": "This link is invalid or has expired",
     "passwordTooShort": "Password must be at least 8 characters",
     "incorrectCredentials": "Incorrect email or password",
+    "useGoogleSignIn": "This account uses Google. Sign in with Google instead.",
     "confirmEmail": "Confirm your email before signing in",
     "accountExists": "An account with this email already exists",
     "serverError": "Something went wrong on the server",
