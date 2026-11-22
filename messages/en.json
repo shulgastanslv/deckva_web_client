@@ -681,7 +681,7 @@
         "sell": "Sell",
         "teach": "Teach",
         "engage": "Engage",
-        "editorial": "Editorial"
+        "editorial": "Aesthetic"
       },
       "comingSoon": "Coming soon",
       "connectors": "Connectors",
@@ -706,7 +706,7 @@
       "searchModels": "Search models",
       "model": "Model",
       "generateDialogTitle": "Generate carousel",
-      "generateDialogSubtitle": "Confirm topic, language, ratio, handle, slides, and cover.",
+      "generateDialogSubtitle": "Confirm topic, language, ratio, handle, and slides.",
       "generateConfirm": "Generate",
       "generating": "Generating…",
       "topic": "Topic",
@@ -768,19 +768,7 @@
         },
         "aesthetic": {
           "label": "Aesthetic",
-          "hint": "Lifestyle cover, calm tips"
-        },
-        "manifesto": {
-          "label": "Manifesto",
-          "hint": "Short slogan, then stance"
-        },
-        "niches": {
-          "label": "Niches",
-          "hint": "Ideas for experts by niche"
-        },
-        "lookbook": {
-          "label": "Lookbook",
-          "hint": "Photo ideas to save"
+          "hint": "Lifestyle, lookbook, and manifesto — style is randomized"
         }
       }
     }

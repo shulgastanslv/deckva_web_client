@@ -14,6 +14,9 @@ function visit(value: unknown): unknown {
 
   const next: Record<string, unknown> = {};
   for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    // Fabric recreates a default LayoutManager. Lowercasing its type
+    // ("layoutManager" → "layoutmanager") breaks classRegistry lookup.
+    if (key === "layoutManager") continue;
     next[key] = visit(child);
   }
   if (typeof next.type === "string" && next.type.length > 0) {

@@ -1,16 +1,23 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { SpinnerGap as Loader2 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
+import {
+  sidebarSelectTrigger,
+  sidebarTextarea,
+} from "@/components/canvas/sidebar/sidebar-ui";
 import { Button } from "@/components/ui/button";
+import { controlSize } from "@/components/ui/control";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageUploader } from "@/components/ui/image-uploader";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -19,17 +26,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import {
-  sidebarSelectTrigger,
-  sidebarTextarea,
-} from "@/components/canvas/sidebar/sidebar-ui";
 import { CANVAS_RATIOS, STUDIO_RATIO_KEYS, type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const PROMPT_LANGUAGES = ["ru", "en", "be"] as const;
 const RATIO_OPTIONS = STUDIO_RATIO_KEYS;
 const SLIDE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
-const HANDLE_OPTIONS = [
+const HANDLE_SEEDS = [
   "@coach",
   "@founder",
   "@creator",
@@ -45,7 +48,21 @@ const HANDLE_OPTIONS = [
 ] as const;
 
 export function pickRandomHandle(): string {
-  return HANDLE_OPTIONS[Math.floor(Math.random() * HANDLE_OPTIONS.length)]!;
+  return HANDLE_SEEDS[Math.floor(Math.random() * HANDLE_SEEDS.length)]!;
+}
+
+function normalizeHandle(raw: string): string {
+  const trimmed = raw.trim().replace(/^@+/, "");
+  if (!trimmed) return "";
+  return `@${trimmed}`;
+}
+
+function FieldLabel({ children }: { children: ReactNode }) {
+  return (
+    <span className="text-[11px] font-normal uppercase tracking-wide text-muted-foreground">
+      {children}
+    </span>
+  );
 }
 
 type Props = {
@@ -64,9 +81,6 @@ type Props = {
   onHandleChange: (value: string) => void;
   showHandle: boolean;
   onShowHandleChange: (value: boolean) => void;
-  coverUrl: string | null;
-  onCoverUrlChange: (value: string | null) => void;
-  attaching?: boolean;
   onConfirm: () => void;
 };
 
@@ -86,35 +100,29 @@ export function GenerateOptionsDialog({
   onHandleChange,
   showHandle,
   onShowHandleChange,
-  coverUrl,
-  onCoverUrlChange,
-  attaching = false,
   onConfirm,
 }: Props) {
   const t = useTranslations("studio.prompt");
   const tc = useTranslations("common");
-  const locked = busy || attaching;
+  const locked = busy;
   const dims = CANVAS_RATIOS[aspectRatio];
   const canConfirm = topic.trim().length > 0 && !locked;
-  const previewAspect = `${dims.width} / ${dims.height}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[440px]">
+      <DialogContent className="gap-0 overflow-hidden rounded-3xl border-border/50 p-0 shadow-none sm:max-w-[400px]">
         <DialogHeader className="space-y-1 px-5 pt-5 text-left">
           <DialogTitle className="text-base font-semibold tracking-tight">
             {t("generateDialogTitle")}
           </DialogTitle>
-          <p className="text-[13px] text-muted-foreground">
+          <DialogDescription className="text-[13px] text-muted-foreground">
             {t("generateDialogSubtitle")}
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[min(72vh,640px)] space-y-3.5 overflow-y-auto px-5 py-4">
+        <div className="space-y-3.5 px-5 py-4">
           <label className="block space-y-1.5">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              {t("topic")}
-            </span>
+            <FieldLabel>{t("topic")}</FieldLabel>
             <textarea
               value={topic}
               disabled={locked}
@@ -127,9 +135,7 @@ export function GenerateOptionsDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                {t("language")}
-              </span>
+              <FieldLabel>{t("language")}</FieldLabel>
               <Select
                 value={language}
                 disabled={locked}
@@ -154,49 +160,30 @@ export function GenerateOptionsDialog({
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  {t("handle")}
-                </span>
+                <FieldLabel>{t("handle")}</FieldLabel>
                 <Switch
-                  size="sm"
                   checked={showHandle}
                   disabled={locked}
                   onCheckedChange={onShowHandleChange}
                   aria-label={t("showHandle")}
                 />
               </div>
-              <Select
+              <Input
                 value={handle}
                 disabled={locked || !showHandle}
-                onValueChange={onHandleChange}
-              >
-                <SelectTrigger
-                  className={cn(
-                    sidebarSelectTrigger,
-                    !showHandle && "opacity-50",
-                  )}
-                >
-                  <SelectValue placeholder={t("handlePlaceholder")} />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl p-1.5">
-                  {HANDLE_OPTIONS.map((item) => (
-                    <SelectItem
-                      key={item}
-                      value={item}
-                      className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50"
-                    >
-                      {item}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder={t("handlePlaceholder")}
+                className={cn(!showHandle && "opacity-50")}
+                onChange={(e) => onHandleChange(e.target.value)}
+                onBlur={() => {
+                  const next = normalizeHandle(handle);
+                  if (next !== handle) onHandleChange(next);
+                }}
+              />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              {t("ratio")}
-            </span>
+            <FieldLabel>{t("ratio")}</FieldLabel>
             <Select
               value={aspectRatio}
               disabled={locked}
@@ -229,9 +216,7 @@ export function GenerateOptionsDialog({
           </div>
 
           <div className="space-y-1.5">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              {t("slidesCount")}
-            </span>
+            <FieldLabel>{t("slidesCount")}</FieldLabel>
             <div className="flex flex-wrap gap-1.5">
               {SLIDE_OPTIONS.map((n) => (
                 <button
@@ -240,7 +225,8 @@ export function GenerateOptionsDialog({
                   disabled={locked}
                   onClick={() => onSlidesCountChange(n)}
                   className={cn(
-                    "flex size-9 items-center justify-center rounded-md text-[13px] font-medium tabular-nums transition-colors",
+                    controlSize,
+                    "flex items-center justify-center rounded-md border-none text-[13px] font-normal tabular-nums shadow-none transition-colors",
                     slidesCount === n
                       ? "bg-foreground text-background"
                       : "bg-muted/40 text-foreground hover:bg-muted/60",
@@ -252,28 +238,12 @@ export function GenerateOptionsDialog({
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              {t("cover")}
-            </span>
-            <ImageUploader
-              value={coverUrl}
-              onChange={onCoverUrlChange}
-              disabled={locked}
-              busy={attaching}
-              title={t("addCover")}
-              hint={t("coverHint")}
-              previewAspect={previewAspect}
-              className="max-h-56"
-            />
-          </div>
-
           <div className="flex gap-2 pt-1">
             <Button
               type="button"
               variant="ghost"
               disabled={locked}
-              className="flex-1 rounded-md border-none bg-muted/40 text-[13px] shadow-none hover:bg-muted/60"
+              className="flex-1 rounded-md border-none bg-muted/40 text-[13px] font-normal shadow-none hover:bg-muted/60"
               onClick={() => onOpenChange(false)}
             >
               {tc("cancel")}
@@ -281,7 +251,7 @@ export function GenerateOptionsDialog({
             <Button
               type="button"
               disabled={!canConfirm}
-              className="flex-1 rounded-md text-[13px] shadow-none"
+              className="flex-1 rounded-md border-none bg-primary text-[13px] font-normal text-primary-foreground shadow-none hover:bg-primary/90"
               onClick={onConfirm}
             >
               {locked ? (

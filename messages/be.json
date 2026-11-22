@@ -681,7 +681,7 @@
         "sell": "Продажы",
         "teach": "Навучанне",
         "engage": "Уцягванне",
-        "editorial": "Editorial"
+        "editorial": "Эстэтыка"
       },
       "comingSoon": "Хутка",
       "connectors": "Канэктары",
@@ -706,7 +706,7 @@
       "searchModels": "Пошук мадэляў",
       "model": "Мадэль",
       "generateDialogTitle": "Згенераваць карусель",
-      "generateDialogSubtitle": "Пацвердзіце тэму, мову, фармат, нік, колькасць слайдаў і вокладку.",
+      "generateDialogSubtitle": "Пацвердзіце тэму, мову, фармат, нік і колькасць слайдаў.",
       "generateConfirm": "Згенераваць",
       "generating": "Генерацыя…",
       "topic": "Тэма",
@@ -767,20 +767,8 @@
           "hint": "Пакеты, для каго, як выбраць"
         },
         "aesthetic": {
-          "label": "Aesthetic",
-          "hint": "Lifestyle-вокладка, спакойныя парады"
-        },
-        "manifesto": {
-          "label": "Маніфест",
-          "hint": "Кароткі слоган і пазіцыя"
-        },
-        "niches": {
-          "label": "Нішы",
-          "hint": "Ідэі для экспертаў па нішах"
-        },
-        "lookbook": {
-          "label": "Lookbook",
-          "hint": "Ідэі кадраў для захавання"
+          "label": "Эстэтыка",
+          "hint": "Lifestyle, lookbook і маніфест — стыль выбіраецца выпадкова"
         }
       }
     }

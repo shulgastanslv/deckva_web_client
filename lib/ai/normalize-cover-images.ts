@@ -24,7 +24,9 @@ function isImageNode(node: Record<string, unknown>): node is ImageNode {
 function shouldCoverFit(node: ImageNode): boolean {
   if (typeof node.src !== "string" || !node.src.trim()) return false;
   const role = String(node.swibpRole ?? "");
-  if (role === "frame" || role === "handle" || role === "swipe") return false;
+  if (role === "frame" || role === "handle" || role === "swipe" || role === "canvas") {
+    return false;
+  }
   return true;
 }
 

@@ -614,6 +614,40 @@ export function StudioPrompt({
                       const groupActive = group.skills.some(
                         (s) => s.id === skillId,
                       );
+
+                      if (group.skills.length === 1) {
+                        const skill = group.skills[0]!;
+                        const active = skillId === skill.id;
+                        return (
+                          <DropdownMenuItem
+                            key={group.id}
+                            className={cn(
+                              "cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] font-normal focus:bg-muted/50",
+                              active && "bg-muted/50",
+                            )}
+                            onSelect={() => {
+                              const next =
+                                skillId === skill.id ? null : skill.id;
+                              pickSkill(next);
+                              trackEvent("prompt_skill_selected", {
+                                skillId: next,
+                              });
+                            }}
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-foreground">
+                                {t(`prompt.skillItems.${skill.id}.label`)}
+                              </span>
+                            </span>
+                            {active ? (
+                              <Check
+                                className="size-4 shrink-0 text-foreground"
+                                weight="bold"
+                              />
+                            ) : null}
+                          </DropdownMenuItem>
+                        );
+                      }
                       return (
                         <DropdownMenuSub key={group.id}>
                           <DropdownMenuSubTrigger
@@ -1045,7 +1079,6 @@ export function StudioPrompt({
         open={optionsOpen}
         onOpenChange={setOptionsOpen}
         busy={busy}
-        attaching={attaching}
         topic={value}
         onTopicChange={setValue}
         language={language}
@@ -1058,8 +1091,6 @@ export function StudioPrompt({
         onHandleChange={setHandle}
         showHandle={showHandle}
         onShowHandleChange={setShowHandle}
-        coverUrl={coverUrl}
-        onCoverUrlChange={setCoverUrl}
         onConfirm={confirmGenerate}
       />
     </div>

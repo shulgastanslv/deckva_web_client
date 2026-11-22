@@ -681,7 +681,7 @@
         "sell": "Продажи",
         "teach": "Обучение",
         "engage": "Вовлечение",
-        "editorial": "Editorial"
+        "editorial": "Эстетика"
       },
       "comingSoon": "Скоро",
       "connectors": "Коннекторы",
@@ -706,7 +706,7 @@
       "searchModels": "Поиск моделей",
       "model": "Модель",
       "generateDialogTitle": "Сгенерировать карусель",
-      "generateDialogSubtitle": "Подтвердите тему, язык, формат, ник, число слайдов и обложку.",
+      "generateDialogSubtitle": "Подтвердите тему, язык, формат, ник и число слайдов.",
       "generateConfirm": "Сгенерировать",
       "generating": "Генерация…",
       "topic": "Тема",
@@ -767,20 +767,8 @@
           "hint": "Пакеты, для кого, как выбрать"
         },
         "aesthetic": {
-          "label": "Aesthetic",
-          "hint": "Lifestyle-обложка, спокойные советы"
-        },
-        "manifesto": {
-          "label": "Манифест",
-          "hint": "Короткий слоган и позиция"
-        },
-        "niches": {
-          "label": "Ниши",
-          "hint": "Идеи для экспертов по нишам"
-        },
-        "lookbook": {
-          "label": "Lookbook",
-          "hint": "Идеи кадров для сохранения"
+          "label": "Эстетика",
+          "hint": "Lifestyle, lookbook и манифест — стиль выбирается случайно"
         }
       }
     }

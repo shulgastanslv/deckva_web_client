@@ -219,22 +219,29 @@ export function PreviewModal({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        e.stopPropagation();
         setActiveId((id) => {
           const i = slideIds.indexOf(id);
           return slideIds[Math.min(slideIds.length - 1, i + 1)] ?? id;
         });
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        e.stopPropagation();
         setActiveId((id) => {
           const i = slideIds.indexOf(id);
           return slideIds[Math.max(0, i - 1)] ?? id;
         });
       } else if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
         onClose();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    // Capture so canvas shortcuts don't step the editor slide underneath.
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [open, slideIds, onClose]);
 
   if (!open) return null;
@@ -254,7 +261,13 @@ export function PreviewModal({
   const thumbH = Math.round(thumbW / aspectRatio);
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-in fade-in-0 flex-col bg-background/95 backdrop-blur-md duration-200 select-none">
+    <div
+      role="dialog"
+      aria-modal="true"
+      data-state="open"
+      data-slot="preview-modal"
+      className="fixed inset-0 z-50 flex animate-in fade-in-0 flex-col bg-background/95 backdrop-blur-md duration-200 select-none"
+    >
       <div className="grid shrink-0 grid-cols-3 items-center px-6 py-4">
         <div className="flex items-center gap-3">
           {rendering && (

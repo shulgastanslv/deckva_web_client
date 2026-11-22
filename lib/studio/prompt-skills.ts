@@ -9,10 +9,7 @@ export type PromptSkillId =
   | "myths"
   | "framework"
   | "pricing"
-  | "aesthetic"
-  | "manifesto"
-  | "niches"
-  | "lookbook";
+  | "aesthetic";
 
 export type PromptSkillGroupId = "sell" | "teach" | "engage" | "editorial";
 
@@ -27,6 +24,13 @@ export type PromptSkill = {
 export type PromptSkillGroup = {
   id: PromptSkillGroupId;
   skills: PromptSkill[];
+};
+
+/** Old editorial skills collapsed into aesthetic (server randomizes variants). */
+const LEGACY_SKILL_ALIASES: Record<string, PromptSkillId> = {
+  manifesto: "aesthetic",
+  niches: "aesthetic",
+  lookbook: "aesthetic",
 };
 
 const SKILL_BY_ID: Record<PromptSkillId, PromptSkill> = {
@@ -126,34 +130,9 @@ const SKILL_BY_ID: Record<PromptSkillId, PromptSkill> = {
     slidesCount: 6,
     apply: (topic) =>
       [
-        "Build an aesthetic lifestyle carousel (full-bleed cover). Soft lowercase hook; one calm tip or idea per mid slide; soft CTA.",
-        `Brief: ${topic}`,
-      ].join("\n"),
-  },
-  manifesto: {
-    id: "manifesto",
-    slidesCount: 5,
-    apply: (topic) =>
-      [
-        "Build a manifesto carousel. Cover is a short stacked slogan (3–6 words); mid slides unpack the stance; close with CTA.",
-        `Brief: ${topic}`,
-      ].join("\n"),
-  },
-  niches: {
-    id: "niches",
-    slidesCount: 7,
-    apply: (topic) =>
-      [
-        "Build a niches / ideas-for-experts carousel. Cover lists niche names; each mid slide is one niche tip; end with CTA.",
-        `Brief: ${topic}`,
-      ].join("\n"),
-  },
-  lookbook: {
-    id: "lookbook",
-    slidesCount: 6,
-    apply: (topic) =>
-      [
-        "Build a lookbook / photo-ideas carousel. Cover is an idea title with a short save-cue; mid slides are frame ideas; end with CTA.",
+        "Build an aesthetic / editorial lifestyle carousel.",
+        "Cover style is chosen on the server (portrait, editorial brackets, diptych, collage, manifesto, niches).",
+        "Soft lowercase hook; one calm tip or frame idea per mid slide; soft CTA — not salesy.",
         `Brief: ${topic}`,
       ].join("\n"),
   },
@@ -163,7 +142,7 @@ const SKILL_GROUP_IDS: Record<PromptSkillGroupId, PromptSkillId[]> = {
   sell: ["launch", "offer", "pricing"],
   teach: ["howto", "tips", "checklist", "framework"],
   engage: ["story", "comparison", "myths"],
-  editorial: ["aesthetic", "manifesto", "niches", "lookbook"],
+  editorial: ["aesthetic"],
 };
 
 const SKILL_GROUPS: PromptSkillGroup[] = (
@@ -183,9 +162,19 @@ export function listPromptSkillGroups(): PromptSkillGroup[] {
   return SKILL_GROUPS;
 }
 
-export function getPromptSkill(id: string | null | undefined): PromptSkill | null {
+export function resolvePromptSkillId(
+  id: string | null | undefined,
+): PromptSkillId | null {
   if (!id) return null;
-  return SKILLS.find((skill) => skill.id === id) ?? null;
+  const key = id.trim().toLowerCase();
+  const mapped = LEGACY_SKILL_ALIASES[key] ?? key;
+  return mapped in SKILL_BY_ID ? (mapped as PromptSkillId) : null;
+}
+
+export function getPromptSkill(id: string | null | undefined): PromptSkill | null {
+  const resolved = resolvePromptSkillId(id);
+  if (!resolved) return null;
+  return SKILL_BY_ID[resolved];
 }
 
 export function applyPromptSkill(
