@@ -26,6 +26,9 @@ export function useAutoSave(persist: Persist) {
     if (window.localStorage.getItem("swibp.showSlideNav") === "0") {
       store.setShowSlideNav(false);
     }
+    if (window.localStorage.getItem("swibp.showHistoryHint") === "0") {
+      store.setShowHistoryHint(false);
+    }
 
     let timer = 0;
     let cancelled = false;

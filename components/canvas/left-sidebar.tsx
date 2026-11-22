@@ -3,6 +3,7 @@
 import React, { ReactNode, useState } from "react";
 import {
   Image as ImageIcon,
+  Info,
   Stack as LayersIcon,
   SidebarSimple as PanelLeftClose,
   Sidebar as PanelLeftOpen,
@@ -11,6 +12,7 @@ import {
   Shapes as ShapesIcon,
   Package,
   ArrowCounterClockwise as Undo2,
+  X,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 import Logo from "@/components/logo/logo";
@@ -37,6 +39,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useCanvasManager } from "@/context/canvas-manager";
+import { useCanvasStore } from "@/store/useCanvasStore";
 import { cn } from "@/lib/utils";
 
 export type NavId =
@@ -93,7 +96,10 @@ export function LeftSidebar({
 }: LeftSidebarProps) {
   const [legal, setLegal] = useState<LegalKind | null>(null);
   const manager = useCanvasManager();
+  const showHistoryHint = useCanvasStore((s) => s.showHistoryHint);
+  const setShowHistoryHint = useCanvasStore((s) => s.setShowHistoryHint);
   const t = useTranslations("editor.panels");
+  const th = useTranslations("editor.history");
   const tc = useTranslations("common");
 
   const panelTitles: Record<NavId, string> = {
@@ -227,6 +233,28 @@ export function LeftSidebar({
             <SaveStatusMenu />
           </div>
         </div>
+
+        {showHistoryHint ? (
+          <div className="mx-3.5 mb-2 flex items-start gap-2 rounded-md bg-muted/40 px-3 py-2.5">
+            <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <p className="min-w-0 flex-1 text-[12px] leading-snug text-muted-foreground">
+              {th("saveHint")}
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={tc("close")}
+              className="size-7 shrink-0 rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              onClick={() => {
+                setShowHistoryHint(false);
+                window.localStorage.setItem("swibp.showHistoryHint", "0");
+              }}
+            >
+              <X className="size-3.5" />
+            </Button>
+          </div>
+        ) : null}
 
         <ScrollArea className="h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:max-w-full [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-viewport]>div]:!max-w-full">
           {activeNav === "elements" && <SidebarElements />}

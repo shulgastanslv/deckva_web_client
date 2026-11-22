@@ -488,7 +488,7 @@ export function SelectionToolbar() {
 
   const bumpFontSize = (delta: number) => {
     if (!textState) return;
-    const next = Math.min(240, Math.max(8, textState.fontSize + delta));
+    const next = Math.min(500, Math.max(8, textState.fontSize + delta));
     update({ fontSize: next } as unknown as Partial<FabricObject>);
   };
 
@@ -650,7 +650,7 @@ export function SelectionToolbar() {
                   onChange={(e) => {
                     const parsed = Number(e.target.value.replace(/\D/g, ""));
                     if (!Number.isFinite(parsed)) return;
-                    const next = Math.min(240, Math.max(8, parsed));
+                    const next = Math.min(500, Math.max(8, parsed));
                     update({ fontSize: next } as unknown as Partial<FabricObject>);
                   }}
                   className="h-7 w-8 border-0 bg-transparent text-center text-[13px] tabular-nums text-foreground outline-none"

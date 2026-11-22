@@ -1312,7 +1312,7 @@ export function RightSidebar({
                         value={formValues.fontSize ?? 32}
                         onChange={(v) => updateProp("fontSize", v)}
                         min={8}
-                        max={240}
+                        max={500}
                         unit="px"
                       />
                       <NumberField
@@ -1788,7 +1788,7 @@ export function RightSidebar({
                       noteStyleEdit();
                     }}
                     min={10}
-                    max={140}
+                    max={500}
                     unit="px"
                   />
                   <NumberField

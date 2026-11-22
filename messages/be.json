@@ -1669,7 +1669,9 @@
       "slideNav": "Навігацыя па слайдах",
       "slideNavHint": "Кнопкі назад / наперад на палатне",
       "autosave": "Аўтазахаванне",
-      "autosaveHint": "Ціха захоўвае ў фоне"
+      "autosaveHint": "Ціха захоўвае ў фоне",
+      "historyHint": "Падказка пра гісторыю",
+      "historyHintSetting": "Паказваць параду захаваць версію ў гісторыю змен"
     },
     "history": {
       "title": "Гісторыя змен",
@@ -1677,7 +1679,8 @@
       "restore": "Адкаціць",
       "delete": "Выдаліць",
       "restoring": "Аднаўленне…",
-      "savedAt": "Захавана {time}"
+      "savedAt": "Захавана {time}",
+      "saveHint": "Захавайце праз меню статусу, каб запісаць версію ў гісторыю змен. Аўтазахаванне трымае праект, але не стварае здымкі гісторыі."
     },
     "tools": {
       "move": "Перамяшчэнне",
@@ -2041,11 +2044,18 @@
       "accountBilling": "Акаўнт",
       "nav": {
         "profile": "Профіль",
+        "statistics": "Статыстыка",
+        "notifications": "Апавяшчэнні",
         "security": "Бяспека",
         "preferences": "Перавагі",
-        "account": "Акаўнт",
-        "usage": "Ліміт"
+        "account": "Акаўнт"
       },
+      "notifyProduct": "Абнаўленні прадукту",
+      "notifyProductHint": "Новыя магчымасці, парады і рэліз-ноты",
+      "notifyCommunity": "Супольнасць",
+      "notifyCommunityHint": "Адказы, згадкі і выбраныя працы",
+      "notifyEmail": "Дайджэсты на пошту",
+      "notifyEmailHint": "Рэдкія зводкі ў ваш inbox",
       "profilePicture": "Фота профілю",
       "profilePictureHint": "Націсніце на аватар, каб загрузіць новую выяву.",
       "removeAvatar": "Выдаліць",

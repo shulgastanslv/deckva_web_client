@@ -15,6 +15,7 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 const STORAGE_KEY = "swibp.autosave";
 const CANVASES_KEY = "swibp.showAllCanvases";
 const NAV_KEY = "swibp.showSlideNav";
+const HISTORY_HINT_KEY = "swibp.showHistoryHint";
 
 interface SidebarSettingsProps {
   showDotGrid: boolean;
@@ -86,6 +87,8 @@ export function SidebarSettings({ showDotGrid, setShowDotGrid }: SidebarSettings
   const setShowAllCanvases = useCanvasStore((s) => s.setShowAllCanvases);
   const showSlideNav = useCanvasStore((s) => s.showSlideNav);
   const setShowSlideNav = useCanvasStore((s) => s.setShowSlideNav);
+  const showHistoryHint = useCanvasStore((s) => s.showHistoryHint);
+  const setShowHistoryHint = useCanvasStore((s) => s.setShowHistoryHint);
 
   const autoFlowEnabled = useCanvasStore((s) => s.autoFlowEnabled);
   const autoFlowEdgeTolerance = useCanvasStore((s) => s.autoFlowEdgeTolerance);
@@ -210,6 +213,16 @@ export function SidebarSettings({ showDotGrid, setShowDotGrid }: SidebarSettings
         onCheckedChange={(enabled) => {
           setAutoSave(enabled);
           window.localStorage.setItem(STORAGE_KEY, enabled ? "1" : "0");
+        }}
+      />
+
+      <SettingRow
+        label={t("historyHint")}
+        hint={t("historyHintSetting")}
+        checked={showHistoryHint}
+        onCheckedChange={(enabled) => {
+          setShowHistoryHint(enabled);
+          window.localStorage.setItem(HISTORY_HINT_KEY, enabled ? "1" : "0");
         }}
       />
     </div>

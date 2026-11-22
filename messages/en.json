@@ -1669,7 +1669,9 @@
       "slideNav": "Slide navigation",
       "slideNavHint": "Show previous / next buttons on the canvas",
       "autosave": "Autosave",
-      "autosaveHint": "Saves quietly in the background"
+      "autosaveHint": "Saves quietly in the background",
+      "historyHint": "History save hint",
+      "historyHintSetting": "Show a tip to manually save versions into change history"
     },
     "history": {
       "title": "Change history",
@@ -1677,7 +1679,8 @@
       "restore": "Restore",
       "delete": "Delete",
       "restoring": "Restoring…",
-      "savedAt": "Saved {time}"
+      "savedAt": "Saved {time}",
+      "saveHint": "Use Save in the status menu to store a version in change history. Autosave keeps the project but does not create history snapshots."
     },
     "tools": {
       "move": "Move",
@@ -2041,11 +2044,18 @@
       "accountBilling": "Account",
       "nav": {
         "profile": "Profile",
+        "statistics": "Statistics",
+        "notifications": "Notifications",
         "security": "Security",
         "preferences": "Preferences",
-        "account": "Account",
-        "usage": "Usage"
+        "account": "Account"
       },
+      "notifyProduct": "Product updates",
+      "notifyProductHint": "New features, tips, and release notes",
+      "notifyCommunity": "Community",
+      "notifyCommunityHint": "Replies, mentions, and featured work",
+      "notifyEmail": "Email digests",
+      "notifyEmailHint": "Occasional summaries in your inbox",
       "profilePicture": "Profile Picture",
       "profilePictureHint": "Click the avatar to upload a new image.",
       "removeAvatar": "Remove",

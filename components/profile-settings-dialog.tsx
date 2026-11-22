@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+  Bell,
   Camera as CameraIcon,
+  ChartBar as ChartBarIcon,
   Check,
   Key as KeyRound,
   Translate as Languages,
@@ -13,7 +15,6 @@ import {
   Sun,
   Trash as Trash2,
   User as UserRound,
-  Wallet,
 } from "@phosphor-icons/react";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
@@ -52,7 +53,13 @@ import type {
 import { DAILY_GENERATION_LIMIT } from "@/lib/studio/plans";
 import { cn } from "@/lib/utils";
 
-type Section = "profile" | "usage" | "security" | "preferences" | "account";
+type Section =
+  | "profile"
+  | "statistics"
+  | "notifications"
+  | "security"
+  | "preferences"
+  | "account";
 
 type UsageState = {
   remaining: number;
@@ -63,6 +70,12 @@ type UsageState = {
   stats: GenerationUsageStats;
 };
 
+type NotifyPrefs = {
+  product: boolean;
+  community: boolean;
+  email: boolean;
+};
+
 const EMPTY_STATS: GenerationUsageStats = {
   total: 0,
   mostActiveMonth: null,
@@ -71,9 +84,34 @@ const EMPTY_STATS: GenerationUsageStats = {
   currentStreak: 0,
 };
 
+const NOTIFY_KEY = "swibp.notifyPrefs";
+
+const DEFAULT_NOTIFY: NotifyPrefs = {
+  product: true,
+  community: true,
+  email: false,
+};
+
+function readNotifyPrefs(): NotifyPrefs {
+  if (typeof window === "undefined") return DEFAULT_NOTIFY;
+  try {
+    const raw = window.localStorage.getItem(NOTIFY_KEY);
+    if (!raw) return DEFAULT_NOTIFY;
+    const parsed = JSON.parse(raw) as Partial<NotifyPrefs>;
+    return {
+      product: parsed.product !== false,
+      community: parsed.community !== false,
+      email: parsed.email === true,
+    };
+  } catch {
+    return DEFAULT_NOTIFY;
+  }
+}
+
 const NAV_IDS: { id: Section; icon: typeof UserRound }[] = [
   { id: "profile", icon: UserRound },
-  { id: "usage", icon: Wallet },
+  { id: "statistics", icon: ChartBarIcon },
+  { id: "notifications", icon: Bell },
   { id: "security", icon: KeyRound },
   { id: "preferences", icon: Monitor },
   { id: "account", icon: LogOut },
@@ -154,6 +192,7 @@ export function ProfileSettingsDialog({
     days: [],
     stats: EMPTY_STATS,
   });
+  const [notify, setNotify] = useState<NotifyPrefs>(DEFAULT_NOTIFY);
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -198,6 +237,7 @@ export function ProfileSettingsDialog({
     setConfirmPassword("");
     setDeleteConfirm("");
     setDeletePassword("");
+    setNotify(readNotifyPrefs());
 
     void Promise.all([getProfile(), getGenerationStatus()])
       .then(([profileRes, status]) => {
@@ -532,7 +572,7 @@ export function ProfileSettingsDialog({
                     </div>
                   ) : null}
 
-                  {section === "usage" ? (
+                  {section === "statistics" ? (
                     <div className="space-y-3">
                       <GenerationHeatmap
                         days={usage.days}
@@ -549,6 +589,56 @@ export function ProfileSettingsDialog({
                               limit: usage.limit,
                             })}
                       </p>
+                    </div>
+                  ) : null}
+
+                  {section === "notifications" ? (
+                    <div className="space-y-3">
+                      {(
+                        [
+                          {
+                            key: "product" as const,
+                            label: t("notifyProduct"),
+                            hint: t("notifyProductHint"),
+                          },
+                          {
+                            key: "community" as const,
+                            label: t("notifyCommunity"),
+                            hint: t("notifyCommunityHint"),
+                          },
+                          {
+                            key: "email" as const,
+                            label: t("notifyEmail"),
+                            hint: t("notifyEmailHint"),
+                          },
+                        ] as const
+                      ).map((row) => (
+                        <div
+                          key={row.key}
+                          className="flex items-center justify-between gap-4 rounded-md bg-muted/35 px-4 py-3.5"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-[13px] font-medium">{row.label}</p>
+                            <p className="mt-0.5 text-[12px] text-muted-foreground">
+                              {row.hint}
+                            </p>
+                          </div>
+                          <Switch
+                            checked={notify[row.key]}
+                            onCheckedChange={(checked) => {
+                              setNotify((prev) => {
+                                const next = { ...prev, [row.key]: checked };
+                                window.localStorage.setItem(
+                                  NOTIFY_KEY,
+                                  JSON.stringify(next),
+                                );
+                                return next;
+                              });
+                            }}
+                            aria-label={row.label}
+                          />
+                        </div>
+                      ))}
                     </div>
                   ) : null}
 

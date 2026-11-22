@@ -290,6 +290,13 @@ export function StudioBrowse() {
           <div>
             <h1 className="text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
               {pageTitle}
+              <span className="ml-2 text-[0.7em] font-normal text-muted-foreground">
+                (
+                {activeTab === "community"
+                  ? community.length
+                  : projects.length}
+                )
+              </span>
             </h1>
             <p className="mt-2 text-[14px] text-muted-foreground">
               {pageDescription}

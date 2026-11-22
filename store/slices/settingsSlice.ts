@@ -13,6 +13,8 @@ export interface SettingsSlice {
   showAllCanvases: boolean;
   /** Floating prev/next controls on the canvas. */
   showSlideNav: boolean;
+  /** Soft tip: manual Save writes a change-history snapshot. */
+  showHistoryHint: boolean;
   vignette: number;
   noise: number;
   warmth: number;
@@ -32,6 +34,7 @@ export interface SettingsSlice {
   setAutoSave: (enabled: boolean) => void;
   setShowAllCanvases: (enabled: boolean) => void;
   setShowSlideNav: (enabled: boolean) => void;
+  setShowHistoryHint: (enabled: boolean) => void;
   setVignette: (vignette: number) => void;
   setNoise: (noise: number) => void;
   setWarmth: (warmth: number) => void;
@@ -82,6 +85,7 @@ export const createSettingsSlice: StateCreator<
   autoSave: true,
   showAllCanvases: false,
   showSlideNav: true,
+  showHistoryHint: true,
   ...FILTER_DEFAULTS,
 
   toggleGrid: () => set((s) => ({ isGridVisible: !s.isGridVisible })),
@@ -99,6 +103,7 @@ export const createSettingsSlice: StateCreator<
   setAutoSave: (autoSave) => set({ autoSave }),
   setShowAllCanvases: (showAllCanvases) => set({ showAllCanvases }),
   setShowSlideNav: (showSlideNav) => set({ showSlideNav }),
+  setShowHistoryHint: (showHistoryHint) => set({ showHistoryHint }),
   setVignette: (vignette) => set({ vignette }),
   setNoise: (noise) => set({ noise }),
   setWarmth: (warmth) => set({ warmth }),
