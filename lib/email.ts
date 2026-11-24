@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -12,17 +12,33 @@ export function isValidEmail(value: string): boolean {
 }
 
 export function appBaseUrl(): string {
-  return (process.env.NEXTAUTH_URL ).replace(/\/$/, "");
+  return (process.env.NEXTAUTH_URL || "http://localhost:3000").replace(/\/$/, "");
 }
 
 export type SendResult =
   | { ok: true }
   | { ok: false; reason: "unconfigured" | "failed" };
 
-function resendClient(): Resend | null {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (!apiKey) return null;
-  return new Resend(apiKey);
+function getTransporter() {
+  const host = process.env.SMTP_HOST?.trim();
+  const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587;
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS?.trim();
+
+  // Если переменные не настроены, возвращаем null
+  if (!host || !user || !pass) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // true для 465 порта (SSL), false для 587 (STARTTLS)
+    auth: {
+      user,
+      pass,
+    },
+  });
 }
 
 export async function sendAuthEmail(input: {
@@ -31,27 +47,22 @@ export async function sendAuthEmail(input: {
   text: string;
   html: string;
 }): Promise<SendResult> {
-  const from =
-    process.env.RESEND_FROM?.trim() || "Deckva <onboarding@resend.dev>";
-  const resend = resendClient();
+  const from = process.env.SMTP_FROM?.trim() || "Deckva <noreply@yourdomain.com>";
+  const transporter = getTransporter();
 
-  if (!resend) {
+  if (!transporter) {
+    console.error("SMTP не настроен. Проверьте переменные окружения SMTP_HOST, SMTP_USER, SMTP_PASS.");
     return { ok: false, reason: "unconfigured" };
   }
 
   try {
-    const { error } = await resend.emails.send({
+    await transporter.sendMail({
       from,
       to: input.to,
       subject: input.subject,
       text: input.text,
       html: input.html,
     });
-
-    if (error) {
-      console.error("sendAuthEmail:", error);
-      return { ok: false, reason: "failed" };
-    }
 
     return { ok: true };
   } catch (err) {
@@ -77,11 +88,6 @@ export function authEmailHtml(input: {
       <td align="center">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:480px;background:#ffffff;border-radius:16px;padding:32px 28px;">
           <tr>
-            <td style="font-size:20px;font-weight:600;color:#18181b;padding-bottom:8px;">
-              Deckva
-            </td>
-          </tr>
-          <tr>
             <td style="font-size:18px;font-weight:600;color:#18181b;padding-bottom:12px;">
               ${input.title}
             </td>
@@ -94,7 +100,7 @@ export function authEmailHtml(input: {
           <tr>
             <td style="padding-bottom:24px;">
               <a href="${safeUrl}"
-                 style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 20px;border-radius:8px;">
+                 style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 20px;border-radius:50px;">
                 ${input.actionLabel}
               </a>
             </td>
