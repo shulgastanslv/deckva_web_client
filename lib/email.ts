@@ -37,6 +37,9 @@ function getTransporter() {
     tls: {
       rejectUnauthorized: false,
     },
+    connectionTimeout: 10000, // 10 секунд на установку соединения
+    greetingTimeout: 5000,    // 5 секунд на приветствие SMTP-сервера
+    socketTimeout: 15000,     // 15 секунд на передачу данных
     auth: {
       user,
       pass,
