@@ -30,8 +30,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/presentation.png",
-        width: 3840,
-        height: 2160,
+        width: 1200,
+        height: 630,
         alt: "Deckva — AI Carousel Editor",
         type: "image/png",
       },

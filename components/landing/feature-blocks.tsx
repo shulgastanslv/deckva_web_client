@@ -119,7 +119,7 @@ function FeatureImage({
         alt={alt}
         width={width}
         height={height}
-        className="absolute inset-0 h-full w-full rounded-3xl object-cover object-center"
+        className="absolute inset-0 h-full w-full rounded-3xl object-left object-cover"
         loading="lazy"
         decoding="async"
         draggable={false}

@@ -29,7 +29,7 @@ import { FaqSection } from "./faq-section";
 
 const LEGAL_STATIC = {
   fullName: "Шульга Станислав",
-  email: "hello@deckva.by",
+  email: "shulgastanislav@gmail.com",
 } as const;
 
 const FAQ_IDS = [
@@ -336,8 +336,6 @@ export function LandingPage() {
                     {t("menu.details")}
                   </p>
                   <ul className="mt-4 space-y-3 text-sm text-white/70">
-                    <li>{legal.status}</li>
-                    <li>{legal.country}</li>
                     <li className="text-white">{legal.fullName}</li>
                     <li>
                       <a
