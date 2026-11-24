@@ -34,6 +34,9 @@ function getTransporter() {
     host,
     port,
     secure: port === 465, // true для 465 порта (SSL), false для 587 (STARTTLS)
+    tls: {
+      rejectUnauthorized: false,
+    },
     auth: {
       user,
       pass,
@@ -100,7 +103,7 @@ export function authEmailHtml(input: {
           <tr>
             <td style="padding-bottom:24px;">
               <a href="${safeUrl}"
-                 style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 20px;border-radius:50px;">
+                 style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 20px;border-radius:px;">
                 ${input.actionLabel}
               </a>
             </td>
