@@ -1,0 +1,39 @@
+[Unit]
+Description=Deckva Web Client (Next.js)
+Documentation=https://nextjs.org/docs
+After=network.target
+
+[Service]
+Type=simple
+
+# 👤 Пользователь, от которого будет запущен сервис
+User=root
+Group=root
+
+# 📂 Путь к проекту
+WorkingDirectory=/deckva_web_client
+
+# 🌍 Переменные окружения
+EnvironmentFile=/deckva_web_client/.env
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="HOSTNAME=0.0.0.0"
+
+# 🚀 Запуск через npm run start (вызывает next start из package.json)
+ExecStart=/usr/bin/npm run start
+
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=60
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=deckva-web-client
+
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+
+
