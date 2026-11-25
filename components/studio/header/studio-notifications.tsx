@@ -5,6 +5,7 @@ import {
   Bell,
   Check,
   CaretDown as ChevronDown,
+  Eye,
   SpinnerGap as Loader2,
   Envelope as Mail,
   EnvelopeOpen as MailOpen,
@@ -25,6 +26,7 @@ import {
   toggleNotificationRead,
   type NotificationItem,
 } from "@/actions/admin";
+import { ProjectPreviewDialog } from "@/components/studio/dialogs/project-preview-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -80,6 +82,17 @@ function hrefCtaKey(href: string): "openInvite" | "openProject" | "openLink" {
   if (href.includes("/invite/")) return "openInvite";
   if (href.includes("/studio/editor")) return "openProject";
   return "openLink";
+}
+
+function projectIdFromHref(href: string | null | undefined): string | null {
+  if (!href || !href.includes("/studio/editor")) return null;
+  try {
+    const url = new URL(href, "https://deckva.local");
+    return url.searchParams.get("project");
+  } catch {
+    const match = href.match(/[?&]project=([^&]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
 }
 
 function MarkdownBody({ source }: { source: string }) {
@@ -153,7 +166,6 @@ function ReadModal({
   item: NotificationItem | null;
   onClose: () => void;
 }) {
-  const t = useTranslations("studio.notifications");
   return (
     <Dialog open={!!item} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
@@ -170,19 +182,6 @@ function ReadModal({
         </DialogHeader>
         <ScrollArea className="max-h-[55vh] flex-1 px-6 pb-6">
           <MarkdownBody source={item?.body || ""} />
-          {item?.href ? (
-            <div className="mt-6">
-              <Button
-                type="button"
-                className="rounded-md px-5 text-[13px] font-medium"
-                onClick={() => {
-                  window.location.href = item.href!;
-                }}
-              >
-                {t(hrefCtaKey(item.href))}
-              </Button>
-            </div>
-          ) : null}
         </ScrollArea>
       </DialogContent>
     </Dialog>
@@ -207,6 +206,7 @@ function NotificationsPanel({
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [readingItem, setReadingItem] = useState<NotificationItem | null>(null);
+  const [previewProjectId, setPreviewProjectId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
@@ -309,6 +309,24 @@ function NotificationsPanel({
     }
   };
 
+  const openItem = (item: NotificationItem) => {
+    const projectId = projectIdFromHref(item.href);
+    if (projectId) {
+      setPreviewProjectId(projectId);
+      return;
+    }
+    setReadingItem(item);
+  };
+
+  const openHref = (item: NotificationItem) => {
+    const projectId = projectIdFromHref(item.href);
+    if (projectId) {
+      setPreviewProjectId(projectId);
+      return;
+    }
+    if (item.href) window.location.href = item.href;
+  };
+
   return (
     <>
       <div className="flex h-full min-h-0 flex-col">
@@ -390,7 +408,7 @@ function NotificationsPanel({
                   <button
                     type="button"
                     className="w-full text-left"
-                    onClick={() => setReadingItem(item)}
+                    onClick={() => openItem(item)}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <p className="line-clamp-1 text-[13px] font-bold text-foreground">
@@ -405,21 +423,18 @@ function NotificationsPanel({
                     </p>
                   </button>
 
-                  {item.href ? (
-                    <div className="mt-3">
+                  <div className="mt-3 flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100 max-md:opacity-100">
+                    {item.href ? (
                       <Button
-                        type="button"
-                        className="h-8 rounded-md px-3 text-[12px] font-medium"
-                        onClick={() => {
-                          window.location.href = item.href!;
-                        }}
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openHref(item)}
+                        title={t(hrefCtaKey(item.href))}
+                        className="size-8 rounded-md"
                       >
-                        {t(hrefCtaKey(item.href))}
+                        <Eye className="size-3.5" />
                       </Button>
-                    </div>
-                  ) : null}
-
-                  <div className="mt-3 flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    ) : null}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -477,6 +492,13 @@ function NotificationsPanel({
       </div>
 
       <ReadModal item={readingItem} onClose={() => setReadingItem(null)} />
+      <ProjectPreviewDialog
+        projectId={previewProjectId}
+        open={Boolean(previewProjectId)}
+        onOpenChange={(next) => {
+          if (!next) setPreviewProjectId(null);
+        }}
+      />
     </>
   );
 }

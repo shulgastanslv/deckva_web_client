@@ -14,22 +14,7 @@ function StudioHomeRedirects() {
     const project = searchParams.get("project");
     if (project) {
       router.replace(`/studio/editor?project=${encodeURIComponent(project)}`);
-      return;
     }
-
-    const verify = searchParams.get("verify");
-    const reset = searchParams.get("reset");
-    if (!verify && !reset) return;
-
-    window.dispatchEvent(
-      new CustomEvent("core:auth-link", {
-        detail: { verify, reset },
-      }),
-    );
-    const url = new URL(window.location.href);
-    url.searchParams.delete("verify");
-    url.searchParams.delete("reset");
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
   }, [router, searchParams]);
 
   return null;

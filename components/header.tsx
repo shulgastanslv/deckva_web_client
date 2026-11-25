@@ -56,8 +56,6 @@ interface HeaderProps {
 
 export function Header({ onPreview, onPhonePreview }: HeaderProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
-  const [authResetToken, setAuthResetToken] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isPublishOpen, setIsPublishOpen] = useState(false);
   const { status } = useSession();
@@ -96,19 +94,6 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
     }
     setCurrentRatio(ratio);
   };
-
-  useEffect(() => {
-    const onAuthLink = (event: Event) => {
-      const detail = (
-        event as CustomEvent<{ verify?: string | null; reset?: string | null }>
-      ).detail;
-      if (detail?.verify) setAuthVerifyToken(detail.verify);
-      if (detail?.reset) setAuthResetToken(detail.reset);
-      if (detail?.verify || detail?.reset) setIsAuthModalOpen(true);
-    };
-    window.addEventListener("core:auth-link", onAuthLink);
-    return () => window.removeEventListener("core:auth-link", onAuthLink);
-  }, []);
 
   const openPublish = () => {
     if (status !== "authenticated") {
@@ -278,15 +263,7 @@ export function Header({ onPreview, onPhonePreview }: HeaderProps) {
 
       <AuthModal
         isOpen={isAuthModalOpen}
-        verifyToken={authVerifyToken}
-        resetToken={authResetToken}
-        onOpenChange={(open) => {
-          setIsAuthModalOpen(open);
-          if (!open) {
-            setAuthVerifyToken(null);
-            setAuthResetToken(null);
-          }
-        }}
+        onOpenChange={setIsAuthModalOpen}
       />
       <ShareModal
         open={showShare}

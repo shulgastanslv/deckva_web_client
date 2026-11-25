@@ -29,7 +29,7 @@ export function EditorPhoneZoom() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-9 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+          className="size-9 rounded-full text-muted-foreground hover:bg-muted/40 hover:text-foreground"
           onClick={() => setZoom(clampZoom(zoom - 10))}
           title={t("out")}
           aria-label={t("out")}
@@ -38,7 +38,7 @@ export function EditorPhoneZoom() {
         </Button>
         <button
           type="button"
-          className="flex h-9 min-w-11 items-center justify-center rounded-md px-1.5 font-mono text-[11px] font-normal tabular-nums text-foreground hover:bg-muted/50"
+          className="flex h-9 min-w-11 items-center justify-center rounded-full px-1.5 font-mono text-[11px] font-normal tabular-nums text-foreground hover:bg-muted/40"
           onClick={() => setZoom(100)}
           title={t("reset")}
           aria-label={t("reset")}
@@ -48,7 +48,7 @@ export function EditorPhoneZoom() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-9 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+          className="size-9 rounded-full text-muted-foreground hover:bg-muted/40 hover:text-foreground"
           onClick={() => setZoom(clampZoom(zoom + 10))}
           title={t("in")}
           aria-label={t("in")}

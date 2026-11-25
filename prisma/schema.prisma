@@ -31,13 +31,11 @@ enum OrganizationInviteStatus {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  /// Null for OAuth-only accounts (e.g. Google).
-  password  String?
   name      String?
   image     String?
   role      UserRole @default(USER)
-  /// Set when the user confirms the inbox, or for accounts that existed before verification.
-  emailVerified DateTime?
+  /// Set on every successful OAuth sign-in. Null = provisioned, never signed in.
+  lastSignedInAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -58,7 +56,6 @@ model User {
   memberships      OrganizationMember[]
   sentInvites      OrganizationInvite[] @relation("OrganizationInviteSender")
   savedProjects    SavedProject[]
-  authTokens       AuthToken[]
   news             News[]
   notifications    Notification[]
   feedbacks        Feedback[]
@@ -246,21 +243,6 @@ model Folder {
   @@index([userId])
   @@index([userId, updatedAt])
   @@index([organizationId])
-}
-
-/// One-time links for email confirmation and password reset.
-model AuthToken {
-  id        String   @id @default(cuid())
-  email     String
-  tokenHash String   @unique
-  type      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([email, type])
 }
 
 enum CommunityStatus {

@@ -72,9 +72,6 @@ export function StudioHeader({
           <KeyboardShortcutsMenu />
           <InviteMembersDialog />
         </div>
-        <div className="md:hidden">
-          <InviteMembersDialog />
-        </div>
         <StudioNotifications />
 
         {!signedIn ? (

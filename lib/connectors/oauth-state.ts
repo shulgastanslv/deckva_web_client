@@ -1,6 +1,9 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 
+import { appBaseUrl } from "@/lib/app-url";
 import type { ConnectorProviderId } from "@/lib/connectors/types";
+
+export { appBaseUrl };
 
 type OAuthStatePayload = {
   userId: string;
@@ -47,14 +50,6 @@ export function verifyOAuthState(
   } catch {
     return null;
   }
-}
-
-export function appBaseUrl(): string {
-  return (
-    process.env.NEXTAUTH_URL?.replace(/\/$/, "") ||
-    process.env.AUTH_URL?.replace(/\/$/, "") ||
-    "http://localhost:3000"
-  );
 }
 
 export function connectorCallbackUrl(provider: ConnectorProviderId): string {

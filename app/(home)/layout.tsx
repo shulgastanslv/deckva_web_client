@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 
+import { SITE_URL, ogImage } from "@/lib/seo/og";
+
 const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
   variable: "--font-landing",
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
     "slide editor",
     "social carousel",
   ],
-  authors: [{ name: "Deckva", url: "https://deckva.by" }],
+  authors: [{ name: "Deckva", url: SITE_URL }],
   creator: "Deckva",
   publisher: "Deckva",
   openGraph: {
@@ -27,22 +29,15 @@ export const metadata: Metadata = {
     siteName: "Deckva",
     locale: "en_US",
     type: "website",
-    images: [
-      {
-        url: "/presentation.png",
-        width: 1200,
-        height: 630,
-        alt: "Deckva — AI Carousel Editor",
-        type: "image/png",
-      },
-    ],
+    url: SITE_URL,
+    images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: "AI Carousel Editor",
     description:
       "Generate carousels, edit slides, and export to PNG, ZIP, or PDF.",
-    images: ["/presentation.png"],
+    images: [ogImage],
   },
 };
 

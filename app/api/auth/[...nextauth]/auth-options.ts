@@ -1,31 +1,13 @@
-import { prisma } from "@/lib/prisma";
+import {
+  getAuthProviderByNextAuthId,
+  getConfiguredAuthProviders,
+  linkOAuthAccount,
+} from "@/lib/auth/oauth";
 import { emailIsAdmin } from "@/lib/auth-role";
-import { isValidEmail, normalizeEmail } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/lib/roles";
 import { promotePlatformAdmin } from "@/lib/studio/admin-unlimited";
-import bcrypt from "bcryptjs";
-import { type AuthOptions, type Profile } from "next-auth";
-import type { User as DbUser } from "@/lib/generated/prisma/client";
-import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
-
-function verifiedGoogleEmail(profile: Profile | undefined): string | null {
-  if (!profile || typeof profile.email !== "string") return null;
-  const verified =
-    (profile as { email_verified?: unknown }).email_verified === true;
-  if (!verified) return null;
-  const email = normalizeEmail(profile.email);
-  return isValidEmail(email) ? email : null;
-}
-
-function isUniqueEmail(err: unknown): boolean {
-  return (
-    typeof err === "object" &&
-    err !== null &&
-    "code" in err &&
-    (err as { code?: unknown }).code === "P2002"
-  );
-}
+import { type AuthOptions } from "next-auth";
 
 /** Session JWT is stored in cookies — never put data URLs or OAuth secrets in it. */
 function cookieSafeImage(value: unknown): string | null {
@@ -47,114 +29,8 @@ function slimJwt(token: Record<string, unknown>) {
   return token;
 }
 
-/** Keep one User row for both Google and password sign-in. Password is never cleared. */
-async function linkGoogleAccount(input: {
-  email: string;
-  name?: string | null;
-  image?: string | null;
-}): Promise<DbUser> {
-  const existing = await prisma.user.findUnique({ where: { email: input.email } });
-  if (!existing) {
-    try {
-      return await prisma.user.create({
-        data: {
-          email: input.email,
-          name: input.name || null,
-          image: input.image || null,
-          emailVerified: new Date(),
-        },
-      });
-    } catch (err) {
-      if (!isUniqueEmail(err)) throw err;
-      const raced = await prisma.user.findUnique({ where: { email: input.email } });
-      if (!raced) throw err;
-      return mergeGoogleProfile(raced, input);
-    }
-  }
-  return mergeGoogleProfile(existing, input);
-}
-
-async function mergeGoogleProfile(
-  existing: DbUser,
-  input: { name?: string | null; image?: string | null },
-): Promise<DbUser> {
-  const name = existing.name ?? input.name ?? null;
-  // Google-only → always refresh Google photo. Password accounts keep DB image.
-  const image = existing.password
-    ? (existing.image ?? null)
-    : (input.image ?? existing.image ?? null);
-  const emailVerified = existing.emailVerified ?? new Date();
-  if (
-    existing.name === name &&
-    existing.image === image &&
-    existing.emailVerified
-  ) {
-    return existing;
-  }
-  return prisma.user.update({
-    where: { id: existing.id },
-    data: { name, image, emailVerified },
-  });
-}
-
 export const authOptions: AuthOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
-    CredentialsProvider({
-      id: "credentials",
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Enter your email and password");
-        }
-
-        const email = normalizeEmail(credentials.email);
-        if (!isValidEmail(email)) {
-          throw new Error("Incorrect email or password");
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
-
-        if (!user || !user.password) {
-          throw new Error("No password account found for this email");
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password,
-        );
-
-        if (!isPasswordValid) {
-          throw new Error("Incorrect password");
-        }
-
-        if (!user.emailVerified) {
-          throw new Error("Confirm your email before signing in");
-        }
-
-        if (user.bannedAt) {
-          throw new Error("This account has been suspended");
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-        };
-      },
-    }),
-  ],
+  providers: getConfiguredAuthProviders().map((p) => p.createProvider()),
   pages: {
     signIn: "/",
   },
@@ -164,24 +40,18 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ account, profile, user }) {
-      if (account?.provider === "google") {
-        const email = verifiedGoogleEmail(profile);
-        if (!email) return false;
-        const row = await prisma.user.findUnique({
-          where: { email },
-          select: { bannedAt: true },
-        });
-        if (row?.bannedAt) return false;
-        return true;
-      }
-      if (user?.id) {
-        const row = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { bannedAt: true },
-        });
-        if (row?.bannedAt) return false;
-      }
+    async signIn({ account, profile }) {
+      const provider = getAuthProviderByNextAuthId(account?.provider);
+      if (!provider) return false;
+
+      const email = provider.resolveEmail(profile);
+      if (!email) return false;
+
+      const row = await prisma.user.findUnique({
+        where: { email },
+        select: { bannedAt: true },
+      });
+      if (row?.bannedAt) return false;
       return true;
     },
     async jwt({ token, user, account, profile, trigger, session }) {
@@ -195,11 +65,12 @@ export const authOptions: AuthOptions = {
         }
       }
 
-      if (account?.provider === "google") {
-        const email = verifiedGoogleEmail(profile);
-        if (!email) throw new Error("Google did not confirm this email");
+      const provider = getAuthProviderByNextAuthId(account?.provider);
+      if (provider) {
+        const email = provider.resolveEmail(profile);
+        if (!email) throw new Error("OAuth provider did not confirm this email");
 
-        const dbUser = await linkGoogleAccount({
+        const dbUser = await linkOAuthAccount({
           email,
           name: user?.name,
           image: cookieSafeImage(user?.image),
@@ -212,15 +83,6 @@ export const authOptions: AuthOptions = {
         token.email = dbUser.email;
         token.name = dbUser.name;
         const image = cookieSafeImage(dbUser.image);
-        token.image = image;
-        token.picture = image;
-        token.banned = false;
-      } else if (user?.id) {
-        token.id = user.id;
-        token.sub = user.id;
-        if (user.email) token.email = user.email;
-        if (user.name !== undefined) token.name = user.name;
-        const image = cookieSafeImage(user.image);
         token.image = image;
         token.picture = image;
         token.banned = false;

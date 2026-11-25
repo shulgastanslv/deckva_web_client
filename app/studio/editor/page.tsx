@@ -67,28 +67,6 @@ function ProjectBootstrap() {
   return null;
 }
 
-function AuthLinkHandler() {
-  const searchParams = useSearchParams();
-  const verify = searchParams.get("verify");
-  const reset = searchParams.get("reset");
-
-  useEffect(() => {
-    if (!verify && !reset) return;
-    window.dispatchEvent(
-      new CustomEvent("core:auth-link", {
-        detail: { verify, reset },
-      }),
-    );
-    const url = new URL(window.location.href);
-    url.searchParams.delete("verify");
-    url.searchParams.delete("reset");
-    const next = `${url.pathname}${url.search}${url.hash}`;
-    window.history.replaceState(null, "", next);
-  }, [verify, reset]);
-
-  return null;
-}
-
 export default function CarouselEditor() {
   const tPanels = useTranslations("editor.panels");
   const tc = useTranslations("common");
@@ -176,7 +154,6 @@ export default function CarouselEditor() {
       <Suspense fallback={null}>
         <StudioIntentBootstrap />
         <ProjectBootstrap />
-        <AuthLinkHandler />
       </Suspense>
 
       <div

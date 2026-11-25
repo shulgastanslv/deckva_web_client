@@ -23,39 +23,13 @@ import { cn } from "@/lib/utils";
 
 export function StudioShell({ children }: { children: ReactNode }) {
   const [authOpen, setAuthOpen] = useState(false);
-  const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
-  const [authResetToken, setAuthResetToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const onAuthLink = (event: Event) => {
-      const detail = (
-        event as CustomEvent<{ verify?: string | null; reset?: string | null }>
-      ).detail;
-      if (detail?.verify) setAuthVerifyToken(detail.verify);
-      if (detail?.reset) setAuthResetToken(detail.reset);
-      if (detail?.verify || detail?.reset) setAuthOpen(true);
-    };
-    window.addEventListener("core:auth-link", onAuthLink);
-    return () => window.removeEventListener("core:auth-link", onAuthLink);
-  }, []);
 
   return (
     <StudioCreateProvider onNeedAuth={() => setAuthOpen(true)}>
       <StudioShellInner onMenuAuth={() => setAuthOpen(true)}>
         {children}
       </StudioShellInner>
-      <AuthModal
-        isOpen={authOpen}
-        verifyToken={authVerifyToken}
-        resetToken={authResetToken}
-        onOpenChange={(open) => {
-          setAuthOpen(open);
-          if (!open) {
-            setAuthVerifyToken(null);
-            setAuthResetToken(null);
-          }
-        }}
-      />
+      <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
     </StudioCreateProvider>
   );
 }

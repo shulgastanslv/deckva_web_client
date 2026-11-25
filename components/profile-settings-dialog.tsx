@@ -6,7 +6,6 @@ import {
   Camera as CameraIcon,
   ChartBar as ChartBarIcon,
   Check,
-  Key as KeyRound,
   Translate as Languages,
   SpinnerGap as Loader2,
   SignOut as LogOut,
@@ -43,9 +42,6 @@ import {
 } from "@/lib/i18n/config";
 import { setAppLocale } from "@/lib/i18n/set-locale";
 import { messages } from "@/lib/messages";
-import { isPasswordLongEnough, PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
-import { useDisplayCurrency } from "@/hooks/use-display-currency";
-import { CURRENCY_LABELS } from "@/lib/studio/currency";
 import type {
   GenerationDayPoint,
   GenerationUsageStats,
@@ -57,7 +53,6 @@ type Section =
   | "profile"
   | "statistics"
   | "notifications"
-  | "security"
   | "preferences"
   | "account";
 
@@ -112,44 +107,9 @@ const NAV_IDS: { id: Section; icon: typeof UserRound }[] = [
   { id: "profile", icon: UserRound },
   { id: "statistics", icon: ChartBarIcon },
   { id: "notifications", icon: Bell },
-  { id: "security", icon: KeyRound },
   { id: "preferences", icon: Monitor },
   { id: "account", icon: LogOut },
 ];
-
-function formatJoined(iso: string) {
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      month: "short",
-      year: "numeric",
-    }).format(new Date(iso));
-  } catch {
-    return "";
-  }
-}
-
-function GoogleMark({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <path
-        fill="#EA4335"
-        d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.8 7.3l3.7 2.9C6.4 7.2 9 5 12 5z"
-      />
-      <path
-        fill="#4285F4"
-        d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.5 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.8 7.3C.7 9.5 0 10.7 0 12.5s.7 3 1.8 5.2l3.7-2.9z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.6-2.2-6.5-5.2L1.8 15.8C3.7 19.5 7.5 23 12 23z"
-      />
-    </svg>
-  );
-}
 
 export function ProfileSettingsDialog({
   open,
@@ -164,25 +124,14 @@ export function ProfileSettingsDialog({
   const locale = useLocale() as AppLocale;
   const t = useTranslations("dialogs.settings");
   const [localePending, startLocaleTransition] = useTransition();
-  const { currency, setCurrency, currencies } = useDisplayCurrency();
   const [section, setSection] = useState<Section>("profile");
   const [themeMounted, setThemeMounted] = useState(false);
-  const [hasPassword, setHasPassword] = useState(true);
-  const [profileReady, setProfileReady] = useState(false);
-
   const [name, setName] = useState("");
   const [initialName, setInitialName] = useState("");
   const [email, setEmail] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const [createdAt, setCreatedAt] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState(false);
-
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [deleteConfirm, setDeleteConfirm] = useState("");
-  const [deletePassword, setDeletePassword] = useState("");
 
   const [usage, setUsage] = useState<UsageState>({
     remaining: DAILY_GENERATION_LIMIT,
@@ -200,25 +149,17 @@ export function ProfileSettingsDialog({
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  /** Google / OAuth-only accounts have no local password. */
-  const isGoogleAccount = profileReady && !hasPassword;
-  const nav = NAV_IDS.filter((item) => !(isGoogleAccount && item.id === "security")).map(
-    (item) => ({
-      ...item,
-      label: t(`nav.${item.id}`),
-    }),
-  );
+  const nav = NAV_IDS.map((item) => ({
+    ...item,
+    label: t(`nav.${item.id}`),
+  }));
 
   const avatarSrc = image || session?.user?.image || null;
   const initial = (name.trim()[0] || email[0] || "U").toUpperCase();
   const isDark = themeMounted && resolvedTheme === "dark";
 
   const nameDirty = name.trim() !== initialName.trim();
-  const passwordDirty = Boolean(
-    currentPassword || newPassword || confirmPassword,
-  );
   const canSaveProfile = nameDirty && name.trim().length > 0;
-  const canSaveSecurity = passwordDirty;
 
   useEffect(() => {
     setThemeMounted(true);
@@ -229,14 +170,9 @@ export function ProfileSettingsDialog({
     let cancelled = false;
     setSection("profile");
     setLoading(true);
-    setProfileReady(false);
     setError(null);
     setSaved(false);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
     setDeleteConfirm("");
-    setDeletePassword("");
     setNotify(readNotifyPrefs());
 
     void Promise.all([getProfile(), getGenerationStatus()])
@@ -251,10 +187,6 @@ export function ProfileSettingsDialog({
         setInitialName(profileRes.name ?? "");
         setEmail(profileRes.email);
         setImage(profileRes.image);
-        setHasPassword(profileRes.hasPassword);
-        setProfileReady(true);
-        setEmailVerified(Boolean(profileRes.emailVerified));
-        setCreatedAt(profileRes.createdAt);
         setUsage({
           remaining: status.entitlement.remaining,
           used: status.entitlement.used,
@@ -367,47 +299,12 @@ export function ProfileSettingsDialog({
     }
   };
 
-  const onSaveSecurity = async () => {
-    setError(null);
-    setSaved(false);
-
-    if (!isPasswordLongEnough(newPassword)) {
-      setError(t("validation.passwordMin"));
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError(t("validation.passwordsMismatch"));
-      return;
-    }
-    if (hasPassword && !currentPassword) {
-      setError(t("validation.currentPassword"));
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const res = await updateProfile({
-        currentPassword: hasPassword ? currentPassword : undefined,
-        newPassword,
-      });
-      if (!res.success) {
-        setError((res as { error: string }).error);
-        return;
-      }
-      onOpenChange(false);
-      await signOut({ callbackUrl: "/" });
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const onDelete = async () => {
     setError(null);
     setDeleting(true);
     try {
       const res = await deleteAccount({
         confirm: deleteConfirm,
-        password: hasPassword ? deletePassword : undefined,
       });
       if (!res.success) {
         setError((res as { error: string }).error);
@@ -426,8 +323,8 @@ export function ProfileSettingsDialog({
         showCloseButton
         className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[720px]"
       >
-        <div className="flex min-h-[440px] flex-col sm:flex-row">
-          <aside className="flex shrink-0 flex-col bg-muted/25 sm:w-[168px]">
+        <div className="flex min-h-[440px] w-full min-w-0 flex-col sm:flex-row">
+          <aside className="flex w-full min-w-0 shrink-0 flex-col bg-muted/25 sm:w-[168px]">
             <div className="px-4 pt-4 pb-2">
               <DialogTitle className="text-[13px] font-semibold tracking-tight">
                 {t("title")}
@@ -437,7 +334,7 @@ export function ProfileSettingsDialog({
               </DialogDescription>
             </div>
 
-            <nav className="flex gap-1 overflow-x-auto px-2 pb-3 sm:flex-col sm:overflow-visible sm:px-2 sm:pb-4">
+            <nav className="flex gap-1 overflow-x-auto overscroll-x-contain px-2 pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:flex-col sm:overflow-visible sm:px-2 sm:pb-4">
               {nav.map((item) => {
                 const Icon = item.icon;
                 const active = section === item.id;
@@ -451,7 +348,7 @@ export function ProfileSettingsDialog({
                       setSaved(false);
                     }}
                     className={cn(
-                      "inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-left text-[12.5px] font-medium transition-colors",
+                      "inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-left text-[12.5px] font-normal transition-colors",
                       active
                         ? "bg-background text-foreground"
                         : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
@@ -560,15 +457,6 @@ export function ProfileSettingsDialog({
                           />
                         </div>
 
-                        {profileReady && isGoogleAccount ? (
-                          <div
-                            className="flex w-full min-h-12 items-center gap-2.5 rounded-md bg-muted/40 px-4 py-3.5 text-[13px] font-normal text-foreground"
-                            title={t("signedInGoogle")}
-                          >
-                            <GoogleMark className="size-5 shrink-0" />
-                            <span>{t("signedInGoogle")}</span>
-                          </div>
-                        ) : null}
                     </div>
                   ) : null}
 
@@ -642,72 +530,6 @@ export function ProfileSettingsDialog({
                     </div>
                   ) : null}
 
-                  {section === "security" && !isGoogleAccount ? (
-                    <div className="space-y-3.5">
-                      <p className="text-[12px] leading-relaxed text-muted-foreground">
-                        {t("changePasswordHint")}
-                      </p>
-
-                      <div className="space-y-1.5">
-                        <Label
-                          htmlFor="profile-current-password"
-                          className="text-[12px]"
-                        >
-                          {t("currentPassword")}
-                        </Label>
-                        <Input
-                          id="profile-current-password"
-                          type="password"
-                          value={currentPassword}
-                          onChange={(event) => {
-                            setCurrentPassword(event.target.value);
-                            setSaved(false);
-                          }}
-                          autoComplete="current-password"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <Label
-                          htmlFor="profile-new-password"
-                          className="text-[12px]"
-                        >
-                          {t("newPassword")}
-                        </Label>
-                        <Input
-                          id="profile-new-password"
-                          type="password"
-                          value={newPassword}
-                          onChange={(event) => {
-                            setNewPassword(event.target.value);
-                            setSaved(false);
-                          }}
-                          autoComplete="new-password"
-                          placeholder={t("passwordMin")}
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <Label
-                          htmlFor="profile-confirm-password"
-                          className="text-[12px]"
-                        >
-                          {t("confirmPassword")}
-                        </Label>
-                        <Input
-                          id="profile-confirm-password"
-                          type="password"
-                          value={confirmPassword}
-                          onChange={(event) => {
-                            setConfirmPassword(event.target.value);
-                            setSaved(false);
-                          }}
-                          autoComplete="new-password"
-                        />
-                      </div>
-                    </div>
-                  ) : null}
-
                   {section === "preferences" ? (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-4 rounded-2xl bg-muted/35 px-4 py-3.5">
@@ -769,31 +591,6 @@ export function ProfileSettingsDialog({
                         </div>
                       </div>
 
-                      <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
-                        <div className="min-w-0">
-                          <p className="text-[13px] font-medium">{t("currency")}</p>
-                          <p className="mt-0.5 text-[12px] text-muted-foreground">
-                            {t("currencyHint")}
-                          </p>
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {currencies.map((code) => (
-                              <button
-                                key={code}
-                                type="button"
-                                onClick={() => setCurrency(code)}
-                                className={cn(
-                                  "inline-flex h-9 items-center rounded-md px-3.5 text-[13px] font-normal transition-colors",
-                                  code === currency
-                                    ? "bg-foreground text-background"
-                                    : "bg-muted/50 text-foreground hover:bg-muted/70",
-                                )}
-                              >
-                                {CURRENCY_LABELS[code]}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   ) : null}
 
@@ -818,67 +615,48 @@ export function ProfileSettingsDialog({
                         </Button>
                       </div>
 
-                      {!isGoogleAccount ? (
-                        <div className="rounded-2xl bg-destructive/5 px-4 py-3.5 ring-1 ring-destructive/10">
-                          <p className="text-[13px] font-medium text-destructive">
-                            {t("deleteAccount")}
-                          </p>
-                          <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">
-                            {t("deleteAccountHint")}
-                          </p>
+                      <div className="rounded-2xl bg-destructive/5 px-4 py-3.5 ring-1 ring-destructive/10">
+                        <p className="text-[13px] font-medium text-destructive">
+                          {t("deleteAccount")}
+                        </p>
+                        <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">
+                          {t("deleteAccountHint")}
+                        </p>
 
-                          <div className="mt-3 space-y-1.5">
-                            <Label htmlFor="delete-password" className="text-[12px]">
-                              {t("deletePassword")}
-                            </Label>
-                            <Input
-                              id="delete-password"
-                              type="password"
-                              value={deletePassword}
-                              onChange={(event) =>
-                                setDeletePassword(event.target.value)
-                              }
-                              autoComplete="current-password"
-                              className="bg-background/80"
-                            />
-                          </div>
-
-                          <div className="mt-3 space-y-1.5">
-                            <Label htmlFor="delete-confirm" className="text-[12px]">
-                              {t("typeDelete")}
-                            </Label>
-                            <Input
-                              id="delete-confirm"
-                              value={deleteConfirm}
-                              onChange={(event) =>
-                                setDeleteConfirm(event.target.value)
-                              }
-                              placeholder={t("deletePlaceholder")}
-                              className="bg-background/80"
-                              autoComplete="off"
-                            />
-                          </div>
-
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            className="mt-3 rounded-md"
-                            disabled={
-                              deleting ||
-                              deleteConfirm.trim().toUpperCase() !== "DELETE" ||
-                              !deletePassword
+                        <div className="mt-3 space-y-1.5">
+                          <Label htmlFor="delete-confirm" className="text-[12px]">
+                            {t("typeDelete")}
+                          </Label>
+                          <Input
+                            id="delete-confirm"
+                            value={deleteConfirm}
+                            onChange={(event) =>
+                              setDeleteConfirm(event.target.value)
                             }
-                            onClick={() => void onDelete()}
-                          >
-                            {deleting ? (
-                              <Loader2 className="size-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="size-3.5" />
-                            )}
-                            {t("deleteAccount")}
-                          </Button>
+                            placeholder={t("deletePlaceholder")}
+                            className="bg-background/80"
+                            autoComplete="off"
+                          />
                         </div>
-                      ) : null}
+
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          className="mt-3 rounded-md"
+                          disabled={
+                            deleting ||
+                            deleteConfirm.trim().toUpperCase() !== "DELETE"
+                          }
+                          onClick={() => void onDelete()}
+                        >
+                          {deleting ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="size-3.5" />
+                          )}
+                          {t("deleteAccount")}
+                        </Button>
+                      </div>
 
                       {error ? (
                         <p className="text-[12px] text-destructive">{error}</p>
@@ -889,7 +667,7 @@ export function ProfileSettingsDialog({
               )}
             </div>
 
-            {!loading && (section === "profile" || section === "security") ? (
+            {!loading && section === "profile" ? (
               <div className="flex items-center justify-between gap-3 bg-muted/15 px-5 py-3">
                 <div className="min-h-4 text-[12px]">
                   {error ? (
@@ -914,17 +692,8 @@ export function ProfileSettingsDialog({
                   <Button
                     type="button"
                     className="rounded-md"
-                    disabled={
-                      saving ||
-                      (section === "profile"
-                        ? !canSaveProfile
-                        : !canSaveSecurity)
-                    }
-                    onClick={() =>
-                      void (section === "profile"
-                        ? onSaveProfile()
-                        : onSaveSecurity())
-                    }
+                    disabled={saving || !canSaveProfile}
+                    onClick={() => void onSaveProfile()}
                   >
                     {saving ? (
                       <Loader2 className="size-5 animate-spin" />

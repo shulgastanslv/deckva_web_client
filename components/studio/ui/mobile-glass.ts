@@ -5,7 +5,7 @@
 
 /** Light frosted glass (docks / pills that float over content). */
 export const mobileGlassSurface =
-  "border border-border/40 bg-background/80 shadow-sm backdrop-blur-xl dark:border-border/50 dark:bg-background/75";
+  "border border-border/30 bg-background/55 shadow-sm backdrop-blur-2xl backdrop-saturate-150 dark:border-border/40 dark:bg-background/45";
 
 /** Floating bottom dock inset from screen edges. */
 export const mobileGlassDock =
@@ -20,7 +20,7 @@ export const mobileGlassSheet =
 
 /** Compact floating control (zoom, chips). */
 export const mobileGlassPill =
-  `${mobileGlassSurface} rounded-2xl`;
+  `${mobileGlassSurface} rounded-full`;
 
 /** Side drawer on phone. */
 export const mobileGlassDrawer =

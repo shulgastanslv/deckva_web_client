@@ -64,7 +64,7 @@ function StudioMobileNavInner({
       <nav
         aria-label={t("studio")}
         className={cn(
-          "pointer-events-auto flex items-stretch justify-around gap-0.5 px-1.5 py-1.5",
+          "pointer-events-auto flex items-center justify-around gap-0.5 px-1.5 py-1.5",
           mobileGlassDock,
         )}
       >
@@ -72,9 +72,10 @@ function StudioMobileNavInner({
           <Link
             key={href}
             href={href}
+            aria-label={label}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1.5 text-[10px] font-normal tracking-tight transition-colors",
+              "flex size-10 shrink-0 items-center justify-center rounded-full transition-colors",
               active
                 ? "bg-muted/50 text-foreground"
                 : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
@@ -84,18 +85,15 @@ function StudioMobileNavInner({
               className="size-5 stroke-[1.5]"
               weight={active ? "fill" : "regular"}
             />
-            <span className="max-w-full truncate px-0.5">{label}</span>
           </Link>
         ))}
         <button
           type="button"
           onClick={onCreate}
           aria-label={t("newProject")}
-          className="flex min-w-0 flex-1 items-center justify-center rounded-md px-1 py-1.5 text-foreground transition-colors hover:bg-muted/30"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-opacity hover:opacity-90"
         >
-          <span className="flex size-9 items-center justify-center rounded-md bg-foreground text-background">
-            <Plus className="size-5 stroke-[2]" />
-          </span>
+          <Plus className="size-5 stroke-[2]" />
         </button>
       </nav>
     </div>

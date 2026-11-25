@@ -101,7 +101,8 @@ export function InviteMembersDialog() {
       }
 
       const notified = res.results.filter((r) => r.status === "notified").length;
-      const invited = res.results.filter((r) => r.status === "invited").length;
+      const invitedRows = res.results.filter((r) => r.status === "invited");
+      const invited = invitedRows.length;
       const already = res.results.filter(
         (r) => r.status === "already_member",
       ).length;
@@ -111,6 +112,20 @@ export function InviteMembersDialog() {
       if (invited) parts.push(t("inviteLinkReady", { n: invited }));
       if (already) parts.push(t("alreadyMembers", { n: already }));
       setSummary(parts.join(" · ") || tc("done"));
+
+      const urls = invitedRows
+        .map((r) => ("url" in r ? r.url : undefined))
+        .filter((u): u is string => Boolean(u));
+      if (urls.length > 0) {
+        try {
+          await navigator.clipboard.writeText(urls.join("\n"));
+          setCopied(true);
+          window.setTimeout(() => setCopied(false), 2000);
+        } catch {
+          // Clipboard may be blocked; links still exist in invite records.
+        }
+      }
+
       setEmails("");
       void invalidateStudioOrganizations(queryClient);
     } catch {

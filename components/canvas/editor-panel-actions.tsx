@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import {
   ArrowUp,
@@ -40,9 +40,6 @@ function FigmaMark({ className }: { className?: string }) {
   );
 }
 
-const iconBtn =
-  "size-8 rounded-md border-none text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
-
 const menuItem =
   "cursor-pointer gap-2 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50";
 
@@ -52,7 +49,6 @@ type EditorPanelActionsProps = {
   className?: string;
 };
 
-/** Figma-style right-panel chrome: account · preview · share / export. */
 export function EditorPanelActions({
   onPreview,
   onPhonePreview,
@@ -61,27 +57,12 @@ export function EditorPanelActions({
   const { status } = useSession();
   const slides = useCanvasStore((s) => s.slides);
   const [authOpen, setAuthOpen] = useState(false);
-  const [authVerifyToken, setAuthVerifyToken] = useState<string | null>(null);
-  const [authResetToken, setAuthResetToken] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [figmaOpen, setFigmaOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const t = useTranslations("editor");
   const tc = useTranslations("common");
-
-  useEffect(() => {
-    const onAuthLink = (event: Event) => {
-      const detail = (
-        event as CustomEvent<{ verify?: string | null; reset?: string | null }>
-      ).detail;
-      if (detail?.verify) setAuthVerifyToken(detail.verify);
-      if (detail?.reset) setAuthResetToken(detail.reset);
-      if (detail?.verify || detail?.reset) setAuthOpen(true);
-    };
-    window.addEventListener("core:auth-link", onAuthLink);
-    return () => window.removeEventListener("core:auth-link", onAuthLink);
-  }, []);
 
   const requireAuth = (then: () => void) => {
     if (status !== "authenticated") {
@@ -176,18 +157,7 @@ export function EditorPanelActions({
           </DropdownMenu>
         )}
       </div>
-      <AuthModal
-        isOpen={authOpen}
-        verifyToken={authVerifyToken}
-        resetToken={authResetToken}
-        onOpenChange={(open) => {
-          setAuthOpen(open);
-          if (!open) {
-            setAuthVerifyToken(null);
-            setAuthResetToken(null);
-          }
-        }}
-      />
+      <AuthModal isOpen={authOpen} onOpenChange={setAuthOpen} />
       <ShareModal
         open={shareOpen}
         onOpenChange={setShareOpen}

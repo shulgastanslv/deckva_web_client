@@ -6,6 +6,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { htmlLang, isAppLocale, ogLocale, type AppLocale } from "@/lib/i18n/config";
+import { SITE_URL, ogImage } from "@/lib/seo/og";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -25,21 +26,13 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
-const ogImage = {
-  url: "/presentation.png",
-  width: 1200,
-  height: 630,
-  alt: "Deckva — AI Carousel Editor",
-  type: "image/png",
-} as const;
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
   const localeRaw = await getLocale();
   const locale: AppLocale = isAppLocale(localeRaw) ? localeRaw : "ru";
 
   return {
-    metadataBase: new URL("https://deckva.by"),
+    metadataBase: new URL(SITE_URL),
     applicationName: "Deckva",
     title: {
       default: t("titleDefault"),
@@ -50,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
       .split(",")
       .map((part) => part.trim())
       .filter(Boolean),
-    authors: [{ name: "Deckva", url: "https://deckva.by" }],
+    authors: [{ name: "Deckva", url: SITE_URL }],
     creator: "Deckva",
     publisher: "Deckva",
     icons: {
@@ -62,11 +55,9 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Deckva",
       title: t("ogTitle"),
       description: t("ogDescription"),
-      url: "https://deckva.by",
+      url: SITE_URL,
       images: [ogImage],
-      
     },
-    
     twitter: {
       card: "summary_large_image",
       title: t("ogTitle"),

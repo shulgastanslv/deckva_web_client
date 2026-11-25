@@ -1,11 +1,8 @@
 "use server";
 
-import bcrypt from "bcryptjs";
-
 import { requireUserId } from "@/lib/auth/session";
-import { isPasswordLongEnough } from "@/lib/auth/password";
 import { emailIsAdmin } from "@/lib/auth-role";
-import { isValidEmail, normalizeEmail } from "@/lib/email";
+import { isValidEmail, normalizeEmail } from "@/lib/email-address";
 import { messages } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { isPlatformAdmin } from "@/lib/roles";
@@ -288,7 +285,35 @@ export interface AdminUserRow {
   unlimitedGenerations: boolean;
   generationsUsedToday: number;
   banned: boolean;
+  /** False until the person completes an OAuth sign-in. */
+  signedIn: boolean;
+  lastSignedInAt: string | null;
   createdAt: string;
+}
+
+function toAdminUserRow(row: {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+  unlimitedGenerations: boolean;
+  generationsUsedToday: number;
+  bannedAt: Date | null;
+  lastSignedInAt: Date | null;
+  createdAt: Date;
+}): AdminUserRow {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    role: row.role,
+    unlimitedGenerations: row.unlimitedGenerations,
+    generationsUsedToday: row.generationsUsedToday,
+    banned: row.bannedAt != null,
+    signedIn: row.lastSignedInAt != null,
+    lastSignedInAt: row.lastSignedInAt?.toISOString() ?? null,
+    createdAt: row.createdAt.toISOString(),
+  };
 }
 
 export async function listUsers(): Promise<
@@ -309,21 +334,13 @@ export async function listUsers(): Promise<
         unlimitedGenerations: true,
         generationsUsedToday: true,
         bannedAt: true,
+        lastSignedInAt: true,
         createdAt: true,
       },
     });
     return {
       success: true,
-      users: rows.map((row) => ({
-        id: row.id,
-        email: row.email,
-        name: row.name,
-        role: row.role,
-        unlimitedGenerations: row.unlimitedGenerations,
-        generationsUsedToday: row.generationsUsedToday,
-        banned: row.bannedAt != null,
-        createdAt: row.createdAt.toISOString(),
-      })),
+      users: rows.map(toAdminUserRow),
     };
   } catch (err) {
     console.error("listUsers error:", err);
@@ -382,73 +399,69 @@ export async function updateUserFlags(input: {
   }
 }
 
-export async function createUser(input: {
+const adminUserSelect = {
+  id: true,
+  email: true,
+  name: true,
+  role: true,
+  unlimitedGenerations: true,
+  generationsUsedToday: true,
+  bannedAt: true,
+  lastSignedInAt: true,
+  createdAt: true,
+} as const;
+
+/**
+ * Grant access by OAuth email (no password).
+ * - New email → pending row; they sign in with any enabled IdP on that email.
+ * - Existing email → update role / unlimited (fill empty name if provided).
+ */
+export async function provisionUser(input: {
   email: string;
-  password: string;
   name?: string;
   role?: "USER" | "ADMIN";
-  /** When true, mark email as verified so the user can sign in immediately. */
-  verifyEmail?: boolean;
-}): Promise<ActionResult<{ user: AdminUserRow }>> {
+}): Promise<ActionResult<{ user: AdminUserRow; created: boolean }>> {
   try {
     if (!(await requireAdminId())) {
       return { success: false, error: messages.errors.adminsOnly };
     }
 
     const email = normalizeEmail(input.email);
-    if (!isValidEmail(email) || !input.password) {
-      return { success: false, error: messages.errors.validEmailAndPassword };
-    }
-    if (!isPasswordLongEnough(input.password)) {
-      return { success: false, error: messages.errors.passwordTooShort };
-    }
-
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      return { success: false, error: messages.errors.accountExists };
+    if (!isValidEmail(email)) {
+      return { success: false, error: messages.errors.validEmail };
     }
 
     const role = input.role === "ADMIN" ? "ADMIN" : "USER";
     const name = input.name?.trim() || null;
-    const password = await bcrypt.hash(input.password, 10);
-    const verifyEmail = input.verifyEmail !== false;
+    const unlimitedGenerations = role === "ADMIN";
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      const row = await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          role,
+          unlimitedGenerations,
+          ...(name && !existing.name ? { name } : {}),
+        },
+        select: adminUserSelect,
+      });
+      return { success: true, user: toAdminUserRow(row), created: false };
+    }
 
     const row = await prisma.user.create({
       data: {
         email,
         name,
-        password,
         role,
-        emailVerified: verifyEmail ? new Date() : null,
-        unlimitedGenerations: role === "ADMIN",
+        unlimitedGenerations,
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        unlimitedGenerations: true,
-        generationsUsedToday: true,
-        bannedAt: true,
-        createdAt: true,
-      },
+      select: adminUserSelect,
     });
 
-    return {
-      success: true,
-      user: {
-        id: row.id,
-        email: row.email,
-        name: row.name,
-        role: row.role,
-        unlimitedGenerations: row.unlimitedGenerations,
-        generationsUsedToday: row.generationsUsedToday,
-        banned: row.bannedAt != null,
-        createdAt: row.createdAt.toISOString(),
-      },
-    };
+    return { success: true, user: toAdminUserRow(row), created: true };
   } catch (err) {
-    console.error("createUser error:", err);
+    console.error("provisionUser error:", err);
     return { success: false, error: messages.errors.generic };
   }
 }

@@ -3,6 +3,7 @@ import { Inter, Instrument_Serif, Cormorant_Garamond } from "next/font/google";
 
 import { StudioSessionCache } from "@/components/studio/studio-session-cache";
 import { StudioTourHost } from "@/components/studio/tour/studio-tour-host";
+import { SITE_URL, ogImage } from "@/lib/seo/og";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
   title: "Studio",
   description: "Canvas editing, community, folders, and PNG/ZIP slide export.",
   keywords: ["Deckva", "studio", "carousel editor", "canvas", "community", "export PNG"],
-  authors: [{ name: "Deckva", url: "https://deckva.by" }],
+  authors: [{ name: "Deckva", url: SITE_URL }],
   creator: "Deckva",
   publisher: "Deckva",
   icons: { icon: "/browser.svg" },
@@ -39,22 +40,15 @@ export const metadata: Metadata = {
     siteName: "Deckva",
     locale: "en_US",
     type: "website",
-    images: [
-      {
-        url: "/presentation.png",
-        width: 1200,
-        height: 630,
-        alt: "Deckva — AI Carousel Editor",
-        type: "image/png",
-      },
-    ],
+    url: `${SITE_URL}/studio`,
+    images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: "AI Carousel Editor",
     description:
       "Generate carousels, edit slides, and export to PNG, ZIP, or PDF.",
-    images: ["/presentation.png"],
+    images: [ogImage],
   },
 };
 

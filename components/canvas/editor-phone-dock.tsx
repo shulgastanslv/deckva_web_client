@@ -32,7 +32,7 @@ export function EditorPhoneDock({
 
   const itemClass = (active: boolean) =>
     cn(
-      "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1.5 text-[10px] font-normal tracking-tight transition-colors",
+      "flex size-10 shrink-0 items-center justify-center rounded-full transition-colors",
       active
         ? "bg-muted/50 text-foreground"
         : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
@@ -43,7 +43,7 @@ export function EditorPhoneDock({
       <nav
         aria-label={t("editor")}
         className={cn(
-          "pointer-events-auto flex items-stretch justify-around gap-0.5 px-1.5 py-1.5",
+          "pointer-events-auto flex items-center justify-around gap-0.5 px-1.5 py-1.5",
           mobileGlassDock,
         )}
       >
@@ -53,12 +53,12 @@ export function EditorPhoneDock({
           aria-label={tn("studioHome")}
         >
           <HomeIcon className="size-5 stroke-[1.5]" />
-          <span className="max-w-full truncate px-0.5">{tn("home")}</span>
         </Link>
 
         <button
           type="button"
           onClick={onLibrary}
+          aria-label={t("library")}
           aria-pressed={libraryOpen}
           className={itemClass(libraryOpen)}
         >
@@ -66,7 +66,6 @@ export function EditorPhoneDock({
             className="size-5 stroke-[1.5]"
             weight={libraryOpen ? "fill" : "regular"}
           />
-          <span className="max-w-full truncate px-0.5">{t("library")}</span>
         </button>
 
         <button
@@ -76,7 +75,6 @@ export function EditorPhoneDock({
           className={itemClass(false)}
         >
           <Undo2 className="size-5 stroke-[1.5]" />
-          <span className="max-w-full truncate px-0.5">{tc("undo")}</span>
         </button>
 
         <button
@@ -86,12 +84,12 @@ export function EditorPhoneDock({
           className={itemClass(false)}
         >
           <Redo2 className="size-5 stroke-[1.5]" />
-          <span className="max-w-full truncate px-0.5">{tc("redo")}</span>
         </button>
 
         <button
           type="button"
           onClick={onStyle}
+          aria-label={t("style")}
           aria-pressed={styleOpen}
           className={itemClass(styleOpen)}
         >
@@ -99,7 +97,6 @@ export function EditorPhoneDock({
             className="size-5 stroke-[1.5]"
             weight={styleOpen ? "fill" : "regular"}
           />
-          <span className="max-w-full truncate px-0.5">{t("style")}</span>
         </button>
       </nav>
     </div>

@@ -5,12 +5,8 @@ import { randomBytes } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
 
-import {
-  appBaseUrl,
-  isValidEmail,
-  normalizeEmail,
-  sendAuthEmail,
-} from "@/lib/email";
+import { appBaseUrl } from "@/lib/app-url";
+import { isValidEmail, normalizeEmail } from "@/lib/email-address";
 import {
   InviteSendStatus,
   OrganizationInviteStatus,
@@ -47,6 +43,8 @@ export type InvitePreview = {
 export type InviteSendResult = {
   email: string;
   status: InviteSendStatusValue;
+  /** Invite accept URL when the recipient is not yet a Deckva user. */
+  url?: string;
 };
 
 const OPEN_INVITE_DAYS = 365;
@@ -231,13 +229,8 @@ export async function sendOrganizationInvites(input: {
         });
         results.push({ email, status: InviteSendStatus.notified });
       } else {
-        await sendAuthEmail({
-          to: email,
-          subject: `Join ${org.name} on Deckva`,
-          text: `${inviterName} invited you to join ${org.name} on Deckva.\n\nOpen this link to accept:\n${url}`,
-          html: `<p><strong>${inviterName}</strong> invited you to join <strong>${org.name}</strong> on Deckva.</p><p><a href="${url}">Accept invite</a></p>`,
-        });
-        results.push({ email, status: InviteSendStatus.invited });
+        // No outbound email — share the invite link manually (OAuth-only product).
+        results.push({ email, status: InviteSendStatus.invited, url });
       }
 
       invited += 1;

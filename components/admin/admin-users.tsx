@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, SpinnerGap as Loader2, Trash as Trash2 } from "@phosphor-icons/react";
 
 import {
-  createUser,
   deleteUser,
   listUsers,
+  provisionUser,
   updateUserFlags,
   type AdminUserRow,
 } from "@/actions/admin";
@@ -27,7 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { PASSWORD_MIN_LENGTH } from "@/lib/auth/password";
 import { cn } from "@/lib/utils";
 
 export function AdminUsers() {
@@ -133,7 +132,8 @@ export function AdminUsers() {
             Users
           </h2>
           <p className="mt-1 text-[13px] text-muted-foreground">
-            Accounts, roles, and daily generation limits.
+            Provision by email, then they sign in with OAuth. Manage roles and
+            generation limits.
           </p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -149,7 +149,7 @@ export function AdminUsers() {
             onClick={() => setCreateOpen(true)}
           >
             <Plus className="size-3.5" />
-            Create user
+            Add user
           </Button>
         </div>
       </div>
@@ -193,9 +193,20 @@ export function AdminUsers() {
                       {user.email}
                     </p>
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                      Joined {new Date(user.createdAt).toLocaleDateString()} ·
+                      {user.signedIn
+                        ? `Signed in ${new Date(user.lastSignedInAt!).toLocaleDateString()}`
+                        : "Pending sign-in"}
+                      {" · "}
                       today {user.generationsUsedToday} gens
+                      {!user.signedIn
+                        ? ` · added ${new Date(user.createdAt).toLocaleDateString()}`
+                        : null}
                     </p>
+                    {!user.signedIn && !user.banned ? (
+                      <span className="mt-1.5 inline-flex rounded-md bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-400">
+                        Pending OAuth
+                      </span>
+                    ) : null}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
@@ -279,12 +290,20 @@ export function AdminUsers() {
         </ul>
       )}
 
-      <CreateUserDialog
+      <ProvisionUserDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={(user) => {
-          setUsers((prev) => [user, ...prev]);
+        onDone={(user, created) => {
+          setUsers((prev) => {
+            const without = prev.filter((row) => row.id !== user.id);
+            return [user, ...without];
+          });
           setCreateOpen(false);
+          setMessage(
+            created
+              ? `Provisioned ${user.email}. Waiting for first OAuth sign-in.`
+              : `Updated access for ${user.email}.`,
+          );
         }}
       />
 
@@ -335,20 +354,18 @@ export function AdminUsers() {
   );
 }
 
-function CreateUserDialog({
+function ProvisionUserDialog({
   open,
   onOpenChange,
-  onCreated,
+  onDone,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated: (user: AdminUserRow) => void;
+  onDone: (user: AdminUserRow, created: boolean) => void;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [role, setRole] = useState<"USER" | "ADMIN">("USER");
-  const [verifyEmail, setVerifyEmail] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -356,9 +373,7 @@ function CreateUserDialog({
     if (!open) {
       setName("");
       setEmail("");
-      setPassword("");
       setRole("USER");
-      setVerifyEmail(true);
       setError(null);
       setBusy(false);
     }
@@ -368,18 +383,12 @@ function CreateUserDialog({
     setBusy(true);
     setError(null);
     try {
-      const res = await createUser({
-        name,
-        email,
-        password,
-        role,
-        verifyEmail,
-      });
+      const res = await provisionUser({ name, email, role });
       if (res.success === false) {
         setError(res.error);
         return;
       }
-      onCreated(res.user);
+      onDone(res.user, res.created);
     } finally {
       setBusy(false);
     }
@@ -390,10 +399,12 @@ function CreateUserDialog({
       <DialogContent className="gap-0 overflow-hidden rounded-3xl border-border/50 p-0 sm:max-w-md">
         <DialogHeader className="space-y-1 border-b border-border/40 px-5 pt-5 pb-3 text-left">
           <DialogTitle className="text-[15px] font-semibold tracking-tight">
-            Create user
+            Add user
           </DialogTitle>
           <DialogDescription className="text-[13px] text-muted-foreground">
-            Create a password account. Verified users can sign in immediately.
+            Grant access by email. They sign in with Google (or another OAuth
+            connector) using this address — no password is stored. If the email
+            already exists, role is updated.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -405,7 +416,22 @@ function CreateUserDialog({
         >
           <div>
             <label className="mb-1.5 block text-[13px] text-foreground">
-              Name
+              Email
+            </label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="off"
+              placeholder="name@company.com"
+              className="rounded-md border-none bg-muted/40 shadow-none"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[13px] text-foreground">
+              Display name{" "}
+              <span className="text-muted-foreground">(optional)</span>
             </label>
             <Input
               value={name}
@@ -415,36 +441,7 @@ function CreateUserDialog({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[13px] text-foreground">
-              Email
-            </label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="off"
-              className="rounded-md border-none bg-muted/40 shadow-none"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-[13px] text-foreground">
-              Password
-            </label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={PASSWORD_MIN_LENGTH}
-              autoComplete="new-password"
-              className="rounded-md border-none bg-muted/40 shadow-none"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-[13px] text-foreground">
-              Role
-            </label>
+            <label className="mb-1.5 block text-[13px] text-foreground">Role</label>
             <Select
               value={role}
               onValueChange={(value) => {
@@ -460,18 +457,6 @@ function CreateUserDialog({
               </SelectContent>
             </Select>
           </div>
-          <label className="flex items-center justify-between gap-3 rounded-md bg-muted/40 px-3 py-2.5 text-[13px] text-foreground">
-            <span>
-              Verify email automatically
-              <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                Skip confirmation — account can sign in right away
-              </span>
-            </span>
-            <Switch
-              checked={verifyEmail}
-              onCheckedChange={setVerifyEmail}
-            />
-          </label>
           {error ? (
             <p className="text-[12px] text-destructive">{error}</p>
           ) : null}
@@ -480,7 +465,7 @@ function CreateUserDialog({
             disabled={busy}
             className="w-full rounded-md text-[13px] font-normal"
           >
-            {busy ? <Loader2 className="size-3.5 animate-spin" /> : "Create"}
+            {busy ? <Loader2 className="size-3.5 animate-spin" /> : "Grant access"}
           </Button>
         </form>
       </DialogContent>

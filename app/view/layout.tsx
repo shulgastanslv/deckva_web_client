@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 
+import { ogImage } from "@/lib/seo/og";
+
 const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
 });
@@ -15,6 +17,11 @@ export const metadata: Metadata = {
     siteName: "Deckva",
     locale: "ru_BY",
     type: "website",
+    images: [ogImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImage],
   },
 };
 
