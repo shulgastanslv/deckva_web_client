@@ -86,8 +86,8 @@ const FEATURE_META: Record<FeatureId, FeatureMeta> = {
     href: "/studio",
     place: "feature_mobile",
     kind: "mobile",
-    grid: "lg:grid-cols-[1fr_0.85fr] lg:gap-12 xl:gap-14",
-    visual: "max-w-[15.5rem] sm:max-w-[17rem] lg:max-w-[18.5rem]",
+    grid: "lg:grid-cols-[1.05fr_0.8fr] lg:gap-12 xl:gap-14",
+    visual: "max-w-[14rem] sm:max-w-[15.5rem] lg:max-w-[16.5rem]",
   },
   export: {
     href: "#pricing",

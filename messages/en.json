@@ -860,24 +860,14 @@
         "alt": "Device mockups preview"
       },
       "mobile": {
-        "title": "Studio that fits in your hand",
+        "title": "Works on your phone",
         "points": [
-          "Floating glass dock for home, projects, and create",
-          "Library and style as sheets above the canvas",
-          "Edit a draft on the go — finish on a larger screen when you want"
+          "Studio and editor have a phone layout",
+          "Floating dock for the main actions",
+          "Start a draft anywhere"
         ],
-        "cta": "Open on phone",
-        "alt": "Mobile studio preview with glass dock",
-        "previewGreeting": "Good morning",
-        "previewSub": "One line is enough to start a carousel.",
-        "previewPrompt": "What should this carousel be about?",
-        "previewRecent": "Recent",
-        "dock": {
-          "home": "Home",
-          "projects": "Projects",
-          "community": "Community",
-          "brand": "Brand"
-        }
+        "cta": "Open studio",
+        "alt": "Phone with a simple mobile studio dock"
       },
       "export": {
         "title": "Download a ready post",
