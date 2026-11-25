@@ -12,6 +12,7 @@ import {
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
+import { mobileGlassDock } from "@/components/studio/ui/mobile-glass";
 import { cn } from "@/lib/utils";
 
 function StudioMobileNavInner({
@@ -37,8 +38,7 @@ function StudioMobileNavInner({
       href: "/studio/browse",
       label: t("projects"),
       icon: FolderIcon,
-      active:
-        pathname.startsWith("/studio/browse") && !communityTab,
+      active: pathname.startsWith("/studio/browse") && !communityTab,
     },
     {
       href: "/studio/browse?tab=community",
@@ -55,44 +55,50 @@ function StudioMobileNavInner({
   ];
 
   return (
-    <nav
-      aria-label={t("studio")}
+    <div
       className={cn(
-        "flex shrink-0 items-stretch justify-around border-t border-border/40 bg-muted/20 px-1 pt-0.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] md:hidden",
-        drawerOpen && "invisible pointer-events-none",
+        "pointer-events-none absolute inset-x-0 bottom-0 z-40 md:hidden",
+        drawerOpen && "invisible",
       )}
     >
-      {items.map(({ href, label, icon: Icon, active }) => (
-        <Link
-          key={href}
-          href={href}
-          aria-current={active ? "page" : undefined}
-          className={cn(
-            "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-normal tracking-tight",
-            active ? "text-foreground" : "text-muted-foreground",
-          )}
-        >
-          <Icon
-            className={cn(
-              "size-5 stroke-[1.5]",
-              active ? "opacity-100" : "opacity-80",
-            )}
-            weight={active ? "fill" : "regular"}
-          />
-          <span className="max-w-full truncate px-0.5">{label}</span>
-        </Link>
-      ))}
-      <button
-        type="button"
-        onClick={onCreate}
-        aria-label={t("newProject")}
-        className="flex min-w-0 flex-1 items-center justify-center text-foreground"
+      <nav
+        aria-label={t("studio")}
+        className={cn(
+          "pointer-events-auto flex items-stretch justify-around gap-0.5 px-1.5 py-1.5",
+          mobileGlassDock,
+        )}
       >
-        <span className="flex size-9 items-center justify-center rounded-md bg-foreground text-background">
-          <Plus className="size-5 stroke-[2]" />
-        </span>
-      </button>
-    </nav>
+        {items.map(({ href, label, icon: Icon, active }) => (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-md px-1 py-1.5 text-[10px] font-normal tracking-tight transition-colors",
+              active
+                ? "bg-muted/50 text-foreground"
+                : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
+            )}
+          >
+            <Icon
+              className="size-5 stroke-[1.5]"
+              weight={active ? "fill" : "regular"}
+            />
+            <span className="max-w-full truncate px-0.5">{label}</span>
+          </Link>
+        ))}
+        <button
+          type="button"
+          onClick={onCreate}
+          aria-label={t("newProject")}
+          className="flex min-w-0 flex-1 items-center justify-center rounded-md px-1 py-1.5 text-foreground transition-colors hover:bg-muted/30"
+        >
+          <span className="flex size-9 items-center justify-center rounded-md bg-foreground text-background">
+            <Plus className="size-5 stroke-[2]" />
+          </span>
+        </button>
+      </nav>
+    </div>
   );
 }
 
@@ -106,9 +112,9 @@ export function StudioMobileNav({
   return (
     <Suspense
       fallback={
-        <nav
+        <div
           aria-hidden
-          className="flex h-[3.25rem] shrink-0 md:hidden"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[4.75rem] md:hidden"
         />
       }
     >

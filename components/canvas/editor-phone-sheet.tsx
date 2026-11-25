@@ -4,6 +4,10 @@ import type { ReactNode } from "react";
 import { X } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
+import {
+  mobileGlassSheet,
+  mobileSheetBottom,
+} from "@/components/studio/ui/mobile-glass";
 import { cn } from "@/lib/utils";
 
 /** Bottom sheet on phone; transparent passthrough wrapper on md+. */
@@ -25,21 +29,25 @@ export function EditorPhoneSheet({
   return (
     <div
       className={cn(
-        // Phone: bottom sheet above the dock
-        "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:flex max-md:flex-col max-md:overflow-hidden max-md:rounded-t-3xl max-md:bg-background",
+        // Phone: floating glass sheet above the dock
+        "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:flex max-md:flex-col max-md:overflow-hidden",
         open
-          ? "max-md:bottom-[calc(3.5rem+env(safe-area-inset-bottom))] max-md:h-[min(70dvh,calc(100dvh-7.5rem))]"
+          ? cn(
+              "max-md:h-[min(68dvh,calc(100dvh-8.5rem))]",
+              mobileSheetBottom,
+              mobileGlassSheet,
+            )
           : "max-md:hidden",
         // Desktop: normal sidebar slot
-        "md:relative md:z-20 md:flex md:h-full md:min-h-0 md:shrink-0 md:overflow-visible md:rounded-none md:bg-transparent",
+        "md:relative md:inset-auto md:z-20 md:flex md:h-full md:min-h-0 md:shrink-0 md:overflow-visible md:rounded-none md:border-0 md:bg-transparent md:shadow-none md:backdrop-blur-none",
         className,
       )}
     >
       <div className="flex shrink-0 flex-col md:hidden">
-        <div className="flex justify-center pt-2.5 pb-1">
-          <span className="h-1 w-9 rounded-full bg-muted-foreground/30" />
+        <div className="flex justify-center pt-3 pb-1.5">
+          <span className="h-1 w-10 rounded-full bg-muted-foreground/25" />
         </div>
-        <div className="flex items-center justify-between px-3 pb-1.5">
+        <div className="flex items-center justify-between px-3.5 pb-2">
           <h2 className="px-1 text-[13px] font-normal text-foreground">
             {title}
           </h2>
@@ -53,7 +61,7 @@ export function EditorPhoneSheet({
           </button>
         </div>
       </div>
-      <div className="min-h-0 min-w-0 flex-1 overflow-hidden md:contents">
+      <div className="min-h-0 min-w-0 flex-1 overflow-hidden px-0.5 pb-2 md:contents md:p-0">
         {children}
       </div>
     </div>

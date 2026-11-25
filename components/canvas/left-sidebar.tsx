@@ -131,7 +131,7 @@ export function LeftSidebar({
     >
       <aside
         data-tour="editorRail"
-        className="flex w-14 shrink-0 flex-col items-center justify-between bg-background py-3 max-md:py-2 md:py-4"
+        className="flex w-14 shrink-0 flex-col items-center justify-between bg-transparent py-3 max-md:py-2 md:bg-background md:py-4"
       >
         <TooltipProvider delayDuration={300}>
           <div className="flex flex-col items-center gap-1.5">

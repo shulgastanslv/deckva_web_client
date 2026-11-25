@@ -8,7 +8,9 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { clampZoom } from "@/components/canvas/zoom-controls";
+import { mobileGlassPill } from "@/components/studio/ui/mobile-glass";
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { cn } from "@/lib/utils";
 
 /** Compact horizontal zoom strip for the phone editor (above the dock). */
 export function EditorPhoneZoom() {
@@ -17,12 +19,17 @@ export function EditorPhoneZoom() {
   const t = useTranslations("editor.zoom");
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center md:hidden">
-      <div className="pointer-events-auto flex items-center gap-0.5 rounded-md bg-background/95 p-0.5 shadow-sm">
+    <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center px-4 md:hidden">
+      <div
+        className={cn(
+          "pointer-events-auto flex items-center gap-0.5 p-1",
+          mobileGlassPill,
+        )}
+      >
         <Button
           variant="ghost"
           size="icon"
-          className="size-9 rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+          className="size-9 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
           onClick={() => setZoom(clampZoom(zoom - 10))}
           title={t("out")}
           aria-label={t("out")}
@@ -31,7 +38,7 @@ export function EditorPhoneZoom() {
         </Button>
         <button
           type="button"
-          className="flex h-9 min-w-10 items-center justify-center rounded-md px-1.5 font-mono text-[11px] font-normal tabular-nums text-foreground hover:bg-muted/60"
+          className="flex h-9 min-w-11 items-center justify-center rounded-md px-1.5 font-mono text-[11px] font-normal tabular-nums text-foreground hover:bg-muted/50"
           onClick={() => setZoom(100)}
           title={t("reset")}
           aria-label={t("reset")}
@@ -41,7 +48,7 @@ export function EditorPhoneZoom() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-9 rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+          className="size-9 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
           onClick={() => setZoom(clampZoom(zoom + 10))}
           title={t("in")}
           aria-label={t("in")}

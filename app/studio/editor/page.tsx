@@ -172,7 +172,7 @@ export default function CarouselEditor() {
   const closePhoneSheet = () => setPhoneSheet(null);
 
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-background font-sans text-foreground select-none">
+    <div className="relative flex h-dvh w-full flex-col overflow-hidden bg-background font-sans text-foreground select-none">
       <Suspense fallback={null}>
         <StudioIntentBootstrap />
         <ProjectBootstrap />
@@ -182,6 +182,8 @@ export default function CarouselEditor() {
       <div
         className={cn(
           "flex min-h-0 flex-1 bg-muted/20",
+          // Room for the floating glass dock on phone
+          !focusMode && "max-md:pb-[calc(4.75rem+env(safe-area-inset-bottom))]",
           "md:gap-3 md:p-3",
         )}
         style={
