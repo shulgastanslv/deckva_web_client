@@ -859,6 +859,26 @@
         "cta": "Open studio",
         "alt": "Device mockups preview"
       },
+      "mobile": {
+        "title": "Studio that fits in your hand",
+        "points": [
+          "Floating glass dock for home, projects, and create",
+          "Library and style as sheets above the canvas",
+          "Edit a draft on the go — finish on a larger screen when you want"
+        ],
+        "cta": "Open on phone",
+        "alt": "Mobile studio preview with glass dock",
+        "previewGreeting": "Good morning",
+        "previewSub": "One line is enough to start a carousel.",
+        "previewPrompt": "What should this carousel be about?",
+        "previewRecent": "Recent",
+        "dock": {
+          "home": "Home",
+          "projects": "Projects",
+          "community": "Community",
+          "brand": "Brand"
+        }
+      },
       "export": {
         "title": "Download a ready post",
         "points": [
@@ -986,7 +1006,7 @@
       },
       "mobile": {
         "q": "Can I use it on my phone?",
-        "a": "Viewing and downloading work. Building and editing are better on a computer — the studio is made for a larger screen."
+        "a": "Yes. Studio and the editor have a phone layout — floating dock, sheets for library and style, and a centered canvas. A larger screen is still nicer for deep edits, but you can start and tweak on the go."
       },
       "commercial": {
         "q": "Can I use this commercially?",

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { landIsland, landSerif } from "@/components/landing/landing-shell";
+import { MobileStudioVisual } from "@/components/landing/mobile-studio-visual";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,7 @@ const FEATURE_IDS = [
   "edit",
   "codeblock",
   "mockups",
+  "mobile",
   "export",
 ] as const;
 
@@ -33,7 +35,7 @@ type CustomFeatureMeta = {
   href: string;
   place: string;
   reverse?: boolean;
-  kind: "codeblock";
+  kind: "codeblock" | "mobile";
   grid: string;
   visual: string;
 };
@@ -80,9 +82,17 @@ const FEATURE_META: Record<FeatureId, FeatureMeta> = {
     grid: "lg:grid-cols-[0.85fr_1.15fr] lg:gap-12 xl:gap-14",
     visual: "max-w-[22rem] sm:max-w-[26rem] lg:max-w-[30rem]",
   },
+  mobile: {
+    href: "/studio",
+    place: "feature_mobile",
+    kind: "mobile",
+    grid: "lg:grid-cols-[1fr_0.85fr] lg:gap-12 xl:gap-14",
+    visual: "max-w-[15.5rem] sm:max-w-[17rem] lg:max-w-[18.5rem]",
+  },
   export: {
     href: "#pricing",
     place: "feature_export",
+    reverse: true,
     kind: "image",
     src: "/landing/export.png",
     width: 739,
@@ -286,6 +296,11 @@ export function FeatureBlocks() {
 
               {meta.kind === "codeblock" ? (
                 <CodeBlockVisual alt={t(`${id}.alt`)} className={meta.visual} />
+              ) : meta.kind === "mobile" ? (
+                <MobileStudioVisual
+                  alt={t(`${id}.alt`)}
+                  className={meta.visual}
+                />
               ) : (
                 <FeatureImage
                   src={meta.src}
@@ -299,7 +314,7 @@ export function FeatureBlocks() {
           </article>
         );
       })}
-      <div className="h-[18vh]" aria-hidden />
+      <div className="h-[22vh]" aria-hidden />
     </section>
   );
 }
