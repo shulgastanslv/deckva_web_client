@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import {
   Folder as FolderIcon,
   House as HomeIcon,
@@ -13,7 +14,7 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
-export function StudioMobileNav({
+function StudioMobileNavInner({
   drawerOpen,
   onCreate,
 }: {
@@ -22,6 +23,8 @@ export function StudioMobileNav({
 }) {
   const t = useTranslations("studio.nav");
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const communityTab = searchParams.get("tab") === "community";
 
   const items = [
     {
@@ -34,13 +37,14 @@ export function StudioMobileNav({
       href: "/studio/browse",
       label: t("projects"),
       icon: FolderIcon,
-      active: pathname.startsWith("/studio/browse"),
+      active:
+        pathname.startsWith("/studio/browse") && !communityTab,
     },
     {
       href: "/studio/browse?tab=community",
       label: t("community"),
       icon: UsersIcon,
-      active: pathname.includes("tab=community"),
+      active: pathname.startsWith("/studio/browse") && communityTab,
     },
     {
       href: "/studio/brand-kit",
@@ -54,8 +58,8 @@ export function StudioMobileNav({
     <nav
       aria-label={t("studio")}
       className={cn(
-        "flex shrink-0 items-stretch justify-around bg-muted/20 px-1 pb-[env(safe-area-inset-bottom)] md:hidden",
-        drawerOpen && "invisible",
+        "flex shrink-0 items-stretch justify-around border-t border-border/40 bg-muted/20 px-1 pt-0.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] md:hidden",
+        drawerOpen && "invisible pointer-events-none",
       )}
     >
       {items.map(({ href, label, icon: Icon, active }) => (
@@ -64,12 +68,18 @@ export function StudioMobileNav({
           href={href}
           aria-current={active ? "page" : undefined}
           className={cn(
-            "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium",
+            "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-normal tracking-tight",
             active ? "text-foreground" : "text-muted-foreground",
           )}
         >
-          <Icon className="size-5 stroke-[1.5]" />
-          {label}
+          <Icon
+            className={cn(
+              "size-5 stroke-[1.5]",
+              active ? "opacity-100" : "opacity-80",
+            )}
+            weight={active ? "fill" : "regular"}
+          />
+          <span className="max-w-full truncate px-0.5">{label}</span>
         </Link>
       ))}
       <button
@@ -83,5 +93,26 @@ export function StudioMobileNav({
         </span>
       </button>
     </nav>
+  );
+}
+
+export function StudioMobileNav({
+  drawerOpen,
+  onCreate,
+}: {
+  drawerOpen: boolean;
+  onCreate: () => void;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <nav
+          aria-hidden
+          className="flex h-[3.25rem] shrink-0 md:hidden"
+        />
+      }
+    >
+      <StudioMobileNavInner drawerOpen={drawerOpen} onCreate={onCreate} />
+    </Suspense>
   );
 }

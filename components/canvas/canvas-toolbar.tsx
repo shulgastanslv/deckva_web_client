@@ -257,40 +257,42 @@ export function CanvasToolbar({
   return (
     <div
       data-tour="editorToolbar"
-      className="flex h-full w-full min-w-0 items-center justify-end gap-1.5 select-none"
+      className="flex h-full w-full min-w-0 items-center justify-end gap-1 select-none"
     >
-      <div className="flex shrink-0 items-center gap-1.5">
+      <div className="flex min-w-0 items-center gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex items-center rounded-md p-0.5">
-          <PageIcon
-            title={t("moveEarlier")}
-            disabled={!canGoPrev}
-            onClick={() => move("left")}
-          >
-            <ChevronUp className="size-5" />
-          </PageIcon>
-          <PageIcon
-            title={t("moveLater")}
-            disabled={!canGoNext}
-            onClick={() => move("right")}
-          >
-            <ChevronDown className="size-5" />
-          </PageIcon>
-          <PageIcon
-            title={target ? (targetHidden ? t("showObject") : t("hideObject")) : t("selectObjectToHide")}
-            disabled={!target}
-            pressed={targetHidden}
-            onClick={toggleHidden}
-          >
-            {targetHidden ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-          </PageIcon>
-          <PageIcon
-            title={target ? (targetLocked ? t("unlockObject") : t("lockObject")) : t("selectObjectToLock")}
-            disabled={!target}
-            pressed={targetLocked}
-            onClick={toggleLocked}
-          >
-            {targetLocked ? <Lock className="size-5" /> : <Unlock className="size-5" />}
-          </PageIcon>
+          <div className="hidden items-center md:flex">
+            <PageIcon
+              title={t("moveEarlier")}
+              disabled={!canGoPrev}
+              onClick={() => move("left")}
+            >
+              <ChevronUp className="size-5" />
+            </PageIcon>
+            <PageIcon
+              title={t("moveLater")}
+              disabled={!canGoNext}
+              onClick={() => move("right")}
+            >
+              <ChevronDown className="size-5" />
+            </PageIcon>
+            <PageIcon
+              title={target ? (targetHidden ? t("showObject") : t("hideObject")) : t("selectObjectToHide")}
+              disabled={!target}
+              pressed={targetHidden}
+              onClick={toggleHidden}
+            >
+              {targetHidden ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+            </PageIcon>
+            <PageIcon
+              title={target ? (targetLocked ? t("unlockObject") : t("lockObject")) : t("selectObjectToLock")}
+              disabled={!target}
+              pressed={targetLocked}
+              onClick={toggleLocked}
+            >
+              {targetLocked ? <Lock className="size-5" /> : <Unlock className="size-5" />}
+            </PageIcon>
+          </div>
           <PageIcon title={t("duplicateSlide")} onClick={() => void duplicate()}>
             <CopyPlus className="size-5" />
           </PageIcon>
@@ -368,6 +370,40 @@ export function CanvasToolbar({
                 <span className="flex-1">{t("focusMode")}</span>
               </DropdownMenuItem>
             ) : null}
+
+            <DropdownMenuSeparator className="bg-border/50 md:hidden" />
+            <DropdownMenuItem
+              className={cn(menuItem, "md:hidden")}
+              disabled={!canGoPrev}
+              onSelect={() => move("left")}
+            >
+              <ChevronUp className="size-5" />
+              {t("moveEarlier")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className={cn(menuItem, "md:hidden")}
+              disabled={!canGoNext}
+              onSelect={() => move("right")}
+            >
+              <ChevronDown className="size-5" />
+              {t("moveLater")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className={cn(menuItem, "md:hidden")}
+              disabled={!target}
+              onSelect={toggleHidden}
+            >
+              {targetHidden ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+              {targetHidden ? t("showObject") : t("hideObject")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className={cn(menuItem, "md:hidden")}
+              disabled={!target}
+              onSelect={toggleLocked}
+            >
+              {targetLocked ? <Lock className="size-5" /> : <Unlock className="size-5" />}
+              {targetLocked ? t("unlockObject") : t("lockObject")}
+            </DropdownMenuItem>
 
             <DropdownMenuSeparator className="bg-border/50" />
 

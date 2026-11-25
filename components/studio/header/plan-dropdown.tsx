@@ -114,7 +114,7 @@ export function PlanDropdown() {
         <Button
           variant="secondary"
           className={cn(
-            "gap-1.5 rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60",
+            "gap-1.5 rounded-md border-none bg-muted/40 px-2.5 text-[12px] font-normal text-foreground shadow-none hover:bg-muted/60 data-[state=open]:bg-muted/60 sm:px-3.5 sm:text-[13px]",
           )}
         >
           <span className="inline-flex items-center tabular-nums">{label}</span>

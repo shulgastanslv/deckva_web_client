@@ -13,6 +13,7 @@ import { CodeBlockEditDialog } from "@/components/canvas/code-block-edit-dialog"
 import { CanvasRulers, RULER_SIZE } from "@/components/canvas/canvas-rulers";
 import { clampZoom } from "@/components/canvas/zoom-controls";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsPhone } from "@/hooks/use-is-phone";
 import { cn } from "@/lib/utils";
 
 function SlideSkeleton({ className }: { className?: string }) {
@@ -34,11 +35,13 @@ function SlideSkeleton({ className }: { className?: string }) {
   );
 }
 
-const PADDING = 56;
+const PADDING_DESKTOP = 56;
+const PADDING_PHONE = 20;
 /** Space between slides when the multi-canvas ribbon is on. */
 const RIBBON_GAP = 28;
 /** Space after the active slide before the “add” slot in single-canvas mode. */
 const SINGLE_GAP = 56;
+const SINGLE_GAP_PHONE = 28;
 /** Canva-style page bar height reserved above the slide stage. */
 export const PAGE_BAR_H = 44;
 /** Space under the active slide for the slide index caption. */
@@ -80,32 +83,37 @@ function stageFrame(
   slideCount: number,
   pageBarH = 0,
   ribbon = false,
+  compact = false,
 ): StageFrame {
-  const availW = Math.max(viewportW - PADDING * 2 - RULER_SIZE, 1);
-  const availH = Math.max(viewportH - PADDING * 2 - pageBarH - RULER_SIZE, 1);
+  const padding = compact ? PADDING_PHONE : PADDING_DESKTOP;
+  const availW = Math.max(viewportW - padding * 2 - (compact ? 0 : RULER_SIZE), 1);
+  const availH = Math.max(viewportH - padding * 2 - pageBarH - (compact ? 0 : RULER_SIZE), 1);
   const fit = Math.min(availW / nativeW, availH / nativeH);
   const scale = Math.max(0.05, fit * (zoomPercent / 100));
   const width = Math.max(1, Math.round(nativeW * scale));
   const height = Math.max(1, Math.round(nativeH * scale));
   const count = Math.max(1, ribbon ? slideCount : 1);
-  const gap = ribbon ? RIBBON_GAP : SINGLE_GAP;
-  const addSlotW = 112;
+  const gap = ribbon ? RIBBON_GAP : compact ? SINGLE_GAP_PHONE : SINGLE_GAP;
+  // Phone: no trailing add-slot — keeps the active slide centered; add via toolbar.
+  const addSlotW = compact ? 0 : 112;
+  const trailingGap = compact ? 0 : gap;
   const pagesWidth =
-    count * width + Math.max(0, count - 1) * gap + gap + addSlotW;
+    count * width + Math.max(0, count - 1) * gap + trailingGap + addSlotW;
   const stackH = height + pageBarH + SLIDE_CAPTION_H;
-  const contentWidth = Math.max(viewportW, pagesWidth + PADDING * 2 + RULER_SIZE);
-  const contentHeight = Math.max(viewportH, stackH + PADDING * 2 + RULER_SIZE);
+  const edge = compact ? 0 : RULER_SIZE;
+  const contentWidth = Math.max(viewportW, pagesWidth + padding * 2 + edge);
+  const contentHeight = Math.max(viewportH, stackH + padding * 2 + edge);
   const stackTop = (contentHeight - stackH) / 2;
   return {
     scale,
     width,
     height,
-    top: Math.max(stackTop + pageBarH, RULER_SIZE + pageBarH + 8),
+    top: Math.max(stackTop + pageBarH, edge + pageBarH + (compact ? 4 : 8)),
     contentWidth,
     contentHeight,
     nativeW,
     nativeH,
-    originX: Math.max((contentWidth - pagesWidth) / 2, RULER_SIZE + PADDING / 2),
+    originX: Math.max((contentWidth - pagesWidth) / 2, edge + padding / 2),
     gap,
     count,
     addSlotW,
@@ -169,6 +177,8 @@ export function CanvasView({
   const lastFocusedIdRef = useRef(currentSlideId);
   const scrollRafRef = useRef(0);
 
+  const isPhone = useIsPhone();
+  const compact = isPhone === true;
   const pageBarH = pageChrome ? PAGE_BAR_H : 0;
   const currentIndex = Math.max(
     0,
@@ -187,8 +197,9 @@ export function CanvasView({
       slides.length,
       pageBarH,
       showAllCanvases,
+      compact,
     );
-  }, [viewport, canvasDimensions, zoom, slides.length, pageBarH, showAllCanvases]);
+  }, [viewport, canvasDimensions, zoom, slides.length, pageBarH, showAllCanvases, compact]);
   const frameRef = useRef(frame);
   frameRef.current = frame;
 
@@ -310,6 +321,12 @@ export function CanvasView({
     lastFocusedIdRef.current = currentSlideId;
     scrollSlideToCenter(showAllCanvases ? currentIndex : 0, "smooth");
   }, [currentSlideId, currentIndex, showAllCanvases]);
+
+  // Phone / first paint — snap the active slide into the viewport center.
+  useLayoutEffect(() => {
+    if (!frame || !compact) return;
+    scrollSlideToCenter(showAllCanvases ? currentIndex : 0, "auto");
+  }, [frame?.width, frame?.height, compact, showAllCanvases, currentIndex]);
 
   useEffect(() => {
     if (!manager) return;
@@ -776,7 +793,7 @@ export function CanvasView({
             </div>
           ) : null}
 
-          {frame && !isGeneratingCarousel ? (
+          {frame && !isGeneratingCarousel && !compact ? (
             <button
               type="button"
               title="Add slide"

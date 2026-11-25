@@ -112,22 +112,25 @@ function StudioShellInner({
             <button
               type="button"
               aria-label={tn("closeMenu")}
-              className="absolute inset-0 bg-black/55"
+              className="absolute inset-0 bg-black/50"
               onClick={() => setNavOpen(false)}
             />
-            <div className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col overflow-hidden bg-muted/20 dark:bg-background">
-              <div className="flex justify-end px-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+            <div className="absolute inset-y-0 left-0 flex w-[min(18.5rem,86vw)] flex-col overflow-hidden bg-background pt-[env(safe-area-inset-top)] shadow-sm">
+              <div className="flex shrink-0 items-center justify-between px-3 py-2">
+                <span className="px-1 text-[13px] font-normal text-muted-foreground">
+                  {tn("studio")}
+                </span>
                 <button
                   type="button"
                   aria-label={tc("close")}
                   onClick={() => setNavOpen(false)}
-                  className="flex size-9 items-center justify-center rounded-md text-foreground"
+                  className="flex size-9 items-center justify-center rounded-md text-foreground hover:bg-muted/40"
                 >
-                  <X className="size-5" />
+                  <X className="size-5 stroke-[1.5]" />
                 </button>
               </div>
               <StudioSidebar
-                className="min-h-0 w-full flex-1"
+                className="min-h-0 w-full flex-1 bg-background"
                 search={sidebarSearch}
                 onSearchChange={setSidebarSearch}
                 onBlank={create.openBlank}

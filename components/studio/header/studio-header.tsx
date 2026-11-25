@@ -29,8 +29,8 @@ export function StudioHeader({
   const signedIn = status === "authenticated";
 
   return (
-    <header className="flex shrink-0 items-center justify-between gap-2 py-4 px-3 bg-muted/20 rounded-t-2xl sm:gap-3 sm:px-6">
-      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+    <header className="flex shrink-0 items-center justify-between gap-2 bg-muted/20 px-3 py-3 md:rounded-t-2xl md:px-6 md:py-4">
+      <div className="flex min-w-0 items-center gap-1 sm:gap-2">
         {onMenu ? (
           <button
             type="button"
@@ -61,15 +61,18 @@ export function StudioHeader({
           />
         </button>
         {signedIn ? (
-          <span data-tour="plan" className="inline-flex">
+          <span data-tour="plan" className="inline-flex min-w-0">
             <PlanDropdown />
           </span>
         ) : null}
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <div className="hidden items-center gap-2 md:flex">
           <KeyboardShortcutsMenu />
+          <InviteMembersDialog />
+        </div>
+        <div className="md:hidden">
           <InviteMembersDialog />
         </div>
         <StudioNotifications />
@@ -78,7 +81,7 @@ export function StudioHeader({
           <Button
             type="button"
             variant="secondary"
-            className="rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-medium shadow-none hover:bg-muted/60"
+            className="rounded-md border-none bg-muted/40 px-3 text-[13px] font-medium shadow-none hover:bg-muted/60 sm:px-3.5"
             onClick={onSignIn}
           >
             {t("signIn")}
