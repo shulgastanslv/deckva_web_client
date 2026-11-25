@@ -301,7 +301,7 @@ export function FeatureBlocks() {
                   alt={t(`${id}.alt`)}
                   className={meta.visual}
                 />
-              ) : (
+              ) : meta.kind === "image" ? (
                 <FeatureImage
                   src={meta.src}
                   alt={t(`${id}.alt`)}
@@ -309,7 +309,7 @@ export function FeatureBlocks() {
                   height={meta.height}
                   className={meta.visual}
                 />
-              )}
+              ) : null}
             </div>
           </article>
         );
