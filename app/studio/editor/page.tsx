@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
 
 import { LeftSidebar, RAIL_SHORTCUTS } from "@/components/canvas/left-sidebar";
 import { CanvasToolbar } from "@/components/canvas/canvas-toolbar";
@@ -14,9 +13,10 @@ import { SelectionToolbar } from "@/components/canvas/selection-toolbar";
 import { AutoFlowPrompt } from "@/components/canvas/auto-flow-prompt";
 import { RightSidebar } from "@/components/canvas/right-sidebar";
 import { PreviewModal } from "@/components/canvas/preview-modal";
-import { ZoomControls } from "@/components/canvas/zoom-controls";
 import type { NavId } from "@/components/canvas/left-sidebar";
 import { EditorPhoneDock } from "@/components/canvas/editor-phone-dock";
+import { EditorPhoneSheet } from "@/components/canvas/editor-phone-sheet";
+import { EditorPhoneZoom } from "@/components/canvas/editor-phone-zoom";
 import { StudioIntentBootstrap } from "@/components/studio/studio-intent-bootstrap";
 import { peekStudioIntent } from "@/lib/studio/pending-intent";
 
@@ -25,11 +25,7 @@ import { useProject } from "@/hooks/use-project";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useCanvasManager, useSlidesController } from "@/context/canvas-manager";
 import { cn } from "@/lib/utils";
-
-const SlideNavigator = dynamic(
-  () => import("@/components/canvas/slide-navigator").then((mod) => mod.SlideNavigator),
-  { ssr: false },
-);
+import { useTranslations } from "next-intl";
 
 function ProjectBootstrap() {
   const searchParams = useSearchParams();
@@ -94,6 +90,8 @@ function AuthLinkHandler() {
 }
 
 export default function CarouselEditor() {
+  const tPanels = useTranslations("editor.panels");
+  const tc = useTranslations("common");
   const [activeNav, setActiveNav] = useState<NavId>("elements");
   const [showDotGrid, setShowDotGrid] = useState(true);
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
@@ -165,17 +163,16 @@ export default function CarouselEditor() {
     return () => window.removeEventListener("keydown", onKey);
   }, [focusMode, manager, phoneSheet]);
 
-  const sheetFrame =
-    "max-md:fixed max-md:inset-x-0 max-md:z-40 max-md:overflow-hidden max-md:rounded-t-3xl max-md:bg-background max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:h-[min(72dvh,calc(100dvh-8.5rem))] md:relative md:z-20 md:flex md:h-full md:min-h-0 md:shrink-0 md:overflow-visible";
-
   const openPreview = (view: "slides" | "phone") => {
     setPreviewSlideId(useCanvasStore.getState().currentSlideId);
     setPreviewView(view);
     setShowPreviewModal(true);
   };
 
+  const closePhoneSheet = () => setPhoneSheet(null);
+
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-background font-sans text-foreground select-none">
+    <div className="relative flex h-dvh w-full flex-col overflow-hidden bg-background font-sans text-foreground select-none">
       <Suspense fallback={null}>
         <StudioIntentBootstrap />
         <ProjectBootstrap />
@@ -185,6 +182,8 @@ export default function CarouselEditor() {
       <div
         className={cn(
           "flex min-h-0 flex-1 bg-muted/20",
+          // Room for the floating glass dock on phone
+          !focusMode && "max-md:pb-[calc(4.75rem+env(safe-area-inset-bottom))]",
           "md:gap-3 md:p-3",
         )}
         style={
@@ -198,11 +197,10 @@ export default function CarouselEditor() {
         }
       >
         {!focusMode && (
-          <div
-            className={cn(
-              sheetFrame,
-              phoneSheet === "library" ? "max-md:flex" : "max-md:hidden",
-            )}
+          <EditorPhoneSheet
+            open={phoneSheet === "library"}
+            title={tPanels("library")}
+            onClose={closePhoneSheet}
           >
             <LeftSidebar
               activeNav={activeNav}
@@ -212,7 +210,7 @@ export default function CarouselEditor() {
               showDotGrid={showDotGrid}
               setShowDotGrid={setShowDotGrid}
             />
-          </div>
+          </EditorPhoneSheet>
         )}
 
         <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -240,24 +238,24 @@ export default function CarouselEditor() {
               <CanvasChromeRestore onShow={() => setCanvasChrome(true)} />
             )}
             {!focusMode && <AutoFlowPrompt />}
+            {!focusMode && !phoneSheet ? <EditorPhoneZoom /> : null}
 
             {!focusMode && phoneSheet ? (
               <button
                 type="button"
-                aria-label="Close panel"
+                aria-label={tc("close")}
                 className="absolute inset-0 z-30 md:hidden"
-                onClick={() => setPhoneSheet(null)}
+                onClick={closePhoneSheet}
               />
             ) : null}
           </div>
         </main>
 
         {!focusMode && (
-          <div
-            className={cn(
-              sheetFrame,
-              phoneSheet === "style" ? "max-md:flex" : "max-md:hidden",
-            )}
+          <EditorPhoneSheet
+            open={phoneSheet === "style"}
+            title={tPanels("style")}
+            onClose={closePhoneSheet}
           >
             <RightSidebar
               isRightCollapsed={isRightCollapsed}
@@ -265,7 +263,7 @@ export default function CarouselEditor() {
               onPreview={() => openPreview("slides")}
               onPhonePreview={() => openPreview("phone")}
             />
-          </div>
+          </EditorPhoneSheet>
         )}
       </div>
 

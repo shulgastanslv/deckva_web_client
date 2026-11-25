@@ -15,9 +15,11 @@ import {
 } from "@/components/studio/lib/use-studio-create";
 import { StudioMobileNav } from "@/components/studio/studio-mobile-nav";
 import { StudioSidebar } from "@/components/studio/sidebar/studio-sidebar";
+import { mobileGlassDrawer } from "@/components/studio/ui/mobile-glass";
 import { StudioPageMotion } from "@/components/studio/ui/studio-page-motion";
 import { StudioUpgradeBanner } from "@/components/studio/ui/studio-upgrade-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 export function StudioShell({ children }: { children: ReactNode }) {
   const [authOpen, setAuthOpen] = useState(false);
@@ -112,27 +114,41 @@ function StudioShellInner({
             <button
               type="button"
               aria-label={tn("closeMenu")}
-              className="absolute inset-0 bg-black/55"
+              className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
               onClick={() => setNavOpen(false)}
             />
-            <div className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col overflow-hidden bg-muted/20 dark:bg-background">
-              <div className="flex justify-end px-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
-                <button
-                  type="button"
-                  aria-label={tc("close")}
-                  onClick={() => setNavOpen(false)}
-                  className="flex size-9 items-center justify-center rounded-md text-foreground"
-                >
-                  <X className="size-5" />
-                </button>
+            <div
+              className={cn(
+                "absolute inset-y-2 left-0 flex w-[min(18.5rem,86vw)] flex-col overflow-hidden py-[max(0.5rem,env(safe-area-inset-top))] pl-[max(0.5rem,env(safe-area-inset-left))]",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex min-h-0 flex-1 flex-col overflow-hidden",
+                  mobileGlassDrawer,
+                )}
+              >
+                <div className="flex shrink-0 items-center justify-between px-3.5 py-2.5">
+                  <span className="px-1 text-[13px] font-normal text-muted-foreground">
+                    {tn("studio")}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={tc("close")}
+                    onClick={() => setNavOpen(false)}
+                    className="flex size-9 items-center justify-center rounded-md text-foreground hover:bg-muted/40"
+                  >
+                    <X className="size-5 stroke-[1.5]" />
+                  </button>
+                </div>
+                <StudioSidebar
+                  className="min-h-0 w-full flex-1 bg-transparent"
+                  search={sidebarSearch}
+                  onSearchChange={setSidebarSearch}
+                  onBlank={create.openBlank}
+                  onTemplates={create.openCommunity}
+                />
               </div>
-              <StudioSidebar
-                className="min-h-0 w-full flex-1"
-                search={sidebarSearch}
-                onSearchChange={setSidebarSearch}
-                onBlank={create.openBlank}
-                onTemplates={create.openCommunity}
-              />
             </div>
           </div>
         ) : null}

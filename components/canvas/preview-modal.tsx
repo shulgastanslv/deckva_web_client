@@ -268,12 +268,12 @@ export function PreviewModal({
       data-slot="preview-modal"
       className="fixed inset-0 z-50 flex animate-in fade-in-0 flex-col bg-background/95 backdrop-blur-md duration-200 select-none"
     >
-      <div className="grid shrink-0 grid-cols-3 items-center px-6 py-4">
+      <div className="grid shrink-0 grid-cols-3 items-center px-3 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 sm:py-4">
         <div className="flex items-center gap-3">
           {rendering && (
             <span className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
               <Loader2 className="size-3 animate-spin" />
-              {t("preparing")}
+              <span className="hidden sm:inline">{t("preparing")}</span>
             </span>
           )}
         </div>
@@ -282,7 +282,7 @@ export function PreviewModal({
             type="button"
             onClick={() => setView("slides")}
             className={cn(
-              "h-7 rounded-md px-3 transition-colors",
+              "h-7 rounded-md px-2.5 transition-colors sm:px-3",
               view === "slides" ? "bg-background text-foreground" : "text-muted-foreground",
             )}
           >
@@ -292,22 +292,22 @@ export function PreviewModal({
             type="button"
             onClick={() => setView("phone")}
             className={cn(
-              "h-7 rounded-md px-3 transition-colors",
+              "h-7 rounded-md px-2.5 transition-colors sm:px-3",
               view === "phone" ? "bg-background text-foreground" : "text-muted-foreground",
             )}
           >
             {t("phone")}
           </button>
         </div>
-        <div className="flex items-center justify-self-end gap-3">
-          <span className="font-mono text-[13px] text-muted-foreground">
+        <div className="flex items-center justify-self-end gap-2 sm:gap-3">
+          <span className="font-mono text-[12px] text-muted-foreground sm:text-[13px]">
             {activeIdx + 1} / {slides.length}
           </span>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
- className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
+            className="size-9 rounded-md text-muted-foreground hover:text-foreground"
           >
             <X className="size-5" />
           </Button>

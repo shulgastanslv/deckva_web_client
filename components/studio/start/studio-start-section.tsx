@@ -88,12 +88,12 @@ export function StudioStartSection({
 
   return (
     <section>
-      <div className="mb-5 flex items-start justify-between gap-4">
+      <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5 sm:gap-4">
         <div className="min-w-0">
-          <h2 className="flex items-center gap-2 text-4xl font-medium tracking-tight text-foreground sm:text-4xl">
+          <h2 className="text-2xl font-medium tracking-tight text-foreground sm:text-4xl">
             {greeting}
           </h2>
-          <p className="mt-1.5 text-[13px] text-muted-foreground sm:text-sm">
+          <p className="mt-1 text-[13px] text-muted-foreground sm:mt-1.5 sm:text-sm">
             {t("activationSub")}
           </p>
         </div>
@@ -105,7 +105,7 @@ export function StudioStartSection({
             onImportJson={onImportJson}
             label={t("otherWays")}
             align="end"
-            triggerClassName="shrink-0 gap-1.5 bg-muted/40 px-3.5 text-[13px] font-normal text-foreground hover:bg-muted/60 data-[state=open]:bg-muted/60"
+            triggerClassName="shrink-0 gap-1.5 bg-muted/40 px-2.5 text-[12px] font-normal text-foreground hover:bg-muted/60 data-[state=open]:bg-muted/60 sm:px-3.5 sm:text-[13px]"
           />
         </span>
       </div>

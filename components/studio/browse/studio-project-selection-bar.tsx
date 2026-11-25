@@ -41,7 +41,7 @@ export function StudioProjectSelectionBar({
   return (
     <div
       className={cn(
-        "sticky bottom-4 z-20 mx-auto flex w-fit max-w-full flex-wrap items-center gap-1.5 rounded-md bg-foreground px-2 py-1.5 text-background shadow-sm",
+        "sticky bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 mx-3 flex w-fit max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-1.5 rounded-2xl bg-foreground/95 px-2.5 py-2 text-background shadow-sm backdrop-blur-md md:bottom-4 md:mx-auto md:rounded-md",
         className,
       )}
     >

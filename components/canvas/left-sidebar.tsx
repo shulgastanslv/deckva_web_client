@@ -131,11 +131,16 @@ export function LeftSidebar({
     >
       <aside
         data-tour="editorRail"
-        className="flex w-14 shrink-0 flex-col items-center justify-between bg-background py-4"
+        className="flex w-14 shrink-0 flex-col items-center justify-between bg-transparent py-3 max-md:py-2 md:bg-background md:py-4"
       >
         <TooltipProvider delayDuration={300}>
           <div className="flex flex-col items-center gap-1.5">
-            <Logo width={36} height={36} href="/studio" className="mb-1.5" />
+            <Logo
+              width={36}
+              height={36}
+              href="/studio"
+              className="mb-1.5 hidden md:block"
+            />
             {navItems.map(({ id, icon: Icon, label }, index) => (
               <RailTooltip key={id} label={`${label} (${index + 1})`}>
                 <Button
@@ -158,43 +163,45 @@ export function LeftSidebar({
           </div>
 
           <div className="flex flex-col items-center gap-1.5">
-            <RailTooltip label={tc("undo")}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={railBtn}
-                aria-label={tc("undo")}
-                onClick={() => void manager?.undo()}
-              >
-                <Undo2 className={navIconClass} />
-              </Button>
-            </RailTooltip>
-            <RailTooltip label={tc("redo")}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={railBtn}
-                aria-label={tc("redo")}
-                onClick={() => void manager?.redo()}
-              >
-                <Redo2 className={navIconClass} />
-              </Button>
-            </RailTooltip>
-            <RailTooltip label={isLeftCollapsed ? t("expandPanel") : t("collapsePanel")}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={railBtn}
-                aria-label={isLeftCollapsed ? t("expandPanel") : t("collapsePanel")}
-                onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
-              >
-                {isLeftCollapsed ? (
-                  <PanelLeftOpen className={navIconClass} />
-                ) : (
-                  <PanelLeftClose className={navIconClass} />
-                )}
-              </Button>
-            </RailTooltip>
+            <div className="hidden flex-col items-center gap-1.5 md:flex">
+              <RailTooltip label={tc("undo")}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={railBtn}
+                  aria-label={tc("undo")}
+                  onClick={() => void manager?.undo()}
+                >
+                  <Undo2 className={navIconClass} />
+                </Button>
+              </RailTooltip>
+              <RailTooltip label={tc("redo")}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={railBtn}
+                  aria-label={tc("redo")}
+                  onClick={() => void manager?.redo()}
+                >
+                  <Redo2 className={navIconClass} />
+                </Button>
+              </RailTooltip>
+              <RailTooltip label={isLeftCollapsed ? t("expandPanel") : t("collapsePanel")}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={railBtn}
+                  aria-label={isLeftCollapsed ? t("expandPanel") : t("collapsePanel")}
+                  onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
+                >
+                  {isLeftCollapsed ? (
+                    <PanelLeftOpen className={navIconClass} />
+                  ) : (
+                    <PanelLeftClose className={navIconClass} />
+                  )}
+                </Button>
+              </RailTooltip>
+            </div>
             <RailTooltip label={`${t("settings")} (5)`}>
               <Button
                 variant="ghost"
@@ -228,7 +235,9 @@ export function LeftSidebar({
           </h2>
           <div className="flex items-center gap-1">
             <ProjectFileMenu />
-            <CanvasNavHint />
+            <span className="hidden md:contents">
+              <CanvasNavHint />
+            </span>
             <ChangeHistoryMenu />
             <SaveStatusMenu />
           </div>

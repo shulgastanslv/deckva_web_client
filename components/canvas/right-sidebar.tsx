@@ -1089,7 +1089,7 @@ export function RightSidebar({
             type="button"
             variant="ghost"
             size="icon"
-            className={`size-9 shrink-0 text-muted-foreground hover:text-foreground ${btnRound}`}
+            className={`hidden size-9 shrink-0 text-muted-foreground hover:text-foreground md:inline-flex ${btnRound}`}
             onClick={toggleRightCollapsed}
             title={t("collapsePanel")}
           >
