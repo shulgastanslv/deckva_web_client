@@ -185,7 +185,6 @@ export function GenerateOptionsDialog({
             <div className="flex items-center justify-between gap-2">
               <FieldLabel>{t("handle")}</FieldLabel>
               <Switch
-                size="sm"
                 checked={showHandle}
                 disabled={locked}
                 onCheckedChange={onShowHandleChange}

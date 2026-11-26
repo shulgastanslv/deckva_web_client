@@ -21,7 +21,7 @@ function Switch({
       data-slot="switch"
       data-size={size}
       className={cn(
-        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none",
+        "peer group/switch relative inline-flex shrink-0 items-center rounded-full p-0.5 transition-all outline-none",
         "focus-visible:ring-2 focus-visible:ring-ring/20",
         "aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
         "data-checked:bg-primary data-unchecked:bg-muted",
@@ -37,12 +37,9 @@ function Switch({
         className={cn(
           "pointer-events-none block rounded-full bg-background ring-0 transition-transform",
           "dark:data-checked:bg-primary-foreground dark:data-unchecked:bg-foreground",
+          "data-unchecked:translate-x-0 data-checked:translate-x-full",
           "group-data-[size=default]/switch:size-4",
           "group-data-[size=sm]/switch:size-3",
-          "group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)]",
-          "group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)]",
-          "group-data-[size=default]/switch:data-unchecked:translate-x-0.5",
-          "group-data-[size=sm]/switch:data-unchecked:translate-x-0.5",
         )}
       />
     </SwitchPrimitive.Root>
