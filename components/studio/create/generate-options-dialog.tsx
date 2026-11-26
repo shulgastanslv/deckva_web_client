@@ -8,12 +8,11 @@ import {
   sidebarSelectTrigger,
   sidebarTextarea,
 } from "@/components/canvas/sidebar/sidebar-ui";
+import { SlideCountPicker } from "@/components/studio/create/slide-count-picker";
 import { Button } from "@/components/ui/button";
-import { controlSize } from "@/components/ui/control";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -31,7 +30,6 @@ import { cn } from "@/lib/utils";
 
 const PROMPT_LANGUAGES = ["ru", "en", "be"] as const;
 const RATIO_OPTIONS = STUDIO_RATIO_KEYS;
-const SLIDE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 const HANDLE_SEEDS = [
   "@coach",
   "@founder",
@@ -59,7 +57,7 @@ function normalizeHandle(raw: string): string {
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return (
-    <span className="text-[11px] font-normal uppercase tracking-wide text-muted-foreground">
+    <span className="text-[12px] font-normal text-muted-foreground">
       {children}
     </span>
   );
@@ -105,36 +103,30 @@ export function GenerateOptionsDialog({
   const t = useTranslations("studio.prompt");
   const tc = useTranslations("common");
   const locked = busy;
-  const dims = CANVAS_RATIOS[aspectRatio];
   const canConfirm = topic.trim().length > 0 && !locked;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 overflow-hidden rounded-3xl border-border/50 p-0 shadow-none sm:max-w-[400px]">
-        <DialogHeader className="space-y-1 px-5 pt-5 text-left">
+        <DialogHeader className="px-5 pt-5 text-left">
           <DialogTitle className="text-base font-semibold tracking-tight">
             {t("generateDialogTitle")}
           </DialogTitle>
-          <DialogDescription className="text-[13px] text-muted-foreground">
-            {t("generateDialogSubtitle")}
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3.5 px-5 py-4">
-          <label className="block space-y-1.5">
-            <FieldLabel>{t("topic")}</FieldLabel>
-            <textarea
-              value={topic}
-              disabled={locked}
-              rows={3}
-              placeholder={t("topicPlaceholder")}
-              className={cn(sidebarTextarea, "min-h-[88px]")}
-              onChange={(e) => onTopicChange(e.target.value)}
-            />
-          </label>
+        <div className="space-y-3 px-5 pt-4 pb-5">
+          <textarea
+            value={topic}
+            disabled={locked}
+            rows={2}
+            placeholder={t("topicPlaceholder")}
+            aria-label={t("topic")}
+            className={cn(sidebarTextarea, "min-h-16")}
+            onChange={(e) => onTopicChange(e.target.value)}
+          />
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="min-w-0 space-y-1.5">
               <FieldLabel>{t("language")}</FieldLabel>
               <Select
                 value={language}
@@ -158,92 +150,77 @@ export function GenerateOptionsDialog({
               </Select>
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between gap-2">
-                <FieldLabel>{t("handle")}</FieldLabel>
-                <Switch
-                  checked={showHandle}
-                  disabled={locked}
-                  onCheckedChange={onShowHandleChange}
-                  aria-label={t("showHandle")}
-                />
-              </div>
-              <Input
-                value={handle}
-                disabled={locked || !showHandle}
-                placeholder={t("handlePlaceholder")}
-                className={cn(!showHandle && "opacity-50")}
-                onChange={(e) => onHandleChange(e.target.value)}
-                onBlur={() => {
-                  const next = normalizeHandle(handle);
-                  if (next !== handle) onHandleChange(next);
-                }}
-              />
+            <div className="min-w-0 space-y-1.5">
+              <FieldLabel>{t("ratio")}</FieldLabel>
+              <Select
+                value={aspectRatio}
+                disabled={locked}
+                onValueChange={(v) => onAspectRatioChange(v as RatioKey)}
+              >
+                <SelectTrigger className={sidebarSelectTrigger}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl p-1.5">
+                  {RATIO_OPTIONS.map((ratio) => {
+                    const size = CANVAS_RATIOS[ratio];
+                    return (
+                      <SelectItem
+                        key={ratio}
+                        value={ratio}
+                        className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50"
+                      >
+                        {ratio}
+                        <span className="ml-2 text-muted-foreground">
+                          {size.width}×{size.height}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <FieldLabel>{t("ratio")}</FieldLabel>
-            <Select
-              value={aspectRatio}
-              disabled={locked}
-              onValueChange={(v) => onAspectRatioChange(v as RatioKey)}
-            >
-              <SelectTrigger className={sidebarSelectTrigger}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl p-1.5">
-                {RATIO_OPTIONS.map((ratio) => {
-                  const size = CANVAS_RATIOS[ratio];
-                  return (
-                    <SelectItem
-                      key={ratio}
-                      value={ratio}
-                      className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50"
-                    >
-                      {ratio}
-                      <span className="ml-2 text-muted-foreground">
-                        {size.width}×{size.height}
-                      </span>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-            <p className="text-[11px] text-muted-foreground">
-              {dims.width}×{dims.height}px
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <FieldLabel>{t("handle")}</FieldLabel>
+              <Switch
+                size="sm"
+                checked={showHandle}
+                disabled={locked}
+                onCheckedChange={onShowHandleChange}
+                aria-label={t("showHandle")}
+              />
+            </div>
+            <Input
+              value={handle}
+              disabled={locked || !showHandle}
+              placeholder={t("handlePlaceholder")}
+              className={cn(!showHandle && "opacity-50")}
+              onChange={(e) => onHandleChange(e.target.value)}
+              onBlur={() => {
+                const next = normalizeHandle(handle);
+                if (next !== handle) onHandleChange(next);
+              }}
+            />
           </div>
 
           <div className="space-y-1.5">
             <FieldLabel>{t("slidesCount")}</FieldLabel>
-            <div className="flex flex-wrap gap-1.5">
-              {SLIDE_OPTIONS.map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  disabled={locked}
-                  onClick={() => onSlidesCountChange(n)}
-                  className={cn(
-                    controlSize,
-                    "flex items-center justify-center rounded-md border-none text-[13px] font-normal tabular-nums shadow-none transition-colors",
-                    slidesCount === n
-                      ? "bg-foreground text-background"
-                      : "bg-muted/40 text-foreground hover:bg-muted/60",
-                  )}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
+            <SlideCountPicker
+              value={slidesCount}
+              disabled={locked}
+              ariaLabel={t("slidesCount")}
+              onChange={onSlidesCountChange}
+            />
           </div>
 
           <div className="flex gap-2 pt-1">
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               disabled={locked}
-              className="flex-1 rounded-md border-none bg-muted/40 text-[13px] font-normal shadow-none hover:bg-muted/60"
+              className="flex-1 font-normal"
               onClick={() => onOpenChange(false)}
             >
               {tc("cancel")}
@@ -251,12 +228,12 @@ export function GenerateOptionsDialog({
             <Button
               type="button"
               disabled={!canConfirm}
-              className="flex-1 rounded-md border-none bg-primary text-[13px] font-normal text-primary-foreground shadow-none hover:bg-primary/90"
+              className="flex-1 font-normal"
               onClick={onConfirm}
             >
               {locked ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="size-5 animate-spin" />
                   {t("generating")}
                 </>
               ) : (

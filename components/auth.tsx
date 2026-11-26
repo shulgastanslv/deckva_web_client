@@ -8,16 +8,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { SpinnerGap as Loader2 } from "@phosphor-icons/react";
+import { CaretRight, SpinnerGap as Loader2 } from "@phosphor-icons/react";
 
 import { AuthProviderIcon } from "@/components/auth/oauth-icons";
+import { controlSize } from "@/components/ui/control";
 import Logo from "./logo/logo";
 import { AUTH_PROVIDERS_UI } from "@/lib/auth/oauth/catalog";
 import type { AuthProviderId } from "@/lib/auth/oauth/types";
+import { cn } from "@/lib/utils";
 
 interface AuthModalProps {
   isOpen?: boolean;
@@ -94,13 +95,21 @@ export function AuthModal({
         showCloseButton={!required}
         className="gap-0 overflow-hidden rounded-3xl border-border/50 p-0 sm:max-w-[400px]"
       >
-        <DialogHeader className="space-y-3 px-6 pt-6 pb-2 text-center sm:text-center">
-          <div className="mx-auto">
-            <Logo width={42} height={42} />
+        <div className="px-5 pt-5">
+          <div className="flex items-start justify-start mb-4">
+            <Logo width={42} height={42} className="pointer-events-none" />
           </div>
-        </DialogHeader>
+          <DialogHeader className="gap-1.5 text-left">
+            <DialogTitle className="text-base font-semibold tracking-tight">
+              {t("title")}
+            </DialogTitle>
+            <DialogDescription className="text-[13px] leading-snug">
+              {t("description")}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-3 px-6 py-5">
+        <div className="space-y-2 px-5 pt-4 pb-5">
           {errorMessage ? (
             <p className="rounded-md bg-destructive/10 px-3 py-2 text-[13px] text-destructive">
               {errorMessage}
@@ -110,49 +119,56 @@ export function AuthModal({
           {providers.map((provider) => {
             const busy = loadingId === provider.id;
             return (
-              <Button
+              <button
                 key={provider.id}
                 type="button"
-                variant="secondary"
-                className="w-full gap-2 h-12 text-[13px]"
                 disabled={loadingId !== null}
                 onClick={() => handleSignIn(provider.nextAuthId, provider.id)}
+                className="flex w-full items-center gap-3 rounded-md bg-muted/40 p-1.5 pr-3 text-left text-[13px] font-normal text-foreground transition-colors hover:bg-muted/60 disabled:opacity-50"
               >
-                {busy ? (
-                  <Loader2 className="size-5 animate-spin stroke-[1.5]" />
-                ) : (
-                  <AuthProviderIcon id={provider.id} />
-                )}
-                {t(provider.labelKey)}
-              </Button>
+                <span
+                  className={cn(
+                    controlSize,
+                    "flex shrink-0 items-center justify-center rounded-md bg-background",
+                  )}
+                >
+                  {busy ? (
+                    <Loader2 className="size-5 animate-spin stroke-[1.5]" />
+                  ) : (
+                    <AuthProviderIcon id={provider.id} />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">{t(provider.labelKey)}</span>
+                <CaretRight className="size-3.5 shrink-0 text-muted-foreground" />
+              </button>
             );
           })}
-
-          <p className="pt-1 text-center text-sm leading-relaxed text-muted-foreground">
-            {t.rich("agreeLegal", {
-              terms: (chunks) => (
-                <Link
-                  href="/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-foreground underline-offset-2 hover:underline"
-                >
-                  {chunks}
-                </Link>
-              ),
-              privacy: (chunks) => (
-                <Link
-                  href="/privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-foreground underline-offset-2 hover:underline"
-                >
-                  {chunks}
-                </Link>
-              ),
-            })}
-          </p>
         </div>
+
+        <p className="bg-muted/30 px-5 py-3.5 text-[12px] leading-snug text-muted-foreground">
+          {t.rich("agreeLegal", {
+            terms: (chunks) => (
+              <Link
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground underline-offset-2 hover:underline"
+              >
+                {chunks}
+              </Link>
+            ),
+            privacy: (chunks) => (
+              <Link
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground underline-offset-2 hover:underline"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
       </DialogContent>
     </Dialog>
   );

@@ -2,18 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import { StudioPrompt } from "@/components/studio/studio-prompt";
 import {
   pickStarterPrompts,
-  type StarterCarouselId,
+  starterText,
+  type StarterTopic,
 } from "@/lib/studio/onboarding";
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import { trackEvent } from "@/lib/analytics";
-import { useTranslations } from "next-intl";
-
-const STARTER_COUNT = 5;
 
 type GreetingPeriod = "morning" | "hello" | "evening";
 
@@ -56,9 +55,8 @@ export function StudioStartSection({
   const t = useTranslations("studio");
   const { data: session } = useSession();
   const [period, setPeriod] = useState<GreetingPeriod>("hello");
-  const [starters, setStarters] = useState<
-    Array<{ id: StarterCarouselId }>
-  >([]);
+  const locale = useLocale();
+  const [starters, setStarters] = useState<StarterTopic[]>([]);
 
   const displayName = firstNameFrom(
     name ?? session?.user?.name ?? null,
@@ -69,8 +67,8 @@ export function StudioStartSection({
   }, []);
 
   useEffect(() => {
-    const count = STARTER_COUNT + Math.floor(Math.random() * 2);
-    setStarters(pickStarterPrompts(count).map((item) => ({ id: item.id })));
+    const count = 3 + Math.floor(Math.random() * 3);
+    setStarters(pickStarterPrompts(count));
   }, []);
 
   const greeting =
@@ -127,23 +125,23 @@ export function StudioStartSection({
           <span className="text-[12px] text-muted-foreground">
             {t("tryStarter")}
           </span>
-          {starters.map((starter) => (
-            <button
-              key={starter.id}
-              type="button"
-              disabled={generating}
-              onClick={() => {
-                trackEvent("studio_starter_chip", { id: starter.id });
-                void onStarter(
-                  t(`starters.${starter.id}.topic`),
-                  starter.id,
-                );
-              }}
-              className="inline-flex h-8 items-center rounded-md bg-muted/40 px-3 text-[12px] font-medium text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60"
-            >
-              {t(`starters.${starter.id}.label`)}
-            </button>
-          ))}
+          {starters.map((starter) => {
+            const copy = starterText(starter, locale);
+            return (
+              <button
+                key={starter.id}
+                type="button"
+                disabled={generating}
+                onClick={() => {
+                  trackEvent("studio_starter_chip", { id: starter.id });
+                  void onStarter(copy.topic, starter.id);
+                }}
+                className="inline-flex h-8 items-center rounded-md bg-muted/40 px-3 text-[12px] font-normal text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60"
+              >
+                {copy.label}
+              </button>
+            );
+          })}
         </div>
       ) : null}
     </section>

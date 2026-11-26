@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   Bell,
   Camera as CameraIcon,
-  ChartBar as ChartBarIcon,
+  ChartLineUp,
   Check,
   Translate as Languages,
   SpinnerGap as Loader2,
@@ -34,6 +34,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { navIconClass } from "@/components/canvas/sidebar/sidebar-ui";
+import { controlH } from "@/components/ui/control";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import {
   localeLabels,
@@ -105,7 +107,7 @@ function readNotifyPrefs(): NotifyPrefs {
 
 const NAV_IDS: { id: Section; icon: typeof UserRound }[] = [
   { id: "profile", icon: UserRound },
-  { id: "statistics", icon: ChartBarIcon },
+  { id: "statistics", icon: ChartLineUp },
   { id: "notifications", icon: Bell },
   { id: "preferences", icon: Monitor },
   { id: "account", icon: LogOut },
@@ -324,17 +326,17 @@ export function ProfileSettingsDialog({
         className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-[720px]"
       >
         <div className="flex min-h-[440px] w-full min-w-0 flex-col sm:flex-row">
-          <aside className="flex w-full min-w-0 shrink-0 flex-col bg-muted/25 sm:w-[168px]">
-            <div className="px-4 pt-4 pb-2">
-              <DialogTitle className="text-[13px] font-semibold tracking-tight">
+          <aside className="flex w-full min-w-0 shrink-0 flex-col gap-3 bg-muted/20 px-3.5 py-3 sm:w-56">
+            <div>
+              <DialogTitle className="text-[14px] font-semibold tracking-tight">
                 {t("title")}
               </DialogTitle>
-              <DialogDescription className="mt-0.5 text-[11px] text-muted-foreground">
+              <DialogDescription className="mt-0.5 text-[13px] text-muted-foreground">
                 {t("accountBilling")}
               </DialogDescription>
             </div>
 
-            <nav className="flex gap-1 overflow-x-auto overscroll-x-contain px-2 pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:flex-col sm:overflow-visible sm:px-2 sm:pb-4">
+            <nav className="flex gap-1 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:flex-col sm:overflow-visible">
               {nav.map((item) => {
                 const Icon = item.icon;
                 const active = section === item.id;
@@ -348,13 +350,14 @@ export function ProfileSettingsDialog({
                       setSaved(false);
                     }}
                     className={cn(
-                      "inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-left text-[12.5px] font-normal transition-colors",
+                      controlH,
+                      "inline-flex shrink-0 items-center gap-2.5 rounded-md px-3 text-left text-[13px] font-normal transition-colors",
                       active
                         ? "bg-background text-foreground"
-                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+                        : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
                     )}
                   >
-                    <Icon className="size-3.5 shrink-0" />
+                    <Icon className={navIconClass} />
                     {item.label}
                   </button>
                 );
@@ -393,8 +396,8 @@ export function ProfileSettingsDialog({
                                 {initial}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="absolute inset-0 hidden items-center justify-center rounded-full bg-black/40 transition-all group-hover:flex">
-                              <CameraIcon className="size-5 text-white/90" />
+                            <div className="absolute inset-0 hidden items-center justify-center rounded-full bg-foreground/40 transition-all group-hover:flex">
+                              <CameraIcon className="size-5 text-background" />
                             </div>
                             <input
                               type="file"
@@ -409,7 +412,7 @@ export function ProfileSettingsDialog({
                             />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium">{t("profilePicture")}</p>
+                            <p className="text-[13px] font-normal">{t("profilePicture")}</p>
                             <p className="mt-1 text-[12px] text-muted-foreground">
                               {t("profilePictureHint")}
                             </p>
@@ -421,7 +424,7 @@ export function ProfileSettingsDialog({
                                 onClick={() => void onRemoveAvatar()}
                                 className="mt-2 inline-flex items-center gap-1.5 rounded-md px-0 text-[12px] font-normal text-muted-foreground transition-colors hover:text-destructive disabled:opacity-40"
                               >
-                                <Trash2 className="size-3.5" />
+                                <Trash2 className="size-5 stroke-[1.5]" />
                                 {t("removeAvatar")}
                               </button>
                             ) : null}
@@ -503,10 +506,10 @@ export function ProfileSettingsDialog({
                       ).map((row) => (
                         <div
                           key={row.key}
-                          className="flex items-center justify-between gap-4 rounded-md bg-muted/35 px-4 py-3.5"
+                          className="flex items-center justify-between gap-4 rounded-md bg-muted/40 px-3.5 py-3"
                         >
                           <div className="min-w-0">
-                            <p className="text-[13px] font-medium">{row.label}</p>
+                            <p className="text-[13px] font-normal">{row.label}</p>
                             <p className="mt-0.5 text-[12px] text-muted-foreground">
                               {row.hint}
                             </p>
@@ -532,18 +535,18 @@ export function ProfileSettingsDialog({
 
                   {section === "preferences" ? (
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between gap-4 rounded-2xl bg-muted/35 px-4 py-3.5">
+                      <div className="flex items-center justify-between gap-4 rounded-md bg-muted/40 px-3.5 py-3">
                         <div className="min-w-0">
-                          <p className="text-[13px] font-medium">{t("appearance")}</p>
+                          <p className="text-[13px] font-normal">{t("appearance")}</p>
                           <p className="mt-0.5 text-[12px] text-muted-foreground">
                             {t("appearanceHint")}
                           </p>
                         </div>
                         <div className="flex items-center gap-2.5">
                           {isDark ? (
-                            <Moon className="size-4 text-muted-foreground" />
+                            <Moon className="size-5 stroke-[1.5] text-muted-foreground" />
                           ) : (
-                            <Sun className="size-4 text-muted-foreground" />
+                            <Sun className="size-5 stroke-[1.5] text-muted-foreground" />
                           )}
                           <Switch
                             checked={isDark}
@@ -555,15 +558,15 @@ export function ProfileSettingsDialog({
                         </div>
                       </div>
 
-                      <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
+                      <div className="rounded-md bg-muted/40 px-3.5 py-3">
                         <div className="flex items-start gap-2.5">
-                          <Languages className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                          <Languages className={cn(navIconClass, "mt-0.5 text-muted-foreground")} />
                           <div className="min-w-0 flex-1">
-                            <p className="text-[13px] font-medium">{t("language")}</p>
+                            <p className="text-[13px] font-normal">{t("language")}</p>
                             <p className="mt-0.5 text-[12px] text-muted-foreground">
                               {t("languageHint")}
                             </p>
-                            <div className="mt-3 flex flex-wrap gap-1.5">
+                            <div className="mt-3 flex flex-wrap gap-1 rounded-md bg-muted/40 p-1">
                               {locales.map((code) => (
                                 <button
                                   key={code}
@@ -577,10 +580,11 @@ export function ProfileSettingsDialog({
                                     });
                                   }}
                                   className={cn(
-                                    "inline-flex h-9 items-center rounded-md px-3.5 text-[13px] font-normal transition-colors disabled:opacity-60",
+                                    controlH,
+                                    "inline-flex items-center rounded-md px-3 text-[13px] font-normal transition-colors disabled:opacity-60",
                                     code === locale
-                                      ? "bg-foreground text-background"
-                                      : "bg-muted/50 text-foreground hover:bg-muted/70",
+                                      ? "bg-background text-foreground"
+                                      : "text-muted-foreground hover:text-foreground",
                                   )}
                                 >
                                   {localeLabels[code]}
@@ -596,15 +600,15 @@ export function ProfileSettingsDialog({
 
                   {section === "account" ? (
                     <div className="space-y-3.5">
-                      <div className="rounded-2xl bg-muted/35 px-4 py-3.5">
-                        <p className="text-[13px] font-medium">{t("signOut")}</p>
+                      <div className="rounded-md bg-muted/40 px-3.5 py-3">
+                        <p className="text-[13px] font-normal">{t("signOut")}</p>
                         <p className="mt-0.5 text-[12px] text-muted-foreground">
                           {t("signOutHint")}
                         </p>
                         <Button
                           type="button"
-                          variant="outline"
-                          className="mt-3 rounded-md"
+                          variant="secondary"
+                          className="mt-3"
                           onClick={() => {
                             onOpenChange(false);
                             void signOut({ callbackUrl: "/" });
@@ -615,8 +619,8 @@ export function ProfileSettingsDialog({
                         </Button>
                       </div>
 
-                      <div className="rounded-2xl bg-destructive/5 px-4 py-3.5 ring-1 ring-destructive/10">
-                        <p className="text-[13px] font-medium text-destructive">
+                      <div className="rounded-md bg-destructive/10 px-3.5 py-3">
+                        <p className="text-[13px] font-normal text-destructive">
                           {t("deleteAccount")}
                         </p>
                         <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">
@@ -642,7 +646,7 @@ export function ProfileSettingsDialog({
                         <Button
                           type="button"
                           variant="destructive"
-                          className="mt-3 rounded-md"
+                          className="mt-3"
                           disabled={
                             deleting ||
                             deleteConfirm.trim().toUpperCase() !== "DELETE"
@@ -650,9 +654,9 @@ export function ProfileSettingsDialog({
                           onClick={() => void onDelete()}
                         >
                           {deleting ? (
-                            <Loader2 className="size-3.5 animate-spin" />
+                            <Loader2 className="size-5 animate-spin" />
                           ) : (
-                            <Trash2 className="size-3.5" />
+                            <Trash2 className="size-5 stroke-[1.5]" />
                           )}
                           {t("deleteAccount")}
                         </Button>
@@ -668,12 +672,12 @@ export function ProfileSettingsDialog({
             </div>
 
             {!loading && section === "profile" ? (
-              <div className="flex items-center justify-between gap-3 bg-muted/15 px-5 py-3">
+              <div className="flex items-center justify-between gap-3 px-5 py-3">
                 <div className="min-h-4 text-[12px]">
                   {error ? (
                     <p className="text-destructive">{error}</p>
                   ) : saved ? (
-                    <p className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                    <p className="inline-flex items-center gap-1 text-foreground">
                       <Check className="size-3.5" />
                       {t("saved")}
                     </p>

@@ -18,15 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SlideCountPicker } from "@/components/studio/create/slide-count-picker";
 import { CANVAS_RATIOS, STUDIO_RATIO_KEYS, type RatioKey } from "@/lib/types";
-import { cn } from "@/lib/utils";
 import {
   sidebarFieldInput,
   sidebarSelectTrigger,
 } from "@/components/canvas/sidebar/sidebar-ui";
 
 const RATIOS = STUDIO_RATIO_KEYS;
-const SLIDE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export type BlankProjectInput = {
   title: string;
@@ -150,24 +149,12 @@ export function BlankProjectDialog({
             <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("slidesCount")}
             </span>
-            <div className="flex flex-wrap gap-1.5">
-              {SLIDE_OPTIONS.map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  disabled={locked}
-                  onClick={() => setSlidesCount(n)}
-                  className={cn(
-                    "flex size-9 items-center justify-center rounded-md text-[13px] font-medium tabular-nums transition-colors",
-                    slidesCount === n
-                      ? "bg-foreground text-background"
-                      : "bg-muted/40 text-foreground hover:bg-muted/60",
-                  )}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
+            <SlideCountPicker
+              value={slidesCount}
+              disabled={locked}
+              ariaLabel={t("slidesCount")}
+              onChange={setSlidesCount}
+            />
           </div>
 
           <div className="flex gap-2 pt-1">

@@ -705,6 +705,34 @@
       "recentPrompts": "Recent prompts",
       "searchModels": "Search models",
       "model": "Model",
+      "modelHint": "Slides, ratio, and structure stay the same. Switch models when you want a different voice: a sharper hook, a plainer draft, or lines that stay closer to the brief.",
+      "modelVoice": {
+        "claudeOpus": "Opus. Most careful Claude: tone and the exact line matter more than speed.",
+        "claudeSonnet": "Sonnet. The usual Claude pick: stays close to the brief, lighter than Opus.",
+        "claudeHaiku": "Haiku. Claude’s short, even voice, faster than Sonnet.",
+        "geminiFlashLite": "Flash Lite. Fastest Gemini: plain short lines for a first pass.",
+        "geminiFlash": "Flash. Quick Gemini for steps and lists, lighter than Pro.",
+        "geminiPro": "Pro. Gemini for a long brief: tighter structure than Flash.",
+        "deepseekChat": "Chat. A direct DeepSeek draft with little polish.",
+        "deepseekV3": "V3. Same direct voice, holds a longer brief better than Chat.",
+        "gpt4oMini": "4o Mini. Light hooks when the post is simple.",
+        "gpt41Mini": "4.1 Mini. Shorter than full 4.1, follows the brief more carefully than 4o Mini.",
+        "gpt41": "4.1. Sharper hooks and a cleaner slide order.",
+        "qwen72b": "Qwen 2.5 72B. Short lines, comfortable in several languages.",
+        "llama3370b": "Llama 3.3 70B. Plain sentences, little flourish.",
+        "claude": "Measured tone, stays close to the brief",
+        "openai": "Sharper hooks, a reliable default",
+        "gemini": "Clear steps and tidy lists",
+        "deepseek": "Direct draft, less polish",
+        "qwen": "Short lines, easy across languages",
+        "mistral": "Plain, tight sentences",
+        "meta": "Straightforward, little flourish",
+        "xai": "Conversational, sharper takes",
+        "perplexity": "More factual, less sales voice",
+        "ollama": "Depends on the local model",
+        "huggingface": "Depends on the specific model",
+        "unknown": "Another voice, same structure"
+      },
       "generateDialogTitle": "Generate carousel",
       "generateDialogSubtitle": "Confirm topic, language, ratio, handle, and slides.",
       "generateConfirm": "Generate",
@@ -1989,6 +2017,8 @@
   },
   "dialogs": {
     "auth": {
+      "title": "Sign in to your account",
+      "description": "Projects, generations, and settings stay on this account.",
       "providers": {
         "google": "Continue with Google"
       },

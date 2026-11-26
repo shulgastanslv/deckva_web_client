@@ -43,6 +43,7 @@ function formatWhen(iso: string) {
 export function ChangeHistoryMenu() {
   const t = useTranslations("editor.history");
   const projectId = useCanvasStore((s) => s.currentProjectId);
+  const showHistoryHint = useCanvasStore((s) => s.showHistoryHint);
   const slidesController = useSlidesController();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -187,6 +188,15 @@ export function ChangeHistoryMenu() {
             })
           )}
         </div>
+
+        {showHistoryHint ? (
+          <>
+            <DropdownMenuSeparator className="bg-border/50" />
+            <p className="px-2.5 py-2 text-[12px] leading-snug text-muted-foreground">
+              {t("saveHint")}
+            </p>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

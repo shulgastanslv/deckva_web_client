@@ -1058,7 +1058,7 @@ export function RightSidebar({
       )}
     >
       {showCollapsedRail ? (
-        <aside className="hidden h-full w-12 shrink-0 flex-col items-center gap-2 bg-muted/20 py-3 md:flex">
+        <aside className="hidden h-full w-12 shrink-0 flex-col items-center gap-2 bg-background py-3 md:flex">
           <Button
             variant="ghost"
             size="icon"

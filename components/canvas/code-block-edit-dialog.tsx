@@ -1,25 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Group } from "fabric";
 import { useTranslations } from "next-intl";
-import {
-  ArrowFatLinesLeft as IndentDecrease,
-  ArrowFatLinesRight as IndentIncrease,
-  Check,
-  ClipboardText as ClipboardPaste,
-  Copy,
-  Eraser,
-  TextAa as Wrap,
-  ArrowCounterClockwise as RotateCcw,
-} from "@phosphor-icons/react";
 
 import { useCanvasManager } from "@/context/canvas-manager";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -32,9 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { sidebarSelectTrigger, sidebarTextarea } from "@/components/canvas/sidebar/sidebar-ui";
 import {
   CODE_LANGS,
-  DEFAULT_CODE,
   isCodeBlock,
   readCodeOptions,
   type CodeBlockOptions,
@@ -44,12 +33,7 @@ import { cn } from "@/lib/utils";
 
 const INDENT = "  ";
 
-function replaceSelection(
-  value: string,
-  start: number,
-  end: number,
-  next: string,
-) {
+function replaceSelection(value: string, start: number, end: number, next: string) {
   return {
     value: value.slice(0, start) + next + value.slice(end),
     cursor: start + next.length,
@@ -58,8 +42,7 @@ function replaceSelection(
 
 function indentBlock(code: string, start: number, end: number, out = false) {
   const lineStart = code.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
-  const rawEnd = end;
-  const block = code.slice(lineStart, rawEnd);
+  const block = code.slice(lineStart, end);
   const lines = block.split("\n");
   const nextLines = lines.map((line) => {
     if (!out) return INDENT + line;
@@ -67,56 +50,6 @@ function indentBlock(code: string, start: number, end: number, out = false) {
     if (line.startsWith(INDENT)) return line.slice(INDENT.length);
     if (line.startsWith(" ")) return line.replace(/^ +/, (m) => m.slice(Math.min(2, m.length)));
     return line;
-  });
-  const nextBlock = nextLines.join("\n");
-  const value = code.slice(0, lineStart) + nextBlock + code.slice(rawEnd);
-  return {
-    value,
-    start: lineStart,
-    end: lineStart + nextBlock.length,
-  };
-}
-
-function formatCode(code: string) {
-  return code
-    .replace(/\r\n/g, "\n")
-    .replace(/[ \t]+$/gm, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/^\n+/, "")
-    .replace(/\n*$/, "\n");
-}
-
-function commentPrefix(lang: CodeLang) {
-  if (lang === "python" || lang === "shell" || lang === "yaml" || lang === "toml" || lang === "dockerfile") {
-    return "# ";
-  }
-  if (lang === "html" || lang === "markdown" || lang === "vue" || lang === "svelte") {
-    return "<!-- ";
-  }
-  if (lang === "sql") return "-- ";
-  return "// ";
-}
-
-function toggleComments(code: string, start: number, end: number, lang: CodeLang) {
-  const prefix = commentPrefix(lang);
-  const lineStart = code.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
-  const block = code.slice(lineStart, end);
-  const lines = block.split("\n");
-  const allCommented = lines.every(
-    (line) => !line.trim() || line.trimStart().startsWith(prefix.trim()),
-  );
-  const nextLines = lines.map((line) => {
-    if (!line.trim()) return line;
-    const leading = line.match(/^\s*/)?.[0] ?? "";
-    const body = line.slice(leading.length);
-    if (allCommented) {
-      if (body.startsWith(prefix)) return leading + body.slice(prefix.length);
-      if (body.startsWith(prefix.trim())) {
-        return leading + body.slice(prefix.trim().length);
-      }
-      return line;
-    }
-    return leading + prefix + body;
   });
   const nextBlock = nextLines.join("\n");
   return {
@@ -134,8 +67,6 @@ export function CodeBlockEditDialog() {
   const [group, setGroup] = useState<Group | null>(null);
   const [code, setCode] = useState("");
   const [options, setOptions] = useState<CodeBlockOptions | null>(null);
-  const [wrap, setWrap] = useState(true);
-  const [copied, setCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -147,20 +78,13 @@ export function CodeBlockEditDialog() {
       setOptions(next);
       setCode(next.code);
       setOpen(true);
-      setCopied(false);
     });
   }, [manager]);
-
-  const stats = useMemo(() => {
-    const lines = code.length === 0 ? 0 : code.split("\n").length;
-    return { lines, chars: code.length };
-  }, [code]);
 
   const close = () => {
     setOpen(false);
     setGroup(null);
     setOptions(null);
-    setCopied(false);
   };
 
   const save = () => {
@@ -174,60 +98,6 @@ export function CodeBlockEditDialog() {
     setOptions((prev) => (prev ? { ...prev, ...partial } : prev));
   };
 
-  const applyEdit = (
-    next: { value: string; start?: number; end?: number; cursor?: number },
-  ) => {
-    setCode(next.value);
-    requestAnimationFrame(() => {
-      const el = textareaRef.current;
-      if (!el) return;
-      el.focus();
-      if (typeof next.cursor === "number") {
-        el.setSelectionRange(next.cursor, next.cursor);
-      } else if (typeof next.start === "number" && typeof next.end === "number") {
-        el.setSelectionRange(next.start, next.end);
-      }
-    });
-  };
-
-  const withSelection = (
-    fn: (value: string, start: number, end: number) => {
-      value: string;
-      start?: number;
-      end?: number;
-      cursor?: number;
-    },
-  ) => {
-    const el = textareaRef.current;
-    if (!el) return;
-    applyEdit(fn(code, el.selectionStart, el.selectionEnd));
-  };
-
-  const copyCode = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1200);
-    } catch {
-      /* ignore */
-    }
-  };
-
-  const pasteCode = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (!text) return;
-      withSelection((value, start, end) =>
-        replaceSelection(value, start, end, text),
-      );
-    } catch {
-      /* ignore — browser may block clipboard read */
-    }
-  };
-
-  const toolBtn =
-    "size-9 shrink-0 rounded-md border-none bg-muted/40 text-muted-foreground shadow-none hover:bg-muted/60 hover:text-foreground";
-
   return (
     <Dialog
       open={open}
@@ -235,138 +105,49 @@ export function CodeBlockEditDialog() {
         if (!next) close();
       }}
     >
-      <DialogContent className="flex max-h-[min(48rem,92dvh)] w-[min(52rem,calc(100vw-1.5rem))] flex-col gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-4xl">
-        <DialogHeader className="gap-1 border-b border-border/40 px-5 pt-5 pb-3">
-          <DialogTitle>{t("editCode")}</DialogTitle>
-          <DialogDescription>{t("pasteOrEdit")}</DialogDescription>
+      <DialogContent className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-lg">
+        <DialogHeader className="space-y-1 px-5 pt-5 text-left">
+          <DialogTitle className="text-base font-semibold tracking-tight">
+            {t("editCode")}
+          </DialogTitle>
+          <DialogDescription className="text-[13px] text-muted-foreground">
+            {t("pasteOrEdit")}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-wrap items-center gap-1.5 border-b border-border/40 px-4 py-2.5">
-          <Input
-            value={options?.filename ?? ""}
-            onChange={(e) => patchOptions({ filename: e.target.value })}
-            placeholder={t("filename")}
-            aria-label={t("filename")}
-            className="w-[8.5rem] rounded-md border-none bg-muted/40 px-3 text-[13px] shadow-none focus-visible:ring-2 focus-visible:ring-ring/20"
-          />
-
-          <Select
-            value={options?.lang ?? "go"}
-            onValueChange={(value) => patchOptions({ lang: value as CodeLang })}
-          >
-            <SelectTrigger
-              aria-label={t("language")}
- className="w-[9.5rem] rounded-md border-none bg-muted/40 px-3.5 text-[13px] font-normal shadow-none hover:bg-muted/60 focus:ring-0 focus-visible:ring-2 focus-visible:ring-ring/20"
+        <div className="space-y-3 px-5 py-4">
+          <div className="flex gap-2">
+            <Input
+              value={options?.filename ?? ""}
+              onChange={(e) => patchOptions({ filename: e.target.value })}
+              placeholder={t("filename")}
+              aria-label={t("filename")}
+              className="min-w-0 flex-1"
+            />
+            <Select
+              value={options?.lang ?? "go"}
+              onValueChange={(value) => patchOptions({ lang: value as CodeLang })}
             >
-              <SelectValue placeholder={t("language")} />
-            </SelectTrigger>
-            <SelectContent className="max-h-72 rounded-2xl p-1.5">
-              {CODE_LANGS.map((item) => (
-                <SelectItem
-                  key={item.id}
-                  value={item.id}
-                  className="text-[13px] focus:bg-muted/50"
-                >
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="mx-0.5 hidden h-5 w-px bg-border/50 sm:block" />
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
- className={toolBtn}
-            title={tc("copy")}
-            aria-label={tc("copy")}
-            onClick={() => void copyCode()}
-          >
-            {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
- className={toolBtn}
-            title={t("paste")}
-            aria-label={t("paste")}
-            onClick={() => void pasteCode()}
-          >
-            <ClipboardPaste className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
- className={toolBtn}
-            title={t("indent")}
-            aria-label={t("indent")}
-            onClick={() =>
-              withSelection((value, start, end) => indentBlock(value, start, end, false))
-            }
-          >
-            <IndentIncrease className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
- className={toolBtn}
-            title={t("outdent")}
-            aria-label={t("outdent")}
-            onClick={() =>
-              withSelection((value, start, end) => indentBlock(value, start, end, true))
-            }
-          >
-            <IndentDecrease className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
- className={cn(toolBtn, wrap && "bg-muted/60 text-foreground")}
-            title={t("wrap")}
-            aria-label={t("wrap")}
-            aria-pressed={wrap}
-            onClick={() => setWrap((v) => !v)}
-          >
-            <Wrap className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
- className={toolBtn}
-            title={t("format")}
-            aria-label={t("format")}
-            onClick={() => setCode((prev) => formatCode(prev))}
-          >
-            <Eraser className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
- className={toolBtn}
-            title={t("resetStarter")}
-            aria-label={t("resetStarter")}
-            onClick={() => {
-              setCode(DEFAULT_CODE);
-              patchOptions({ lang: "go", filename: "main.go" });
-            }}
-          >
-            <RotateCcw className="size-4" />
-          </Button>
-
-          <div className="ml-auto hidden text-[11px] tabular-nums text-muted-foreground sm:block">
-            {t("stats", { lines: stats.lines, chars: stats.chars })}
+              <SelectTrigger
+                aria-label={t("language")}
+                className={cn(sidebarSelectTrigger, "w-[9.5rem] shrink-0")}
+              >
+                <SelectValue placeholder={t("language")} />
+              </SelectTrigger>
+              <SelectContent className="max-h-72 rounded-2xl p-1.5">
+                {CODE_LANGS.map((item) => (
+                  <SelectItem
+                    key={item.id}
+                    value={item.id}
+                    className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50"
+                  >
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </div>
 
-        <div className="min-h-0 flex-1 px-4 py-3">
           <textarea
             ref={textareaRef}
             value={code}
@@ -377,57 +158,47 @@ export function CodeBlockEditDialog() {
                 save();
                 return;
               }
-              if ((e.metaKey || e.ctrlKey) && e.key === "/") {
-                e.preventDefault();
-                const lang = options?.lang ?? "go";
-                withSelection((value, start, end) =>
-                  toggleComments(value, start, end, lang),
-                );
-                return;
-              }
-              if (e.key === "Tab") {
-                e.preventDefault();
-                withSelection((value, start, end) => {
-                  if (start !== end) {
-                    return indentBlock(value, start, end, e.shiftKey);
-                  }
-                  if (e.shiftKey) {
-                    return indentBlock(value, start, end, true);
-                  }
-                  return replaceSelection(value, start, end, INDENT);
-                });
-              }
+              if (e.key !== "Tab") return;
+              e.preventDefault();
+              const el = textareaRef.current;
+              if (!el) return;
+              const start = el.selectionStart;
+              const end = el.selectionEnd;
+              const next =
+                start !== end || e.shiftKey
+                  ? indentBlock(code, start, end, e.shiftKey)
+                  : replaceSelection(code, start, end, INDENT);
+              setCode(next.value);
+              const selStart = "start" in next ? next.start : next.cursor;
+              const selEnd = "end" in next ? next.end : next.cursor;
+              requestAnimationFrame(() => {
+                const node = textareaRef.current;
+                if (!node) return;
+                node.focus();
+                node.setSelectionRange(selStart, selEnd);
+              });
             }}
             spellCheck={false}
             autoFocus
-            wrap={wrap ? "soft" : "off"}
-            className={cn(
-              "h-[min(28rem,52dvh)] w-full resize-none rounded-2xl bg-muted/30 px-4 py-3 font-mono text-[13px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground focus:bg-muted/45",
-              !wrap && "overflow-x-auto whitespace-pre",
-            )}
+            className={cn(sidebarTextarea, "h-64 font-mono")}
             placeholder={t("pasteCode")}
             aria-label={t("code")}
           />
-        </div>
 
-        <DialogFooter className="gap-3 border-t border-border/40 px-5 pt-4 pb-5 sm:justify-between sm:gap-4">
-          <p className="hidden min-w-0 flex-1 pr-3 text-[12px] leading-snug text-muted-foreground sm:block">
-            {t("editShortcuts")}
-          </p>
-          <div className="flex shrink-0 gap-2">
+          <div className="flex gap-2 pt-1">
             <Button
               type="button"
               variant="secondary"
-              className="rounded-md border-none bg-muted/40 shadow-none hover:bg-muted/60"
+              className="flex-1"
               onClick={close}
             >
               {tc("cancel")}
             </Button>
-            <Button type="button" className="rounded-md" onClick={save}>
+            <Button type="button" className="flex-1" onClick={save}>
               {tc("save")}
             </Button>
           </div>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

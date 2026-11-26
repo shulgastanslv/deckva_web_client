@@ -11,6 +11,7 @@ import {
   Plus,
   Scroll as ScrollText,
   MagnifyingGlass as Search,
+  Question,
   Shapes,
   PlugsIcon,
   X,
@@ -47,6 +48,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { controlH, controlSize } from "@/components/ui/control";
+import {
+  Popover,
+  PopoverContent,
+  PopoverAnchor,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   GenerateOptionsDialog,
   pickRandomHandle,
@@ -90,6 +97,28 @@ const CONNECTORS = [
     brand: "googledrive" as const,
   },
 ];
+
+/** Match the live catalog versions before the brand fallback. Order matters. */
+const MODEL_VOICE_RULES: { test: RegExp; key: string }[] = [
+  { test: /opus/i, key: "claudeOpus" },
+  { test: /sonnet/i, key: "claudeSonnet" },
+  { test: /haiku/i, key: "claudeHaiku" },
+  { test: /flash[- ]?lite/i, key: "geminiFlashLite" },
+  { test: /gemini[^a-z0-9]*pro|gemini-pro/i, key: "geminiPro" },
+  { test: /gemini[^a-z0-9]*flash|gemini-flash(?!-lite)/i, key: "geminiFlash" },
+  { test: /deepseek[^a-z0-9]*v3|deepseek-v3/i, key: "deepseekV3" },
+  { test: /deepseek/i, key: "deepseekChat" },
+  { test: /4o[- ]?mini/i, key: "gpt4oMini" },
+  { test: /4\.1[- ]?mini/i, key: "gpt41Mini" },
+  { test: /4\.1/i, key: "gpt41" },
+  { test: /qwen/i, key: "qwen72b" },
+  { test: /llama/i, key: "llama3370b" },
+];
+
+function modelVoiceKey(modelId: string, displayName: string) {
+  const hay = `${modelId} ${displayName}`;
+  return MODEL_VOICE_RULES.find((rule) => rule.test.test(hay))?.key;
+}
 
 const PROVIDER_FILTERS: { id: ModelFilter; label: string }[] = [
   { id: "all", label: "All" },
@@ -160,6 +189,7 @@ export function StudioPrompt({
   const [modelQuery, setModelQuery] = useState("");
   const [modelFilter, setModelFilter] = useState<ModelFilter>("all");
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const [previewModelId, setPreviewModelId] = useState<string | null>(null);
   const [plusOpen, setPlusOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [attachments, setAttachments] = useState<PromptAttachment[]>([]);
@@ -301,6 +331,18 @@ export function StudioPrompt({
     } catch {
       // ignore
     }
+  };
+
+  const modelVoice = (model: AiModelInfo) => {
+    const versionKey = modelVoiceKey(model.modelId, model.displayName);
+    const brandKey = resolveBrandFromModelId(model.modelId).key;
+    if (versionKey && t.has(`prompt.modelVoice.${versionKey}`)) {
+      return t(`prompt.modelVoice.${versionKey}`);
+    }
+    if (t.has(`prompt.modelVoice.${brandKey}`)) {
+      return t(`prompt.modelVoice.${brandKey}`);
+    }
+    return t("prompt.modelVoice.unknown");
   };
 
   const addFiles = async (files: FileList | File[] | null) => {
@@ -881,6 +923,7 @@ export function StudioPrompt({
             </DropdownMenu>
 
             {models.length > 0 ? (
+              <span className="inline-flex items-center">
               <DropdownMenu
                 open={modelMenuOpen}
                 onOpenChange={(open) => {
@@ -888,6 +931,7 @@ export function StudioPrompt({
                   if (!open) {
                     setModelQuery("");
                     setModelFilter("all");
+                    setPreviewModelId(null);
                   }
                 }}
               >
@@ -898,7 +942,7 @@ export function StudioPrompt({
                     title={selected?.displayName ?? t("prompt.model")}
                     className={cn(
                       controlH,
-                      "inline-flex max-w-[260px] items-center gap-2 rounded-md px-2.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60",
+                      "inline-flex max-w-[220px] items-center gap-2 rounded-md px-2.5 text-[13px] font-normal text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60",
                     )}
                   >
                     {selected ? (
@@ -912,7 +956,7 @@ export function StudioPrompt({
                 <DropdownMenuContent
                   align="start"
                   sideOffset={10}
-                  className="w-[320px] rounded-2xl p-1.5"
+                  className="w-64 rounded-2xl p-1.5"
                   onCloseAutoFocus={(event) => event.preventDefault()}
                 >
                   <div
@@ -965,31 +1009,83 @@ export function StudioPrompt({
 
                   <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
-                  <div className="max-h-64 overflow-y-auto overscroll-contain">
+                  <div
+                    className="max-h-80 overflow-y-auto overscroll-contain"
+                    onPointerLeave={() => setPreviewModelId(null)}
+                  >
                     {filteredModels.length === 0 ? (
                       <p className="px-3 py-6 text-center text-[12px] text-muted-foreground">
                         {t("prompt.noModelsMatch")}
                       </p>
                     ) : (
                       filteredModels.map((model) => (
-                          <DropdownMenuItem
-                            key={model.modelId}
-                            className={cn(
-                              "flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] focus:bg-muted/50",
-                              model.modelId === selected?.modelId && "bg-muted/50",
-                            )}
-                            onSelect={() => pickModel(model.modelId)}
+                        <Popover
+                          key={model.modelId}
+                          open={modelMenuOpen && previewModelId === model.modelId}
+                        >
+                          <PopoverAnchor asChild>
+                            <DropdownMenuItem
+                              className={cn(
+                                "flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50",
+                                model.modelId === selected?.modelId && "bg-muted/50",
+                              )}
+                              onPointerEnter={() => setPreviewModelId(model.modelId)}
+                              onFocus={() => setPreviewModelId(model.modelId)}
+                              onSelect={() => pickModel(model.modelId)}
+                            >
+                              <AiModelIcon modelId={model.modelId} />
+                              <span className="min-w-0 flex-1 truncate">
+                                {model.displayName}
+                              </span>
+                            </DropdownMenuItem>
+                          </PopoverAnchor>
+                          <PopoverContent
+                            side="right"
+                            align="start"
+                            sideOffset={8}
+                            className="pointer-events-none z-[60] w-64 p-3"
+                            onOpenAutoFocus={(event) => event.preventDefault()}
                           >
-                            <AiModelIcon modelId={model.modelId} />
-                            <span className="min-w-0 flex-1 truncate">
+                            <p className="text-[13px] font-normal text-foreground">
                               {model.displayName}
-                            </span>
-                          </DropdownMenuItem>
-                        ))
+                            </p>
+                            <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
+                              {modelVoice(model)}
+                            </p>
+                          </PopoverContent>
+                        </Popover>
+                      ))
                     )}
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={disabled || busy}
+                    aria-label={tc("help")}
+                    title={tc("help")}
+                    className={cn(
+                      controlSize,
+                      "inline-flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 data-[state=open]:text-foreground disabled:opacity-50",
+                    )}
+                  >
+                    <Question className={menuIconClass} />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  side="top"
+                  align="start"
+                  sideOffset={8}
+                  className="w-72 p-3"
+                >
+                  <p className="text-[13px] leading-snug text-muted-foreground">
+                    {t("prompt.modelHint")}
+                  </p>
+                </PopoverContent>
+              </Popover>
+              </span>
             ) : null}
 
             {history.length > 0 ? (
