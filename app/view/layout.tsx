@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Просмотр карусели",
   description:
     "Публичный просмотр карусели, созданной в Deckva. Листайте слайды и смотрите готовый пост.",
+  robots: { index: false, follow: false },
   openGraph: {
     title: "Карусель · Deckva",
     description: "Публичный просмотр карусели из студии Deckva.",

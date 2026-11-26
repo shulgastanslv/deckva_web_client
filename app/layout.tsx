@@ -31,9 +31,16 @@ export async function generateMetadata(): Promise<Metadata> {
   const localeRaw = await getLocale();
   const locale: AppLocale = isAppLocale(localeRaw) ? localeRaw : "ru";
 
+  const googleVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+
   return {
     metadataBase: new URL(SITE_URL),
     applicationName: "Deckva",
+    alternates: { canonical: "/" },
+    robots: { index: true, follow: true },
+    ...(googleVerification
+      ? { verification: { google: googleVerification } }
+      : {}),
     title: {
       default: t("titleDefault"),
       template: t("titleTemplate"),

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
+import { getLocale, getTranslations } from "next-intl/server";
 
+import { isAppLocale, ogLocale, type AppLocale } from "@/lib/i18n/config";
 import { SITE_URL, ogImage } from "@/lib/seo/og";
 
 const manrope = Manrope({
@@ -8,38 +10,33 @@ const manrope = Manrope({
   variable: "--font-landing",
 });
 
-export const metadata: Metadata = {
-  title: "Home",
-  description:
-    "Deckva turns a topic into one carousel: slides in feed ratio and a file with no watermark.",
-  keywords: [
-    "Deckva",
-    "carousel editor",
-    "Instagram carousel",
-    "slide editor",
-    "social carousel",
-  ],
-  authors: [{ name: "Deckva", url: SITE_URL }],
-  creator: "Deckva",
-  publisher: "Deckva",
-  openGraph: {
-    title: "AI Carousel Editor",
-    description:
-      "Generate carousels, edit slides, and export to PNG, ZIP, or PDF.",
-    siteName: "Deckva",
-    locale: "en_US",
-    type: "website",
-    url: SITE_URL,
-    images: [ogImage],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AI Carousel Editor",
-    description:
-      "Generate carousels, edit slides, and export to PNG, ZIP, or PDF.",
-    images: [ogImage],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  const localeRaw = await getLocale();
+  const locale: AppLocale = isAppLocale(localeRaw) ? localeRaw : "ru";
+  const description = t("description");
+
+  return {
+    title: { absolute: t("titleDefault") },
+    description,
+    alternates: { canonical: "/" },
+    openGraph: {
+      title: t("ogTitle"),
+      description,
+      url: SITE_URL,
+      siteName: "Deckva",
+      locale: ogLocale[locale],
+      type: "website",
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("ogTitle"),
+      description,
+      images: [ogImage],
+    },
+  };
+}
 
 export default function MarketingLayout({
   children,

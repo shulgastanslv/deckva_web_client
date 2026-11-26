@@ -28,6 +28,7 @@ export const maxDuration = 180;
 export const metadata: Metadata = {
   title: "Studio",
   description: "Canvas editing, community, folders, and PNG/ZIP slide export.",
+  robots: { index: false, follow: false },
   keywords: ["Deckva", "studio", "carousel editor", "canvas", "community", "export PNG"],
   authors: [{ name: "Deckva", url: SITE_URL }],
   creator: "Deckva",
