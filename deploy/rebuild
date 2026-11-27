@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+ROOT="/root/deckva_web_client"
+SERVICE="deckva-web-client"
+WAIT_SECS=60
+
+export GIT_TERMINAL_PROMPT=0
+
+run() {
+  local ok="$1"
+  local bad="$2"
+  shift 2
+  echo "$ok"
+  if ! "$@"; then
+    echo "$bad" >&2
+    exit 1
+  fi
+}
+
+cd "$ROOT" || {
+  echo "enter failed" >&2
+  exit 1
+}
+
+run "pulling repo" "pull failed" git pull
+run "building app" "build failed" npm run build
+run "restarting service" "restart failed" sudo systemctl restart "$SERVICE"
+
+echo "waiting active"
+for ((i = 1; i <= WAIT_SECS; i++)); do
+  if sudo systemctl is-active --quiet "$SERVICE"; then
+    echo "rebuild done"
+    exit 0
+  fi
+  sleep 1
+done
+
+echo "service down" >&2
+sudo systemctl status "$SERVICE" --no-pager >&2 || true
+exit 1
