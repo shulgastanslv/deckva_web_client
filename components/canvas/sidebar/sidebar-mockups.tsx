@@ -44,8 +44,6 @@ const DEVICE_OPTIONS: { id: FrameKind; label: string }[] = [
   { id: "iphone17pro", label: "iPhone 17 Pro" },
   { id: "iphone17promax", label: "iPhone 17 Pro Max" },
   { id: "iphone18promax", label: "iPhone 18 Pro Max" },
-  { id: "iphoneDuoClose", label: "iPhone Duo Close" },
-  { id: "iphoneDuoOpen", label: "iPhone Duo Open" },
   { id: "iphoneAir", label: "iPhone Air" },
 ];
 

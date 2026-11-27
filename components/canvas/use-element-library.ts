@@ -42,8 +42,6 @@ export interface ElementSection {
 export const FRAME_ITEMS = [
   { kind: "iphone18pro", label: "iPhone 18 Pro", src: "/mockups/thumbnails/iphone_18_pro.webp" },
   { kind: "iphone18promax", label: "iPhone 18 Pro Max", src: "/mockups/thumbnails/iphone_18_pro_max.webp" },
-  { kind: "iphoneDuoClose", label: "iPhone Duo Close", src: "/mockups/thumbnails/iphone_duo_closed.webp" },
-  { kind: "iphoneDuoOpen", label: "iPhone Duo Open", src: "/mockups/thumbnails/iphone_duo_open.webp" },
   { kind: "iphone17pro", label: "iPhone 17 Pro", src: "/mockups/thumbnails/iphone_17_pro.webp" },
   { kind: "iphone17promax", label: "iPhone 17 Pro Max", src: "/mockups/thumbnails/iphone_17_pro_max.webp" },
   { kind: "iphoneAir", label: "iPhone Air", src: "/mockups/thumbnails/iphone_air.webp" },

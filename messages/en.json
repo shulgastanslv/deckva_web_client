@@ -114,12 +114,12 @@
     "switchToDarkTheme": "Switch to dark theme"
   },
   "meta": {
-    "titleDefault": "Free Carousel Maker for Socials — Deckva",
+    "titleDefault": "Create beautiful social media carousels — Deckva",
     "titleTemplate": "%s · Deckva",
-    "description": "A free Canva alternative for Instagram, Pinterest, and Threads. Write a topic, edit the slides, and download PNG or ZIP with no watermark.",
-    "keywords": "free carousel maker, canva alternative, instagram carousel, pinterest carousel, threads carousel, Deckva",
-    "ogTitle": "Free Carousel Maker for Socials — Deckva",
-    "ogDescription": "A free Canva alternative for Instagram, Pinterest, and Threads. Write a topic, edit the slides, and download PNG or ZIP with no watermark."
+    "description": "Deckva lets you quickly create beautiful carousels for Instagram, Pinterest, and Threads without design skills. Start for free.",
+    "keywords": "beautiful social media carousels, carousel maker, instagram carousel, pinterest carousel, threads carousel, Deckva",
+    "ogTitle": "Create beautiful social media carousels — Deckva",
+    "ogDescription": "Deckva lets you quickly create beautiful carousels for Instagram, Pinterest, and Threads without design skills. Start for free."
   },
   "studio": {
     "makeCarousel": "Make a carousel",

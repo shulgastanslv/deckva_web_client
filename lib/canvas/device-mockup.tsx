@@ -274,28 +274,10 @@ function loadImage(src: string) {
   return image.decode().then(() => image);
 }
 
-function traceRoundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  radius: number,
-) {
-  const r = Math.max(0, Math.min(radius, w / 2, h / 2));
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
-
 /**
  * Draws the device frame onto a canvas at MOCKUP_SCALE.
- * html2canvas used to stamp the file id (`iphone16pro`) onto the bezel and
- * rasterize the whole phone at 1×, which is why frames looked soft.
+ * The screen is a square fill tucked under the bezel. The frame PNG
+ * supplies the rounded hole, so a rounded clip cannot leave a gap.
  */
 export async function renderDeviceMockup(kind: FrameKind, screen?: string) {
   const config = DEVICE_CONFIGS[kind] || DEVICE_CONFIGS.iphone18pro;
@@ -310,15 +292,13 @@ export async function renderDeviceMockup(kind: FrameKind, screen?: string) {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
 
-  const { x, y, w, h, radius } = config.screenBox;
-  const sx = x * MOCKUP_SCALE;
-  const sy = y * MOCKUP_SCALE;
-  const sw = w * MOCKUP_SCALE;
-  const sh = h * MOCKUP_SCALE;
+  const { x, y, w, h } = config.screenBox;
+  const bleed = 2 * MOCKUP_SCALE;
+  const sx = x * MOCKUP_SCALE - bleed;
+  const sy = y * MOCKUP_SCALE - bleed;
+  const sw = w * MOCKUP_SCALE + bleed * 2;
+  const sh = h * MOCKUP_SCALE + bleed * 2;
 
-  ctx.save();
-  traceRoundRect(ctx, sx, sy, sw, sh, radius * MOCKUP_SCALE);
-  ctx.clip();
   if (screen) {
     try {
       const shot = await loadImage(screen);
@@ -334,7 +314,6 @@ export async function renderDeviceMockup(kind: FrameKind, screen?: string) {
     ctx.fillStyle = "#e4e4e7";
     ctx.fillRect(sx, sy, sw, sh);
   }
-  ctx.restore();
 
   ctx.drawImage(frame, 0, 0, width, height);
   return canvas.toDataURL("image/png");

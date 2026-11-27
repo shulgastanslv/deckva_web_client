@@ -574,10 +574,19 @@ export class CanvasManager {
     this.canvas.on("object:added", (e) => {
       if (e.target?.type === "group") stabilizeGroups([e.target]);
       if (isTextbox(e.target)) configureTextboxControls(e.target);
+      if ((e.target as { swibpRole?: string } | undefined)?.swibpRole === "frame") {
+        this.objects.configureFrame(e.target!);
+      }
       onMutation(e);
     });
     this.canvas.on("object:removed", onMutation);
     this.canvas.on("object:scaling", (e) => {
+      const role = (e.target as { swibpRole?: string } | undefined)?.swibpRole;
+      if (e.target && role === "frame") {
+        this.objects.keepFrameProportional(e.target, e.transform?.corner);
+        this.canvas.requestRenderAll();
+        return;
+      }
       if (!isTextbox(e.target)) return;
       // Side handles should use changeWidth; if scale leaks in, bake → rewrap.
       bakeTextboxScale(e.target);
@@ -597,7 +606,8 @@ export class CanvasManager {
       }
       // Images: bake non-uniform resize into a fresh cover crop (no stretch).
       // Skip pure move / rotate / uniform scale — those keep a correct cover.
-      if (e.target?.type === "image" && !this.crop.active) {
+      const imageRole = (e.target as { swibpRole?: string } | undefined)?.swibpRole;
+      if (e.target?.type === "image" && !this.crop.active && imageRole !== "frame") {
         const sx = Math.abs(e.target.scaleX || 1);
         const sy = Math.abs(e.target.scaleY || 1);
         if (Math.abs(sx - sy) > 0.001) {

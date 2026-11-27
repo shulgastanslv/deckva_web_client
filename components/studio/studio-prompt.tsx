@@ -1161,7 +1161,7 @@ export function StudioPrompt({
                       "inline-flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50",
                     )}
                   >
-                    <CardsIcon className={menuIconClass} />
+                    <CardsThreeIcon className={menuIconClass} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent

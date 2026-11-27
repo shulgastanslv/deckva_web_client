@@ -6,7 +6,7 @@ import {
   SpinnerGap as Loader2,
 } from "@phosphor-icons/react";
 import { useCanvasManager } from "@/context/canvas-manager";
-import { sidebarActionBtn, sidebarSurfaceIdle } from "@/components/canvas/sidebar/sidebar-ui";
+import { sidebarActionBtn } from "@/components/canvas/sidebar/sidebar-ui";
 import { fileToDataUrl } from "@/lib/image/file-to-data-url";
 import { messages } from "@/lib/messages";
 import { reportError } from "@/lib/report-error";
@@ -40,14 +40,14 @@ function contentZoneStyle(split: CanvasSplit): CSSProperties {
 
 function SplitPreview({ split }: { split: CanvasSplit }) {
   return (
-    <span className="relative block aspect-[4/5] w-full overflow-hidden rounded-[0.9rem] bg-background">
+    <span className="relative block aspect-[4/5] w-full overflow-hidden rounded-md bg-background">
       <span
-        className="absolute flex flex-col justify-center gap-[7%] px-[14%]"
+        className="absolute flex flex-col justify-center gap-[8%] px-[16%]"
         style={contentZoneStyle(split)}
       >
-        <span className="h-[7%] w-[72%] rounded-md bg-foreground/25 dark:bg-foreground/30" />
-        <span className="h-[7%] w-full rounded-md bg-foreground/12 dark:bg-foreground/18" />
-        <span className="h-[7%] w-[58%] rounded-md bg-foreground/12 dark:bg-foreground/18" />
+        <span className="h-[8%] w-[70%] rounded-sm bg-foreground/20" />
+        <span className="h-[8%] w-full rounded-sm bg-foreground/10" />
+        <span className="h-[8%] w-[55%] rounded-sm bg-foreground/10" />
       </span>
 
       <span
@@ -56,10 +56,10 @@ function SplitPreview({ split }: { split: CanvasSplit }) {
       >
         <ImagePlus
           className={cn(
-            "opacity-90",
-            split.imageTracks === 1 && split.count === 3 ? "size-2.5" : "size-3.5",
+            "opacity-80",
+            split.imageTracks === 1 && split.count === 3 ? "size-3" : "size-3.5",
           )}
-          strokeWidth={2}
+          weight="regular"
         />
       </span>
     </span>
@@ -125,7 +125,7 @@ export function ScreenSplit() {
         }}
       />
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
         {CANVAS_SPLITS.map((split) => {
           const selected = splitId === split.id;
           return (
@@ -138,24 +138,14 @@ export function ScreenSplit() {
               aria-pressed={selected}
               onClick={() => placeLayout(split)}
               className={cn(
-                "group flex flex-col gap-1.5 rounded-2xl p-1.5 text-left transition-colors disabled:pointer-events-none disabled:opacity-40",
+                "group flex flex-col items-center gap-1.5 rounded-md px-1.5 py-2 text-center transition-colors disabled:pointer-events-none disabled:opacity-40",
                 selected
-                  ? "bg-background text-foreground outline outline-2 outline-offset-1 outline-foreground"
-                  : cn(
-                      sidebarSurfaceIdle,
-                      "text-muted-foreground hover:bg-muted/80 hover:text-foreground dark:hover:bg-muted/40",
-                    ),
+                  ? "bg-muted/70 text-foreground dark:bg-muted/45"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground dark:hover:bg-muted/35",
               )}
             >
               <SplitPreview split={split} />
-              <span
-                className={cn(
-                  "px-0.5 pb-0.5 text-center text-[11px] font-medium leading-none",
-                  selected
-                    ? "text-foreground"
-                    : "text-muted-foreground group-hover:text-foreground",
-                )}
-              >
+              <span className="w-full truncate text-[11px] font-normal leading-tight">
                 {split.label}
               </span>
             </button>

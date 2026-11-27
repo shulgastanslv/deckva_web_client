@@ -147,7 +147,7 @@ function Avatar({
     <div className={cn("relative shrink-0", dim)}>
       <div
         className={cn(
-          "overflow-hidden rounded-md bg-neutral-200",
+          "overflow-hidden rounded-full bg-neutral-200",
           dim,
           ring && "ring-2 ring-pink-500 ring-offset-1 ring-offset-white",
         )}

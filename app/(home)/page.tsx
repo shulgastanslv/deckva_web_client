@@ -36,12 +36,15 @@ export default async function Landing() {
         },
       },
       {
-        "@type": "SoftwareApplication",
+        "@type": "WebApplication",
+        "@id": `${SITE_URL}/#app`,
         name: "Deckva",
         applicationCategory: "DesignApplication",
         operatingSystem: "Web",
         url: `${SITE_URL}/`,
+        inLanguage: locale,
         description: t("description"),
+        publisher: { "@id": `${SITE_URL}/#organization` },
         offers: {
           "@type": "Offer",
           price: "0",

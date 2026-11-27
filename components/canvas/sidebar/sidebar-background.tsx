@@ -6,7 +6,6 @@ import {
   SpinnerGap as Loader2,
   Image as ImageIcon,
   Palette,
-  Check,
 } from "@phosphor-icons/react";
 import {
   SOLID_PRESETS,
@@ -32,12 +31,6 @@ import { useCanvasManager } from "@/context/canvas-manager";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { ScreenSplit } from "@/components/canvas/sidebar/screen-split";
 import { BackgroundPattern } from "@/components/canvas/sidebar/background-pattern";
 import { UploadOrDrop } from "@/components/canvas/sidebar/upload-or-drop";
@@ -50,9 +43,7 @@ import {
   loadBrandKit,
   type BrandKit,
 } from "@/lib/studio/brand-kit";
-import { DDDEPTH_BACKGROUNDS, DDDEPTH_COUNT } from "@/lib/presets/dddepth";
 import {
-  sidebarActionBtn,
   sidebarFieldInput,
   sidebarSegmented,
   sidebarSegmentedItem,
@@ -63,9 +54,7 @@ import {
   sidebarTabsTrigger,
 } from "@/components/canvas/sidebar/sidebar-ui";
 
-type Tab = "color" | "gradient" | "image" | "shapes";
-
-const DDDEPTH_QUICK = 9;
+type Tab = "color" | "gradient" | "image";
 
 const SET_SWATCH_KEYS = [
   "background",
@@ -120,7 +109,6 @@ export function SidebarBackground() {
   const fillTabs: { id: Tab; label: string }[] = [
     { id: "color", label: t("color") },
     { id: "gradient", label: t("gradient") },
-    { id: "shapes", label: t("threeD") },
     { id: "image", label: t("image") },
   ];
 
@@ -129,8 +117,6 @@ export function SidebarBackground() {
   const [imageUrl, setImageUrl] = useState("");
   const [urlLoading, setUrlLoading] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
-  const [activeBg, setActiveBg] = useState<string | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [solidColor, setSolidColor] = useState("#ffffff");
 
   const projectPalette = useCanvasStore((s) => s.palette);
@@ -216,19 +202,16 @@ export function SidebarBackground() {
 
   const applySolid = (color: string) => {
     const hex = normalizeHex(color) ?? color;
-    setActiveBg(null);
     setSolidColor(hex);
     void manager?.setBackground({ type: "solid", color: hex });
   };
 
   const applyGradient = (colors: [string, string]) => {
-    setActiveBg(null);
     void manager?.setBackground({ type: "gradient", colors });
   };
 
   const applyImageFile = (file: File) => {
     if (!file.type.startsWith("image/")) return;
-    setActiveBg(null);
     void fileToDataUrl(file)
       .then((dataUrl) => manager?.setBackground({ type: "image", url: dataUrl }))
       .catch((err) => reportError(err, messages.errors.readImage));
@@ -253,7 +236,6 @@ export function SidebarBackground() {
     setUrlError(null);
     setUrlLoading(true);
     try {
-      setActiveBg(null);
       await manager?.setBackground({ type: "image", url: parsed.toString() });
     } catch (err) {
       reportError(err, messages.errors.loadBackgroundCors);
@@ -263,17 +245,11 @@ export function SidebarBackground() {
     }
   };
 
-  const applyDddepth = (src: string, closePicker = false) => {
-    setActiveBg(src);
-    void manager?.setBackground({ type: "image", url: src });
-    if (closePicker) setPickerOpen(false);
-  };
-
   return (
     <div className="flex min-w-0 flex-col text-[13px] text-foreground">
       <CollapsibleGroup id="background-fill" title={t("fill")} defaultOpen>
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="gap-3">
-        <TabsList className={cn(sidebarTabsList, "grid-cols-4")}>
+        <TabsList className={cn(sidebarTabsList, "grid-cols-3")}>
           {fillTabs.map((item) => (
             <TabsTrigger
               key={item.id}
@@ -285,56 +261,6 @@ export function SidebarBackground() {
             </TabsTrigger>
           ))}
         </TabsList>
-
-        <TabsContent value="shapes" className="mt-0">
-          <div className="flex flex-col gap-2">
-            {activeBg ? (
-              <button
-                type="button"
-                onClick={() => setPickerOpen(true)}
-                className="relative h-28 w-full overflow-hidden rounded-2xl bg-muted/30"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={activeBg} alt="" className="size-full object-cover" />
-                <span className="absolute inset-x-0 bottom-0 bg-background/70 px-2.5 py-1.5 text-left text-[12px] font-medium backdrop-blur-sm">
-                  {t("change")}
-                </span>
-              </button>
-            ) : null}
-            <div className="grid grid-cols-3 gap-1.5">
-              {DDDEPTH_BACKGROUNDS.slice(0, DDDEPTH_QUICK).map((src) => {
-                const selected = activeBg === src;
-                return (
-                  <button
-                    key={src}
-                    type="button"
-                    title={t("setAsBackground")}
-                    onClick={() => applyDddepth(src)}
-                    className={cn(
-                      "relative aspect-square overflow-hidden rounded-xl bg-muted/40",
-                      selected && "outline outline-2 outline-offset-1 outline-foreground",
-                    )}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" loading="lazy" className="size-full object-cover" />
-                    {selected ? (
-                      <span className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-foreground text-background">
-                        <Check className="size-3" strokeWidth={3} />
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-            <Button
-              variant="secondary"
- className={cn(sidebarActionBtn, "w-full")}
-              onClick={() => setPickerOpen(true)}
-            >
-              Browse all · {DDDEPTH_COUNT}
-            </Button>
-          </div>
-        </TabsContent>
 
         <TabsContent value="color" className="mt-0 space-y-3">
           <ColorPicker
@@ -563,43 +489,6 @@ export function SidebarBackground() {
           {t("swatchHint")} Apply follows All, Marked, or This slide.
         </p>
       </CollapsibleGroup>
-
-      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
-        <DialogContent className="grid max-h-[min(40rem,85dvh)] w-[min(36rem,calc(100vw-2rem))] grid-rows-[auto_minmax(0,1fr)] gap-3 overflow-hidden rounded-3xl p-4 sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold">
-              3D backgrounds
-            </DialogTitle>
-          </DialogHeader>
-          <div className="min-h-0 overflow-y-auto overscroll-contain pr-1">
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {DDDEPTH_BACKGROUNDS.map((src) => {
-                const selected = activeBg === src;
-                return (
-                  <button
-                    key={src}
-                    type="button"
-                    title={t("setAsBackground")}
-                    onClick={() => applyDddepth(src, true)}
-                    className={cn(
-                      "relative aspect-square overflow-hidden rounded-2xl bg-muted/40",
-                      selected && "outline outline-2 outline-offset-1 outline-foreground",
-                    )}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" loading="lazy" className="size-full object-cover" />
-                    {selected ? (
-                      <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-md bg-foreground text-background">
-                        <Check className="size-3" strokeWidth={3} />
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

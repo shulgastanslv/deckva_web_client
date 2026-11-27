@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import type { Group } from "fabric";
+import { FileCodeIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useCanvasManager } from "@/context/canvas-manager";
@@ -13,7 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -21,7 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { sidebarSelectTrigger, sidebarTextarea } from "@/components/canvas/sidebar/sidebar-ui";
+import {
+  CodeBlock,
+  CodeBlockActions,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockHeader,
+  CodeBlockLine,
+  CodeBlockTitle,
+} from "@/components/ui/code-block";
+import { sidebarSelectTrigger } from "@/components/canvas/sidebar/sidebar-ui";
+import { useHighlightedCode } from "@/hooks/use-highlighted-code";
 import {
   CODE_LANGS,
   isCodeBlock,
@@ -32,6 +42,12 @@ import {
 import { cn } from "@/lib/utils";
 
 const INDENT = "  ";
+
+function highlightLanguage(lang: CodeLang) {
+  if (lang === "auto" || lang === "plaintext") return "text";
+  if (lang === "shell") return "bash";
+  return lang;
+}
 
 function replaceSelection(value: string, start: number, end: number, next: string) {
   return {
@@ -57,6 +73,86 @@ function indentBlock(code: string, start: number, end: number, out = false) {
     start: lineStart,
     end: lineStart + nextBlock.length,
   };
+}
+
+function CodeBlockEditor({
+  code,
+  language,
+  onChange,
+  onSave,
+  textareaRef,
+}: {
+  code: string;
+  language: string;
+  onChange: (value: string) => void;
+  onSave: () => void;
+  textareaRef: RefObject<HTMLTextAreaElement | null>;
+}) {
+  const lines = useHighlightedCode(code, language);
+  const shown = code.endsWith("\n") ? [...lines, ""] : lines.length > 0 ? lines : [""];
+
+  return (
+    <CodeBlockContent tabIndex={-1} className="max-h-80 min-h-64">
+      <span className="relative grid min-w-max grid-cols-[1.5rem_minmax(0,1fr)] gap-x-3">
+        <span
+          aria-hidden
+          className="pointer-events-none select-none text-end text-muted-foreground"
+        >
+          {shown.map((_, index) => (
+            <span key={index} className="block min-h-lh">
+              {index + 1}
+            </span>
+          ))}
+        </span>
+        <span className="relative min-w-max">
+          <span aria-hidden className="pointer-events-none block">
+            {shown.map((line, index) => (
+              <CodeBlockLine key={index} className="mx-0 px-0">
+                {line === "" || (Array.isArray(line) && line.length === 0) ? "\u00a0" : line}
+              </CodeBlockLine>
+            ))}
+          </span>
+          <textarea
+            ref={textareaRef}
+            value={code}
+            onChange={(event) => onChange(event.target.value)}
+            onKeyDown={(event) => {
+              if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                event.preventDefault();
+                onSave();
+                return;
+              }
+              if (event.key !== "Tab") return;
+              event.preventDefault();
+              const el = textareaRef.current;
+              if (!el) return;
+              const start = el.selectionStart;
+              const end = el.selectionEnd;
+              const next =
+                start !== end || event.shiftKey
+                  ? indentBlock(code, start, end, event.shiftKey)
+                  : replaceSelection(code, start, end, INDENT);
+              onChange(next.value);
+              const selStart = "start" in next ? next.start : next.cursor;
+              const selEnd = "end" in next ? next.end : next.cursor;
+              requestAnimationFrame(() => {
+                const node = textareaRef.current;
+                if (!node) return;
+                node.focus();
+                node.setSelectionRange(selStart, selEnd);
+              });
+            }}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoCorrect="off"
+            autoFocus
+            aria-label="Code"
+            className="absolute inset-0 size-full resize-none border-0 bg-transparent p-0 font-mono text-sm leading-relaxed text-transparent caret-foreground outline-none selection:bg-foreground/15"
+          />
+        </span>
+      </span>
+    </CodeBlockContent>
+  );
 }
 
 export function CodeBlockEditDialog() {
@@ -98,6 +194,8 @@ export function CodeBlockEditDialog() {
     setOptions((prev) => (prev ? { ...prev, ...partial } : prev));
   };
 
+  const lang = options?.lang ?? "go";
+
   return (
     <Dialog
       open={open}
@@ -105,7 +203,7 @@ export function CodeBlockEditDialog() {
         if (!next) close();
       }}
     >
-      <DialogContent className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-lg">
+      <DialogContent className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-2xl">
         <DialogHeader className="space-y-1 px-5 pt-5 text-left">
           <DialogTitle className="text-base font-semibold tracking-tight">
             {t("editCode")}
@@ -116,82 +214,55 @@ export function CodeBlockEditDialog() {
         </DialogHeader>
 
         <div className="space-y-3 px-5 py-4">
-          <div className="flex gap-2">
-            <Input
-              value={options?.filename ?? ""}
-              onChange={(e) => patchOptions({ filename: e.target.value })}
-              placeholder={t("filename")}
-              aria-label={t("filename")}
-              className="min-w-0 flex-1"
-            />
-            <Select
-              value={options?.lang ?? "go"}
-              onValueChange={(value) => patchOptions({ lang: value as CodeLang })}
-            >
-              <SelectTrigger
-                aria-label={t("language")}
-                className={cn(sidebarSelectTrigger, "w-[9.5rem] shrink-0")}
-              >
-                <SelectValue placeholder={t("language")} />
-              </SelectTrigger>
-              <SelectContent className="max-h-72 rounded-2xl p-1.5">
-                {CODE_LANGS.map((item) => (
-                  <SelectItem
-                    key={item.id}
-                    value={item.id}
-                    className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50"
+          <CodeBlock className="rounded-md border-0 bg-muted/40 shadow-none dark:bg-muted/30">
+            <CodeBlockHeader>
+              <CodeBlockTitle className="flex min-w-0 flex-1 items-center font-normal">
+                <FileCodeIcon />
+                <input
+                  value={options?.filename ?? ""}
+                  onChange={(event) => patchOptions({ filename: event.target.value })}
+                  placeholder={t("filename")}
+                  aria-label={t("filename")}
+                  className="min-w-0 flex-1 bg-transparent font-sans text-sm font-normal text-foreground outline-none placeholder:text-muted-foreground"
+                />
+              </CodeBlockTitle>
+              <CodeBlockActions>
+                <Select
+                  value={lang}
+                  onValueChange={(value) => patchOptions({ lang: value as CodeLang })}
+                >
+                  <SelectTrigger
+                    aria-label={t("language")}
+                    className={cn(sidebarSelectTrigger, "w-[9.5rem] shrink-0")}
                   >
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <textarea
-            ref={textareaRef}
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            onKeyDown={(e) => {
-              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                e.preventDefault();
-                save();
-                return;
-              }
-              if (e.key !== "Tab") return;
-              e.preventDefault();
-              const el = textareaRef.current;
-              if (!el) return;
-              const start = el.selectionStart;
-              const end = el.selectionEnd;
-              const next =
-                start !== end || e.shiftKey
-                  ? indentBlock(code, start, end, e.shiftKey)
-                  : replaceSelection(code, start, end, INDENT);
-              setCode(next.value);
-              const selStart = "start" in next ? next.start : next.cursor;
-              const selEnd = "end" in next ? next.end : next.cursor;
-              requestAnimationFrame(() => {
-                const node = textareaRef.current;
-                if (!node) return;
-                node.focus();
-                node.setSelectionRange(selStart, selEnd);
-              });
-            }}
-            spellCheck={false}
-            autoFocus
-            className={cn(sidebarTextarea, "h-64 font-mono")}
-            placeholder={t("pasteCode")}
-            aria-label={t("code")}
-          />
+                    <SelectValue placeholder={t("language")} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72 rounded-2xl p-1.5">
+                    {CODE_LANGS.map((item) => (
+                      <SelectItem
+                        key={item.id}
+                        value={item.id}
+                        className="rounded-md py-2.5 pl-3.5 pr-10 text-[13px] font-normal focus:bg-muted/50"
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CodeBlockCopyButton value={code} />
+              </CodeBlockActions>
+            </CodeBlockHeader>
+            <CodeBlockEditor
+              code={code}
+              language={highlightLanguage(lang)}
+              onChange={setCode}
+              onSave={save}
+              textareaRef={textareaRef}
+            />
+          </CodeBlock>
 
           <div className="flex gap-2 pt-1">
-            <Button
-              type="button"
-              variant="secondary"
-              className="flex-1"
-              onClick={close}
-            >
+            <Button type="button" variant="secondary" className="flex-1" onClick={close}>
               {tc("cancel")}
             </Button>
             <Button type="button" className="flex-1" onClick={save}>

@@ -12,35 +12,50 @@ import {
   type BackgroundPatternId,
 } from "@/lib/canvas/background-patterns";
 
-function PatternSwatch({
-  id,
-  ink = "#52525b",
-  paper = "#f4f4f5",
-}: {
-  id: BackgroundPatternId;
-  ink?: string;
-  paper?: string;
-}) {
+function tokenColor(property: string, fallback: string) {
+  if (typeof document === "undefined") return fallback;
+  const probe = document.createElement("span");
+  probe.style.color = `var(${property})`;
+  document.body.appendChild(probe);
+  const color = getComputedStyle(probe).color;
+  probe.remove();
+  return color || fallback;
+}
+
+function PatternSwatch({ id }: { id: BackgroundPatternId }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = ref.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-    const pattern = ctx.createPattern(drawPatternTile(id, ink), "repeat");
-    if (!pattern) return;
-    ctx.fillStyle = paper;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = pattern;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }, [id, ink, paper]);
+
+    const paint = () => {
+      const paper = tokenColor("--muted", "#f4f4f5");
+      const ink = tokenColor("--foreground", "#18181b");
+      const tile = drawPatternTile(id, paper, { opacity: 0.42, color: ink, scale: 0.9 });
+      const pattern = ctx.createPattern(tile, "repeat");
+      if (!pattern) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = paper;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = pattern;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
+    paint();
+    const root = document.documentElement;
+    const observer = new MutationObserver(paint);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, [id]);
 
   return (
     <canvas
       ref={ref}
       width={96}
       height={96}
-      className="pointer-events-none size-full scale-110"
+      className="pointer-events-none size-full"
     />
   );
 }
@@ -74,7 +89,7 @@ export function BackgroundPattern() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-1.5">
         {BACKGROUND_PATTERNS.map((pattern) => {
           const selected = patternId === pattern.id;
           return (
@@ -89,9 +104,9 @@ export function BackgroundPattern() {
                 paintPattern(pattern.id, patternScale, patternOpacity, patternColor, true)
               }
               className={cn(
-                "relative aspect-square overflow-hidden rounded-md bg-muted/40 transition-transform disabled:pointer-events-none disabled:opacity-40",
-                "hover:scale-105 active:scale-95",
-                selected && "outline outline-2 outline-offset-2 outline-foreground",
+                "relative aspect-square overflow-hidden rounded-md bg-muted transition-colors disabled:pointer-events-none disabled:opacity-40",
+                "hover:bg-muted/80 dark:hover:bg-muted/80",
+                selected && "ring-1 ring-inset ring-foreground/30",
               )}
             >
               <PatternSwatch id={pattern.id} />

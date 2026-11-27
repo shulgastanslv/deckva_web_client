@@ -523,6 +523,7 @@ export class ObjectFactory {
       scaleY: 1 / MOCKUP_SCALE,
     });
     this.mark(img, { swibpRole: "frame", swibpFrameKind: kind });
+    this.configureFrame(img);
     this.addToCanvas(img);
     return img;
   }
@@ -560,6 +561,31 @@ export class ObjectFactory {
     img.setCoords();
     this.canvas.requestRenderAll();
     return img;
+  }
+
+  /** Corners only: a frame can grow or shrink, never stretch. */
+  configureFrame(obj: FabricObject) {
+    obj.setControlsVisibility?.({
+      ml: false,
+      mr: false,
+      mt: false,
+      mb: false,
+    });
+  }
+
+  keepFrameProportional(obj: FabricObject, corner?: string) {
+    const sx = obj.scaleX || 1;
+    const sy = obj.scaleY || 1;
+    const magnitude =
+      corner === "ml" || corner === "mr"
+        ? Math.abs(sx)
+        : corner === "mt" || corner === "mb"
+          ? Math.abs(sy)
+          : Math.max(Math.abs(sx), Math.abs(sy));
+    obj.set({
+      scaleX: magnitude * (Math.sign(sx) || 1),
+      scaleY: magnitude * (Math.sign(sy) || 1),
+    });
   }
 
   private isFrame(obj: FabricObject | null | undefined): obj is Image {
@@ -616,6 +642,7 @@ export class ObjectFactory {
       angle,
     });
     this.mark(frame, { swibpRole: "frame", swibpFrameKind: kind });
+    this.configureFrame(frame);
     frame.setCoords();
     this.canvas.setActiveObject(frame);
     this.canvas.requestRenderAll();
