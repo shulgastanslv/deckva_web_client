@@ -219,6 +219,7 @@ export function StudioHome() {
         <section className="mt-10">
           <StudioSectionHeader
             title={t("recent")}
+            hint={t("recentHint")}
             trailing={
               signedIn && !empty ? (
                 <StudioViewToggle view={view} onChange={setView} />

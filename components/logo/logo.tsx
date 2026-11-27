@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { LOGO_PATH_BACK, LOGO_PATH_FRONT } from "@/components/logo/logo-paths";
 import { cn } from "@/lib/utils";
@@ -19,16 +19,18 @@ export function WhiteLogo({
   href = "/",
 }: LogoProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <svg
+      key={pathname}
       width={width}
       height={height}
       viewBox="0 0 24 24"
       fill="none"
       onClick={() => router.push(href)}
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("text-foreground", className)}
+      className={cn("logo-enter text-foreground", className)}
       aria-hidden
     >
       <path
@@ -53,16 +55,18 @@ export default function Logo({
   href = "/",
 }: LogoProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <svg
+      key={pathname}
       width={width}
       height={height}
       viewBox="0 0 24 24"
       fill="none"
       onClick={() => router.push(href)}
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("text-foreground", className)}
+      className={cn("logo-enter text-foreground", className)}
       aria-hidden
     >
       <path

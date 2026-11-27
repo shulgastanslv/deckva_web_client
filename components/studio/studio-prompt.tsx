@@ -11,10 +11,11 @@ import {
   Plus,
   Scroll as ScrollText,
   MagnifyingGlass as Search,
-  Question,
   Shapes,
   PlugsIcon,
   X,
+  CardsThreeIcon,
+  CardsIcon,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useLocale, useTranslations } from "next-intl";
@@ -37,6 +38,11 @@ import {
 } from "@/components/studio/brand-icon";
 import { menuIconClass } from "@/components/canvas/sidebar/sidebar-ui";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -48,12 +54,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { controlH, controlSize } from "@/components/ui/control";
-import {
-  Popover,
-  PopoverContent,
-  PopoverAnchor,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   GenerateOptionsDialog,
   pickRandomHandle,
@@ -76,7 +76,8 @@ const PROMPT_LANGUAGES = ["ru", "en", "be"] as const;
 
 const MODEL_KEY = "studio_ai_model";
 const HISTORY_KEY = "studio_prompt_recents";
-const MAX_HISTORY = 6;
+const MAX_HISTORY = 40;
+const HISTORY_DAY = 24 * 60 * 60 * 1000;
 const MAX_ATTACHMENTS = 4;
 const MAX_TEXT_CHARS = 4000;
 
@@ -129,32 +130,81 @@ const PROVIDER_FILTERS: { id: ModelFilter; label: string }[] = [
   { id: "mistral", label: "Mistral" },
 ];
 
-function loadHistory(): string[] {
+type HistoryEntry = { text: string; at: number };
+type HistoryFilter = "all" | "today" | "week" | "earlier";
+
+function parseHistoryEntry(item: unknown): HistoryEntry | null {
+  if (typeof item === "string") {
+    const text = item.trim();
+    return text ? { text, at: 0 } : null;
+  }
+  if (!item || typeof item !== "object") return null;
+  const text = "text" in item && typeof item.text === "string" ? item.text.trim() : "";
+  if (!text) return null;
+  const at = "at" in item && typeof item.at === "number" ? item.at : 0;
+  return { text, at };
+}
+
+function loadHistory(): HistoryEntry[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(HISTORY_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter((item): item is string => typeof item === "string")
-      .slice(0, MAX_HISTORY);
+    const seen = new Set<string>();
+    const entries: HistoryEntry[] = [];
+    for (const item of parsed) {
+      const entry = parseHistoryEntry(item);
+      if (!entry || seen.has(entry.text)) continue;
+      seen.add(entry.text);
+      entries.push(entry);
+      if (entries.length >= MAX_HISTORY) break;
+    }
+    return entries;
   } catch {
     return [];
   }
 }
 
-function pushHistory(topic: string): string[] {
-  const next = [topic, ...loadHistory().filter((item) => item !== topic)].slice(
-    0,
-    MAX_HISTORY,
-  );
+function pushHistory(topic: string): HistoryEntry[] {
+  const next = [
+    { text: topic, at: Date.now() },
+    ...loadHistory().filter((item) => item.text !== topic),
+  ].slice(0, MAX_HISTORY);
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
   } catch {
     /* ignore */
   }
   return next;
+}
+
+function startOfToday() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date.getTime();
+}
+
+function matchesHistoryFilter(at: number, filter: HistoryFilter) {
+  if (filter === "all") return true;
+  if (!at) return filter === "earlier";
+  const today = startOfToday();
+  if (filter === "today") return at >= today;
+  if (filter === "week") return at >= today - 6 * HISTORY_DAY;
+  return at < today - 6 * HISTORY_DAY;
+}
+
+function formatHistoryWhen(at: number, locale: string) {
+  if (!at) return "";
+  const date = new Date(at);
+  const sameDay = date.toDateString() === new Date().toDateString();
+  return new Intl.DateTimeFormat(
+    locale,
+    sameDay
+      ? { hour: "2-digit", minute: "2-digit" }
+      : { day: "numeric", month: "short" },
+  ).format(date);
 }
 
 async function readTextFile(file: File): Promise<string> {
@@ -181,15 +231,18 @@ export function StudioPrompt({
   const appliedTopic = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const modelSearchRef = useRef<HTMLInputElement>(null);
+  const historySearchRef = useRef<HTMLInputElement>(null);
 
   const [value, setValue] = useState(initialTopic);
   const [models, setModels] = useState<AiModelInfo[]>([]);
   const [modelId, setModelId] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [historyQuery, setHistoryQuery] = useState("");
+  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
+  const [historyMenuOpen, setHistoryMenuOpen] = useState(false);
   const [modelQuery, setModelQuery] = useState("");
   const [modelFilter, setModelFilter] = useState<ModelFilter>("all");
   const [modelMenuOpen, setModelMenuOpen] = useState(false);
-  const [previewModelId, setPreviewModelId] = useState<string | null>(null);
   const [plusOpen, setPlusOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [attachments, setAttachments] = useState<PromptAttachment[]>([]);
@@ -289,6 +342,12 @@ export function StudioPrompt({
     return () => window.clearTimeout(id);
   }, [modelMenuOpen]);
 
+  useEffect(() => {
+    if (!historyMenuOpen) return;
+    const id = window.setTimeout(() => historySearchRef.current?.focus(), 30);
+    return () => window.clearTimeout(id);
+  }, [historyMenuOpen]);
+
   const selected = models.find((m) => m.modelId === modelId) ?? models[0];
   const trimmed = value.trim();
   const canSend = trimmed.length >= 2 && !disabled && !busy && !attaching;
@@ -323,6 +382,26 @@ export function StudioPrompt({
       );
     });
   }, [models, modelQuery, modelFilter]);
+
+  const historyFilters = useMemo(
+    () =>
+      [
+        ["all", t("prompt.historyAll")],
+        ["today", t("prompt.historyToday")],
+        ["week", t("prompt.historyWeek")],
+        ["earlier", t("prompt.historyEarlier")],
+      ] as const,
+    [t],
+  );
+
+  const filteredHistory = useMemo(() => {
+    const q = historyQuery.trim().toLowerCase();
+    return history.filter((entry) => {
+      if (!matchesHistoryFilter(entry.at, historyFilter)) return false;
+      if (!q) return true;
+      return entry.text.toLowerCase().includes(q);
+    });
+  }, [history, historyQuery, historyFilter]);
 
   const pickModel = (id: string) => {
     setModelId(id);
@@ -534,9 +613,9 @@ export function StudioPrompt({
 
   return (
     <div className="w-full space-y-3">
-      <div className="rounded-2xl bg-muted/25 p-2 transition-colors focus-within:bg-muted/35 dark:bg-muted/20 dark:focus-within:bg-muted/30">
+      <div className="rounded-3xl bg-muted/25 p-2 transition-colors focus-within:bg-muted/35 dark:bg-muted/20 dark:focus-within:bg-muted/30">
         {(attachments.length > 0 || skillId) && (
-          <div className="flex flex-wrap gap-1.5 px-2.5 pt-2">
+          <div className="flex min-w-0 flex-wrap gap-1.5 px-2.5 pt-2">
             {skillId ? (
               <span className="inline-flex h-7 max-w-full items-center gap-1.5 rounded-md bg-muted/50 px-2 text-[12px] font-medium text-foreground">
                 <ScrollText className="size-3.5 shrink-0 text-muted-foreground" />
@@ -556,7 +635,7 @@ export function StudioPrompt({
             {attachments.map((file) => (
               <span
                 key={file.id}
-                className="inline-flex h-7 max-w-[180px] items-center gap-1.5 rounded-md bg-muted/50 px-2 text-[12px] text-foreground"
+                className="inline-flex h-7 max-w-full min-w-0 items-center gap-1.5 rounded-md bg-muted/50 px-2 text-[12px] text-foreground"
               >
                 {file.kind === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -605,7 +684,9 @@ export function StudioPrompt({
             <input
               ref={fileInputRef}
               type="file"
-              className="hidden"
+              tabIndex={-1}
+              aria-hidden
+              className="pointer-events-none fixed top-0 left-0 size-px opacity-0"
               multiple
               accept="image/*,.txt,.md,.markdown,.csv,text/plain,text/markdown,text/csv"
               onChange={(event) => {
@@ -632,12 +713,17 @@ export function StudioPrompt({
               <DropdownMenuContent
                 align="start"
                 sideOffset={8}
-                className="w-56 rounded-2xl p-1.5"
+                collisionPadding={12}
+                className="w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl p-1.5"
               >
                 <DropdownMenuItem
                   className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] focus:bg-muted/50"
                   disabled={attaching || attachments.length >= MAX_ATTACHMENTS}
-                  onSelect={() => fileInputRef.current?.click()}
+                  onPointerDown={(event) => {
+                    if (attaching || attachments.length >= MAX_ATTACHMENTS) return;
+                    event.preventDefault();
+                    fileInputRef.current?.click();
+                  }}
                 >
                   <Paperclip className={menuIconClass} />
                   {t("prompt.addFiles")}
@@ -650,7 +736,8 @@ export function StudioPrompt({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent
                     sideOffset={8}
-                    className="w-52 rounded-2xl p-1.5"
+                    collisionPadding={12}
+                    className="w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl p-1.5"
                   >
                     {skillGroups.map((group) => {
                       const groupActive = group.skills.some(
@@ -704,7 +791,8 @@ export function StudioPrompt({
                           </DropdownMenuSubTrigger>
                           <DropdownMenuSubContent
                             sideOffset={8}
-                            className="w-64 rounded-2xl p-1.5"
+                            collisionPadding={12}
+                            className="w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl p-1.5"
                           >
                             {group.skills.map((skill) => {
                               const active = skillId === skill.id;
@@ -760,7 +848,8 @@ export function StudioPrompt({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent
                     sideOffset={8}
-                    className="w-72 rounded-2xl p-2"
+                    collisionPadding={12}
+                    className="w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl p-2"
                   >
                     {CONNECTORS.map((item) => {
                       const state = connectorById.get(item.id);
@@ -841,7 +930,8 @@ export function StudioPrompt({
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent
                     sideOffset={8}
-                    className="w-72 rounded-2xl p-1.5"
+                    collisionPadding={12}
+                    className="w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl p-1.5"
                   >
                     <DropdownMenuLabel className="px-2.5 py-1.5 text-[11px] font-normal text-muted-foreground">
                       {t("prompt.recentAssets")}
@@ -912,7 +1002,10 @@ export function StudioPrompt({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-normal focus:bg-muted/50"
-                      onSelect={() => fileInputRef.current?.click()}
+                      onPointerDown={(event) => {
+                        event.preventDefault();
+                        fileInputRef.current?.click();
+                      }}
                     >
                       <Paperclip className={menuIconClass} />
                       {t("prompt.addFiles")}
@@ -931,7 +1024,6 @@ export function StudioPrompt({
                   if (!open) {
                     setModelQuery("");
                     setModelFilter("all");
-                    setPreviewModelId(null);
                   }
                 }}
               >
@@ -942,7 +1034,7 @@ export function StudioPrompt({
                     title={selected?.displayName ?? t("prompt.model")}
                     className={cn(
                       controlH,
-                      "inline-flex max-w-[220px] items-center gap-2 rounded-md px-2.5 text-[13px] font-normal text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60",
+                      "inline-flex max-w-[9.5rem] items-center gap-2 rounded-md px-2.5 text-[13px] font-normal text-foreground transition-colors hover:bg-muted/60 data-[state=open]:bg-muted/60 disabled:opacity-60 sm:max-w-[220px]",
                     )}
                   >
                     {selected ? (
@@ -956,7 +1048,8 @@ export function StudioPrompt({
                 <DropdownMenuContent
                   align="start"
                   sideOffset={10}
-                  className="w-64 rounded-2xl p-1.5"
+                  collisionPadding={12}
+                  className="w-[min(24rem,calc(100vw-1.5rem))] rounded-2xl p-1.5"
                   onCloseAutoFocus={(event) => event.preventDefault()}
                 >
                   <div
@@ -1009,28 +1102,20 @@ export function StudioPrompt({
 
                   <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
-                  <div
-                    className="max-h-80 overflow-y-auto overscroll-contain"
-                    onPointerLeave={() => setPreviewModelId(null)}
-                  >
+                  <div className="max-h-80 overflow-y-auto overscroll-contain">
                     {filteredModels.length === 0 ? (
                       <p className="px-3 py-6 text-center text-[12px] text-muted-foreground">
                         {t("prompt.noModelsMatch")}
                       </p>
                     ) : (
                       filteredModels.map((model) => (
-                        <Popover
-                          key={model.modelId}
-                          open={modelMenuOpen && previewModelId === model.modelId}
-                        >
-                          <PopoverAnchor asChild>
+                        <Tooltip key={model.modelId}>
+                          <TooltipTrigger asChild>
                             <DropdownMenuItem
                               className={cn(
                                 "flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50",
                                 model.modelId === selected?.modelId && "bg-muted/50",
                               )}
-                              onPointerEnter={() => setPreviewModelId(model.modelId)}
-                              onFocus={() => setPreviewModelId(model.modelId)}
                               onSelect={() => pickModel(model.modelId)}
                             >
                               <AiModelIcon modelId={model.modelId} />
@@ -1038,58 +1123,34 @@ export function StudioPrompt({
                                 {model.displayName}
                               </span>
                             </DropdownMenuItem>
-                          </PopoverAnchor>
-                          <PopoverContent
+                          </TooltipTrigger>
+                          <TooltipContent
                             side="right"
-                            align="start"
                             sideOffset={8}
-                            className="pointer-events-none z-[60] w-64 p-3"
-                            onOpenAutoFocus={(event) => event.preventDefault()}
+                            className="max-w-72 text-left"
                           >
-                            <p className="text-[13px] font-normal text-foreground">
-                              {model.displayName}
-                            </p>
-                            <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
-                              {modelVoice(model)}
-                            </p>
-                          </PopoverContent>
-                        </Popover>
+                            {modelVoice(model)}
+                          </TooltipContent>
+                        </Tooltip>
                       ))
                     )}
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={disabled || busy}
-                    aria-label={tc("help")}
-                    title={tc("help")}
-                    className={cn(
-                      controlSize,
-                      "inline-flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground data-[state=open]:bg-muted/60 data-[state=open]:text-foreground disabled:opacity-50",
-                    )}
-                  >
-                    <Question className={menuIconClass} />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  side="top"
-                  align="start"
-                  sideOffset={8}
-                  className="w-72 p-3"
-                >
-                  <p className="text-[13px] leading-snug text-muted-foreground">
-                    {t("prompt.modelHint")}
-                  </p>
-                </PopoverContent>
-              </Popover>
               </span>
             ) : null}
 
             {history.length > 0 ? (
-              <DropdownMenu>
+              <DropdownMenu
+                open={historyMenuOpen}
+                onOpenChange={(open) => {
+                  setHistoryMenuOpen(open);
+                  if (!open) {
+                    setHistoryQuery("");
+                    setHistoryFilter("all");
+                  }
+                }}
+              >
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
@@ -1100,27 +1161,83 @@ export function StudioPrompt({
                       "inline-flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50",
                     )}
                   >
-                    <Clock3 className={menuIconClass} />
+                    <CardsIcon className={menuIconClass} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
                   sideOffset={8}
-                  className="w-72 rounded-2xl p-1.5"
+                  collisionPadding={12}
+                  className="w-[min(24rem,calc(100vw-1.5rem))] rounded-2xl p-1.5"
+                  onCloseAutoFocus={(event) => event.preventDefault()}
                 >
-                  <DropdownMenuLabel className="px-3 py-1.5 text-[12px] font-medium text-muted-foreground">
-                    {t("prompt.recentHistory")}
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="my-1 bg-border/50" />
-                  {history.map((item) => (
-                    <DropdownMenuItem
-                      key={item}
-                      className="cursor-pointer rounded-md px-3 py-2.5 text-[13px] focus:bg-muted/50"
-                      onSelect={() => setValue(item)}
-                    >
-                      <span className="line-clamp-2">{item}</span>
-                    </DropdownMenuItem>
-                  ))}
+                  <div
+                    className="space-y-2 px-1.5 pb-1.5 pt-1"
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                  >
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        ref={historySearchRef}
+                        value={historyQuery}
+                        onChange={(event) => setHistoryQuery(event.target.value)}
+                        placeholder={t("prompt.searchHistory")}
+                        className={cn(
+                          controlH,
+                          "w-full rounded-md bg-muted/40 pr-3 pl-8 text-[13px] outline-none placeholder:text-muted-foreground focus:bg-muted/60",
+                        )}
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {historyFilters.map(([id, label]) => {
+                        const active = historyFilter === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => setHistoryFilter(id)}
+                            className={cn(
+                              "inline-flex h-7 items-center rounded-md px-2 text-[12px] font-normal transition-colors",
+                              active
+                                ? "bg-foreground text-background"
+                                : "bg-muted/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                            )}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+                  <div className="max-h-80 overflow-y-auto overscroll-contain">
+                    {filteredHistory.length === 0 ? (
+                      <p className="px-3 py-6 text-center text-[12px] text-muted-foreground">
+                        {t("prompt.noHistoryMatch")}
+                      </p>
+                    ) : (
+                      filteredHistory.map((entry) => {
+                        const when = formatHistoryWhen(entry.at, locale);
+                        return (
+                          <DropdownMenuItem
+                            key={entry.text}
+                            className="cursor-pointer items-start gap-3 rounded-md px-3 py-2.5 text-[13px] font-normal focus:bg-muted/50"
+                            onSelect={() => setValue(entry.text)}
+                          >
+                            <span className="line-clamp-2 min-w-0 flex-1">
+                              {entry.text}
+                            </span>
+                            {when ? (
+                              <span className="shrink-0 pt-0.5 text-[11px] text-muted-foreground">
+                                {when}
+                              </span>
+                            ) : null}
+                          </DropdownMenuItem>
+                        );
+                      })
+                    )}
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : null}
@@ -1152,17 +1269,22 @@ export function StudioPrompt({
 
       {history.length > 0 ? (
         <div className="flex flex-wrap gap-1.5 px-0.5">
-          {history.slice(0, 4).map((item) => (
-            <button
-              key={item}
-              type="button"
-              disabled={disabled || busy}
-              onClick={() => setValue(item)}
-              className="max-w-[220px] truncate rounded-md bg-muted/40 px-2.5 py-1.5 text-[12px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50"
-              title={item}
-            >
-              {item}
-            </button>
+          {history.slice(0, 4).map((entry) => (
+            <Tooltip key={entry.text}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  disabled={disabled || busy}
+                  onClick={() => setValue(entry.text)}
+                  className="max-w-[220px] truncate rounded-md bg-muted/40 px-2.5 py-1.5 text-[12px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50"
+                >
+                  {entry.text}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={6} className="max-w-72 text-left">
+                {entry.text}
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
       ) : null}

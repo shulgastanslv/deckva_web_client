@@ -1,9 +1,7 @@
-import { createRoot } from "react-dom/client";
-import { flushSync } from "react-dom";
 import type { FrameKind } from "@/lib/canvas/frames";
 
-/** Snapshot pixels per CSS pixel, чтобы устройство оставалось четким. */
-export const MOCKUP_SCALE = 1;
+/** Snapshot pixels per CSS pixel. 3× keeps the bezel sharp when the frame is scaled on the slide. */
+export const MOCKUP_SCALE = 3;
 
 interface DeviceSpec {
   width: number;
@@ -269,151 +267,75 @@ export function getDeviceScreenSize(kind: FrameKind): { width: number; height: n
   };
 }
 
-function Screen({ src }: { src?: string }) {
-  if (!src) {
-    return <div style={{ width: "100%", height: "100%", background: "#e4e4e7" }} />;
-  }
-  return (
-    <img
-      src={src}
-      alt=""
-      draggable={false}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        objectPosition: "center",
-        display: "block",
-      }}
-    />
-  );
-}
-
-function Device({ kind, screen }: { kind: FrameKind; screen?: string }) {
-  const config = DEVICE_CONFIGS[kind] || DEVICE_CONFIGS.iphone18pro;
-  const { x, y, w, h, radius } = config.screenBox;
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        width: config.width,
-        height: config.height,
-        display: "inline-block",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          left: x,
-          top: y,
-          width: w,
-          height: h,
-          borderRadius: radius,
-          overflow: "hidden",
-          background: "#111",
-          zIndex: 1,
-        }}
-      >
-        <Screen src={screen} />
-      </div>
-
-      {/* Fill the authored box so screenBox stays aligned across devices */}
-      <img
-        src={config.frameUrl}
-        alt={kind}
-        crossOrigin="anonymous"
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "fill",
-          pointerEvents: "none",
-          zIndex: 2,
-        }}
-      />
-    </div>
-  );
-}
-
-/** Cover-crops картинку под размеры экрана конкретного устройства. */
-async function coverScreen(kind: FrameKind, source: string) {
-  const config = DEVICE_CONFIGS[kind] || DEVICE_CONFIGS.iphone18pro;
-  const pixelW = Math.max(1, Math.round(config.screenBox.w * MOCKUP_SCALE));
-  const pixelH = Math.max(1, Math.round(config.screenBox.h * MOCKUP_SCALE));
-
+function loadImage(src: string) {
   const image = new Image();
   image.crossOrigin = "anonymous";
-  image.src = source;
-  await image.decode();
+  image.src = src;
+  return image.decode().then(() => image);
+}
 
-  const canvas = document.createElement("canvas");
-  canvas.width = pixelW;
-  canvas.height = pixelH;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return source;
-
-  const scale = Math.max(pixelW / image.naturalWidth, pixelH / image.naturalHeight);
-  const drawW = image.naturalWidth * scale;
-  const drawH = image.naturalHeight * scale;
-  ctx.drawImage(image, (pixelW - drawW) / 2, (pixelH - drawH) / 2, drawW, drawH);
-  return canvas.toDataURL("image/png");
+function traceRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  radius: number,
+) {
+  const r = Math.max(0, Math.min(radius, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
 }
 
 /**
- * Рендерит устройство с реалистичным PNG-мокапом в PNG-изображение.
+ * Draws the device frame onto a canvas at MOCKUP_SCALE.
+ * html2canvas used to stamp the file id (`iphone16pro`) onto the bezel and
+ * rasterize the whole phone at 1×, which is why frames looked soft.
  */
 export async function renderDeviceMockup(kind: FrameKind, screen?: string) {
-  const screenSrc = screen ? await coverScreen(kind, screen) : undefined;
-  const iframe = document.createElement("iframe");
-  iframe.setAttribute("aria-hidden", "true");
-  iframe.style.cssText =
-    "position:fixed;left:-10000px;top:0;width:1400px;height:1800px;border:0;opacity:0;pointer-events:none";
-  document.body.appendChild(iframe);
+  const config = DEVICE_CONFIGS[kind] || DEVICE_CONFIGS.iphone18pro;
+  const frame = await loadImage(config.frameUrl);
+  const width = Math.max(1, Math.round(config.width * MOCKUP_SCALE));
+  const height = Math.max(1, Math.round(config.height * MOCKUP_SCALE));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Couldn't open a mockup frame");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
-  const doc = iframe.contentDocument;
-  const view = iframe.contentWindow;
-  if (!doc || !view) {
-    iframe.remove();
-    throw new Error("Couldn't open a mockup frame");
-  }
+  const { x, y, w, h, radius } = config.screenBox;
+  const sx = x * MOCKUP_SCALE;
+  const sy = y * MOCKUP_SCALE;
+  const sw = w * MOCKUP_SCALE;
+  const sh = h * MOCKUP_SCALE;
 
-  doc.body.style.margin = "0";
-  doc.body.style.background = "transparent";
-  const host = doc.createElement("div");
-  host.style.display = "inline-block";
-  host.style.background = "transparent";
-  doc.body.appendChild(host);
-
-  const root = createRoot(host);
-  try {
-    flushSync(() => {
-      root.render(<Device kind={kind} screen={screenSrc} />);
-    });
-    await Promise.all(
-      [...host.querySelectorAll("img")].map((img) => img.decode().catch(() => undefined)),
-    );
-    const node = host.firstElementChild as HTMLElement | null;
-    if (!node || node.offsetWidth < 2) {
-      throw new Error("Mockup did not render");
+  ctx.save();
+  traceRoundRect(ctx, sx, sy, sw, sh, radius * MOCKUP_SCALE);
+  ctx.clip();
+  if (screen) {
+    try {
+      const shot = await loadImage(screen);
+      const cover = Math.max(sw / shot.naturalWidth, sh / shot.naturalHeight);
+      const dw = shot.naturalWidth * cover;
+      const dh = shot.naturalHeight * cover;
+      ctx.drawImage(shot, sx + (sw - dw) / 2, sy + (sh - dh) / 2, dw, dh);
+    } catch {
+      ctx.fillStyle = "#e4e4e7";
+      ctx.fillRect(sx, sy, sw, sh);
     }
-
-    const { default: html2canvas } = await import("html2canvas");
-    const shot = await html2canvas(node, {
-      backgroundColor: null,
-      scale: MOCKUP_SCALE,
-      logging: false,
-      useCORS: true,
-      allowTaint: true,
-      windowWidth: view.innerWidth,
-      windowHeight: view.innerHeight,
-    });
-    return shot.toDataURL("image/png");
-  } finally {
-    root.unmount();
-    iframe.remove();
+  } else {
+    ctx.fillStyle = "#e4e4e7";
+    ctx.fillRect(sx, sy, sw, sh);
   }
+  ctx.restore();
+
+  ctx.drawImage(frame, 0, 0, width, height);
+  return canvas.toDataURL("image/png");
 }

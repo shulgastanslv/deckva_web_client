@@ -111,18 +111,18 @@ export function StudioProjectRow({
         </button>
       </td>
 
-      <td className="py-2.5 pr-3 align-middle">
+      <td className="hidden py-2.5 pr-3 align-middle md:table-cell">
         <StudioProjectOwner
           name={project.authorName}
           image={project.authorImage}
         />
       </td>
 
-      <td className="py-2.5 pr-3 align-middle text-[13px] text-muted-foreground">
+      <td className="hidden py-2.5 pr-3 align-middle text-[13px] text-muted-foreground md:table-cell">
         {t("slidesCount", { n: project.slideCount })}
       </td>
 
-      <td className="py-2.5 pr-3 align-middle text-[13px] text-muted-foreground">
+      <td className="hidden py-2.5 pr-3 align-middle text-[13px] text-muted-foreground md:table-cell">
         {project.aspectRatio}
       </td>
 

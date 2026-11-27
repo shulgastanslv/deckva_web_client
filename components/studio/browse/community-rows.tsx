@@ -11,7 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const cols =
-  "grid-cols-[minmax(0,1.6fr)_72px_88px_minmax(0,1fr)_minmax(0,0.9fr)]";
+  "grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_72px_88px_minmax(0,1fr)_minmax(0,0.9fr)]";
 
 function formatWhen(iso: string | null) {
   if (!iso) return "—";
@@ -35,10 +35,10 @@ export function CommunityRows({
 }) {
   const t = useTranslations("studio.browse");
   return (
-    <div className="min-w-0 overflow-x-auto">
+    <div className="min-w-0">
       <div
         className={cn(
-          "mb-1 grid min-w-[640px] gap-3 px-2 pb-2 text-[12px] text-muted-foreground",
+          "mb-1 hidden gap-3 px-2 pb-2 text-[12px] text-muted-foreground md:grid",
           cols,
         )}
       >
@@ -49,7 +49,7 @@ export function CommunityRows({
         <span>{t("colAuthor")}</span>
       </div>
 
-      <div className="min-w-[640px] divide-y-0">
+      <div>
         {items.map((item) => {
           const when = formatWhen(
             item.communityUpdatedAt ?? item.publishedAt,
@@ -84,34 +84,40 @@ export function CommunityRows({
                   </p>
                   <p className="truncate text-[11px] text-muted-foreground">
                     {item.aspectRatio}
+                    <span className="md:hidden">
+                      {" "}
+                      · {item.slideCount} · {when}
+                    </span>
                   </p>
                 </div>
               </div>
 
-              <span className="text-[13px] text-muted-foreground">
+              <span className="hidden text-[13px] text-muted-foreground md:block">
                 {item.slideCount}
               </span>
               {item.category ? (
-                <span
-                  className={cn(
-                    communityCategoryChipClass,
-                    communityCategoryTone(item.category),
-                  )}
-                >
-                  {item.category}
+                <span className="hidden md:contents">
+                  <span
+                    className={cn(
+                      communityCategoryChipClass,
+                      communityCategoryTone(item.category),
+                    )}
+                  >
+                    {item.category}
+                  </span>
                 </span>
               ) : (
-                <span className="truncate text-[13px] text-muted-foreground">
+                <span className="hidden truncate text-[13px] text-muted-foreground md:block">
                   —
                 </span>
               )}
-              <div className="min-w-0">
+              <div className="hidden min-w-0 md:block">
                 <p className="truncate text-[13px] text-foreground">{when}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">
+                <p className="truncate text-[11px] text-muted-foreground">
                   {t("byAuthor", { name: editor })}
                 </p>
               </div>
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="hidden min-w-0 items-center gap-2 md:flex">
                 <Avatar className="size-6">
                   <AvatarImage src={item.authorImage ?? undefined} alt="" />
                   <AvatarFallback className="text-[9px]">

@@ -54,7 +54,20 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: "Deckva",
     publisher: "Deckva",
     icons: {
-      icon: "/browser.svg",
+      icon: [
+        {
+          url: "/favicon-192.png",
+          type: "image/png",
+          sizes: "192x192",
+        },
+      ],
+      apple: [
+        {
+          url: "/apple-touch-icon.png",
+          sizes: "180x180",
+          type: "image/png",
+        },
+      ],
     },
     openGraph: {
       type: "website",

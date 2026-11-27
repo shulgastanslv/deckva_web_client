@@ -290,11 +290,6 @@ export function StudioBrowse() {
           <div>
             <h1 className="text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
               {pageTitle}
-              {!activeFolder && activeTab === "all" ? (
-                <span className="ml-2 text-[0.7em] font-normal text-muted-foreground">
-                  ({projects.length})
-                </span>
-              ) : null}
             </h1>
             <p className="mt-2 text-[14px] text-muted-foreground">
               {pageDescription}
@@ -461,7 +456,7 @@ export function StudioBrowse() {
                 {t("publishHint")}
               </p>
             </div>
-          ) : communityView === "rows" ? (
+          ) : communityView === "rows"  ? (
             <CommunityRows
               items={community}
               onOpen={(id) => setPreviewId(id)}

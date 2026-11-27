@@ -169,7 +169,7 @@ export function LandingPage() {
             >
               <Menu />
             </Button>
-            <Logo width={36} height={36} className="text-foreground" />
+            <Logo width={36} height={36} className="shrink-0 text-foreground" />
             <nav className="ml-5 hidden items-center gap-5 text-sm font-medium text-muted-foreground lg:flex">
               {NAV.map((item) => (
                 <a key={item.link} href={item.link} className="hover:text-foreground">

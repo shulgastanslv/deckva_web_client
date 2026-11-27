@@ -114,12 +114,12 @@
     "switchToDarkTheme": "Switch to dark theme"
   },
   "meta": {
-    "titleDefault": "Deckva — carousel studio",
+    "titleDefault": "Free Carousel Maker for Socials — Deckva",
     "titleTemplate": "%s · Deckva",
-    "description": "A carousel studio for social media. Write a topic, get slides, edit them on the canvas, and download PNG or ZIP with no watermark.",
-    "keywords": "Deckva,carousel,Instagram,studio,slide editor,social media",
-    "ogTitle": "Deckva — carousel studio",
-    "ogDescription": "A carousel studio for social media. Write a topic, get slides, edit them on the canvas, and download PNG or ZIP with no watermark."
+    "description": "A free Canva alternative for Instagram, Pinterest, and Threads. Write a topic, edit the slides, and download PNG or ZIP with no watermark.",
+    "keywords": "free carousel maker, canva alternative, instagram carousel, pinterest carousel, threads carousel, Deckva",
+    "ogTitle": "Free Carousel Maker for Socials — Deckva",
+    "ogDescription": "A free Canva alternative for Instagram, Pinterest, and Threads. Write a topic, edit the slides, and download PNG or ZIP with no watermark."
   },
   "studio": {
     "makeCarousel": "Make a carousel",
@@ -130,6 +130,20 @@
     "greetingHelloNamed": "Hello, {name}",
     "greetingEvening": "Good evening",
     "greetingEveningNamed": "Good evening, {name}",
+    "greetingExtra": {
+      "1": "{name}, what are we posting?",
+      "2": "A carousel, {name}?",
+      "3": "One topic, {name}",
+      "4": "The canvas is open, {name}",
+      "5": "Your turn, {name}",
+      "6": "Start with a sentence, {name}",
+      "7": "Slides next, {name}",
+      "8": "Back to the draft, {name}",
+      "9": "Keep it short, {name}",
+      "10": "Another post, {name}?",
+      "11": "Drop a topic, {name}",
+      "12": "Ready when you are, {name}"
+    },
     "activationSub": "One topic → slides → edit → export PNG, ZIP, or PDF.",
     "activationHint": "Enter → carousel · then export PNG/ZIP/PDF",
     "tour": {
@@ -179,8 +193,10 @@
       }
     },
     "tryStarter": "Or start from a ready topic",
+    "tryStarterHint": "A ready topic drops a structure into the prompt, so you can generate without a blank page.",
     "makeLikeThis": "Make one like this",
     "recent": "Recent",
+    "recentHint": "Carousels you worked on lately. Open one to keep editing.",
     "blankCarousel": "Blank carousel",
     "viewOptions": "View options",
     "otherWays": "More ways",
@@ -703,6 +719,12 @@
       "approxPrice": "~{price} {currency}",
       "recentHistory": "Recent history",
       "recentPrompts": "Recent prompts",
+      "searchHistory": "Search prompts",
+      "historyAll": "All",
+      "historyToday": "Today",
+      "historyWeek": "7 days",
+      "historyEarlier": "Older",
+      "noHistoryMatch": "No prompts match",
       "searchModels": "Search models",
       "model": "Model",
       "modelHint": "Slides, ratio, and structure stay the same. Switch models when you want a different voice: a sharper hook, a plainer draft, or lines that stay closer to the brief.",

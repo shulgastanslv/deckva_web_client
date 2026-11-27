@@ -23,13 +23,13 @@ export function StudioProjectList({
   const t = useTranslations("studio.browse");
   return (
     <div className="w-full min-w-0 overflow-x-auto">
-      <table className="w-full table-fixed border-collapse text-left">
+      <table className="w-full border-collapse text-left md:table-fixed">
         <colgroup>
           <col className="w-10" />
           <col />
-          <col className="w-[12rem]" />
-          <col className="w-[7rem]" />
-          <col className="w-[5.5rem]" />
+          <col />
+          <col />
+          <col />
           <col className="w-10" />
         </colgroup>
         <thead>
@@ -40,13 +40,13 @@ export function StudioProjectList({
             <th className="py-2 pr-3 font-normal" scope="col">
               {t("colName")}
             </th>
-            <th className="py-2 pr-3 font-normal" scope="col">
+            <th className="hidden w-[12rem] py-2 pr-3 font-normal md:table-cell" scope="col">
               {t("colCreatedBy")}
             </th>
-            <th className="py-2 pr-3 font-normal" scope="col">
+            <th className="hidden w-[7rem] py-2 pr-3 font-normal md:table-cell" scope="col">
               {t("colSlides")}
             </th>
-            <th className="py-2 pr-3 font-normal" scope="col">
+            <th className="hidden w-[5.5rem] py-2 pr-3 font-normal md:table-cell" scope="col">
               {t("colRatio")}
             </th>
             <th className="py-2 pr-2 pl-1 font-normal" scope="col">

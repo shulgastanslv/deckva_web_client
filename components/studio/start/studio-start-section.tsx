@@ -7,6 +7,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { StudioCreateMenu } from "@/components/studio/create/studio-create-menu";
 import { StudioPrompt } from "@/components/studio/studio-prompt";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   pickStarterPrompts,
   starterText,
   type StarterTopic,
@@ -55,6 +60,7 @@ export function StudioStartSection({
   const t = useTranslations("studio");
   const { data: session } = useSession();
   const [period, setPeriod] = useState<GreetingPeriod>("hello");
+  const [extraIndex, setExtraIndex] = useState(0);
   const locale = useLocale();
   const [starters, setStarters] = useState<StarterTopic[]>([]);
 
@@ -64,6 +70,7 @@ export function StudioStartSection({
 
   useEffect(() => {
     setPeriod(greetingPeriod(new Date().getHours()));
+    setExtraIndex(Math.floor(Math.random() * 13));
   }, []);
 
   useEffect(() => {
@@ -71,18 +78,22 @@ export function StudioStartSection({
     setStarters(pickStarterPrompts(count));
   }, []);
 
-  const greeting =
-    period === "morning"
-      ? displayName
-        ? t("greetingMorningNamed", { name: displayName })
-        : t("greetingMorning")
+  const timeGreeting = displayName
+    ? period === "morning"
+      ? t("greetingMorningNamed", { name: displayName })
       : period === "evening"
-        ? displayName
-          ? t("greetingEveningNamed", { name: displayName })
-          : t("greetingEvening")
-        : displayName
-          ? t("greetingHelloNamed", { name: displayName })
-          : t("greetingHello");
+        ? t("greetingEveningNamed", { name: displayName })
+        : t("greetingHelloNamed", { name: displayName })
+    : period === "morning"
+      ? t("greetingMorning")
+      : period === "evening"
+        ? t("greetingEvening")
+        : t("greetingHello");
+
+  const greeting =
+    displayName && extraIndex > 0
+      ? t(`greetingExtra.${extraIndex}`, { name: displayName })
+      : timeGreeting;
 
   return (
     <section>
@@ -122,24 +133,37 @@ export function StudioStartSection({
           data-tour="starters"
           className="mt-3 flex flex-wrap items-center gap-2"
         >
-          <span className="text-[12px] text-muted-foreground">
-            {t("tryStarter")}
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-default text-[12px] text-muted-foreground">
+                {t("tryStarter")}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={6} className="max-w-64">
+              {t("tryStarterHint")}
+            </TooltipContent>
+          </Tooltip>
           {starters.map((starter) => {
             const copy = starterText(starter, locale);
             return (
-              <button
-                key={starter.id}
-                type="button"
-                disabled={generating}
-                onClick={() => {
-                  trackEvent("studio_starter_chip", { id: starter.id });
-                  void onStarter(copy.topic, starter.id);
-                }}
-                className="inline-flex h-8 items-center rounded-md bg-muted/40 px-3 text-[12px] font-normal text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60"
-              >
-                {copy.label}
-              </button>
+              <Tooltip key={starter.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={generating}
+                    onClick={() => {
+                      trackEvent("studio_starter_chip", { id: starter.id });
+                      void onStarter(copy.topic, starter.id);
+                    }}
+                    className="inline-flex h-8 max-w-[220px] items-center rounded-md bg-muted/40 px-3 text-[12px] font-normal text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60"
+                  >
+                    <span className="truncate">{copy.label}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={6} className="max-w-72 text-left">
+                  {copy.topic}
+                </TooltipContent>
+              </Tooltip>
             );
           })}
         </div>
