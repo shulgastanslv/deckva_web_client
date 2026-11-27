@@ -79,11 +79,15 @@ export function CommandsKbd() {
     {
       title: t("sections.panels"),
       rows: [
-        { label: te("panels.elements"), keys: "1" },
-        { label: te("panels.layers"), keys: "2" },
-        { label: te("panels.background"), keys: "3" },
-        { label: te("panels.assets"), keys: "4" },
-        { label: te("panels.settings"), keys: "5" },
+        { label: te("elements.text"), keys: "1" },
+        { label: te("elements.photos"), keys: "2" },
+        { label: te("elements.shapes"), keys: "3" },
+        { label: te("elements.frames"), keys: "4" },
+        { label: te("elements.code"), keys: "5" },
+        { label: te("panels.layers"), keys: "6" },
+        { label: te("panels.background"), keys: "7" },
+        { label: te("panels.assets"), keys: "8" },
+        { label: te("panels.settings"), keys: "9" },
       ],
     },
   ];

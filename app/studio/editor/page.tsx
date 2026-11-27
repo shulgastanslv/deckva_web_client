@@ -70,7 +70,7 @@ function ProjectBootstrap() {
 export default function CarouselEditor() {
   const tPanels = useTranslations("editor.panels");
   const tc = useTranslations("common");
-  const [activeNav, setActiveNav] = useState<NavId>("elements");
+  const [activeNav, setActiveNav] = useState<NavId>("text");
   const [showDotGrid, setShowDotGrid] = useState(true);
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);

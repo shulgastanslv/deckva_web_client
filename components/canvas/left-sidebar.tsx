@@ -2,15 +2,21 @@
 
 import React, { ReactNode, useState } from "react";
 import {
+  Code,
+  FrameCorners,
   Image as ImageIcon,
+  ImagesSquare,
   Stack as LayersIcon,
   SidebarSimple as PanelLeftClose,
   Sidebar as PanelLeftOpen,
+  Parallelogram,
   ArrowClockwise as Redo2,
   Gear as Settings,
-  Shapes as ShapesIcon,
   Package,
+  PaletteIcon as Palette,
+  TextT,
   ArrowCounterClockwise as Undo2,
+  Triangle,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 import Logo from "@/components/logo/logo";
@@ -40,14 +46,29 @@ import { useCanvasManager } from "@/context/canvas-manager";
 import { cn } from "@/lib/utils";
 
 export type NavId =
-  | "elements"
+  | "frames"
+  | "text"
+  | "shapes"
+  | "code"
+  | "photos"
   | "layers"
   | "settings"
   | "assets"
   | "background";
 
+export const ELEMENT_PAGES = ["text", "photos", "shapes", "frames", "code"] as const;
+export type ElementPage = (typeof ELEMENT_PAGES)[number];
+
+export function isElementPage(id: NavId): id is ElementPage {
+  return (ELEMENT_PAGES as readonly string[]).includes(id);
+}
+
 export const RAIL_SHORTCUTS: NavId[] = [
-  "elements",
+  "text",
+  "photos",
+  "shapes",
+  "frames",
+  "code",
   "layers",
   "background",
   "assets",
@@ -94,10 +115,15 @@ export function LeftSidebar({
   const [legal, setLegal] = useState<LegalKind | null>(null);
   const manager = useCanvasManager();
   const t = useTranslations("editor.panels");
+  const te = useTranslations("editor.elements");
   const tc = useTranslations("common");
 
   const panelTitles: Record<NavId, string> = {
-    elements: t("elements"),
+    frames: te("frames"),
+    text: te("text"),
+    shapes: te("shapes"),
+    code: te("code"),
+    photos: te("photos"),
     layers: t("layers"),
     settings: t("settings"),
     assets: t("assets"),
@@ -105,9 +131,13 @@ export function LeftSidebar({
   };
 
   const navItems: { id: NavId; icon: ReactNode; label: string }[] = [
-    { id: "elements", icon: <ShapesIcon className={navIconClass} />, label: t("elements") },
+    { id: "text", icon: <TextT className={navIconClass} />, label: te("text") },
+    { id: "photos", icon: <ImagesSquare className={navIconClass} />, label: te("photos") },
+    { id: "shapes", icon: <Triangle className={navIconClass} />, label: te("shapes") },
+    { id: "frames", icon: <FrameCorners className={navIconClass} />, label: te("frames") },
+    { id: "code", icon: <Code className={navIconClass} />, label: te("code") },
     { id: "layers", icon: <LayersIcon className={navIconClass} />, label: t("layers") },
-    { id: "background", icon: <ImageIcon className={navIconClass} />, label: t("background") },
+    { id: "background", icon: <Palette className={navIconClass} />, label: t("background") },
     { id: "assets", icon: <Package className={navIconClass} />, label: t("assets") },
   ];
 
@@ -142,6 +172,7 @@ export function LeftSidebar({
                   size="icon"
                   className={cn(
                     railBtn,
+                    index === ELEMENT_PAGES.length && "mt-2",
                     activeNav === id &&
                       !isLeftCollapsed &&
                       "bg-muted/60 text-foreground hover:bg-muted/60",
@@ -196,7 +227,7 @@ export function LeftSidebar({
                 </Button>
               </RailTooltip>
             </div>
-            <RailTooltip label={`${t("settings")} (5)`}>
+            <RailTooltip label={`${t("settings")} (9)`}>
               <Button
                 variant="ghost"
                 size="icon"
@@ -238,7 +269,7 @@ export function LeftSidebar({
         </div>
 
         <ScrollArea className="h-full min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:max-w-full [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!min-w-0 [&_[data-slot=scroll-area-viewport]>div]:!max-w-full">
-          {activeNav === "elements" && <SidebarElements />}
+          {isElementPage(activeNav) && <SidebarElements category={activeNav} />}
           {activeNav === "layers" && <SidebarLayers />}
           {activeNav === "assets" && <SidebarAssets />}
           {activeNav === "settings" && (

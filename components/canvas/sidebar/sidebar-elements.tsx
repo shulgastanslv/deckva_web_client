@@ -18,7 +18,6 @@ import {
 import type { FrameKind } from "@/lib/canvas/frames";
 import { FramesPicker } from "@/components/canvas/sidebar/frames-picker";
 import { CodeBlockSettings } from "@/components/canvas/code-block-inspector";
-import { ElementsMenu } from "@/components/canvas/sidebar/elements-menu";
 import { GalleryCard, GallerySection } from "@/components/canvas/sidebar/gallery-card";
 import { UploadOrDrop } from "@/components/canvas/sidebar/upload-or-drop";
 import {
@@ -36,8 +35,6 @@ import {
 } from "@/lib/canvas/recent-photos";
 
 type Category = "photos" | "text" | "shapes" | "frames" | "code";
-
-const CATEGORIES: Category[] = ["photos", "text", "shapes", "frames", "code"];
 
 const SEARCH_PLACEHOLDER: Record<
   Category,
@@ -82,7 +79,7 @@ function filterItems(items: ElementItem[], search: string) {
   );
 }
 
-export function SidebarElements() {
+export function SidebarElements({ category }: { category: Category }) {
   const t = useTranslations("editor.elements");
   const tc = useTranslations("common");
   const {
@@ -101,8 +98,11 @@ export function SidebarElements() {
   } = useElementLibrary();
 
   const { selectedObject } = useSelectedObject();
-  const [category, setCategory] = useState<Category>("photos");
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setSearch("");
+  }, [category]);
   const [recentPhotos, setRecentPhotos] = useState<RecentPhoto[]>([]);
 
   useEffect(() => {
@@ -159,18 +159,6 @@ export function SidebarElements() {
             className={cn(sidebarFieldInput, "pl-9")}
           />
         </div>
-        <ElementsMenu
-          value={category}
-          ariaLabel={t("elementCategory")}
-          onChange={(id) => {
-            setCategory(id as Category);
-            setSearch("");
-          }}
-          items={CATEGORIES.map((id) => ({
-            id,
-            label: t(id),
-          }))}
-        />
       </div>
 
       <div aria-label={t(category)} className="w-full min-w-0">
