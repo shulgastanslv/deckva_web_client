@@ -18,12 +18,12 @@ export default async function ViewPage({
 
   if (!result.success) {
     return (
-      <div className="flex min-h-dvh flex-col">
+      <div className="flex min-h-dvh flex-col bg-background text-foreground">
         <ViewHeader />
         <main className="grid flex-1 place-items-center px-4 pb-16 text-center">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">This link is private</h1>
-            <p className="mt-3 max-w-sm text-[#5c6170] dark:text-[#a0a0a0]">
+          <div className="max-w-sm">
+            <h1 className="text-lg font-semibold tracking-tight">This link is private</h1>
+            <p className="mt-2 text-[13px] font-normal text-muted-foreground">
               The carousel is not public, or the link is no longer valid.
             </p>
           </div>
