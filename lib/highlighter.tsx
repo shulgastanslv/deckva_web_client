@@ -4,7 +4,7 @@ import {
   type GrammarState,
   type HighlighterCore,
 } from "shiki/core"
-import { createJavaScriptRegexEngine } from "shiki/engine/javascript"
+import { createJavaScriptRegexEngine } from "@shikijs/engine-javascript"
 
 // Add the languages you need. Each one loads the first time it is used.
 const languages = {
