@@ -71,6 +71,7 @@ import {
 import type { StudioPromptSubmit } from "@/lib/studio/generation/types";
 import { type RatioKey } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { HistoryIcon } from "lucide-react";
 
 const PROMPT_LANGUAGES = ["ru", "en", "be"] as const;
 
@@ -1161,7 +1162,7 @@ export function StudioPrompt({
                       "inline-flex items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50",
                     )}
                   >
-                    <CardsThreeIcon className={menuIconClass} />
+                    <HistoryIcon className="size-5 stroke-[1.5]" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent

@@ -25,15 +25,6 @@ export default async function Landing() {
         name: "Deckva",
         url: `${SITE_URL}/`,
         email: "shulgastanislav@gmail.com",
-        logo: {
-          "@type": "ImageObject",
-          "@id": `${SITE_URL}/#logo`,
-          url: `${SITE_URL}/logo-512.png`,
-          contentUrl: `${SITE_URL}/logo-512.png`,
-          width: 512,
-          height: 512,
-          caption: "Deckva",
-        },
       },
       {
         "@type": "WebApplication",
