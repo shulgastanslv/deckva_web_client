@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useCanvasManager } from "@/context/canvas-manager";
 import { cn } from "@/lib/utils";
+import { Shapes } from "lucide-react";
 
 export type NavId =
   | "frames"
@@ -133,7 +134,7 @@ export function LeftSidebar({
   const navItems: { id: NavId; icon: ReactNode; label: string }[] = [
     { id: "text", icon: <TextT className={navIconClass} />, label: te("text") },
     { id: "photos", icon: <ImagesSquare className={navIconClass} />, label: te("photos") },
-    { id: "shapes", icon: <Triangle className={navIconClass} />, label: te("shapes") },
+    { id: "shapes", icon: <Shapes className={navIconClass} />, label: te("shapes") },
     { id: "frames", icon: <FrameCorners className={navIconClass} />, label: te("frames") },
     { id: "code", icon: <Code className={navIconClass} />, label: te("code") },
     { id: "layers", icon: <LayersIcon className={navIconClass} />, label: t("layers") },
